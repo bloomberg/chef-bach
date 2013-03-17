@@ -14,6 +14,7 @@ rabbit_host=<%="#{node[:bcpc][:management][:vip]}"%>
 rabbit_password=<%="#{get_config('rabbitmq-password')}"%>
 rabbit_ha_queues=False
 rabbit_durable_queues=True
+
 # If using qpid...
 #rpc_backend=nova.openstack.common.rpc.impl_qpid
 #qpid_hostname=<%="#{node[:bcpc][:management][:vip]}"%>
@@ -47,6 +48,8 @@ network_size=<%="#{node[:bcpc][:fixed][:network_size]}"%>
 dhcpbridge_flagfile=/etc/nova/nova.conf
 dhcpbridge=/usr/bin/nova-dhcpbridge
 force_dhcp_release=True
+share_dhcp_address=True
+teardown_unused_network_gateway=True
 fixed_ip_disassociate_timeout=180
 send_arp_for_ha=True
 my_ip=<%="#{node[:bcpc][:management][:ip]}"%>
