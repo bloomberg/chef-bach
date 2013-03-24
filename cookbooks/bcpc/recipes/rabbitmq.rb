@@ -27,6 +27,13 @@ ruby_block "initialize-rabbitmq-config" do
     end
 end
 
+apt_repository "rabbitmq" do
+    uri node['bcpc']['repos']['rabbitmq']
+    distribution 'testing'
+    components ["main"]
+    key "rabbitmq.key"
+end
+
 package "rabbitmq-server" do
     action :upgrade
     notifies :run, "bash[rabbitmq-stop]", :immediately
@@ -38,8 +45,19 @@ template "/var/lib/rabbitmq/.erlang.cookie" do
     notifies :run, "bash[rabbitmq-restart]", :delayed
 end
 
+template "/etc/rabbitmq/rabbitmq-env.conf" do
+    source "rabbitmq-env.conf.erb"
+    mode 0644
+end
+
+directory "/etc/rabbitmq/rabbitmq.conf.d" do
+    mode 00755
+    owner "root"
+    group "root"
+end
+
 template "/etc/rabbitmq/rabbitmq.conf.d/bcpc.conf" do
-    source "rabbit-env.conf.erb"
+    source "rabbitmq-bcpc.conf.erb"
     mode 00644
     notifies :run, "bash[rabbitmq-restart]", :delayed
 end
@@ -78,11 +96,11 @@ end
 
 get_head_nodes.each do |server|
     if server.hostname != node.hostname
-        bash "rabbitmq-cluster-#{node.hostname}-#{server.hostname}" do
+        bash "rabbitmq-clustering-with-#{server.hostname}" do
             code <<-EOH
                 rabbitmqctl stop_app
                 rabbitmqctl reset
-                rabbitmqctl cluster rabbit@#{server.hostname} rabbit@#{node.hostname}
+                rabbitmqctl join_cluster rabbit@#{server.hostname}
                 rabbitmqctl start_app
             EOH
             not_if "rabbitmqctl cluster_status | grep rabbit@#{server.hostname}"

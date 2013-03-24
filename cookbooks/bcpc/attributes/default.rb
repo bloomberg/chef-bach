@@ -58,6 +58,7 @@ default['bcpc']['dns_servers'] = [ "8.8.8.8", "8.8.4.4" ]
 #
 ###########################################
 default['bcpc']['repos']['ceph'] = "http://www.ceph.com/debian-bobtail/"
+default['bcpc']['repos']['rabbitmq'] = "http://www.rabbitmq.com/debian"
 default['bcpc']['repos']['mysql'] = "http://repo.percona.com/apt"
 default['bcpc']['repos']['openstack'] = "http://ubuntu-cloud.archive.canonical.com/ubuntu"
 default['bcpc']['repos']['hwraid'] = "http://hwraid.le-vert.net/ubuntu"
