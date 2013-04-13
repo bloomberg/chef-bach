@@ -1,0 +1,16 @@
+--- extended_availability_zone.py.orig  2013-04-13 13:44:32.907312197 -0400
++++ extended_availability_zone.py   2013-04-13 13:28:06.963294766 -0400
+@@ -41,11 +41,11 @@
+         if not host:
+             return None
+         cache_key = "azcache-%s" % host
+-        az = self.mc.get(cache_key)
++        az = self.mc.get(cache_key.encode('UTF-8'))
+         if not az:
+             elevated = context.elevated()
+             az = availability_zones.get_host_availability_zone(elevated, host)
+-            self.mc.set(cache_key, az, AZ_CACHE_SECONDS)
++            self.mc.set(cache_key.encode('UTF-8'), az, AZ_CACHE_SECONDS)
+         return az
+ 
+     def _extend_server(self, context, server, instance):
