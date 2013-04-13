@@ -35,7 +35,7 @@ rabbit_durable_queues=True
 #qpid_password=<%="#{get_config('rabbitmq-password')}"%>
 
 # Volume driver settings for RBD
-volume_driver=cinder.volume.driver.RBDDriver
+volume_driver=cinder.volume.drivers.rbd.RBDDriver
 rbd_user=admin
 rbd_pool=<%="#{node['bcpc']['cinder_rbd_pool']}"%>
 rbd_secret_uuid=<%="#{get_config('libvirt-secret-uuid')}"%>
