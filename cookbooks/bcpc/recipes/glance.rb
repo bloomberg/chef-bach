@@ -60,14 +60,6 @@ template "/etc/glance/glance-registry.conf" do
     notifies :run, "bash[restart-glance]", :delayed
 end
 
-template "/etc/glance/glance-registry-paste.ini" do
-    source "glance-registry-paste.ini.erb"
-    owner "glance"
-    group "glance"
-    mode 00600
-    notifies :run, "bash[restart-glance]", :delayed
-end
-
 template "/etc/glance/glance-scrubber.conf" do
     source "glance-scrubber.conf.erb"
     owner "glance"
