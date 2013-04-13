@@ -34,7 +34,7 @@ dmz_cidr=169.254.169.254/32
 enabled_apis=ec2,osapi_compute,metadata
 
 # Nova Scheduler
-scheduler_driver=nova.scheduler.simple.SimpleScheduler
+scheduler_driver=nova.scheduler.filter_scheduler.FilterScheduler
 
 # Nova Network settings
 network_manager=nova.network.manager.VlanManager
