@@ -1,0 +1,21 @@
+{
+    "name": "BCPC-Worknode",
+    "default_attributes": {
+    },
+    "json_class": "Chef::Role",
+    "run_list": [
+      "role[Basic]",
+      "recipe[bcpc::default]",
+      "recipe[bcpc::networking]",
+      "recipe[bcpc::ceph-common]",
+      "recipe[bcpc::ceph-work]",
+      "recipe[bcpc::nova-common]",
+      "recipe[bcpc::nova-work]",
+      "recipe[bcpc::diamond]",
+      "recipe[bcpc::beaver]"
+    ],
+    "description": "A functional compute node in a BCPC cluster",
+    "chef_type": "role",
+    "override_attributes": {
+    }
+}

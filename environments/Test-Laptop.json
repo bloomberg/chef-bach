@@ -1,0 +1,28 @@
+{
+  "name": "Test-Laptop",
+  "default_attributes": {
+    "bcpc": {
+      "virt_type" : "qemu",
+      "ceph_disks": [ "sdb", "sdc", "sdd", "sde" ],
+      "management": {
+        "vip" : "192.168.43.15",
+        "interface" : "eth0",
+        "netmask" : "255.255.255.0",
+        "cidr" : "192.168.43.0/24",
+        "gateway" : "192.168.43.2"
+      }
+    },
+    "chef_client": {
+      "server_url": "http://192.168.43.128:4000",
+      "cache_path": "/var/chef/cache",
+      "backup_path": "/var/chef/backup",
+      "validation_client_name": "chef-validator",
+      "run_path": "/var/chef"
+    }
+  },
+  "json_class": "Chef::Environment",
+  "description": "Pravir's laptop test environment",
+  "cookbook_versions": {
+  },
+  "chef_type": "environment"
+}

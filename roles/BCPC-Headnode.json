@@ -1,0 +1,34 @@
+{
+    "name": "BCPC-Headnode",
+    "default_attributes": {
+    },
+    "json_class": "Chef::Role",
+    "run_list": [
+      "role[Basic]",
+      "recipe[bcpc::default]",
+      "recipe[bcpc::networking]",
+      "recipe[bcpc::ceph-common]",
+      "recipe[bcpc::ceph-head]",
+      "recipe[bcpc::mysql]",
+      "recipe[bcpc::rabbitmq]",
+      "recipe[bcpc::keepalived]",
+      "recipe[bcpc::haproxy]",
+      "recipe[bcpc::nova-common]",
+      "recipe[bcpc::keystone]",
+      "recipe[bcpc::glance]",
+      "recipe[bcpc::cinder]",
+      "recipe[bcpc::nova-head]",
+      "recipe[bcpc::horizon]",
+      "recipe[bcpc::powerdns]",
+      "recipe[bcpc::graphite]",
+      "recipe[bcpc::elasticsearch]",
+      "recipe[bcpc::logstash]",
+      "recipe[bcpc::kibana]",
+      "role[BCPC-Worknode]",
+      "recipe[bcpc::nova-setup]"
+    ],
+    "description": "A highly-available head node in a BCPC cluster",
+    "chef_type": "role",
+    "override_attributes": {
+    }
+}
