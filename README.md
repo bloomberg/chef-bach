@@ -29,17 +29,21 @@ storage devices (aside from boot volume) and three NICs.  You can modify
 the environments accordingly for your setup.
 
 You can install these cookbooks via:
- $ knife cookbook site download apt
- $ knife cookbook site download ubuntu
- $ knife cookbook site download chef-client
+
+ $ knife cookbook site download apt  
+ $ knife cookbook site download ubuntu  
+ $ knife cookbook site download chef-client  
 
 You can set up the environment with:
- $ knife environment from file environments/*.json
- $ knife role from file roles/*.json
+
+ $ knife environment from file environments/*.json  
+ $ knife role from file roles/*.json  
  $ knife cookbook upload -a
 
 To enroll a machine as a head node:
+
  $ knife bootstrap -E Test-Laptop -r "role[BCPC-Headnode]" IP-address
 
 To enroll a machine as a worker node:
+
  $ knife bootstrap -E Test-Laptop -r "role[BCPC-Worknode]" IP-address
