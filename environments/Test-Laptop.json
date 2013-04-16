@@ -21,7 +21,7 @@
     }
   },
   "json_class": "Chef::Environment",
-  "description": "Pravir's laptop test environment",
+  "description": "Laptop test environment",
   "cookbook_versions": {
   },
   "chef_type": "environment"
