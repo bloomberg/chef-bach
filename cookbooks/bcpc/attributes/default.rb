@@ -12,7 +12,7 @@ default['bcpc']['virt_type'] = "kvm"
 # Region name for this cluster
 default['bcpc']['region_name'] = node.chef_environment
 # Domain name that will be used for DNS
-default['bcpc']['domain_name'] = "bcpc.test.com"
+default['bcpc']['domain_name'] = "bcpc.example.com"
 
 ###########################################
 #
@@ -49,8 +49,8 @@ default['bcpc']['fixed']['vlan_start'] = "1000"
 default['bcpc']['fixed']['num_networks'] = "100"
 default['bcpc']['fixed']['network_size'] = "256"
 
-default['bcpc']['ntp_servers'] = [ "172.17.64.35", "172.17.65.35" ]
-default['bcpc']['dns_servers'] = [ "192.168.43.2", "10.17.1.20" ]
+default['bcpc']['ntp_servers'] = [ "pool.ntp.org" ]
+default['bcpc']['dns_servers'] = [ "8.8.8.8", "8.8.4.4" ]
 
 ###########################################
 #
@@ -89,11 +89,3 @@ default['bcpc']['logstash']['user'] = "logstash"
 default['bcpc']['logstash']['group'] = "adm"
 default['bcpc']['kibana']['user'] = "kibana"
 default['bcpc']['kibana']['group'] = "adm"
-
-###########################################
-#
-#  Default AD configuration (if available)
-#
-###########################################
-default['bcpc']['vas']['ou'] = ""
-default['bcpc']['vas']['domain'] = ""
