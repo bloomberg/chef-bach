@@ -19,6 +19,7 @@
 
 include_recipe "bcpc::mysql"
 include_recipe "bcpc::ceph-head"
+include_recipe "bcpc::openstack"
 
 ruby_block "initialize-cinder-config" do
     block do

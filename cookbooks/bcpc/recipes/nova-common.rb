@@ -18,6 +18,7 @@
 #
 
 include_recipe "bcpc::default"
+include_recipe "bcpc::openstack"
 
 ruby_block "initialize-nova-config" do
     block do
@@ -27,21 +28,6 @@ ruby_block "initialize-nova-config" do
         make_config('mysql-nova-password', secure_password)
         make_config('glance-cloudpipe-uuid', %x[uuidgen -r].strip)
     end
-end
-
-apt_repository "openstack" do
-    uri node['bcpc']['repos']['openstack']
-    distribution "#{node['lsb']['codename']}-#{node['bcpc']['openstack_branch']}/#{node['bcpc']['openstack_release']}"
-    components ["main"]
-    deb_src true
-    key "canonical-cloud.key"
-end
-
-%w{python-novaclient python-cinderclient python-glanceclient nova-common python-nova
-   python-keystoneclient python-nova-adminclient python-mysqldb}.each do |pkg|
-        package pkg do
-            action :upgrade
-        end
 end
 
 directory "/var/lib/nova/.ssh" do

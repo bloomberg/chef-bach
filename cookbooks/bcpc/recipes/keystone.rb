@@ -18,6 +18,7 @@
 #
 
 include_recipe "bcpc::mysql"
+include_recipe "bcpc::openstack"
 
 ruby_block "initialize-keystone-config" do
     block do
