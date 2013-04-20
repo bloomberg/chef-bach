@@ -90,6 +90,7 @@ end
 
 service "mysql" do
     action [ :enable, :start ]
+    start_command "service mysql start || true"
 end
 
 ruby_block "initial-mysql-config" do
