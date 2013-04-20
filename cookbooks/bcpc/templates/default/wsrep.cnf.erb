@@ -21,6 +21,8 @@ wsrep_urls="<%= "#{@servers.collect{|x| 'gcomm://'+x['bcpc']['management']['ip']
 ##
 [mysqld]
 
+datadir=/var/lib/mysql
+
 # (This must be substituted by wsrep_format)
 binlog_format=ROW
 
@@ -114,7 +116,7 @@ wsrep_notify_cmd=
 ##
 
 # State Snapshot Transfer method
-wsrep_sst_method=rsync
+wsrep_sst_method=xtrabackup
 
 # Address on THIS node to receive SST at. DON'T SET IT TO DONOR ADDRESS!!!
 # (SST method dependent. Defaults to the first IP of the first interface)
