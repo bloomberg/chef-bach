@@ -57,9 +57,12 @@ bash "initialize-ceph-admin-and-osd-config" do
             osd 'allow *' \
             mds 'allow' > /dev/null
         ceph --name mon. --keyring /var/lib/ceph/mon/ceph-#{node.hostname}/keyring \
-            auth get-or-create-key client.bootstrap-osd > /dev/null
+            auth get-or-create-key client.bootstrap-osd \
+            mon 'allow command osd create ...; allow command osd crush set ...; allow command auth add * osd allow\\ * mon allow\\ rwx; allow command mon getmap' > /dev/null
     EOH
 end
+
+include_recipe "bcpc::ceph-work"
 
 directory "/var/lib/ceph/mds/ceph-#{node.hostname}" do
     user "root"
@@ -91,8 +94,6 @@ end
 execute "ceph-mds-start" do
     command "initctl emit ceph-mds id='#{node.hostname}'"
 end
-
-include_recipe "bcpc::ceph-work"
 
 execute "ceph-mount-share-in-fstab" do
     command <<-EOH

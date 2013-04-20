@@ -39,7 +39,7 @@ end
 
 bash "write-bootstrap-osd-key" do
     code <<-EOH
-        BOOTSTRAP_KEY=`ceph --name mon. --keyring /etc/ceph/ceph.mon.keyring auth get-or-create-key client.bootstrap-osd`
+        BOOTSTRAP_KEY=`ceph --name mon. --keyring /etc/ceph/ceph.mon.keyring auth get-or-create-key client.bootstrap-osd mon 'allow command osd create ...; allow command osd crush set ...; allow command auth add * osd allow\\ * mon allow\\ rwx; allow command mon getmap'`
         ceph-authtool "/var/lib/ceph/bootstrap-osd/ceph.keyring" \
             --create-keyring \
             --name=client.bootstrap-osd \
