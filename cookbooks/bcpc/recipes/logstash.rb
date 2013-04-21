@@ -27,6 +27,7 @@ end
 
 link "/opt/logstash.jar" do
     to "/opt/logstash-1.1.9-monolithic.jar"
+    notifies :restart, "service[logstash]", :delayed
 end
 
 user node[:bcpc][:logstash][:user] do
