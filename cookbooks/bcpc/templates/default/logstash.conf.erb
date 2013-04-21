@@ -38,6 +38,14 @@ filter {
         negate => true
         what => "previous"
     }
+    multiline {
+        pattern => "^\s"
+        what => "previous"
+    }
+    multiline {
+        pattern => "^$"
+        what => "previous"
+    }
 }
 
 output { 
