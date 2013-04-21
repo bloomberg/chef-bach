@@ -164,8 +164,9 @@ end
 bash "patch-for-nova-bugs" do
     user "root"
     code <<-EOH
-        patch /usr/lib/python2.7/dist-packages/nova/api/openstack/compute/contrib/extended_availability_zone.py < /tmp/nova.patch
-        cp /tmp/nova.patch /usr/lib/python2.7/dist-packages/nova/
+        cd /usr/lib/python2.7/dist-packages/nova
+        patch -p1 < /tmp/nova.patch
+        cp /tmp/nova.patch .
     EOH
     not_if "test -f /usr/lib/python2.7/dist-packages/nova/nova.patch"
 end
