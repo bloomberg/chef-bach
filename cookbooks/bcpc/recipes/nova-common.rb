@@ -22,39 +22,10 @@ include_recipe "bcpc::openstack"
 
 ruby_block "initialize-nova-config" do
     block do
-        make_config('ssh-nova-private-key', %x[printf 'y\n' | ssh-keygen -t rsa -N '' -q -f /dev/stdout | sed -e '1,1d' -e 's/.*-----BEGIN/-----BEGIN/'])
-        make_config('ssh-nova-public-key', %x[echo "#{get_config('ssh-nova-private-key')}" | ssh-keygen -y -f /dev/stdin])
         make_config('mysql-nova-user', "nova")
         make_config('mysql-nova-password', secure_password)
         make_config('glance-cloudpipe-uuid', %x[uuidgen -r].strip)
     end
-end
-
-directory "/var/lib/nova/.ssh" do
-    owner "nova"
-    group "nova"
-    mode 00700
-end
-
-template "/var/lib/nova/.ssh/authorized_keys" do
-    source "nova-authorized_keys.erb"
-    owner "nova"
-    group "nova"
-    mode 00644
-end
-
-template "/var/lib/nova/.ssh/id_rsa" do
-    source "nova-id_rsa.erb"
-    owner "nova"
-    group "nova"
-    mode 00600
-end
-
-template "/var/lib/nova/.ssh/config" do
-    source "nova-ssh_config.erb"
-    owner "nova"
-    group "nova"
-    mode 00600
 end
 
 template "/etc/nova/nova.conf" do

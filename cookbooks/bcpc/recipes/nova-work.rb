@@ -20,6 +20,13 @@
 include_recipe "bcpc::nova-common"
 include_recipe "bcpc::ceph-work"
 
+ruby_block "initialize-nova-work-config" do
+    block do
+        make_config('ssh-nova-private-key', %x[printf 'y\n' | ssh-keygen -t rsa -N '' -q -f /dev/stdout | sed -e '1,1d' -e 's/.*-----BEGIN/-----BEGIN/'])
+        make_config('ssh-nova-public-key', %x[echo "#{get_config('ssh-nova-private-key')}" | ssh-keygen -y -f /dev/stdin])
+    end
+end
+
 package "nova-compute-#{node[:bcpc][:virt_type]}" do
     action :upgrade
 end
@@ -49,6 +56,33 @@ bash "restart-all-nova-workers" do
     notifies :restart, "service[nova-novncproxy]", :immediately
 end
 
+directory "/var/lib/nova/.ssh" do
+    owner "nova"
+    group "nova"
+    mode 00700
+end
+
+template "/var/lib/nova/.ssh/authorized_keys" do
+    source "nova-authorized_keys.erb"
+    owner "nova"
+    group "nova"
+    mode 00644
+end
+
+template "/var/lib/nova/.ssh/id_rsa" do
+    source "nova-id_rsa.erb"
+    owner "nova"
+    group "nova"
+    mode 00600
+end
+
+template "/var/lib/nova/.ssh/config" do
+    source "nova-ssh_config.erb"
+    owner "nova"
+    group "nova"
+    mode 00600
+end
+
 service "libvirt-bin" do
     action [ :enable, :start ]
 end
@@ -58,6 +92,14 @@ template "/etc/nova/virsh-secret.xml" do
     owner "nova"
     group "nova"
     mode 00600
+end
+
+bash "set-nova-user-shell" do
+    user "root"
+    code <<-EOH
+        chsh -s /bin/bash nova
+    EOH
+    not_if "grep nova /etc/passwd | grep /bin/bash"
 end
 
 ruby_block 'load-virsh-keys' do

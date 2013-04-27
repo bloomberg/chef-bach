@@ -49,7 +49,7 @@ dhcpbridge=/usr/bin/nova-dhcpbridge
 force_dhcp_release=True
 fixed_ip_disassociate_timeout=180
 send_arp_for_ha=True
-my_ip=<%="#{node[:bcpc][:floating][:ip]}"%>
+my_ip=<%="#{node[:bcpc][:management][:ip]}"%>
 routing_source_ip=<%="#{node[:bcpc][:floating][:ip]}"%>
 
 # Nova Compute settings
