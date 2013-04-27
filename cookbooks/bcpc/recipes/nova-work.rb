@@ -40,7 +40,7 @@ end
     end
 end
 
-%w{novnc pm-utils memcached python-memcache}.each do |pkg|
+%w{novnc pm-utils memcached python-memcache sysfsutils}.each do |pkg|
     package pkg do
         action :upgrade
     end
@@ -81,6 +81,24 @@ template "/var/lib/nova/.ssh/config" do
     owner "nova"
     group "nova"
     mode 00600
+end
+
+bash "enable-defaults-libvirt-bin" do
+    user "root"
+    code <<-EOH
+        sed --in-place '/^libvirtd_opts=/d' /etc/default/libvirt-bin
+        echo 'libvirtd_opts=\"-d -l\"' >> /etc/default/libvirt-bin
+    EOH
+    not_if "grep -e '^libvirtd_opts=\"-d -l\"' /etc/default/libvirt-bin"
+    notifies :restart, "service[libvirt-bin]", :delayed
+end
+
+template "/etc/libvirt/libvirtd.conf" do
+    source "libvirtd.conf.erb"
+    owner "root"
+    group "root"
+    mode 00644
+    notifies :restart, "service[libvirt-bin]", :delayed
 end
 
 service "libvirt-bin" do
@@ -134,7 +152,7 @@ bash "libvirt-device-acls" do
         echo "]" >> /etc/libvirt/qemu.conf
     EOH
     not_if "grep -e '^cgroup_device_acl' /etc/libvirt/qemu.conf"
-    notifies :restart, "service[libvirt-bin]", :immediately
+    notifies :restart, "service[libvirt-bin]", :delayed
 end
 
 cookbook_file "/tmp/folsom-volumes.patch" do
