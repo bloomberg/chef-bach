@@ -5,6 +5,7 @@ description      "Installs/Configures Bloomberg Clustered Private Cloud (BCPC)"
 long_description IO.read(File.join(File.dirname(__FILE__), 'README.md'))
 version          "0.3.0"
 
-%w{apt ubuntu chef-client}.each do |cookbook|
-depends cookbook
-end
+depends "apt", ">= 1.9.2"
+depends "ubuntu", ">= 1.1.2"
+depends "chef-client", ">= 2.2.2"
+depends "cron", ">= 1.2.2"
