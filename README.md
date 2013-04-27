@@ -20,8 +20,8 @@ Setup
 =====
 
 These recipes are currently intended for building a BCPC cloud on top of
-Ubuntu 12.04 servers. When setting this up in VMs, be sure to add a few
-dedicated disks (for ceph OSDs) aside from boot volume. In
+Ubuntu 12.04 servers using Chef 10. When setting this up in VMs, be sure to
+add a few dedicated disks (for ceph OSDs) aside from boot volume. In
 addition, it's expected that you have three separate NICs per machine, with
 the following as defaults (and recommendations for VM settings):
  - ``eth0`` - management traffic (bridged NIC in VM)
@@ -37,7 +37,7 @@ Step 1 - One-time setup
 Make sure that you have `rubygems` and `chef` installed:
 
 ```
- $ [sudo] gem install chef
+ $ [sudo] gem install chef --version 10.18
 ```
 
 These cookbooks assume that you already have the following cookbooks
