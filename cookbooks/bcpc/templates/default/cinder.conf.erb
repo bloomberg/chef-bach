@@ -8,6 +8,7 @@
 # XXX: The following is a work-around to allow any cinder process
 #      to serve any volume (since they're RBD backed)
 host = bcpc
+storage_availability_zone=<%="#{node[:bcpc][:region_name]}"%>
 rootwrap_config = /etc/cinder/rootwrap.conf
 api_paste_confg = /etc/cinder/api-paste.ini
 verbose = True
