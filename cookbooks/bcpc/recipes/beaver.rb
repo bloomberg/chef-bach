@@ -86,6 +86,14 @@ template "/etc/init.d/beaver" do
     notifies :restart, "service[beaver]", :delayed
 end
 
+template "/etc/cron.d/beaver" do
+    source "cron-beaver.erb"
+    owner "root"
+    group "root"
+    mode 00644
+    notifies :restart, "service[cron]", :delayed
+end
+
 service "beaver" do
     action [ :enable, :start ]
 end

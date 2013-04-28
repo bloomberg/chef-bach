@@ -93,6 +93,10 @@ service "ntp" do
     action [ :enable, :start ]
 end
 
+service "cron" do
+    action [ :enable, :start ]
+end
+
 # Core networking package
 package "vlan"
 
