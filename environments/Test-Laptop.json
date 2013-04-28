@@ -1,6 +1,6 @@
 {
   "name": "Test-Laptop",
-  "default_attributes": {
+  "override_attributes": {
     "bcpc": {
       "virt_type" : "qemu",
       "ceph_disks": [ "sdb", "sdc", "sdd", "sde" ],
