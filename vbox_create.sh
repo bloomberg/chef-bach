@@ -5,7 +5,7 @@ set -x
 export HTTP_PROXY=
 export HTTPS_PROXY=
 
-VBM=/usr/bin/VBoxManage
+VBM=VBoxManage
 DRIVE_SIZE=20480
 
 DIR=`dirname $0`/vbox
