@@ -49,6 +49,18 @@ ruby_block "wait-for-mon-quorum" do
     end
 end
 
+ruby_block "reap-dead-ceph-mon-servers" do
+    block do
+        head_names = get_head_nodes.collect{|x| x.hostname}
+        status = JSON.parse(%x[ceph --admin-daemon /var/run/ceph/ceph-mon.#{node.hostname}.asok mon_status])
+        status['monmap']['mons'].collect{|x| x['name']}.each do |server|
+            if not head_names.include?(server)
+                %x[ ceph mon remove #{server} ]
+            end
+        end
+    end
+end
+
 bash "initialize-ceph-admin-and-osd-config" do
     code <<-EOH
         ceph --name mon. --keyring /var/lib/ceph/mon/ceph-#{node.hostname}/keyring \
