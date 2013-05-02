@@ -113,3 +113,11 @@ ruby_block "set-rabbitmq-guest-password" do
         %x[ rabbitmqctl change_password "#{get_config('rabbitmq-user')}" "#{get_config('rabbitmq-password')}" ]
     end
 end
+
+bash "set-rabbitmq-ha-policy" do
+    user "root"
+    code <<-EOH
+        rabbitmqctl set_policy HA '^(?!amq\.).*' '{"ha-mode": "exactly", "ha-params": 2}'
+    EOH
+    not_if "rabbitmqctl list_policies | grep ha-mode"
+end

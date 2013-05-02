@@ -9,7 +9,7 @@ rabbitmq_host: <%="#{node[:bcpc][:management][:vip]}"%>
 rabbitmq_password: <%="#{get_config('rabbitmq-password')}"%>
 rabbitmq_exchange_durable: 1
 rabbitmq_queue_durable: 1
-rabbitmq_ha_queue: 1
+rabbitmq_ha_queue: 0
 
 [/var/log/{syslog,auth.log}]
 type: syslog
