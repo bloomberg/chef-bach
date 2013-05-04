@@ -163,7 +163,8 @@ end
         notifies :restart, "service[#{pkg}]", :delayed
     end
     service pkg do
-        supports :restart => false
+        supports :restart => true
+        restart_command "service #{pkg} stop && sleep 2 && service #{pkg} start"
         action [ :enable, :start ]
     end
 end
