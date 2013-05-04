@@ -1,5 +1,5 @@
-Overview
-========
+BCPC Cluster Bootstrap Overview
+===============================
 
 This repository contains a set of scripts that is useful to bootstrap a BCPC
 cluster with a Cobbler, Chef, DHCP, and gateway server.  Once the
@@ -30,8 +30,9 @@ This will create four VMs:
 - bcpc-vm3
 
 The bcpc-vm images will not work appropriately until the bcpc-bootstrap node is
-configured and serving images via PXE.  Once this bootstrap process is
-complete, they should automatically begin installation upon bootup.
+configured and serving images via PXE and has the firewall rules in place.
+Once the initial bootstrap process is complete, they should automatically begin
+installation upon bootup.
 
 Then, bring up the bcpc-bootstrap VM - which has a virtual CD attached to
 kick off the Ubuntu install:
@@ -121,7 +122,7 @@ If you use the bootstrap_chef.sh script, it will automatically register
 bcpc-vm1, bcpc-vm2, and bcpc-vm3 VMs.  If you have other VMs to register:
 
 ```
-cobbler system add --name=$i --hostname=$i --profile=bcpc_host --ip-address=10.0.100.20 --mac=AA:BB:CC:DD:EE:FF
+cobbler system add --name=bcpc-vm10 --hostname=bcpc-vm10 --profile=bcpc_host --ip-address=10.0.100.20 --mac=AA:BB:CC:DD:EE:FF
 ```
 
 User account on VM
@@ -139,6 +140,9 @@ ubuntu@bcpc-bootstrap:~/chef-bcpc$ ssh ubuntu@10.0.100.11 uname -a
 ubuntu@10.0.100.11's password: <type in abcdefgh>
 Linux bcpc-vm1 3.2.0-41-generic #66-Ubuntu SMP Thu Apr 25 03:27:11 UTC 2013 x86_64 x86_64 x86_64 GNU/Linux
 ```
+
+Assigning roles to VM
+=====================
 
 At this point, you can then run:
 ```
