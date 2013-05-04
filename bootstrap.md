@@ -117,3 +117,16 @@ bcpc-vm1, bcpc-vm2, and bcpc-vm3 VMs.  If you have other VMs to register:
 ```
 cobbler system add --name=$i --hostname=$i --profile=bcpc_host --ip-address=10.0.100.20 --mac=AA:BB:CC:DD:EE:FF
 ```
+
+Upon PXE boot imaging, the bcpc-vm boxes will be imaged with the auto-generated
+password for the ubuntu user.  From the bootstrap node, you can retrieve the
+password as:
+
+```
+ubuntu@bcpc-bootstrap:~/chef-bcpc$ knife data bag show configs Test-Laptop
+cobbler-root-password:         abcdefgh
+...
+ubuntu@bcpc-bootstrap:~/chef-bcpc$ ssh ubuntu@10.0.100.11 uname -a
+ubuntu@10.0.100.11's password: <type in abcdefgh>
+Linux bcpc-vm1 3.2.0-41-generic #66-Ubuntu SMP Thu Apr 25 03:27:11 UTC 2013 x86_64 x86_64 x86_64 GNU/Linux
+```
