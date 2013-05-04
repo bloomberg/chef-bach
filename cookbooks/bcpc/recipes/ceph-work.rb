@@ -51,3 +51,17 @@ end
 execute "trigger-osd-startup" do
     command "udevadm trigger --subsystem-match=block --action=add"
 end
+
+ruby_block "reap-ceph-disks-from-dead-servers" do
+    block do
+        storage_ips = get_all_nodes.collect{|x| x['bcpc']['storage']['ip']}
+        status = JSON.parse(%x[ceph osd dump --format=json])
+        status['osds'].select{|x| x['up']==0 && x['in']==0}.each do |osd|
+            if not storage_ips.include?(osd['public_addr'][/[^:]*/])
+                %x[ ceph osd crush remove osd.#{osd['osd']} 
+                    ceph osd rm osd.#{osd['osd']}
+                    ceph auth del osd.#{osd['osd']}]
+            end
+        end
+    end
+end
