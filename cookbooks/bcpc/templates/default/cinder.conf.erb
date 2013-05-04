@@ -24,7 +24,7 @@ osapi_volume_listen=<%="#{node[:bcpc][:management][:ip]}"%>
 sql_connection=mysql://<%="#{get_config('mysql-cinder-user')}"%>:<%="#{get_config('mysql-cinder-password')}"%>@<%="#{node[:bcpc][:management][:vip]}"%>/<%="#{node['bcpc']['cinder_dbname']}"%>
 
 # Rabbit message queue settings
-rabbit_hosts=<%= "#{@servers.collect{|x| x['bcpc']['management']['ip']}.join(',')}" %>
+rabbit_host=<%="#{node[:bcpc][:management][:vip]}"%>
 rabbit_password=<%="#{get_config('rabbitmq-password')}"%>
 rabbit_ha_queues=False
 rabbit_durable_queues=True
