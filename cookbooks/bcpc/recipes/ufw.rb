@@ -39,12 +39,19 @@ template "/etc/ufw/before.rules" do
     notifies :restart, "service[ufw]", :delayed
 end
 
-# ufw allow 22/tcp
-# ufw allow 80/tcp
-# ufw allow 4000/tcp
-# ufw allow 4040/tcp
-# ufw allow in on eth0 from any port 68 to any port 67 proto udp
-# ufw allow in on eth0 from 10.0.100.0/24 to 10.0.100.1 port tftp
+bash "setup-allow-rules-ufw" do
+    user "root"
+    code <<-EOH
+      ufw allow 22/tcp
+      ufw allow 80/tcp
+      ufw allow 4000/tcp
+      ufw allow 4040/tcp
+      ufw allow in on eth0 from any port 68 to any port 67 proto udp
+      ufw allow in on eth0 from 10.0.100.0/24 to 10.0.100.1 port tftp
+      ufw --force enable
+    EOH
+    not_if "ufw status numbered | grep 22/tcp"
+end
 
 service "ufw" do
     action [ :enable, :start ]
