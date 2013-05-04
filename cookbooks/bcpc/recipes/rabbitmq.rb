@@ -36,13 +36,13 @@ end
 
 package "rabbitmq-server" do
     action :upgrade
-    notifies :run, "bash[rabbitmq-stop]", :immediately
+    notifies :stop, "service[rabbitmq-server]", :immediately
 end
 
 template "/var/lib/rabbitmq/.erlang.cookie" do
     source "erlang.cookie.erb"
     mode 00400
-    notifies :run, "bash[rabbitmq-restart]", :delayed
+    notifies :restart, "service[rabbitmq-server]", :delayed
 end
 
 template "/etc/rabbitmq/rabbitmq-env.conf" do
@@ -59,19 +59,19 @@ end
 template "/etc/rabbitmq/rabbitmq.conf.d/bcpc.conf" do
     source "rabbitmq-bcpc.conf.erb"
     mode 00644
-    notifies :run, "bash[rabbitmq-restart]", :delayed
+    notifies :restart, "service[rabbitmq-server]", :delayed
 end
 
 template "/etc/rabbitmq/rabbitmq.config" do
     source "rabbitmq.config.erb"
     mode 00644
-    notifies :run, "bash[rabbitmq-restart]", :delayed
+    notifies :restart, "service[rabbitmq-server]", :delayed
 end
 
 execute "enable-rabbitmq-web-mgmt" do
     command "/usr/lib/rabbitmq/bin/rabbitmq-plugins enable rabbitmq_management"
     not_if "/usr/lib/rabbitmq/bin/rabbitmq-plugins list -e | grep rabbitmq_management"
-    notifies :run, "bash[rabbitmq-restart]", :delayed
+    notifies :restart, "service[rabbitmq-server]", :delayed
 end
 
 bash "rabbitmq-stop" do
@@ -83,14 +83,8 @@ bash "rabbitmq-stop" do
     EOH
 end
 
-bash "rabbitmq-restart" do
-    user "root"
-    action :nothing
-    notifies :run, "bash[rabbitmq-stop]", :immediately
-    notifies :start, "service[rabbitmq-server]", :immediately
-end
-
 service "rabbitmq-server" do
+    stop_command "service rabbitmq-server stop && epmd -kill"
     action [ :enable, :start ]
 end
 
