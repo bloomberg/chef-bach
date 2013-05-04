@@ -27,7 +27,9 @@
       },
       "bootstrap": {
         "interface" : "eth3",
-        "server" : "10.0.100.1"
+        "server" : "10.0.100.1",
+        "dhcp_subnet" : "10.0.100.0",
+        "dhcp_range" : "10.0.100.10 10.0.100.250"
       },
       "ntp_servers" : [ "pool.ntp.org" ],
       "dns_servers" : [ "8.8.8.8", "8.8.4.4" ]
