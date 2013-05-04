@@ -57,13 +57,25 @@ Install notes:
 
 Login to new VM.
 
-If using NAT, port 22 inbound may be blocked; so, set up interface on eth0
-hostonlyif.  Add to /etc/network/interfaces on bcpc-bootstrap:
+If using NAT, port 22 inbound may be blocked; so, set up the other interfaces
+on the hostonlyif ifaces (eth0-2).  Add to /etc/network/interfaces on
+bcpc-bootstrap:
 
 ```
+# Static interfaces
 auto eth0
 iface eth0 inet static
   address 10.0.100.1
+  netmask 255.255.255.0
+
+auto eth1
+iface eth1 inet static
+  address 172.16.100.1
+  netmask 255.255.255.0
+
+auto eth2
+iface eth2 inet static
+  address 192.168.100.1
   netmask 255.255.255.0
 ```
 

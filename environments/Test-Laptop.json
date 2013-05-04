@@ -6,7 +6,7 @@
       "ceph_disks": [ "sdb", "sdc", "sdd", "sde" ],
       "domain_name" : "bcpc.example.com",
       "management": {
-        "vip" : "10.0.100.15",
+        "vip" : "10.0.100.5",
         "interface" : "eth0",
         "netmask" : "255.255.255.0",
         "cidr" : "10.0.100.0/24",

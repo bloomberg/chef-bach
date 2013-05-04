@@ -9,4 +9,16 @@
     SSLEngine on
     SSLCertificateFile /etc/ssl/certs/ssl-bcpc.pem
     SSLCertificateKeyFile /etc/ssl/private/ssl-bcpc.key
+
+    ProxyPass /rabbitmq/ http://<%="#{node[:bcpc][:management][:vip]}"%>:55672/
+    ProxyPassReverse /rabbitmq/ http://<%="#{node[:bcpc][:management][:vip]}"%>:55672/
+    ProxyPass /elasticsearch/ http://<%="#{node[:bcpc][:management][:vip]}"%>:9200/
+    ProxyPassReverse /elasticsearch/ http://<%="#{node[:bcpc][:management][:vip]}"%>:9200/
+    ProxyPass /kibana/ http://<%="#{node[:bcpc][:management][:vip]}"%>:5601/
+    ProxyPassReverse /kibana/ http://<%="#{node[:bcpc][:management][:vip]}"%>:5601/
+    ProxyPass /haproxy/ http://<%="#{node[:bcpc][:management][:vip]}"%>:1936/
+    ProxyPassReverse /haproxy/ http://<%="#{node[:bcpc][:management][:vip]}"%>:1936/
+    ProxyPass /graphite/ http://<%="#{node[:bcpc][:management][:vip]}"%>:8888/
+    ProxyPassReverse /graphite/ http://<%="#{node[:bcpc][:management][:vip]}"%>:8888/
+
 </VirtualHost>
