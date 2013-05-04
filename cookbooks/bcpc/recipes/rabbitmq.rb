@@ -115,11 +115,10 @@ ruby_block "set-rabbitmq-guest-password" do
 end
 
 bash "set-rabbitmq-ha-policy" do
-    user "root"
+    min_quorum = get_head_nodes.length/2 + 1
     code <<-EOH
-        rabbitmqctl set_policy HA '^(?!amq\.).*' '{"ha-mode": "exactly", "ha-params": 2}'
+        rabbitmqctl set_policy HA '^(?!amq\.).*' '{"ha-mode": "exactly", "ha-params": #{min_quorum}}'
     EOH
-    not_if "rabbitmqctl list_policies | grep ha-mode"
 end
 
 ruby_block "reap-dead-rabbitmq-servers" do
