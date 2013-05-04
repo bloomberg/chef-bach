@@ -35,7 +35,7 @@ and tweak accordingly for your setup (by adding them to an environment file).
 Cluster Bootstrap
 -----------------
 
-Please refer to the (BCPC Bootstrap Guide)[https://github.com/bloomberg/chef-bcpc/blob/master/bootstrap.md]
+Please refer to the [BCPC Bootstrap Guide](https://github.com/bloomberg/chef-bcpc/blob/master/bootstrap.md)
 for more information about getting a BCPC cluster bootstrapped.
 
 There are provided scripts which set up a Chef server that also permits imaging
