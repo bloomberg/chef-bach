@@ -44,7 +44,8 @@ template "/etc/elasticsearch/elasticsearch.yml" do
     owner "root"
     group "root"
     mode 00644
-    variables( :servers => get_head_nodes )
+    variables( :servers => get_head_nodes,
+               :min_quorum => get_head_nodes.length/2 + 1 )
     notifies :restart, "service[elasticsearch]", :immediately
 end
 
@@ -65,4 +66,21 @@ bash "install-elasticsearch-plugins" do
         tar zxf /tmp/elasticsearch-plugins.tgz -C /usr/share/elasticsearch/plugins/
     EOH
     not_if "test -d /usr/share/elasticsearch/plugins/head"
+end
+
+package "curl" do
+    action :upgrade
+end
+
+bash "set-elasticsearch-replicas" do
+    min_quorum = get_head_nodes.length/2 + 1
+    code <<-EOH
+        curl -XPUT '#{node[:bcpc][:management][:vip]}:9200/_settings' -d '
+        {
+            "index" : {
+                "number_of_replicas" : #{min_quorum-1}
+            }
+        }
+        '
+    EOH
 end
