@@ -34,6 +34,12 @@ if [ ! -f cirros-0.3.0-x86_64-disk.img ]; then
 fi
 FILES="cirros-0.3.0-x86_64-disk.img $FILES"
 
+# Grab the Ubuntu 12.04 installer image
+if [ ! -f ubuntu-12.04-mini.iso ]; then
+    curl -o ubuntu-12.04-mini.iso http://archive.ubuntu.com/ubuntu/dists/precise/main/installer-amd64/current/images/netboot/mini.iso
+fi
+FILES="ubuntu-12.04-mini.iso $FILES"
+
 # Make the diamond package
 if [ ! -f diamond.deb ]; then
     git clone https://github.com/BrightcoveOS/Diamond.git
