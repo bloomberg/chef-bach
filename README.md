@@ -72,3 +72,34 @@ Or enroll a server as a worker node:
 ```
  $ knife bootstrap -E Test-Laptop -r "role[BCPC-Worknode]" <IPAddress>
 ```
+
+Using a cluster
+---------------
+
+Once the nodes are configured and bootstrapped, BCPC services will be
+accessible via the floating IP.  (For the Test-Laptop environment, it is
+10.0.100.5.)
+
+For example, you can go to ``https://10.0.100.5/horizon/`` for the OpenStack
+web interface.  To find the automatically-generated OpenStack credentials, look
+in the data bag for your environment under ``keystone-admin-user`` and
+``keystone-admin-password``:
+
+```
+ubuntu@bcpc-bootstrap:~$ knife data bag show configs Test-Laptop | grep keystone-admin
+keystone-admin-password:       abcdefgh
+keystone-admin-token:          this-is-my-token
+keystone-admin-user:           admin
+
+```
+
+For example, to check on ``Ceph``:
+
+```
+ubuntu@bcpc-vm1:~$ ceph -s
+   health HEALTH_OK
+   monmap e1: 1 mons at {bcpc-vm1=172.16.100.11:6789/0}, election epoch 2, quorum 0 bcpc-vm1
+   osdmap e94: 12 osds: 12 up, 12 in
+    pgmap v705: 2192 pgs: 2192 active+clean; 80333 KB data, 729 MB used, 227 GB / 227 GB avail
+   mdsmap e4: 1/1/1 up {0=bcpc-vm1=up:active}
+```
