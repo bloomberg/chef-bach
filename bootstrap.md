@@ -11,6 +11,12 @@ You are only required to bring up a bare Ubuntu 12.04 image before running the
 bootstrap_chef.sh script - it will take the image the rest of the way
 installing all of the good stuff.
 
+If you do not wish to use our scripts (we won't be offended), please refer to
+the manual instructions at the end of this document.
+
+Kicking off the bootstrap process
+=================================
+
 To start off, create the VirtualBox images:
 
 ```
@@ -118,6 +124,9 @@ bcpc-vm1, bcpc-vm2, and bcpc-vm3 VMs.  If you have other VMs to register:
 cobbler system add --name=$i --hostname=$i --profile=bcpc_host --ip-address=10.0.100.20 --mac=AA:BB:CC:DD:EE:FF
 ```
 
+User account on VM
+==================
+
 Upon PXE boot imaging, the bcpc-vm boxes will be imaged with the auto-generated
 password for the ubuntu user.  From the bootstrap node, you can retrieve the
 password as:
@@ -130,3 +139,80 @@ ubuntu@bcpc-bootstrap:~/chef-bcpc$ ssh ubuntu@10.0.100.11 uname -a
 ubuntu@10.0.100.11's password: <type in abcdefgh>
 Linux bcpc-vm1 3.2.0-41-generic #66-Ubuntu SMP Thu Apr 25 03:27:11 UTC 2013 x86_64 x86_64 x86_64 GNU/Linux
 ```
+
+At this point, you can then run:
+```
+$ knife bootstrap -E Test-Laptop -r 'role[BCPC-Headnode]' 10.0.100.11
+$ knife bootstrap -E Test-Laptop -r 'role[BCPC-Worknode]' 10.0.100.12
+$ knife bootstrap -E Test-Laptop -r 'role[BCPC-Worknode]' 10.0.100.12
+```
+
+Manual setup notes
+==================
+
+Step 1 - One-time setup
+----------------------
+
+Make sure that you have `rubygems` and `chef` installed. Currently this only works on `chef@10.18` which requires some massaging to install due to a newer version of `net-ssh`.
+
+```
+ $ [sudo] gem install net-ssh -v 2.2.2 --no-ri --no-rdoc
+ $ [sudo] gem install net-ssh-gateway -v 1.1.0 --no-ri --no-rdoc --ignore-dependencies
+ $ [sudo] gem install net-ssh-multi -v 1.1.0 --no-ri --no-rdoc --ignore-dependencies
+ $ [sudo] gem install chef --no-ri --no-rdoc -v 10.18
+```
+
+These cookbooks assume that you already have the following cookbooks
+available:
+ - apt
+ - ubuntu
+ - cron
+ - chef-client
+
+You can install these cookbooks via:
+
+```
+ $ cd cookbooks/
+ $ knife cookbook site download apt  
+ $ knife cookbook site download ubuntu  
+ $ knife cookbook site download cron
+ $ knife cookbook site download chef-client  
+```
+
+This will download the cookbooks locally. You need to untar them into `/cookbooks`:
+
+```
+ $ tar -zxvf apt*.tar.gz
+ $ tar -zxvf ubuntu*.tar.gz
+ $ tar -zxvf cron*.tar.gz
+ $ tar -zxvf chef-client*.tar.gz
+ $ rm apt*.tar.gz ubuntu*.tar.gz rm cron*.tar.gz chef-client*.tar.gz
+ $ cd ../
+```
+
+You also need to build the installer bins for a number of external
+dependencies, and there's a script to help (tested on Ubuntu 12.04)
+
+```
+ $ ./cookbooks/bcpc/files/default/build_bins.sh
+```
+
+If you're planning to run OpenStack on top of VirtualBox, be sure to build the base VirtualBox images first:
+
+```
+ $ cd path/to/chef-bcpc
+ $ ./vbox_create.sh
+```
+
+Step 2 - Prep the servers
+----------------------
+
+After you've set up your own environment file, get everything up to your
+chef server:
+
+```
+ $ knife environment from file environments/*.json  
+ $ knife role from file roles/*.json  
+ $ knife cookbook upload -a
+```
+

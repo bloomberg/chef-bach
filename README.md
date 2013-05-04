@@ -24,88 +24,29 @@ Ubuntu 12.04 servers using Chef 10. When setting this up in VMs, be sure to
 add a few dedicated disks (for ceph OSDs) aside from boot volume. In
 addition, it's expected that you have three separate NICs per machine, with
 the following as defaults (and recommendations for VM settings):
- - ``eth0`` - management traffic (bridged NIC in VM)
+ - ``eth0`` - management traffic (host-only NIC in VM)
  - ``eth1`` - storage traffic (host-only NIC in VM)
- - ``eth2`` - VM traffic (NAT NIC in VM)
+ - ``eth2`` - VM traffic (host-only NIC in VM)
+ - ``eth3`` - external gateway (NAT NIC in VM - only in bootstrap node)
 
 You should look at the various settings in ``cookbooks/bcpc/attributes/default.rb``
 and tweak accordingly for your setup (by adding them to an environment file).
 
-Step 1 - One-time setup
-----------------------
+Cluster Bootstrap
+-----------------
 
-Make sure that you have `rubygems` and `chef` installed. Currently this only works on `chef@10.18` which requires some massaging to install due to a newer version of `net-ssh`.
+Please refer to the (BCPC Bootstrap Guide)[https://github.com/bloomberg/chef-bcpc/blob/master/bootstrap.md]
+for more information about getting a BCPC cluster bootstrapped.
 
-```
- $ [sudo] gem install net-ssh -v 2.2.2 --no-ri --no-rdoc
- $ [sudo] gem install net-ssh-gateway -v 1.1.0 --no-ri --no-rdoc --ignore-dependencies
- $ [sudo] gem install net-ssh-multi -v 1.1.0 --no-ri --no-rdoc --ignore-dependencies
- $ [sudo] gem install chef --no-ri --no-rdoc -v 10.18
-```
+There are provided scripts which set up a Chef server that also permits imaging
+of the cluster via PXE.
 
-These cookbooks assume that you already have the following cookbooks
-available:
- - apt
- - ubuntu
- - cron
- - chef-client
+Once the Chef server is set up, you can bootstrap any number of nodes to get
+them registered with the chef server for your environment - see the next
+section for enrolling the nodes.
 
-You can install these cookbooks via:
-
-```
- $ cd cookbooks/
- $ knife cookbook site download apt  
- $ knife cookbook site download ubuntu  
- $ knife cookbook site download cron
- $ knife cookbook site download chef-client  
-```
-
-This will download the cookbooks locally. You need to untar them into `/cookbooks`:
-
-```
- $ tar -zxvf apt*.tar.gz
- $ tar -zxvf ubuntu*.tar.gz
- $ tar -zxvf cron*.tar.gz
- $ tar -zxvf chef-client*.tar.gz
- $ rm apt*.tar.gz ubuntu*.tar.gz rm cron*.tar.gz chef-client*.tar.gz
- $ cd ../
-```
-
-You also need to build the installer bins for a number of external
-dependencies, and there's a script to help (tested on Ubuntu 12.04)
-
-```
- $ ./cookbooks/bcpc/files/default/build_bins.sh
-```
-
-If you're planning to run OpenStack on top of VirtualBox, be sure to build the base VirtualBox images first:
-
-```
- $ cd path/to/chef-bcpc
- $ ./vbox_create.sh
-```
-
-Step 2 - Prep the servers
-----------------------
-
-After you've set up your own environment file, get everything up to your
-chef server:
-
-```
- $ knife environment from file environments/*.json  
- $ knife role from file roles/*.json  
- $ knife cookbook upload -a
-```
-
-Now you can bootstrap any number of nodes to get them registered with the
-chef server for your environment (with ``Test-Laptop`` used as the env):
-
-```
- $ knife bootstrap -E Test-Laptop <IPAddress>
-```
-
-Step 3 - Make a cluster
-----------------------
+Make a cluster
+--------------
 
 To build a new cluster, you have to start with building a single
 head node first. Since the recipes will automatically generate all passwords
