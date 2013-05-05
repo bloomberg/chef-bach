@@ -67,10 +67,16 @@ ruby_block "reap-ceph-disks-from-dead-servers" do
     end
 end
 
-execute "ceph-mount-share-in-fstab" do
+execute "cephfs-in-fstab" do
     command <<-EOH
         echo "-- /mnt fuse.ceph-fuse rw,nosuid,nodev,noexec,noatime 0 2" >> /etc/fstab
-        mount -a
     EOH
     not_if "cat /etc/fstab | grep ceph-fuse"
+end
+
+execute "cephfs-mount-fs" do
+    command <<-EOH
+        mount -a
+    EOH
+    not_if "mount | grep ceph-fuse"
 end
