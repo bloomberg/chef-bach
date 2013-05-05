@@ -1,6 +1,6 @@
 #
 # Cookbook Name:: bcpc
-# Recipe:: debmirror
+# Recipe:: apt-mirror
 #
 # Copyright 2013, Bloomberg L.P.
 #
@@ -19,9 +19,9 @@
 
 include_recipe "bcpc::default"
 
-package "debmirror"
+package "apt-mirror"
 
 template "/etc/apt/mirrors.list" do
-    source "debmirror.mirror.list.erb"
+    source "apt-mirror.mirror.list.erb"
     mode 00644
 end
