@@ -9,7 +9,7 @@ fi
 rsync -avP -e "ssh -i $KEYFILE" --exclude vbox --exclude $KEYFILE . ubuntu@$1:chef-bcpc
 
 ssh -i $KEYFILE ubuntu@$1 "cd chef-bcpc && ./setup_ssh_keys.sh $KEYFILE.pub"
-host=`ssh -i $KEYFILE ubuntu@$1 "hostname"`
+host=`ssh -i $KEYFILE ubuntu@$1 "hostname -f"`
 ssh -t -i $KEYFILE ubuntu@$1 "cd chef-bcpc && sudo ./setup_chef_server.sh"
 ssh -t -i $KEYFILE ubuntu@$1 "cd chef-bcpc && ./setup_chef_cookbooks.sh"
 ssh -t -i $KEYFILE ubuntu@$1 "cd chef-bcpc && knife environment from file environments/*.json && knife role from file roles/*.json && knife cookbook upload -a"
@@ -18,8 +18,8 @@ f=`ssh -i $KEYFILE ubuntu@$1 "cd chef-bcpc && knife client list | grep $host"`
 if [ -z "$f" ]; then
   ssh -t -i $KEYFILE ubuntu@$1 "cd chef-bcpc && knife bootstrap -E Test-Laptop $1 -x ubuntu --sudo"
   # Make this client an admin user before proceeding.
-  ssh -t -i $KEYFILE ubuntu@$1 "cd chef-bcpc && EDITOR=vi knife client edit \`hostname\`"
-  ssh -t -i $KEYFILE ubuntu@$1 "cd chef-bcpc && knife node run_list add \`hostname\` 'role[BCPC-Bootstrap]'"
+  ssh -t -i $KEYFILE ubuntu@$1 "cd chef-bcpc && EDITOR=vi knife client edit \`hostname -f\`"
+  ssh -t -i $KEYFILE ubuntu@$1 "cd chef-bcpc && knife node run_list add \`hostname -f\` 'role[BCPC-Bootstrap]'"
 fi
 ssh -t -i $KEYFILE root@$1 "chef-client"
 
