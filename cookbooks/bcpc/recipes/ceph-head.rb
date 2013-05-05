@@ -74,8 +74,6 @@ bash "initialize-ceph-admin-and-osd-config" do
     EOH
 end
 
-include_recipe "bcpc::ceph-work"
-
 directory "/var/lib/ceph/mds/ceph-#{node.hostname}" do
     user "root"
     group "root"
@@ -106,3 +104,5 @@ end
 execute "ceph-mds-start" do
     command "initctl emit ceph-mds id='#{node.hostname}'"
 end
+
+include_recipe "bcpc::ceph-work"

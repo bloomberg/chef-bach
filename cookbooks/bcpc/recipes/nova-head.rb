@@ -72,3 +72,6 @@ ruby_block "reap-dead-servers-from-nova" do
         end
     end
 end
+
+include_recipe "bcpc::nova-work"
+include_recipe "bcpc::nova-setup"
