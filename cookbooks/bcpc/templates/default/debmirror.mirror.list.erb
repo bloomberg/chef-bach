@@ -1,0 +1,65 @@
+############# config ##################
+#
+# set base_path    /var/spool/apt-mirror
+#
+# set mirror_path  $base_path/mirror
+# set skel_path    $base_path/skel
+# set var_path     $base_path/var
+# set cleanscript $var_path/clean.sh
+# set defaultarch  <running host architecture>
+# set postmirror_script $var_path/postmirror.sh
+# set run_postmirror 0
+set nthreads     20
+set _tilde 0
+#
+############# end config ##############
+
+deb http://us.archive.ubuntu.com/ubuntu precise main restricted universe multiverse
+deb-i386 http://us.archive.ubuntu.com/ubuntu precise main restricted universe multiverse
+
+deb http://us.archive.ubuntu.com/ubuntu precise-security main restricted universe multiverse
+deb-i386 http://us.archive.ubuntu.com/ubuntu precise-security main restricted universe multiverse
+
+deb http://us.archive.ubuntu.com/ubuntu precise-updates main restricted universe multiverse
+deb-i386 http://us.archive.ubuntu.com/ubuntu precise-updates main restricted universe multiverse
+
+deb http://us.archive.ubuntu.com/ubuntu precise-backports main restricted universe multiverse
+deb-i386 http://us.archive.ubuntu.com/ubuntu precise-backports main restricted universe multiverse
+
+deb http://us.archive.ubuntu.com/ubuntu precise main/debian-installer restricted/debian-installer universe/debian-installer multiverse/debian-installer
+deb http://us.archive.ubuntu.com/ubuntu precise-security main/debian-installer restricted/debian-installer universe/debian-installer multiverse/debian-installer
+deb http://us.archive.ubuntu.com/ubuntu precise-updates main/debian-installer restricted/debian-installer universe/debian-installer multiverse/debian-installer
+
+deb http://hwraid.le-vert.net/ubuntu precise main
+deb-i386 http://hwraid.le-vert.net/ubuntu precise main
+
+deb http://ceph.com/debian-bobtail precise main
+deb-i386 http://ceph.com/debian-bobtail precise main
+
+deb http://ceph.com/debian precise main
+deb-i386 http://ceph.com/debian precise main
+
+deb http://repo.percona.com/apt precise main
+deb-i386 http://repo.percona.com/apt precise main
+
+deb http://ubuntu-cloud.archive.canonical.com/ubuntu precise-updates/folsom main
+deb-i386 http://ubuntu-cloud.archive.canonical.com/ubuntu precise-updates/folsom main
+
+deb http://ubuntu-cloud.archive.canonical.com/ubuntu precise-proposed/folsom main
+deb-i386 http://ubuntu-cloud.archive.canonical.com/ubuntu precise-proposed/folsom main
+
+deb http://apt.opscode.com/ precise-0.10 main
+deb-i386 http://apt.opscode.com/ precise-0.10 main
+
+deb http://www.rabbitmq.com/debian testing main
+deb-i386 http://www.rabbitmq.com/debian testing main
+
+clean http://us.archive.ubuntu.com/ubuntu
+clean http://hwraid.le-vert.net/ubuntu
+clean http://ceph.com/debian
+clean http://ceph.com/debian-bobtail
+clean http://ceph.com/debian-testing
+clean http://repo.percona.com/apt
+clean http://apt.opscode.com
+clean http://www.rabbitmq.com/debian
+clean http://ubuntu-cloud.archive.canonical.com/ubuntu
