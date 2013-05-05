@@ -58,3 +58,17 @@ bash "nova-database-sync" do
     code "nova-manage db sync"
     notifies :run, "bash[restart-nova-scheduler-cert]", :immediately
 end
+
+ruby_block "reap-dead-servers-from-nova" do
+    block do
+        all_hosts = get_all_nodes.collect{|x| x.hostname}
+        nova_hosts = %x[nova-manage service list | awk '{print $2}' | grep -ve "^Host$" | uniq].split
+        nova_hosts.each do |host|
+            if not all_hosts.include?(host)
+                %x[ mysql -uroot -p#{get_config('mysql-root-password')} #{node['bcpc']['nova_dbname']} -e "DELETE FROM services WHERE host=\\"#{host}\\";"
+                    mysql -uroot -p#{get_config('mysql-root-password')} #{node['bcpc']['nova_dbname']} -e "DELETE FROM compute_nodes WHERE hypervisor_hostname=\\"#{host}\\";"
+                ]
+            end
+        end
+    end
+end
