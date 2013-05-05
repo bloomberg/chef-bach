@@ -13,7 +13,8 @@
       "recipe[bcpc::nova-common]",
       "recipe[bcpc::nova-work]",
       "recipe[bcpc::diamond]",
-      "recipe[bcpc::beaver]"
+      "recipe[bcpc::beaver]",
+      "recipe[bcpc::zabbix-agent]"
     ],
     "description": "A functional compute node in a BCPC cluster",
     "chef_type": "role",

@@ -14,7 +14,7 @@ apt-get -y update
 apt-get -y dist-upgrade
 
 # Install tools needed for packaging
-apt-get -y install git rubygems make pbuilder python-mock python-configobj python-support cdbs python-all-dev python-stdeb
+apt-get -y install git rubygems make pbuilder python-mock python-configobj python-support cdbs python-all-dev python-stdeb libmysqlclient-dev
 if [ -z `gem list --local bundler | grep bundler` ]; then
   gem install bundler --no-ri --no-rdoc
 fi
@@ -136,5 +136,28 @@ if [ ! -f python-carbon_0.9.10_all.deb ] || [ ! -f python-whisper_0.9.10_all.deb
     rm -rf carbon-0.9.10 carbon-0.9.10.tar.gz whisper-0.9.10 whisper-0.9.10.tar.gz graphite-web-0.9.10 graphite-web-0.9.10.tar.gz
 fi
 FILES="python-carbon_0.9.10_all.deb python-whisper_0.9.10_all.deb python-graphite-web_0.9.10_all.deb $FILES"
+
+# Build the zabbix packages
+if [ ! -f zabbix-agent.tar.gz ] || [ ! -f zabbix-server.tar.gz ]; then
+    curl -L -O http://sourceforge.net/projects/zabbix/files/ZABBIX%20Latest%20Stable/2.0.6/zabbix-2.0.6.tar.gz
+    tar zxf zabbix-2.0.6.tar.gz
+    rm -rf /tmp/zabbix-install && mkdir -p /tmp/zabbix-install
+    cd zabbix-2.0.6
+    ./configure --prefix=/tmp/zabbix-install --enable-agent
+    make install
+    tar zcf zabbix-agent.tar.gz -C /tmp/zabbix-install .
+    rm -rf /tmp/zabbix-install && mkdir -p /tmp/zabbix-install
+    ./configure --prefix=/tmp/zabbix-install --enable-server --with-mysql
+    make install
+    cp -a frontends/php /tmp/zabbix-install/share/zabbix/
+    cp database/mysql/* /tmp/zabbix-install/share/zabbix/
+    tar zcf zabbix-server.tar.gz -C /tmp/zabbix-install .
+    rm -rf /tmp/zabbix-install
+    cd ..
+    cp zabbix-2.0.6/zabbix-agent.tar.gz .
+    cp zabbix-2.0.6/zabbix-server.tar.gz .
+    rm -rf zabbix-2.0.6 zabbix-2.0.6.tar.gz
+fi
+FILES="zabbix-agent.tar.gz zabbix-server.tar.gz $FILES"
 
 popd
