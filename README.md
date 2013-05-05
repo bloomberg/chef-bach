@@ -3,7 +3,10 @@ Overview
 
 This is a set of [Chef](https://github.com/opscode/chef) cookbooks to bring up
 an instance of an [OpenStack](http://www.openstack.org/)-based cluster of head
-and worker nodes.
+and worker nodes.  In addition to hosting virtual machines, there are a number
+of additional services provided with these cookbooks - such as distributed
+storage, DNS, log aggregation/search, and monitoring - see below for a partial
+list of services provided by these cookbooks.
 
 Each head node runs all of the core services in a highly-available manner with
 no restriction upon how many head nodes there are.  The cluster is deemed
@@ -103,3 +106,28 @@ ubuntu@bcpc-vm1:~$ ceph -s
     pgmap v705: 2192 pgs: 2192 active+clean; 80333 KB data, 729 MB used, 227 GB / 227 GB avail
    mdsmap e4: 1/1/1 up {0=bcpc-vm1=up:active}
 ```
+
+BCPC Services
+-------------
+
+BCPC currently relies upon a number of open-source packages:
+
+ - [Apache HTTP Server](http://httpd.apache.org/)
+ - [Beaver](https://github.com/josegonzalez/beaver)
+ - [Ceph](http://ceph.com/)
+ - [Chef](http://www.opscode.com/chef/)
+ - [Cobbler](http://www.cobblerd.org/)
+ - [Diamond](https://github.com/BrightcoveOS/Diamond)
+ - [ElasticSearch](http://www.elasticsearch.org/)
+ - [Graphite](http://graphite.readthedocs.org/en/latest/)
+ - [HAProxy](http://haproxy.1wt.eu/)
+ - [Keepalived](http://www.keepalived.org/)
+ - [Kibana](http://kibana.org/)
+ - [Logstash](http://logstash.net/)
+ - [OpenStack](http://www.openstack.org/)
+ - [Percona XtraDB Cluster](http://www.percona.com/software/percona-xtradb-cluster)
+ - [PowerDNS](https://www.powerdns.com/)
+ - [RabbitMQ](http://www.rabbitmq.com/)
+ - [Ubuntu](http://www.ubuntu.com/)
+
+Thanks to all of these communities for producing this software!
