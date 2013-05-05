@@ -110,7 +110,7 @@ ListenIP=<%="#{node[:bcpc][:management][:ip]}"%>
 # Mandatory: no
 # Range: 0-100
 # Default:
-StartAgents=0
+StartAgents=3
 
 ##### Active checks related
 
@@ -124,8 +124,6 @@ StartAgents=0
 #
 # Mandatory: no
 # Default:
-# ServerActive=
-
 ServerActive=<%="#{node[:bcpc][:management][:vip]}"%>
 
 ### Option: Hostname
@@ -135,8 +133,6 @@ ServerActive=<%="#{node[:bcpc][:management][:vip]}"%>
 #
 # Mandatory: no
 # Default:
-# Hostname=
-
 Hostname=<%="#{node.hostname}"%>
 
 ### Option: HostnameItem

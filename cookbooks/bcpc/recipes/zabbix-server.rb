@@ -17,7 +17,7 @@ ruby_block "initialize-zabbix-config" do
     end
 end
 
-%w{libapache2-mod-php5 php5-mysql php5-gd}.each do |pkg|
+%w{traceroute libapache2-mod-php5 php5-mysql php5-gd}.each do |pkg|
     package pkg do
         action :upgrade
     end
