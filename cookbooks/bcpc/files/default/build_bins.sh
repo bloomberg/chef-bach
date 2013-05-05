@@ -15,7 +15,12 @@ apt-get -y dist-upgrade
 
 # Install tools needed for packaging
 apt-get -y install git rubygems make pbuilder python-mock python-configobj python-support cdbs python-all-dev python-stdeb
-gem install bundler fpm --no-ri --no-rdoc
+if [ -z `gem list --local bundler | grep bundler` ]; then
+  gem install bundler --no-ri --no-rdoc
+fi
+if [ -z `gem list --local fpm | grep fpm` ]; then
+  gem install fpm --no-ri --no-rdoc
+fi
 
 # Build kibana installable bundle
 if [ ! -f kibana.tgz ]; then
