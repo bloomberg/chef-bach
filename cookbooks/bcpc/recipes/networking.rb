@@ -81,18 +81,6 @@ service "ssh" do
     action [ :enable, :start ]
 end
 
-package "ntp"
-
-template "/etc/ntp.conf" do
-    source "ntp.conf.erb"
-    mode 00644
-    notifies :restart, "service[ntp]", :immediately
-end
-
-service "ntp" do
-    action [ :enable, :start ]
-end
-
 service "cron" do
     action [ :enable, :start ]
 end

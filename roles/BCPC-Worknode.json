@@ -7,6 +7,7 @@
       "role[Basic]",
       "recipe[bcpc::default]",
       "recipe[bcpc::networking]",
+      "recipe[bcpc::ntp]",
       "recipe[bcpc::ceph-common]",
       "recipe[bcpc::ceph-work]",
       "recipe[bcpc::nova-common]",
