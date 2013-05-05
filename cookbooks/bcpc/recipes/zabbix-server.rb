@@ -21,50 +21,6 @@ ruby_block "initialize-zabbix-config" do
     end
 end
 
-%w{traceroute libapache2-mod-php5 php5-mysql php5-gd}.each do |pkg|
-    package pkg do
-        action :upgrade
-    end
-end
-
-bash "apache-enable-php5" do
-    user "root"
-    code <<-EOH
-        a2enmod php5
-    EOH
-    not_if "test -r /etc/apache2/mods-enabled/php5.load"
-    notifies :restart, "service[apache2]", :delayed
-end
-
-file "/etc/php5/apache2/conf.d/bcpc.ini" do
-    user "root"
-    group "root"
-    mode 00644
-    content <<-EOH
-        post_max_size = 16M
-        max_execution_time = 300
-        max_input_time = 300
-        date.timezone = America/New_York
-    EOH
-    notifies :restart, "service[apache2]", :delayed
-end
-
-template "/usr/local/share/zabbix/php/conf/zabbix.conf.php" do
-    source "zabbix.conf.php.erb"
-    user node[:bcpc][:zabbix][:user]
-    group "www-data"
-    mode 00640
-    notifies :restart, "service[apache2]", :delayed
-end
-
-template "/etc/apache2/conf.d/zabbix-web.conf" do
-    source "apache-zabbix-web.conf.erb"
-    owner "root"
-    group "root"
-    mode 00644
-    notifies :restart, "service[apache2]", :delayed
-end
-
 cookbook_file "/tmp/zabbix-server.tar.gz" do
     source "bins/zabbix-server.tar.gz"
     owner "root"
@@ -129,4 +85,48 @@ end
 service "zabbix-server" do
     provider Chef::Provider::Service::Upstart
     action [ :enable, :start ]
+end
+
+%w{traceroute libapache2-mod-php5 php5-mysql php5-gd}.each do |pkg|
+    package pkg do
+        action :upgrade
+    end
+end
+
+bash "apache-enable-php5" do
+    user "root"
+    code <<-EOH
+        a2enmod php5
+    EOH
+    not_if "test -r /etc/apache2/mods-enabled/php5.load"
+    notifies :restart, "service[apache2]", :delayed
+end
+
+file "/etc/php5/apache2/conf.d/bcpc.ini" do
+    user "root"
+    group "root"
+    mode 00644
+    content <<-EOH
+        post_max_size = 16M
+        max_execution_time = 300
+        max_input_time = 300
+        date.timezone = America/New_York
+    EOH
+    notifies :restart, "service[apache2]", :delayed
+end
+
+template "/usr/local/share/zabbix/php/conf/zabbix.conf.php" do
+    source "zabbix.conf.php.erb"
+    user node[:bcpc][:zabbix][:user]
+    group "www-data"
+    mode 00640
+    notifies :restart, "service[apache2]", :delayed
+end
+
+template "/etc/apache2/conf.d/zabbix-web.conf" do
+    source "apache-zabbix-web.conf.erb"
+    owner "root"
+    group "root"
+    mode 00644
+    notifies :restart, "service[apache2]", :delayed
 end
