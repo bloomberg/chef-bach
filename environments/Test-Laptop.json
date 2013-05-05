@@ -31,7 +31,7 @@
         "dhcp_subnet" : "10.0.100.0",
         "dhcp_range" : "10.0.100.10 10.0.100.250"
       },
-      "ntp_servers" : [ "pool.ntp.org" ],
+      "ntp_servers" : [ "0.pool.ntp.org", "1.pool.ntp.org", "2.pool.ntp.org", "3.pool.ntp.org" ],
       "dns_servers" : [ "8.8.8.8", "8.8.4.4" ]
     },
     "chef_client": {
