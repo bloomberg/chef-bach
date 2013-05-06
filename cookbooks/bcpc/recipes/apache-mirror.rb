@@ -1,6 +1,6 @@
 #
 # Cookbook Name:: bcpc
-# Recipe:: apt-mirror
+# Recipe:: apache-mirror
 #
 # Copyright 2013, Bloomberg L.P.
 #
@@ -17,11 +17,16 @@
 # limitations under the License.
 #
 
-include_recipe "bcpc::default"
+package "apache2"
 
-package "apt-mirror"
+service "apache2" do
+    action [ :enable, :start ]
+end
 
-template "/etc/apt/mirror.list" do
-    source "apt-mirror.mirror.list.erb"
+template "/etc/apache2/sites-available/default" do
+    source "apache-mirror.erb"
+    owner "root"
+    group "root"
     mode 00644
+    notifies :restart, "service[apache2]", :delayed
 end

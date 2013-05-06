@@ -24,7 +24,8 @@ package "whois"
 
 ruby_block "initialize-cobbler-config" do
     block do
-        make_config('cobbler-user-password', secure_password)
+        # don't do anything with this for now
+        #make_config('cobbler-user-password', secure_password)
         make_config('cobbler-root-password', secure_password)
         make_config('cobbler-root-password-salted', %x[ printf "#{get_config('cobbler-root-password')}" | mkpasswd -s -m sha-512 ] )
     end
