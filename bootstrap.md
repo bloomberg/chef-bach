@@ -124,9 +124,6 @@ Please enter the location of the validation key: [/etc/chef/validation.pem]
 Please enter the path to a chef repository (or leave blank): .
 ```
 
-You will eventually be prompted to make the initial client an admin - just
-modify the admin flag to true and save the file.
-
 Registering VMs for PXE boot
 ============================
 
@@ -158,10 +155,19 @@ Assigning roles to VM
 
 At this point, you can then run:
 ```
-$ knife bootstrap -E Test-Laptop -r 'role[BCPC-Headnode]' 10.0.100.11
-$ knife bootstrap -E Test-Laptop -r 'role[BCPC-Worknode]' 10.0.100.12
-$ knife bootstrap -E Test-Laptop -r 'role[BCPC-Worknode]' 10.0.100.12
+$ sudo knife bootstrap -E Test-Laptop -r 'role[BCPC-Headnode]' 10.0.100.11
+$ sudo knife bootstrap -E Test-Laptop -r 'role[BCPC-Worknode]' 10.0.100.12
+$ sudo knife bootstrap -E Test-Laptop -r 'role[BCPC-Worknode]' 10.0.100.12
 ```
+
+Also, after the first run, make the client an administrator, or you will get the error:
+'''
+[...]error: Net::HTTPServerException: 403 "Forbidden"
+'''
+To make a host an administrator, one can access the Chef web UI via
+http://10.0.100.1:4040 and follow:
+Clients -> <Host> -> Edit -> Admin (toggle true) -> Save Client
+Then, re-run the bootstrap command.
 
 Using BCPC
 ==========

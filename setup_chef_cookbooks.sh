@@ -4,8 +4,8 @@
 
 set -x
 
-if [ ! -f ~/.chef/knife.rb ]; then
-  knife configure --initial
+if [ ! -f .chef/knife.rb ]; then
+  echo -e ".chef/knife.rb\nhttp://10.0.100.1:4000\n\n\n\n\n\n.\n" | knife configure --initial
 fi
 
 cd cookbooks
