@@ -52,8 +52,8 @@ Install notes:
 - select eth3 as network interface for DHCP (vbox_create.sh sets it up as NAT)
 - bcpc-bootstrap as hostname
 - ubuntu/ubuntu as default user/password
+- install OpenSSH server
 - install grub to MBR
-- remove virtual CD
 
 Login to new VM.
 

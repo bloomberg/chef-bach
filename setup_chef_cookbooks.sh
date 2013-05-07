@@ -1,9 +1,11 @@
 #!/bin/bash -e
 
+# Expected to be run in the root of the Chef Git repository (e.g. chef-bcpc)
+
 set -x
 
-if [ ! -f .chef/knife.rb ]; then
-  knife configure --initial .
+if [ ! -f ~/.chef/knife.rb ]; then
+  knife configure --initial
 fi
 
 cd cookbooks

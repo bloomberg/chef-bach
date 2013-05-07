@@ -40,7 +40,7 @@ $VBM hostonlyif ipconfig vboxnet2 --ip 192.168.100.2 --netmask 255.255.255.0
 # Create bootstrap VM
 for vm in bcpc-bootstrap; do
     # Only if VM doesn't exist
-    if ! $VBM list vms | grep $vm ; then
+    if ! $VBM list vms | grep "^\"${vm}\"" ; then
         $VBM createvm --name $vm --ostype Ubuntu_64 --basefolder $P --register
         $VBM modifyvm $vm --memory 1024
         $VBM storagectl $vm --name "SATA Controller" --add sata
@@ -59,13 +59,14 @@ for vm in bcpc-bootstrap; do
         $VBM modifyvm $vm --nic4 nat
         # Add the bootable mini ISO for installing Ubuntu 12.04
         $VBM storageattach $vm --storagectl "IDE Controller" --device 0 --port 0 --type dvddrive --medium ubuntu-12.04-mini.iso
+        $VBM modifyvm $vm --boot1 disk
     fi
 done
 
 # Create each VM
 for vm in bcpc-vm1 bcpc-vm2 bcpc-vm3; do
     # Only if VM doesn't exist
-    if ! $VBM list vms | grep $vm ; then
+    if ! $VBM list vms | grep "^\"${vm}\"" ; then
         $VBM createvm --name $vm --ostype Ubuntu_64 --basefolder $P --register
         $VBM modifyvm $vm --memory 2048
         $VBM storagectl $vm --name "SATA Controller" --add sata
