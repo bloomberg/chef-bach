@@ -34,6 +34,11 @@ configured and serving images via PXE and has the firewall rules in place.
 Once the initial bootstrap process is complete, they should automatically begin
 installation upon bootup.
 
+In our testing, VirtualBox guest SMP makes performance significantly worse, so
+it is recommended that you keep one CPU per VM.  You may also find that 2GB is
+not enough for a BCPC-Headnode and wish to tweak the amount of RAM given to
+any head node VM.
+
 Then, bring up the bcpc-bootstrap VM - which has a virtual CD attached to
 kick off the Ubuntu install:
 
@@ -195,6 +200,57 @@ ubuntu@bcpc-vm1:~$ ceph -s
    osdmap e94: 12 osds: 12 up, 12 in
     pgmap v705: 2192 pgs: 2192 active+clean; 80333 KB data, 729 MB used, 227 GB / 227 GB avail
    mdsmap e4: 1/1/1 up {0=bcpc-vm1=up:active}
+```
+
+Setting up a private repos mirror
+=================================
+
+If you do a lot of installations or are on an isolated network, you may wish to
+utilize a private mirror.  Currently, this will require about 100GB of local
+storage.
+
+```
+ubuntu@bcpc-bootstrap:~$ knife node run_list add \`hostname -f\` 'recipe[bcpc::apache-mirror]'
+ubuntu@bcpc-bootstrap:~$ knife node run_list add \`hostname -f\` 'recipe[bcpc::apt-mirror]'
+ubuntu@bcpc-bootstrap:~$ sudo chef-client
+ubuntu@bcpc-bootstrap:~$ sudo apt-mirror /etc/apt/mirror.list
+```
+
+After successfully downloading the repository mirrors, you will then need to
+edit the local environment - the following patch highlights the necessary
+settings:
+
+```
+diff --git a/environments/Test-Laptop.json b/environments/Test-Laptop.json
+index d844783..9a9e53a 100644
+--- a/environments/Test-Laptop.json
++++ b/environments/Test-Laptop.json
+@@ -28,12 +28,25 @@
+       "bootstrap": {
+         "interface" : "eth3",
+         "server" : "10.0.100.1",
++        "mirror" : "10.0.100.1",
+         "dhcp_subnet" : "10.0.100.0",
+         "dhcp_range" : "10.0.100.10 10.0.100.250"
+       },
++      "repos": {
++        "ceph": "http://10.0.100.1/ceph-bobtail",
++        "rabbitmq": "http://10.0.100.1/rabbitmq",
++        "mysql": "http://10.0.100.1/percona",
++        "openstack": "http://10.0.100.1/ubuntu-cloud",
++        "hwraid": "http://10.0.100.1/hwraid"
++      },
+       "ntp_servers" : [ "0.pool.ntp.org", "1.pool.ntp.org", "2.pool.ntp.org", "3.pool.ntp.org" ],
+       "dns_servers" : [ "8.8.8.8", "8.8.4.4" ]
+     },
++    "ubuntu": {
++      "archive_url": "http://10.0.100.1/ubuntu",
++      "security_url": "http://10.0.100.1/ubuntu",
++      "include_source_packages": false
++    },
+     "chef_client": {
+       "server_url": "http://10.0.100.1:4000",
+       "cache_path": "/var/chef/cache",
 ```
 
 Manual setup notes
