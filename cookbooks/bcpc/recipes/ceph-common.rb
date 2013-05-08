@@ -23,7 +23,6 @@ apt_repository "ceph" do
     uri node['bcpc']['repos']['ceph']
     distribution node['lsb']['codename']
     components ["main"]
-    deb_src true
     key "ceph-release.key"
 end
 

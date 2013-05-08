@@ -32,7 +32,6 @@ apt_repository "percona" do
     uri node['bcpc']['repos']['mysql']
     distribution node['lsb']['codename']
     components ["main"]
-    deb_src true
     key "percona-release.key"
 end
 

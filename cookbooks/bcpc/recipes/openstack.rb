@@ -23,7 +23,6 @@ apt_repository "openstack" do
     uri node['bcpc']['repos']['openstack']
     distribution "#{node['lsb']['codename']}-#{node['bcpc']['openstack_branch']}/#{node['bcpc']['openstack_release']}"
     components ["main"]
-    deb_src true
     key "canonical-cloud.key"
 end
 
