@@ -20,6 +20,8 @@
 include_recipe "bcpc::mysql"
 include_recipe "bcpc::nova-common"
 
+package "python-memcache"
+
 %w{nova-scheduler nova-cert nova-consoleauth}.each do |pkg|
     package pkg do
         action :upgrade
