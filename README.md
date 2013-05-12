@@ -30,7 +30,6 @@ the following as defaults (and recommendations for VM settings):
  - ``eth0`` - management traffic (host-only NIC in VM)
  - ``eth1`` - storage traffic (host-only NIC in VM)
  - ``eth2`` - VM traffic (host-only NIC in VM)
- - ``eth3`` - external gateway (NAT NIC in VM - only in bootstrap node)
 
 You should look at the various settings in ``cookbooks/bcpc/attributes/default.rb``
 and tweak accordingly for your setup (by adding them to an environment file).
@@ -41,8 +40,8 @@ Cluster Bootstrap
 Please refer to the [BCPC Bootstrap Guide](https://github.com/bloomberg/chef-bcpc/blob/master/bootstrap.md)
 for more information about getting a BCPC cluster bootstrapped.
 
-There are provided scripts which set up a Chef server that also permits imaging
-of the cluster via PXE.
+There are provided scripts which set up a Chef server via Vagrant or on bare
+metal that permit imaging of the cluster via PXE.
 
 Once the Chef server is set up, you can bootstrap any number of nodes to get
 them registered with the chef server for your environment - see the next
