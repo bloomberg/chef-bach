@@ -40,8 +40,9 @@ Cluster Bootstrap
 Please refer to the [BCPC Bootstrap Guide](https://github.com/bloomberg/chef-bcpc/blob/master/bootstrap.md)
 for more information about getting a BCPC cluster bootstrapped.
 
-There are provided scripts which set up a Chef server via Vagrant or on bare
-metal that permit imaging of the cluster via PXE.
+There are provided scripts which set up a Chef and Cobbler server via
+[Vagrant](http://www.vagrantup.com/) or on bare metal that permit imaging of
+the cluster via PXE.
 
 Once the Chef server is set up, you can bootstrap any number of nodes to get
 them registered with the chef server for your environment - see the next
@@ -50,16 +51,17 @@ section for enrolling the nodes.
 Make a cluster
 --------------
 
-To build a new cluster, you have to start with building a single
-head node first. Since the recipes will automatically generate all passwords
-and keys for this new cluster, enable the target node as an ``admin`` in the
-chef server so that the recipes can write the generated info to a databag.
-The databag will be called ``configs`` and the databag item will be the same
-name as the environment (``Test-Laptop`` in this example). You only need to
-leave the node as an ``admin`` for the first chef-client run. You can also
-manually create the databag & item (as per the example in
-``data_bags/configs/Example.json``) and manually upload it if you'd rather
-not bother with the whole ``admin`` thing for the first run.
+To build a new BCPC cluster, you have to start with building a single head node
+first. (This assumes that you have already completed the bootstrap process and
+have a Chef server available.)  Since the recipes will automatically generate
+all passwords and keys for this new cluster, enable the target node as an
+``admin`` in the chef server so that the recipes can write the generated info
+to a databag.  The databag will be called ``configs`` and the databag item will
+be the same name as the environment (``Test-Laptop`` in this example). You only
+need to leave the node as an ``admin`` for the first chef-client run. You can
+also manually create the databag & item (as per the example in
+``data_bags/configs/Example.json``) and manually upload it if you'd rather not
+bother with the whole ``admin`` thing for the first run.
 
 So add this first node as the role ``BCPC-Headnode`` and run ``chef-client``
 on the target node. After the first one is up, you can add another head
@@ -128,5 +130,7 @@ BCPC currently relies upon a number of open-source packages:
  - [PowerDNS](https://www.powerdns.com/)
  - [RabbitMQ](http://www.rabbitmq.com/)
  - [Ubuntu](http://www.ubuntu.com/)
+ - [Vagrant](http://www.vagrantup.com/)
+ - [VirtualBox](https://www.virtualbox.org/)
 
 Thanks to all of these communities for producing this software!
