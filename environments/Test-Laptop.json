@@ -26,7 +26,8 @@
         "available_subnet" : "192.168.100.128/25"
       },
       "bootstrap": {
-        "interface" : "eth3",
+        "interface" : "eth0",
+        "pxe_interface" : "eth1",
         "server" : "10.0.100.1",
         "dhcp_subnet" : "10.0.100.0",
         "dhcp_range" : "10.0.100.10 10.0.100.250"
