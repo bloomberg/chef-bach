@@ -64,8 +64,8 @@ If vagrant is locally installed, we utilize the
 [vagrant box images from Canonical](http://cloud-images.ubuntu.com/vagrant/)
 to provision the bcpc-bootstrap node.
 
-If you have a local offline repository mirror, you should alter the Vagrantfile
-to use it when provisioning:
+If you have a [local repository mirror](#setting-up-a-private-repos-mirror),
+you can alter the Vagrantfile to use it when provisioning:
 
 ```
 $local_mirror = "10.0.100.4"
@@ -90,9 +90,9 @@ Please continue to
 bcpc-bootstrap creation without Vagrant
 =======================================
 
-If you do not have Vagrant installed, the vbox_create.sh script will create the
-appropriate VMs.  You will then need to bring up the bcpc-bootstrap VM - which
-has a virtual CD attached to kick off the Ubuntu install:
+If you do not have Vagrant installed, the ``vbox_create.sh`` script will create
+the appropriate VMs.  You will then need to bring up the bcpc-bootstrap VM -
+which has a virtual CD attached to kick off the Ubuntu install:
 
 ```
 $ VBoxManage startvm bcpc-bootstrap
