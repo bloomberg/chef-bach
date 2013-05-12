@@ -30,10 +30,15 @@ $install_chef_server_script = <<EOH
 EOH
 
 $setup_chef_cookbooks_script = <<EOH
-  cd /chef-bcpc
+  rsync -avP --exclude vbox /chef-bcpc ~vagrant/
+  cd ~vagrant/chef-bcpc
 
   if [ ! -f .chef/knife.rb ]; then
-    echo -e ".chef/knife.rb\nhttp://10.0.100.1:4000\n\n\n\n\n\n.\n" | knife configure --initial
+    chmod 644 /etc/chef/webui.pem
+    chmod 644 /etc/chef/validation.pem
+    echo -e ".chef/knife.rb\nhttp://10.0.100.1:4000\n\n\n\n\n\n.\n" | sudo -u vagrant knife configure --initial
+    chmod 600 /etc/chef/webui.pem
+    chmod 600 /etc/chef/validation.pem
   fi
 
   cd cookbooks
@@ -45,10 +50,14 @@ $setup_chef_cookbooks_script = <<EOH
       rm $i*.tar.gz
     fi
   done
+
+  bcpc/files/default/build_bins.sh
+
+  chown -R vagrant ~vagrant/chef-bcpc
 EOH
 
 $install_chef_cookbooks_script = <<EOH
-  cd /chef-bcpc
+  cd chef-bcpc
   knife environment from file environments/*.json
   knife role from file roles/*.json
   knife cookbook upload -a
@@ -93,6 +102,7 @@ Vagrant.configure("2") do |config|
      # Don't boot with headless mode
      #vb.gui = true
 
+     vb.customize ["modifyvm", :id, "--nictype2", "82543GC"]
      vb.customize ["modifyvm", :id, "--memory", "1024"]
    end
 

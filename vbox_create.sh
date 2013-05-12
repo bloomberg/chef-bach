@@ -35,6 +35,9 @@ if hash vagrant ; then
   if [ ! -f precise-server-cloudimg-amd64-vagrant-disk1.box ]; then
     curl -o precise-server-cloudimg-amd64-vagrant-disk1.box http://cloud-images.ubuntu.com/vagrant/precise/current/precise-server-cloudimg-amd64-vagrant-disk1.box
   fi
+  if [ ! -f insecure_private_key ]; then
+    cp $HOME/.vagrant.d/insecure_private_key .
+  fi
   cp ../Vagrantfile .
   vagrant up
 else

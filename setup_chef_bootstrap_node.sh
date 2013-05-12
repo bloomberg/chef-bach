@@ -1,7 +1,13 @@
-#!/bin/bash
+#!/bin/bash -e
 
-#knife bootstrap -E Test-Laptop $1
-knife bootstrap -E Test-Laptop $1 -x ubuntu --sudo
+# Are we running under Vagrant?  If so, jump through some extra hoops.
+if [ -d /chef-bcpc ]; then
+  cd chef-bcpc
+  knife bootstrap -E Test-Laptop $1 -i /chef-bcpc/vbox/insecure_private_key -x vagrant --sudo
+else
+  knife bootstrap -E Test-Laptop $1 -x ubuntu --sudo
+fi
+
 admin_val=`knife client show $(hostname -f) | grep ^admin: | sed "s/admin:[^a-z]*//"`
 if [ "$admin_val" != "true" ]; then
   # Make this client an admin user before proceeding.
