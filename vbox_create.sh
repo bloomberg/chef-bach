@@ -23,20 +23,19 @@ if [ ! -f ubuntu-12.04-mini.iso ]; then
     curl -o ubuntu-12.04-mini.iso http://archive.ubuntu.com/ubuntu/dists/precise/main/installer-amd64/current/images/netboot/mini.iso
 fi
 
-if [ ! hash $VBM ]; then
+if ! hash $VBM ; then
   echo "You do not appear to have $VBM from VirtualBox"
   exit 1
 fi
 
 # Can we create the bootstrap VM via Vagrant
-if [ hash vagrant ]; then
+if hash vagrant ; then
   echo "Vagrant detected - using Vagrant to initialize bcpc-bootstrap"
   echo "N.B. This may take approximately 30-45 minutes to complete."
   if [ ! -f precise-server-cloudimg-amd64-vagrant-disk1.box ]; then
-    curl -o precise-server-cloudimg-amd64-vagrant-disk1.box http://cloud-images.ubuntu.com/precise/current/precise-server-cloudimg-amd64-vagrant-disk1.box
+    curl -o precise-server-cloudimg-amd64-vagrant-disk1.box http://cloud-images.ubuntu.com/vagrant/precise/current/precise-server-cloudimg-amd64-vagrant-disk1.box
   fi
   cp ../Vagrantfile .
-  vagrant init precise64 precise-server-cloudimg-amd64-vagrant-disk1.box
   vagrant up
 else
   echo "Vagrant not detected - using raw VirtualBox for bcpc-bootstrap"
