@@ -38,15 +38,19 @@ This will create four VMs:
 - bcpc-vm2
 - bcpc-vm3
 
-If you have vagrant installed, the scripts will automatically provision the
-bcpc-bootstrap node.  See below for notes around the Vagrant installation.
-Otherwise, you will need to complete a manual installation of the
-bcpc-bootstrap node - see below for notes around manual installation.
+If you have vagrant installed, the ``vbox_create.sh`` script will automatically
+begin the provisioning of the bcpc-bootstrap node.  This may take 30-45 minutes
+to complete successfully.  See below for [notes around the Vagrant
+installation](#bcpc-bootstrap-creation-with-vagrant).  Otherwise, you can
+provision the bcpc-bootstrap node through included shell scripts - see below
+for
+[installation notes without Vagrant](#bcpc-bootstrap-creation-without-vagrant).
 
 Once the bcpc-bootstrap node is available, the bcpc-vm images will be able to
 be configured and boot via PXE.  Once the initial bootstrap process is complete
-and the bcpc-vm machines are enrolled in Cobbler, the bcpc-vm machines should
-automatically begin installation upon bootup.
+and the bcpc-vm machines are
+[enrolled in Cobbler](#registering-vms-for-pxe-boot), the bcpc-vm machines
+should automatically begin installation upon bootup.
 
 In our testing, VirtualBox guest SMP makes performance significantly worse, so
 it is recommended that you keep one CPU per VM.  You may also find that 2GB is
@@ -57,7 +61,7 @@ bcpc-bootstrap creation with Vagrant
 ====================================
 
 If vagrant is locally installed, we utilize the
-[vagrant box images from Canonical](http://cloud-images.ubuntu.com/vagrant/precise/current/precise-server-cloudimg-amd64-vagrant-disk1.box)
+[vagrant box images from Canonical](http://cloud-images.ubuntu.com/vagrant/)
 to provision the bcpc-bootstrap node.
 
 If you have a local offline repository mirror, you should alter the Vagrantfile
@@ -155,8 +159,8 @@ $ ./bootstrap_chef.sh 10.0.100.1
 
 This will bring up the chef-server on http://10.0.100.1:4040.
 
-Initial knife questions
------------------------
+Initial knife questions without Vagrant
+---------------------------------------
 
 You will be asked to set up your knife setup on the bcpc-bootstrap node.
 The path to the chef repository must be . (period) to work.
@@ -313,6 +317,9 @@ index d844783..9a9e53a 100644
 
 Manual setup notes
 ==================
+
+This records notes if you do not wish to use Vagrant or our included shell
+scripts to provision the bootstrap nodes.
 
 Step 1 - One-time setup
 ----------------------
