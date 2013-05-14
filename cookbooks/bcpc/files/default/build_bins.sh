@@ -2,9 +2,6 @@
 
 set -x
 
-export HTTP_PROXY=
-export HTTPS_PROXY=
-
 DIR=`dirname $0`
 
 pushd $DIR/bins/
