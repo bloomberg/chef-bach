@@ -30,6 +30,16 @@ $install_chef_server_script = <<EOH
 EOH
 
 $setup_chef_cookbooks_script = <<EOH
+  cd /chef-bcpc/cookbooks
+
+  for i in apt ubuntu cron chef-client; do
+    if [ ! -d $i ]; then
+      knife cookbook site download $i
+      tar zxf $i*.tar.gz
+      rm $i*.tar.gz
+    fi
+  done
+
   rsync -avP --exclude vbox /chef-bcpc ~vagrant/
   cd ~vagrant/chef-bcpc
 
@@ -41,18 +51,8 @@ $setup_chef_cookbooks_script = <<EOH
     chmod 600 /etc/chef/validation.pem
   fi
 
-  cd cookbooks
-
-  for i in apt ubuntu cron chef-client; do
-    if [ ! -d $i ]; then
-      knife cookbook site download $i
-      tar zxf $i*.tar.gz
-      rm $i*.tar.gz
-    fi
-  done
-
-  bcpc/files/default/build_bins.sh
-
+  cookbooks/bcpc/files/default/build_bins.sh
+  rsync -avP cookbooks/bcpc/files/default/bins/* /chef-bcpc/cookbooks/bcpc/files/default/bins/
   chown -R vagrant ~vagrant/chef-bcpc
 EOH
 
@@ -100,8 +100,8 @@ Vagrant.configure("2") do |config|
 
   config.vm.provider :virtualbox do |vb|
      # Don't boot with headless mode
-     #vb.gui = true
-
+     vb.gui = true
+     vb.name = "bcpc-bootstrap"
      vb.customize ["modifyvm", :id, "--nictype2", "82543GC"]
      vb.customize ["modifyvm", :id, "--memory", "1024"]
    end

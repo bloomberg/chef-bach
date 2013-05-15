@@ -36,16 +36,19 @@ if hash vagrant ; then
     curl -o precise-server-cloudimg-amd64-vagrant-disk1.box http://cloud-images.ubuntu.com/vagrant/precise/current/precise-server-cloudimg-amd64-vagrant-disk1.box
   fi
   if [ ! -f insecure_private_key ]; then
+    # Ensure that the private key has been created by running vagrant at least once
+    vagrant -v
     cp $HOME/.vagrant.d/insecure_private_key .
   fi
   cp ../Vagrantfile .
   vagrant up
 else
   echo "Vagrant not detected - using raw VirtualBox for bcpc-bootstrap"
-  # Make the three BCPC networks we'll need
+  # Make the three BCPC networks we'll need, but clear all nets and dhcpservers first
   for i in 0 1 2 3 4 5 6 7 8 9; do
     $VBM hostonlyif remove vboxnet$i || true
   done
+  $VBM list dhcpservers | grep NetworkName | awk '{print $2}' | xargs -n1 $VBM dhcpserver remove --netname
   $VBM hostonlyif create
   $VBM hostonlyif create
   $VBM hostonlyif create
