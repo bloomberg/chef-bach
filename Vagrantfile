@@ -31,7 +31,6 @@ EOH
 
 $setup_chef_cookbooks_script = <<EOH
   cd /chef-bcpc/cookbooks
-
   for i in apt ubuntu cron chef-client; do
     if [ ! -d $i ]; then
       knife cookbook site download $i
@@ -39,17 +38,21 @@ $setup_chef_cookbooks_script = <<EOH
       rm $i*.tar.gz
     fi
   done
-
-  rsync -avP --exclude vbox /chef-bcpc ~vagrant/
-  cd ~vagrant/chef-bcpc
+  cd ..
 
   if [ ! -f .chef/knife.rb ]; then
     chmod 644 /etc/chef/webui.pem
     chmod 644 /etc/chef/validation.pem
-    echo -e ".chef/knife.rb\nhttp://10.0.100.1:4000\n\n\n\n\n\n.\n" | sudo -u vagrant knife configure --initial
+    echo -e ".chef/knife.rb\nhttp://10.0.100.1:4000\n\n\n\n\n.chef/validation.pem\n.\n" | sudo -u vagrant knife configure --initial
+    sed -i 's/\\/chef-bcpc\\///' .chef/knife.rb
+    sed -i 's/\\.chef\\/vagrant.pem/vagrant.pem/' .chef/knife.rb
+    cp /etc/chef/validation.pem .chef/validation.pem
     chmod 600 /etc/chef/webui.pem
     chmod 600 /etc/chef/validation.pem
   fi
+
+  rsync -avP --exclude vbox /chef-bcpc ~vagrant/
+  cd ~vagrant/chef-bcpc
 
   cookbooks/bcpc/files/default/build_bins.sh
   rsync -avP cookbooks/bcpc/files/default/bins/* /chef-bcpc/cookbooks/bcpc/files/default/bins/
