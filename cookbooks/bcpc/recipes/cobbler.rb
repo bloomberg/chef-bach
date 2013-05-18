@@ -53,7 +53,6 @@ end
 template "/var/lib/cobbler/kickstarts/bcpc_ubuntu_host.preseed" do
     source "cobbler.bcpc_ubuntu_host.preseed.erb"
     mode 00644
-    variables( :root_password => get_config('cobbler-root-password-salted') )
 end
 
 cookbook_file "/tmp/ubuntu-12.04-mini.iso" do

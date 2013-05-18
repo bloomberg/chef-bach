@@ -42,7 +42,7 @@ d-i     passwd/root-login       boolean false
 d-i     passwd/make-user        boolean true
 d-i     passwd/user-fullname    string ubuntu
 d-i     passwd/username string ubuntu
-d-i     passwd/user-password-crypted    password <%= @root_password %>
+d-i     passwd/user-password-crypted    password <%="#{get_config('cobbler-root-password-salted')}"%>
 d-i     passwd/user-uid string 
 d-i     user-setup/allow-password-weak  boolean false
 d-i     user-setup/encrypt-home boolean false
