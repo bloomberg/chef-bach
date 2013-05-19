@@ -68,13 +68,20 @@ on the target node. After the first one is up, you can add another head
 node with:
 
 ```
- $ knife bootstrap -E Test-Laptop -r "role[BCPC-Headnode]" <IPAddress>
+ $ knife bootstrap -E Test-Laptop -r "role[BCPC-Headnode]" -x ubuntu --sudo <IPAddress>
 ```
 
-Or enroll a server as a worker node:
+If you get an error saying ``403 "Forbidden"`` on the initial run, you 
+probably forgot to make the initial headnode client an admin user:
 
 ```
- $ knife bootstrap -E Test-Laptop -r "role[BCPC-Worknode]" <IPAddress>
+10.0.100.11 [2013-05-18T13:23:11-04:00] FATAL: Net::HTTPServerException: ruby_block[initialize-ssh-keys] (bcpc::networking line 22) had an error: Net::HTTPServerException: 403 "Forbidden"
+```
+
+To enroll a server as a worker node:
+
+```
+ $ knife bootstrap -E Test-Laptop -r "role[BCPC-Worknode]" -x ubuntu --sudo <IPAddress>
 ```
 
 Using a cluster
