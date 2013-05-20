@@ -137,7 +137,7 @@ BCPC currently relies upon a number of open-source packages:
  - [PowerDNS](https://www.powerdns.com/)
  - [RabbitMQ](http://www.rabbitmq.com/)
  - [Ubuntu](http://www.ubuntu.com/)
- - [Vagrant](http://www.vagrantup.com/)
- - [VirtualBox](https://www.virtualbox.org/)
+ - [Vagrant](http://www.vagrantup.com/) - Verified with version 1.2.2
+ - [VirtualBox](https://www.virtualbox.org/) - Verified with version 4.2.12
 
 Thanks to all of these communities for producing this software!

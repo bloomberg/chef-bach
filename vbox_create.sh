@@ -35,12 +35,12 @@ if hash vagrant ; then
   if [ ! -f precise-server-cloudimg-amd64-vagrant-disk1.box ]; then
     curl -o precise-server-cloudimg-amd64-vagrant-disk1.box http://cloud-images.ubuntu.com/vagrant/precise/current/precise-server-cloudimg-amd64-vagrant-disk1.box
   fi
+  cp ../Vagrantfile .
   if [ ! -f insecure_private_key ]; then
     # Ensure that the private key has been created by running vagrant at least once
     vagrant -v
     cp $HOME/.vagrant.d/insecure_private_key .
   fi
-  cp ../Vagrantfile .
   vagrant up
 else
   echo "Vagrant not detected - using raw VirtualBox for bcpc-bootstrap"
