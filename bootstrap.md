@@ -133,7 +133,7 @@ iface eth3 inet static
 After changing the interfaces file:
 
 ```
-# service networking restart
+$ sudo service networking restart
 ```
 
 This is a good time to take a snapshot of your bootstrap node:
