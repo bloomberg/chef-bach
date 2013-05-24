@@ -195,7 +195,7 @@ Registering VMs for PXE boot
 
 Once you have provisioned the local Chef server (via Vagrant or
 bootstrap_chef.sh), you will need to register the bcpc-vm1, bcpc-vm2, and
-bcpc-vm3 VMs. 
+bcpc-vm3 VMs before they can boot. 
 
 When using vagrant you can register the remaining VMs like this :
 
