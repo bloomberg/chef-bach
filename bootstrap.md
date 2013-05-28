@@ -156,31 +156,14 @@ following instructions above), you can then run the bootstrap_chef.sh script
 from the hypervisor running VirtualBox:
 
 ```
-$ ./bootstrap_chef.sh 10.0.100.1
+$ ./bootstrap_chef.sh ubuntu 10.0.100.1
 ```
 
-- Chef server URL: http://10.0.100.1:4000
-- Chef password: chef (must not be blank or chef-solr will not start)
-- You can leave chef-server-webui pw blank (will default to admin/p@ssw0rd1)
-
 This will bring up the chef-server on http://10.0.100.1:4040.
+The Web UI will be at http://10.0.100.1:4000 with defaults admin/p@ssw0rd1
 
 Initial knife questions without Vagrant
 ---------------------------------------
-
-You will be asked to set up your knife setup on the bcpc-bootstrap node.
-The path to the chef repository must be . (period) to work.
-
-```
-Where should I put the config file? [/home/ubuntu/.chef/knife.rb] .chef/knife.rb
-Please enter the chef server URL: [http://bcpc-bootstrap:4000] http://10.0.100.1:4000
-Please enter a clientname for the new client: [ubuntu] 
-Please enter the existing admin clientname: [chef-webui] 
-Please enter the location of the existing admin client's private key: [/etc/chef/webui.pem] 
-Please enter the validation clientname: [chef-validator] 
-Please enter the location of the validation key: [/etc/chef/validation.pem] 
-Please enter the path to a chef repository (or leave blank): .
-```
 
 At this point, your bcpc-bootstrap node should be appropriately provisioned.
 
@@ -213,7 +196,7 @@ $ ./enroll_cobbler.sh 10.0.100.1
 If you have other VMs to register:
 
 ```
-cobbler system add --name=bcpc-vm10 --hostname=bcpc-vm10 --profile=bcpc_host --ip-address=10.0.100.20 --mac=AA:BB:CC:DD:EE:FF
+$ cobbler system add --name=bcpc-vm10 --hostname=bcpc-vm10 --profile=bcpc_host --ip-address=10.0.100.20 --mac=AA:BB:CC:DD:EE:FF
 ```
 
 You can boot up the other VMs now, for example :
