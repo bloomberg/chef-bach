@@ -42,6 +42,11 @@ The default proxy setup does not configure a proxy, but it still must
 define 'CURL' which is used in the subsequent scripts. The default is
 CURL=curl.
 
+If you do configure a proxy at the start of the process, there are a
+couple of additional manual steps later in the process. Proxy support
+in BCPC is, currently, even more of a work-in-progress than the rest
+of the project.
+
 Kicking off the bootstrap process
 =================================
 
