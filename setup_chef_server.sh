@@ -6,6 +6,16 @@
 
 set -e
 
+if [ -f ./proxy_setup.sh ]; then
+  . ./proxy_setup.sh
+fi
+
+# needed within build_bins which we call
+if [ -z "$CURL" ]; then
+	echo "CURL is not defined"
+	exit
+fi
+
 if [ ! -f /etc/apt/sources.list.d/opscode.list ]; then
   cp opscode.list /etc/apt/sources.list.d/
 fi
