@@ -28,11 +28,15 @@ About proxies
 
 BCPC can be brought up behind a proxy. An example is given in
 proxy_setup.sh in the chef-bcpc directory. To actually use a proxy
-uncomment and edit the example lines. The example uses a squid caching
-proxy on the hypervisor (for example your workstation or laptop). The
-hypervisor is always IP address 10.0.100.2 from the point of view of
-the VMs. This can actually be helpful to cache certain downloadables
-which are slow to download from their normal sites.
+uncomment and edit the example lines. The example uses a proxy on the
+hypervisor (for example your workstation or laptop) just to keep the
+explanation self-contained and simple. The hypervisor is always IP
+address 10.0.100.2 from the point of view of the VMs. Your proxy may
+well be elsewhere on your network. If you use the hostname, instead of
+the IP address of a proxy, you may need to adjust the DNS settings in
+./environments/Test-Laptop.json - the default is to use Google's free
+DNS servers 8.8.8.8 and 8.8.4.4 but those nameservers will not resolve
+a hostname within a private network.
 
 The default proxy setup does not configure a proxy, but it still must
 define 'CURL' which is used in the subsequent scripts. The default is
@@ -168,15 +172,21 @@ Provisioning chef-server without Vagrant
 
 I *think* you have to fix up the preseed file
 (cookbooks/bcpc/templates/default/cobbler.bcpc_ubuntu_host.preseed.erb)
-here if using a proxy:
+here if using a proxy (for now explained in diff format) :
 
-
+ d-i     mirror/country string manual
+ d-i     mirror/http/hostname string <%= @node[:bcpc][:bootstrap][:mirror] %>
+ d-i     mirror/http/directory string /ubuntu
+-d-i     mirror/http/proxy string
+ d-i     apt-setup/security_host <%= @node[:bcpc][:bootstrap][:mirror] %>
  d-i     apt-setup/security_path string /ubuntu
  <% end %>
-+d-i     mirror/http/proxy string http://10.0.100.2:3128
  
++d-i     mirror/http/proxy string http://10.0.100.2:3128
++
  d-i     debian-installer/allow_unauthenticated  string false
-
+ d-i     pkgsel/upgrade  select safe-upgrade
+ d-i     pkgsel/language-packs   multiselect
 
 
 Once you can SSH in to the bcpc-bootstrap node (ssh ubuntu@10.0.100.1 if
