@@ -34,7 +34,8 @@ if [[ -z $VAGRANT ]]; then
     ssh-keygen -N "" -f $KEYFILE
   fi
   rsync -avP -e "ssh -i $KEYFILE" --exclude vbox --exclude $KEYFILE . ${SSH_USER}@$IP:chef-bcpc
-  ssh -i $KEYFILE ${SSH_USER}@$IP "cd $BCPC_DIR && ./setup_ssh_keys.sh $KEYFILE.pub"
+  SSH_CMD="ssh -t -i $KEYFILE ${SSH_USER}@${IP}
+  $SSH_CMD "cd $BCPC_DIR && ./setup_ssh_keys.sh $KEYFILE.pub"
 else
   /usr/bin/rsync -avP --exclude '*.iso' --exclude '*.img' --exclude '*.box' --exclude '*.rom' /chef-bcpc-host/ ~vagrant/chef-bcpc/
 fi
