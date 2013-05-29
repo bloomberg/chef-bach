@@ -2,6 +2,15 @@
 
 set -e
 
+if [ -f ./proxy_setup.sh ]; then
+  . ./proxy_setup.sh
+fi
+
+if [ -z "$CURL" ]; then
+	echo "CURL is not defined"
+	exit
+fi
+
 DIR=`dirname $0`/vbox
 
 pushd $DIR
