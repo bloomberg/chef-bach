@@ -190,9 +190,6 @@ $ ./bootstrap_chef.sh ubuntu 10.0.100.1
 This will bring up the chef-server on http://10.0.100.1:4040.
 The Web UI will be at http://10.0.100.1:4000 with defaults admin/p@ssw0rd1
 
-Initial knife questions without Vagrant
----------------------------------------
-
 At this point, your bcpc-bootstrap node should be appropriately provisioned.
 
 This is a good time to take a snapshot of your bootstrap node:

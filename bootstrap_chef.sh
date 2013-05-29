@@ -4,10 +4,11 @@ set -e
 
 if [[ $# -eq 2 ]]; then
   KEYFILE="bootstrap_chef.id_rsa"
-  SSH_CMD="$SSH_CMD"
   SSH_USER="$1"
+  IP="$2"
   BCPC_DIR="chef-bcpc"
   VAGRANT=""
+  SSH_CMD="ssh -t -i $KEYFILE ${SSH_USER}@${IP}" 
   # override the ssh-user and keyfile if using Vagrant
   if [[ $1 == "--vagrant-local" ]]; then
     echo "Running on the local Vagrant VM"
@@ -20,9 +21,8 @@ if [[ $# -eq 2 ]]; then
     BCPC_DIR="~vagrant/chef-bcpc"
     SSH_CMD="vagrant ssh -c"
   else
-    echo "SSHing to the non-Vagrant machine $2"
+    echo "SSHing to the non-Vagrant machine ${IP}"
   fi
-  IP="$2"
 else
   echo "Usage: `basename $0` --vagrant-local|--vagrant-remote|<user name> IP-Address" >> /dev/stderr
   exit
@@ -33,11 +33,12 @@ if [[ -z $VAGRANT ]]; then
   if [[ ! -f $KEYFILE ]]; then
     ssh-keygen -N "" -f $KEYFILE
   fi
+  echo "Running rsync of non-Vagrant install"
   rsync -avP -e "ssh -i $KEYFILE" --exclude vbox --exclude $KEYFILE . ${SSH_USER}@$IP:chef-bcpc
-  SSH_CMD="ssh -t -i $KEYFILE ${SSH_USER}@${IP}"
-  $SSH_CMD "cd $BCPC_DIR && ./setup_ssh_keys.sh $KEYFILE.pub"
+  $SSH_CMD "cd $BCPC_DIR && ./setup_ssh_keys.sh ${KEYFILE}.pub"
 else
-  /usr/bin/rsync -avP --exclude '*.iso' --exclude '*.img' --exclude '*.box' --exclude '*.rom' /chef-bcpc-host/ ~vagrant/chef-bcpc/
+  echo "Running rsync of Vagrant install"
+  /usr/bin/rsync -avP --exclude '*.iso' --exclude '*.img' --exclude '*.box' --exclude '*.rom' /chef-bcpc-host/ /home/vagrant/chef-bcpc/
 fi
 
 $SSH_CMD "cd $BCPC_DIR && sudo ./setup_chef_server.sh"
