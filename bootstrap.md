@@ -23,6 +23,21 @@ Finally, if you do not wish to use our scripts (we won't be offended), please
 refer to the [manual instructions](#manual-setup-notes) at the end of this
 document.
 
+About proxies
+=============
+
+BCPC can be brought up behind a proxy. An example is given in
+proxy_setup.sh in the chef-bcpc directory. To actually use a proxy
+uncomment and edit the example lines. The example uses a squid caching
+proxy on the hypervisor (for example your workstation or laptop). The
+hypervisor is always IP address 10.0.100.2 from the point of view of
+the VMs. This can actually be helpful to cache certain downloadables
+which are slow to download from their normal sites.
+
+The default proxy setup does not configure a proxy, but it still must
+define 'CURL' which is used in the subsequent scripts. The default is
+CURL=curl.
+
 Kicking off the bootstrap process
 =================================
 
@@ -151,6 +166,19 @@ $ VBoxManage snapshot bcpc-bootstrap take initial-install
 Provisioning chef-server without Vagrant
 ----------------------------------------
 
+I *think* you have to fix up the preseed file
+(cookbooks/bcpc/templates/default/cobbler.bcpc_ubuntu_host.preseed.erb)
+here if using a proxy:
+
+
+ d-i     apt-setup/security_path string /ubuntu
+ <% end %>
++d-i     mirror/http/proxy string http://10.0.100.2:3128
+ 
+ d-i     debian-installer/allow_unauthenticated  string false
+
+
+
 Once you can SSH in to the bcpc-bootstrap node (ssh ubuntu@10.0.100.1 if
 following instructions above), you can then run the bootstrap_chef.sh script
 from the hypervisor running VirtualBox:
@@ -226,6 +254,13 @@ Linux bcpc-vm1 3.2.0-41-generic #66-Ubuntu SMP Thu Apr 25 03:27:11 UTC 2013 x86_
 
 Assigning roles to VM
 =====================
+
+If using a proxy, the bcpc-vm VMs will need some initial configuration
+for wget before they can be 'knife bootstrap'ed. To do this, setup a
+.wgetrc in the ubuntu home dir on each bcpc-vm to look like this
+(using the example of a proxy on the hypervisor) :
+
+http_proxy = http://10.0.100.2:3128/
 
 At this point, from the bootstrap node you can then run:
 ```
