@@ -30,7 +30,7 @@ chmod +r /etc/chef/validation.pem
 chmod +r /etc/chef/webui.pem
 
 # copy our ssh-key to be authorized for root
-if [[ -f $HOME/.ssh/authorized_keys -a ! -f /root/.ssh/authorized_keys ]]; then
+if [[ -f $HOME/.ssh/authorized_keys && ! -f /root/.ssh/authorized_keys ]]; then
   if [[ ! -d /root/.ssh ]]; then
     mkdir /root/.ssh
   fi
