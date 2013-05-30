@@ -178,7 +178,7 @@ Provisioning chef-server without Vagrant
 I *think* you have to fix up the preseed file
 (cookbooks/bcpc/templates/default/cobbler.bcpc_ubuntu_host.preseed.erb)
 here if using a proxy (for now explained in diff format) :
-
+```
  d-i     mirror/country string manual
  d-i     mirror/http/hostname string <%= @node[:bcpc][:bootstrap][:mirror] %>
  d-i     mirror/http/directory string /ubuntu
@@ -192,7 +192,7 @@ here if using a proxy (for now explained in diff format) :
  d-i     debian-installer/allow_unauthenticated  string false
  d-i     pkgsel/upgrade  select safe-upgrade
  d-i     pkgsel/language-packs   multiselect
-
+```
 
 Once you can SSH in to the bcpc-bootstrap node (ssh ubuntu@10.0.100.1 if
 following instructions above), you can then run the bootstrap_chef.sh script
