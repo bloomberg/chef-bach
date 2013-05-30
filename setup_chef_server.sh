@@ -6,17 +6,17 @@
 
 set -e
 
-if [ -f ./proxy_setup.sh ]; then
+if [[ -f ./proxy_setup.sh ]]; then
   . ./proxy_setup.sh
 fi
 
 # needed within build_bins which we call
-if [ -z "$CURL" ]; then
+if [[ -z "$CURL" ]]; then
 	echo "CURL is not defined"
 	exit
 fi
 
-if [ ! -f /etc/apt/sources.list.d/opscode.list ]; then
+if [[ ! -f /etc/apt/sources.list.d/opscode.list ]]; then
   cp opscode.list /etc/apt/sources.list.d/
 fi
 
@@ -30,8 +30,8 @@ chmod +r /etc/chef/validation.pem
 chmod +r /etc/chef/webui.pem
 
 # copy our ssh-key to be authorized for root
-if [ -f $HOME/.ssh/authorized_keys -a ! -f /root/.ssh/authorized_keys ]; then
-  if [ ! -d /root/.ssh ]; then
+if [[ -f $HOME/.ssh/authorized_keys -a ! -f /root/.ssh/authorized_keys ]]; then
+  if [[ ! -d /root/.ssh ]]; then
     mkdir /root/.ssh
   fi
   cp $HOME/.ssh/authorized_keys /root/.ssh/authorized_keys

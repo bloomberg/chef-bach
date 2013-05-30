@@ -2,13 +2,13 @@
 
 set -x
 
-if [ -f ./proxy_setup.sh ]; then
+if [[ -f ./proxy_setup.sh ]]; then
   . ./proxy_setup.sh
 fi
 
-if [-z "$CURL" ]; then
-	echo "CURL is not defined"
-	exit
+if [[ -z "$CURL" ]]; then
+  echo "CURL is not defined"
+  exit
 fi
 
 VBM=VBoxManage
@@ -20,12 +20,12 @@ pushd $DIR
 
 P=`python -c "import os.path; print os.path.abspath('./')"`
 
-if [ ! -f gpxe-1.0.1-80861004.rom ]; then
+if [[ ! -f gpxe-1.0.1-80861004.rom ]]; then
   $CURL -o gpxe-1.0.1-80861004.rom "http://rom-o-matic.net/gpxe/gpxe-1.0.1/contrib/rom-o-matic/build.php" -H "Origin: http://rom-o-matic.net" -H "Host: rom-o-matic.net" -H "Content-Type: application/x-www-form-urlencoded" -H "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8" -H "Referer: http://rom-o-matic.net/gpxe/gpxe-1.0.1/contrib/rom-o-matic/build.php" -H "Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.3" --data "version=1.0.1&use_flags=1&ofmt=ROM+binary+%28flashable%29+image+%28.rom%29&nic=all-drivers&pci_vendor_code=8086&pci_device_code=1004&PRODUCT_NAME=&PRODUCT_SHORT_NAME=gPXE&CONSOLE_PCBIOS=on&BANNER_TIMEOUT=20&NET_PROTO_IPV4=on&COMCONSOLE=0x3F8&COMSPEED=115200&COMDATA=8&COMPARITY=0&COMSTOP=1&DOWNLOAD_PROTO_TFTP=on&DNS_RESOLVER=on&NMB_RESOLVER=off&IMAGE_ELF=on&IMAGE_NBI=on&IMAGE_MULTIBOOT=on&IMAGE_PXE=on&IMAGE_SCRIPT=on&IMAGE_BZIMAGE=on&IMAGE_COMBOOT=on&AUTOBOOT_CMD=on&NVO_CMD=on&CONFIG_CMD=on&IFMGMT_CMD=on&IWMGMT_CMD=on&ROUTE_CMD=on&IMAGE_CMD=on&DHCP_CMD=on&SANBOOT_CMD=on&LOGIN_CMD=on&embedded_script=&A=Get+Image"
 fi
 
 # Grab the Ubuntu 12.04 installer image
-if [ ! -f ubuntu-12.04-mini.iso ]; then
+if [[ ! -f ubuntu-12.04-mini.iso ]]; then
     $CURL -o ubuntu-12.04-mini.iso http://archive.ubuntu.com/ubuntu/dists/precise/main/installer-amd64/current/images/netboot/mini.iso
 fi
 
@@ -38,11 +38,11 @@ fi
 if hash vagrant ; then
   echo "Vagrant detected - using Vagrant to initialize bcpc-bootstrap"
   echo "N.B. This may take approximately 30-45 minutes to complete."
-  if [ ! -f precise-server-cloudimg-amd64-vagrant-disk1.box ]; then
+  if [[ ! -f precise-server-cloudimg-amd64-vagrant-disk1.box ]]; then
     $CURL -o precise-server-cloudimg-amd64-vagrant-disk1.box http://cloud-images.ubuntu.com/vagrant/precise/current/precise-server-cloudimg-amd64-vagrant-disk1.box
   fi
   cp ../Vagrantfile .
-  if [ ! -f insecure_private_key ]; then
+  if [[ ! -f insecure_private_key ]]; then
     # Ensure that the private key has been created by running vagrant at least once
     vagrant -v
     cp $HOME/.vagrant.d/insecure_private_key .
@@ -52,12 +52,12 @@ else
   echo "Vagrant not detected - using raw VirtualBox for bcpc-bootstrap"
   # Make the three BCPC networks we'll need, but clear all nets and dhcpservers first
   for i in 0 1 2 3 4 5 6 7 8 9; do
-    if [ ! -z `$VBM list hostonlyifs | grep vboxnet$i | cut -f2 -d" "` ]; then
+    if [[ ! -z `$VBM list hostonlyifs | grep vboxnet$i | cut -f2 -d" "` ]]; then
       $VBM hostonlyif remove vboxnet$i || true
     fi
   done
 
-  if [ ! -z `$VBM list dhcpservers` ]; then
+  if [[ ! -z `$VBM list dhcpservers` ]]; then
     $VBM list dhcpservers | grep NetworkName | awk '{print $2}' | xargs -n1 $VBM dhcpserver remove --netname
   fi
   $VBM hostonlyif create
