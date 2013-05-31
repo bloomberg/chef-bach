@@ -44,7 +44,7 @@ fi
 echo "Setting up chef server"
 $SSH_CMD "cd $BCPC_DIR && sudo ./setup_chef_server.sh"
 echo "Setting up chef cookbooks"
-$SSH_CMD "cd $BCPC_DIR && ./setup_chef_cookbooks.sh"
+$SSH_CMD "cd $BCPC_DIR && ./setup_chef_cookbooks.sh ${IP}"
 echo "Setting up chef environment, roles, and uploading cookbooks"
 $SSH_CMD "cd $BCPC_DIR && knife environment from file environments/*.json && knife role from file roles/*.json && knife cookbook upload -a -o cookbooks"
 echo "Enrolling local bootstrap node into chef"

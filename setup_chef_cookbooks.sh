@@ -8,13 +8,19 @@ if [[ -f ./proxy_setup.sh ]]; then
   . ./proxy_setup.sh
 fi
 
+if [[ -z "$1" ]]; then
+	BOOTSTRAP_IP=10.0.100.1
+else
+	BOOTSTRAP_IP=$1
+fi
+
 # make sure we do not have a previous .chef directory in place to allow re-runs
 if [[ -f .chef/knife.rb ]]; then
   knife node delete `hostname -f` -y || true
   knife client delete root -y || true
   mv .chef/ ".chef_found_$(date +"%m-%d-%Y %H:%M:%S")"
 fi
-echo -e ".chef/knife.rb\nhttp://10.0.100.1:4000\n\n\n\n\n\n.\n" | knife configure --initial
+echo -e ".chef/knife.rb\nhttp://$BOOTSTRAP_IP:4000\n\n\n\n\n\n.\n" | knife configure --initial
 
 cp -p .chef/knife.rb .chef/knife-proxy.rb
 

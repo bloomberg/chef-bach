@@ -17,5 +17,5 @@ if [ -n "$PROXY" ]; then
   
   # to ignore SSL errors
   export GIT_SSL_NO_VERIFY=true
-  export CURL='curl -k -l -x http://10.0.100.2:3128/'
+  export CURL="curl -k -l -x http://${PROXY}"
 fi
