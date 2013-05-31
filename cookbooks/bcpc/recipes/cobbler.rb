@@ -24,8 +24,9 @@ package "whois"
 
 ruby_block "initialize-cobbler-config" do
     block do
-        # don't do anything with this for now
-        #make_config('cobbler-user-password', secure_password)
+        make_config('cobbler-web-user', "cobbler")
+        make_config('cobbler-web-password', secure_password)
+        make_config('cobbler-web-password-digest', %x[ printf "#{get_config('cobbler-web-user')}:Cobbler:#{get_config('cobbler-web-password')}" | md5sum | awk '{print $1}' ] )
         make_config('cobbler-root-password', secure_password)
         make_config('cobbler-root-password-salted', %x[ printf "#{get_config('cobbler-root-password')}" | mkpasswd -s -m sha-512 ] )
     end
@@ -39,6 +40,11 @@ template "/etc/cobbler/settings" do
     source "cobbler.settings.erb"
     mode 00644
     notifies :restart, "service[cobbler]", :delayed
+end
+
+template "/etc/cobbler/users.digest" do
+    source "cobbler.users.digest.erb"
+    mode 00600
 end
 
 template "/etc/cobbler/dhcp.template" do

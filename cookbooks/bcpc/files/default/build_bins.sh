@@ -50,6 +50,18 @@ if [ ! -f ubuntu-12.04-mini.iso ]; then
 fi
 FILES="ubuntu-12.04-mini.iso $FILES"
 
+# Grab the CentOS 6 PXE boot images
+if [ ! -f centos-6-initrd.img ]; then
+    #$CURL -o centos-6-mini.iso http://mirror.net.cen.ct.gov/centos/6/isos/x86_64/CentOS-6.4-x86_64-netinstall.iso
+    $CURL -o centos-6-initrd.img http://mirror.net.cen.ct.gov/centos/6/os/x86_64/images/pxeboot/initrd.img
+fi
+FILES="centos-6-initrd.img $FILES"
+
+if [ ! -f centos-6-vmlinuz ]; then
+    $CURL -o centos-6-vmlinuz http://mirror.net.cen.ct.gov/centos/6/os/x86_64/images/pxeboot/vmlinuz
+fi
+FILES="centos-6-vmlinuz $FILES"
+
 # Make the diamond package
 if [ ! -f diamond.deb ]; then
     git clone https://github.com/BrightcoveOS/Diamond.git
