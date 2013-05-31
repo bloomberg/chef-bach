@@ -38,10 +38,14 @@ if [[ -z $VAGRANT ]]; then
   $SSH_CMD "cd $BCPC_DIR && ./setup_ssh_keys.sh ${KEYFILE}.pub"
 else
   echo "Running rsync of Vagrant install"
-  /usr/bin/rsync -avP --exclude '*.iso' --exclude '*.img' --exclude '*.box' --exclude '*.rom' /chef-bcpc-host/ /home/vagrant/chef-bcpc/
+  /usr/bin/rsync -avP --exclude vbox /chef-bcpc-host/ /home/vagrant/chef-bcpc/
 fi
 
+echo "Setting up chef server"
 $SSH_CMD "cd $BCPC_DIR && sudo ./setup_chef_server.sh"
+echo "Setting up chef cookbooks"
 $SSH_CMD "cd $BCPC_DIR && ./setup_chef_cookbooks.sh"
+echo "Setting up chef environment, roles, and uploading cookbooks"
 $SSH_CMD "cd $BCPC_DIR && knife environment from file environments/*.json && knife role from file roles/*.json && knife cookbook upload -a -o cookbooks"
+echo "Enrolling local bootstrap node into chef"
 $SSH_CMD "cd $BCPC_DIR && ./setup_chef_bootstrap_node.sh ${IP}"

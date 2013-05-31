@@ -4,7 +4,7 @@
 
 # Are we running under Vagrant?  If so, jump through some extra hoops.
 if [[ -d /home/vagrant ]]; then
-  knife bootstrap -E Test-Laptop $1 -i vbox/insecure_private_key -x vagrant --sudo
+  knife bootstrap -E Test-Laptop $1 -i /chef-bcpc-host/vbox/insecure_private_key -x vagrant --sudo
 else
   knife bootstrap -E Test-Laptop $1 -x ubuntu --sudo
 fi
