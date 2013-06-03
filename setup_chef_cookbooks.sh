@@ -14,10 +14,16 @@ else
 	BOOTSTRAP_IP=$1
 fi
 
+if [[ -z "$2" ]]; then
+	USER=root
+else
+	USER=$2
+fi
+
 # make sure we do not have a previous .chef directory in place to allow re-runs
 if [[ -f .chef/knife.rb ]]; then
   knife node delete `hostname -f` -y || true
-  knife client delete root -y || true
+  knife client delete $USER -y || true
   mv .chef/ ".chef_found_$(date +"%m-%d-%Y %H:%M:%S")"
 fi
 echo -e ".chef/knife.rb\nhttp://$BOOTSTRAP_IP:4000\n\n\n\n\n\n.\n" | knife configure --initial

@@ -1,12 +1,21 @@
 #!/bin/bash -e
 
+# Parameters : 
+# $1 is the IP address of the bootstrap node
+# $2 is the knife recipe name, default "Test-Laptop"
+
+if [[ $# -lt 2 ]]; then
+	echo "Usage: `basename $0` IP-Address recipe-name" >> /dev/stderr
+	exit
+fi
+
 # Assume we are running in the chef-bcpc directory
 
 # Are we running under Vagrant?  If so, jump through some extra hoops.
 if [[ -d /home/vagrant ]]; then
-  knife bootstrap -E Test-Laptop $1 -i /chef-bcpc-host/vbox/insecure_private_key -x vagrant --sudo
+  knife bootstrap -E $2 $1 -i /chef-bcpc-host/vbox/insecure_private_key -x vagrant --sudo
 else
-  knife bootstrap -E Test-Laptop $1 -x ubuntu --sudo
+  knife bootstrap -E $2 $1 -x ubuntu --sudo
 fi
 
 admin_val=`knife client show $(hostname -f) | grep ^admin: | sed "s/admin:[^a-z]*//"`
