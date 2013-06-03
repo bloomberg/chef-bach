@@ -227,17 +227,28 @@ $ ./enroll_cobbler.sh
 ```
 
 whereas for the non-Vagrant case you'll have to provide the IP address
-of the bootstrap node:
+of the bootstrap node (we are using 10.0.100.1 in this example) :
 
 ```
 $ ./enroll_cobbler.sh 10.0.100.1
 ```
 
-If you have other VMs to register:
+If you have other VMs to register, you need to do it on the bootstrap node :
 
 ```
-$ cobbler system add --name=bcpc-vm10 --hostname=bcpc-vm10 --profile=bcpc_host --ip-address=10.0.100.20 --mac=AA:BB:CC:DD:EE:FF
+$ ssh ubuntu@10.0.100.1
+$ sudo cobbler system add --name=bcpc-vm10 --hostname=bcpc-vm10 --profile=bcpc_host --ip-address=10.0.100.20 --mac=AA:BB:CC:DD:EE:FF
+$ sudo cobbler resync
 ```
+
+Note that if you need to redo these registrations of manual nodes,
+you'll need to first remove them before re-adding, so
+
+```
+$ ssh ubuntu@10.0.100.1
+$ sudo cobbler system remove --name=bcpc-vm1
+$ ... modified add command ...
+$ sudo cobbler resync
 
 You can boot up the other VMs now, for example :
 
