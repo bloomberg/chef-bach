@@ -4,7 +4,7 @@
 # $1 is the IP address of the bootstrap node
 # $2 is the knife recipe name, default "Test-Laptop"
 
-if [[ $# -lt 2 ]]; then
+if [[ $# -ne 2 ]]; then
 	echo "Usage: `basename $0` IP-Address recipe-name" >> /dev/stderr
 	exit
 fi
