@@ -220,7 +220,7 @@ $ VBoxManage snapshot bcpc-bootstrap take chef-server-provisioned
 If you see Host key verification failed when testing the ssh connection, you 
 have probably recreated the VMs but not updated the SSH key. If this is the 
 case you need to manually remove the old key - remove the entry for 
-10.0.100.1 from ~/.ssh/known_keys
+10.0.100.1 from ~/.ssh/known_hosts
 
 Registering VMs for PXE boot
 ============================
