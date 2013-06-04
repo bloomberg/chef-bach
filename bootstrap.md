@@ -126,6 +126,7 @@ Manual install notes:
 
 - select eth0 as network interface for DHCP (vbox_create.sh sets it up as NAT)
 - bcpc-bootstrap as hostname
+- If using a proxy, enter it when prompted, else leave blank
 - ubuntu/ubuntu as default user/password
 - install OpenSSH server
 - install grub to MBR
