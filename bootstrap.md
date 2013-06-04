@@ -47,6 +47,9 @@ couple of additional manual steps later in the process. Proxy support
 in BCPC is, currently, even more of a work-in-progress than the rest
 of the project.
 
+Note also that the proxy settings are only known to work with the 
+non-Vagrant method of bringing up the VMs. 
+
 Kicking off the bootstrap process
 =================================
 
