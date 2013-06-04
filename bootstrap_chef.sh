@@ -28,7 +28,7 @@ if [[ $# -gt 1 ]]; then
   else
     echo "SSHing to the non-Vagrant machine ${IP}"
   fi
-  if [[ $# -gt 2 ]]; then
+  if [[ $# -eq 3 ]]; then
 	  RECIPE="$3"
   else
       RECIPE="Test-Laptop"
