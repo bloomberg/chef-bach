@@ -249,6 +249,7 @@ $ ssh ubuntu@10.0.100.1
 $ sudo cobbler system remove --name=bcpc-vm1
 $ ... modified add command ...
 $ sudo cobbler resync
+```
 
 You can boot up the other VMs now, for example :
 
