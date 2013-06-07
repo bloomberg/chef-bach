@@ -31,6 +31,10 @@ Vagrant.configure("2") do |config|
     bootstrap.vm.network :private_network, ip: "192.168.100.1", netmask: "255.255.255.0", adapter_ip: "192.168.100.2"
 
     bootstrap.vm.synced_folder "../", "/chef-bcpc-host"
+
+    # set up repositories
+    bootstrap.vm.provision :shell, :inline => $repos_script
+
     # since we are creating the server and the validation keys on this new
     # machine itself, we can't use Vagrant's built-in chef provisioning.
     bootstrap.vm.provision :shell, :inline => "/chef-bcpc-host/bootstrap_chef.sh --vagrant-local 10.0.100.1"
@@ -55,6 +59,8 @@ Vagrant.configure("2") do |config|
      vb.name = "bcpc-bootstrap"
      vb.customize ["modifyvm", :id, "--nictype2", "82543GC"]
      vb.customize ["modifyvm", :id, "--memory", "1024"]
+     #vb.customize ["modifyvm", :id, "--ioapic", "on"]
+     #vb.customize ["modifyvm", :id, "--chipset", "ich9"]
    end
 
 end
