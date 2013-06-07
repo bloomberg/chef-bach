@@ -17,9 +17,11 @@ reboot
 # --proxy=http://@@server@@:3128
 url --url=http://mirror.net.cen.ct.gov/centos/6/os/x86_64
 repo --name="CT Centos Repo" --baseurl=http://mirror.net.cen.ct.gov/centos/6/os/x86_64 
+repo --name="CT Centos Repo (Updates)" --baseurl=http://mirror.net.cen.ct.gov/centos/6/updates/x86_64 
 <% else %>
-url --url=http://<%= @node[:bcpc][:bootstrap][:mirror] %>/centos
-repo --name="Local Repo" --baseurl=http://<%= @node[:bcpc][:bootstrap][:mirror] %>/centos
+url --url=http://<%= @node[:bcpc][:bootstrap][:mirror] %>/centos/6/os/x86_64
+repo --name="Local Repo" --baseurl=http://<%= @node[:bcpc][:bootstrap][:mirror] %>/centos/6/os/x86_64
+repo --name="Local Repo (Updates)" --baseurl=http://<%= @node[:bcpc][:bootstrap][:mirror] %>/centos/6/updates/x86_64
 <% end %>
 network --bootproto=dhcp --hostname=$system_name --device=eth0 --onboot=on
 
