@@ -39,4 +39,7 @@ Listen <%="#{node[:bcpc][:management][:ip]}"%>:8888
         SetHandler None
     </Location>
 
+    SSLEngine on
+    SSLCertificateFile /etc/ssl/certs/ssl-bcpc.pem
+    SSLCertificateKeyFile /etc/ssl/private/ssl-bcpc.key
 </VirtualHost>
