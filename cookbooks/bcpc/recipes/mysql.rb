@@ -25,6 +25,8 @@ ruby_block "initialize-mysql-config" do
         make_config('mysql-root-password', secure_password)
         make_config('mysql-galera-user', "sst")
         make_config('mysql-galera-password', secure_password)
+        make_config('mysql-check-user', "check")
+        make_config('mysql-check-password', secure_password)
     end
 end
 
@@ -55,7 +57,7 @@ ruby_block "initial-mysql-config" do
                 mysql -u root -p#{get_config('mysql-root-password')} -e "UPDATE mysql.user SET host='%' WHERE user='root' and host='localhost'; FLUSH PRIVILEGES;"
                 mysql -u root -p#{get_config('mysql-root-password')} -e "GRANT USAGE ON *.* to #{get_config('mysql-galera-user')}@'%' IDENTIFIED BY '#{get_config('mysql-galera-password')}';"
                 mysql -u root -p#{get_config('mysql-root-password')} -e "GRANT ALL PRIVILEGES on *.* TO #{get_config('mysql-galera-user')}@'%' IDENTIFIED BY '#{get_config('mysql-galera-password')}';"
-                mysql -u root -p#{get_config('mysql-root-password')} -e "INSERT INTO mysql.user (Host,User) VALUES ('%','haproxy');"
+                mysql -u root -p#{get_config('mysql-root-password')} -e "GRANT PROCESS ON *.* to #{get_config('mysql-check-user')}@'localhost' IDENTIFIED BY '#{get_config('mysql-check-password')}';"
                 mysql -u root -p#{get_config('mysql-root-password')} -e "FLUSH PRIVILEGES;"
             ]
         end
@@ -113,4 +115,28 @@ end
 service "mysql" do
     action [ :enable, :start ]
     start_command "service mysql start || true"
+end
+
+package "xinetd" do
+    action :upgrade
+end
+
+bash "add-mysqlchk-to-etc-services" do
+    user "root"
+    code <<-EOH
+        printf "mysqlchk\t3307/tcp\n" >> /etc/services
+    EOH
+    not_if "grep mysqlchk /etc/services"
+end
+
+template "/etc/xinetd.d/mysqlchk" do
+    source "xinetd-mysqlchk.erb"
+    owner "root"
+    group "root"
+    mode 00440
+    notifies :restart, "service[xinetd]", :immediately
+end
+
+service "xinetd" do
+    action [ :enable, :start ]
 end
