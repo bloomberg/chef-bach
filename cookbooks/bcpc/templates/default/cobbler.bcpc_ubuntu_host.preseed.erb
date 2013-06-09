@@ -20,7 +20,7 @@ d-i     partman-auto/expert_recipe string root :: 5000 100000 10000000000 ext4 \
           format{ } use_filesystem{ } filesystem{ ext4 } \
           mountpoint{ / } \
         . \
-        100% 90 2048+100% linux-swap \
+        8192 8192 8192 linux-swap \
           $primary{ } method{ swap } format{ } \
         .
 d-i     partman-auto/choose_recipe select root
