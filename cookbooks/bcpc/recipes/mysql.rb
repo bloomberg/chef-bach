@@ -57,7 +57,7 @@ ruby_block "initial-mysql-config" do
                 mysql -u root -p#{get_config('mysql-root-password')} -e "UPDATE mysql.user SET host='%' WHERE user='root' and host='localhost'; FLUSH PRIVILEGES;"
                 mysql -u root -p#{get_config('mysql-root-password')} -e "GRANT USAGE ON *.* to #{get_config('mysql-galera-user')}@'%' IDENTIFIED BY '#{get_config('mysql-galera-password')}';"
                 mysql -u root -p#{get_config('mysql-root-password')} -e "GRANT ALL PRIVILEGES on *.* TO #{get_config('mysql-galera-user')}@'%' IDENTIFIED BY '#{get_config('mysql-galera-password')}';"
-                mysql -u root -p#{get_config('mysql-root-password')} -e "GRANT PROCESS ON *.* to #{get_config('mysql-check-user')}@'localhost' IDENTIFIED BY '#{get_config('mysql-check-password')}';"
+                mysql -u root -p#{get_config('mysql-root-password')} -e "GRANT PROCESS ON *.* to '#{get_config('mysql-check-user')}'@'localhost' IDENTIFIED BY '#{get_config('mysql-check-password')}';"
                 mysql -u root -p#{get_config('mysql-root-password')} -e "FLUSH PRIVILEGES;"
             ]
         end
