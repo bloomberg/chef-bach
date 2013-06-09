@@ -49,32 +49,20 @@ ruby_block "wait-for-mon-quorum" do
     end
 end
 
-template "/usr/local/bin/if_leader" do
-    source "ceph-if_leader.erb"
-    mode 0755
-    owner "root"
-    group "root"
+%w{get_monstatus if_leader if_not_leader if_quorum if_not_quorum}.each do |script|
+    template "/usr/local/bin/#{script}" do
+        source "ceph-#{script}.erb"
+        mode 0755
+        owner "root"
+        group "root"
+    end
 end
 
-template "/usr/local/bin/if_quorum" do
-    source "ceph-if_quorum.erb"
-    mode 0755
-    owner "root"
+template "/etc/sudoers.d/monstatus" do
+    source "sudoers-monstatus.erb"
+    user "root"
     group "root"
-end
-
-template "/usr/local/bin/if_not_leader" do
-    source "ceph-if_not_leader.erb"
-    mode 0755
-    owner "root"
-    group "root"
-end
-
-template "/usr/local/bin/if_not_quorum" do
-    source "ceph-if_not_quorum.erb"
-    mode 0755
-    owner "root"
-    group "root"
+    mode 00440
 end
 
 ruby_block "reap-dead-ceph-mon-servers" do

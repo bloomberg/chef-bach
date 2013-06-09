@@ -5,6 +5,4 @@
 #
 ################################################
 
-if sudo get_monstatus | grep state | grep -e 'leader' > /dev/null; then
-    $*
-fi
+ceph --admin-daemon=/var/run/ceph/ceph-mon.<%="#{node.hostname}"%>.asok mon_status
