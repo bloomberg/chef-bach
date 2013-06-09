@@ -4,9 +4,9 @@
 #
 ################################################
 
-Listen <%="#{node[:bcpc][:management][:ip]}"%>:8888
+Listen <%="#{node[:bcpc][:management][:vip]}"%>:8888
 
-<VirtualHost <%="#{node[:bcpc][:management][:ip]}"%>:8888>
+<VirtualHost <%="#{node[:bcpc][:management][:vip]}"%>:8888>
 
     DocumentRoot "/opt/graphite/webapp"
 

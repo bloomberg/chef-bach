@@ -76,13 +76,6 @@ listen kibana <%="#{node[:bcpc][:management][:vip]}"%>:5601
   <%= "server #{server.hostname} #{server[:bcpc][:management][:ip]}:5601 check" %>
 <% end -%>
 
-listen graphite <%="#{node[:bcpc][:management][:vip]}"%>:8888
-  balance  source
-  option  tcplog
-<% @servers.each do |server| -%>
-  <%= "server #{server.hostname} #{server[:bcpc][:management][:ip]}:8888 check" %>
-<% end -%>
-
 listen keystone-api <%="#{node[:bcpc][:management][:vip]}"%>:5000
   balance  source
   option  tcplog
