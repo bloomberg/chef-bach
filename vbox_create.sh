@@ -78,7 +78,7 @@ else
     # Only if VM doesn't exist
     if ! $VBM list vms | grep "^\"${vm}\"" ; then
         $VBM createvm --name $vm --ostype Ubuntu_64 --basefolder $P --register
-        $VBM modifyvm $vm --memory 1024
+        $VBM modifyvm $vm --memory 2048
         $VBM storagectl $vm --name "SATA Controller" --add sata
         $VBM storagectl $vm --name "IDE Controller" --add ide
         # Create a number of hard disks
