@@ -14,7 +14,7 @@ vrrp_script chk_haproxy {
 }
 
 vrrp_script chk_ceph {
-  script "/usr/local/bin/if_quorum true"
+  script "/usr/local/bin/if_not_quorum false"
   interval 5
   fall 10
   rise 1
