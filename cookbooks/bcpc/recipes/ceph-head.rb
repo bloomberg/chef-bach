@@ -49,6 +49,20 @@ ruby_block "wait-for-mon-quorum" do
     end
 end
 
+template "/usr/local/bin/if_leader" do
+    source "ceph-if_leader.erb"
+    mode 0755
+    owner "root"
+    group "root"
+end
+
+template "/usr/local/bin/if_quorum" do
+    source "ceph-if_quorum.erb"
+    mode 0755
+    owner "root"
+    group "root"
+end
+
 ruby_block "reap-dead-ceph-mon-servers" do
     block do
         head_names = get_head_nodes.collect{|x| x.hostname}

@@ -14,7 +14,7 @@ vrrp_script chk_haproxy {
 }
 
 vrrp_script chk_ceph {
-  script "ceph --admin-daemon=/var/run/ceph/ceph-mon.<%="#{node.hostname}"%>.asok mon_status | grep state | grep -e 'leader\|peon'"
+  script "/usr/local/bin/if_quorum true"
   interval 5
   fall 10
   rise 1
