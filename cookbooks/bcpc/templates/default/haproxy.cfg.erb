@@ -52,8 +52,10 @@ listen mysql-galera <%="#{node[:bcpc][:management][:vip]}"%>:3306
 <% end -%>
 
 listen rabbitmq-amqp <%="#{node[:bcpc][:management][:vip]}"%>:5672
+  timeout  client 1h
+  timeout  server 1h
   mode tcp
-  balance source
+  balance leastconn
   option  tcplog
   option tcpka
 <% @servers.each do |server| -%>

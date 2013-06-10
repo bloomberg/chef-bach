@@ -85,7 +85,7 @@ log_dir = /var/log/keystone
 connection = mysql://<%="#{get_config('mysql-keystone-user')}"%>:<%="#{get_config('mysql-keystone-password')}"%>@<%=@node["bcpc"]["management"]["vip"]%>/<%=@node['bcpc']['keystone_dbname']%>
 
 # the timeout before idle sql connections are reaped
-# idle_timeout = 200
+idle_timeout = 10
 
 [identity]
 driver = keystone.identity.backends.sql.Identity

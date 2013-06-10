@@ -61,7 +61,7 @@ sql_connection = mysql://<%="#{get_config('mysql-glance-user')}"%>:<%="#{get_con
 # idle connections. This can result in 'MySQL Gone Away' exceptions. If you
 # notice this, you can lower this value to ensure that SQLAlchemy reconnects
 # before MySQL can drop the connection.
-sql_idle_timeout = 3600
+sql_idle_timeout = 10
 
 # Number of Glance API worker processes to start.
 # On machines with more than one CPU increasing this value

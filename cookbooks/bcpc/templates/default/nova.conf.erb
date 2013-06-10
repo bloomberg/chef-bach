@@ -8,6 +8,7 @@
 
 # MySQL Connection
 sql_connection=mysql://<%="#{get_config('mysql-nova-user')}"%>:<%="#{get_config('mysql-nova-password')}"%>@<%="#{node[:bcpc][:management][:vip]}"%>/<%="#{node['bcpc']['nova_dbname']}"%>
+sql_idle_timeout=10
 
 # Rabbit message queue settings
 rabbit_host=<%="#{node[:bcpc][:management][:vip]}"%>
