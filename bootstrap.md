@@ -359,6 +359,16 @@ If you do a lot of installations or are on an isolated network, you may wish to
 utilize a private mirror.  Currently, this will require about 100GB of local
 storage.
 
+If you're using a proxy, then create /etc/apt/apt.conf.d/09proxy to
+look like:
+
+```
+Acquire::http::Proxy "http://proxy.bloomberg.com:80/";
+Acquire::https::Proxy "https://proxy.bloomberg.com:80/";
+```
+
+and then do this :
+
 ```
 ubuntu@bcpc-bootstrap:~$ knife node run_list add \`hostname -f\` 'recipe[bcpc::apache-mirror]'
 ubuntu@bcpc-bootstrap:~$ knife node run_list add \`hostname -f\` 'recipe[bcpc::apt-mirror]'
