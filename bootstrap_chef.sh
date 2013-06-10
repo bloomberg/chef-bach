@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Parameters:
-# $1 is the vagrant/non-vagrant install mode (see "Usage:" below)
+# $1 is the vagrant install mode or user name to SSH as (see "Usage:" below)
 # $2 is the IP address of the bootstrap node
 # $3 is the optional knife recipe name, default "Test-Laptop"
 
@@ -9,7 +9,6 @@ set -e
 
 if [[ $# -gt 1 ]]; then
   KEYFILE="bootstrap_chef.id_rsa"
-  SSH_USER="$1"
   IP="$2"
   BCPC_DIR="chef-bcpc"
   VAGRANT=""
@@ -19,17 +18,20 @@ if [[ $# -gt 1 ]]; then
     echo "Running on the local Vagrant VM"
     VAGRANT="true"
     BCPC_DIR="~vagrant/chef-bcpc"
+    SSH_USER="$USER"
     SSH_CMD="bash -c"
   elif [[ $1 == "--vagrant-remote" ]]; then
     echo "SSHing to the Vagrant VM"
     VAGRANT="true"
     BCPC_DIR="~vagrant/chef-bcpc"
+    SSH_USER="vagrant"
     SSH_CMD="vagrant ssh -c"
   else
-    echo "SSHing to the non-Vagrant machine ${IP}"
+    SSH_USER="$1"
+    echo "SSHing to the non-Vagrant machine ${IP} as ${SSH_USER}"
   fi
   if [[ $# -eq 3 ]]; then
-	  RECIPE="$3"
+      RECIPE="$3"
   else
       RECIPE="Test-Laptop"
   fi
