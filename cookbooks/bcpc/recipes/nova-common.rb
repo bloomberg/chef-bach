@@ -41,3 +41,10 @@ template "/etc/nova/api-paste.ini" do
     group "nova"
     mode 00600
 end
+
+template "/usr/local/bin/hup_openstack" do
+    source "hup_openstack.erb"
+    mode 0755
+    owner "root"
+    group "root"
+end
