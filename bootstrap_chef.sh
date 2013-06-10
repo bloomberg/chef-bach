@@ -12,7 +12,6 @@ if [[ $# -gt 1 ]]; then
   IP="$2"
   BCPC_DIR="chef-bcpc"
   VAGRANT=""
-  SSH_CMD="ssh -t -i $KEYFILE ${SSH_USER}@${IP}" 
   # override the ssh-user and keyfile if using Vagrant
   if [[ $1 == "--vagrant-local" ]]; then
     echo "Running on the local Vagrant VM"
@@ -28,6 +27,7 @@ if [[ $# -gt 1 ]]; then
     SSH_CMD="vagrant ssh -c"
   else
     SSH_USER="$1"
+	SSH_CMD="ssh -t -i $KEYFILE ${SSH_USER}@${IP}" 
     echo "SSHing to the non-Vagrant machine ${IP} as ${SSH_USER}"
   fi
   if [[ $# -eq 3 ]]; then
@@ -47,11 +47,13 @@ if [[ -z $VAGRANT ]]; then
   fi
   echo "Running rsync of non-Vagrant install"
   rsync -avP -e "ssh -i $KEYFILE" --exclude vbox --exclude $KEYFILE . ${SSH_USER}@$IP:chef-bcpc
+echo SSH_CMD $SSH_CMD
   $SSH_CMD "cd $BCPC_DIR && ./setup_ssh_keys.sh ${KEYFILE}.pub"
 else
   echo "Running rsync of Vagrant install"
   /usr/bin/rsync -avP --exclude vbox /chef-bcpc-host/ /home/vagrant/chef-bcpc/
 fi
+
 
 echo "Setting up chef server"
 $SSH_CMD "cd $BCPC_DIR && sudo ./setup_chef_server.sh"
