@@ -13,7 +13,7 @@ d-i     debian-installer/splash boolean false
 d-i     console-setup/ask_detect        boolean false
 d-i     console-setup/layoutcode        string us
 d-i     console-setup/variantcode       string 
-d-i     netcfg/get_nameservers  string 
+d-i     netcfg/get_nameservers  string <%= @node[:bcpc][:dns_servers].join(' ') %>
 d-i     netcfg/get_ipaddress    string 
 d-i     netcfg/get_netmask      string 255.255.255.0
 d-i     netcfg/get_gateway      string 
