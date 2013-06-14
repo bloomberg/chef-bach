@@ -37,11 +37,12 @@ fi
 
 cd cookbooks
 
-for i in apt ubuntu cron chef-client; do
-  if [[ ! -d $i ]]; then
+# allow versions on cookbooks so 
+for cookbook in "apt 1.10.0" ubuntu cron chef-client; do
+  if [[ ! -d ${cookbook% *} ]]; then
      # unless the proxy was defined this knife config will be the same as the one generated above
-    knife cookbook site download $i --config ../.chef/knife-proxy.rb
-    tar zxf $i*.tar.gz
-    rm $i*.tar.gz
+    knife cookbook site download $cookbook --config ../.chef/knife-proxy.rb
+    tar zxf ${cookbook% *}*.tar.gz
+    rm ${cookbook% *}*.tar.gz
   fi
 done

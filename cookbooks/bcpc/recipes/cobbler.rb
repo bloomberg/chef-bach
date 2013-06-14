@@ -50,7 +50,6 @@ end
 template "/etc/cobbler/dhcp.template" do
     source "cobbler.dhcp.template.erb"
     mode 00644
-    # TODO - calculate subnet from node[:bcpc][:management][:cidr]
     variables( :range => node[:bcpc][:bootstrap][:dhcp_range],
                :subnet => node[:bcpc][:bootstrap][:dhcp_subnet] )
     notifies :restart, "service[cobbler]", :delayed
