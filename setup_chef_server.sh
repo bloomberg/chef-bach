@@ -20,11 +20,31 @@ if [[ ! -f /etc/apt/sources.list.d/opscode.list ]]; then
   cp opscode.list /etc/apt/sources.list.d/
 fi
 
-apt-get update
-apt-get --allow-unauthenticated -y install opscode-keyring
-apt-get update
-DEBCONF_DB_FALLBACK=File{$(pwd)/debconf-chef.conf} DEBIAN_FRONTEND=noninteractive apt-get -y --force-yes install chef
-DEBCONF_DB_FALLBACK=File{$(pwd)/debconf-chef.conf} DEBIAN_FRONTEND=noninteractive apt-get -y --force-yes install chef-server
+# When rerunning a bootstrap, the 'apt-get update' gets very slow if
+# the bootstrap node happens to be our apt mirror, so only do this if
+# the package we're after is not installed at all
+#
+# See http://askubuntu.com/questions/44122/upgrade-a-single-package-with-apt-get
+#
+if dpkg -s opscode-keyring 2>/dev/null | grep -q Status.*installed; then
+  echo opscode-keyring is installed
+else 
+  apt-get update
+  apt-get --allow-unauthenticated -y install opscode-keyring
+  apt-get update
+fi
+
+if dpkg -s chef 2>/dev/null | grep -q Status.*installed; then
+  echo chef is installed
+else
+  DEBCONF_DB_FALLBACK=File{$(pwd)/debconf-chef.conf} DEBIAN_FRONTEND=noninteractive apt-get -y --force-yes install chef
+fi
+
+if dpkg -s chef-server 2>/dev/null | grep -q Status.*installed; then
+echo chef-server is installed
+  DEBCONF_DB_FALLBACK=File{$(pwd)/debconf-chef.conf} DEBIAN_FRONTEND=noninteractive apt-get -y --force-yes install chef-server
+fi
+
 
 chmod +r /etc/chef/validation.pem
 chmod +r /etc/chef/webui.pem
