@@ -41,7 +41,8 @@ else
 fi
 
 if dpkg -s chef-server 2>/dev/null | grep -q Status.*installed; then
-echo chef-server is installed
+  echo chef-server is installed
+else
   DEBCONF_DB_FALLBACK=File{$(pwd)/debconf-chef.conf} DEBIAN_FRONTEND=noninteractive apt-get -y --force-yes install chef-server
 fi
 
