@@ -363,8 +363,8 @@ If you're using a proxy, then create /etc/apt/apt.conf.d/09proxy to
 look like:
 
 ```
-Acquire::http::Proxy "http://proxy.bloomberg.com:80/";
-Acquire::https::Proxy "https://proxy.bloomberg.com:80/";
+Acquire::http::Proxy "http://myproxy.example.com:80/";
+Acquire::https::Proxy "https://myproxy.example.com:80/";
 ```
 
 and then do this :
