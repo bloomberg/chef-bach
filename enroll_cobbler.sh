@@ -11,6 +11,13 @@ if [ -z "$CURL" ]; then
 	exit
 fi
 
+if [[ -z `hash vagrant` ]]; then
+    if [[ -z "$1" ]]; then
+	echo "Usage: non-vagrant requires bootstrap node IP address to be given"
+	exit
+    fi
+fi
+
 DIR=`dirname $0`/vbox
 
 pushd $DIR
