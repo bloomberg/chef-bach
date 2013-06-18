@@ -413,6 +413,10 @@ index d844783..9a9e53a 100644
        "cache_path": "/var/chef/cache",
 ```
 
+When you change or add an environment file like this, you only need to rerun the 'knife environment' 
+command and then chef-client once again. Scripting this adjustment is TODO. Rerunning the entire bootstrap_chef.sh 
+script at this stage is not recommended.
+
 Manual setup notes
 ==================
 
