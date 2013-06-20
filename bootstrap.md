@@ -359,12 +359,10 @@ If you do a lot of installations or are on an isolated network, you may wish to
 utilize a private mirror.  Currently, this will require about 100GB of local
 storage.
 
-If you're using a proxy, then create /etc/apt/apt.conf.d/09proxy to
-look like:
+If you're using a proxy, then create ~ubuntu/.wgetrc something like this:
 
 ```
-Acquire::http::Proxy "http://myproxy.example.com:80/";
-Acquire::https::Proxy "https://myproxy.example.com:80/";
+http_proxy = http://proxy.example.com:80
 ```
 
 and then do this :
