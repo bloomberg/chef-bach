@@ -359,12 +359,10 @@ If you do a lot of installations or are on an isolated network, you may wish to
 utilize a private mirror.  Currently, this will require about 100GB of local
 storage.
 
-If you're using a proxy, then create /etc/apt/apt.conf.d/09proxy to
-look like:
+If you're using a proxy, then create ~ubuntu/.wgetrc something like this:
 
 ```
-Acquire::http::Proxy "http://proxy.bloomberg.com:80/";
-Acquire::https::Proxy "https://proxy.bloomberg.com:80/";
+http_proxy = http://proxy.example.com:80
 ```
 
 and then do this :
@@ -412,6 +410,10 @@ index d844783..9a9e53a 100644
        "server_url": "http://10.0.100.1:4000",
        "cache_path": "/var/chef/cache",
 ```
+
+When you change or add an environment file like this, you only need to rerun the 'knife environment' 
+command and then chef-client once again. Scripting this adjustment is TODO. Rerunning the entire bootstrap_chef.sh 
+script at this stage is not recommended.
 
 Manual setup notes
 ==================

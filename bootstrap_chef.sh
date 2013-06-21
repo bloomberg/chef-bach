@@ -5,6 +5,11 @@
 # $2 is the IP address of the bootstrap node
 # $3 is the optional knife recipe name, default "Test-Laptop"
 
+if [[ $OSTYPE == msys || $OSTYPE == cygwin ]]; then
+  # try to fix permission mismatch between windows and real unix
+  RSYNCEXTRA="--perms --chmod=a=rwx,Da+x"
+fi
+
 set -e
 
 if [[ $# -gt 1 ]]; then
@@ -46,11 +51,11 @@ if [[ -z $VAGRANT ]]; then
     ssh-keygen -N "" -f $KEYFILE
   fi
   echo "Running rsync of non-Vagrant install"
-  rsync -avP -e "ssh -i $KEYFILE" --exclude vbox --exclude $KEYFILE . ${SSH_USER}@$IP:chef-bcpc
+  rsync  $RSYNCEXTRA -avP -e "ssh -i $KEYFILE" --exclude vbox --exclude $KEYFILE . ${SSH_USER}@$IP:chef-bcpc
   $SSH_CMD "cd $BCPC_DIR && ./setup_ssh_keys.sh ${KEYFILE}.pub"
 else
   echo "Running rsync of Vagrant install"
-  /usr/bin/rsync -avP --exclude vbox /chef-bcpc-host/ /home/vagrant/chef-bcpc/
+  /usr/bin/rsync $RSYNCEXTRA -avP --exclude vbox /chef-bcpc-host/ /home/vagrant/chef-bcpc/
 fi
 
 echo "Setting up chef server"
