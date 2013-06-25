@@ -69,7 +69,7 @@ end
 bash "import-ubuntu-distribution-cobbler" do
     user "root"
     code <<-EOH
-        mount -o loop /tmp/ubuntu-12.04-mini.iso /mnt
+        mount -o loop -o ro /tmp/ubuntu-12.04-mini.iso /mnt
         cobbler import --name=ubuntu-12.04-mini --path=/mnt --breed=ubuntu --os-version=precise --arch=x86_64
         umount /mnt
         cobbler sync
