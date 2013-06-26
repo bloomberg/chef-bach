@@ -23,6 +23,13 @@ Finally, if you do not wish to use our scripts (we won't be offended), please
 refer to the [manual instructions](#manual-setup-notes) at the end of this
 document.
 
+About hypervisor hosts
+======================
+
+chef-bcpc has been successfully tested on Ubuntu 12.04, Mac OS X 10.7.5 and 
+Windows 7. On Windows, in addition to VirtualBox you need a working bash 
+interpreter and rsync available in your PATH
+
 About proxies
 =============
 
