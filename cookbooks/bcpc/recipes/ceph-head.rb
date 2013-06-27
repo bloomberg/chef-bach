@@ -21,6 +21,7 @@ include_recipe "bcpc::ceph-common"
 
 bash 'ceph-mon-mkfs' do
     code <<-EOH
+        mkdir -p /var/lib/ceph/mon/ceph-#{node.hostname}
         ceph-mon --mkfs -i "#{node.hostname}" --keyring "/etc/ceph/ceph.mon.keyring"
     EOH
     not_if "test -f /var/lib/ceph/mon/ceph-#{node.hostname}/keyring"
