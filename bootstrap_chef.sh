@@ -36,12 +36,12 @@ if [[ $# -gt 1 ]]; then
     echo "SSHing to the non-Vagrant machine ${IP} as ${SSH_USER}"
   fi
   if [[ $# -eq 3 ]]; then
-      RECIPE="$3"
+      CHEF_ENVIRONMENT="$3"
   else
-      RECIPE="Test-Laptop"
+      CHEF_ENVIRONMENT="Test-Laptop"
   fi
 else
-  echo "Usage: `basename $0` --vagrant-local|--vagrant-remote|<user name> IP-Address (recipe-name)" >> /dev/stderr
+  echo "Usage: `basename $0` --vagrant-local|--vagrant-remote|<user name> IP-Address [chef environment]" >> /dev/stderr
   exit
 fi
 
@@ -65,4 +65,4 @@ $SSH_CMD "cd $BCPC_DIR && ./setup_chef_cookbooks.sh ${IP} ${SSH_USER}"
 echo "Setting up chef environment, roles, and uploading cookbooks"
 $SSH_CMD "cd $BCPC_DIR && knife environment from file environments/*.json && knife role from file roles/*.json && knife cookbook upload -a -o cookbooks"
 echo "Enrolling local bootstrap node into chef"
-$SSH_CMD "cd $BCPC_DIR && ./setup_chef_bootstrap_node.sh ${IP} ${RECIPE}"
+$SSH_CMD "cd $BCPC_DIR && ./setup_chef_bootstrap_node.sh ${IP} ${CHEF_ENVIRONMENT}"
