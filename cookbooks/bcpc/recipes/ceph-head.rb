@@ -91,6 +91,13 @@ bash "initialize-ceph-admin-and-osd-config" do
     EOH
 end
 
+bash "set-ceph-crush-tunables" do
+    code <<-EOH
+        ceph --name mon. --keyring /var/lib/ceph/mon/ceph-#{node.hostname}/keyring \
+            osd crush tunables optimal
+    EOH
+end
+
 directory "/var/lib/ceph/mds/ceph-#{node.hostname}" do
     user "root"
     group "root"
