@@ -58,8 +58,9 @@ listen rabbitmq-amqp <%="#{node[:bcpc][:management][:vip]}"%>:5672
   balance leastconn
   option  tcplog
   option tcpka
+  option httpchk
 <% @servers.each do |server| -%>
-  <%= "server #{server.hostname} #{server[:bcpc][:management][:ip]}:5672 #check inter 2s rise 2 fall 2" %>
+  <%= "server #{server.hostname} #{server[:bcpc][:management][:ip]}:5672 check port 5673 inter 1s rise 1 fall 1 observe layer4" %>
 <% end -%>
 
 listen rabbitmq-web <%="#{node[:bcpc][:management][:vip]}"%>:55672
