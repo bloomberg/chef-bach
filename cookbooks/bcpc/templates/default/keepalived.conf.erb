@@ -10,13 +10,13 @@ global_defs {
 
 vrrp_script chk_haproxy {
   script "killall -0 haproxy"
-  interval 2
+  interval 1
 }
 
 vrrp_script chk_ceph {
   script "/usr/local/bin/if_not_quorum false"
   interval 5
-  fall 10
+  fall 3
   rise 1
 }
 
@@ -24,7 +24,7 @@ vrrp_instance <%= "BCPC_#{node[:bcpc][:region_name]}" %> {
   virtual_router_id <%="#{get_config('keepalived-router-id')}"%>
 
   # for electing MASTER, highest priority wins.
-  priority  100
+  priority  <%= "#{255-node[:bcpc][:node_number].to_i}" %>
   state     BACKUP
   nopreempt
 
