@@ -28,6 +28,11 @@ defaults
   timeout  client 50s
   timeout  server 50s
 
+listen stats 127.0.0.1:1936
+  mode http
+  stats enable
+  stats uri /
+
 listen stats <%="#{node[:bcpc][:management][:ip]}"%>:1936
   mode http
   stats enable
