@@ -126,6 +126,37 @@ bash "set-rabbitmq-ha-policy" do
     EOH
 end
 
+template "/usr/local/bin/rabbitmqcheck" do
+    source "rabbitmqcheck.erb"
+    mode 0755
+    owner "root"
+    group "root"
+end
+
+package "xinetd" do
+    action :upgrade
+end
+
+bash "add-amqpchk-to-etc-services" do
+    user "root"
+    code <<-EOH
+        printf "amqpchk\t5673/tcp\n" >> /etc/services
+    EOH
+    not_if "grep amqpchk /etc/services"
+end
+
+template "/etc/xinetd.d/amqpchk" do
+    source "xinetd-amqpchk.erb"
+    owner "root"
+    group "root"
+    mode 00440
+    notifies :restart, "service[xinetd]", :immediately
+end
+
+service "xinetd" do
+    action [ :enable, :start ]
+end
+
 ruby_block "reap-dead-rabbitmq-servers" do
     block do
         head_names = get_head_nodes.collect{|x| x.hostname}
