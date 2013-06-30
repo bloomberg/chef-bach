@@ -19,7 +19,7 @@
 
 include_recipe "bcpc::default"
 
-%w{python-daemon python-pika python-boto python-redis}.each do |pkg|
+%w{python-daemon python-pika python-boto python-redis python-zmq}.each do |pkg|
     package pkg do
         action :upgrade
     end
