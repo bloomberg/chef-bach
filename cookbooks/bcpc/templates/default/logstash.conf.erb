@@ -5,17 +5,6 @@
 ################################################
 
 input {
-    #amqp {
-    #    host => "<%="#{node[:bcpc][:management][:vip]}"%>"
-    #    password => "<%="#{get_config('rabbitmq-password')}"%>"
-    #    exchange => 'logstash-exchange'
-    #    queue => 'logstash-queue'
-    #    key => 'logstash-key'
-    #    type => 'direct'
-    #    auto_delete => false
-    #    exclusive => false
-    #    durable => true
-    #}
     zeromq {
         type => 'shipper-input'
         mode => 'server'

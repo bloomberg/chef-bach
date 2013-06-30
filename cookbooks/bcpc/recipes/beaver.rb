@@ -38,23 +38,6 @@ end
     end
 end
 
-cookbook_file "/tmp/beaver-ha.patch" do
-    source "beaver-ha.patch"
-    owner "root"
-    mode 00644
-end
-
-bash "patch-for-beaver-ha" do
-    user "root"
-    code <<-EOH
-        cd /usr/lib/python2.7/dist-packages/beaver
-        patch -p2 < /tmp/beaver-ha.patch
-        cp /tmp/beaver-ha.patch .
-    EOH
-    not_if "test -f /usr/lib/python2.7/dist-packages/beaver/beaver-ha.patch"
-    notifies :restart, "service[beaver]", :delayed
-end
-
 user node[:bcpc][:beaver][:user] do
     shell "/bin/false"
     home "/var/log"
