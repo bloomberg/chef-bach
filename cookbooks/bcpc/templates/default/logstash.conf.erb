@@ -43,6 +43,12 @@ output {
     #    debug => true
     # }
     elasticsearch_http {
-        host => "<%="#{node[:bcpc][:management][:vip]}"%>"
+        host => "<%="#{node[:bcpc][:management][:ip]}"%>"
+    #elasticsearch {
+    #    embedded => false
+    #    bind_host => "<%="#{node[:bcpc][:management][:ip]}"%>"
+    #    host => "<%="#{node[:bcpc][:management][:ip]}"%>"
+    #    cluster => "<%="#{node[:bcpc][:region_name]}"%>"
+    #    node_name => "<%="#{node.hostname}-logstash"%>"
     }
 }
