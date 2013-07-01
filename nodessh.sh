@@ -98,12 +98,17 @@ if [[ -z "$UP" ]]; then
     exit
 fi
 
-# finally ... run the specified command
-# the -t creates a pty which ensures we see errors if the command fails
-if [[ "$4" == sudo ]]; then
-    # if we need to sudo, pipe the passwd to that too
-    sshpass -p $PASSWD ssh -t ubuntu@$IP "echo $PASSWD | sudo -S $COMMAND"
+if [[ $(basename "$0") == nodescp ]]; then
+    sshpass -p $PASSWD scp "$3" "$4"
 else
+    # finally ... run the specified command
+    # the -t creates a pty which ensures we see errors if the command fails
+    if [[ "$4" == sudo ]]; then
+    # if we need to sudo, pipe the passwd to that too
+	sshpass -p $PASSWD ssh -t ubuntu@$IP "echo $PASSWD | sudo -S $COMMAND"
+    else
     # not sudo, do it the normal way
-    sshpass -p $PASSWD ssh -t ubuntu@$IP "$COMMAND"
-fi
+	sshpass -p $PASSWD ssh -t ubuntu@$IP "$COMMAND"
+    fi
+fi 
+
