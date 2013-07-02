@@ -5,9 +5,31 @@
 #
 ################################################
 
+#
+# This script must restart any services that connect (as clients) to the VIP
+# since those connections will hang if this node was the previous VIP-holder
+# and is now no longer (the connections usually never get broken so the
+# clients never attempt to reconnect until some app-specific idle timeout
+# kicks in)
+#
+
 # Kill beaver if it's defunct or normal, then restart it
 if [ X"`ps -ef | grep beaver | grep defunct | grep -v grep`" != X ]; then
 	ps -ef | grep "beaver -t zmq" | grep -v grep | awk '{print $2}' | xargs -n1 kill -9
 fi
 killall beaver || true
 service beaver start
+
+# Restart the diamond service 
+service diamond restart
+
+# Restart the Zabbix agent
+service zabbix-agent restart
+
+# Restart the powerdns service
+service pdns restart
+
+# Restart the openstack services that connect to the VIP
+for i in keystone glance-api glance-registry cinder-api cinder-scheduler cinder-volume nova-api nova-cert nova-compute nova-conductor nova-consoleauth nova-network nova-novncproxy nova-scheduler; do
+	service $i restart
+done
