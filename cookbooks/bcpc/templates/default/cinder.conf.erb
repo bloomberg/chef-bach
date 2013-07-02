@@ -22,7 +22,7 @@ osapi_volume_listen=<%="#{node[:bcpc][:management][:ip]}"%>
 
 # MySQL Connection
 sql_connection=mysql://<%="#{get_config('mysql-cinder-user')}"%>:<%="#{get_config('mysql-cinder-password')}"%>@<%="#{node[:bcpc][:management][:vip]}"%>/<%="#{node['bcpc']['cinder_dbname']}"%>
-sql_idle_timeout=10
+sql_idle_timeout=3600
 
 # Rabbit message queue settings
 rabbit_hosts=<%= "#{@servers.collect{|x| x['bcpc']['management']['ip']}.join(',')}" %>

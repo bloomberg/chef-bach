@@ -40,7 +40,7 @@ sql_connection = mysql://<%="#{get_config('mysql-glance-user')}"%>:<%="#{get_con
 # idle connections. This can result in 'MySQL Gone Away' exceptions. If you
 # notice this, you can lower this value to ensure that SQLAlchemy reconnects
 # before MySQL can drop the connection.
-sql_idle_timeout = 10
+sql_idle_timeout = 3600
 
 # Limit the api to return `param_limit_max` items in a call to a container. If
 # a larger `limit` query param is provided, it will be reduced to this value.
