@@ -254,7 +254,7 @@ If you have other VMs to register, you need to do it on the bootstrap node :
 ```
 $ ssh ubuntu@10.0.100.1
 $ sudo cobbler system add --name=bcpc-vm10 --hostname=bcpc-vm10 --profile=bcpc_host --ip-address=10.0.100.20 --mac=AA:BB:CC:DD:EE:FF
-$ sudo cobbler resync
+$ sudo cobbler sync
 ```
 
 Note that if you need to redo these registrations of manual nodes,
@@ -264,7 +264,7 @@ you'll need to first remove them before re-adding, so
 $ ssh ubuntu@10.0.100.1
 $ sudo cobbler system remove --name=bcpc-vm1
 $ ... modified add command ...
-$ sudo cobbler resync
+$ sudo cobbler sync
 ```
 
 You can boot up the other VMs now, for example :
