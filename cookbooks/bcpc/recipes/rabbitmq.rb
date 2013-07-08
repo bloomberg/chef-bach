@@ -122,7 +122,7 @@ end
 bash "set-rabbitmq-ha-policy" do
     min_quorum = get_head_nodes.length/2 + 1
     code <<-EOH
-        rabbitmqctl set_policy HA '^(?!amq\.).*' '{"ha-mode": "exactly", "ha-params": #{min_quorum}}'
+        rabbitmqctl set_policy HA '^(?!(amq\.|[a-f0-9]{32})).*' '{"ha-mode": "exactly", "ha-params": #{min_quorum}}'
     EOH
 end
 
