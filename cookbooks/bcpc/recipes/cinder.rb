@@ -50,7 +50,6 @@ template "/etc/cinder/cinder.conf" do
     owner "cinder"
     group "cinder"
     mode 00600
-    variables( :servers => get_head_nodes )
     notifies :run, "bash[restart-cinder]", :delayed
 end
 
