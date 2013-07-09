@@ -201,3 +201,9 @@ execute "run-routing-script-once" do
     action :nothing
     command "/etc/network/if-up.d/bcpc-routing"
 end
+
+bash "disable-noninteractive-pam-logging" do
+    user "root"
+    code "sed --in-place 's/^\\(session\\s*required\\s*pam_unix.so\\)/#\\1/' /etc/pam.d/common-session-noninteractive"
+    only_if "grep -e '^session\\s*required\\s*pam_unix.so' /etc/pam.d/common-session-noninteractive"
+end
