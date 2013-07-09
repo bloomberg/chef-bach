@@ -5,6 +5,8 @@
 #
 ################################################
 
+RABBITMQCTL=/usr/sbin/rabbitmqctl
+
 function ok {
 printf "\
 HTTP/1.0 200 OK\r
@@ -25,7 +27,10 @@ RabbitMQ on this node is not up.\r
 "
 }
 
-if rabbitmqctl cluster_status > /dev/null 2>&1; then
+# Needed to prevent erlexec from failing if HOME is unset
+export HOME=/var/lib/rabbitmq
+
+if $RABBITMQCTL cluster_status > /dev/null 2>&1; then
     ok
 else
     not_ok

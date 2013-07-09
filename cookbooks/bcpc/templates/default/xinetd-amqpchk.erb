@@ -15,7 +15,7 @@ service amqpchk
         bind            = <%="#{node[:bcpc][:management][:ip]}"%>
         port            = 5673
         wait            = no
-        user            = root
+        user            = rabbitmq
         server          = /usr/local/bin/rabbitmqcheck
         log_on_failure  += USERID
         only_from       = <%="#{node[:bcpc][:management][:cidr]}"%>
