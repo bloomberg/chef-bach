@@ -39,7 +39,7 @@ template "/etc/keystone/keystone.conf" do
     owner "keystone"
     group "keystone"
     mode 00600
-    notifies :restart, "service[keystone]", :delayed
+    notifies :restart, "service[keystone]", :immediately
 end
 
 template "/root/adminrc" do

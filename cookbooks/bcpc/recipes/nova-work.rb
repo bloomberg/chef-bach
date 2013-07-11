@@ -181,4 +181,5 @@ bash "patch-for-nova-bugs" do
         cp /tmp/nova.patch .
     EOH
     not_if "test -f /usr/lib/python2.7/dist-packages/nova/nova.patch"
+    notifies :restart, "service[nova-api]", :immediately
 end

@@ -70,8 +70,8 @@ template "/etc/glance/glance-cache.conf" do
     owner "glance"
     group "glance"
     mode 00600
-    notifies :restart, "service[glance-api]", :delayed
-    notifies :restart, "service[glance-registry]", :delayed
+    notifies :restart, "service[glance-api]", :immediately
+    notifies :restart, "service[glance-registry]", :immediately
 end
 
 ruby_block "glance-database-creation" do
@@ -103,4 +103,24 @@ bash "create-glance-rados-pool" do
         ceph osd pool set #{node[:bcpc][:glance_rbd_pool]} size 3
     EOH
     not_if "rados lspools | grep #{node[:bcpc][:glance_rbd_pool]}"
+end
+
+cookbook_file "/tmp/cirros-0.3.0-x86_64-disk.img" do
+    source "bins/cirros-0.3.0-x86_64-disk.img"
+    owner "root"
+    mode 00444
+end
+
+package "qemu-utils" do
+    action :upgrade
+end
+
+bash "glance-cirros-image" do
+    user "root"
+    code <<-EOH
+        . /root/adminrc
+        qemu-img convert -f qcow2 -O raw /tmp/cirros-0.3.0-x86_64-disk.img /tmp/cirros-0.3.0-x86_64-disk.raw
+        glance image-create --name='Cirros 0.3.0 x86_64' --is-public=True --container-format=bare --disk-format=raw --file /tmp/cirros-0.3.0-x86_64-disk.raw
+    EOH
+    not_if ". /root/adminrc; glance image-list | grep Cirros"
 end
