@@ -1,5 +1,6 @@
 #!/bin/bash
 
+# change the following IP address to match your bootstrap node
 echo "deb http://100.100.126.11/chef precise-0.10 main" > /etc/apt/sources.list.d/opscode.list
 
 if dpkg -s opscode-keyring 2>/dev/null | grep -q Status.*installed; then
