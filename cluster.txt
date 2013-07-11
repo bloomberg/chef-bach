@@ -1,0 +1,4 @@
+cluster1-bcpc-n2 aa:bb:cc:dd:ee:f0 10.0.1.12 myclusterdomain.com head
+cluster1-bcpc-n3 aa:bb:cc:dd:ee:f1 10.0.1.13 myclusterdomain.com work
+cluster1-bcpc-n4 aa:bb:cc:dd:ee:f2 10.0.1.14 myclusterdomain.com work
+end
