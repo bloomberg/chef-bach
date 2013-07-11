@@ -8,5 +8,4 @@ service nova-scheduler   restart
 service nova-cert        restart
 service nova-consoleauth restart
 service nova-conductor   restart
-# need to manually fix ceph :(
-#chef-client
+chef-client
