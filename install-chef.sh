@@ -1,7 +1,15 @@
 #!/bin/bash
 
+# if you dont have internet access from your cluster nodes, you will
+# not be able to "knife bootstrap" nodes to get them ready for
+# chef. Instead you need to install chef separately. Assuming the
+# necessary bits are on apt/apache mirror as per the mirror
+# instructions in bootstrap.md then the following will get chef
+# installed and allow you to proceed
+
 # change the following IP address to match your bootstrap node
-echo "deb http://100.100.126.11/chef precise-0.10 main" > /etc/apt/sources.list.d/opscode.list
+
+echo "deb http://100.0.1.11/chef precise-0.10 main" > /etc/apt/sources.list.d/opscode.list
 
 if dpkg -s opscode-keyring 2>/dev/null | grep -q Status.*installed; then
   echo opscode-keyring is installed
