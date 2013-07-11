@@ -66,7 +66,7 @@ template "/etc/init.d/beaver" do
     owner node[:bcpc][:beaver][:user]
     group node[:bcpc][:beaver][:group]
     mode 00755
-    notifies :restart, "service[beaver]", :delayed
+    notifies :restart, "service[beaver]", :immediately
 end
 
 template "/etc/cron.d/beaver" do

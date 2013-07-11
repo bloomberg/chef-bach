@@ -17,7 +17,7 @@
 # limitations under the License.
 #
 
-include_recipe "bcpc::nova-common"
+include_recipe "bcpc::openstack"
 include_recipe "bcpc::ceph-work"
 
 ruby_block "initialize-nova-work-config" do
@@ -46,14 +46,26 @@ end
     end
 end
 
-bash "restart-all-nova-workers" do
-    action :nothing
-    subscribes :run, resources("template[/etc/nova/nova.conf]"), :delayed
-    subscribes :run, resources("template[/etc/nova/api-paste.ini]"), :delayed
-    notifies :restart, "service[nova-api]", :immediately
-    notifies :restart, "service[nova-compute]", :immediately
-    notifies :restart, "service[nova-network]", :immediately
-    notifies :restart, "service[nova-novncproxy]", :immediately
+template "/etc/nova/nova.conf" do
+    source "nova.conf.erb"
+    owner "nova"
+    group "nova"
+    mode 00600
+    notifies :restart, "service[nova-api]", :delayed
+    notifies :restart, "service[nova-compute]", :delayed
+    notifies :restart, "service[nova-network]", :delayed
+    notifies :restart, "service[nova-novncproxy]", :delayed
+end
+
+template "/etc/nova/api-paste.ini" do
+    source "nova.api-paste.ini.erb"
+    owner "nova"
+    group "nova"
+    mode 00600
+    notifies :restart, "service[nova-api]", :delayed
+    notifies :restart, "service[nova-compute]", :delayed
+    notifies :restart, "service[nova-network]", :delayed
+    notifies :restart, "service[nova-novncproxy]", :delayed
 end
 
 directory "/var/lib/nova/.ssh" do

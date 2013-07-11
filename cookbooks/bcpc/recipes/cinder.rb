@@ -38,19 +38,14 @@ end
     end
 end
 
-bash "restart-cinder" do
-    action :nothing
-    notifies :restart, "service[cinder-api]", :immediately
-    notifies :restart, "service[cinder-volume]", :immediately
-    notifies :restart, "service[cinder-scheduler]", :immediately
-end
-
 template "/etc/cinder/cinder.conf" do
     source "cinder.conf.erb"
     owner "cinder"
     group "cinder"
     mode 00600
-    notifies :run, "bash[restart-cinder]", :delayed
+    notifies :restart, "service[cinder-api]", :delayed
+    notifies :restart, "service[cinder-volume]", :delayed
+    notifies :restart, "service[cinder-scheduler]", :delayed
 end
 
 template "/etc/cinder/api-paste.ini" do
@@ -58,7 +53,9 @@ template "/etc/cinder/api-paste.ini" do
     owner "cinder"
     group "cinder"
     mode 00600
-    notifies :run, "bash[restart-cinder]", :delayed
+    notifies :restart, "service[cinder-api]", :delayed
+    notifies :restart, "service[cinder-volume]", :delayed
+    notifies :restart, "service[cinder-scheduler]", :delayed
 end
 
 ruby_block "cinder-database-creation" do
@@ -79,7 +76,9 @@ bash "cinder-database-sync" do
     action :nothing
     user "root"
     code "cinder-manage db sync"
-    notifies :run, "bash[restart-cinder]", :immediately
+    notifies :restart, "service[cinder-api]", :immediately
+    notifies :restart, "service[cinder-volume]", :immediately
+    notifies :restart, "service[cinder-scheduler]", :immediately
 end
 
 bash "create-cinder-rados-pool" do

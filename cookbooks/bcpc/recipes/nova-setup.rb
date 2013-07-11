@@ -19,7 +19,6 @@
 
 include_recipe "bcpc::keystone"
 include_recipe "bcpc::nova-head"
-include_recipe "bcpc::nova-work"
 
 bash "nova-default-secgroup" do
     user "root"

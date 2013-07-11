@@ -18,7 +18,15 @@
 #
 
 include_recipe "bcpc::mysql"
-include_recipe "bcpc::nova-common"
+include_recipe "bcpc::openstack"
+
+ruby_block "initialize-nova-config" do
+    block do
+        make_config('mysql-nova-user', "nova")
+        make_config('mysql-nova-password', secure_password)
+        make_config('glance-cloudpipe-uuid', %x[uuidgen -r].strip)
+    end
+end
 
 package "python-memcache"
 
@@ -31,14 +39,26 @@ package "python-memcache"
     end
 end
 
-bash "restart-nova-scheduler-cert" do
-    action :nothing
-    subscribes :run, resources("template[/etc/nova/nova.conf]"), :delayed
-    subscribes :run, resources("template[/etc/nova/api-paste.ini]"), :delayed
-    notifies :restart, "service[nova-scheduler]", :immediately
-    notifies :restart, "service[nova-cert]", :immediately
-    notifies :restart, "service[nova-consoleauth]", :immediately
-    notifies :restart, "service[nova-conductor]", :immediately
+template "/etc/nova/nova.conf" do
+    source "nova.conf.erb"
+    owner "nova"
+    group "nova"
+    mode 00600
+    notifies :restart, "service[nova-scheduler]", :delayed
+    notifies :restart, "service[nova-cert]", :delayed
+    notifies :restart, "service[nova-consoleauth]", :delayed
+    notifies :restart, "service[nova-conductor]", :delayed
+end
+
+template "/etc/nova/api-paste.ini" do
+    source "nova.api-paste.ini.erb"
+    owner "nova"
+    group "nova"
+    mode 00600
+    notifies :restart, "service[nova-scheduler]", :delayed
+    notifies :restart, "service[nova-cert]", :delayed
+    notifies :restart, "service[nova-consoleauth]", :delayed
+    notifies :restart, "service[nova-conductor]", :delayed
 end
 
 ruby_block "nova-database-creation" do
@@ -59,7 +79,10 @@ bash "nova-database-sync" do
     action :nothing
     user "root"
     code "nova-manage db sync"
-    notifies :run, "bash[restart-nova-scheduler-cert]", :immediately
+    notifies :restart, "service[nova-scheduler]", :immediately
+    notifies :restart, "service[nova-cert]", :immediately
+    notifies :restart, "service[nova-consoleauth]", :immediately
+    notifies :restart, "service[nova-conductor]", :immediately
 end
 
 ruby_block "reap-dead-servers-from-nova" do

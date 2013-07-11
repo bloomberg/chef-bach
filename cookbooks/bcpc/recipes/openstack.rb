@@ -32,3 +32,10 @@ end
             action :upgrade
         end
 end
+
+template "/usr/local/bin/hup_openstack" do
+    source "hup_openstack.erb"
+    mode 0755
+    owner "root"
+    group "root"
+end

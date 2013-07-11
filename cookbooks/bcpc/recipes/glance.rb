@@ -38,18 +38,13 @@ end
     end
 end
 
-bash "restart-glance" do
-    action :nothing
-    notifies :restart, "service[glance-api]", :immediately
-    notifies :restart, "service[glance-registry]", :immediately
-end
-
 template "/etc/glance/glance-api.conf" do
     source "glance-api.conf.erb"
     owner "glance"
     group "glance"
     mode 00600
-    notifies :run, "bash[restart-glance]", :delayed
+    notifies :restart, "service[glance-api]", :delayed
+    notifies :restart, "service[glance-registry]", :delayed
 end
 
 template "/etc/glance/glance-registry.conf" do
@@ -57,7 +52,8 @@ template "/etc/glance/glance-registry.conf" do
     owner "glance"
     group "glance"
     mode 00600
-    notifies :run, "bash[restart-glance]", :delayed
+    notifies :restart, "service[glance-api]", :delayed
+    notifies :restart, "service[glance-registry]", :delayed
 end
 
 template "/etc/glance/glance-scrubber.conf" do
@@ -65,7 +61,8 @@ template "/etc/glance/glance-scrubber.conf" do
     owner "glance"
     group "glance"
     mode 00600
-    notifies :run, "bash[restart-glance]", :delayed
+    notifies :restart, "service[glance-api]", :delayed
+    notifies :restart, "service[glance-registry]", :delayed
 end
 
 template "/etc/glance/glance-cache.conf" do
@@ -73,7 +70,8 @@ template "/etc/glance/glance-cache.conf" do
     owner "glance"
     group "glance"
     mode 00600
-    notifies :run, "bash[restart-glance]", :delayed
+    notifies :restart, "service[glance-api]", :delayed
+    notifies :restart, "service[glance-registry]", :delayed
 end
 
 ruby_block "glance-database-creation" do
@@ -94,7 +92,8 @@ bash "glance-database-sync" do
     action :nothing
     user "root"
     code "glance-manage db_sync"
-    notifies :run, "bash[restart-glance]", :immediately
+    notifies :restart, "service[glance-api]", :immediately
+    notifies :restart, "service[glance-registry]", :immediately
 end
 
 bash "create-glance-rados-pool" do
