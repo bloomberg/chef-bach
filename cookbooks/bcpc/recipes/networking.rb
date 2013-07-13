@@ -109,6 +109,16 @@ bash "enable-ip-forwarding" do
     not_if "grep -e '^net.ipv4.ip_forward=1' /etc/sysctl.conf"
 end
 
+bash "set-tcp-keepalive-timeout" do
+    user "root"
+    code <<-EOH
+        echo "1" > /proc/sys/net/ipv4/tcp_keepalive_time
+        sed --in-place '/^net.ipv4.tcp_keepalive_time/d' /etc/sysctl.conf
+        echo 'net.ipv4.tcp_keepalive_time=1800' >> /etc/sysctl.conf
+    EOH
+    not_if "grep -e '^net.ipv4.tcp_keepalive_time=1800' /etc/sysctl.conf"
+end
+
 bash "enable-mellanox" do
     user "root"
     code <<-EOH
