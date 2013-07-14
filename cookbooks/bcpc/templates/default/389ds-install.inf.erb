@@ -8,7 +8,7 @@
 AdminDomain = <%="#{node[:bcpc][:domain_name]}"%>
 ConfigDirectoryAdminID = <%="#{get_config('389ds-admin-user')}"%>
 ConfigDirectoryAdminPwd = <%="#{get_config('389ds-admin-password')}"%>
-ConfigDirectoryLdapURL = ldap://<%="#{node.hostname}"%>:389/o=NetscapeRoot
+ConfigDirectoryLdapURL = ldap://<%="#{node.hostname}"%>.<%="#{node[:bcpc][:domain_name]}"%>:389/o=NetscapeRoot
 FullMachineName = <%="#{node.hostname}"%>.<%="#{node[:bcpc][:domain_name]}"%>
 ServerRoot = /usr/lib/x86_64-linux-gnu/dirsrv
 SuiteSpotGroup = dirsrv
@@ -18,7 +18,7 @@ SuiteSpotUserID = dirsrv
 Port = 9830
 ServerAdminID = <%="#{get_config('389ds-admin-user')}"%>
 ServerAdminPwd = <%="#{get_config('389ds-admin-password')}"%>
-ServerIpAddress = <%="#{node[:bcpc][:management][:ip]}"%>
+ServerIpAddress = 127.0.0.1
 SysUser = dirsrv
 
 [slapd]
@@ -30,4 +30,3 @@ RootDNPwd = <%="#{get_config('389ds-rootdn-password')}"%>
 ServerIdentifier = <%="#{node.hostname}"%>
 ServerPort = 389
 SlapdConfigForMC = yes
-#Suffix = dc=local,dc=lan
