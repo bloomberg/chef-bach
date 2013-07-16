@@ -49,7 +49,7 @@ IP=$2
 #    exit
 #fi
 
-SSHCOMMON="-o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o VerifyHostKeyDNS=no"
+SSHCOMMON="-q -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o VerifyHostKeyDNS=no"
 
 if [[ $(basename "$0") == nodescp ]]; then
     SCPCMD="scp $SSHCOMMON"
