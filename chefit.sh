@@ -1,9 +1,26 @@
 #!/bin/bash
-set -x
-./nodessh.sh Test-Laptop 10.0.100.12 "echo \"deb http://apt.opscode.com/ precise-0.10 main\" > /tmp/opscode.list" 
-./nodessh.sh Test-Laptop 10.0.100.12 "cp /tmp/opscode.list /etc/apt/sources.list.d" sudo
-./nodessh.sh Test-Laptop 10.0.100.12 "sudo apt-get update" sudo
-./nodessh.sh Test-Laptop 10.0.100.12 "sudo apt-get install --allow-unauthenticated -y opscode-keyring" sudo
-./nodessh.sh Test-Laptop 10.0.100.12 "sudo apt-get update" sudo
-./nodessh.sh Test-Laptop 10.0.100.12 "DEBCONF_DB_FALLBACK=File{$(pwd)/debconf-chef.conf} DEBIAN_FRONTEND=noninteractive apt-get -y --force-yes install chef" sudo
-./nodessh.sh Test-Laptop 10.0.100.12 "DEBCONF_DB_FALLBACK=File{$(pwd)/debconf-chef.conf} DEBIAN_FRONTEND=noninteractive apt-get -y --force-yes install chef-client" sudo
+#
+# 
+#
+#set -x
+IP="$1"
+ENVIRONMENT="$2"
+echo "initial configuration of $IP"
+
+SCPCMD="./nodescp    $ENVIRONMENT $IP"
+SSHCMD="./nodessh.sh $ENVIRONMENT $IP"
+
+echo "copy files..."
+$SCPCMD zap-ceph-disks.sh ubuntu@$IP:/home/ubuntu
+$SCPCMD install-chef.sh   ubuntu@$IP:/home/ubuntu
+$SCPCMD finish-worker.sh  ubuntu@$IP:/home/ubuntu
+$SCPCMD finish-head.sh    ubuntu@$IP:/home/ubuntu
+
+echo "setup chef"
+$SSHCMD  "/home/ubuntu/install-chef.sh" sudo
+
+echo "zap disks"
+$SSHCMD "/home/ubuntu/zap-ceph-disks.sh" sudo
+
+echo "done."
+
