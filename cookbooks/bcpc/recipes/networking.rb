@@ -219,3 +219,20 @@ bash "disable-noninteractive-pam-logging" do
     code "sed --in-place 's/^\\(session\\s*required\\s*pam_unix.so\\)/#\\1/' /etc/pam.d/common-session-noninteractive"
     only_if "grep -e '^session\\s*required\\s*pam_unix.so' /etc/pam.d/common-session-noninteractive"
 end
+
+package "apache2" do
+    action :upgrade
+end
+
+bash "set-apache-bind-address" do
+    code <<-EOH
+        sed -i "s/\\\(^[\\\t ]*Listen[\\\t ]*\\\)80[\\\t ]*$/\\\\1#{node[:bcpc][:management][:ip]}:80/g" /etc/apache2/ports.conf
+        sed -i "s/\\\(^[\\\t ]*Listen[\\\t ]*\\\)443[\\\t ]*$/\\\\1#{node[:bcpc][:management][:ip]}:443/g" /etc/apache2/ports.conf
+    EOH
+    not_if "grep #{node[:bcpc][:management][:ip]} /etc/apache2/ports.conf"
+    notifies :restart, "service[apache2]", :immediately
+end
+
+service "apache2" do
+    action [ :enable, :start ]
+end
