@@ -46,6 +46,7 @@ multi_host=True
 fixed_range=<%="#{node[:bcpc][:fixed][:cidr]}"%>
 floating_range=<%="#{node[:bcpc][:floating][:cidr]}"%>
 network_size=<%="#{node[:bcpc][:fixed][:network_size]}"%>
+flat_network_dns=<%="#{node[:bcpc][:management][:vip]}"%>
 dhcpbridge_flagfile=/etc/nova/nova.conf
 dhcpbridge=/usr/bin/nova-dhcpbridge
 force_dhcp_release=True
