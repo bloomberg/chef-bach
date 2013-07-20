@@ -224,6 +224,17 @@ package "apache2" do
     action :upgrade
 end
 
+%w{proxy_http ssl}.each do |mod|
+    bash "apache-enable-#{mod}" do
+        user "root"
+        code <<-EOH
+            a2enmod #{mod}
+        EOH
+        not_if "test -r /etc/apache2/mods-enabled/#{mod}.load"
+        notifies :restart, "service[apache2]", :delayed
+    end
+end
+
 bash "set-apache-bind-address" do
     code <<-EOH
         sed -i "s/\\\(^[\\\t ]*Listen[\\\t ]*\\\)80[\\\t ]*$/\\\\1#{node[:bcpc][:management][:ip]}:80/g" /etc/apache2/ports.conf
@@ -242,15 +253,4 @@ template "/var/www/index.html" do
     owner "root"
     group "root"
     mode 00644
-end
-
-%w{proxy_http ssl}.each do |mod|
-    bash "apache-enable-#{mod}" do
-        user "root"
-        code <<-EOH
-            a2enmod #{mod}
-        EOH
-        not_if "test -r /etc/apache2/mods-enabled/#{mod}.load"
-        notifies :restart, "service[apache2]", :delayed
-    end
 end
