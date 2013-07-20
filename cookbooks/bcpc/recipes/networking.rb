@@ -224,6 +224,14 @@ package "apache2" do
     action :upgrade
 end
 
+template "/etc/apache2/sites-enabled/000-default" do
+    source "apache-000-default.erb"
+    owner "root"
+    group "root"
+    mode 00644
+    notifies :restart, "service[apache2]", :delayed
+end
+
 %w{proxy_http ssl}.each do |mod|
     bash "apache-enable-#{mod}" do
         user "root"
