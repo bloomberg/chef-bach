@@ -46,6 +46,8 @@
 
     Redirect permanent /graphite https://<%="#{node[:bcpc][:management][:vip]}"%>:8888
     Redirect permanent /horizon https://<%="#{node[:bcpc][:management][:vip]}"%>/horizon
+    Redirect permanent /phpmyadmin https://<%="#{node[:bcpc][:management][:vip]}"%>/phpmyadmin
+    Redirect permanent /phpldapadmin https://<%="#{node[:bcpc][:management][:vip]}"%>/phpldapadmin
 </VirtualHost>
 
 <VirtualHost <%="#{node[:bcpc][:management][:ip]}"%>:443>
