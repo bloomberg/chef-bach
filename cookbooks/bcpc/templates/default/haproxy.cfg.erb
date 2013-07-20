@@ -45,16 +45,10 @@ listen stats-vip <%="#{node[:bcpc][:management][:vip]}"%>:1936
   mode http
   server myself <%="#{node[:bcpc][:management][:ip]}"%>:1936
 
-listen logstash-zmq <%="#{node[:bcpc][:management][:vip]}"%>:5556
-  timeout  client 1h
-  timeout  server 1h
+listen memcached <%="#{node[:bcpc][:management][:vip]}"%>:11211
   mode tcp
-  balance leastconn
-  option  tcplog
   option tcpka
-<% @servers.each do |server| -%>
-  <%= "server #{server.hostname} #{server[:bcpc][:management][:ip]}:5556 check inter 1s rise 1 fall 1 observe layer4" %>
-<% end -%>
+  server myself 127.0.0.1:11211
 
 listen mysql-galera <%="#{node[:bcpc][:management][:vip]}"%>:3306
   timeout  client 1h
@@ -87,20 +81,6 @@ listen rabbitmq-web <%="#{node[:bcpc][:management][:vip]}"%>:55672
   <%= "server #{server.hostname} #{server[:bcpc][:management][:ip]}:55672 check inter 1s rise 1 fall 1" %>
 <% end -%>
 
-listen elasticsearch <%="#{node[:bcpc][:management][:vip]}"%>:9200
-  balance  source
-  option  tcplog
-<% @servers.each do |server| -%>
-  <%= "server #{server.hostname} #{server[:bcpc][:management][:ip]}:9200 check inter 1s rise 1 fall 1" %>
-<% end -%>
-
-listen kibana <%="#{node[:bcpc][:management][:vip]}"%>:5601
-  balance  source
-  option  tcplog
-<% @servers.each do |server| -%>
-  <%= "server #{server.hostname} #{server[:bcpc][:management][:ip]}:5601 check inter 1s rise 1 fall 1" %>
-<% end -%>
-
 listen keystone-api <%="#{node[:bcpc][:management][:vip]}"%>:5000
   balance  source
   option  tcplog
@@ -115,27 +95,6 @@ listen keystone-admin <%="#{node[:bcpc][:management][:vip]}"%>:35357
   <%= "server #{server.hostname} #{server[:bcpc][:management][:ip]}:35357 check inter 1s rise 1 fall 1" %>
 <% end -%>
 
-listen nova-ec2 <%="#{node[:bcpc][:management][:vip]}"%>:8773
-  balance  source
-  option  tcplog
-<% @servers.each do |server| -%>
-  <%= "server #{server.hostname} #{server[:bcpc][:management][:ip]}:8773 check inter 1s rise 1 fall 1" %>
-<% end -%>
-
-listen nova-compute <%="#{node[:bcpc][:management][:vip]}"%>:8774
-  balance  source
-  option  tcplog
-<% @servers.each do |server| -%>
-  <%= "server #{server.hostname} #{server[:bcpc][:management][:ip]}:8774 check inter 1s rise 1 fall 1" %>
-<% end -%>
-
-listen cinder-api <%="#{node[:bcpc][:management][:vip]}"%>:8776
-  balance  source
-  option  tcplog
-<% @servers.each do |server| -%>
-  <%= "server #{server.hostname} #{server[:bcpc][:management][:ip]}:8776 check inter 1s rise 1 fall 1" %>
-<% end -%>
-
 listen glance-api <%="#{node[:bcpc][:management][:vip]}"%>:9292
   balance  source
   option  tcplog
@@ -148,6 +107,27 @@ listen glance-registry <%="#{node[:bcpc][:management][:vip]}"%>:9191
   option  tcplog
 <% @servers.each do |server| -%>
   <%= "server #{server.hostname} #{server[:bcpc][:management][:ip]}:9191 check inter 1s rise 1 fall 1" %>
+<% end -%>
+
+listen cinder-api <%="#{node[:bcpc][:management][:vip]}"%>:8776
+  balance  source
+  option  tcplog
+<% @servers.each do |server| -%>
+  <%= "server #{server.hostname} #{server[:bcpc][:management][:ip]}:8776 check inter 1s rise 1 fall 1" %>
+<% end -%>
+
+listen nova-ec2 <%="#{node[:bcpc][:management][:vip]}"%>:8773
+  balance  source
+  option  tcplog
+<% @servers.each do |server| -%>
+  <%= "server #{server.hostname} #{server[:bcpc][:management][:ip]}:8773 check inter 1s rise 1 fall 1" %>
+<% end -%>
+
+listen nova-compute <%="#{node[:bcpc][:management][:vip]}"%>:8774
+  balance  source
+  option  tcplog
+<% @servers.each do |server| -%>
+  <%= "server #{server.hostname} #{server[:bcpc][:management][:ip]}:8774 check inter 1s rise 1 fall 1" %>
 <% end -%>
 
 listen horizon-http <%="#{node[:bcpc][:management][:vip]}"%>:80
@@ -166,7 +146,27 @@ listen horizon-https <%="#{node[:bcpc][:management][:vip]}"%>:443
   <%= "server #{server.hostname} #{server[:bcpc][:management][:ip]}:443 check inter 1s rise 1 fall 1 observe layer4" %>
 <% end -%>
 
-listen memcached <%="#{node[:bcpc][:management][:vip]}"%>:11211
+listen elasticsearch <%="#{node[:bcpc][:management][:vip]}"%>:9200
+  balance  source
+  option  tcplog
+<% @servers.each do |server| -%>
+  <%= "server #{server.hostname} #{server[:bcpc][:management][:ip]}:9200 check inter 1s rise 1 fall 1" %>
+<% end -%>
+
+listen logstash-zmq <%="#{node[:bcpc][:management][:vip]}"%>:5556
+  timeout  client 1h
+  timeout  server 1h
   mode tcp
+  balance leastconn
+  option  tcplog
   option tcpka
-  server myself 127.0.0.1:11211
+<% @servers.each do |server| -%>
+  <%= "server #{server.hostname} #{server[:bcpc][:management][:ip]}:5556 check inter 1s rise 1 fall 1 observe layer4" %>
+<% end -%>
+
+listen kibana <%="#{node[:bcpc][:management][:vip]}"%>:5601
+  balance  source
+  option  tcplog
+<% @servers.each do |server| -%>
+  <%= "server #{server.hostname} #{server[:bcpc][:management][:ip]}:5601 check inter 1s rise 1 fall 1" %>
+<% end -%>
