@@ -23,6 +23,7 @@ include_recipe "bcpc::nova-head"
 bash "nova-default-secgroup" do
     user "root"
     code <<-EOH
+        sleep 5
         . /root/adminrc
         nova secgroup-add-rule default icmp -1 -1 0.0.0.0/0
         nova secgroup-add-rule default tcp 22 22 0.0.0.0/0
