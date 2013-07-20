@@ -34,8 +34,8 @@ end
 
 template "/opt/kibana3/config.js" do
     source "kibana-config.js.erb"
-    user node[:bcpc][:kibana][:user]
-    group node[:bcpc][:kibana][:group]
+    user "root"
+    group "root"
     mode 00644
 end
 
