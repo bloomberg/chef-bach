@@ -51,17 +51,6 @@ template "/etc/apache2/conf.d/openstack-dashboard.conf" do
     notifies :restart, "service[apache2]", :delayed
 end
 
-%w{proxy_http ssl}.each do |mod|
-    bash "apache-enable-#{mod}" do
-        user "root"
-        code <<-EOH
-            a2enmod #{mod}
-        EOH
-        not_if "test -r /etc/apache2/mods-enabled/#{mod}.load"
-        notifies :restart, "service[apache2]", :delayed
-    end
-end
-
 template "/etc/openstack-dashboard/local_settings.py" do
     source "horizon.local_settings.py.erb"
     owner "root"

@@ -243,3 +243,14 @@ template "/var/www/index.html" do
     group "root"
     mode 00644
 end
+
+%w{proxy_http ssl}.each do |mod|
+    bash "apache-enable-#{mod}" do
+        user "root"
+        code <<-EOH
+            a2enmod #{mod}
+        EOH
+        not_if "test -r /etc/apache2/mods-enabled/#{mod}.load"
+        notifies :restart, "service[apache2]", :delayed
+    end
+end
