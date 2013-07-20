@@ -136,3 +136,15 @@ nsds5BeginReplicaRefresh: start
         end
     end
 end
+
+package "phpldapadmin" do
+    action :upgrade
+end
+
+template "/etc/phpldapadmin/config.php" do
+    source "phpldapadmin-config.php.erb"
+    owner "root"
+    group "root"
+    mode 00644
+end
+
