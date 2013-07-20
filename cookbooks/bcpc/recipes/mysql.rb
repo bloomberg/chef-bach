@@ -140,3 +140,28 @@ end
 service "xinetd" do
     action [ :enable, :start ]
 end
+
+ruby_block "phpmyadmin-debconf-setup" do
+    block do
+        if not system "debconf-get-selections | grep phpmyadmin >/dev/null 2>&1" then
+            puts %x[
+                echo 'phpmyadmin phpmyadmin/dbconfig-install boolean true' | debconf-set-selections
+                echo 'phpmyadmin phpmyadmin/mysql/admin-pass password #{get_config('mysql-root-password')}' | debconf-set-selections
+                echo 'phpmyadmin phpmyadmin/mysql/app-pass password #{get_config('mysql-phpmyadmin-password')}' | debconf-set-selections
+                echo 'phpmyadmin phpmyadmin/reconfigure-webserver multiselect apache2' | debconf-set-selections
+            ]
+        end
+    end
+end
+
+package "phpmyadmin" do
+    action :upgrade
+end
+
+bash "phpmyadmin-config-setup" do
+    user "root"
+    code <<-EOH
+        echo '$cfg["AllowArbitraryServer"] = TRUE;' >> /etc/phpmyadmin/config.inc.php
+    EOH
+    not_if "cat /etc/phpmyadmin/config.inc.php | grep AllowArbitraryServer"
+end
