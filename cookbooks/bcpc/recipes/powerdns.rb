@@ -117,6 +117,18 @@ get_all_nodes.each do |server|
     end
 end
 
+%w{openstack kibana graphite zabbix}.each do |static|
+    ruby_block "create-dns-entry-#{static}" do
+        block do
+            if not system "mysql -uroot -p#{get_config('mysql-root-password')} #{node['bcpc']['pdns_dbname']} -e 'SELECT name FROM records_static' | grep \"#{static}.#{node[:bcpc][:domain_name]}\"" then
+                %x[ mysql -uroot -p#{get_config('mysql-root-password')} #{node['bcpc']['pdns_dbname']} <<-EOH
+                        INSERT INTO records_static (domain_id, name, content, type, ttl, prio) VALUES ((SELECT id FROM domains WHERE name='#{node[:bcpc][:domain_name]}'),'#{static}.#{node[:bcpc][:domain_name]}','#{node[:bcpc][:management][:vip]}','A',300,NULL);
+                ]
+            end
+        end
+    end
+end
+
 ruby_block "powerdns-table-view" do
     block do
         if not system "mysql -uroot -p#{get_config('mysql-root-password')} -e 'SELECT TABLE_NAME FROM INFORMATION_SCHEMA.VIEWS WHERE TABLE_SCHEMA = \"#{node['bcpc']['pdns_dbname']}\" AND TABLE_NAME=\"records\"'|grep \"records\"" then
