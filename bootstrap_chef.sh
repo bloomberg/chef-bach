@@ -45,6 +45,12 @@ else
   exit
 fi
 
+# protect against rsyncing to the wrong bootstrap node
+if [[ ! -f "environments/$3.json" ]]; then
+    echo "Error: environment file $3.json not found"
+    exit
+fi
+
 
 if [[ -z $VAGRANT ]]; then
   if [[ ! -f $KEYFILE ]]; then
