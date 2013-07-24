@@ -48,8 +48,7 @@ if [[ -f cluster.txt ]]; then
 	    echo "$HOST has a default storage route"
 	    SG=$[SG + 1]
 	fi
-	for SERVICE in keystone glance-api glance-registry cinder-scheduler cinder-volume cinder-api nova-api nova-novncproxy nova-scheduler nova-consoleauth nova-cert nova-conductor nova-compute no
-va-network; do
+	for SERVICE in keystone glance-api glance-registry cinder-scheduler cinder-volume cinder-api nova-api nova-novncproxy nova-scheduler nova-consoleauth nova-cert nova-conductor nova-compute nova-network; do
 	    STAT=`./nodessh.sh $ENVIRONMENT $HOST "service $SERVICE status | grep running" sudo`
 	    if [[ ! "$STAT" =~ "unrecognized" ]]; then
 		STAT=`echo $STAT | cut -f2 -d":"`
