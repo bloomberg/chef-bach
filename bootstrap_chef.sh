@@ -51,11 +51,11 @@ if [[ -z $VAGRANT ]]; then
     ssh-keygen -N "" -f $KEYFILE
   fi
   echo "Running rsync of non-Vagrant install"
-  rsync  $RSYNCEXTRA -avP -e "ssh -i $KEYFILE" --exclude vbox --exclude $KEYFILE . ${SSH_USER}@$IP:chef-bcpc
+  rsync  $RSYNCEXTRA -avP -e "ssh -i $KEYFILE" --exclude vbox --exclude $KEYFILE --exclude .chef . ${SSH_USER}@$IP:chef-bcpc 
   $SSH_CMD "cd $BCPC_DIR && ./setup_ssh_keys.sh ${KEYFILE}.pub"
 else
   echo "Running rsync of Vagrant install"
-  /usr/bin/rsync $RSYNCEXTRA -avP --exclude vbox /chef-bcpc-host/ /home/vagrant/chef-bcpc/
+  /usr/bin/rsync $RSYNCEXTRA -avP --exclude vbox --exclude .chef /chef-bcpc-host/ /home/vagrant/chef-bcpc/
 fi
 
 echo "Setting up chef server"
