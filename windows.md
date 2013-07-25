@@ -5,7 +5,8 @@ You can use a suitable Windows box as the hypervisor for your BCPC
 cluster. As with other hypervisors the hardware spec should include at
 least 16GB and a CPU with virtualisation support (Intel VT-X or
 AMD-V). You must ensure that the virtualisation is also enabled in the
-BIOS.
+BIOS. An SSD is recommended for the filesystem hosting the VMs as bringing 
+up a full cluster involves a lot of I/O.
 
 To run the initial scripts which create the VMs, you need a working
 bash interpreter and some other standard unix tools must be available
