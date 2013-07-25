@@ -15,6 +15,7 @@ in your path. At a minimum this includes:
 - VirtualBox
 - python
 - curl
+- rsync
 
 An easy enough way to put this all together is to install cygwin for
 the basic unix command-line tools, Python for Windows and MSYS-GIT for
@@ -30,4 +31,4 @@ export PATH=$PATH:/c/Program\ Files/Oracle/VirtualBox
 ```
 
 chef-bcpc has been tested on Windows 7 64-bit using VirtualBox 4.2.12, Python 2.6, 
-MSysGit 1.8.0, Cygwin 1.7
+MSysGit 1.8.0, Cygwin 1.7, rsync 3.0.9
