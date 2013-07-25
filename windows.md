@@ -29,3 +29,5 @@ export PATH=$PATH:/c/Python26
 export PATH=$PATH:/c/Program\ Files/Oracle/VirtualBox
 ```
 
+chef-bcpc has been tested on Windows 7 64-bit using VirtualBox 4.2.12, Python 2.6, 
+MSysGit 1.8.0, Cygwin 1.7
