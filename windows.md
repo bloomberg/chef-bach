@@ -17,7 +17,8 @@ in your path. At a minimum this includes:
 
 An easy enough way to put this all together is to install cygwin for
 the basic unix command-line tools, Python for Windows and MSYS-GIT for
-a nice bash shell. A sample ~/.bash_profile to tie this al together
+a nice bash shell, and then include the paths to all of these in your PATH. 
+A sample ~/.bash_profile to tie this all together
 looks like this:
 
 ```
