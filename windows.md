@@ -13,6 +13,7 @@ bash interpreter and some other standard unix tools must be available
 in your path. At a minimum this includes:
 
 - VirtualBox
+- bash
 - python
 - curl
 - rsync
