@@ -33,3 +33,7 @@ export PATH=$PATH:/c/Program\ Files/Oracle/VirtualBox
 
 chef-bcpc has been tested on Windows 7 64-bit using VirtualBox 4.2.12, Python 2.6, 
 MSysGit 1.8.0, Cygwin 1.7, rsync 3.0.9
+
+Many other combinations will most likely work - most of a chef-bcpc bringup process 
+runs inside the VMs and is unaffected by hypervisor setup. The parts that creat and 
+initialise the VMs and download some supporting files are nothing unusual or difficult.
