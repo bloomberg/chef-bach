@@ -46,8 +46,8 @@ else
 fi
 
 # protect against rsyncing to the wrong bootstrap node
-if [[ ! -f "environments/$3.json" ]]; then
-    echo "Error: environment file $3.json not found"
+if [[ ! -f "environments/${CHEF_ENVIRONMENT}.json" ]]; then
+    echo "Error: environment file ${CHEF_ENVIRONMENT}.json not found"
     exit
 fi
 
