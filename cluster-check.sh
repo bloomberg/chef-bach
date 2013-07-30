@@ -71,7 +71,7 @@ if [[ -f cluster.txt ]]; then
 			vtrace "$HOST has a default storage route"
 			SG=$[SG + 1]
 		fi
-		CHEF=`./nodessh.sh $ENVIRONMENT $HOST "which chef"`
+		CHEF=`./nodessh.sh $ENVIRONMENT $HOST "which chef-client"`
 		if [[ -z "$CHEF" ]]; then
 			echo "$HOST doesn't seem to have chef installed so probably hasn't been assigned a role"
 			echo
