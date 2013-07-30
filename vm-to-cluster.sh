@@ -1,7 +1,8 @@
 #!/bin/bash
 #
 # Script to help making a cluster definition file (cluster.txt) from
-# the current VMs known by VirtualBox
+# the current VMs known by VirtualBox. This is intended to be run on
+# the hypervisor as it relies on using the VBoxManage tool
 #
 # cluster.txt can be used by the cluster-*.sh tools for various
 # cluster automation tasks, see cluster-readme.txt
@@ -20,11 +21,11 @@ function getvminfo {
 	MAC1=`$VBM showvminfo $1 | grep "NIC 1" | grep MAC | awk '{print $4}' | awk '{print substr($0, 1, length() -1)}'`
 	# add the customary colons in
 	MAC1=`echo $MAC1 | sed -e 's/^\([0-9A-Fa-f]\{2\}\)/\1_/'  \
-     -e 's/_\([0-9A-Fa-f]\{2\}\)/:\1_/' \
-     -e 's/_\([0-9A-Fa-f]\{2\}\)/:\1_/' \
-     -e 's/_\([0-9A-Fa-f]\{2\}\)/:\1_/' \
-     -e 's/_\([0-9A-Fa-f]\{2\}\)/:\1_/' \
-     -e 's/_\([0-9A-Fa-f]\{2\}\)/:\1/'`
+		-e 's/_\([0-9A-Fa-f]\{2\}\)/:\1_/' \
+		-e 's/_\([0-9A-Fa-f]\{2\}\)/:\1_/' \
+		-e 's/_\([0-9A-Fa-f]\{2\}\)/:\1_/' \
+		-e 's/_\([0-9A-Fa-f]\{2\}\)/:\1_/' \
+		-e 's/_\([0-9A-Fa-f]\{2\}\)/:\1/'`
 	# now get the IP address
 	IP=`VBoxManage guestproperty get $1 "/VirtualBox/GuestInfo/Net/0/V4/IP" | awk '{print $2}'`
 	echo "$1 $MAC1 $IP $DOMAIN unknown"
