@@ -8,6 +8,8 @@ NameVirtualHost <%="#{node[:bcpc][:management][:ip]}"%>:443
 
 <VirtualHost <%="#{node[:bcpc][:management][:ip]}"%>:443>
     ServerName "openstack.<%="#{node[:bcpc][:domain_name]}"%>"
+    ServerAlias <%="#{node[:bcpc][:management][:vip]}"%>
+    ServerAlias <%="#{node[:bcpc][:management][:ip]}"%>
     WSGIScriptAlias /horizon /usr/share/openstack-dashboard/openstack_dashboard/wsgi/django.wsgi
     WSGIDaemonProcess horizon user=www-data group=www-data processes=3 threads=10
     Alias /static /usr/share/openstack-dashboard/openstack_dashboard/static/
