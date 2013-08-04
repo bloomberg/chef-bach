@@ -114,15 +114,17 @@ You can log in to your bcpc-bootstrap node from the hypervisor via:
 $ vagrant ssh
 ```
 
-After the automatic provisioning is complete, this is a good time to take a
-snapshot of your bootstrap node:
+After the automatic Vagrant provisioning is complete, this is a good time to
+take a snapshot of your bootstrap node:
 
 ```
 $ VBoxManage snapshot bcpc-bootstrap take initial-install
 ```
 
-Please continue to
-[Registering VMs for PXE boot](#registering-vms-for-pxe-boot).
+Please note that the 3 bcpc-vm nodes are enrolled in cobbler on the bootstrap
+node at the end of ``vbox_create.sh``.
+
+Please continue to [Imaging BCPC Nodes](#imaging-bcpc-nodes).
 
 bcpc-bootstrap creation without Vagrant
 =======================================
@@ -235,9 +237,8 @@ case you need to manually remove the old key - remove the entry for
 Registering VMs for PXE boot
 ============================
 
-Once you have provisioned the local Chef server (via Vagrant or
-bootstrap_chef.sh), you will need to register the bcpc-vm1, bcpc-vm2, and
-bcpc-vm3 VMs before they can boot. 
+Once you have provisioned the local Chef server, you will need to register the
+bcpc-vm1, bcpc-vm2, and bcpc-vm3 VMs before they can boot. 
 
 When using vagrant you can register the remaining VMs like this :
 
@@ -270,7 +271,12 @@ $ ... modified add command ...
 $ sudo cobbler sync
 ```
 
-You can boot up the other VMs now, for example :
+Imaging BCPC Nodes
+==================
+
+Once the BCPC bootstrap VM is created and the node VMs are registered in
+Cobbler (done automatically with Vagrant-based ``vbox_create.sh`` invocations),
+you can boot up the other VMs now, for example :
 
 ```
 $ VBoxManage startvm bcpc-vm1
@@ -278,6 +284,15 @@ $ VBoxManage startvm bcpc-vm2
 $ VBoxManage startvm bcpc-vm3
 ```
 
+This should kick off the PXE boot installation of the nodes.  If this
+doesn't work, please check that the systems are accessible in cobbler:
+
+```
+root@bcpc-bootstrap:~# cobbler system list
+   bcpc-vm1
+   bcpc-vm2
+   bcpc-vm3
+```
 
 User account on VM
 ==================

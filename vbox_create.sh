@@ -40,8 +40,7 @@ fi
 
 # Can we create the bootstrap VM via Vagrant
 if hash vagrant ; then
-  echo "Vagrant detected - using Vagrant to initialize bcpc-bootstrap"
-  echo "N.B. This may take approximately 30-45 minutes to complete."
+  echo "Vagrant detected - using Vagrant to initialize bcpc-bootstrap VM"
   if [[ ! -f precise-server-cloudimg-amd64-vagrant-disk1.box ]]; then
     $CURL -o precise-server-cloudimg-amd64-vagrant-disk1.box http://cloud-images.ubuntu.com/vagrant/precise/current/precise-server-cloudimg-amd64-vagrant-disk1.box
   fi
@@ -52,6 +51,10 @@ if hash vagrant ; then
     cp $HOME/.vagrant.d/insecure_private_key .
   fi
   vagrant up
+  # Set the VirtualBox network names
+  VBN0=vboxnet0
+  VBN1=vboxnet1
+  VBN2=vboxnet2
 else
   echo "Vagrant not detected - using raw VirtualBox for bcpc-bootstrap"
   if [[ -z "WIN" ]]; then
@@ -67,16 +70,16 @@ else
     # Remove in reverse to avoid substring matching issue
     for i in 10 9 8 7 6 5 4 3 2 1; do
       if [[ i -gt 1 ]]; then
-        IF="VirtualBox Host-Only Ethernet Adapter #$i";   
+        IF="VirtualBox Host-Only Ethernet Adapter #$i";
       else
-	IF="VirtualBox Host-Only Ethernet Adapter";
+        IF="VirtualBox Host-Only Ethernet Adapter";
       fi
       if [[ ! -z `$VBM list hostonlyifs | grep "$IF"` ]]; then
-	$VBM hostonlyif remove "$IF"
+        $VBM hostonlyif remove "$IF"
       fi
     done
   fi
-	      
+
   if [[ ! -z `$VBM list dhcpservers` ]]; then
     $VBM list dhcpservers | grep NetworkName | awk '{print $2}' | xargs -n1 $VBM dhcpserver remove --netname
   fi
@@ -159,5 +162,20 @@ for vm in bcpc-vm1 bcpc-vm2 bcpc-vm3; do
         #$VBM modifyvm $vm --largepages on --vtxvpid on --hwvirtexexcl on
     fi
 done
+
+# VMs are now created - if we are using Vagrant, finish the install process.
+if hash vagrant ; then
+  # N.B. As of Aug 2013, grub-pc gets confused and wants to prompt re: 3-way
+  # merge.  Sigh.
+  #vagrant ssh -c "sudo ucf -p /etc/default/grub"
+  #vagrant ssh -c "sudo ucfr -p grub-pc /etc/default/grub"
+  vagrant ssh -c "sudo mv /etc/default/grub.ucf-dist /etc/default/grub"
+  pushd ../
+  echo "Bootstrap complete - setting up Chef server"
+  echo "N.B. This may take approximately 30-45 minutes to complete."
+  ./bootstrap_chef.sh --vagrant-remote 10.0.100.1
+  ./enroll_cobbler.sh
+  popd
+fi
 
 popd
