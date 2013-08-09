@@ -1,0 +1,18 @@
+{
+    "name": "BCPC-Workernode-Hadoop",
+    "default_attributes": {
+    },
+    "json_class": "Chef::Role",
+    "run_list": [
+      "recipe[chef-client::delete_validation]",
+      "recipe[chef-client::config]",
+      "recipe[bcpc-centos::default]",
+      "recipe[bcpc-centos::iptables]",
+      "recipe[bcpc-centos::networking]",
+      "recipe[bcpc-centos::ntp]"
+    ],
+    "description": "A node in a Hadoop cluster",
+    "chef_type": "role",
+    "override_attributes": {
+    }
+}
