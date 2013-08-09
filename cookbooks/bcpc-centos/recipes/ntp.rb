@@ -17,8 +17,6 @@
 # limitations under the License.
 #
 
-include_recipe "bcpc::default"
-
 package "ntp"
 
 template "/etc/ntp.conf" do

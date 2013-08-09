@@ -17,6 +17,10 @@
 # limitations under the License.
 #
 
+yum_package "parted" do
+  action :install
+end
+
 node['bcpc']['hdfs_disks'].each do |disk|
   execute "hdfs_disk-prepare-#{disk}" do
     command <<-EOH
