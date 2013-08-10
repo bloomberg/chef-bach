@@ -7,9 +7,10 @@
 # cluster.txt can be used by the cluster-*.sh tools for various
 # cluster automation tasks, see cluster-readme.txt
 #
-
+#set -x
 if [[ -z "$1" ]]; then
 	echo "Usage: $0 domain"
+	exit
 fi
 
 DOMAIN=$1
@@ -27,7 +28,13 @@ function getvminfo {
 		-e 's/_\([0-9A-Fa-f]\{2\}\)/:\1_/' \
 		-e 's/_\([0-9A-Fa-f]\{2\}\)/:\1/'`
 	# now get the IP address
-	IP=`VBoxManage guestproperty get $1 "/VirtualBox/GuestInfo/Net/0/V4/IP" | awk '{print $2}'`
+	PROPERTY=`VBoxManage guestproperty get $1 "/VirtualBox/GuestInfo/Net/0/V4/IP"`
+	if [[ "$PROPERTY" = "No value set!" ]]; then
+	    echo "$VM not booted yet" >&2
+	    IP="IP unavailable - has this VM been booted?"
+	else
+	    IP=`echo $PROPERTY | awk '{print $2}'`
+	fi
 	echo "$1 $MAC1 $IP $DOMAIN unknown"
 }
 

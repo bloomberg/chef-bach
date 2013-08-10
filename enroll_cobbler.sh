@@ -2,6 +2,14 @@
 
 set -e
 
+if ! hash vagrant 2>/dev/null; then
+    if [[ -z "$1" ]]; then
+	# only if vagrant not available do we need the param
+	echo "Usage: $0 <bootstrap node ip address>"
+	exit
+    fi
+fi
+
 if [ -f ./proxy_setup.sh ]; then
   . ./proxy_setup.sh
 fi
@@ -9,13 +17,6 @@ fi
 if [ -z "$CURL" ]; then
 	echo "CURL is not defined"
 	exit
-fi
-
-if ! hash vagrant; then
-    if [[ -z "$1" ]]; then
-	echo "Usage: non-vagrant requires bootstrap node IP address to be given"
-	exit
-    fi
 fi
 
 DIR=`dirname $0`/vbox
@@ -29,7 +30,7 @@ node=11
 for i in bcpc-vm1 bcpc-vm2 bcpc-vm3; do
   MAC=`VBoxManage showvminfo --machinereadable $i | grep macaddress1 | cut -d \" -f 2 | sed 's/.\{2\}/&:/g;s/:$//'`
   echo "Registering $i with $MAC for ${subnet}.${node}"
-  if hash vagrant; then
+  if hash vagrant 2>/dev/null; then
     vagrant ssh -c "sudo cobbler system remove --name=$i; sudo cobbler system add --name=$i --hostname=$i --profile=bcpc_host --ip-address=${subnet}.${node} --mac=${MAC}"
   else
     ssh -t -i $KEYFILE ubuntu@$1 "sudo cobbler system remove --name=$i; sudo cobbler system add --name=$i --hostname=$i --profile=bcpc_host --ip-address=${subnet}.${node} --mac=${MAC}"
@@ -37,7 +38,7 @@ for i in bcpc-vm1 bcpc-vm2 bcpc-vm3; do
   let node=node+1
 done
 
-if hash vagrant; then
+if hash vagrant 2>/dev/null; then
   vagrant ssh -c "sudo cobbler sync"
 else
   ssh -t -i $KEYFILE ubuntu@$1 "sudo cobbler sync"

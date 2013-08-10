@@ -16,6 +16,12 @@ if [[ -z "$CURL" ]]; then
 fi
 
 VBM=VBoxManage
+
+# Use this if you intend to make an apt-mirror in this VM (see the
+#instructions on using an apt-mirror towards the end of bootstrap.md)
+#BOOTSTRAP_DRIVE_SIZE=120480
+
+BOOTSTRAP_DRIVE_SIZE=20480
 DRIVE_SIZE=20480
 
 DIR=`dirname $0`/vbox
@@ -124,7 +130,7 @@ else
         # Create a number of hard disks
         port=0
         for disk in a; do
-            $VBM createhd --filename $P/$vm/$vm-$disk.vdi --size $DRIVE_SIZE
+            $VBM createhd --filename $P/$vm/$vm-$disk.vdi --size $BOOTSTRAP_DRIVE_SIZE
             $VBM storageattach $vm --storagectl "SATA Controller" --device 0 --port $port --type hdd --medium $P/$vm/$vm-$disk.vdi
             port=$((port+1))
         done
