@@ -66,6 +66,7 @@ else
     else  
         # not sudo, do it the normal way
 	if [[ "$COMMAND" == - ]]; then
+	    echo "You might need this : cobbler_root = $PASSWD"
 	    sshpass -p $PASSWD $SSHCMD -t ubuntu@$IP
 	else
 	    sshpass -p $PASSWD $SSHCMD -t ubuntu@$IP "$COMMAND"
