@@ -47,7 +47,7 @@ node['bcpc']['hdfs_disks'].each_with_index do |disk, i|
   execute "hdfs-update-fstab-#{disk}" do
     dir = "/var/lib/hadoop/fs/%02d" % (i + 1)
     command <<-EOH
-    echo "/dev/#{disk}1 #{dir} xfs rw,noatime,discard 0 0" >> /etc/fstab
+    echo "/dev/#{disk}1 #{dir} xfs defaults 1 1" >> /etc/fstab
     EOH
     not_if "cat /etc/fstab | grep #{dir}"
   end
