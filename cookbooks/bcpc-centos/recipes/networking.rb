@@ -101,12 +101,6 @@ template "/etc/sysconfig/network-scripts/rule-#{node[:bcpc][:storage][:interface
   mode 00644
 end
 
-template "/etc/hosts" do
-  source "hosts.erb"
-  mode 00644
-  variables( :servers => get_all_nodes )
-end
-
 bash "storage vlan up" do
   user "root"
   code <<-EOH
@@ -114,4 +108,16 @@ bash "storage vlan up" do
   ifup #{node[:bcpc][:floating][:vlan_interface]}
   EOH
   not_if "if link show | grep #{node[:bcpc][:floating][:interface]}"
+end
+
+template "/etc/hosts" do
+  source "hosts.erb"
+  mode 00644
+  variables( :servers => get_all_nodes )
+end
+
+bash "set hostname" do
+  code <<-EOH
+  /bin/hostname #{node.name.match(/([a-z_-]+)/)[0]}
+  EOH
 end

@@ -26,5 +26,15 @@ template "/etc/ntp.conf" do
 end
 
 service "ntpd" do
+  action [ :stop ]
+end
+
+bash "set ntpd time" do
+  code <<-EOH
+  /usr/sbin/ntpdate #{node['bcpc']['ntp_servers'].first}
+  EOH
+end
+
+service "ntpd" do
   action [ :enable, :start ]
 end
