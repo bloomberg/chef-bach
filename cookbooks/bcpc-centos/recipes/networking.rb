@@ -112,11 +112,14 @@ end
 
 template "/etc/hosts" do
   source "hosts.erb"
+  owner "root"
+  group "root"
   mode 00644
   variables( :servers => get_all_nodes )
 end
 
 bash "set hostname" do
+  user "root"
   code <<-EOH
   /bin/hostname #{node.name.match(/([a-z_-]+)/)[0]}
   EOH

@@ -30,6 +30,7 @@ service "ntpd" do
 end
 
 bash "set ntpd time" do
+  user "root"
   code <<-EOH
   /usr/sbin/ntpdate #{node['bcpc']['ntp_servers'].first}
   EOH
