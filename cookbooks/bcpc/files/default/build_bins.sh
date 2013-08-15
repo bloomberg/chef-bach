@@ -6,12 +6,12 @@ set -x
 # setup_chef_server which calls this script. Default definition is
 # CURL=curl
 if [ -z "$CURL" ]; then
-  echo "$CURL not defined"
-  exit
+  CURL=curl
 fi
 
 DIR=`dirname $0`
 
+mkdir -p $DIR/bins
 pushd $DIR/bins/
 
 # Get up to date
