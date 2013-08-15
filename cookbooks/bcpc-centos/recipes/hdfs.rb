@@ -21,12 +21,21 @@ yum_package "parted" do
   action :install
 end
 
+yum_package "xfsprogs" do
+  action :install
+end
+
+yum_package "xfsprogs-devel" do
+  action :install
+end
+
 node['bcpc']['hdfs_disks'].each do |disk|
   execute "hdfs_disk-prepare-#{disk}" do
     command <<-EOH
     /sbin/parted -a optimal -s /dev/#{disk} mklabel gpt
     /sbin/parted -a optimal -s /dev/#{disk} mkpart primary xfs 1049kB 100%
     /sbin/parted -a optimal -s /dev/#{disk} set 1 lvm on
+    /sbin/mkfs.xfs -f /dev/#{disk}1
     EOH
     not_if "/sbin/parted #{disk} print | grep xfs"
   end
@@ -38,8 +47,8 @@ node['bcpc']['hdfs_disks'].each_with_index do |disk, i|
     owner "root"
     group "root"
     mode 00644
+    recursive true
     action :create
-    not_if File.directory?(dir)
   end
 end
 
@@ -47,7 +56,8 @@ node['bcpc']['hdfs_disks'].each_with_index do |disk, i|
   execute "hdfs-update-fstab-#{disk}" do
     dir = "/var/lib/hadoop/fs/%02d" % (i + 1)
     command <<-EOH
-    echo "/dev/#{disk}1 #{dir} xfs defaults 1 1" >> /etc/fstab
+    echo "/dev/#{disk}1 #{dir} xfs defaults 0 0" >> /etc/fstab
+    /bin/mount #{dir}
     EOH
     not_if "cat /etc/fstab | grep #{dir}"
   end
