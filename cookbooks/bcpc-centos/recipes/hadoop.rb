@@ -17,22 +17,15 @@
 # limitations under the License.
 #
 
-ruby_block "initialize-hadoop-config" do
-  block do
-    make_config('ssh-private-key', %x[printf 'y\n' | ssh-keygen -t rsa -N '' -q -f /dev/stdout | sed -e '1,1d' -e 's/.*-----BEGIN/-----BEGIN/'])
-    make_config('ssh-public-key', %x[echo "#{get_config('ssh-private-key')}" | ssh-keygen -y -f /dev/stdin])
-  end
-end
-
 directory "/root/.ssh" do
   owner "root"
   group "root"
   mode 00700
 end
 
-template "/root/.ssh/authorized_keys" do
-  source "authorized_keys.erb"
-  owner "root"
-  group "root"
-  mode 00644
+bash "add ssh public key" do
+  user "root"
+  code <<-EOH
+  cat #{Chef::DataBagItem.load('configs', 'hadoop-cluster')['ssh-public-key'] } >> /root/.ssh/authorized_keys
+  EOH
 end

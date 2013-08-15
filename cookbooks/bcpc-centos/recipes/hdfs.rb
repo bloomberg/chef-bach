@@ -37,7 +37,7 @@ node['bcpc']['hdfs_disks'].each do |disk|
     /sbin/parted -a optimal -s /dev/#{disk} set 1 lvm on
     /sbin/mkfs.xfs -f /dev/#{disk}1
     EOH
-    not_if "/sbin/parted #{disk} print | grep xfs"
+    not_if "/sbin/parted /dev/#{disk} print | grep xfs"
   end
 end
 
