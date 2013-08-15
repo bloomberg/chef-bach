@@ -26,6 +26,6 @@ end
 bash "add ssh public key" do
   user "root"
   code <<-EOH
-  cat #{Chef::DataBagItem.load('configs', 'hadoop-cluster')['ssh-public-key'] } >> /root/.ssh/authorized_keys
+  echo "#{Chef::DataBagItem.load('configs', 'hadoop-cluster')['ssh-public-key'] }" >> /root/.ssh/authorized_keys
   EOH
 end
