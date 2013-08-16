@@ -175,7 +175,7 @@ if hash vagrant ; then
   # merge.  Sigh.
   #vagrant ssh -c "sudo ucf -p /etc/default/grub"
   #vagrant ssh -c "sudo ucfr -p grub-pc /etc/default/grub"
-  vagrant ssh -c "sudo mv /etc/default/grub.ucf-dist /etc/default/grub"
+  vagrant ssh -c "test -f /etc/default/grub.ucf-dist && sudo mv /etc/default/grub.ucf-dist /etc/default/grub" || true
   pushd ../
   echo "Bootstrap complete - setting up Chef server"
   echo "N.B. This may take approximately 30-45 minutes to complete."
