@@ -17,7 +17,7 @@
 # limitations under the License.
 #
 
-bash "disable-packagekit" do
+bash "disable packagekit" do
     user "root"
     code <<-EOH
         echo "enabled=0" > /etc/yum/pluginconf.d/refresh-packagekit.conf
