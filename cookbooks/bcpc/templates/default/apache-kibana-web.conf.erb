@@ -4,9 +4,10 @@
 #
 ################################################
 
+Listen <%="#{node[:bcpc][:management][:vip]}"%>:5601
 NameVirtualHost <%="#{node[:bcpc][:management][:ip]}"%>:443
 
-<VirtualHost <%="#{node[:bcpc][:management][:ip]}"%>:443>
+<VirtualHost <%="#{node[:bcpc][:management][:vip]}"%>:5601 <%="#{node[:bcpc][:management][:ip]}"%>:443>
     ServerName "kibana.<%="#{node[:bcpc][:domain_name]}"%>"
     DocumentRoot "/opt/kibana3"
     SSLEngine on
