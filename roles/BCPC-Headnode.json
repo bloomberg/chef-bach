@@ -7,7 +7,6 @@
       "role[Basic]",
       "recipe[bcpc::default]",
       "recipe[bcpc::networking]",
-      "recipe[bcpc::ntp]",
       "recipe[bcpc::ceph-head]",
       "recipe[bcpc::mysql]",
       "recipe[bcpc::rabbitmq]",

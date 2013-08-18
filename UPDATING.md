@@ -31,6 +31,25 @@ In Dumpling, it is now reduced to:
 mon 'allow profile bootstrap-osd' 
 ```
 
+BCPC now uses the standard Opscode Community ntp cookbook instead of rolling
+our own ntp recipes.  Environments need to be updated from:
+
+```
+"bcpc": {
+  ...
+  "ntp_servers" : [ "0.pool.ntp.org", "1.pool.ntp.org", "2.pool.ntp.org", "3.pool.ntp.org" ],
+  ...
+}
+```
+
+to (at the outer level - akin to ``bcpc``, ``chef_client``, and ``ubuntu``):
+
+```
+"ntp": {
+   "servers" : [ "0.pool.ntp.org", "1.pool.ntp.org", "2.pool.ntp.org", "3.pool.ntp.org" ]
+},
+```
+
 #### 20130720
 Kibana has been upgraded from version 2 to version 3.
 First run `service stop kibana` on each headnode before running
