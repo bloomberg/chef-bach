@@ -189,7 +189,7 @@ bash "interface-floating" do
         echo "  address #{node[:bcpc][:floating][:ip]}" >> /etc/network/interfaces
         echo "  netmask #{node[:bcpc][:floating][:netmask]}" >> /etc/network/interfaces
         echo "  gateway #{node[:bcpc][:floating][:gateway]}" >> /etc/network/interfaces
-        echo "  dns-nameservers #{node[:bcpc][:management][:vip]} #{node[:bcpc][:dns_servers].join(' ')}" >> /etc/network/interfaces
+        echo "  dns-nameservers #{node[:bcpc][:management][:vip]} #{(n=node[:bcpc][:dns_servers].dup; n.push n.shift).join(' ')}" >> /etc/network/interfaces
         echo "  dns-search #{node[:bcpc][:domain_name]}" >> /etc/network/interfaces
         echo "  metric 200" >> /etc/network/interfaces
         ifup #{node[:bcpc][:floating][:interface]}
