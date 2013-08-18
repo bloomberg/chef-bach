@@ -48,13 +48,3 @@ end
 service "keepalived" do
     action [ :enable, :start ]
 end
-
-bash "enable-nonlocal-bind" do
-    user "root"
-    code <<-EOH
-        echo "1" > /proc/sys/net/ipv4/ip_nonlocal_bind
-        sed --in-place '/^net.ipv4.ip_nonlocal_bind/d' /etc/sysctl.conf
-        echo 'net.ipv4.ip_nonlocal_bind=1' >> /etc/sysctl.conf
-    EOH
-    not_if "grep -e '^net.ipv4.ip_nonlocal_bind=1' /etc/sysctl.conf"
-end

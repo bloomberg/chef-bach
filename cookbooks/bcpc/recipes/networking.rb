@@ -116,6 +116,16 @@ bash "enable-ip-forwarding" do
     not_if "grep -e '^net.ipv4.ip_forward=1' /etc/sysctl.conf"
 end
 
+bash "enable-nonlocal-bind" do
+    user "root"
+    code <<-EOH
+        echo "1" > /proc/sys/net/ipv4/ip_nonlocal_bind
+        sed --in-place '/^net.ipv4.ip_nonlocal_bind/d' /etc/sysctl.conf
+        echo 'net.ipv4.ip_nonlocal_bind=1' >> /etc/sysctl.conf
+    EOH
+    not_if "grep -e '^net.ipv4.ip_nonlocal_bind=1' /etc/sysctl.conf"
+end
+
 bash "set-tcp-keepalive-timeout" do
     user "root"
     code <<-EOH
