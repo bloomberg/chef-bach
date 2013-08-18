@@ -87,7 +87,7 @@ bash "initialize-ceph-admin-and-osd-config" do
             mds 'allow' > /dev/null
         ceph --name mon. --keyring /var/lib/ceph/mon/ceph-#{node.hostname}/keyring \
             auth get-or-create-key client.bootstrap-osd \
-            mon 'allow command osd create ...; allow command osd crush set ...; allow command auth add * osd allow\\ * mon allow\\ rwx; allow command mon getmap' > /dev/null
+            mon 'allow profile bootstrap-osd' > /dev/null
     EOH
 end
 
