@@ -33,6 +33,7 @@ end
 template "/etc/keepalived/keepalived.conf" do
     source "keepalived.conf.erb"
     mode 00644
+    notifies :restart, "service[keepalived]", :delayed
     notifies :restart, "service[keepalived]", :immediately
 end
 
