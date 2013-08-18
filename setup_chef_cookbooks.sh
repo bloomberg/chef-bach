@@ -9,7 +9,7 @@ if [[ -f ./proxy_setup.sh ]]; then
 fi
 
 if [[ -z "$1" ]]; then
-	BOOTSTRAP_IP=10.0.100.1
+	BOOTSTRAP_IP=10.0.100.3
 else
 	BOOTSTRAP_IP=$1
 fi

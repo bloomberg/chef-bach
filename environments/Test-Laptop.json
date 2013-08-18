@@ -10,25 +10,25 @@
         "interface" : "eth0",
         "netmask" : "255.255.255.0",
         "cidr" : "10.0.100.0/24",
-        "gateway" : "10.0.100.1"
+        "gateway" : "10.0.100.3"
       },
       "storage": {
         "interface" : "eth1",
         "netmask" : "255.255.255.0",
         "cidr" : "172.16.100.0/24",
-        "gateway" : "172.16.100.1"
+        "gateway" : "172.16.100.3"
       },
       "floating": {
         "interface" : "eth2",
         "netmask" : "255.255.255.0",
         "cidr" : "192.168.100.0/24",
-        "gateway" : "192.168.100.1",
+        "gateway" : "192.168.100.3",
         "available_subnet" : "192.168.100.128/25"
       },
       "bootstrap": {
         "interface" : "eth0",
         "pxe_interface" : "eth1",
-        "server" : "10.0.100.1",
+        "server" : "10.0.100.3",
         "dhcp_subnet" : "10.0.100.0",
         "dhcp_range" : "10.0.100.14 10.0.100.250"
       },
@@ -36,7 +36,7 @@
       "dns_servers" : [ "8.8.8.8", "8.8.4.4" ]
     },
     "chef_client": {
-      "server_url": "http://10.0.100.1:4000",
+      "server_url": "http://10.0.100.3:4000",
       "cache_path": "/var/chef/cache",
       "backup_path": "/var/chef/backup",
       "validation_client_name": "chef-validator",
