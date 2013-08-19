@@ -46,7 +46,7 @@ node['bcpc']['hdfs_disks'].each_with_index do |disk, i|
   directory dir do
     owner "root"
     group "root"
-    mode 00644
+    mode 00755
     recursive true
     action :create
   end
