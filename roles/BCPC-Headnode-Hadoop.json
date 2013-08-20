@@ -10,6 +10,7 @@
       "recipe[bcpc-centos::ntp]",
       "recipe[bcpc-centos::hadoop]",
       "recipe[bcpc-centos::iptables]",
+      "recipe[bcpc-centos::ganglia]",
       "recipe[bcpc-centos::selinux]",
       "recipe[bcpc-centos::packagekit]",
       "recipe[bcpc-centos::hdfs]",
