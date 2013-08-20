@@ -8,11 +8,10 @@
       "recipe[chef-client::config]",
       "recipe[bcpc-centos::default]",
       "recipe[bcpc-centos::ntp]",
-      "recipe[bcpc-centos::hadoop]",
       "recipe[bcpc-centos::iptables]",
-      "recipe[bcpc-centos::ganglia]",
       "recipe[bcpc-centos::selinux]",
       "recipe[bcpc-centos::packagekit]",
+      "recipe[bcpc-centos::hadoop]",
       "recipe[bcpc-centos::hdfs]",
       "recipe[bcpc-centos::networking]"
     ],
