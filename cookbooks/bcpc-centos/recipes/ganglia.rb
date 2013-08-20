@@ -20,13 +20,24 @@
 # base-installed ganglia will interfere with the Ambari-controlled version
 # so disable it
 
-bash "disable ganglia" do
+service "gmond" do
+  action [ :stop ]
+end
+
+service "gmetad" do
+  action [ :stop ]
+end
+
+bash "disable gmond" do
   user "root"
   code <<-EOH
-  /sbin/service gmond stop
   /sbin/chkconfig gmond off
-  /sbin/service gmetad stop
+  EOH
+end
+
+bash "disable gmetad" do
+  user "root"
+  code <<-EOH
   /sbin/chkconfig gmetad off
   EOH
-  only_if "/sbin/chkconfig | grep gmond | grep on"
 end

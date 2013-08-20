@@ -17,11 +17,13 @@
 # limitations under the License.
 #
 
+service "iptables" do
+  action [ :save, :stop ]
+end
+
 bash "disable iptables" do
   user "root"
   code <<-EOH
-  /etc/init.d/iptables save
-  /etc/init.d/iptables stop
   /sbin/chkconfig iptables off
   EOH
   only_if "/sbin/chkconfig | grep iptables | grep on"
