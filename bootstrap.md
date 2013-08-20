@@ -411,28 +411,28 @@ index d844783..9a9e53a 100644
 @@ -28,12 +28,25 @@
          "interface" : "eth0",
          "pxe_interface" : "eth1",
-         "server" : "10.0.100.1",
-+        "mirror" : "10.0.100.1",
+         "server" : "10.0.100.3",
++        "mirror" : "10.0.100.3",
          "dhcp_subnet" : "10.0.100.0",
          "dhcp_range" : "10.0.100.10 10.0.100.250"
        },
 +      "repos": {
-+        "ceph": "http://10.0.100.1/ceph-bobtail",
-+        "rabbitmq": "http://10.0.100.1/rabbitmq",
-+        "mysql": "http://10.0.100.1/percona",
-+        "openstack": "http://10.0.100.1/ubuntu-cloud",
-+        "hwraid": "http://10.0.100.1/hwraid"
++        "ceph": "http://10.0.100.3/ceph-bobtail",
++        "rabbitmq": "http://10.0.100.3/rabbitmq",
++        "mysql": "http://10.0.100.3/percona",
++        "openstack": "http://10.0.100.3/ubuntu-cloud",
++        "hwraid": "http://10.0.100.3/hwraid"
 +      },
        "ntp_servers" : [ "0.pool.ntp.org", "1.pool.ntp.org", "2.pool.ntp.org", "3.pool.ntp.org" ],
        "dns_servers" : [ "8.8.8.8", "8.8.4.4" ]
      },
 +    "ubuntu": {
-+      "archive_url": "http://10.0.100.1/ubuntu",
-+      "security_url": "http://10.0.100.1/ubuntu",
++      "archive_url": "http://10.0.100.3/ubuntu",
++      "security_url": "http://10.0.100.3/ubuntu",
 +      "include_source_packages": false
 +    },
      "chef_client": {
-       "server_url": "http://10.0.100.1:4000",
+       "server_url": "http://10.0.100.3:4000",
        "cache_path": "/var/chef/cache",
 ```
 
