@@ -22,7 +22,7 @@ fi
 
 if [[ -f cluster.txt ]]; then
     echo "Using cluster definition from cluster.txt"
-    while read HOSTNAME MACADDR IPADDR DOMAIN ROLE; do
+    while read HOSTNAME MACADDR IPADDR ILOIPADDR DOMAIN ROLE; do
 	if [[ $HOSTNAME = "end" ]]; then
 	    continue
 	fi
