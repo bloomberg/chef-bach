@@ -162,17 +162,17 @@ add the following to the end
 # Static interfaces
 auto eth1
 iface eth1 inet static
-  address 10.0.100.1
+  address 10.0.100.3
   netmask 255.255.255.0
 
 auto eth2
 iface eth2 inet static
-  address 172.16.100.1
+  address 172.16.100.3
   netmask 255.255.255.0
 
 auto eth3
 iface eth3 inet static
-  address 192.168.100.1
+  address 192.168.100.3
   netmask 255.255.255.0
 ```
 
@@ -210,16 +210,16 @@ here if using a proxy (for now explained in diff format) :
  d-i     pkgsel/language-packs   multiselect
 ```
 
-Once you can SSH in to the bcpc-bootstrap node (ssh ubuntu@10.0.100.1 if
+Once you can SSH in to the bcpc-bootstrap node (ssh ubuntu@10.0.100.3 if
 following instructions above), you can then run the bootstrap_chef.sh script
 from the hypervisor running VirtualBox:
 
 ```
-$ ./bootstrap_chef.sh ubuntu 10.0.100.1
+$ ./bootstrap_chef.sh ubuntu 10.0.100.3
 ```
 
-This will bring up the chef-server on http://10.0.100.1:4040.
-The Web UI will be at http://10.0.100.1:4000 with defaults admin/p@ssw0rd1
+This will bring up the chef-server on http://10.0.100.3:4040.
+The Web UI will be at http://10.0.100.3:4000 with defaults admin/p@ssw0rd1
 
 At this point, your bcpc-bootstrap node should be appropriately provisioned.
 
@@ -232,7 +232,7 @@ $ VBoxManage snapshot bcpc-bootstrap take chef-server-provisioned
 If you see Host key verification failed when testing the ssh connection, you 
 have probably recreated the VMs but not updated the SSH key. If this is the 
 case you need to manually remove the old key - remove the entry for 
-10.0.100.1 from ~/.ssh/known_hosts
+10.0.100.3 from ~/.ssh/known_hosts
 
 Registering VMs for PXE boot
 ============================
@@ -247,16 +247,16 @@ $ ./enroll_cobbler.sh
 ```
 
 whereas for the non-Vagrant case you'll have to provide the IP address
-of the bootstrap node (we are using 10.0.100.1 in this example) :
+of the bootstrap node (we are using 10.0.100.3 in this example) :
 
 ```
-$ ./enroll_cobbler.sh 10.0.100.1
+$ ./enroll_cobbler.sh 10.0.100.3
 ```
 
 If you have other VMs to register, you need to do it on the bootstrap node :
 
 ```
-$ ssh ubuntu@10.0.100.1
+$ ssh ubuntu@10.0.100.3
 $ sudo cobbler system add --name=bcpc-vm10 --hostname=bcpc-vm10 --profile=bcpc_host --ip-address=10.0.100.20 --mac=AA:BB:CC:DD:EE:FF
 $ sudo cobbler sync
 ```
@@ -265,7 +265,7 @@ Note that if you need to redo these registrations of manual nodes,
 you'll need to first remove them before re-adding, so
 
 ```
-$ ssh ubuntu@10.0.100.1
+$ ssh ubuntu@10.0.100.3
 $ sudo cobbler system remove --name=bcpc-vm1
 $ ... modified add command ...
 $ sudo cobbler sync
@@ -332,7 +332,7 @@ Also, after the first run, make the BCPC-Headnode an administrator, or you will 
 [...]error: Net::HTTPServerException: 403 "Forbidden"
 '''
 To make a host an administrator, one can access the Chef web UI via
-http://10.0.100.1:4040 and follow:
+http://10.0.100.3:4040 and follow:
 Clients -> &lt;Host> -> Edit -> Admin (toggle true) -> Save Client
 where &lt;Host> is something like bcpc-vm1.local.lan, then re-run the
 bootstrap command. 
@@ -343,7 +343,7 @@ through. Also note that this will change your password in the
 data bag.
 
 If you get a "Tampered with cookie 500" error clear out your cookies
-from your browser for 10.0.100.1
+from your browser for 10.0.100.3
 
 Boostrapping these nodes will take quite a long time - as much as an
 hour or more. You can monitor progress by logging into the VMs and

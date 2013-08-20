@@ -74,7 +74,7 @@ template "/etc/cron.d/beaver" do
     owner "root"
     group "root"
     mode 00644
-    notifies :restart, "service[cron]", :delayed
+    notifies :restart, "service[cron]", :immediately
 end
 
 service "beaver" do

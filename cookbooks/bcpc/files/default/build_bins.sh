@@ -19,7 +19,7 @@ apt-get -y update
 apt-get -y dist-upgrade
 
 # Install tools needed for packaging
-apt-get -y install git rubygems make pbuilder python-mock python-configobj python-support cdbs python-all-dev python-stdeb libmysqlclient-dev
+apt-get -y install git rubygems make pbuilder python-mock python-configobj python-support cdbs python-all-dev python-stdeb libmysqlclient-dev libldap2-dev
 if [ -z `gem list --local fpm | grep fpm | cut -f1 -d" "` ]; then
   gem install fpm --no-ri --no-rdoc
 fi
@@ -150,24 +150,24 @@ FILES="python-carbon_0.9.10_all.deb python-whisper_0.9.10_all.deb python-graphit
 
 # Build the zabbix packages
 if [ ! -f zabbix-agent.tar.gz ] || [ ! -f zabbix-server.tar.gz ]; then
-    $CURL -L -O http://sourceforge.net/projects/zabbix/files/ZABBIX%20Latest%20Stable/2.0.6/zabbix-2.0.6.tar.gz
-    tar zxf zabbix-2.0.6.tar.gz
+    $CURL -L -O http://sourceforge.net/projects/zabbix/files/ZABBIX%20Latest%20Stable/2.0.7/zabbix-2.0.7.tar.gz
+    tar zxf zabbix-2.0.7.tar.gz
     rm -rf /tmp/zabbix-install && mkdir -p /tmp/zabbix-install
-    cd zabbix-2.0.6
-    ./configure --prefix=/tmp/zabbix-install --enable-agent
+    cd zabbix-2.0.7
+    ./configure --prefix=/tmp/zabbix-install --enable-agent --with-ldap
     make install
     tar zcf zabbix-agent.tar.gz -C /tmp/zabbix-install .
     rm -rf /tmp/zabbix-install && mkdir -p /tmp/zabbix-install
-    ./configure --prefix=/tmp/zabbix-install --enable-server --with-mysql
+    ./configure --prefix=/tmp/zabbix-install --enable-server --with-mysql --with-ldap
     make install
     cp -a frontends/php /tmp/zabbix-install/share/zabbix/
     cp database/mysql/* /tmp/zabbix-install/share/zabbix/
     tar zcf zabbix-server.tar.gz -C /tmp/zabbix-install .
     rm -rf /tmp/zabbix-install
     cd ..
-    cp zabbix-2.0.6/zabbix-agent.tar.gz .
-    cp zabbix-2.0.6/zabbix-server.tar.gz .
-    rm -rf zabbix-2.0.6 zabbix-2.0.6.tar.gz
+    cp zabbix-2.0.7/zabbix-agent.tar.gz .
+    cp zabbix-2.0.7/zabbix-server.tar.gz .
+    rm -rf zabbix-2.0.7 zabbix-2.0.7.tar.gz
 fi
 FILES="zabbix-agent.tar.gz zabbix-server.tar.gz $FILES"
 

@@ -26,9 +26,9 @@ Vagrant.configure("2") do |config|
   config.vm.define :bootstrap do |bootstrap|
     bootstrap.vm.hostname = "bcpc-bootstrap"
 
-    bootstrap.vm.network :private_network, ip: "10.0.100.1", netmask: "255.255.255.0", adapter_ip: "10.0.100.2"
-    bootstrap.vm.network :private_network, ip: "172.16.100.1", netmask: "255.255.255.0", adapter_ip: "172.16.100.2"
-    bootstrap.vm.network :private_network, ip: "192.168.100.1", netmask: "255.255.255.0", adapter_ip: "192.168.100.2"
+    bootstrap.vm.network :private_network, ip: "10.0.100.3", netmask: "255.255.255.0", adapter_ip: "10.0.100.2"
+    bootstrap.vm.network :private_network, ip: "172.16.100.3", netmask: "255.255.255.0", adapter_ip: "172.16.100.2"
+    bootstrap.vm.network :private_network, ip: "192.168.100.3", netmask: "255.255.255.0", adapter_ip: "192.168.100.2"
 
     bootstrap.vm.synced_folder "../", "/chef-bcpc-host"
 
@@ -37,7 +37,7 @@ Vagrant.configure("2") do |config|
 
     # since we are creating the server and the validation keys on this new
     # machine itself, we can't use Vagrant's built-in chef provisioning.
-    bootstrap.vm.provision :shell, :inline => "/chef-bcpc-host/bootstrap_chef.sh --vagrant-local 10.0.100.1"
+    bootstrap.vm.provision :shell, :inline => "/chef-bcpc-host/bootstrap_chef.sh --vagrant-local 10.0.100.3"
   end
 
   #config.vm.define :mirror do |mirror|

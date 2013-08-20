@@ -9,7 +9,7 @@ if [[ -f ./proxy_setup.sh ]]; then
 fi
 
 if [[ -z "$1" ]]; then
-	BOOTSTRAP_IP=10.0.100.1
+	BOOTSTRAP_IP=10.0.100.3
 else
 	BOOTSTRAP_IP=$1
 fi
@@ -38,7 +38,7 @@ fi
 cd cookbooks
 
 # allow versions on cookbooks so 
-for cookbook in "apt 1.10.0" ubuntu cron chef-client; do
+for cookbook in "apt 1.10.0" ubuntu cron chef-client ntp; do
   if [[ ! -d ${cookbook% *} ]]; then
      # unless the proxy was defined this knife config will be the same as the one generated above
     knife cookbook site download $cookbook --config ../.chef/knife-proxy.rb

@@ -3,5 +3,6 @@
 cookbooks/apt/
 cookbooks/chef-client/
 cookbooks/cron/
+cookbooks/ntp/
 cookbooks/ubuntu/
 
