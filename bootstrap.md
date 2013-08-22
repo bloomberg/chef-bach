@@ -417,7 +417,7 @@ index d844783..9a9e53a 100644
          "dhcp_range" : "10.0.100.10 10.0.100.250"
        },
 +      "repos": {
-+        "ceph": "http://10.0.100.3/ceph-bobtail",
++        "ceph": "http://10.0.100.3/ceph-dumpling",
 +        "rabbitmq": "http://10.0.100.3/rabbitmq",
 +        "mysql": "http://10.0.100.3/percona",
 +        "openstack": "http://10.0.100.3/ubuntu-cloud",
