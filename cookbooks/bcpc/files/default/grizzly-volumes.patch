@@ -327,45 +327,6 @@ diff -ru openstack-nova/nova/compute/manager.py nova/nova/compute/manager.py
      def _spawn(self, context, instance, image_meta, network_info,
                 block_device_info, injected_files, admin_password,
                 set_access_ip=False):
-diff -ru openstack-nova/nova/db/sqlalchemy/api.py nova/nova/db/sqlalchemy/api.py
---- openstack-nova/nova/db/sqlalchemy/api.py	2013-08-24 08:45:44.000000000 -0400
-+++ nova/nova/db/sqlalchemy/api.py	2013-08-24 08:43:37.000000000 -0400
-@@ -2935,19 +2935,8 @@
-     return model_query(context, models.BlockDeviceMapping, session=session)
- 
- 
--def _scrub_empty_str_values(dct, keys_to_scrub):
--    """
--    Remove any keys found in sequence keys_to_scrub from the dict
--    if they have the value ''.
--    """
--    for key in keys_to_scrub:
--        if key in dct and dct[key] == '':
--            del dct[key]
--
--
- @require_context
- def block_device_mapping_create(context, values):
--    _scrub_empty_str_values(values, ['volume_size'])
-     bdm_ref = models.BlockDeviceMapping()
-     bdm_ref.update(values)
-     bdm_ref.save()
-@@ -2955,7 +2944,6 @@
- 
- @require_context
- def block_device_mapping_update(context, bdm_id, values):
--    _scrub_empty_str_values(values, ['volume_size'])
-     _block_device_mapping_get_query(context).\
-             filter_by(id=bdm_id).\
-             update(values)
-@@ -2963,7 +2951,6 @@
- 
- @require_context
- def block_device_mapping_update_or_create(context, values):
--    _scrub_empty_str_values(values, ['volume_size'])
-     session = get_session()
-     with session.begin():
-         result = _block_device_mapping_get_query(context, session=session).\
 diff -ru openstack-nova/nova/exception.py nova/nova/exception.py
 --- openstack-nova/nova/exception.py	2013-08-24 08:45:44.000000000 -0400
 +++ nova/nova/exception.py	2013-08-24 08:43:37.000000000 -0400
@@ -382,40 +343,6 @@ diff -ru openstack-nova/nova/exception.py nova/nova/exception.py
  
  class NotAuthorized(NovaException):
      message = _("Not authorized.")
-diff -ru openstack-nova/nova/tests/test_db_api.py nova/nova/tests/test_db_api.py
---- openstack-nova/nova/tests/test_db_api.py	2013-08-24 08:45:45.000000000 -0400
-+++ nova/nova/tests/test_db_api.py	2013-08-24 08:43:37.000000000 -0400
-@@ -19,7 +19,6 @@
- 
- """Unit tests for the DB API."""
- 
--import copy
- import datetime
- import types
- import uuid as stdlib_uuid
-@@ -2330,22 +2329,6 @@
-             if bdm['device_name'] == values['device_name']:
-                 return bdm
- 
--    def test_scrub_empty_str_values_no_effect(self):
--        values = {'volume_size': 5}
--        expected = copy.copy(values)
--        sqlalchemy_api._scrub_empty_str_values(values, ['volume_size'])
--        self.assertEqual(values, expected)
--
--    def test_scrub_empty_str_values_empty_string(self):
--        values = {'volume_size': ''}
--        sqlalchemy_api._scrub_empty_str_values(values, ['volume_size'])
--        self.assertEqual(values, {})
--
--    def test_scrub_empty_str_values_empty_unicode(self):
--        values = {'volume_size': u''}
--        sqlalchemy_api._scrub_empty_str_values(values, ['volume_size'])
--        self.assertEqual(values, {})
--
-     def test_block_device_mapping_create(self):
-         bdm = self._create_bdm({})
-         self.assertFalse(bdm is None)
 diff -ru openstack-nova/nova/virt/libvirt/driver.py nova/nova/virt/libvirt/driver.py
 --- openstack-nova/nova/virt/libvirt/driver.py	2013-08-24 08:45:45.000000000 -0400
 +++ nova/nova/virt/libvirt/driver.py	2013-08-24 08:43:37.000000000 -0400
