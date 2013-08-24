@@ -6,8 +6,15 @@ hardware.
 Cluster definition file : cluster.txt
 
   Defines your hardware (see the sample file provided for an
-  example). You can use vm-to-cluster.sh on the hyhpervisor to make a
+  example). You can use vm-to-cluster.sh on the hypervisor to make a
   cluster.txt from your running VMs after booting.
+
+  The expected fields are :
+
+  hostname mac-address IP-address ILO-IP-Address domain role
+
+  "ILO" stands for Integrated Lights-Out - a management console on,
+  for example, HP servers. It's not important for VMs.
 
 Cluster helper scripts
 

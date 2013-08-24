@@ -5,7 +5,7 @@
 ################################################
 
 global_defs {
-  router_id controller-<%= "#{node[:bcpc][:node_number]}" %>
+  router_id <%="#{node.hostname}"%>
 }
 
 vrrp_script chk_haproxy {
@@ -20,7 +20,7 @@ vrrp_script chk_ceph {
   rise 1
 }
 
-vrrp_instance <%= "BCPC_#{node[:bcpc][:region_name]}" %> {
+vrrp_instance <%="#{node[:bcpc][:region_name]}"%> {
   virtual_router_id <%="#{get_config('keepalived-router-id')}"%>
 
   # for electing MASTER, highest priority wins.
@@ -31,7 +31,7 @@ vrrp_instance <%= "BCPC_#{node[:bcpc][:region_name]}" %> {
   interface <%= "#{node[:bcpc][:management][:interface]}" %>
 
   virtual_ipaddress {
-    <%= "#{node[:bcpc][:management][:vip]}" %>
+    <%="#{node[:bcpc][:management][:vip]}/#{(node['bcpc']['management']['cidr'].match /\d+\.\d+\.\d+\.\d+\/(\d+)/)[1].to_i}"%>
   }
   track_script {
     chk_haproxy
@@ -41,7 +41,5 @@ vrrp_instance <%= "BCPC_#{node[:bcpc][:region_name]}" %> {
     auth_type PASS
     auth_pass <%="#{get_config('keepalived-password')}"%>
   }
-  notify_stop "/usr/local/bin/vip_change"
-  notify_fault "/usr/local/bin/vip_change"
-  notify_backup "/usr/local/bin/vip_change"
+  notify "/usr/local/bin/vip_change"
 }

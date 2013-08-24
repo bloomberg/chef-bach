@@ -5,7 +5,7 @@ if [[ -f cluster.txt ]]; then
     # fping is fast but might not be available
     if [[ -z `which fping` ]]; then
 	# use standard ping instead
-	while read HOSTNAME MACADDR IPADDR DOMAIN ROLE; do
+	while read HOSTNAME MACADDR IPADDR ILOIPADDR DOMAIN ROLE; do
 	    if [[ ! "$HOSTNAME" = end ]]; then
 		echo "scanning $ROLE node $HOSTNAME($IPADDR) using ping" && ping -c 1 $IPADDR | grep ttl |cut -f4 -d" " | cut -f1 -d":"
 	    fi

@@ -30,7 +30,7 @@ if [[ ! -f "environments/$ENVIRONMENT.json" ]]; then
     exit
 fi
 
-while read HOSTNAME MACADDR IPADDR DOMAIN ROLE; do
+while read HOSTNAME MACADDR IPADDR ILOIPADDR DOMAIN ROLE; do
     if [[ -z "$EXACTHOST" || "$EXACTHOST" = "$HOSTNAME" || "$EXACTHOST" = "$IPADDR" || "$EXACTHOST" = "heads" && "$ROLE" = "head" || "$EXACTHOST" = "workers" && "$ROLE" = "work" ]]; then
 	if   [[ "$ROLE" = head ]]; then
 	    HEADS="$HEADS $IPADDR"

@@ -22,5 +22,9 @@ $SSHCMD  "/home/ubuntu/install-chef.sh" sudo
 echo "zap disks"
 $SSHCMD "/home/ubuntu/zap-ceph-disks.sh" sudo
 
+echo "temporarily adjust system time to avoid time skew related failures"
+GOODDATE=`date`
+$SSHCMD "date -s '$GOODDATE'" sudo
+
 echo "done."
 

@@ -11,12 +11,16 @@
 # $3 is the command to execute (use "-" for an interactive shell)
 # $4 (optional) if 'sudo' is specified, the command will be executed using sudo
 #
-
-#set -x
 if [[ -z "$1" || -z "$2" || -z "$3" ]]; then
-    echo "Usage: $0 'environment 'nodename|IP address' 'command' (sudo)"
-    exit
+	NAME=$(basename "$0")
+	if [[ "$NAME" = nodescp ]]; then		
+		echo "Usage: $0 'environment' 'nodename|IP address' 'from' 'to'"
+	else
+		echo "Usage: $0 'environment 'nodename|IP address' 'command' (sudo)"
+    fi
+	exit
 fi
+
 if [[ -z `which sshpass` ]]; then
     echo "Error: sshpass required for this tool. You should be able to 'sudo apt-get install sshpass' to get it"
     exit

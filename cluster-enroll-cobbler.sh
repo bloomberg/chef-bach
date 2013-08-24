@@ -8,6 +8,14 @@
 # - if no node is provided, the first parameter will be used to choose
 #   an action to apply to all nodes
 #
+# - if a special nodename is provided that matches a role, then all
+#   hosts with that role will have the specified cobbler action (add
+#   or remove) applied to them. [Technically cobbler doesn't know
+#   anything about roles, however it can be convenient to register,
+#   say, all head nodes first, get them up and running without any
+#   risk of work nodes accidentally coming up before they have a head
+#   node to talk to, and then register all work nodes later.]
+#
 # If any cobbler registrations were changed, cobbler sync is called
 #
 if [[ -z "$1" ]]; then
@@ -22,19 +30,19 @@ fi
 
 if [[ -f cluster.txt ]]; then
     echo "Using cluster definition from cluster.txt"
-    while read HOSTNAME MACADDR IPADDR DOMAIN ROLE; do
+    while read HOSTNAME MACADDR IPADDR ILOIPADDR DOMAIN ROLE; do
 	if [[ $HOSTNAME = "end" ]]; then
 	    continue
 	fi
 	
 	if [[ $1 = add ]];then
-	    if [[ -z "$EXACTHOST" || "$EXACTHOST" = $HOSTNAME ]]; then
+		if [[ -z "$EXACTHOST" || "$EXACTHOST" = "$HOSTNAME" || "$EXACTHOST" = "$ROLE" ]]; then
 		MATCH="$HOSTNAME"
 		echo "adding $HOSTNAME.$DOMAIN ($IPADDR,$MACADDR) to cobbler..."
 		sudo cobbler system add --name=$HOSTNAME --hostname=$HOSTNAME.$DOMAIN --profile=bcpc_host --ip-address=$IPADDR --mac=$MACADDR
 	    fi
 	elif [[ $1 == remove ]]; then
-	    if [[ -z "$EXACTHOST" || "$EXACTHOST" = $HOSTNAME ]]; then
+		if [[ -z "$EXACTHOST" || "$EXACTHOST" = "$HOSTNAME" || "$EXACTHOST" = "$ROLE" ]]; then
 		MATCH="$HOSTNAME"
 		echo "removing $HOSTNAME from cobbler..."
 		sudo cobbler system remove --name=$HOSTNAME
