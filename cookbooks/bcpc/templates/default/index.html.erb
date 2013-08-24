@@ -33,7 +33,7 @@
 			</div>
 			<div class="block">
 				<label>HAProxy</label>
-				<a href="http://<%="#{node[:bcpc][:management][:vip]}"%>/haproxy">http://<%="#{node[:bcpc][:management][:vip]}"%>/haproxy</a>
+				<a href="https://<%="#{node[:bcpc][:management][:vip]}"%>/haproxy">https://<%="#{node[:bcpc][:management][:vip]}"%>/haproxy</a>
 			</div>
 			<div class="block">
 				<label>PHP-My-Admin</label>
@@ -45,7 +45,7 @@
 			</div>
 			<div class="block">
 				<label>RabbitMQ</label>
-				<a href="http://<%="#{node[:bcpc][:management][:vip]}"%>/rabbitmq/">http://<%="#{node[:bcpc][:management][:vip]}"%>/rabbitmq/</a>
+				<a href="https://<%="#{node[:bcpc][:management][:vip]}"%>/rabbitmq/">https://<%="#{node[:bcpc][:management][:vip]}"%>/rabbitmq/</a>
 			</div>
 			<div class="block">
 				<label>ElasticSearch</label>
@@ -55,6 +55,11 @@
 				<label>Kibana</label>
 				<a href="https://<%="#{node[:bcpc][:management][:vip]}"%>:5601">https://<%="#{node[:bcpc][:management][:vip]}"%>:5601</a>
 				<a href="https://kibana.<%="#{node[:bcpc][:domain_name]}"%>">https://kibana.<%="#{node[:bcpc][:domain_name]}"%></a>
+			</div>
+			<div class="block">
+				<label>Kibana (logstash interface)</label>
+				<a href="https://<%="#{node[:bcpc][:management][:vip]}"%>:5601/index.html#/dashboard/file/logstash.json">https://<%="#{node[:bcpc][:management][:vip]}"%>:5601/index.html#/dashboard/file/logstash.json</a>
+				<a href="https://kibana.<%="#{node[:bcpc][:domain_name]}"%>/index.html#/dashboard/file/logstash.json">https://kibana.<%="#{node[:bcpc][:domain_name]}"%>/index.html#/dashboard/file/logstash.json</a>
 			</div>
 			<div class="block">
 				<label>Graphite</label>

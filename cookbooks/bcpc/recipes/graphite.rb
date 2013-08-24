@@ -87,11 +87,20 @@ service "apache2" do
     action [ :enable, :start ]
 end
 
-template "/etc/apache2/conf.d/graphite-web.conf" do
+template "/etc/apache2/sites-available/graphite-web" do
     source "apache-graphite-web.conf.erb"
     owner "root"
     group "root"
     mode 00644
+    notifies :restart, "service[apache2]", :delayed
+end
+
+bash "apache-enable-graphite-web" do
+    user "root"
+    code <<-EOH
+         a2ensite graphite-web
+    EOH
+    not_if "test -r /etc/apache2/sites-enabled/graphite-web"
     notifies :restart, "service[apache2]", :delayed
 end
 

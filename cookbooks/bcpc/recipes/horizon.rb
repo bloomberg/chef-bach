@@ -35,11 +35,28 @@ package "openstack-dashboard-ubuntu-theme" do
     action :remove
 end
 
-template "/etc/apache2/conf.d/openstack-dashboard.conf" do
+template "/etc/apache2/vhost-ssl-root.d/openstack-dashboard.conf" do
+    source "apache-vhost-ssl-root-openstack-dashboard.conf.erb"
+    owner "root"
+    group "root"
+    mode 00644
+    notifies :restart, "service[apache2]", :delayed
+end
+
+template "/etc/apache2/sites-available/openstack-dashboard" do
     source "apache-openstack-dashboard.conf.erb"
     owner "root"
     group "root"
     mode 00644
+    notifies :restart, "service[apache2]", :delayed
+end
+
+bash "apache-enable-openstack-dashboard" do
+    user "root"
+    code <<-EOH
+         a2ensite openstack-dashboard
+    EOH
+    not_if "test -r /etc/apache2/sites-enabled/openstack-dashboard"
     notifies :restart, "service[apache2]", :delayed
 end
 

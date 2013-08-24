@@ -2,6 +2,16 @@
 
 These instructions assume that you basically know what you are doing.  =)
 
+#### 20130824
+
+Apache httpd site configurations were switched to use the site model rather
+than place server vhost definitions in conf.d.  To update an existing cluster,
+please run the following on each head node before running ``chef-client``:
+
+```
+# rm /etc/apache2/conf.d/openstack-dashboard.conf /etc/apache2/conf.d/zabbix-web.conf /etc/apache2/conf.d/graphite-web.conf /etc/apache2/conf.d/kibana-web.conf
+```
+
 #### 20130817
 
 Due to a change in Vagrant 1.2.5+, the default bootstrap node cannot have its

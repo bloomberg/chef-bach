@@ -133,10 +133,19 @@ template "/usr/local/share/zabbix/php/conf/zabbix.conf.php" do
     notifies :restart, "service[apache2]", :delayed
 end
 
-template "/etc/apache2/conf.d/zabbix-web.conf" do
+template "/etc/apache2/sites-available/zabbix-web" do
     source "apache-zabbix-web.conf.erb"
     owner "root"
     group "root"
     mode 00644
+    notifies :restart, "service[apache2]", :delayed
+end
+
+bash "apache-enable-zabbix-web" do
+    user "root"
+    code <<-EOH
+         a2ensite zabbix-web
+    EOH
+    not_if "test -r /etc/apache2/sites-enabled/zabbix-web"
     notifies :restart, "service[apache2]", :delayed
 end
