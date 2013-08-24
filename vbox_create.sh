@@ -36,7 +36,8 @@ fi
 
 # Grab the Ubuntu 12.04 installer image
 if [[ ! -f ubuntu-12.04-mini.iso ]]; then
-    $CURL -o ubuntu-12.04-mini.iso http://archive.ubuntu.com/ubuntu/dists/precise/main/installer-amd64/current/images/netboot/mini.iso
+   #$CURL -o ubuntu-12.04-mini.iso http://archive.ubuntu.com/ubuntu/dists/precise/main/installer-amd64/current/images/netboot/mini.iso
+    $CURL -o ubuntu-12.04-mini.iso http://archive.ubuntu.com/ubuntu/dists/precise-updates/main/installer-amd64/current/images/raring-netboot/mini.iso
 fi
 
 if ! hash $VBM ; then
