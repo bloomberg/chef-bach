@@ -19,14 +19,14 @@
 
 include_recipe "bcpc::default"
 
-cookbook_file "/opt/logstash-1.1.9-monolithic.jar" do
-    source "bins/logstash-1.1.9-monolithic.jar"
+cookbook_file "/opt/logstash-1.1.13-flatjar.jar" do
+    source "bins/logstash-1.1.13-flatjar.jar"
     owner "root"
     mode 00644
 end
 
 link "/opt/logstash.jar" do
-    to "/opt/logstash-1.1.9-monolithic.jar"
+    to "/opt/logstash-1.1.13-flatjar.jar"
     notifies :restart, "service[logstash]", :delayed
 end
 

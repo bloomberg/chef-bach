@@ -69,10 +69,10 @@ fi
 FILES="diamond.deb $FILES"
 
 # Snag elasticsearch
-if [ ! -f elasticsearch-0.20.2.deb ]; then
-    $CURL -O -L https://download.elasticsearch.org/elasticsearch/elasticsearch/elasticsearch-0.20.2.deb
+if [ ! -f elasticsearch-0.90.3.deb ]; then
+    $CURL -O -L https://download.elasticsearch.org/elasticsearch/elasticsearch/elasticsearch-0.90.3.deb
 fi
-FILES="elasticsearch-0.20.2.deb $FILES"
+FILES="elasticsearch-0.90.3.deb $FILES"
 
 if [ ! -f elasticsearch-plugins.tgz ]; then
     mkdir head
@@ -86,10 +86,10 @@ FILES="elasticsearch-plugins.tgz $FILES"
 
 
 # Snag logstash
-if [ ! -f logstash-1.1.9-monolithic.jar ]; then
-    $CURL -O -L https://logstash.objects.dreamhost.com/release/logstash-1.1.9-monolithic.jar
+if [ ! -f logstash-1.1.13-flatjar.jar ]; then
+    $CURL -O -L https://logstash.objects.dreamhost.com/release/logstash-1.1.13-flatjar.jar
 fi
-FILES="logstash-1.1.9-monolithic.jar $FILES"
+FILES="logstash-1.1.13-flatjar.jar $FILES"
 
 # Fetch pyrabbit
 if [ ! -f pyrabbit-1.0.1.tar.gz ]; then
