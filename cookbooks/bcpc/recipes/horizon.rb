@@ -35,6 +35,10 @@ package "openstack-dashboard-ubuntu-theme" do
     action :remove
 end
 
+file "/etc/apache2/conf.d/openstack-dashboard.conf" do
+    action :delete
+end
+
 template "/etc/apache2/vhost-ssl-root.d/openstack-dashboard.conf" do
     source "apache-vhost-ssl-root-openstack-dashboard.conf.erb"
     owner "root"
