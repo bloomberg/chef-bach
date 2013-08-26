@@ -74,6 +74,13 @@ def get_head_nodes
 	return (results == []) ? [node] : results
 end
 
+def get_work_nodes
+        all = Set.new get_all_nodes
+        head = Set.new get_head_nodes
+        results = (all - head).to_a
+        return (results = []) ? [node] : results
+end
+
 def secure_password
 	pw = String.new
 	while pw.length < 20
