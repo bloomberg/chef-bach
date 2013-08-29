@@ -2,6 +2,11 @@
 
 set -x
 
+# Define the appropriate version of each binary to grab/build
+VER_KIBANA=d1495fbf6e9c20c707ecd4a77444e1d486a1e7d6
+VER_DIAMOND=d64cc5cbae8bee93ef444e6fa41b4456f89c6e12
+VER_ESPLUGIN=c3635657f4bb5eca0d50afa8545ceb5da8ca223a
+
 # we now define CURL previously in proxy_setup.sh (called from
 # setup_chef_server which calls this script. Default definition is
 # CURL=curl
@@ -27,7 +32,9 @@ fi
 # Build kibana3 installable bundle
 if [ ! -f kibana3.tgz ]; then
     git clone https://github.com/elasticsearch/kibana.git kibana3
-    tar czf kibana3.tgz kibana3
+    cd kibana3
+    git archive --output ../kibana3.tgz --prefix kibana/ $VER_KIBANA
+    cd ..
     rm -rf kibana3
 fi
 FILES="kibana3.tgz $FILES"
@@ -62,6 +69,7 @@ FILES="centos-6-vmlinuz $FILES"
 if [ ! -f diamond.deb ]; then
     git clone https://github.com/BrightcoveOS/Diamond.git
     cd Diamond
+    git checkout $VER_DIAMOND
     make builddeb
     VERSION=`cat version.txt`
     cd ..
@@ -77,12 +85,11 @@ fi
 FILES="elasticsearch-0.90.3.deb $FILES"
 
 if [ ! -f elasticsearch-plugins.tgz ]; then
-    mkdir head
-    cd head
-    git clone https://github.com/mobz/elasticsearch-head.git _site
+    git clone https://github.com/mobz/elasticsearch-head.git
+    cd elasticsearch-head
+    git archive --output ../elasticsearch-plugins.tgz --prefix head/_site/ $VER_ESPLUGIN
     cd ..
-    tar czf elasticsearch-plugins.tgz head
-    rm -rf head
+    rm -rf elasticsearch-head
 fi
 FILES="elasticsearch-plugins.tgz $FILES"
 
