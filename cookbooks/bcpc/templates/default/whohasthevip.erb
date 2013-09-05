@@ -20,9 +20,9 @@ def fail():
 
 def runcmd(cmd):
     """Run the command cmd with options, e.g. ["ls", "-l"]
-    and create a generator to spit back lstdout. 
-    Note currently just sucks everythign into memory before
-    yield,,, porb not best"""
+    and create a generator to spit back stdout. 
+    Note currently just sucks everything into memory before
+    yield."""
 
     p = subprocess.Popen(cmd, stdout=subprocess.PIPE)
     r = p.wait()
