@@ -33,7 +33,7 @@ fi
 if [ ! -f kibana3.tgz ]; then
     git clone https://github.com/elasticsearch/kibana.git kibana3
     cd kibana3
-    git archive --output ../kibana3.tgz --prefix kibana/ $VER_KIBANA
+    git archive --output ../kibana3.tgz --prefix kibana3/ $VER_KIBANA
     cd ..
     rm -rf kibana3
 fi
