@@ -40,6 +40,10 @@ end
     end
 end
 
+service "nova-api" do
+    restart_command "service nova-api stop && service nova-api start && sleep 5"
+end
+
 %w{novnc pm-utils memcached python-memcache sysfsutils}.each do |pkg|
     package pkg do
         action :upgrade

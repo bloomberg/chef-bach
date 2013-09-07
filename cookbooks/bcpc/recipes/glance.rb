@@ -38,6 +38,10 @@ end
     end
 end
 
+service "glance-api" do
+    restart_command "service glance-api stop && service glance-api start && sleep 5"
+end
+
 template "/etc/glance/glance-api.conf" do
     source "glance-api.conf.erb"
     owner "glance"

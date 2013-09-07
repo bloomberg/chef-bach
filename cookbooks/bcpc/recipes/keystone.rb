@@ -58,6 +58,7 @@ end
 
 service "keystone" do
     action [ :enable, :start ]
+    restart_command "service keystone stop && service keystone start && sleep 5"
 end
 
 ruby_block "keystone-database-creation" do
