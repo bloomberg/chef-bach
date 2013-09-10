@@ -41,7 +41,7 @@ if "__main__" == __name__:
     args = lines[1].split()
     vip_mac = args[2]
     vip_interface = args[4]
-    for line in runcmd(["arp", "-a"]):
+    for line in runcmd(["arp", "-an"]):
         if vip_mac in line:
             if vip not in line:
                 v = line.split()
