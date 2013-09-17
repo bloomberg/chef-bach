@@ -2,6 +2,11 @@
 
 set -x
 
+# Define the appropriate version of each binary to grab/build
+VER_KIBANA=d1495fbf6e9c20c707ecd4a77444e1d486a1e7d6
+VER_DIAMOND=d64cc5cbae8bee93ef444e6fa41b4456f89c6e12
+VER_ESPLUGIN=c3635657f4bb5eca0d50afa8545ceb5da8ca223a
+
 # we now define CURL previously in proxy_setup.sh (called from
 # setup_chef_server which calls this script. Default definition is
 # CURL=curl
@@ -27,7 +32,9 @@ fi
 # Build kibana3 installable bundle
 if [ ! -f kibana3.tgz ]; then
     git clone https://github.com/elasticsearch/kibana.git kibana3
-    tar czf kibana3.tgz kibana3
+    cd kibana3
+    git archive --output ../kibana3.tgz --prefix kibana3/ $VER_KIBANA
+    cd ..
     rm -rf kibana3
 fi
 FILES="kibana3.tgz $FILES"
@@ -40,6 +47,8 @@ FILES="cirros-0.3.0-x86_64-disk.img $FILES"
 
 # Grab the Ubuntu 12.04 installer image
 if [ ! -f ubuntu-12.04-mini.iso ]; then
+    # Download this ISO to get the latest kernel/X LTS stack installer
+    #$CURL -o ubuntu-12.04-mini.iso http://archive.ubuntu.com/ubuntu/dists/precise-updates/main/installer-amd64/current/images/raring-netboot/mini.iso
     $CURL -o ubuntu-12.04-mini.iso http://archive.ubuntu.com/ubuntu/dists/precise/main/installer-amd64/current/images/netboot/mini.iso
 fi
 FILES="ubuntu-12.04-mini.iso $FILES"
@@ -60,6 +69,7 @@ FILES="centos-6-vmlinuz $FILES"
 if [ ! -f diamond.deb ]; then
     git clone https://github.com/BrightcoveOS/Diamond.git
     cd Diamond
+    git checkout $VER_DIAMOND
     make builddeb
     VERSION=`cat version.txt`
     cd ..
@@ -69,27 +79,26 @@ fi
 FILES="diamond.deb $FILES"
 
 # Snag elasticsearch
-if [ ! -f elasticsearch-0.20.2.deb ]; then
-    $CURL -O -L https://download.elasticsearch.org/elasticsearch/elasticsearch/elasticsearch-0.20.2.deb
+if [ ! -f elasticsearch-0.90.3.deb ]; then
+    $CURL -O -L https://download.elasticsearch.org/elasticsearch/elasticsearch/elasticsearch-0.90.3.deb
 fi
-FILES="elasticsearch-0.20.2.deb $FILES"
+FILES="elasticsearch-0.90.3.deb $FILES"
 
 if [ ! -f elasticsearch-plugins.tgz ]; then
-    mkdir head
-    cd head
-    git clone https://github.com/mobz/elasticsearch-head.git _site
+    git clone https://github.com/mobz/elasticsearch-head.git
+    cd elasticsearch-head
+    git archive --output ../elasticsearch-plugins.tgz --prefix head/_site/ $VER_ESPLUGIN
     cd ..
-    tar czf elasticsearch-plugins.tgz head
-    rm -rf head
+    rm -rf elasticsearch-head
 fi
 FILES="elasticsearch-plugins.tgz $FILES"
 
 
 # Snag logstash
-if [ ! -f logstash-1.1.9-monolithic.jar ]; then
-    $CURL -O -L https://logstash.objects.dreamhost.com/release/logstash-1.1.9-monolithic.jar
+if [ ! -f logstash-1.1.13-flatjar.jar ]; then
+    $CURL -O -L https://logstash.objects.dreamhost.com/release/logstash-1.1.13-flatjar.jar
 fi
-FILES="logstash-1.1.9-monolithic.jar $FILES"
+FILES="logstash-1.1.13-flatjar.jar $FILES"
 
 # Fetch pyrabbit
 if [ ! -f pyrabbit-1.0.1.tar.gz ]; then

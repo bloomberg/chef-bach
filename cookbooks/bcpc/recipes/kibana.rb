@@ -39,10 +39,19 @@ template "/opt/kibana3/config.js" do
     mode 00644
 end
 
-template "/etc/apache2/conf.d/kibana-web.conf" do
+template "/etc/apache2/sites-available/kibana-web" do
     source "apache-kibana-web.conf.erb"
     owner "root"
     group "root"
     mode 00644
+    notifies :restart, "service[apache2]", :delayed
+end
+
+bash "apache-enable-kibana-web" do
+    user "root"
+    code <<-EOH
+         a2ensite kibana-web
+    EOH
+    not_if "test -r /etc/apache2/sites-enabled/kibana-web"
     notifies :restart, "service[apache2]", :delayed
 end

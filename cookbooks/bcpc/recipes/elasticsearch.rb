@@ -23,15 +23,15 @@ package "openjdk-7-jre-headless" do
     action :upgrade
 end
 
-cookbook_file "/tmp/elasticsearch-0.20.2.deb" do
-    source "bins/elasticsearch-0.20.2.deb"
+cookbook_file "/tmp/elasticsearch-0.90.3.deb" do
+    source "bins/elasticsearch-0.90.3.deb"
     owner "root"
     mode 00444
 end
 
 package "elasticsearch" do
     provider Chef::Provider::Package::Dpkg
-    source "/tmp/elasticsearch-0.20.2.deb"
+    source "/tmp/elasticsearch-0.90.3.deb"
     action :install
 end
 

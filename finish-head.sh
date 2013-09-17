@@ -1,11 +1,7 @@
 #!/bin/bash
-service glance-api       restart
-service glance-registry  restart
-service cinder-api       restart
-service cinder-volume    restart
-service cinder-scheduler restart
-service nova-scheduler   restart
-service nova-cert        restart
-service nova-consoleauth restart
-service nova-conductor   restart
-chef-client
+# You can put fixups here for the case when the 'knife bootstrap -E
+# ...' command step doesnt succeed fully, in assigning a role to a
+# node. For example see below. Currently none should be needed
+#service glance-api       restart
+#service glance-registry  restart
+#chef-client

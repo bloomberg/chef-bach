@@ -38,6 +38,10 @@ end
     end
 end
 
+service "glance-api" do
+    restart_command "service glance-api stop && service glance-api start && sleep 5"
+end
+
 template "/etc/glance/glance-api.conf" do
     source "glance-api.conf.erb"
     owner "glance"
@@ -122,5 +126,5 @@ bash "glance-cirros-image" do
         qemu-img convert -f qcow2 -O raw /tmp/cirros-0.3.0-x86_64-disk.img /tmp/cirros-0.3.0-x86_64-disk.raw
         glance image-create --name='Cirros 0.3.0 x86_64' --is-public=True --container-format=bare --disk-format=raw --file /tmp/cirros-0.3.0-x86_64-disk.raw
     EOH
-    not_if ". /root/adminrc; glance image-list | grep Cirros"
+    only_if ". /root/adminrc; glance image-show 'Cirros 0.3.0 x86_64' 2>&1 | grep -e '^No image'"
 end
