@@ -1,6 +1,6 @@
 #
 # Cookbook Name:: bcpc
-# Recipe:: ceph-apt
+# Recipe:: ceph-yum
 #
 # Copyright 2013, Bloomberg L.P.
 #
@@ -24,6 +24,8 @@ cookbook_file "/etc/pki/rpm-gpg/ceph-release.key" do
   mode 00644
 end
 
+# The YUM repositories for Ceph are wonky in that the repodata is per arch
+# not per OS flavor.
 yum_repository "ceph-x86_64" do
   description "Ceph repository"
   key "ceph-release.key"
