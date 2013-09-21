@@ -23,5 +23,3 @@ default['bcpc']['floating']['cidr'] = '192.168.43.0/24'
 default['bcpc']['floating']['gateway'] = '192.168.43.2'
 
 default['bcpc']['hdfs_disks'] = [ 'sdb', 'sdc', 'sdd', 'sde' ]
-
-default['bcpc']['ntp_servers'] = [ 'pool.ntp.org' ]

@@ -18,5 +18,6 @@
 #
 
 service "iptables" do
-  action [ :save, :stop, :disable ]
+  # :save is not supported in chef 0.10?
+  action [ :stop, :disable ]
 end

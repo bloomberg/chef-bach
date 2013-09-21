@@ -16,6 +16,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+include_recipe "bcpc::default"
 
 template "/etc/sysconfig/network-scripts/ifcfg-#{node[:bcpc][:management][:interface]}" do
   source "network.ifcfg.erb"
@@ -36,42 +37,48 @@ template "/etc/sysconfig/network-scripts/ifcfg-#{node[:bcpc][:storage][:interfac
   owner "root"
   group "root"
   mode 00644
-  variables(:interface => node[:bcpc][:storage][:interface])
+  variables(:interface => node[:bcpc][:storage][:interface],
+            :ip => node[:bcpc][:storage][:ip],
+            :netmask => node[:bcpc][:storage][:netmask],
+            :gateway => node[:bcpc][:storage][:gateway])
 end
 
-template "/etc/sysconfig/network-scripts/ifcfg-#{node[:bcpc][:storage][:vlan_interface]}" do
-  source "network.ifcfg.vlan.erb"
-  owner "root"
-  group "root"
-  mode 00644
-  variables(
-    :interface => node[:bcpc][:storage][:vlan_interface],
-    :ip => node[:bcpc][:storage][:ip],
-    :netmask => node[:bcpc][:storage][:netmask],
-    :gateway => node[:bcpc][:storage][:gateway]
-  )
-end
+# template "/etc/sysconfig/network-scripts/ifcfg-#{node[:bcpc][:storage][:vlan_interface]}" do
+#  source "network.ifcfg.vlan.erb"
+#  owner "root"
+#  group "root"
+#  mode 00644
+#  variables(
+#    :interface => node[:bcpc][:storage][:vlan_interface],
+#    :ip => node[:bcpc][:storage][:ip],
+#    :netmask => node[:bcpc][:storage][:netmask],
+#    :gateway => node[:bcpc][:storage][:gateway]
+#  )
+#end
 
 template "/etc/sysconfig/network-scripts/ifcfg-#{node[:bcpc][:floating][:interface]}" do
   source "network.ifcfg.erb"
   owner "root"
   group "root"
   mode 00644
-  variables(:interface => node[:bcpc][:floating][:interface])
+  variables(:interface => node[:bcpc][:floating][:interface],
+            :ip => node[:bcpc][:floating][:ip],
+            :netmask => node[:bcpc][:floating][:netmask],
+            :gateway => node[:bcpc][:floating][:gateway])
 end
 
-template "/etc/sysconfig/network-scripts/ifcfg-#{node[:bcpc][:floating][:vlan_interface]}" do
-  source "network.ifcfg.vlan.erb"
-  owner "root"
-  group "root"
-  mode 00644
-  variables(
-    :interface => node[:bcpc][:floating][:vlan_interface],
-    :ip => node[:bcpc][:floating][:ip],
-    :netmask => node[:bcpc][:floating][:netmask],
-    :gateway => node[:bcpc][:floating][:gateway]
-  )
-end
+#template "/etc/sysconfig/network-scripts/ifcfg-#{node[:bcpc][:floating][:vlan_interface]}" do
+#  source "network.ifcfg.vlan.erb"
+#  owner "root"
+#  group "root"
+#  mode 00644
+#  variables(
+#    :interface => node[:bcpc][:floating][:vlan_interface],
+#    :ip => node[:bcpc][:floating][:ip],
+#    :netmask => node[:bcpc][:floating][:netmask],
+#    :gateway => node[:bcpc][:floating][:gateway]
+#  )
+#end
 
 template "/etc/sysconfig/network-scripts/route-#{node[:bcpc][:management][:interface]}" do
   source "network.route.mgmt.erb"
@@ -87,7 +94,7 @@ template "/etc/sysconfig/network-scripts/rule-#{node[:bcpc][:management][:interf
   mode 00644
 end
 
-template "/etc/sysconfig/network-scripts/route-#{node[:bcpc][:storage][:vlan_interface]}" do
+template "/etc/sysconfig/network-scripts/route-#{node[:bcpc][:storage][:interface]}" do
   source "network.route.storage.erb"
   owner "root"
   group "root"
@@ -101,13 +108,15 @@ template "/etc/sysconfig/network-scripts/rule-#{node[:bcpc][:storage][:interface
   mode 00644
 end
 
-bash "storage vlan up" do
-  user "root"
-  code <<-EOH
-  ifup #{node[:bcpc][:floating][:interface]}
-  ifup #{node[:bcpc][:floating][:vlan_interface]}
-  EOH
-  not_if "if link show | grep #{node[:bcpc][:floating][:interface]}"
+%w{ floating storage }.each do |iface|
+  bash "#{iface} vlan up" do
+    user "root"
+    code <<-EOH
+     ifup #{node[:bcpc][iface][:interface]}
+     #ifup #{node[:bcpc][iface][:vlan_interface]}
+    EOH
+    not_if "ip link show up | grep #{node[:bcpc][iface][:interface]}"
+  end
 end
 
 template "/etc/hosts" do
@@ -116,11 +125,4 @@ template "/etc/hosts" do
   group "root"
   mode 00644
   variables( :servers => get_all_nodes )
-end
-
-bash "set hostname" do
-  user "root"
-  code <<-EOH
-  /bin/hostname #{node.name.match(/([a-z_-]+)/)[0]}
-  EOH
 end
