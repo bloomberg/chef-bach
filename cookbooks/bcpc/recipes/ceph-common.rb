@@ -16,14 +16,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+if platform?("debian", "ubuntu")
+  include_recipe "bcpc::networking"
+end
 
-include_recipe "bcpc::networking"
-
-apt_repository "ceph" do
-    uri node['bcpc']['repos']['ceph']
-    distribution node['lsb']['codename']
-    components ["main"]
-    key "ceph-release.key"
+case node['platform']
+when "centos","redhat","fedora","suse"
+  include_recipe "bcpc::ceph-yum"
+when "debian","ubuntu"
+  include_recipe "bcpc::ceph-apt"
 end
 
 %w{ceph python-ceph}.each do |pkg|
