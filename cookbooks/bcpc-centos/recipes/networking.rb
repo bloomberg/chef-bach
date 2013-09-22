@@ -17,6 +17,7 @@
 # limitations under the License.
 #
 include_recipe "bcpc::default"
+include_recipe "bcpc::certs"
 
 template "/etc/sysconfig/network-scripts/ifcfg-#{node[:bcpc][:management][:interface]}" do
   source "network.ifcfg.erb"
