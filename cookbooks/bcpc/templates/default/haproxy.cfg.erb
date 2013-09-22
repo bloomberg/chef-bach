@@ -16,6 +16,8 @@ defaults
   maxconn  8000
   source <%="#{node[:bcpc][:management][:vip]}"%>
   mode  http
+  option httpclose
+  option abortonclose
   option tcplog
   option dontlognull
   option nolinger
@@ -59,7 +61,7 @@ listen mysql-galera <%="#{node[:bcpc][:management][:vip]}"%>:3306
   option tcpka
   option httpchk
 <% @servers.each do |server| -%>
-  <%= "server #{server.hostname} #{server[:bcpc][:management][:ip]}:3306 check port 3307 inter 1s rise 1 fall 1 observe layer4" %>
+  <%= "server #{server.hostname} #{server[:bcpc][:management][:ip]}:3306 check port 3307 inter 1s rise 1 fall 1 observe layer4 backup" %>
 <% end -%>
 
 listen rabbitmq-amqp <%="#{node[:bcpc][:management][:vip]}"%>:5672
