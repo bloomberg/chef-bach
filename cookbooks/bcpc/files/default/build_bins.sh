@@ -39,6 +39,15 @@ if [ ! -f kibana3.tgz ]; then
 fi
 FILES="kibana3.tgz $FILES"
 
+# Grab plugins for fluentd
+for i in elasticsearch tail-multiline tail-ex record-reformer rewrite; do
+    if [ ! -f fluent-plugin-${i}.gem ]; then
+        gem fetch fluent-plugin-${i}
+        mv fluent-plugin-${i}-*.gem fluent-plugin-${i}.gem
+    fi
+    FILES="fluent-plugin-${i}.gem $FILES"
+done
+
 # Fetch the cirros image for testing
 if [ ! -f cirros-0.3.0-x86_64-disk.img ]; then
     $CURL -O -L https://launchpad.net/cirros/trunk/0.3.0/+download/cirros-0.3.0-x86_64-disk.img

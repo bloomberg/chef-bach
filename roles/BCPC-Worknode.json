@@ -10,7 +10,6 @@
       "recipe[bcpc::ceph-work]",
       "recipe[bcpc::nova-work]",
       "recipe[bcpc::diamond]",
-      "recipe[bcpc::beaver]",
       "recipe[bcpc::fluentd]",
       "recipe[bcpc::zabbix-agent]"
     ],

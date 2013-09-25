@@ -27,4 +27,36 @@ end
 
 package "td-agent" do
     action :upgrade
+    options "--allow-unauthenticated"
+end
+
+bash "set-td-agent-user" do
+    user "root"
+    code "sed --in-place 's/^USER=td-agent.*/USER=root/' /etc/init.d/td-agent"
+    only_if "grep -e '^USER=td-agent' /etc/init.d/td-agent"
+    notifies :restart, "service[td-agent]", :delayed
+end
+
+%w{elasticsearch tail-multiline tail-ex record-reformer rewrite}.each do |pkg|
+    cookbook_file "/tmp/fluent-plugin-#{pkg}.gem" do
+        source "bins/fluent-plugin-#{pkg}.gem"
+        owner "root"
+        mode 00444
+    end
+    bash "install-fluent-plugin-#{pkg}" do
+		code "/usr/lib/fluent/ruby/bin/fluent-gem install /tmp/fluent-plugin-#{pkg}.gem"
+		not_if "/usr/lib/fluent/ruby/bin/fluent-gem list --local | grep fluent-plugin-#{pkg}"
+    end
+end
+
+template "/etc/td-agent/td-agent.conf" do
+    source "fluentd-td-agent.conf.erb"
+    owner "root"
+    group "root"
+    mode 00644
+    notifies :restart, "service[td-agent]", :immediately
+end
+
+service "td-agent" do
+    action [ :enable, :start ]
 end
