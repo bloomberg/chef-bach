@@ -88,10 +88,6 @@ default['bcpc']['admin_role'] = "Admin"
 default['bcpc']['member_role'] = "Member"
 default['bcpc']['admin_email'] = "admin@localhost.com"
 
-default['bcpc']['beaver']['user'] = "beaver"
-default['bcpc']['beaver']['group'] = "adm"
-default['bcpc']['logstash']['user'] = "logstash"
-default['bcpc']['logstash']['group'] = "adm"
 default['bcpc']['zabbix']['user'] = "zabbix"
 default['bcpc']['zabbix']['group'] = "adm"
 
