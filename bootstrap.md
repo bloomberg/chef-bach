@@ -66,7 +66,7 @@ Kicking off the bootstrap process
 To start off, create the VirtualBox images:
 
 ```
-$ ./vbox_create.sh
+$ ./vbox_create.sh [chef-environment]
 ```
 
 This will create four VMs:
@@ -74,6 +74,12 @@ This will create four VMs:
 - bcpc-vm1
 - bcpc-vm2
 - bcpc-vm3
+
+The ``[chef-environment]`` variable is optional and will default to
+``Test-Laptop`` is unspecfied. This is useful if you need to create the
+bootstrap node with non-default settings such as a a local APT mirror
+(``node[:bcpc][:bootstrap][:mirror]``) or a local internet proxy
+(``node[:bcpc][:bootstrap][:proxy]``).
 
 If you have vagrant installed, the ``vbox_create.sh`` script will automatically
 begin the provisioning of the bcpc-bootstrap node.  This may take 30-45 minutes

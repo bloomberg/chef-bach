@@ -180,7 +180,7 @@ if hash vagrant ; then
   pushd ../
   echo "Bootstrap complete - setting up Chef server"
   echo "N.B. This may take approximately 30-45 minutes to complete."
-  ./bootstrap_chef.sh --vagrant-remote 10.0.100.3
+  ./bootstrap_chef.sh --vagrant-remote 10.0.100.3 $1
   ./enroll_cobbler.sh
   popd
 fi
