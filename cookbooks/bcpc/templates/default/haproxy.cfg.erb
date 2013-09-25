@@ -27,8 +27,8 @@ defaults
   timeout  queue 1m
   timeout  connect 5s
   timeout  check 10s
-  timeout  client 50s
-  timeout  server 50s
+  timeout  client 30m
+  timeout  server 30m
 
 listen stats 127.0.0.1:1936
   mode http
@@ -53,8 +53,8 @@ listen memcached <%="#{node[:bcpc][:management][:vip]}"%>:11211
   server myself 127.0.0.1:11211
 
 listen mysql-galera <%="#{node[:bcpc][:management][:vip]}"%>:3306
-  timeout  client 1h
-  timeout  server 1h
+  timeout  client 24h
+  timeout  server 24h
   mode tcp
   balance leastconn
   option  tcplog
@@ -65,8 +65,8 @@ listen mysql-galera <%="#{node[:bcpc][:management][:vip]}"%>:3306
 <% end -%>
 
 listen rabbitmq-amqp <%="#{node[:bcpc][:management][:vip]}"%>:5672
-  timeout  client 1h
-  timeout  server 1h
+  timeout  client 24h
+  timeout  server 24h
   mode tcp
   balance leastconn
   option  tcplog
