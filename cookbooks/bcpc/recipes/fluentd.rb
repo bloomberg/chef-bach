@@ -62,7 +62,7 @@ bash "patch-for-fluentd-plugin" do
         patch < /tmp/fluentd.patch
         cp /tmp/fluentd.patch .
     EOH
-    not_if "test -f cd /usr/lib/fluent/ruby/lib/ruby/gems/*/gems/fluent-plugin-elasticsearch-*/lib/fluent/plugin/fluentd.patch"
+    not_if "test -f /usr/lib/fluent/ruby/lib/ruby/gems/*/gems/fluent-plugin-elasticsearch-*/lib/fluent/plugin/fluentd.patch"
     notifies :restart, "service[td-agent]", :delayed
 end
 
