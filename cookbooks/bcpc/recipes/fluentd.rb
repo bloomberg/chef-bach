@@ -49,6 +49,23 @@ end
     end
 end
 
+cookbook_file "/tmp/fluentd.patch" do
+    source "fluentd.patch"
+    owner "root"
+    mode 00644
+end
+
+bash "patch-for-fluentd-plugin" do
+    user "root"
+    code <<-EOH
+        cd /usr/lib/fluent/ruby/lib/ruby/gems/*/gems/fluent-plugin-elasticsearch-*/lib/fluent/plugin
+        patch < /tmp/fluentd.patch
+        cp /tmp/fluentd.patch .
+    EOH
+    not_if "test -f cd /usr/lib/fluent/ruby/lib/ruby/gems/*/gems/fluent-plugin-elasticsearch-*/lib/fluent/plugin/fluentd.patch"
+    notifies :restart, "service[td-agent]", :delayed
+end
+
 template "/etc/td-agent/td-agent.conf" do
     source "fluentd-td-agent.conf.erb"
     owner "root"
