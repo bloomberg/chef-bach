@@ -34,7 +34,7 @@
     pos_file /var/log/td-agent/dpkg.pos
     tag pre.system.dpkg
     format /^(?<time>[^ ]* [^ ]*) (?<message>.*)$/
-    time_format %Y-%m-%e %H:%M:%S
+    time_format %Y-%m-%d %H:%M:%S
 </source>
 
 <source>
@@ -59,7 +59,7 @@
     pos_file /var/log/td-agent/apache-error.pos
     tag pre.apache.error
     format /^\[(?<time>[^ ]* [^ ]* [^ ]* [^ ]* [^ ]*)\] \[(?<level>[^ ]*)\] (?<message>.*)$/
-    time_format %a %b %e %H:%M:%S %Y
+    time_format %a %b %d %H:%M:%S %Y
 </source>
 
 <source>
@@ -68,7 +68,7 @@
     pos_file /var/log/td-agent/ceph-daemons.pos
     tag pre.ceph.daemons
     format /^(?<time>[^ ]* [^ ]*) (?<offset>[^ ]*)[ ]*(?<level>[^ ]*) (?<message>.*)$/
-    time_format %Y-%m-%e %H:%M:%S
+    time_format %Y-%m-%d %H:%M:%S
 </source>
 
 <source>
@@ -77,7 +77,7 @@
     pos_file /var/log/td-agent/ceph-activity.pos
     tag pre.ceph.activity
     format /^(?<time>[^ ]* [^ ]*) (?<ident>[^ ]*) (?<host>[^ ]*) (?<offset>[^ ]*) : \[(?<level>[^ ]*)\] (?<message>.*)$/
-    time_format %Y-%m-%e %H:%M:%S
+    time_format %Y-%m-%d %H:%M:%S
 </source>
 
 <source>
@@ -86,7 +86,7 @@
     pos_file /var/log/td-agent/openstack-cinder.pos
     tag pre.openstack.cinder
     format /^(?<time>[^ ]* [^ ]*)\s*(?<level>[^ ]*) \[(?<ident>[^ ]*)\] (?<message>.*)$/
-    time_format %Y-%m-%e %H:%M:%S
+    time_format %Y-%m-%d %H:%M:%S
 </source>
 
 <source>
@@ -95,7 +95,7 @@
     pos_file /var/log/td-agent/openstack-glance.pos
     tag pre.openstack.glance
     format /^(?<time>[^ ]* [^ ]*)\s*(?<pid>([0-9]+)?)\s*(?<level>[a-zA-Z]*)\s*(?<ident>[^ ]*)\s*(\[.*\])?\s*(?<message>.*)$/
-    time_format %Y-%m-%e %H:%M:%S
+    time_format %Y-%m-%d %H:%M:%S
 </source>
 
 <source>
@@ -104,7 +104,7 @@
     pos_file /var/log/td-agent/openstack-keystone.pos
     tag pre.openstack.keystone
     format /^(?<time>[^ ]* [^ ]*)\s*(?<level>[^ ]*) \[(?<ident>[^ ]*)\] (?<message>.*)$/
-    time_format %Y-%m-%e %H:%M:%S
+    time_format %Y-%m-%d %H:%M:%S
 </source>
 
 <source>
@@ -113,37 +113,54 @@
     pos_file /var/log/td-agent/openstack-nova.pos
     tag pre.openstack.nova
     format /^(?<time>[^ ]* [^ ]*)\s*(?<pid>([0-9]+)?)\s*(?<level>[a-zA-Z]*)\s*(?<ident>[^ ]*)\s*(\[.*\])?\s*(?<message>.*)$/
-    time_format %Y-%m-%e %H:%M:%S
+    time_format %Y-%m-%d %H:%M:%S
 </source>
 
-#[/var/lib/mysql/<%="#{node.hostname}"%>.err]
-#type: mysql
-#tags: mysql
-#
-#[/var/log/rabbitmq/rabbit@<%="#{node.hostname}"%>.log]
-#type: rabbitmq
-#tags: rabbitmq
-#
-#[/var/log/elasticsearch/<%="#{node[:bcpc][:region_name]}"%>.log]
-#type: elasticsearch
-#tags: logging
-#
-#[/var/log/kibana/kibana.log]
-#type: kibana
-#tags: logging
-#
-#[/var/log/logstash/logstash.log]
-#type: logstash
-#tags: logging
-#
-#[/var/log/beaver/beaver.log]
-#type: beaver
-#tags: logging
-#
-#[/var/log/diamond/diamond.log]
-#type: diamond
-#tags: metrics
-#
+<source>
+    type tail_multiline
+    path /var/lib/mysql/<%="#{node.hostname}"%>.err
+    pos_file /var/log/td-agent/mysql.pos
+    tag pre.mysql
+    format /^(?<ident>[^ ]*)\s*(?<time>[^ ]*)\s*(\[(?<level>[^ ]+)\])?\s*(?<message>.*)$/
+    time_format %H:%M:%S
+</source>
+
+<source>
+    type tail_multiline
+    path /var/log/rabbitmq/rabbit@<%="#{node.hostname}"%>.log
+    pos_file /var/log/td-agent/rabbitmq.pos
+    tag pre.rabbitmq
+    format /^=(?<level>[^ ]*)\s*REPORT====\s*(?<time>[^ ]*)\s*===\s*(?<message>.*)$/
+    time_format %d-%b-%Y::%H:%M:%S
+</source>
+
+<source>
+    type tail_multiline
+    path /var/log/elasticsearch/<%="#{node[:bcpc][:region_name]}"%>.log
+    pos_file /var/log/td-agent/elasticsearch.pos
+    tag pre.elasticsearch
+    format /^\[(?<time>[^ ]* [^\]]*)\]\[(?<level>[^ ]*)\s*\]\[(?<ident>[^ ]*)\s*\]\s*\[(?<host>[^ ]*)\s*\]\s*(?<message>.*)$/
+    time_format %Y-%m-%d %H:%M:%S
+</source>
+
+<source>
+    type tail_multiline
+    path /var/log/diamond/diamond.log
+    pos_file /var/log/td-agent/diamond.pos
+    tag pre.diamond
+    format /^\[(?<time>[^ ]* [^\]]*)\]\s*\[(?<ident>[^ ]*)\s*\]\s*(?<message>.*)$/
+    time_format %Y-%m-%d %H:%M:%S
+</source>
+
+<source>
+    type tail_ex
+    path /var/log/zabbix/zabbix**.log
+    pos_file /var/log/td-agent/zabbix.pos
+    tag pre.zabbix
+    format /^\s*(?<pid>[0-9]+):(?<time>[0-9]+:[0-9]+\.[0-9]+)\s*(\[(?<level>[^ ]*)\])?(?<message>.*)$/
+    time_format %Y%m%d:%H%M%S
+</source>
+
 #[/opt/graphite/storage/log/webapp/*.log]
 #type: graphite
 #tags: metrics
@@ -155,10 +172,6 @@
 #[/opt/graphite/storage/log/carbon-relay/*/{console,listener,clients}.log]
 #type: graphite
 #tags: metrics
-#
-#[/var/log/zabbix/zabbix*.log]
-#type: zabbix
-#tags: monitoring
 
 <match pre.**>
     type record_reformer
