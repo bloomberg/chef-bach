@@ -54,7 +54,7 @@ if hash vagrant ; then
   cp ../Vagrantfile .
   if [[ ! -f insecure_private_key ]]; then
     # Ensure that the private key has been created by running vagrant at least once
-    vagrant -v
+    vagrant status
     cp $HOME/.vagrant.d/insecure_private_key .
   fi
   vagrant up
@@ -177,6 +177,12 @@ if hash vagrant ; then
   #vagrant ssh -c "sudo ucf -p /etc/default/grub"
   #vagrant ssh -c "sudo ucfr -p grub-pc /etc/default/grub"
   vagrant ssh -c "test -f /etc/default/grub.ucf-dist && sudo mv /etc/default/grub.ucf-dist /etc/default/grub" || true
+  # Duplicate what d-i's apt-setup generators/50mirror does when set in preseed
+  if [ -n "$http_proxy" ]; then
+    if [ -z `vagrant ssh -c "grep Acquire::http::Proxy /etc/apt/apt.conf"` ]; then
+      vagrant ssh -c "echo 'Acquire::http::Proxy \"$http_proxy\";' | sudo tee -a /etc/apt/apt.conf"
+    fi
+  fi
   pushd ../
   echo "Bootstrap complete - setting up Chef server"
   echo "N.B. This may take approximately 30-45 minutes to complete."
