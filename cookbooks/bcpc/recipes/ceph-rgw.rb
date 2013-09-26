@@ -69,7 +69,7 @@ end
 
 bash "write-client-radosgw-key" do
     code <<-EOH
-        RGW_KEY=`ceph --name client.admin --keyring /etc/ceph/ceph.client.admin.keyring auth get-or-create-key client.radosgw.gateway osd 'allow rwx' mon 'allow rw'`
+        RGW_KEY=`ceph --name client.admin --keyring /etc/ceph/ceph.client.admin.keyring auth get-or-create-key client.radosgw.gateway osd 'allow rwx' mon 'allow r'`
         ceph-authtool "/var/lib/ceph/radosgw/ceph-radosgw.gateway/keyring" \
             --create-keyring \
             --name=client.radosgw.gateway \
@@ -77,6 +77,14 @@ bash "write-client-radosgw-key" do
     EOH
     not_if "test -f /var/lib/ceph/radosgw/ceph-radosgw.gateway/keyring && chmod 644 /var/lib/ceph/radosgw/ceph-radosgw.gateway/keyring" 
 end
+
+bash "pre-alloc-rgwspools" do
+	pools = %w{ .rgw.buckets .log .rgw .rgw.control .users.uid .users.email .users .usage .intent-log }
+	code = pools.map { |pool|
+		"ceph osd pool create #{pool} #{get_num_pgs(node[:bcpc][:pool_multiplier][pool])}"
+	}.join("\n")
+end
+
 
 file "/var/www/s3gw.fcgi" do
     owner "root" 

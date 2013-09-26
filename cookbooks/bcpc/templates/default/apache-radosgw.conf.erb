@@ -1,14 +1,18 @@
-NameVirtualHost <%="#{node[:bcpc][:management][:ip]}:#{node[:bcpc][:ports][:apache][:radosgw]}"%>
+NameVirtualHost <%="#{node[:bcpc][:floating][:ip]}:#{node[:bcpc][:ports][:apache][:radosgw]}"%>
 
-Listen <%="#{node[:bcpc][:management][:ip]}:#{node[:bcpc][:ports][:apache][:radosgw]}"%>
-Listen <%="#{node[:bcpc][:management][:ip]}:#{node[:bcpc][:ports][:apache][:radosgw_https]}"%>
+
+Listen <%="#{node[:bcpc][:floating][:ip]}:#{node[:bcpc][:ports][:apache][:radosgw]}"%>
+Listen <%="#{node[:bcpc][:floating][:ip]}:#{node[:bcpc][:ports][:apache][:radosgw_https]}"%>
+Listen <%="#{node[:bcpc][:metadata][:ip]}:#{node[:bcpc][:ports][:apache][:radosgw]}"%>
+Listen <%="#{node[:bcpc][:metadata][:ip]}:#{node[:bcpc][:ports][:apache][:radosgw_https]}"%>
 
 FastCgiExternalServer /var/www/s3gw.fcgi -socket /var/lib/ceph/radosgw/rgw_fcgi.sock
 
-<VirtualHost  <%="#{node[:bcpc][:management][:ip]}:#{node[:bcpc][:ports][:apache][:radosgw]}"%> >
+<VirtualHost  <%="#{node[:bcpc][:floating][:ip]}:#{node[:bcpc][:ports][:apache][:radosgw]}"%> >
 	    ServerName <%="s3.#{node[:bcpc][:domain_name]}"%>
         ServerAlias <%="#{node[:hostname]}"%>
-        ServerAlias <%="#{node[:bcpc][:management][:ip]}:#{node[:bcpc][:ports][:apache][:radosgw]}"%>
+        ServerAlias <%="#{node[:bcpc][:floating][:ip]}:#{node[:bcpc][:ports][:apache][:radosgw]}"%>
+				ServerAlias <%="#{node[:bcpc][:metadata][:ip]}:#{node[:bcpc][:ports][:apache][:radosgw]}"%>
         ServerAdmin rrichardson6@bloomberg.net
         DocumentRoot /var/www
 	
@@ -30,12 +34,13 @@ FastCgiExternalServer /var/www/s3gw.fcgi -socket /var/lib/ceph/radosgw/rgw_fcgi.
         ServerSignature Off
 </VirtualHost>
 
-NameVirtualHost <%="#{node[:bcpc][:management][:ip]}:#{node[:bcpc][:ports][:apache][:radosgw_https]}"%>
+NameVirtualHost <%="#{node[:bcpc][:anagement][:ip]}:#{node[:bcpc][:ports][:apache][:radosgw_https]}"%>
 
-<VirtualHost  <%="#{node[:bcpc][:management][:ip]}:#{node[:bcpc][:ports][:apache][:radosgw_https]}"%> >
+<VirtualHost  <%="#{node[:bcpc][:floating][:ip]}:#{node[:bcpc][:ports][:apache][:radosgw_https]}"%> >
 	    ServerName <%="s3.#{node[:bcpc][:domain_name]}"%>
         ServerAlias <%="#{node[:hostname]}"%>
-        ServerAlias <%="#{node[:bcpc][:management][:ip]}:#{node[:bcpc][:ports][:apache][:radosgw]}"%>
+        ServerAlias <%="#{node[:bcpc][:floating][:ip]}:#{node[:bcpc][:ports][:apache][:radosgw_https]}"%>
+				ServerAlias <%="#{node[:bcpc][:metadata][:ip]}:#{node[:bcpc][:ports][:apache][:radosgw_https]}"%>
         ServerAdmin rrichardson6@bloomberg.net
         DocumentRoot /var/www
 
