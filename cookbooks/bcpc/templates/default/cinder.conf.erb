@@ -45,3 +45,4 @@ rbd_secret_uuid=<%="#{get_config('libvirt-secret-uuid')}"%>
 # Other service endpoints
 glance_host=<%="#{node[:bcpc][:management][:vip]}"%>
 glance_api_servers=<%="#{node[:bcpc][:management][:vip]}"%>:9292
+glance_api_version=2

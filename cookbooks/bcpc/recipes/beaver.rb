@@ -79,4 +79,5 @@ end
 
 service "beaver" do
     action [ :enable, :start ]
+    restart_command "(killall beaver || true) && service beaver restart"
 end

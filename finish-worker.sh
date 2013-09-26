@@ -1,11 +1,10 @@
 #!/bin/bash
-service glance-api       restart
-service glance-registry  restart
-service cinder-api       restart
-service cinder-volume    restart
-service cinder-scheduler restart
-service nova-scheduler   restart
-service nova-cert        restart
-service nova-consoleauth restart
-service nova-conductor   restart
-chef-client
+# No fixups needed currently
+#
+# If the glance service had an error during the knife
+# bootstrap phase you could fix it by hand and then do the following
+# here
+#
+#service glance-api       restart
+#service glance-registry  restart
+#chef-client
