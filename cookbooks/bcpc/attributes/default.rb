@@ -67,6 +67,8 @@ default['bcpc']['repos']['mysql'] = "http://repo.percona.com/apt"
 default['bcpc']['repos']['openstack'] = "http://ubuntu-cloud.archive.canonical.com/ubuntu"
 default['bcpc']['repos']['hwraid'] = "http://hwraid.le-vert.net/ubuntu"
 default['bcpc']['repos']['fluentd'] = "http://packages.treasure-data.com/precise"
+default['bcpc']['repos']['ceph-apache'] = "http://gitbuilder.ceph.com/apache2-deb-precise-x86_64-basic/"
+default['bcpc']['repos']['ceph-fcgi'] = "http://gitbuilder.ceph.com/libapache-mod-fastcgi-deb-precise-x86_64-basic/"
 
 ###########################################
 #
@@ -98,14 +100,14 @@ default[:bcpc][:ports][:apache][:radosgw_https] = 8443
 default[:bcpc][:ports][:haproxy][:radosgw] = 10080
 default[:bcpc][:ports][:haproxy][:radosgw_https] = 10443
 
-default['bcpc']['rgw_pool_multiplier']['.rgw.buckets'] = 100 
-default['bcpc']['rgw_pool_multiplier']['.log'] = 100 
-default['bcpc']['rgw_pool_multiplier']['.rgw'] = 100 
+default['bcpc']['rgw_pool_multiplier']['.rgw.buckets'] = 100
+default['bcpc']['rgw_pool_multiplier']['.log'] = 100
+default['bcpc']['rgw_pool_multiplier']['.rgw'] = 100
 default['bcpc']['rgw_pool_multiplier']['.rgw.control'] = 50
-default['bcpc']['rgw_pool_multiplier']['.users.uid'] = 50 
+default['bcpc']['rgw_pool_multiplier']['.users.uid'] = 50
 default['bcpc']['rgw_pool_multiplier']['.users.email'] =  50
-default['bcpc']['rgw_pool_multiplier']['.users'] = 100 
-default['bcpc']['rgw_pool_multiplier']['.usage'] =  100 
+default['bcpc']['rgw_pool_multiplier']['.users'] = 100
+default['bcpc']['rgw_pool_multiplier']['.usage'] =  100
 default['bcpc']['rgw_pool_multiplier']['.intent-log'] = 50
 
 

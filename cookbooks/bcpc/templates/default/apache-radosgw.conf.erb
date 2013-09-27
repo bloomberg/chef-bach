@@ -34,7 +34,7 @@ FastCgiExternalServer /var/www/s3gw.fcgi -socket /var/lib/ceph/radosgw/rgw_fcgi.
         ServerSignature Off
 </VirtualHost>
 
-NameVirtualHost <%="#{node[:bcpc][:anagement][:ip]}:#{node[:bcpc][:ports][:apache][:radosgw_https]}"%>
+NameVirtualHost <%="#{node[:bcpc][:floating][:ip]}:#{node[:bcpc][:ports][:apache][:radosgw_https]}"%>
 
 <VirtualHost  <%="#{node[:bcpc][:floating][:ip]}:#{node[:bcpc][:ports][:apache][:radosgw_https]}"%> >
 	    ServerName <%="s3.#{node[:bcpc][:domain_name]}"%>

@@ -36,7 +36,7 @@ apt_repository "ceph-apache" do
     key "ceph-release.key"
 end
 
-package "radosgw" do 
+package "radosgw" do
    action :upgrade
 end
 
@@ -75,20 +75,22 @@ bash "write-client-radosgw-key" do
             --name=client.radosgw.gateway \
             --add-key="$RGW_KEY"
     EOH
-    not_if "test -f /var/lib/ceph/radosgw/ceph-radosgw.gateway/keyring && chmod 644 /var/lib/ceph/radosgw/ceph-radosgw.gateway/keyring" 
+    not_if "test -f /var/lib/ceph/radosgw/ceph-radosgw.gateway/keyring && chmod 644 /var/lib/ceph/radosgw/ceph-radosgw.gateway/keyring"
 end
 
 bash "pre-alloc-rgwspools" do
-	pools = %w{ .rgw.buckets .log .rgw .rgw.control .users.uid .users.email .users .usage .intent-log }
-	code = pools.map { |pool|
-		"ceph osd pool create #{pool} #{get_num_pgs(node[:bcpc][:pool_multiplier][pool])}"
-	}.join("\n")
+    flags '-x'
+    pools = %w{ .rgw.buckets .log .rgw .rgw.control .users.uid .users.email .users .usage .intent-log }
+    code pools.map { |pool|
+    "ceph osd pool create #{pool} #{get_num_pgs(node[:bcpc][:rgw_pool_multiplier][pool])}"
+    }.join("\n")
+    not_if "rados df | grep .rgw.bucktes"
 end
 
 
 file "/var/www/s3gw.fcgi" do
-    owner "root" 
-    group "root" 
+    owner "root"
+    group "root"
     mode 0755
     content "#!/bin/sh\n exec /usr/bin/radosgw -c /etc/ceph/ceph.conf -n client.radosgw.gateway"
 end
