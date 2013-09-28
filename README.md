@@ -120,6 +120,7 @@ BCPC Services
 
 BCPC currently relies upon a number of open-source packages:
 
+ - [389 Directory Server](http://directory.fedoraproject.org/)
  - [Apache HTTP Server](http://httpd.apache.org/)
  - [Ceph](http://ceph.com/)
  - [Chef](http://www.opscode.com/chef/)
@@ -139,5 +140,6 @@ BCPC currently relies upon a number of open-source packages:
  - [Ubuntu](http://www.ubuntu.com/)
  - [Vagrant](http://www.vagrantup.com/) - Verified with version 1.2.2
  - [VirtualBox](https://www.virtualbox.org/) - Verified with version 4.2.12
+ - [Zabbix](http://www.zabbix.com/)
 
 Thanks to all of these communities for producing this software!
