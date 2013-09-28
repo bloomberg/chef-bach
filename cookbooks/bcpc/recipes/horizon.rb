@@ -19,6 +19,7 @@
 
 include_recipe "bcpc::mysql"
 include_recipe "bcpc::openstack"
+include_recipe "bcpc::apache2"
 
 ruby_block "initialize-horizon-config" do
     block do
@@ -57,9 +58,7 @@ end
 
 bash "apache-enable-openstack-dashboard" do
     user "root"
-    code <<-EOH
-         a2ensite openstack-dashboard
-    EOH
+    code "a2ensite openstack-dashboard"
     not_if "test -r /etc/apache2/sites-enabled/openstack-dashboard"
     notifies :restart, "service[apache2]", :delayed
 end

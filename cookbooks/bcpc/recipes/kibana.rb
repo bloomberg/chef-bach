@@ -18,6 +18,7 @@
 #
 
 include_recipe "bcpc::default"
+include_recipe "bcpc::apache2"
 
 cookbook_file "/tmp/kibana3.tgz" do
     source "bins/kibana3.tgz"
@@ -49,9 +50,7 @@ end
 
 bash "apache-enable-kibana-web" do
     user "root"
-    code <<-EOH
-         a2ensite kibana-web
-    EOH
+    code "a2ensite kibana-web"
     not_if "test -r /etc/apache2/sites-enabled/kibana-web"
     notifies :restart, "service[apache2]", :delayed
 end

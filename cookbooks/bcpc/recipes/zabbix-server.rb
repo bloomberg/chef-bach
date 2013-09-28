@@ -19,6 +19,7 @@
 
 include_recipe "bcpc::mysql"
 include_recipe "bcpc::horizon"
+include_recipe "bcpc::apache2"
 
 ruby_block "initialize-zabbix-config" do
     block do
@@ -97,22 +98,13 @@ service "zabbix-server" do
     action [ :enable, :start ]
 end
 
-%w{traceroute libapache2-mod-php5 php5-mysql php5-gd}.each do |pkg|
+%w{traceroute php5-mysql php5-gd}.each do |pkg|
     package pkg do
         action :upgrade
     end
 end
 
-bash "apache-enable-php5" do
-    user "root"
-    code <<-EOH
-        a2enmod php5
-    EOH
-    not_if "test -r /etc/apache2/mods-enabled/php5.load"
-    notifies :restart, "service[apache2]", :delayed
-end
-
-file "/etc/php5/apache2/conf.d/bcpc.ini" do
+file "/etc/php5/apache2/conf.d/zabbix.ini" do
     user "root"
     group "root"
     mode 00644
