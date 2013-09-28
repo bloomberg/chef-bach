@@ -19,6 +19,7 @@
 
 include_recipe "bcpc::mysql"
 include_recipe "bcpc::openstack"
+include_recipe "bcpc::apache2"
 
 ruby_block "initialize-keystone-config" do
     block do
@@ -76,6 +77,31 @@ template "/root/keystonerc" do
     mode 00600
 end
 
+%w{main admin}.each do |api|
+    template "/opt/openstack/keystone-#{api}.cgi" do
+        source "wsgi-keystone.erb"
+        owner "root"
+        group "root"
+        mode 00755
+        variables(:name => api)
+    end
+end
+
+template "/etc/apache2/sites-available/keystone" do
+    source "apache-keystone.conf.erb"
+    owner "root"
+    group "root"
+    mode 00644
+    notifies :restart, "service[apache2]", :delayed
+end
+
+bash "apache-enable-keystone" do
+    user "root"
+    code "a2ensite keystone"
+    not_if "test -r /etc/apache2/sites-enabled/keystone"
+    notifies :restart, "service[apache2]", :immediately
+end
+
 service "keystone" do
     action [ :enable, :start ]
     restart_command "service keystone stop && service keystone start && sleep 5"
@@ -99,6 +125,7 @@ bash "keystone-database-sync" do
     action :nothing
     user "root"
     code "keystone-manage db_sync"
+    notifies :restart, "service[apache2]", :immediately
     notifies :restart, "service[keystone]", :immediately
 end
 
