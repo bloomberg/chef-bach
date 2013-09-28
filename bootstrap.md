@@ -414,7 +414,7 @@ diff --git a/environments/Test-Laptop.json b/environments/Test-Laptop.json
 index d844783..9a9e53a 100644
 --- a/environments/Test-Laptop.json
 +++ b/environments/Test-Laptop.json
-@@ -28,12 +28,25 @@
+@@ -28,12 +28,26 @@
          "interface" : "eth0",
          "pxe_interface" : "eth1",
          "server" : "10.0.100.3",
@@ -427,7 +427,8 @@ index d844783..9a9e53a 100644
 +        "rabbitmq": "http://10.0.100.3/rabbitmq",
 +        "mysql": "http://10.0.100.3/percona",
 +        "openstack": "http://10.0.100.3/ubuntu-cloud",
-+        "hwraid": "http://10.0.100.3/hwraid"
++        "hwraid": "http://10.0.100.3/hwraid",
++        "fluentd": "http://10.0.100.3/fluentd"
 +      },
        "ntp_servers" : [ "0.pool.ntp.org", "1.pool.ntp.org", "2.pool.ntp.org", "3.pool.ntp.org" ],
        "dns_servers" : [ "8.8.8.8", "8.8.4.4" ]
