@@ -4,12 +4,12 @@
 #
 ################################################
 
-Listen <%="#{node[:bcpc][:management][:ip]}"%>:5001
-Listen <%="#{node[:bcpc][:management][:ip]}"%>:35358
+Listen <%="#{node[:bcpc][:management][:ip]}"%>:5000
+Listen <%="#{node[:bcpc][:management][:ip]}"%>:35357
 
 WSGIDaemonProcess keystone user=keystone group=keystone processes=3 threads=10
 
-<VirtualHost <%="#{node[:bcpc][:management][:ip]}"%>:5001>
+<VirtualHost <%="#{node[:bcpc][:management][:ip]}"%>:5000>
 	WSGIScriptAlias / /opt/openstack/keystone-main.cgi
 	WSGIProcessGroup keystone
 
@@ -27,7 +27,7 @@ WSGIDaemonProcess keystone user=keystone group=keystone processes=3 threads=10
 	SSLOptions +StdEnvVars +ExportCertData
 </VirtualHost>
 
-<VirtualHost <%="#{node[:bcpc][:management][:ip]}"%>:35358>
+<VirtualHost <%="#{node[:bcpc][:management][:ip]}"%>:35357>
 	WSGIScriptAlias / /opt/openstack/keystone-admin.cgi
 	WSGIProcessGroup keystone
 
