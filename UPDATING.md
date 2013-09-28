@@ -2,6 +2,15 @@
 
 These instructions assume that you basically know what you are doing.  =)
 
+#### 20130928
+
+On Ubuntu nodes, network interfaces are now templated rather than hard-coded
+upon first-run.  Delete the relevant entries from /etc/network/interfaces and
+it will be replaced by the templated files in /etc/network/interfaces.d/
+
+Beaver (on all head/worker nodes) and logstash (head nodes only) has been
+replaced by fluentd.  You can safely remove those packages now.
+
 #### 20130824
 
 Automatic boot-from-volumes patches in Grizzly is added back in to the tree.
