@@ -14,8 +14,8 @@ WSGIDaemonProcess keystone user=keystone group=keystone processes=3 threads=10
 	WSGIProcessGroup keystone
 
 	LogLevel warn
-	ErrorLog ${APACHE_LOG_DIR}/error.log
-	CustomLog ${APACHE_LOG_DIR}/access.log combined
+	ErrorLog ${APACHE_LOG_DIR}/keystone-error.log
+	CustomLog ${APACHE_LOG_DIR}/keystone-access.log combined
 
     SSLEngine on
     SSLCertificateFile /etc/ssl/certs/ssl-bcpc.pem
@@ -32,8 +32,8 @@ WSGIDaemonProcess keystone user=keystone group=keystone processes=3 threads=10
 	WSGIProcessGroup keystone
 
 	LogLevel warn
-	ErrorLog ${APACHE_LOG_DIR}/error.log
-	CustomLog ${APACHE_LOG_DIR}/access.log combined
+	ErrorLog ${APACHE_LOG_DIR}/keystone-error.log
+	CustomLog ${APACHE_LOG_DIR}/keystone-access.log combined
 
     SSLEngine on
     SSLCertificateFile /etc/ssl/certs/ssl-bcpc.pem
