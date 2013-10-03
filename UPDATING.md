@@ -2,6 +2,32 @@
 
 These instructions assume that you basically know what you are doing.  =)
 
+### 20131002
+To upgrade Power DNS to <vm name>.<tenant name>.<region name>.<domain name>:
+Warning: only '&', '_' and <space> are translated for project names to domain names.
+
+Easiest, unless you put custom information in:
+* ``pdns.records_static``
+* ``pdns.domains``
+* The entire ``pdns`` database
+
+Simply run ``DROP DATABASE pdns`` and re-run chef-client.
+
+If you have custom DNS data in your pdns database, you can roughly do the following:
+
+* Migrate MySQL tables and DB to use UTF8 instead of Sweedish collation in the pdns DB:
+```
+ALTER DATABASE pdns DEFAULT COLLATE utf8_general_ci;
+ALTER TABLE records_static CHARACTER SET utf8 COLLATE utf8_general_ci;
+ALTER TABLE records_static CONVERT TO CHARACTER SET utf8 COLLATE utf8_general_ci;
+ALTER TABLE domains CHARACTER SET utf8 COLLATE utf8_general_ci;
+ALTER TABLE domains CONVERT TO CHARACTER SET utf8 COLLATE utf8_general_ci;
+ALTER TABLE domains RENAME TO domains_static;
+DROP VIEW records;
+```
+
+Then re-run chef-client to get the new required MySQL views and function.
+
 #### 20130928
 
 On Ubuntu nodes, network interfaces are now templated rather than hard-coded
