@@ -2,6 +2,33 @@
 
 These instructions assume that you basically know what you are doing.  =)
 
+### 20131003
+
+Keystone is now serviced over HTTPS on port 5000.  In particular, a new subjectAltName
+field containing the VIP IP address was added to the SSL certificate.
+
+On all headnodes:
+
+```
+# service nova-api stop
+# service keystone stop
+# service apache2 stop
+```
+
+On one headnode:
+```
+# . /root/keystonerc
+# keystone service-delete keystone
+```
+
+Remove the ``ssl-certificate`` and ``ssl-private-key`` fields from the databag - eg:
+
+```
+# EDITOR=vi knife data bag edit configs Test-Laptop
+```
+
+Then, you can run ``chef-client`` to regenerate and redeploy the new certs.
+
 ### 20131002
 To upgrade Power DNS to <vm name>.<tenant name>.<region name>.<domain name>:
 Warning: only '&', '_' and <space> are translated for project names to domain names.
