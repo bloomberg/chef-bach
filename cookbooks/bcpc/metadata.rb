@@ -1,4 +1,4 @@
-maintainer       "Bloomberg L.P."
+maintainer       "Bloomberg Finance L.P."
 maintainer_email "pchandra7@bloomberg.net"
 license          "Apache License 2.0"
 description      "Installs/Configures Bloomberg Clustered Private Cloud (BCPC)"
