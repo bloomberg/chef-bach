@@ -26,7 +26,6 @@
       "recipe[bcpc::zabbix-server]",
       "role[BCPC-Worknode]",
       "recipe[bcpc::zabbix-headnode-monitoring]"
-
     ],
     "description": "A highly-available head node in a BCPC cluster",
     "chef_type": "role",
