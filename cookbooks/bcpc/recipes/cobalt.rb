@@ -20,16 +20,18 @@
 
 include_recipe "bcpc::default"
 
-apt_repository "cobalt" do
+if not node["bcpc"]["vms_key"].nil?
+  apt_repository "cobalt" do
     uri node['bcpc']['repos']['gridcentric'] % ["cobalt", node['bcpc']['openstack_release']]
     distribution "gridcentric"
     components ["multiverse"]
     key "gridcentric.key"
-end
+  end
 
-apt_repository "cobaltclient" do
+  apt_repository "cobaltclient" do
     uri node['bcpc']['repos']['gridcentric'] % ["cobaltclient", node['bcpc']['openstack_release']]
     distribution "gridcentric"
     components ["multiverse"]
     key "gridcentric.key"
+  end
 end
