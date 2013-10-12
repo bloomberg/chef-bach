@@ -124,7 +124,7 @@ if not node['bcpc']['vms_key'].nil?
 end
 
 service "nova-api" do
-    restart_command "service nova-api stop && service nova-api start && sleep 5"
+    restart_command "(service nova-api stop || true) && service nova-api start && sleep 5"
 end
 
 directory "/var/lib/nova/.ssh" do
