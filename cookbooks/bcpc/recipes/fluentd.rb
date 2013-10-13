@@ -45,7 +45,7 @@ end
     end
     bash "install-fluent-plugin-#{pkg}" do
     code "/usr/lib/fluent/ruby/bin/fluent-gem install --local /tmp/fluent-plugin-#{pkg}.gem"
-   not_if "/usr/lib/fluent/ruby/bin/fluent-gem list --local | grep fluent-plugin-#{pkg}"
+    not_if "/usr/lib/fluent/ruby/bin/fluent-gem list --local | grep fluent-plugin-#{pkg}"
     end
 end
 
