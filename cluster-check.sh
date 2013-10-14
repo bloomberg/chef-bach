@@ -34,69 +34,89 @@ VERBOSE="$3"
 # verbose trace - information that's not normally needed
 function vtrace {
     if [[ ! -z "$VERBOSE" ]]; then
-		for STR in "$@"; do
-			echo $STR
-		done
+        for STR in "$@"; do
+            echo -e $STR
+        done
     fi
 }
 if [[ -f cluster.txt ]]; then
     while read HOSTNAME MACADDR IPADDR ILOIPADDR DOMAIN ROLE; do
-		if [[ $HOSTNAME = "end" ]]; then
-			continue
-		fi
-		if [[ -z "$HOSTWANTED" || "$HOSTWANTED" = all || "$HOSTWANTED" = "$ROLE" || "$HOSTWANTED" = "$IPADDR" || "$HOSTWANTED" = "$HOSTNAME" ]]; then
-#	    HOSTS="$HOSTS $HOSTNAME"
-			HOSTS="$HOSTS $IPADDR"
-		fi
+        if [[ $HOSTNAME = "end" ]]; then
+            continue
+        fi
+        if [[ -z "$HOSTWANTED" || "$HOSTWANTED" = all || "$HOSTWANTED" = "$ROLE" || "$HOSTWANTED" = "$IPADDR" || "$HOSTWANTED" = "$HOSTNAME" ]]; then
+#       HOSTS="$HOSTS $HOSTNAME"
+            HOSTS="$HOSTS $IPADDR"
+        fi
     done < cluster.txt
     vtrace "HOSTS = $HOSTS"
-	
+    
     for HOST in $HOSTS; do
-		if [[ -z `fping -aq $HOST` ]]; then
-			echo $HOST is down
-			continue
-		else
-			vtrace "$HOST is up"
-			UP=$[UP + 1]
-		fi
-		if [[ -z `./nodessh.sh $ENVIRONMENT $HOST "ip route show table mgmt | grep default"` ]]; then
-			echo "$HOST no mgmt default route !!WARNING!!"
-		else
-			vtrace "$HOST has a default mgmt route"
-			MG=$[MG + 1]
-		fi
-		if [[ -z `./nodessh.sh $ENVIRONMENT $HOST "ip route show table storage | grep default"` ]]; then
-			echo "$HOST has no storage default route !!WARNING!!"
-		else
-			vtrace "$HOST has a default storage route"
-			SG=$[SG + 1]
-		fi
-		CHEF=`./nodessh.sh $ENVIRONMENT $HOST "which chef-client"`
-		if [[ -z "$CHEF" ]]; then
-			echo "$HOST doesn't seem to have chef installed so probably hasn't been assigned a role"
-			echo
-			continue
-		fi
-		for SERVICE in keystone glance-api glance-registry cinder-scheduler cinder-volume cinder-api nova-api nova-novncproxy nova-scheduler nova-consoleauth nova-cert nova-conductor nova-compute nova-network haproxy; do
-			STAT=`./nodessh.sh $ENVIRONMENT $HOST "service $SERVICE status | grep running" sudo`
-			if [[ ! "$STAT" =~ "unrecognized" ]]; then
-				STAT=`echo $STAT | cut -f2 -d":"`
-				if [[ ! "$STAT" =~ "start/running" ]]; then
-					printf "$HOST %20s %s\n" "$SERVICE" "$STAT"
-				else
-		    # couldn't get a "verbose printf" function to work
-					if [[ ! -z "$VERBOSE" ]]; then
-						printf "$HOST %20s %s\n" "$SERVICE" "$STAT"
-					fi
-				fi
-			fi
-		done
-		STAT=`./nodessh.sh $ENVIRONMENT $HOST "ceph -s | grep HEALTH" sudo`
-		STAT=`echo $STAT | cut -f2 -d":"`
-		printf "$HOST %20s %s\n" ceph "$STAT"
-		echo
+        if [[ -z `fping -aq $HOST` ]]; then
+            echo $HOST is down
+            continue
+        else
+            vtrace "$HOST is up"
+            UP=$[UP + 1]
+        fi
+        if [[ -z `./nodessh.sh $ENVIRONMENT $HOST "ip route show table mgmt | grep default"` ]]; then
+            echo "$HOST no mgmt default route !!WARNING!!"
+        else
+            vtrace "$HOST has a default mgmt route"
+            MG=$[MG + 1]
+        fi
+        if [[ -z `./nodessh.sh $ENVIRONMENT $HOST "ip route show table storage | grep default"` ]]; then
+            echo "$HOST has no storage default route !!WARNING!!"
+        else
+            vtrace "$HOST has a default storage route"
+            SG=$[SG + 1]
+        fi
+        CHEF=`./nodessh.sh $ENVIRONMENT $HOST "which chef-client"`
+        if [[ -z "$CHEF" ]]; then
+            echo "$HOST doesn't seem to have chef installed so probably hasn't been assigned a role"
+            echo
+            continue
+        fi
+        STAT=`./nodessh.sh $ENVIRONMENT $HOST "ceph -s | grep HEALTH" sudo`
+        STAT=`echo $STAT | cut -f2 -d:`
+        if [[ "$STAT" =~ "HEALTH_OK" ]]; then
+            vtrace "$HOST ceph : healthy"
+        else
+            printf "$HOST %20s %s\n" ceph "$STAT"
+        fi
+        # fluentd has a ridiculous status output from the normal
+        # service reporting (something like "* ruby running"), try to
+        # do better, according to this:
+        # http://docs.treasure-data.com/articles/td-agent-monitoring
+        # Roughly speaking if we have two lines of output from the
+        # following ps command it's in good shape, if not dump the
+        # entire output of that command to the status. This needs more
+        # work
+        FLUENTD=`./nodessh.sh $ENVIRONMENT $HOST "ps w -C ruby -C td-agent --no-heading | grep -v chef-client" sudo`
+        STAT=`./nodessh.sh $ENVIRONMENT $HOST "ps w -C ruby -C td-agent --no-heading | grep -v chef-client | wc -l" sudo`
+        STAT=`echo $STAT | cut -f2 -d:`  
+        if [[ "$STAT" =~ 2 ]]; then
+            vtrace "$HOST fluentd normal"
+        else
+            printf "$HOST %20s %s\n" fluentd "$FLUENTD"
+        fi
+        for SERVICE in keystone glance-api glance-registry cinder-scheduler cinder-volume cinder-api nova-api nova-novncproxy nova-scheduler nova-consoleauth nova-cert nova-conductor nova-compute nova-network haproxy; do
+            STAT=`./nodessh.sh $ENVIRONMENT $HOST "service $SERVICE status | grep running" sudo`
+            if [[ ! "$STAT" =~ "unrecognized" ]]; then
+                STAT=`echo $STAT | cut -f2 -d":"`
+                if [[ ! "$STAT" =~ "start/running" ]]; then
+                    printf "$HOST %20s %s\n" "$SERVICE" "$STAT"
+                else
+            # couldn't get a "verbose printf" function to work
+                    if [[ ! -z "$VERBOSE" ]]; then
+                        printf "$HOST %20s %s\n" "$SERVICE" "$STAT"
+                    fi
+                fi
+            fi
+        done
+        echo
     done
 else
-	echo "Warning 'cluster.txt' not found"
+    echo "Warning 'cluster.txt' not found"
 fi
 echo "$ENVIRONMENT cluster summary: $UP hosts up. $MG hosts with default mgmt route. $SG hosts with default storage route"
