@@ -28,6 +28,9 @@ stor_bitlen = (node['bcpc']['storage']['cidr'].match /\d+\.\d+\.\d+\.\d+\/(\d+)/
 stor_hostaddr = IPAddr.new(node['bcpc']['management']['ip'])<<stor_bitlen>>stor_bitlen
 
 flot_bitlen = (node['bcpc']['floating']['cidr'].match /\d+\.\d+\.\d+\.\d+\/(\d+)/)[1].to_i
+##If we have a full class B, then simply leave the 3rd octet alone and use the 4th octet from mgmt ip
+#Then we leave the rest of the float Ips for the VMs
+flot_bitlen = 24 if flot_bitlen == 16
 flot_hostaddr = IPAddr.new(node['bcpc']['management']['ip'])<<flot_bitlen>>flot_bitlen
 
 node.set['bcpc']['node_number'] = mgmt_hostaddr.to_i.to_s
