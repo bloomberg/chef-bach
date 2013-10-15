@@ -69,7 +69,7 @@ end
 
 bash "write-client-radosgw-key" do
     code <<-EOH
-        RGW_KEY=`ceph --name client.admin --keyring /etc/ceph/ceph.client.admin.keyring auth get-or-create-key client.radosgw.gateway osd 'allow rwx' mon 'allow r'`
+        RGW_KEY=`ceph --name client.admin --keyring /etc/ceph/ceph.client.admin.keyring auth get-or-create-key client.radosgw.gateway osd 'allow rwx' mon 'allow rw'`
         ceph-authtool "/var/lib/ceph/radosgw/ceph-radosgw.gateway/keyring" \
             --create-keyring \
             --name=client.radosgw.gateway \
