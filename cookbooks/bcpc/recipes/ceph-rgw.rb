@@ -22,20 +22,6 @@
 #Note, currently rgw cannot use Keystone to auth S3 requests, only swift, so for the time being we'll have
 #to manually provision accounts for RGW in the radosgw-admin tool
 
-apt_repository "ceph-fcgi" do
-    uri node['bcpc']['repos']['ceph-fcgi']
-    distribution node['lsb']['codename']
-    components ["main"]
-    key "ceph-release.key"
-end
-
-apt_repository "ceph-apache" do
-    uri node['bcpc']['repos']['ceph-apache']
-    distribution node['lsb']['codename']
-    components ["main"]
-    key "ceph-release.key"
-end
-
 package "radosgw" do
    action :upgrade
 end
