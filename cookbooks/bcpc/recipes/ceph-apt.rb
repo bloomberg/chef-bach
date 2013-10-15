@@ -22,3 +22,18 @@ apt_repository "ceph" do
     components ["main"]
     key "ceph-release.key"
 end
+
+apt_repository "ceph-fcgi" do
+    uri node['bcpc']['repos']['ceph-fcgi']
+    distribution node['lsb']['codename']
+    components ["main"]
+    key "ceph-autobuild2.key"
+end
+
+apt_repository "ceph-apache" do
+    uri node['bcpc']['repos']['ceph-apache']
+    distribution node['lsb']['codename']
+    components ["main"]
+    key "ceph-autobuild2.key"
+end
+
