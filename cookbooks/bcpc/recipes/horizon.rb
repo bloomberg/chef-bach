@@ -2,7 +2,7 @@
 # Cookbook Name:: bcpc
 # Recipe:: horizon
 #
-# Copyright 2013, Bloomberg L.P.
+# Copyright 2013, Bloomberg Finance L.P.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,6 +19,8 @@
 
 include_recipe "bcpc::mysql"
 include_recipe "bcpc::openstack"
+include_recipe "bcpc::apache2"
+include_recipe "bcpc::cobalt"
 
 ruby_block "initialize-horizon-config" do
     block do
@@ -29,6 +31,17 @@ end
 
 package "openstack-dashboard" do
     action :upgrade
+end
+
+if not node["bcpc"]["vms_key"].nil?
+    package "cobalt-horizon" do
+        action :upgrade
+        options "-o APT::Install-Recommends=0 -o Dpkg::Options::='--force-confnew'"
+    end
+    package "cobalt-novaclient" do
+        action :upgrade
+        options "-o APT::Install-Recommends=0 -o Dpkg::Options::='--force-confnew'"
+    end
 end
 
 package "openstack-dashboard-ubuntu-theme" do
@@ -57,9 +70,7 @@ end
 
 bash "apache-enable-openstack-dashboard" do
     user "root"
-    code <<-EOH
-         a2ensite openstack-dashboard
-    EOH
+    code "a2ensite openstack-dashboard"
     not_if "test -r /etc/apache2/sites-enabled/openstack-dashboard"
     notifies :restart, "service[apache2]", :delayed
 end

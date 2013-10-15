@@ -37,7 +37,7 @@ function getvminfo {
 	fi
 	# there's no IP address for the ILO for VMs, instead use
 	# VirtualBox's graphical console
-	$ILOIPADDR="-"
+	ILOIPADDR="-"
 	echo "$1 $MAC1 $IP $ILOIPADDR $DOMAIN unknown"
 }
 

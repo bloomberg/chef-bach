@@ -2,7 +2,7 @@
 # Cookbook Name:: bcpc
 # Recipe:: keystone
 #
-# Copyright 2013, Bloomberg L.P.
+# Copyright 2013, Bloomberg Finance L.P.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@
 
 include_recipe "bcpc::mysql"
 include_recipe "bcpc::openstack"
+include_recipe "bcpc::apache2"
 
 ruby_block "initialize-keystone-config" do
     block do
@@ -27,6 +28,12 @@ ruby_block "initialize-keystone-config" do
         make_config('keystone-admin-token', secure_password)
         make_config('keystone-admin-user', "admin")
         make_config('keystone-admin-password', secure_password)
+        if get_config('keystone-pki-certificate').nil? then
+            temp = %x[openssl req -new -x509 -passout pass:temp_passwd -newkey rsa:2048 -out /dev/stdout -keyout /dev/stdout -days 1095 -subj "/C=#{node[:bcpc][:country]}/ST=#{node[:bcpc][:state]}/L=#{node[:bcpc][:location]}/O=#{node[:bcpc][:organization]}/OU=#{node[:bcpc][:region_name]}/CN=keystone.#{node[:bcpc][:domain_name]}/emailAddress=#{node[:bcpc][:admin_email]}"]
+            make_config('keystone-pki-private-key', %x[echo "#{temp}" | openssl rsa -passin pass:temp_passwd -out /dev/stdout])
+            make_config('keystone-pki-certificate', %x[echo "#{temp}" | openssl x509])
+        end
+
     end
 end
 
@@ -39,7 +46,23 @@ template "/etc/keystone/keystone.conf" do
     owner "keystone"
     group "keystone"
     mode 00600
-    notifies :restart, "service[keystone]", :immediately
+    notifies :restart, "service[apache2]", :delayed
+end
+
+template "/etc/keystone/cert.pem" do
+    source "keystone-cert.pem.erb"
+    owner "keystone"
+    group "keystone"
+    mode 00644
+    notifies :restart, "service[apache2]", :delayed
+end
+
+template "/etc/keystone/key.pem" do
+    source "keystone-key.pem.erb"
+    owner "keystone"
+    group "keystone"
+    mode 00600
+    notifies :restart, "service[apache2]", :delayed
 end
 
 template "/root/adminrc" do
@@ -56,9 +79,37 @@ template "/root/keystonerc" do
     mode 00600
 end
 
+%w{main admin}.each do |api|
+    template "/opt/openstack/keystone-#{api}.cgi" do
+        source "wsgi-keystone.erb"
+        owner "root"
+        group "root"
+        mode 00755
+        variables(:name => api)
+    end
+end
+
+template "/etc/apache2/sites-available/keystone" do
+    source "apache-keystone.conf.erb"
+    owner "root"
+    group "root"
+    mode 00644
+    notifies :restart, "service[apache2]", :delayed
+end
+
+bash "apache-enable-keystone" do
+    user "root"
+    code "a2ensite keystone"
+    not_if "test -r /etc/apache2/sites-enabled/keystone"
+    notifies :restart, "service[apache2]", :immediately
+end
+
 service "keystone" do
-    action [ :enable, :start ]
-    restart_command "service keystone stop && service keystone start && sleep 5"
+    action [ :disable, :stop ]
+end
+
+service "apache2" do
+    restart_command "service apache2 stop && service apache2 start && sleep 5"
 end
 
 ruby_block "keystone-database-creation" do
@@ -79,7 +130,7 @@ bash "keystone-database-sync" do
     action :nothing
     user "root"
     code "keystone-manage db_sync"
-    notifies :restart, "service[keystone]", :immediately
+    notifies :restart, "service[apache2]", :immediately
 end
 
 bash "keystone-service-catalog-keystone" do
@@ -88,9 +139,9 @@ bash "keystone-service-catalog-keystone" do
         . /root/keystonerc
         export KEYSTONE_ID=`keystone service-create --name=keystone --type=identity --description="Identity Service" | grep " id " | awk '{print $4}'`
         keystone endpoint-create --region #{node[:bcpc][:region_name]} --service_id $KEYSTONE_ID \
-            --publicurl   "http://#{node[:bcpc][:management][:vip]}:5000/v2.0" \
-            --adminurl    "http://#{node[:bcpc][:management][:vip]}:35357/v2.0" \
-            --internalurl "http://#{node[:bcpc][:management][:vip]}:5000/v2.0"
+            --publicurl   "https://#{node[:bcpc][:management][:vip]}:5000/v2.0" \
+            --adminurl    "https://#{node[:bcpc][:management][:vip]}:35357/v2.0" \
+            --internalurl "https://#{node[:bcpc][:management][:vip]}:5000/v2.0"
     EOH
     only_if ". /root/keystonerc; keystone service-get keystone 2>&1 | grep -e '^No service'"
 end

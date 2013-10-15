@@ -2,16 +2,78 @@
 
 These instructions assume that you basically know what you are doing.  =)
 
+### 20131003
+
+Keystone is now serviced over HTTPS on port 5000.  In particular, a new subjectAltName
+field containing the VIP IP address was added to the SSL certificate.
+
+On all headnodes:
+
+```
+# service nova-api stop
+# service keystone stop
+# service apache2 stop
+```
+
+On one headnode:
+```
+# . /root/keystonerc
+# keystone service-delete keystone
+```
+
+Remove the ``ssl-certificate`` and ``ssl-private-key`` fields from the databag - eg:
+
+```
+# EDITOR=vi knife data bag edit configs Test-Laptop
+```
+
+Then, you can run ``chef-client`` to regenerate and redeploy the new certs.
+
+### 20131002
+To upgrade Power DNS to <vm name>.<tenant name>.<region name>.<domain name>:
+Warning: only '&', '_' and <space> are translated for project names to domain names.
+
+Easiest, unless you put custom information in:
+* ``pdns.records_static``
+* ``pdns.domains``
+* The entire ``pdns`` database
+
+Simply run ``DROP DATABASE pdns`` and re-run chef-client.
+
+If you have custom DNS data in your pdns database, you can roughly do the following:
+
+* Migrate MySQL tables and DB to use UTF8 instead of Sweedish collation in the pdns DB:
+```
+ALTER DATABASE pdns DEFAULT COLLATE utf8_general_ci;
+ALTER TABLE records_static CHARACTER SET utf8 COLLATE utf8_general_ci;
+ALTER TABLE records_static CONVERT TO CHARACTER SET utf8 COLLATE utf8_general_ci;
+ALTER TABLE domains CHARACTER SET utf8 COLLATE utf8_general_ci;
+ALTER TABLE domains CONVERT TO CHARACTER SET utf8 COLLATE utf8_general_ci;
+ALTER TABLE domains RENAME TO domains_static;
+DROP VIEW records;
+```
+
+Then re-run chef-client to get the new required MySQL views and function.
+
+#### 20130928
+
+On Ubuntu nodes, network interfaces are now templated rather than hard-coded
+upon first-run.  Delete the relevant entries from /etc/network/interfaces and
+it will be replaced by the templated files in /etc/network/interfaces.d/
+
+Beaver (on all head/worker nodes) and logstash (head nodes only) has been
+replaced by fluentd.  You can safely remove those packages now.
+
 #### 20130824
 
 Automatic boot-from-volumes patches in Grizzly is added back in to the tree.
 You must upload RAW images again.  For example, to convert the public
-Ubuntu 12.04.2 QCOW2 image to RAW:
+Ubuntu 12.04 QCOW2 image to RAW:
 
 ```
-$ curl -O http://cloud-images.ubuntu.com/releases/precise/release/ubuntu-12.04.2-server-cloudimg-amd64-disk1.img
-$ qemu-img convert -O raw ubuntu-12.04.2-server-cloudimg-amd64-disk1.img ubuntu-12.04.2-server-cloudimg-amd64-disk1.raw
-$ glance image-create --name='Ubuntu 12.04.2 x86_64' --is-public=True --container-format=bare --disk-format=raw --file ubuntu-12.04.2-server-cloudimg-amd64-disk1.raw
+$ curl -O http://cloud-images.ubuntu.com/releases/precise/release/ubuntu-12.04-server-cloudimg-amd64-disk1.img
+$ qemu-img convert -O raw ubuntu-12.04-server-cloudimg-amd64-disk1.img ubuntu-12.04-server-cloudimg-amd64-disk1.raw
+$ glance image-create --name='Ubuntu 12.04 x86_64' --is-public=True --container-format=bare --disk-format=raw --file ubuntu-12.04-server-cloudimg-amd64-disk1.raw
 ```
 
 Apache httpd site configurations were switched to use the site model rather

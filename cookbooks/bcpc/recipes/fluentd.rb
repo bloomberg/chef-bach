@@ -2,7 +2,7 @@
 # Cookbook Name:: bcpc
 # Recipe:: fluentd
 #
-# Copyright 2013, Bloomberg L.P.
+# Copyright 2013, Bloomberg Finance L.P.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -44,8 +44,8 @@ end
         mode 00444
     end
     bash "install-fluent-plugin-#{pkg}" do
-		code "/usr/lib/fluent/ruby/bin/fluent-gem install /tmp/fluent-plugin-#{pkg}.gem"
-		not_if "/usr/lib/fluent/ruby/bin/fluent-gem list --local | grep fluent-plugin-#{pkg}"
+    code "/usr/lib/fluent/ruby/bin/fluent-gem install --local /tmp/fluent-plugin-#{pkg}.gem"
+    not_if "/usr/lib/fluent/ruby/bin/fluent-gem list --local | grep fluent-plugin-#{pkg}"
     end
 end
 

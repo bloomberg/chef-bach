@@ -2,7 +2,7 @@
 # Cookbook Name:: bcpc
 # Recipe:: openstack
 #
-# Copyright 2013, Bloomberg L.P.
+# Copyright 2013, Bloomberg Finance L.P.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -41,4 +41,10 @@ template "/usr/local/bin/hup_openstack" do
     mode 0755
     owner "root"
     group "root"
+end
+
+directory "/opt/openstack" do
+    owner "root"
+    group "root"
+    mode 00755
 end

@@ -2,7 +2,7 @@
 # Cookbook Name:: bcpc
 # Recipe:: networking
 #
-# Copyright 2013, Bloomberg L.P.
+# Copyright 2013, Bloomberg Finance L.P.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -77,7 +77,7 @@ end
 bash "set-tcp-keepalive-timeout" do
     user "root"
     code <<-EOH
-        echo "1" > /proc/sys/net/ipv4/tcp_keepalive_time
+        echo "1800" > /proc/sys/net/ipv4/tcp_keepalive_time
         sed --in-place '/^net.ipv4.tcp_keepalive_time/d' /etc/sysctl.conf
         echo 'net.ipv4.tcp_keepalive_time=1800' >> /etc/sysctl.conf
     EOH
@@ -107,53 +107,89 @@ bash "enable-8021q" do
     not_if "grep -e '^8021q' /etc/modules"
 end
 
+directory "/etc/network/interfaces.d" do
+  owner "root"
+  group "root"
+  mode 00755
+  action :create
+end
+
+bash "setup-interfaces-source" do
+  user "root"
+  code <<-EOH
+    echo "source /etc/network/interfaces.d/iface-*" >> /etc/network/interfaces
+  EOH
+  not_if "grep '^source /etc/network/interfaces.d/' /etc/network/interfaces"
+end
+
+template "/etc/network/interfaces.d/iface-#{node[:bcpc][:management][:interface]}" do
+  source "network.iface.erb"
+  owner "root"
+  group "root"
+  mode 00644
+  variables(
+    :interface => node[:bcpc][:management][:interface],
+    :ip => node[:bcpc][:management][:ip],
+    :netmask => node[:bcpc][:management][:netmask],
+    :gateway => node[:bcpc][:management][:gateway],
+    :metric => 100
+  )
+end
+
+template "/etc/network/interfaces.d/iface-#{node[:bcpc][:storage][:interface]}" do
+  source "network.iface.erb"
+  owner "root"
+  group "root"
+  mode 00644
+  variables(
+    :interface => node[:bcpc][:storage][:interface],
+    :ip => node[:bcpc][:storage][:ip],
+    :netmask => node[:bcpc][:storage][:netmask],
+    :gateway => node[:bcpc][:storage][:gateway],
+    :metric => 300
+  )
+end
+
+# set up the DNS resolvers
+# we want the VIP which will be running powerdns to be first on the list
+# but the first entry in our master list is also the only one in pdns,
+# so make that the last entry to minimize double failures when upstream dies.
+resolvers=node[:bcpc][:dns_servers].dup
+resolvers.push resolvers.shift
+resolvers.unshift node[:bcpc][:management][:vip]
+
+template "/etc/network/interfaces.d/iface-#{node[:bcpc][:floating][:interface]}" do
+  source "network.iface.erb"
+  owner "root"
+  group "root"
+  mode 00644
+  variables(
+    :interface => node[:bcpc][:floating][:interface],
+    :ip => node[:bcpc][:floating][:ip],
+    :netmask => node[:bcpc][:floating][:netmask],
+    :gateway => node[:bcpc][:floating][:gateway],
+    :dns => resolvers,
+    :metric => 200
+  )
+end
+
 bash "interface-mgmt-make-static-if-dhcp" do
     user "root"
     code <<-EOH
         sed --in-place '/\\(.*#{node[:bcpc][:management][:interface]}.*\\)/d' /etc/network/interfaces
-        echo >> /etc/network/interfaces
-        echo "auto #{node[:bcpc][:management][:interface]}" >> /etc/network/interfaces
-        echo "iface #{node[:bcpc][:management][:interface]} inet static" >> /etc/network/interfaces
-        echo "  address #{node[:bcpc][:management][:ip]}" >> /etc/network/interfaces
-        echo "  netmask #{node[:bcpc][:management][:netmask]}" >> /etc/network/interfaces
-        echo "  gateway #{node[:bcpc][:management][:gateway]}" >> /etc/network/interfaces
-        echo "  metric 100" >> /etc/network/interfaces
-        ifup #{node[:bcpc][:management][:interface]}
+        resolvconf -d #{node[:bcpc][:management][:interface]}.dhclient
     EOH
     only_if "cat /etc/network/interfaces | grep #{node[:bcpc][:management][:interface]} | grep dhcp"
 end
 
-bash "interface-storage" do
+%w{ management storage floating }.each do |iface|
+  bash "#{iface} up" do
     user "root"
     code <<-EOH
-        echo >> /etc/network/interfaces
-        echo "auto #{node[:bcpc][:storage][:interface]}" >> /etc/network/interfaces
-        echo "iface #{node[:bcpc][:storage][:interface]} inet static" >> /etc/network/interfaces
-        echo "  address #{node[:bcpc][:storage][:ip]}" >> /etc/network/interfaces
-        echo "  netmask #{node[:bcpc][:storage][:netmask]}" >> /etc/network/interfaces
-        echo "  gateway #{node[:bcpc][:storage][:gateway]}" >> /etc/network/interfaces
-        echo "  metric 300" >> /etc/network/interfaces
-        ifup #{node[:bcpc][:storage][:interface]}
+      ifup #{node[:bcpc][iface][:interface]}
     EOH
-    not_if "ifquery --list | grep #{node[:bcpc][:storage][:interface]}"
-end
-
-bash "interface-floating" do
-    user "root"
-    code <<-EOH
-        echo >> /etc/network/interfaces
-        echo "auto #{node[:bcpc][:floating][:interface]}" >> /etc/network/interfaces
-        echo "iface #{node[:bcpc][:floating][:interface]} inet static" >> /etc/network/interfaces
-        echo "  address #{node[:bcpc][:floating][:ip]}" >> /etc/network/interfaces
-        echo "  netmask #{node[:bcpc][:floating][:netmask]}" >> /etc/network/interfaces
-        echo "  gateway #{node[:bcpc][:floating][:gateway]}" >> /etc/network/interfaces
-        echo "  dns-nameservers #{node[:bcpc][:management][:vip]} #{(n=node[:bcpc][:dns_servers].dup; n.push n.shift).join(' ')}" >> /etc/network/interfaces
-        echo "  dns-search #{node[:bcpc][:domain_name]}" >> /etc/network/interfaces
-        echo "  metric 200" >> /etc/network/interfaces
-        ifup #{node[:bcpc][:floating][:interface]}
-        resolvconf -d #{node[:bcpc][:management][:interface]}.dhclient
-    EOH
-    not_if "ifquery --list | grep #{node[:bcpc][:floating][:interface]}"
+    not_if "ip link show up | grep #{node[:bcpc][iface][:interface]}"
+  end
 end
 
 bash "routing-management" do
@@ -278,3 +314,5 @@ template "/var/www/index.html" do
     group "root"
     mode 00644
 end
+
+include_recipe "bcpc::apache2"

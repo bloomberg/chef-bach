@@ -3,6 +3,10 @@
 #  General configuration for this cluster
 #
 ###########################################
+default['bcpc']['country'] = "US"
+default['bcpc']['state'] = "NY"
+default['bcpc']['location'] = "New York"
+default['bcpc']['organization'] = "Bloomberg"
 # Can be "folsom" or "grizzly"
 default['bcpc']['openstack_release'] = "grizzly"
 # Can be "updates" or "proposed"
@@ -13,6 +17,8 @@ default['bcpc']['virt_type'] = "kvm"
 default['bcpc']['region_name'] = node.chef_environment
 # Domain name that will be used for DNS
 default['bcpc']['domain_name'] = "bcpc.example.com"
+# Key if Cobalt+VMS is to be used
+default['bcpc']['vms_key'] = nil
 
 ###########################################
 #
@@ -69,6 +75,7 @@ default['bcpc']['repos']['hwraid'] = "http://hwraid.le-vert.net/ubuntu"
 default['bcpc']['repos']['fluentd'] = "http://packages.treasure-data.com/precise"
 default['bcpc']['repos']['ceph-apache'] = "http://gitbuilder.ceph.com/apache2-deb-precise-x86_64-basic/"
 default['bcpc']['repos']['ceph-fcgi'] = "http://gitbuilder.ceph.com/libapache-mod-fastcgi-deb-precise-x86_64-basic/"
+default['bcpc']['repos']['gridcentric'] = "http://downloads.gridcentric.com/packages/%s/%s/ubuntu"
 
 ###########################################
 #
@@ -86,6 +93,8 @@ default['bcpc']['zabbix_dbname'] = "zabbix"
 
 default['bcpc']['cinder_rbd_pool'] = "volumes"
 default['bcpc']['glance_rbd_pool'] = "images"
+default['bcpc']['vms_disk_pool'] = "vmsdisk"
+default['bcpc']['vms_mem_pool'] = "vmsmem"
 
 default['bcpc']['admin_tenant'] = "AdminTenant"
 default['bcpc']['admin_role'] = "Admin"
