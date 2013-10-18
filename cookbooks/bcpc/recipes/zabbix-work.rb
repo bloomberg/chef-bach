@@ -1,6 +1,6 @@
 #
 # Cookbook Name:: bcpc
-# Recipe:: zabbix-agent
+# Recipe:: zabbix-work
 #
 # Copyright 2013, Bloomberg Finance L.P.
 #
