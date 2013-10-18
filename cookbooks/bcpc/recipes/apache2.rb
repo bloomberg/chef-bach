@@ -17,6 +17,8 @@
 # limitations under the License.
 #
 
+include_recipe "bcpc::ceph-common"
+
 package "apache2" do
    action :upgrade
    version "2.2.22-1ubuntu1-inktank1"
