@@ -193,7 +193,7 @@ listen radosgw-passthru-http  <%="#{node[:bcpc][:management][:vip]}:#{node[:bcpc
   option tcplog
   option httpchk GET /
   http-check expect status 200
-  source <%="#{node[:bcpc][:floating][:ip]}"%>
+  source <%="#{node[:bcpc][:floating][:vip]}"%>
 <% @all_servers.each do |server| -%>
   <%= "server #{server.hostname} #{server[:bcpc][:floating][:ip]}:#{server[:bcpc][:ports][:apache][:radosgw]} check inter 1s rise 1 fall 1 observe layer7" %>
 <% end -%>
@@ -205,7 +205,7 @@ listen radosgw-passthru-https  <%="#{node[:bcpc][:management][:vip]}:#{node[:bcp
   option tcpka
   option httpchk GET /
   http-check expect status 200
-  source <%="#{node[:bcpc][:floating][:ip]}"%>
+  source <%="#{node[:bcpc][:floating][:vip]}"%>
 <% @all_servers.each do |server| -%>
   <%= "server #{server.hostname} #{server[:bcpc][:floating][:ip]}:#{server[:bcpc][:ports][:apache][:radosgw_https]} check port #{server[:bcpc][:ports][:apache][:radosgw]} inter 1s rise 1 fall 1 observe layer4" %>
 <% end -%>
