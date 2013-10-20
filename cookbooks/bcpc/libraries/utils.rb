@@ -74,13 +74,6 @@ def get_head_nodes
 	return (results == []) ? [node] : results
 end
 
-def get_work_nodes
-        all = Set.new get_all_nodes
-        head = Set.new get_head_nodes
-        results = (all - head).to_a
-        return (results = []) ? [node] : results
-end
-
 #pgs work best when a power of 2, use this to calculate the number of pgs in a pool
 #base on a multiplier (which should never be 0)
 def get_num_pgs(multiplier) 
