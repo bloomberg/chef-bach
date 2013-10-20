@@ -48,6 +48,7 @@ default['bcpc']['storage']['netmask'] = "255.255.255.0"
 default['bcpc']['storage']['cidr'] = "100.100.0.0/24"
 default['bcpc']['storage']['gateway'] = "100.100.0.1"
 
+default['bcpc']['floating']['vip'] = "192.168.43.15"
 default['bcpc']['floating']['netmask'] = "255.255.255.0"
 default['bcpc']['floating']['cidr'] = "192.168.43.0/24"
 default['bcpc']['floating']['gateway'] = "192.168.43.2"
