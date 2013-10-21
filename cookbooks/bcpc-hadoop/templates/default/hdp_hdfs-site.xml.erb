@@ -12,12 +12,12 @@
 
   <property>
     <name>dfs.name.dir</name>
-    <value>/disk1/dfs/namedir,/disk2/dfs/namedir,/disk3/dfs/namedir,/disk4/dfs/namedir</value>
+    <value><%=@mounts.map{ |d| "/disk/#{d}/dfs/namedir" }.join(",")%></value>
   </property>
 
   <property>
     <name>dfs.namenode.name.dir</name>
-    <value>/disk1/dfs/nn,/disk2/dfs/nn,/disk3/dfs/nn,/disk4/dfs/nn</value>
+    <value><%=@mounts.map{ |d| "/disk/#{d}/dfs/nn" }.join(",")%></value>
   </property>
 
   <property>
@@ -27,12 +27,12 @@
 
   <property>
     <name>dfs.ha.namenodes.bcpc</name>
-    <value>namenode0,namenode1</value>
+    <value><%=@hh_hosts.map{ |s| "namenode#{s[:bcpc][:node_number]}" }.join(",") %></value>
   </property>
 
   <property>
     <name>dfs.datanode.data.dir</name>
-    <value>/disk1/dfs/dn,/disk2/dfs/dn,/disk3/dfs/dn,/disk4/dfs/dn</value>
+    <value><%=@mounts.map{ |d| "/disk/#{d}/dfs/dn" }.join(",")%></value>
   </property>
 
   <property>
@@ -42,21 +42,21 @@
 
   <% @hh_hosts.each do |h| %>	
     <property>
-      <name>dfs.namenode.rpc-address.bcpc.namenode<%=h[:bcpc][:namenode][:id] %></name>
+      <name>dfs.namenode.rpc-address.bcpc.namenode<%=h[:bcpc][:node_number] %></name>
       <value><%=float_host(h[:hostname]) %>:8020</value>
     </property>
   <% end %>
 
   <% @hh_hosts.each do |h| %>	
     <property>
-      <name>dfs.namenode.http-address.bcpc.namenode<%=h[:bcpc][:namenode][:id] %></name>
+      <name>dfs.namenode.http-address.bcpc.namenode<%=h[:bcpc][:node_number] %></name>
       <value><%=float_host(h[:hostname]) %>:50070</value>
     </property>
   <% end %>
 
   <% @hh_hosts.each do |h| %>	
     <property>
-      <name>dfs.namenode.https-address.bcpc.namenode<%=h[:bcpc][:namenode][:id] %></name>
+      <name>dfs.namenode.https-address.bcpc.namenode<%=h[:bcpc][:node_number] %></name>
       <value><%=float_host(h[:hostname]) %>:50080</value>
     </property>
   <% end %>
@@ -83,7 +83,7 @@
 
   <property>
     <name>dfs.journalnode.edits.dir</name>
-    <value><%= node[:bcpc][:hadoop][:journal][:paths] %></value>
+    <value><%="/disk/#{@mounts[1]}/dfs/jn"%></value>
   </property>
 
   <property>

@@ -5,10 +5,6 @@ package "zookeeper-server" do
   action :upgrade
 end
 
-
-mgmt_hostaddr = IPAddr.new(node['bcpc']['management']['ip'])<<24>>24
-node[:bcpc][:zookeeper][:id] = mgmt_hostaddr.to_i.to_s
-
 directory "/var/lib/zookeeper" do
   recursive true
   owner "zookeeper"

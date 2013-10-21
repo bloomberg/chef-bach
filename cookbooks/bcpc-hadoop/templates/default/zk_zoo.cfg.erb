@@ -28,6 +28,6 @@ dataDir=/var/lib/zookeeper
 clientPort=2181
 
 <% @quorum_hosts.each do |s| %> 
-  <%= "server.#{s[:bcpc][:zookeeper][:id]}=#{float_host(s[:hostname])}:2888:3888" %>
+<%="server.#{s[:bcpc][:node_number]}=#{float_host(s[:hostname])}:2888:3888" %>
 <% end %>
 

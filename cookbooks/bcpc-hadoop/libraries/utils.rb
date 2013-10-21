@@ -85,11 +85,21 @@ def get_hadoop_heads
 end
 
 def get_quorum_hosts
-  results = search(:node, "role:BCPC-Hadoop-Quorumnode AND chef_environment:#{node.chef_environment}")
+  results = search(:node, "(role:BCPC-Hadoop-Quorumnode or role:BCPC-Hadoop-Head) AND chef_environment:#{node.chef_environment}")
   if results.any?{|x| x.hostname == node.hostname}
     results.map!{|x| x.hostname == node.hostname ? node : x}
   else
     results.push(node) if node[:roles].include? "BCPC-Hadoop-Quorumnode"
+  end
+  return results
+end
+
+def get_hadoop_workers
+  results = search(:node, "role:BCPC-Hadoop-Worker AND chef_environment:#{node.chef_environment}")
+  if results.any?{|x| x.hostname == node.hostname}
+    results.map!{|x| x.hostname == node.hostname ? node : x}
+  else
+    results.push(node) if node[:roles].include? "BCPC-Hadoop-Worker"
   end
   return results
 end

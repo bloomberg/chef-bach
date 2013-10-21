@@ -6,12 +6,9 @@
   end
 end
 
-mgmt_hostaddr = IPAddr.new(node['bcpc']['management']['ip'])<<24>>24
-node[:bcpc][:namenode][:id] = mgmt_hostaddr
+node[:bcpc][:hadoop][:mounts].each do |i|
 
-(1..4).each do |i|
-
-  directory "/disk#{i}/dfs/nn" do
+  directory "/disk/#{i}/dfs/nn" do
     owner "hdfs"
     group "hdfs"
     mode 0700
@@ -19,7 +16,7 @@ node[:bcpc][:namenode][:id] = mgmt_hostaddr
     recursive true
   end
 
-  directory "/disk#{i}/dfs/namedir" do
+  directory "/disk/#{i}/dfs/namedir" do
     owner "hdfs"
     group "hdfs"
     mode 0700
@@ -29,34 +26,39 @@ node[:bcpc][:namenode][:id] = mgmt_hostaddr
 
 end
 
+if not File.exists?("/disk/#{node[:bcpc][:hadoop][:mount][0]}/dfs/nn/current/VERSION") then 
+  if get_hadoop_heads.length > 1 and not node[:bcpc][:hadoop][:override_standby] then
+    bash "bootstrap standby" do
+      code "hdfs namenode -bootstrapStandby"
+      user "hdfs"
+      action :run
+    end
 
-bash "format namenode" do
-  code "hadoop namenode -format"
-  user "hdfs"
-  action :run
-  not_if { File.exists?("/disk1/dfs/namedir/VERSION") or File.exists?("/disk1/dfs/nn/current/VERSION") }
-end
+  else
 
+    bash "format namenode" do
+      code "hadoop namenode -format"
+      user "hdfs"
+      action :run
+    end
 
-bash "bootstrap standby" do
-  code "hdfs namenode -bootstrapStandby"
-  user "hdfs"
-  action :run
-end
+    bash "format-zk-hdfs-ha" do
+      code "hdfs zkfc -formatZK"
+      action :run
+      user "hdfs"
+    end
 
-
-service "hadoop-hdfs-namenode" do
-  action [:enable, :restart]
-end
+  end 
+end 
 
 service "hadoop-hdfs-zkfc" do
   action [:enable, :restart]
 end
 
-bash "format-zk-hdfs-ha" do
-  code "hdfs zkfc -formatZK"
-  action :run
-  user "hdfs"
+service "hadoop-hdfs-namenode" do
+  action [:enable, :restart]
 end
+
+
 
 
