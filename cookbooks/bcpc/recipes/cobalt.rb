@@ -2,7 +2,7 @@
 # Cookbook Name:: bcpc
 # Recipe:: cobalt
 #
-# Copyright 2013, Bloomberg L.P.
+# Copyright 2013, Bloomberg Finance L.P.
 # Copyright 2013, Gridcentric Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
