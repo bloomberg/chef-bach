@@ -57,9 +57,9 @@ bash "pre-alloc-rgwspools" do
     flags '-x'
     pools = %w{ .rgw.buckets .log .rgw .rgw.control .users.uid .users.email .users .usage .intent-log }
     code pools.map { |pool|
-    "ceph osd pool create #{pool} #{get_num_pgs(node[:bcpc][:rgw_pool_multiplier][pool])}"
+    "ceph osd pool create #{pool} #{get_num_pgs(node[:bcpc][:rgw_pool_multiplier][pool])};ceph osd pool set #{pool} size #{node[:bcpc][:ceph_s3_replica_count]}"
     }.join("\n")
-    not_if "rados df | grep .rgw.bucktes"
+    not_if "rados df | grep .rgw.buckets"
 end
 
 file "/var/www/s3gw.fcgi" do

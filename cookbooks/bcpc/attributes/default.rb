@@ -27,6 +27,7 @@ default['bcpc']['vms_key'] = nil
 ###########################################
 default['bcpc']['ceph_disks'] = [ "sdb", "sdc", "sdd", "sde" ]
 default['bcpc']['ceph_node_count'] = 3
+default['bcpc']['ceph_s3_replica_count'] = 3
 default['bcpc']['management']['interface'] = "eth0"
 default['bcpc']['storage']['interface'] = "eth1"
 default['bcpc']['floating']['interface'] = "eth2"
