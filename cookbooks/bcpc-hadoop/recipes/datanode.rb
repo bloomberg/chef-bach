@@ -18,14 +18,16 @@ node[:bcpc][:hadoop][:mounts].each do |i|
 end
 
 %w{hadoop-yarn-nodemanager hadoop-hdfs-datanode hadoop-mapreduce}.each do |svc|
-  service svc do 
-    action [:enable, :restart]
+  service svc do
+    action :enable
+    subscribes :restart, "template[/etc/hadoop/conf/hdfs-site.xml]", :delayed
+    subscribes :restart, "template[/etc/hadoop/conf/yarn-site.xml]", :delayed
   end
 end
 
 
 ###
-# We only want to execute this once, as it is setup of dirs within HDFS. 
+# We only want to execute this once, as it is setup of dirs within HDFS.
 # We'd prefer to do it after all nodes are members of the HDFS system
 #
 c1 = bash "create-hdfs-temp" do

@@ -11,7 +11,7 @@ node[:bcpc][:hadoop][:mounts].each do |i|
   directory "/disk/#{i}/dfs/nn" do
     owner "hdfs"
     group "hdfs"
-    mode 0700
+    mode 0755
     action :create
     recursive true
   end
@@ -26,37 +26,45 @@ node[:bcpc][:hadoop][:mounts].each do |i|
 
 end
 
-if not File.exists?("/disk/#{node[:bcpc][:hadoop][:mount][0]}/dfs/nn/current/VERSION") then 
-  if get_hadoop_heads.length > 1 and not node[:bcpc][:hadoop][:override_standby] then
-    bash "bootstrap standby" do
-      code "hdfs namenode -bootstrapStandby"
-      user "hdfs"
-      action :run
-    end
 
-  else
+if node[:bcpc][:hadoop][:standby] then
+#    bash "bootstrap standby" do
+#      code "hdfs namenode -bootstrapStandby"
+#      user "hdfs"
+#      action :run
+#    end
 
-    bash "format namenode" do
-      code "hadoop namenode -format"
-      user "hdfs"
-      action :run
-    end
+bash "work around retarded -bootstrapStandby bug" do
+   creates "/disk/#{node[:bcpc][:hadoop][:mounts][0]}/dfs/nn/current/VERSION"
+end
 
-    bash "format-zk-hdfs-ha" do
-      code "hdfs zkfc -formatZK"
-      action :run
-      user "hdfs"
-    end
+else
 
-  end 
-end 
+  bash "format namenode" do
+    code "hdfs namenode -format"
+    user "hdfs"
+    action :run
+    creates "/disk/#{node[:bcpc][:hadoop][:mounts][0]}/dfs/nn/current/VERSION"
+  end
+
+
+end
+
+bash "format-zk-hdfs-ha" do
+  code "hdfs zkfc -formatZK"
+  action :run
+  user "hdfs"
+  #TODO need a not_if or creates check in zookeeper
+end
 
 service "hadoop-hdfs-zkfc" do
-  action [:enable, :restart]
+  action :enable
+  subscribes :restart, "template[/etc/hadoop/conf/hdfs-site.xml]", :delayed
 end
 
 service "hadoop-hdfs-namenode" do
-  action [:enable, :restart]
+  action :enable
+  subscribes :restart, "template[/etc/hadoop/conf/hdfs-site.xml]", :delayed
 end
 
 

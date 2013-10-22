@@ -15,7 +15,7 @@ if node[:bcpc][:hadoop][:disks].length > 0 then
       options "noatime,nodiratime,inode64"
     end
   end
-  node[:bcpc][:hadoop][:mounts] = node[:bcpc][:hadoop][:disks]
+  node.set[:bcpc][:hadoop][:mounts] = node[:bcpc][:hadoop][:disks]
 else
   (1..4).each do |i|
     directory "/disk/#{i}" do
@@ -25,8 +25,8 @@ else
       action :create
       recursive true
     end
-  end 
-  node[:bcpc][:hadoop][:mounts] = ["1", "2", "3", "4"]
+  end
+  node.set[:bcpc][:hadoop][:mounts] = ["1", "2", "3", "4"]
 end
 
 
@@ -88,7 +88,7 @@ end
       hadoop-env.sh}.each do |t|
      template "/etc/hadoop/conf/#{t}" do
        source "hdp_#{t}.erb"
-       mode 0644 
+       mode 0644
        variables(:hh_hosts => get_hadoop_heads , :quorum_hosts => get_quorum_hosts, :mounts => node[:bcpc][:hadoop][:mounts])
      end
    end

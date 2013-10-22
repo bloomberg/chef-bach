@@ -5,16 +5,17 @@
   end
 end
 
-directory node[:bcpc][:hadoop][:journal][:path] do
+directory "/disk/#{node[:bcpc][:hadoop][:mounts][1]}/dfs/jn" do
   owner "hdfs"
   group "hdfs"
-  mode 0700
+  mode 0755
   action :create
   recursive true
 end
 
 service "hadoop-hdfs-journalnode" do
-  action [:enable, :restart]
+  action :enable
+  subscribes :restart, "template[/etc/hadoop/conf/hdfs-site.xml]", :delayed
 end
 
 
