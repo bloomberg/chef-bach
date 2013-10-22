@@ -72,6 +72,17 @@ template "/etc/nova/api-paste.ini" do
     notifies :restart, "service[nova-novncproxy]", :delayed
 end
 
+template "/etc/nova/policy.json" do
+    source "policy.json.erb"
+    owner "nova"
+    group "nova"
+    mode 00600
+    notifies :restart, "service[nova-api]", :delayed
+    notifies :restart, "service[nova-compute]", :delayed
+    notifies :restart, "service[nova-network]", :delayed
+    notifies :restart, "service[nova-novncproxy]", :delayed
+end
+
 directory "/var/lib/nova/.ssh" do
     owner "nova"
     group "nova"
