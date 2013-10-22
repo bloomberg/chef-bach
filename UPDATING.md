@@ -2,6 +2,16 @@
 
 These instructions assume that you basically know what you are doing.  =)
 
+### 20131021
+
+The Ceph S3 component relies on several pools which it will happily create using the incorrect defaults. 
+In order to tell chef the correct sizing, you must supply your anticipated number of nodes in an attribute: 
+node[:bcpc][:ceph_node_count] 
+
+It is defaulted to 3, if you want it higher, a recommended spot would be an environment file. 
+
+node[:bcpc][:ceph_s3_replica_count] can also be set if you want a number of replicas different than 3
+
 ### 20131003
 
 Keystone is now serviced over HTTPS on port 5000.  In particular, a new subjectAltName

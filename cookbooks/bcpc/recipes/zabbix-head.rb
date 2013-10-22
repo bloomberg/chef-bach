@@ -1,6 +1,6 @@
 #
 # Cookbook Name:: bcpc
-# Recipe:: zabbix-server
+# Recipe:: zabbix-head
 #
 # Copyright 2013, Bloomberg Finance L.P.
 #
@@ -140,4 +140,14 @@ bash "apache-enable-zabbix-web" do
     EOH
     not_if "test -r /etc/apache2/sites-enabled/zabbix-web"
     notifies :restart, "service[apache2]", :delayed
+end
+
+include_recipe "bcpc::zabbix-work"
+
+template "/usr/local/etc/zabbix_agentd.conf.d/zabbix-openstack.conf" do
+    source "zabbix_openstack.conf.erb"
+    owner node[:bcpc][:zabbix][:user]
+    group "root"
+    mode 00600
+    notifies :restart, "service[zabbix-agent]", :immediately
 end

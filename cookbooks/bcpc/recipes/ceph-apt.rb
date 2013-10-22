@@ -16,6 +16,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+
 apt_repository "ceph" do
     uri node['bcpc']['repos']['ceph']
     distribution node['lsb']['codename']
@@ -27,13 +28,13 @@ apt_repository "ceph-fcgi" do
     uri node['bcpc']['repos']['ceph-fcgi']
     distribution node['lsb']['codename']
     components ["main"]
-    key "ceph-autobuild2.key"
+    key "ceph-autobuild.key"
 end
 
 apt_repository "ceph-apache" do
     uri node['bcpc']['repos']['ceph-apache']
     distribution node['lsb']['codename']
     components ["main"]
-    key "ceph-autobuild2.key"
+    key "ceph-autobuild.key"
 end
 

@@ -44,8 +44,8 @@ end
         mode 00444
     end
     bash "install-fluent-plugin-#{pkg}" do
-    code "/usr/lib/fluent/ruby/bin/fluent-gem install --local /tmp/fluent-plugin-#{pkg}.gem"
-    not_if "/usr/lib/fluent/ruby/bin/fluent-gem list --local | grep fluent-plugin-#{pkg}"
+        code "/usr/lib/fluent/ruby/bin/fluent-gem install --local --no-ri --no-rdoc /tmp/fluent-plugin-#{pkg}.gem"
+        not_if "/usr/lib/fluent/ruby/bin/fluent-gem list --local | grep fluent-plugin-#{pkg}"
     end
 end
 

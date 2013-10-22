@@ -27,6 +27,7 @@ default['bcpc']['vms_key'] = nil
 ###########################################
 default['bcpc']['ceph_disks'] = [ "sdb", "sdc", "sdd", "sde" ]
 default['bcpc']['ceph_node_count'] = 3
+default['bcpc']['ceph_s3_replica_count'] = 3
 default['bcpc']['management']['interface'] = "eth0"
 default['bcpc']['storage']['interface'] = "eth1"
 default['bcpc']['floating']['interface'] = "eth2"
@@ -73,8 +74,8 @@ default['bcpc']['repos']['mysql'] = "http://repo.percona.com/apt"
 default['bcpc']['repos']['openstack'] = "http://ubuntu-cloud.archive.canonical.com/ubuntu"
 default['bcpc']['repos']['hwraid'] = "http://hwraid.le-vert.net/ubuntu"
 default['bcpc']['repos']['fluentd'] = "http://packages.treasure-data.com/precise"
-default['bcpc']['repos']['ceph-apache'] = "http://gitbuilder.ceph.com/apache2-deb-precise-x86_64-basic/"
-default['bcpc']['repos']['ceph-fcgi'] = "http://gitbuilder.ceph.com/libapache-mod-fastcgi-deb-precise-x86_64-basic/"
+default['bcpc']['repos']['ceph-apache'] = "http://gitbuilder.ceph.com/apache2-deb-precise-x86_64-basic/ref/master"
+default['bcpc']['repos']['ceph-fcgi'] = "http://gitbuilder.ceph.com/libapache-mod-fastcgi-deb-precise-x86_64-basic/ref/master"
 default['bcpc']['repos']['gridcentric'] = "http://downloads.gridcentric.com/packages/%s/%s/ubuntu"
 
 ###########################################

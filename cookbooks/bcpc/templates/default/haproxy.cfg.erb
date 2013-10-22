@@ -175,17 +175,20 @@ listen elasticsearch <%="#{node[:bcpc][:management][:vip]}"%>:9200
 <% end -%>
 
 listen radosgw-passthru-http  <%="#{node[:bcpc][:management][:vip]}:#{node[:bcpc][:ports][:haproxy][:radosgw]}"%>
-  balance source
-<% @work_servers.each do |server| -%>
-  <%= "server #{server.hostname} #{server[:bcpc][:floating][:ip]}:#{server[:bcpc][:ports][:apache][:radosgw]} check inter 1s rise 1 fall 1 observe layer4" %>
+  balance leastconn
+  option tcplog
+  source <%="#{node[:bcpc][:floating][:ip]}"%>
+<% @all_servers.each do |server| -%>
+  <%= "server #{server.hostname} #{server[:bcpc][:floating][:ip]}:#{server[:bcpc][:ports][:apache][:radosgw]} check inter 1s rise 1 fall 1 observe layer7" %>
 <% end -%>
 
 listen radosgw-passthru-https  <%="#{node[:bcpc][:management][:vip]}:#{node[:bcpc][:ports][:haproxy][:radosgw_https]}"%>
   mode tcp
-  balance source
+  balance leastconn
   option  tcplog
   option tcpka
-<% @work_servers.each do |server| -%>
-  <%= "server #{server.hostname} #{server[:bcpc][:floating][:ip]}:#{server[:bcpc][:ports][:apache][:radosgw_https]} check inter 1s rise 1 fall 1 observe layer4" %>
+  source <%="#{node[:bcpc][:floating][:ip]}"%>
+<% @all_servers.each do |server| -%>
+  <%= "server #{server.hostname} #{server[:bcpc][:floating][:ip]}:#{server[:bcpc][:ports][:apache][:radosgw_https]} check port #{server[:bcpc][:ports][:apache][:radosgw]} inter 1s rise 1 fall 1 observe layer4" %>
 <% end -%>
 

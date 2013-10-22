@@ -42,7 +42,7 @@ end
 template "/etc/haproxy/haproxy.cfg" do
     source "haproxy.cfg.erb"
     mode 00644
-	variables( :servers => get_head_nodes, :work_servers => get_work_nodes )
+	variables( :servers => get_head_nodes, :all_servers => get_all_nodes )
 	notifies :restart, "service[haproxy]", :immediately
 end
 

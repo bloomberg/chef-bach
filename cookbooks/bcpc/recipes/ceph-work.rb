@@ -1,6 +1,6 @@
 #
 # Cookbook Name:: bcpc
-# Recipe:: ceph-osd
+# Recipe:: ceph-work
 #
 # Copyright 2013, Bloomberg Finance L.P.
 #

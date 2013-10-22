@@ -1,9 +1,8 @@
-
 #
 # Cookbook Name:: bcpc
-# Recipe:: ceph-osd
+# Recipe:: ceph-rgw
 #
-# Copyright 2013, Bloomberg L.P.
+# Copyright 2013, Bloomberg Finance L.P.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -22,20 +21,11 @@
 #Note, currently rgw cannot use Keystone to auth S3 requests, only swift, so for the time being we'll have
 #to manually provision accounts for RGW in the radosgw-admin tool
 
+include_recipe "bcpc::apache2"
+
 package "radosgw" do
    action :upgrade
 end
-
-package "apache2" do
-   action :upgrade
-   version "2.2.22-1ubuntu1-inktank1"
-end
-
-package "libapache2-mod-fastcgi" do
-   action :upgrade
-   version "2.4.7~0910052141-1-inktank2"
-end
-
 
 directory "/var/lib/ceph/radosgw/ceph-radosgw.gateway" do
   owner "root"
@@ -52,7 +42,6 @@ file "/var/lib/ceph/radosgw/ceph-radosgw.gateway/done" do
   action :touch
 end
 
-
 bash "write-client-radosgw-key" do
     code <<-EOH
         RGW_KEY=`ceph --name client.admin --keyring /etc/ceph/ceph.client.admin.keyring auth get-or-create-key client.radosgw.gateway osd 'allow rwx' mon 'allow rw'`
@@ -68,11 +57,10 @@ bash "pre-alloc-rgwspools" do
     flags '-x'
     pools = %w{ .rgw.buckets .log .rgw .rgw.control .users.uid .users.email .users .usage .intent-log }
     code pools.map { |pool|
-    "ceph osd pool create #{pool} #{get_num_pgs(node[:bcpc][:rgw_pool_multiplier][pool])}"
+    "ceph osd pool create #{pool} #{get_num_pgs(node[:bcpc][:rgw_pool_multiplier][pool])};ceph osd pool set #{pool} size #{node[:bcpc][:ceph_s3_replica_count]}"
     }.join("\n")
-    not_if "rados df | grep .rgw.bucktes"
+    not_if "rados df | grep .rgw.buckets"
 end
-
 
 file "/var/www/s3gw.fcgi" do
     owner "root"
@@ -81,7 +69,7 @@ file "/var/www/s3gw.fcgi" do
     content "#!/bin/sh\n exec /usr/bin/radosgw -c /etc/ceph/ceph.conf -n client.radosgw.gateway"
 end
 
-template "/etc/apache2/sites-enabled/ceph-web.conf" do
+template "/etc/apache2/sites-available/radosgw" do
     source "apache-radosgw.conf.erb"
     owner "root"
     group "root"
@@ -89,7 +77,13 @@ template "/etc/apache2/sites-enabled/ceph-web.conf" do
     notifies :restart, "service[apache2]", :delayed
 end
 
+bash "apache-enable-radosgw" do
+    user "root"
+    code "a2ensite radosgw"
+    not_if "test -r /etc/apache2/sites-enabled/radosgw"
+    notifies :restart, "service[apache2]", :immediately
+end
+
 execute "radosgw-all-starter" do
     command "start radosgw-all-starter"
 end
-
