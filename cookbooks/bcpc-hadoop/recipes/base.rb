@@ -77,32 +77,45 @@ end
    ssl-server.xml
    yarn-site.xml
   }.each do |t|
-     template "/etc/hadoop/conf/#{t}" do
-       source "hdp_#{t}.erb"
-       mode 0644
-       variables(:hh_hosts => get_hadoop_heads , :quorum_hosts => get_quorum_hosts, :mounts => node[:bcpc][:hadoop][:mounts])
-     end
+   template "/etc/hadoop/conf/#{t}" do
+     source "hdp_#{t}.erb"
+     mode 0644
+     variables(:hh_hosts => get_hadoop_heads , :quorum_hosts => get_quorum_hosts, :mounts => node[:bcpc][:hadoop][:mounts])
    end
+end
 
-   %w{yarn-env.sh
-      hadoop-env.sh}.each do |t|
-     template "/etc/hadoop/conf/#{t}" do
-       source "hdp_#{t}.erb"
-       mode 0644
-       variables(:hh_hosts => get_hadoop_heads , :quorum_hosts => get_quorum_hosts, :mounts => node[:bcpc][:hadoop][:mounts])
-     end
-   end
+%w{yarn-env.sh
+  hadoop-env.sh}.each do |t|
+ template "/etc/hadoop/conf/#{t}" do
+   source "hdp_#{t}.erb"
+   mode 0644
+   variables(:hh_hosts => get_hadoop_heads , :quorum_hosts => get_quorum_hosts, :mounts => node[:bcpc][:hadoop][:mounts])
+ end
+end
 
-   %w{zoo.cfg
-      log4j.properties
-      configuration.xsl
-     }.each do |t|
-     template "/etc/zookeeper/conf/#{t}" do
-       source "zk_#{t}.erb"
-       mode 0644
-       variables(:hh_hosts => get_hadoop_heads , :quorum_hosts => get_quorum_hosts, :mounts => node[:bcpc][:hadoop][:mounts])
-     end
-   end
+%w{zoo.cfg
+  log4j.properties
+  configuration.xsl
+ }.each do |t|
+ template "/etc/zookeeper/conf/#{t}" do
+   source "zk_#{t}.erb"
+   mode 0644
+   variables(:hh_hosts => get_hadoop_heads , :quorum_hosts => get_quorum_hosts, :mounts => node[:bcpc][:hadoop][:mounts])
+ end
+end
+
+%w{hadoop-metrics.properties
+   hbase-env.sh
+   hbase-policy.xml
+   hbase-site.xml
+   log4j.properties
+   regionservers}.each do |t|
+  template "/etc/hbase/conf/#{t}" do
+    source "hb_#{t}.erb"
+    variables(:hh_hosts => get_hadoop_heads, :quorum_hosts => get_quorum_hosts)
+  end
+end
+
 
 package "openjdk-7-jdk" do
   action :upgrade

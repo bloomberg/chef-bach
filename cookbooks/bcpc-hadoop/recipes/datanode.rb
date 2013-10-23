@@ -17,7 +17,7 @@ node[:bcpc][:hadoop][:mounts].each do |i|
   end
 end
 
-%w{hadoop-yarn-nodemanager hadoop-hdfs-datanode hadoop-mapreduce}.each do |svc|
+%w{hadoop-yarn-nodemanager hadoop-hdfs-datanode}.each do |svc|
   service svc do
     action :enable
     subscribes :restart, "template[/etc/hadoop/conf/hdfs-site.xml]", :delayed

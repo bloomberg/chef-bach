@@ -3,7 +3,6 @@
   "override_attributes": {
     "bcpc": {
       "virt_type" : "qemu",
-      "hadoop_disks" : ,
       "domain_name" : "bcpc.example.com",
       "management": {
         "vip" : "10.0.100.5",
@@ -30,16 +29,18 @@
         "pxe_interface" : "eth1",
         "server" : "10.0.100.3",
         "dhcp_subnet" : "10.0.100.0",
-        "dhcp_range" : "10.0.100.14 10.0.100.250"
+        "dhcp_range" : "10.0.100.14 10.0.100.250",
+        "proxy" : "http://199.172.169.11:80"
       },
       "dns_servers" : [ "8.8.8.8", "8.8.4.4" ],
-      "hadoop" : { 
-        "override_standby" : false,
-        "disks" : [ "sdb", "sdc", "sdd", "sde"] 
+      "hadoop" : {
+        "min_node_count" : 2
+      }
+        
       }
     },
     "ntp": {
-			"servers" : [ "0.pool.ntp.org", "1.pool.ntp.org", "2.pool.ntp.org", "3.pool.ntp.org" ]
+      "servers" : [ "nycronus1.bloomberg.com", "njcronus1.bloomberg.com" ]
     },
     "chef_client": {
       "server_url": "http://10.0.100.3:4000",

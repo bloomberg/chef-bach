@@ -12,9 +12,12 @@
     <name>hbase.rootdir</name>
     <value>hdfs://bcpc/hbase</value>
   </property>
-
   <property>
     <name>hbase.zookeeper.quorum</name>
-    <value><%= @quorum_hosts.map{ |s| float_host(s.host) + ":2181" }.join(",") %></value> 
+    <value><%= @quorum_hosts.map{ |s| float_host(s[:hostname]) + ":2181" }.join(",") %></value> 
+  </property>
+  <property>
+    <name>hbase.cluster.distributed</name>
+    <value>true</value>
   </property>
 </configuration>
