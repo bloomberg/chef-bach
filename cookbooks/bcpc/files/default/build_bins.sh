@@ -48,6 +48,14 @@ for i in elasticsearch tail-multiline tail-ex record-reformer rewrite; do
     FILES="fluent-plugin-${i}.gem $FILES"
 done
 
+# Get the Rubygem for zookeeper
+if [ ! -f zk_ruby.gem ]; then
+    gem fetch zk_ruby
+    mv zk_ruby-*.gem zk_ruby.gem
+fi
+FILES="zk_ruby.gem $FILES"
+
+
 # Fetch the cirros image for testing
 if [ ! -f cirros-0.3.0-x86_64-disk.img ]; then
     $CURL -O -L https://launchpad.net/cirros/trunk/0.3.0/+download/cirros-0.3.0-x86_64-disk.img
