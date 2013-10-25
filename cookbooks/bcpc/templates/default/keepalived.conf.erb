@@ -53,7 +53,7 @@ vrrp_instance VI1_<%="#{node[:bcpc][:region_name]}"%> {
 }
 
 vrrp_instance VI2_<%="#{node[:bcpc][:region_name]}"%> {
-  virtual_router_id <%="#{get_config('keepalived-router-id')}"%>
+  virtual_router_id <%="#{get_config('keepalived-router-id').to_i+1}"%>
 
   # for electing MASTER, highest priority wins.
   priority  <%= "#{255-node[:bcpc][:node_number].to_i}" %>
