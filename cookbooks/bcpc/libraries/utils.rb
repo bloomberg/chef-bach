@@ -74,6 +74,24 @@ def get_head_nodes
 	return (results == []) ? [node] : results
 end
 
+def get_cached_head_node_names
+  headnodes = []
+  begin 
+    File.open("/etc/headnodes", "r") do |infile|    
+      while (line = infile.gets)
+        line.strip!
+        if line.length>0 and not line.start_with?("#")
+          headnodes << line.strip
+        end
+      end    
+    end
+  rescue Errno::ENOENT
+    # assume first run   
+  end
+  return headnodes  
+end
+
+
 #pgs work best when a power of 2, use this to calculate the number of pgs in a pool
 #base on a multiplier (which should never be 0)
 def get_num_pgs(multiplier) 
