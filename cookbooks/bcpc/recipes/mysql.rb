@@ -101,6 +101,7 @@ template "/etc/mysql/conf.d/wsrep.cnf" do
         notifies :run, "bash[remove-bare-gcomm]", :delayed
     end
     variables( :seed => seed,
+               :max_connections => [get_head_nodes.length*50+get_all_nodes.length*5, 200].max,
                :servers => results )
 end
 
