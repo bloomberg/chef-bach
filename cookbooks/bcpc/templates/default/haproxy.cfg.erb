@@ -188,24 +188,24 @@ listen elasticsearch <%="#{node[:bcpc][:management][:vip]}"%>:9200
   <%= "server #{server.hostname} #{server[:bcpc][:management][:ip]}:9200 check inter 1s rise 1 fall 1" %>
 <% end -%>
 
-listen radosgw-passthru-http  <%="#{node[:bcpc][:management][:vip]}:#{node[:bcpc][:ports][:haproxy][:radosgw]}"%>
+listen radosgw-passthru-http  <%="#{node[:bcpc][:floating][:vip]}:#{node[:bcpc][:ports][:haproxy][:radosgw]}"%>
   balance leastconn
   option tcplog
   option httpchk GET /
   http-check expect status 200
-  source <%="#{node[:bcpc][:floating][:ip]}"%>
+  source <%="#{node[:bcpc][:floating][:vip]}"%>
 <% @all_servers.each do |server| -%>
   <%= "server #{server.hostname} #{server[:bcpc][:floating][:ip]}:#{server[:bcpc][:ports][:apache][:radosgw]} check inter 1s rise 1 fall 1 observe layer7" %>
 <% end -%>
 
-listen radosgw-passthru-https  <%="#{node[:bcpc][:management][:vip]}:#{node[:bcpc][:ports][:haproxy][:radosgw_https]}"%>
+listen radosgw-passthru-https  <%="#{node[:bcpc][:floating][:vip]}:#{node[:bcpc][:ports][:haproxy][:radosgw_https]}"%>
   mode tcp
   balance leastconn
   option  tcplog
   option tcpka
   option httpchk GET /
   http-check expect status 200
-  source <%="#{node[:bcpc][:floating][:ip]}"%>
+  source <%="#{node[:bcpc][:floating][:vip]}"%>
 <% @all_servers.each do |server| -%>
   <%= "server #{server.hostname} #{server[:bcpc][:floating][:ip]}:#{server[:bcpc][:ports][:apache][:radosgw_https]} check port #{server[:bcpc][:ports][:apache][:radosgw]} inter 1s rise 1 fall 1 observe layer4" %>
 <% end -%>
