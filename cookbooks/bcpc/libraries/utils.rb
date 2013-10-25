@@ -52,13 +52,6 @@ def make_config(key, value)
 	end
 end
 
-def reset_config(key, value)
-        init_config if $dbi.nil?
-        $dbi[key] = value
-        $dbi.save
-        return value
-end
-
 def get_config(key)
 	init_config if $dbi.nil?
 	puts "------------ Fetching value for key \"#{key}\""
@@ -82,15 +75,20 @@ def get_head_nodes
 end
 
 def get_cached_head_node_names
-  results = search(:node, "role:BCPC-Headnode AND chef_environment:#{node.chef_environment}")
-  hostnames = results.map{ |x| x.hostname }
-  cached = get_config("#{node.hostname}_seen_headnodes")
-  if cached.nil?
-    cached = Array.new
+  headnodes = []
+  begin 
+    File.open("/etc/headnodes", "r") do |infile|    
+      while (line = infile.gets)
+        line.strip!
+        if line.length>0 and not line.start_with?("#")
+          headnodes << line.strip
+        end
+      end    
+    end
+  rescue Errno::ENOENT
+    # assume first run   
   end
-  all_heads = hostnames  | cached
-  reset_config("#{node.hostname}_seen_headnodes", all_heads)
-  return all_heads
+  return headnodes  
 end
 
 
