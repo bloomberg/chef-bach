@@ -188,7 +188,7 @@ listen elasticsearch <%="#{node[:bcpc][:management][:vip]}"%>:9200
   <%= "server #{server.hostname} #{server[:bcpc][:management][:ip]}:9200 check inter 1s rise 1 fall 1" %>
 <% end -%>
 
-listen radosgw-passthru-http  <%="#{node[:bcpc][:management][:vip]}:#{node[:bcpc][:ports][:haproxy][:radosgw]}"%>
+listen radosgw-passthru-http  <%="#{node[:bcpc][:floating][:vip]}:#{node[:bcpc][:ports][:haproxy][:radosgw]}"%>
   balance leastconn
   option tcplog
   option httpchk GET /
@@ -198,7 +198,7 @@ listen radosgw-passthru-http  <%="#{node[:bcpc][:management][:vip]}:#{node[:bcpc
   <%= "server #{server.hostname} #{server[:bcpc][:floating][:ip]}:#{server[:bcpc][:ports][:apache][:radosgw]} check inter 1s rise 1 fall 1 observe layer7" %>
 <% end -%>
 
-listen radosgw-passthru-https  <%="#{node[:bcpc][:management][:vip]}:#{node[:bcpc][:ports][:haproxy][:radosgw_https]}"%>
+listen radosgw-passthru-https  <%="#{node[:bcpc][:floating][:vip]}:#{node[:bcpc][:ports][:haproxy][:radosgw_https]}"%>
   mode tcp
   balance leastconn
   option  tcplog
