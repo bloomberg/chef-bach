@@ -21,73 +21,73 @@ require 'openssl'
 require 'thread'
 
 def init_config
-	if not Chef::DataBag.list.key?('configs')
-		puts "************ Creating data_bag \"configs\""
-		bag = Chef::DataBag.new
-		bag.name("configs")
-		bag.save
-	end
-	begin
-		$dbi = data_bag_item("configs", node.chef_environment)
-		puts "============ Loaded existing data_bag_item \"configs/#{node.chef_environment}\""
-	rescue
-		$dbi = Chef::DataBagItem.new
-		$dbi.data_bag("configs")
-		$dbi.raw_data = { "id" => node.chef_environment }
-		$dbi.save
-		puts "++++++++++++ Created new data_bag_item \"configs/#{node.chef_environment}\""
-	end
+  if not Chef::DataBag.list.key?('configs')
+    puts "************ Creating data_bag \"configs\""
+    bag = Chef::DataBag.new
+    bag.name("configs")
+    bag.save
+  end
+  begin
+    $dbi = data_bag_item("configs", node.chef_environment)
+    puts "============ Loaded existing data_bag_item \"configs/#{node.chef_environment}\""
+  rescue
+    $dbi = Chef::DataBagItem.new
+    $dbi.data_bag("configs")
+    $dbi.raw_data = { "id" => node.chef_environment }
+    $dbi.save
+    puts "++++++++++++ Created new data_bag_item \"configs/#{node.chef_environment}\""
+  end
 end
 
 def make_config(key, value)
-	init_config if $dbi.nil?
-	if $dbi[key].nil?
-		$dbi[key] = value
-		$dbi.save
-		puts "++++++++++++ Creating new item with key \"#{key}\""
-		return value
-	else
-		puts "============ Loaded existing item with key \"#{key}\""
-		return $dbi[key]
-	end
+  init_config if $dbi.nil?
+  if $dbi[key].nil?
+    $dbi[key] = value
+    $dbi.save
+    puts "++++++++++++ Creating new item with key \"#{key}\""
+    return value
+  else
+    puts "============ Loaded existing item with key \"#{key}\""
+    return $dbi[key]
+  end
 end
 
 def get_config(key)
-	init_config if $dbi.nil?
-	puts "------------ Fetching value for key \"#{key}\""
-	return $dbi[key]
+  init_config if $dbi.nil?
+  puts "------------ Fetching value for key \"#{key}\""
+  return $dbi[key]
 end
 
 def get_all_nodes
-	results = search(:node, "role:BCPC* AND chef_environment:#{node.chef_environment}")
-	if results.any?{|x| x.hostname == node.hostname}
-		results.map!{|x| x.hostname == node.hostname ? node : x}
-	else
-		results.push(node)
-	end
-	return results
+  results = search(:node, "role:BCPC* AND chef_environment:#{node.chef_environment}")
+  if results.any?{|x| x.hostname == node.hostname}
+    results.map!{|x| x.hostname == node.hostname ? node : x}
+  else
+    results.push(node)
+  end
+  return results
 end
 
 def get_head_nodes
-	results = search(:node, "role:BCPC-Headnode AND chef_environment:#{node.chef_environment}")
-	results.map!{ |x| x.hostname == node.hostname ? node : x }
-	return (results == []) ? [node] : results
+  results = search(:node, "role:BCPC-Headnode AND chef_environment:#{node.chef_environment}")
+  results.map!{ |x| x.hostname == node.hostname ? node : x }
+  return (results == []) ? [node] : results
 end
 
 #pgs work best when a power of 2, use this to calculate the number of pgs in a pool
 #base on a multiplier (which should never be 0)
-def get_num_pgs(multiplier) 
-	multiplier = multiplier || 1
-	result = 1
-	count = node[:bcpc][:ceph_node_count] * node[:bcpc][:ceph_disks].length * multiplier
-	while (result < count) do result = result << 1 end
-	return result
+def get_num_pgs(multiplier)
+  multiplier = multiplier || 1
+  result = 1
+  count = node[:bcpc][:ceph_node_count] * node[:bcpc][:ceph_disks].length * multiplier
+  while (result < count) do result = result << 1 end
+  return result
 end
 
 def secure_password
-	pw = String.new
-	while pw.length < 20
-		pw << ::OpenSSL::Random.random_bytes(1).gsub(/\W/, '')
-	end
-	pw
+  pw = String.new
+  while pw.length < 20
+    pw << ::OpenSSL::Random.random_bytes(1).gsub(/\W/, '')
+  end
+  pw
 end

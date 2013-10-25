@@ -19,6 +19,8 @@
 
 require 'openssl'
 require 'thread'
+require 'rubygems'
+require 'zookeeper'
 
 def init_config
   if not Chef::DataBag.list.key?('configs')
@@ -118,4 +120,10 @@ end
 
 def storage_host(*args)
   "s-" + args.join('.')
+end
+
+def zk_formatted?
+  z = Zookeeper.new("localhost:2181")
+  r = z.get_children(:path => "/hadoop-ha/bcpc")
+  r[:rc] == 0
 end

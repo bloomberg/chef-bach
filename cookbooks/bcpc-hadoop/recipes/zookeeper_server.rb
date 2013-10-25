@@ -17,8 +17,15 @@ bash "init-zookeeper" do
   creates "/var/lib/zookeeper/myid"
 end
 
+file "/var/lib/zookeeper/myid" do
+  content node[:bcpc][:node_number]
+  owner "zookeeper"
+  group "zookeeper"
+  mode 0644
+end
+
 service "zookeeper-server" do
-  action :enable
+  action [:enable, :start]
   subscribes :restart, "template[/etc/zookeeper/conf/zoo.cfg]", :delayed
 end
 

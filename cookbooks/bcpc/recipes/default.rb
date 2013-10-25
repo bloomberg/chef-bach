@@ -38,3 +38,10 @@ node.set['bcpc']['storage']['ip'] = ((IPAddr.new(node['bcpc']['storage']['cidr']
 node.set['bcpc']['floating']['ip'] = ((IPAddr.new(node['bcpc']['floating']['cidr'])>>(32-flot_bitlen)<<(32-flot_bitlen))|flot_hostaddr).to_s
 
 node.save
+
+cookbook_file "/tmp/zookeeper.gem" do
+    source "bins/zookeeper.gem"
+    owner "root"
+    mode 00444
+end
+

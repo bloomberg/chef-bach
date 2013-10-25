@@ -62,16 +62,10 @@ when "rhel"
   # do things on RHEL platforms (redhat, centos, scientific, etc)
 end
 
-#install ruby zookeeper gem
-cookbook_file "/tmp/zk_ruby.gem" do
-    source "bins/zk_ruby.gem"
-    owner "root"
-    mode 00444
-end
 
-bash "install-zk-ruby" do
-    code "gem install --local --no-ri --no-rdoc /tmp/zk_ruby.gem"
-    not_if "gem list --local | grep zk_ruby"
+bash "install-zookeeper-gem" do
+    code "gem install --local --no-ri --no-rdoc /tmp/zookeeper.gem"
+    not_if "gem list --local | grep zookeeper"
 end
 
 

@@ -49,11 +49,11 @@ for i in elasticsearch tail-multiline tail-ex record-reformer rewrite; do
 done
 
 # Get the Rubygem for zookeeper
-if [ ! -f zk_ruby.gem ]; then
-    gem fetch zk_ruby
-    mv zk_ruby-*.gem zk_ruby.gem
+if [ ! -f zookeeper.gem ]; then
+    gem fetch zookeeper
+    mv zookeeper-*.gem zookeeper.gem
 fi
-FILES="zk_ruby.gem $FILES"
+FILES="zookeeper.gem $FILES"
 
 
 # Fetch the cirros image for testing

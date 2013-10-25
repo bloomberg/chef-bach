@@ -36,7 +36,7 @@ node[:bcpc][:hadoop][:mounts].each do |d|
     mode 0755
     action :create
     recursive true
-    only_if node[:bcpc][:hadoop][:standby]
+    only_if { node[:bcpc][:hadoop][:standby] }
   end
 
   file "/disk/#{d}/dfs/nn/current/VERSION" do
@@ -44,7 +44,7 @@ node[:bcpc][:hadoop][:mounts].each do |d|
     group "hdfs"
     mode 0755
     content get_config("namenode_txn_fmt")
-    only_if node[:bcpc][:hadoop][:standby]
+    only_if { node[:bcpc][:hadoop][:standby] }
   end
 end
 
@@ -54,7 +54,7 @@ bash "format namenode" do
   user "hdfs"
   action :run
   creates "/disk/#{node[:bcpc][:hadoop][:mounts][0]}/dfs/nn/current/VERSION"
-  not_if node[:bcpc][:hadoop][:standby]
+  not_if { node[:bcpc][:hadoop][:standby] }
 end
 
 
@@ -62,18 +62,17 @@ bash "format-zk-hdfs-ha" do
   code "hdfs zkfc -formatZK"
   action :run
   user "hdfs"
-  #TODO need a not_if or creates check in zookeeper
-  not_if node[:bcpc][:hadoop][:standby]
+  not_if { zk_formatted? }
 end
 
 service "hadoop-hdfs-zkfc" do
-  action :enable
+  action [:enable, :start]
   subscribes :restart, "template[/etc/hadoop/conf/hdfs-site.xml]", :delayed
   subscribes :restart, "template[/etc/hadoop/conf/hdfs-policy.xml]", :delayed
 end
 
 service "hadoop-hdfs-namenode" do
-  action :enable
+  action [:enable, :start]
   subscribes :restart, "template[/etc/hadoop/conf/hdfs-site.xml]", :delayed
   subscribes :restart, "template[/etc/hadoop/conf/hdfs-policy.xml]", :delayed
 end
