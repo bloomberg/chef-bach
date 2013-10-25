@@ -92,7 +92,7 @@ template "/etc/mysql/conf.d/wsrep.cnf" do
     source "wsrep.cnf.erb"
     mode 00644
     notifies :restart, "service[mysql]", :immediately
-    results = get_head_nodes
+    results = get_mysql_nodes
     # If we are the first one, special case
     seed = ""
     if ((results.length == 1) && (results[0].hostname == node.hostname)) then

@@ -74,6 +74,12 @@ def get_head_nodes
   return (results == []) ? [node] : results
 end
 
+def get_mysql_nodes
+  results = search(:node, "recipes:bcpc\\:\\:mysql AND chef_environment:#{node.chef_environment}")
+  results.map!{ |x| x.hostname == node.hostname ? node : x }
+  return (results == []) ? [node] : results
+end
+
 #pgs work best when a power of 2, use this to calculate the number of pgs in a pool
 #base on a multiplier (which should never be 0)
 def get_num_pgs(multiplier)

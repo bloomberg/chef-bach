@@ -87,7 +87,7 @@ def get_hadoop_heads
 end
 
 def get_quorum_hosts
-  results = search(:node, "(role:BCPC-Hadoop-Quorumnode OR role:BCPC-Hadoop-Standby OR role:BCPC-Hadoop-Head) AND chef_environment:#{node.chef_environment}")
+  results = search(:node, "(roles:BCPC-Hadoop-Quorumnode) AND chef_environment:#{node.chef_environment}")
   if results.any?{|x| x.hostname == node.hostname}
     results.map!{|x| x.hostname == node.hostname ? node : x}
   else
@@ -127,3 +127,5 @@ def zk_formatted?
   r = z.get_children(:path => "/hadoop-ha/bcpc")
   r[:rc] == 0
 end
+
+

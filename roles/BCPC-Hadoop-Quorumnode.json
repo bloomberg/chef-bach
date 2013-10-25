@@ -7,6 +7,7 @@
     "role[Basic]",
     "recipe[bcpc::default]",
     "recipe[bcpc::networking]",
+    "recipe[bcpc::mysql]",
     "recipe[bcpc-hadoop::base]",
     "recipe[bcpc-hadoop::journalnode]",
     "recipe[bcpc-hadoop::zookeeper_server]"
