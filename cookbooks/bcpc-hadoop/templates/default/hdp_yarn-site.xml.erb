@@ -11,23 +11,23 @@
 <configuration>
 <property>
     <name>yarn.resourcemanager.resource-tracker.address</name>
-    <value><%="#{float_host(@hh_hosts.first[:hostname])}:8031"%></value>
+    <value><%="#{float_host(@rm_host.first[:hostname])}:8031" if not @rm_host.empty?%></value>
   </property>
   <property>
     <name>yarn.resourcemanager.address</name>
-    <value><%="#{float_host(@hh_hosts.first[:hostname])}:8032"%></value>
+    <value><%="#{float_host(@rm_host.first[:hostname])}:8032" if not @rm_host.empty?%></value>
   </property>
   <property>
     <name>yarn.resourcemanager.scheduler.address</name>
-    <value><%="#{float_host(@hh_hosts.first[:hostname])}:8030"%></value>
+    <value><%="#{float_host(@rm_host.first[:hostname])}:8030" if not @rm_host.empty?%></value>
   </property>
   <property>
     <name>yarn.resourcemanager.admin.address</name>
-    <value><%="#{float_host(@hh_hosts.first[:hostname])}:8033"%></value>
+    <value><%="#{float_host(@rm_host.first[:hostname])}:8033" if not @rm_host.empty?%></value>
   </property>
   <property>
     <name>yarn.resourcemanager.webapp.address</name>
-    <value><%="#{float_host(@hh_hosts.first[:hostname])}:8088"%></value>
+    <value><%="#{float_host(@rm_host.first[:hostname])}:8088" if not @rm_host.empty?%></value>
   </property>
   <property>
     <description>Classpath for typical applications.</description>

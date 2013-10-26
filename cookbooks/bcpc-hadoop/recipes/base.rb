@@ -63,10 +63,6 @@ when "rhel"
 end
 
 
-bash "install-zookeeper-gem" do
-    code "gem install --local --no-ri --no-rdoc /tmp/zookeeper.gem"
-    not_if "gem list --local | grep zookeeper"
-end
 
 
 %w{capacity-scheduler.xml
@@ -86,7 +82,12 @@ end
    template "/etc/hadoop/conf/#{t}" do
      source "hdp_#{t}.erb"
      mode 0644
-     variables(:hh_hosts => get_hadoop_heads , :quorum_hosts => get_quorum_hosts, :mounts => node[:bcpc][:hadoop][:mounts])
+     variables(:nn_hosts => get_nodes_for("namenode") , 
+               :zk_hosts => get_nodes_for("zookeeper_server"), 
+               :jn_hosts => get_nodes_for("journalnode"),
+               :rm_host  => get_nodes_for("resource_manager"),
+               :dn_hosts => get_nodes_for("datanode"),
+               :mounts => node[:bcpc][:hadoop][:mounts])
    end
 end
 
@@ -95,7 +96,10 @@ end
  template "/etc/hadoop/conf/#{t}" do
    source "hdp_#{t}.erb"
    mode 0644
-   variables(:hh_hosts => get_hadoop_heads , :quorum_hosts => get_quorum_hosts, :mounts => node[:bcpc][:hadoop][:mounts])
+   variables(:nn_hosts => get_nodes_for("namenode"), 
+             :zk_hosts => get_nodes_for("zookeeper_server"), 
+             :jn_hosts => get_nodes_for("journalnode"),
+             :mounts => node[:bcpc][:hadoop][:mounts])
  end
 end
 
@@ -106,7 +110,10 @@ end
  template "/etc/zookeeper/conf/#{t}" do
    source "zk_#{t}.erb"
    mode 0644
-   variables(:hh_hosts => get_hadoop_heads , :quorum_hosts => get_quorum_hosts, :mounts => node[:bcpc][:hadoop][:mounts])
+   variables(:nn_hosts => get_nodes_for("namenode"), 
+             :zk_hosts => get_nodes_for("zookeeper_server"), 
+             :jn_hosts => get_nodes_for("journalnode"),
+             :mounts => node[:bcpc][:hadoop][:mounts])
  end
 end
 
@@ -117,8 +124,12 @@ end
    log4j.properties
    regionservers}.each do |t|
   template "/etc/hbase/conf/#{t}" do
-    source "hb_#{t}.erb"
-    variables(:hh_hosts => get_hadoop_heads, :quorum_hosts => get_quorum_hosts)
+   source "hb_#{t}.erb"
+   variables(:nn_hosts => get_nodes_for("namenode"), 
+             :zk_hosts => get_nodes_for("zookeeper_server"), 
+             :jn_hosts => get_nodes_for("journalnode"),
+             :rs_hosts => get_nodes_for("region_server"),
+             :mounts => node[:bcpc][:hadoop][:mounts])
   end
 end
 

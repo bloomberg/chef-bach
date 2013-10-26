@@ -19,8 +19,7 @@
 
 require 'openssl'
 require 'thread'
-require 'rubygems'
-require 'zookeeper'
+
 
 def init_config
   if not Chef::DataBag.list.key?('configs')
@@ -77,7 +76,7 @@ def get_head_nodes
 end
 
 def get_hadoop_heads
-  results = search(:node, "(role:BCPC-Hadoop-Head OR role:BCPC-Hadoop-Standby) AND chef_environment:#{node.chef_environment}")
+  results = search(:node, "role:BCPC-Hadoop-Head AND chef_environment:#{node.chef_environment}")
   if results.any?{|x| x.hostname == node.hostname}
     results.map!{|x| x.hostname == node.hostname ? node : x}
   else
@@ -86,8 +85,10 @@ def get_hadoop_heads
   return results
 end
 
+
+
 def get_quorum_hosts
-  results = search(:node, "(roles:BCPC-Hadoop-Quorumnode) AND chef_environment:#{node.chef_environment}")
+  results = search(:node, "(roles:BCPC-Hadoop-Quorumnode or role:BCPC-Hadoop-Head) AND chef_environment:#{node.chef_environment}")
   if results.any?{|x| x.hostname == node.hostname}
     results.map!{|x| x.hostname == node.hostname ? node : x}
   else
@@ -106,6 +107,13 @@ def get_hadoop_workers
   return results
 end
 
+def get_nodes_for(recipe, include_self = false)
+  results = search(:node, "recipes:bcpc-hadoop\\:\\:#{recipe} AND chef_environment:#{node.chef_environment}")
+  results.map!{ |x| x.hostname == node.hostname ? node : x }
+  return (results.empty? and include_self) ? [node] : results
+end
+
+
 def secure_password
   pw = String.new
   while pw.length < 20
@@ -123,9 +131,9 @@ def storage_host(*args)
 end
 
 def zk_formatted?
+  require 'rubygems'
+  require 'zookeeper'
   z = Zookeeper.new("localhost:2181")
   r = z.get_children(:path => "/hadoop-ha/bcpc")
   r[:rc] == 0
 end
-
-

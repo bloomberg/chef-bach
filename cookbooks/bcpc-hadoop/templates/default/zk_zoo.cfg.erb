@@ -27,7 +27,7 @@ dataDir=/var/lib/zookeeper
 # the port at which the clients will connect
 clientPort=2181
 
-<% @quorum_hosts.each do |s| %> 
+<% @zk_hosts.each do |s| %> 
 <%="server.#{s[:bcpc][:node_number]}=#{float_host(s[:hostname])}:2888:3888" %>
 <% end %>
 

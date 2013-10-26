@@ -45,3 +45,7 @@ cookbook_file "/tmp/zookeeper.gem" do
     mode 00444
 end
 
+bash "install-zookeeper-gem" do
+    code "gem install --local --no-ri --no-rdoc /tmp/zookeeper.gem"
+    not_if "gem list --local | grep zookeeper"
+end

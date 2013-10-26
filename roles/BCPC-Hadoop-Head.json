@@ -10,7 +10,8 @@
     "recipe[bcpc::mysql]",
     "recipe[bcpc-hadoop::base]",
     "role[BCPC-Hadoop-Quorumnode]",
-    "recipe[bcpc-hadoop::namenode]"
+    "recipe[bcpc-hadoop::namenode]",
+    "recipe[bcpc-hadoop::datanode]"
   ],
   "description": "A highly-available head node in a BCPC Hadoop cluster",
   "chef_type": "role",
