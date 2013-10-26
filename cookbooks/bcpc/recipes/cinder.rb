@@ -38,6 +38,10 @@ end
     end
 end
 
+service "cinder-api" do
+    restart_command "(service cinder-api stop || true) && service cinder-api start && sleep 5"
+end
+
 template "/etc/cinder/cinder.conf" do
     source "cinder.conf.erb"
     owner "cinder"
@@ -81,13 +85,39 @@ bash "cinder-database-sync" do
     notifies :restart, "service[cinder-scheduler]", :immediately
 end
 
-bash "create-cinder-rados-pool" do
-    user "root"
-    code <<-EOH
-        ceph osd pool create #{node[:bcpc][:cinder_rbd_pool]} 1000
-        ceph osd pool set #{node[:bcpc][:cinder_rbd_pool]} size 3
-    EOH
-    not_if "rados lspools | grep #{node[:bcpc][:cinder_rbd_pool]}"
+%w{ssd hdd}.each do |type|
+    bash "create-cinder-rados-pool-#{type}" do
+        user "root"
+        optimal = power_of_2(get_all_nodes.length*node[:bcpc][:ceph][:pgs_per_node]/node[:bcpc][:ceph][:volumes][:replicas]*node[:bcpc][:ceph][:volumes][:portion]/100/2)
+        code <<-EOH
+            ceph osd pool create #{node[:bcpc][:ceph][:volumes][:name]}-#{type} #{optimal}
+            ceph osd pool set #{node[:bcpc][:ceph][:volumes][:name]}-#{type} crush_ruleset #{(type=="ssd")?3:4}
+        EOH
+        not_if "rados lspools | grep #{node[:bcpc][:ceph][:volumes][:name]}-#{type}"
+    end
+
+    bash "set-cinder-rados-pool-replicas-#{type}" do
+        user "root"
+        code "ceph osd pool set #{node[:bcpc][:ceph][:volumes][:name]}-#{type} size #{node[:bcpc][:ceph][:volumes][:replicas]}"
+        not_if "ceph osd pool get #{node[:bcpc][:ceph][:volumes][:name]}-#{type} size | grep #{node[:bcpc][:ceph][:volumes][:replicas]}"
+    end
+
+    bash "set-cinder-rados-pool-pgs-#{type}" do
+        user "root"
+        optimal = power_of_2(get_all_nodes.length*node[:bcpc][:ceph][:pgs_per_node]/node[:bcpc][:ceph][:volumes][:replicas]*node[:bcpc][:ceph][:volumes][:portion]/100/2)
+        code "ceph osd pool set #{node[:bcpc][:ceph][:volumes][:name]}-#{type} pg_num #{optimal}"
+        not_if "ceph osd pool get #{node[:bcpc][:ceph][:volumes][:name]}-#{type} pg_num | grep #{optimal}"
+    end
+
+    bash "cinder-make-type-#{type}" do
+        user "root"
+        code <<-EOH
+            . /root/adminrc
+            cinder type-create #{type.upcase}
+            cinder type-key #{type.upcase} set volume_backend_name=#{type.upcase}
+        EOH
+        not_if ". /root/adminrc; cinder type-list | grep #{type.upcase}"
+    end
 end
 
 service "tgt" do

@@ -53,13 +53,38 @@ bash "write-client-radosgw-key" do
     not_if "test -f /var/lib/ceph/radosgw/ceph-radosgw.gateway/keyring && chmod 644 /var/lib/ceph/radosgw/ceph-radosgw.gateway/keyring"
 end
 
-bash "pre-alloc-rgwspools" do
-    flags '-x'
-    pools = %w{ .rgw.buckets .log .rgw .rgw.control .users.uid .users.email .users .usage .intent-log }
-    code pools.map { |pool|
-    "ceph osd pool create #{pool} #{get_num_pgs(node[:bcpc][:rgw_pool_multiplier][pool])};ceph osd pool set #{pool} size #{node[:bcpc][:ceph_s3_replica_count]}"
-    }.join("\n")
-    not_if "rados df | grep .rgw.buckets"
+bash "create-rgw-rados-pool" do
+    user "root"
+    optimal = power_of_2(get_all_nodes.length*node[:bcpc][:ceph][:pgs_per_node]/node[:bcpc][:ceph][:rgw][:replicas]*node[:bcpc][:ceph][:rgw][:portion]/100)
+    code <<-EOH
+        ceph osd pool create #{node[:bcpc][:ceph][:rgw][:name]} #{optimal}
+        ceph osd pool set #{node[:bcpc][:ceph][:rgw][:name]} crush_ruleset #{(node[:bcpc][:ceph][:rgw][:type]=="ssd")?3:4}
+    EOH
+    not_if "rados lspools | grep #{node[:bcpc][:ceph][:rgw][:name]}"
+end
+
+bash "set-rgw-rados-pool-replicas" do
+    user "root"
+    code "ceph osd pool set #{node[:bcpc][:ceph][:rgw][:name]} size #{node[:bcpc][:ceph][:rgw][:replicas]}"
+    not_if "ceph osd pool get #{node[:bcpc][:ceph][:rgw][:name]} size | grep #{node[:bcpc][:ceph][:rgw][:replicas]}"
+end
+
+bash "set-rgw-rados-pool-pgs" do
+    user "root"
+    optimal = power_of_2(get_all_nodes.length*node[:bcpc][:ceph][:pgs_per_node]/node[:bcpc][:ceph][:rgw][:replicas]*node[:bcpc][:ceph][:rgw][:portion]/100)
+    code "ceph osd pool set #{node[:bcpc][:ceph][:rgw][:name]} pg_num #{optimal}"
+    not_if "ceph osd pool get #{node[:bcpc][:ceph][:rgw][:name]} pg_num | grep #{optimal}"
+end
+
+%w{.rgw .rgw.control .rgw.gc .rgw.root .users.uid .users.email .users .usage .log .intent-log}.each do |pool|
+    bash "create-rados-pool-#{pool}" do
+        code <<-EOH
+            ceph osd pool create #{pool} 128
+            ceph osd pool set #{pool} crush_ruleset #{(node[:bcpc][:ceph][:rgw][:type]=="ssd")?3:4}
+            ceph osd pool set #{pool} size #{node[:bcpc][:ceph][:rgw][:replicas]}
+        EOH
+        not_if "rados df | grep .intent-log"
+    end
 end
 
 file "/var/www/s3gw.fcgi" do

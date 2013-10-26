@@ -129,4 +129,36 @@ execute "ceph-mds-start" do
     command "initctl emit ceph-mds id='#{node.hostname}'"
 end
 
+template "/tmp/crush-map-additions.txt" do
+    source "ceph-crush.erb"
+    owner "root"
+    mode 00644
+end
+
+bash "ceph-get-crush-map" do
+    code <<-EOH
+        ceph osd getcrushmap -o /tmp/crush-map
+        crushtool -d /tmp/crush-map -o /tmp/crush-map.txt
+    EOH
+end
+
+bash "ceph-add-crush-rules" do
+    code <<-EOH
+        cat /tmp/crush-map-additions.txt >> /tmp/crush-map.txt
+        crushtool -c /tmp/crush-map.txt -o /tmp/crush-map-new
+        ceph osd setcrushmap -i /tmp/crush-map-new
+    EOH
+    not_if "grep ssd /tmp/crush-map.txt"
+end
+
+if get_head_nodes.length == 1; then
+    rule = (node[:bcpc][:ceph][:ssd_disks].length > 0) ? 3 : 4
+    %w{data metadata rbd}.each do |pool|
+        bash "move-#{pool}-rados-pool" do
+            user "root"
+            code "ceph osd pool set #{pool} crush_ruleset #{rule}"
+        end
+    end
+end
+
 include_recipe "bcpc::ceph-work"
