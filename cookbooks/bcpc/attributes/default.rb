@@ -49,7 +49,6 @@ default['bcpc']['ceph']['images']['type'] = 'ssd'
 default['bcpc']['ceph']['images']['name'] = "images"
 default['bcpc']['ceph']['volumes']['replicas'] = 3
 default['bcpc']['ceph']['volumes']['portion'] = 33
-default['bcpc']['ceph']['volumes']['type'] = 'ssd'
 default['bcpc']['ceph']['volumes']['name'] = "volumes"
 default['bcpc']['ceph']['vms_disk']['replicas'] = 3
 default['bcpc']['ceph']['vms_disk']['portion'] = 10

@@ -38,6 +38,10 @@ end
     end
 end
 
+service "cinder-api" do
+    restart_command "service cinder-api stop && service cinder-api start && sleep 5"
+end
+
 template "/etc/cinder/cinder.conf" do
     source "cinder.conf.erb"
     owner "cinder"
@@ -81,27 +85,64 @@ bash "cinder-database-sync" do
     notifies :restart, "service[cinder-scheduler]", :immediately
 end
 
-bash "create-cinder-rados-pool" do
+bash "create-cinder-rados-pool-ssd" do
     user "root"
-    optimal = power_of_2(get_all_nodes.length*node[:bcpc][:ceph][:pgs_per_node]/node[:bcpc][:ceph][:volumes][:replicas]*node[:bcpc][:ceph][:volumes][:portion]/100)
+    optimal = power_of_2(get_all_nodes.length*node[:bcpc][:ceph][:pgs_per_node]/node[:bcpc][:ceph][:volumes][:replicas]*node[:bcpc][:ceph][:volumes][:portion]/100/2)
     code <<-EOH
-        ceph osd pool create #{node[:bcpc][:ceph][:volumes][:name]} #{optimal}
-        ceph osd pool set #{node[:bcpc][:ceph][:volumes][:name]} crush_ruleset #{(node[:bcpc][:ceph][:volumes][:type]=="ssd")?3:4}
+        ceph osd pool create #{node[:bcpc][:ceph][:volumes][:name]}-ssd #{optimal}
+        ceph osd pool set #{node[:bcpc][:ceph][:volumes][:name]}-ssd crush_ruleset 3
     EOH
-    not_if "rados lspools | grep #{node[:bcpc][:ceph][:volumes][:name]}"
+    not_if "rados lspools | grep #{node[:bcpc][:ceph][:volumes][:name]}-ssd"
 end
 
-bash "set-cinder-rados-pool-replicas" do
+bash "set-cinder-rados-pool-replicas-ssd" do
     user "root"
-    code "ceph osd pool set #{node[:bcpc][:ceph][:volumes][:name]} size #{node[:bcpc][:ceph][:volumes][:replicas]}"
-    not_if "ceph osd pool get #{node[:bcpc][:ceph][:volumes][:name]} size | grep #{node[:bcpc][:ceph][:volumes][:replicas]}"
+    code "ceph osd pool set #{node[:bcpc][:ceph][:volumes][:name]}-ssd size #{node[:bcpc][:ceph][:volumes][:replicas]}"
+    not_if "ceph osd pool get #{node[:bcpc][:ceph][:volumes][:name]}-ssd size | grep #{node[:bcpc][:ceph][:volumes][:replicas]}"
 end
 
-bash "set-cinder-rados-pool-pgs" do
+bash "set-cinder-rados-pool-pgs-ssd" do
     user "root"
-    optimal = power_of_2(get_all_nodes.length*node[:bcpc][:ceph][:pgs_per_node]/node[:bcpc][:ceph][:volumes][:replicas]*node[:bcpc][:ceph][:volumes][:portion]/100)
-    code "ceph osd pool set #{node[:bcpc][:ceph][:volumes][:name]} pg_num #{optimal}"
-    not_if "ceph osd pool get #{node[:bcpc][:ceph][:volumes][:name]} pg_num | grep #{optimal}"
+    optimal = power_of_2(get_all_nodes.length*node[:bcpc][:ceph][:pgs_per_node]/node[:bcpc][:ceph][:volumes][:replicas]*node[:bcpc][:ceph][:volumes][:portion]/100/2)
+    code "ceph osd pool set #{node[:bcpc][:ceph][:volumes][:name]}-ssd pg_num #{optimal}"
+    not_if "ceph osd pool get #{node[:bcpc][:ceph][:volumes][:name]}-ssd pg_num | grep #{optimal}"
+end
+
+bash "create-cinder-rados-pool-hdd" do
+    user "root"
+    optimal = power_of_2(get_all_nodes.length*node[:bcpc][:ceph][:pgs_per_node]/node[:bcpc][:ceph][:volumes][:replicas]*node[:bcpc][:ceph][:volumes][:portion]/100/2)
+    code <<-EOH
+        ceph osd pool create #{node[:bcpc][:ceph][:volumes][:name]}-hdd #{optimal}
+        ceph osd pool set #{node[:bcpc][:ceph][:volumes][:name]}-hdd crush_ruleset 4
+    EOH
+    not_if "rados lspools | grep #{node[:bcpc][:ceph][:volumes][:name]}-hdd"
+end
+
+bash "set-cinder-rados-pool-replicas-hdd" do
+    user "root"
+    code "ceph osd pool set #{node[:bcpc][:ceph][:volumes][:name]}-hdd size #{node[:bcpc][:ceph][:volumes][:replicas]}"
+    not_if "ceph osd pool get #{node[:bcpc][:ceph][:volumes][:name]}-hdd size | grep #{node[:bcpc][:ceph][:volumes][:replicas]}"
+end
+
+bash "set-cinder-rados-pool-pgs-hdd" do
+    user "root"
+    optimal = power_of_2(get_all_nodes.length*node[:bcpc][:ceph][:pgs_per_node]/node[:bcpc][:ceph][:volumes][:replicas]*node[:bcpc][:ceph][:volumes][:portion]/100/2)
+    code "ceph osd pool set #{node[:bcpc][:ceph][:volumes][:name]}-hdd pg_num #{optimal}"
+    not_if "ceph osd pool get #{node[:bcpc][:ceph][:volumes][:name]}-hdd pg_num | grep #{optimal}"
+end
+
+%w{ssd hdd}.each do |type|
+    if node[:bcpc][:ceph]["#{type}_disks"].length > 0; then
+        bash "cinder-make-type-#{type}" do
+            user "root"
+            code <<-EOH
+                . /root/adminrc
+                cinder type-create #{type.upcase}
+                cinder type-key #{type.upcase} set volume_backend_name=#{type.upcase}
+            EOH
+            not_if ". /root/adminrc; cinder type-list | grep #{type.upcase}"
+        end
+    end
 end
 
 service "tgt" do

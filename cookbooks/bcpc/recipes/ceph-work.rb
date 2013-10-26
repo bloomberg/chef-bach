@@ -41,12 +41,23 @@ bash "ceph-add-crush-rules" do
     not_if "grep ssd /tmp/crush-map.txt"
 end
 
+if get_head_nodes.length == 1; then
+    rule = (node[:bcpc][:ceph][:ssd_disks].length > 0) ? 3 : 4
+    %w{data metadata rbd}.each do |pool|
+        bash "move-#{pool}-rados-pool" do
+            user "root"
+            code "ceph osd pool set #{pool} crush_ruleset #{rule}"
+        end
+    end
+end
+
 %w{ssd hdd}.each do |type|
     node['bcpc']['ceph']["#{type}_disks"].each do |disk|
         execute "ceph-disk-prepare-#{type}-#{disk}" do
             command <<-EOH
                 ceph-disk-prepare /dev/#{disk}
                 ceph-disk-activate /dev/#{disk}
+                sleep 2
                 INFO=`df -k | grep /dev/#{disk} | awk '{print $2,$6}' | sed -e 's/\\/var\\/lib\\/ceph\\/osd\\/ceph-//'`
                 OSD=${INFO#* }
                 WEIGHT=`echo "scale=4; ${INFO% *}/1000000000.0" | bc -q`
