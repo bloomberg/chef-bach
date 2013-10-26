@@ -17,7 +17,7 @@ if [[ -f cluster.txt ]]; then
         done < cluster.txt                     
     else
         # we can use fping
-        while read HOSTNAME MACADDR IPADDR DOMAIN ROLE; do
+        while read HOSTNAME MACADDR IPADDR ILOIPADDR DOMAIN ROLE; do
             ALLHOSTS="$ALLHOSTS $IPADDR"
         done < cluster.txt
         UP=`fping -aq $ALLHOSTS 2> /dev/null`
