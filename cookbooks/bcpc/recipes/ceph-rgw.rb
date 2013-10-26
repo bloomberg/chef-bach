@@ -56,7 +56,10 @@ end
 bash "create-rgw-rados-pool" do
     user "root"
     optimal = power_of_2(get_all_nodes.length*node[:bcpc][:ceph][:pgs_per_node]/node[:bcpc][:ceph][:rgw][:replicas]*node[:bcpc][:ceph][:rgw][:portion]/100)
-    code "ceph osd pool create #{node[:bcpc][:ceph][:rgw][:name]} #{optimal}"
+    code <<-EOH
+        ceph osd pool create #{node[:bcpc][:ceph][:rgw][:name]} #{optimal}
+        ceph osd pool set #{node[:bcpc][:ceph][:rgw][:name]} crush_ruleset #{(node[:bcpc][:ceph][:rgw][:type]=="ssd")?3:4}
+    EOH
     not_if "rados lspools | grep #{node[:bcpc][:ceph][:rgw][:name]}"
 end
 
@@ -73,13 +76,15 @@ bash "set-rgw-rados-pool-pgs" do
     not_if "ceph osd pool get #{node[:bcpc][:ceph][:rgw][:name]} pg_num | grep #{optimal}"
 end
 
-bash "pre-alloc-rgwspools" do
-    flags '-x'
-    pools = %w{.rgw .rgw.control .rgw.gc .rgw.root .users.uid .users.email .users .usage .log .intent-log}
-    code pools.map { |pool|
-    "ceph osd pool create #{pool} 128;ceph osd pool set #{pool} size #{node[:bcpc][:ceph][:rgw][:replicas]}"
-    }.join("\n")
-    not_if "rados df | grep .intent-log"
+%w{.rgw .rgw.control .rgw.gc .rgw.root .users.uid .users.email .users .usage .log .intent-log}.each do |pool|
+    bash "create-rados-pool-#{pool}" do
+        code <<-EOH
+            ceph osd pool create #{pool} 128
+            ceph osd pool set #{pool} crush_ruleset #{(node[:bcpc][:ceph][:rgw][:type]=="ssd")?3:4}
+            ceph osd pool set #{pool} size #{node[:bcpc][:ceph][:rgw][:replicas]}
+        EOH
+        not_if "rados df | grep .intent-log"
+    end
 end
 
 file "/var/www/s3gw.fcgi" do

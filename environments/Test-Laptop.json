@@ -3,7 +3,10 @@
   "override_attributes": {
     "bcpc": {
       "virt_type" : "qemu",
-      "ceph_disks": [ "sdb", "sdc", "sdd", "sde" ],
+      "ceph": {
+        "hdd_disks" : [ "sdb", "sdc" ],
+        "ssd_disks" : [ "sdd", "sde" ]
+      },
       "domain_name" : "bcpc.example.com",
       "management": {
         "vip" : "10.0.100.5",

@@ -95,7 +95,10 @@ if not node["bcpc"]["vms_key"].nil?
     bash "create-vms-disk-rados-pool" do
         user "root"
         optimal = power_of_2(get_all_nodes.length*node[:bcpc][:ceph][:pgs_per_node]/node[:bcpc][:ceph][:vms_disk][:replicas]*node[:bcpc][:ceph][:vms_disk][:portion]/100)
-        code "ceph osd pool create #{node[:bcpc][:ceph][:vms_disk][:name]} #{optimal}"
+        code <<-EOH
+            ceph osd pool create #{node[:bcpc][:ceph][:vms_disk][:name]} #{optimal}
+            ceph osd pool set #{node[:bcpc][:ceph][:vms_disk][:name]} crush_ruleset #{(node[:bcpc][:ceph][:vms_disk][:type]=="ssd")?3:4}
+        EOH
         not_if "rados lspools | grep #{node[:bcpc][:ceph][:vms_disk][:name]}"
     end
 
@@ -115,7 +118,10 @@ if not node["bcpc"]["vms_key"].nil?
     bash "create-vms-mem-rados-pool" do
         user "root"
         optimal = power_of_2(get_all_nodes.length*node[:bcpc][:ceph][:pgs_per_node]/node[:bcpc][:ceph][:vms_mem][:replicas]*node[:bcpc][:ceph][:vms_mem][:portion]/100)
-        code "ceph osd pool create #{node[:bcpc][:ceph][:vms_mem][:name]} #{optimal}"
+        code <<-EOH
+            ceph osd pool create #{node[:bcpc][:ceph][:vms_mem][:name]} #{optimal}
+            ceph osd pool set #{node[:bcpc][:ceph][:vms_mem][:name]} crush_ruleset #{(node[:bcpc][:ceph][:vms_mem][:type]=="ssd")?3:4}
+        EOH
         not_if "rados lspools | grep #{node[:bcpc][:ceph][:vms_mem][:name]}"
     end
 

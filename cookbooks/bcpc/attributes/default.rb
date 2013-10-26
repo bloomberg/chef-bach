@@ -25,8 +25,8 @@ default['bcpc']['vms_key'] = nil
 #  Host-specific defaults for the cluster
 #
 ###########################################
-default['bcpc']['hdd_disks'] = [ "sdb", "sdc" ]
-default['bcpc']['ssd_disks'] = [ "sdd", "sde" ]
+default['bcpc']['ceph']['hdd_disks'] = [ "sdb", "sdc" ]
+default['bcpc']['ceph']['ssd_disks'] = [ "sdd", "sde" ]
 default['bcpc']['management']['interface'] = "eth0"
 default['bcpc']['storage']['interface'] = "eth1"
 default['bcpc']['floating']['interface'] = "eth2"
@@ -37,24 +37,27 @@ default['bcpc']['fixed']['vlan_interface'] = node[:bcpc][:floating][:interface]
 #  Ceph settings for the cluster
 #
 ###########################################
-default['bcpc']['ceph']['hdd_disks'] = node[:bcpc][:hdd_disks]
-default['bcpc']['ceph']['ssd_disks'] = node[:bcpc][:ssd_disks]
 default['bcpc']['ceph']['pgs_per_node'] = 1024
 # The 'portion' parameters should add up to ~100 across all pools
 default['bcpc']['ceph']['rgw']['replicas'] = 3
 default['bcpc']['ceph']['rgw']['portion'] = 33
+default['bcpc']['ceph']['rgw']['type'] = 'hdd'
 default['bcpc']['ceph']['rgw']['name'] = '.rgw.buckets'
 default['bcpc']['ceph']['images']['replicas'] = 3
 default['bcpc']['ceph']['images']['portion'] = 33
+default['bcpc']['ceph']['images']['type'] = 'ssd'
 default['bcpc']['ceph']['images']['name'] = "images"
 default['bcpc']['ceph']['volumes']['replicas'] = 3
 default['bcpc']['ceph']['volumes']['portion'] = 33
+default['bcpc']['ceph']['volumes']['type'] = 'ssd'
 default['bcpc']['ceph']['volumes']['name'] = "volumes"
 default['bcpc']['ceph']['vms_disk']['replicas'] = 3
 default['bcpc']['ceph']['vms_disk']['portion'] = 10
+default['bcpc']['ceph']['vms_disk']['type'] = 'ssd'
 default['bcpc']['ceph']['vms_disk']['name'] = "vmsdisk"
 default['bcpc']['ceph']['vms_mem']['replicas'] = 3
 default['bcpc']['ceph']['vms_mem']['portion'] = 10
+default['bcpc']['ceph']['vms_mem']['type'] = 'ssd'
 default['bcpc']['ceph']['vms_mem']['name'] = "vmsmem"
 
 ###########################################

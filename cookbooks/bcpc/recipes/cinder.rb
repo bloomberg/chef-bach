@@ -84,7 +84,10 @@ end
 bash "create-cinder-rados-pool" do
     user "root"
     optimal = power_of_2(get_all_nodes.length*node[:bcpc][:ceph][:pgs_per_node]/node[:bcpc][:ceph][:volumes][:replicas]*node[:bcpc][:ceph][:volumes][:portion]/100)
-    code "ceph osd pool create #{node[:bcpc][:ceph][:volumes][:name]} #{optimal}"
+    code <<-EOH
+        ceph osd pool create #{node[:bcpc][:ceph][:volumes][:name]} #{optimal}
+        ceph osd pool set #{node[:bcpc][:ceph][:volumes][:name]} crush_ruleset #{(node[:bcpc][:ceph][:volumes][:type]=="ssd")?3:4}
+    EOH
     not_if "rados lspools | grep #{node[:bcpc][:ceph][:volumes][:name]}"
 end
 
