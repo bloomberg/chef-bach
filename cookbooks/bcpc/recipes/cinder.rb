@@ -85,54 +85,31 @@ bash "cinder-database-sync" do
     notifies :restart, "service[cinder-scheduler]", :immediately
 end
 
-bash "create-cinder-rados-pool-ssd" do
-    user "root"
-    optimal = power_of_2(get_all_nodes.length*node[:bcpc][:ceph][:pgs_per_node]/node[:bcpc][:ceph][:volumes][:replicas]*node[:bcpc][:ceph][:volumes][:portion]/100/2)
-    code <<-EOH
-        ceph osd pool create #{node[:bcpc][:ceph][:volumes][:name]}-ssd #{optimal}
-        ceph osd pool set #{node[:bcpc][:ceph][:volumes][:name]}-ssd crush_ruleset 3
-    EOH
-    not_if "rados lspools | grep #{node[:bcpc][:ceph][:volumes][:name]}-ssd"
-end
-
-bash "set-cinder-rados-pool-replicas-ssd" do
-    user "root"
-    code "ceph osd pool set #{node[:bcpc][:ceph][:volumes][:name]}-ssd size #{node[:bcpc][:ceph][:volumes][:replicas]}"
-    not_if "ceph osd pool get #{node[:bcpc][:ceph][:volumes][:name]}-ssd size | grep #{node[:bcpc][:ceph][:volumes][:replicas]}"
-end
-
-bash "set-cinder-rados-pool-pgs-ssd" do
-    user "root"
-    optimal = power_of_2(get_all_nodes.length*node[:bcpc][:ceph][:pgs_per_node]/node[:bcpc][:ceph][:volumes][:replicas]*node[:bcpc][:ceph][:volumes][:portion]/100/2)
-    code "ceph osd pool set #{node[:bcpc][:ceph][:volumes][:name]}-ssd pg_num #{optimal}"
-    not_if "ceph osd pool get #{node[:bcpc][:ceph][:volumes][:name]}-ssd pg_num | grep #{optimal}"
-end
-
-bash "create-cinder-rados-pool-hdd" do
-    user "root"
-    optimal = power_of_2(get_all_nodes.length*node[:bcpc][:ceph][:pgs_per_node]/node[:bcpc][:ceph][:volumes][:replicas]*node[:bcpc][:ceph][:volumes][:portion]/100/2)
-    code <<-EOH
-        ceph osd pool create #{node[:bcpc][:ceph][:volumes][:name]}-hdd #{optimal}
-        ceph osd pool set #{node[:bcpc][:ceph][:volumes][:name]}-hdd crush_ruleset 4
-    EOH
-    not_if "rados lspools | grep #{node[:bcpc][:ceph][:volumes][:name]}-hdd"
-end
-
-bash "set-cinder-rados-pool-replicas-hdd" do
-    user "root"
-    code "ceph osd pool set #{node[:bcpc][:ceph][:volumes][:name]}-hdd size #{node[:bcpc][:ceph][:volumes][:replicas]}"
-    not_if "ceph osd pool get #{node[:bcpc][:ceph][:volumes][:name]}-hdd size | grep #{node[:bcpc][:ceph][:volumes][:replicas]}"
-end
-
-bash "set-cinder-rados-pool-pgs-hdd" do
-    user "root"
-    optimal = power_of_2(get_all_nodes.length*node[:bcpc][:ceph][:pgs_per_node]/node[:bcpc][:ceph][:volumes][:replicas]*node[:bcpc][:ceph][:volumes][:portion]/100/2)
-    code "ceph osd pool set #{node[:bcpc][:ceph][:volumes][:name]}-hdd pg_num #{optimal}"
-    not_if "ceph osd pool get #{node[:bcpc][:ceph][:volumes][:name]}-hdd pg_num | grep #{optimal}"
-end
-
 %w{ssd hdd}.each do |type|
     if node[:bcpc][:ceph]["#{type}_disks"].length > 0; then
+        bash "create-cinder-rados-pool-#{type}" do
+            user "root"
+            optimal = power_of_2(get_all_nodes.length*node[:bcpc][:ceph][:pgs_per_node]/node[:bcpc][:ceph][:volumes][:replicas]*node[:bcpc][:ceph][:volumes][:portion]/100/2)
+            code <<-EOH
+                ceph osd pool create #{node[:bcpc][:ceph][:volumes][:name]}-#{type} #{optimal}
+                ceph osd pool set #{node[:bcpc][:ceph][:volumes][:name]}-#{type} crush_ruleset #{(type=="ssd")?3:4}
+            EOH
+            not_if "rados lspools | grep #{node[:bcpc][:ceph][:volumes][:name]}-#{type}"
+        end
+
+        bash "set-cinder-rados-pool-replicas-#{type}" do
+            user "root"
+            code "ceph osd pool set #{node[:bcpc][:ceph][:volumes][:name]}-#{type} size #{node[:bcpc][:ceph][:volumes][:replicas]}"
+            not_if "ceph osd pool get #{node[:bcpc][:ceph][:volumes][:name]}-#{type} size | grep #{node[:bcpc][:ceph][:volumes][:replicas]}"
+        end
+
+        bash "set-cinder-rados-pool-pgs-#{type}" do
+            user "root"
+            optimal = power_of_2(get_all_nodes.length*node[:bcpc][:ceph][:pgs_per_node]/node[:bcpc][:ceph][:volumes][:replicas]*node[:bcpc][:ceph][:volumes][:portion]/100/2)
+            code "ceph osd pool set #{node[:bcpc][:ceph][:volumes][:name]}-#{type} pg_num #{optimal}"
+            not_if "ceph osd pool get #{node[:bcpc][:ceph][:volumes][:name]}-#{type} pg_num | grep #{optimal}"
+        end
+
         bash "cinder-make-type-#{type}" do
             user "root"
             code <<-EOH
