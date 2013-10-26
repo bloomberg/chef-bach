@@ -19,55 +19,6 @@
 
 include_recipe "bcpc::ceph-common"
 
-template "/tmp/crush-map-additions.txt" do
-    source "ceph-crush.erb"
-    owner "root"
-    mode 00644
-end
-
-bash "ceph-get-crush-map" do
-    code <<-EOH
-        ceph osd getcrushmap -o /tmp/crush-map
-        crushtool -d /tmp/crush-map -o /tmp/crush-map.txt
-    EOH
-end
-
-bash "ceph-add-crush-rules" do
-    code <<-EOH
-        cat /tmp/crush-map-additions.txt >> /tmp/crush-map.txt
-        crushtool -c /tmp/crush-map.txt -o /tmp/crush-map-new
-        ceph osd setcrushmap -i /tmp/crush-map-new
-    EOH
-    not_if "grep ssd /tmp/crush-map.txt"
-end
-
-if get_head_nodes.length == 1; then
-    rule = (node[:bcpc][:ceph][:ssd_disks].length > 0) ? 3 : 4
-    %w{data metadata rbd}.each do |pool|
-        bash "move-#{pool}-rados-pool" do
-            user "root"
-            code "ceph osd pool set #{pool} crush_ruleset #{rule}"
-        end
-    end
-end
-
-%w{ssd hdd}.each do |type|
-    node['bcpc']['ceph']["#{type}_disks"].each do |disk|
-        execute "ceph-disk-prepare-#{type}-#{disk}" do
-            command <<-EOH
-                ceph-disk-prepare /dev/#{disk}
-                ceph-disk-activate /dev/#{disk}
-                sleep 2
-                INFO=`df -k | grep /dev/#{disk} | awk '{print $2,$6}' | sed -e 's/\\/var\\/lib\\/ceph\\/osd\\/ceph-//'`
-                OSD=${INFO#* }
-                WEIGHT=`echo "scale=4; ${INFO% *}/1000000000.0" | bc -q`
-                ceph osd crush set $OSD $WEIGHT root=#{type} host=#{node.hostname}-#{type}
-            EOH
-            not_if "sgdisk -i1 /dev/#{disk} | grep -i 4fbd7e29-9d25-41b8-afd0-062c0ceff05d"
-        end
-    end
-end
-
 bash "write-client-admin-key" do
     code <<-EOH
         ADMIN_KEY=`ceph --name mon. --keyring /etc/ceph/ceph.mon.keyring auth get-or-create-key client.admin`
@@ -88,6 +39,23 @@ bash "write-bootstrap-osd-key" do
             --add-key="$BOOTSTRAP_KEY"
     EOH
     not_if "test -f /var/lib/ceph/bootstrap-osd/ceph.keyring"
+end
+
+%w{ssd hdd}.each do |type|
+    node['bcpc']['ceph']["#{type}_disks"].each do |disk|
+        execute "ceph-disk-prepare-#{type}-#{disk}" do
+            command <<-EOH
+                ceph-disk-prepare /dev/#{disk}
+                ceph-disk-activate /dev/#{disk}
+                sleep 2
+                INFO=`df -k | grep /dev/#{disk} | awk '{print $2,$6}' | sed -e 's/\\/var\\/lib\\/ceph\\/osd\\/ceph-//'`
+                OSD=${INFO#* }
+                WEIGHT=`echo "scale=4; ${INFO% *}/1000000000.0" | bc -q`
+                ceph osd crush set $OSD $WEIGHT root=#{type} host=#{node.hostname}-#{type}
+            EOH
+            not_if "sgdisk -i1 /dev/#{disk} | grep -i 4fbd7e29-9d25-41b8-afd0-062c0ceff05d"
+        end
+    end
 end
 
 execute "trigger-osd-startup" do
