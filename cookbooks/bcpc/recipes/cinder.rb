@@ -39,7 +39,7 @@ end
 end
 
 service "cinder-api" do
-    restart_command "service cinder-api stop && service cinder-api start && sleep 5"
+    restart_command "(service cinder-api stop || true) && service cinder-api start && sleep 5"
 end
 
 template "/etc/cinder/cinder.conf" do

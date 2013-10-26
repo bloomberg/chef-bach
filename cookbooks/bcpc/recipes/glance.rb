@@ -39,7 +39,7 @@ end
 end
 
 service "glance-api" do
-    restart_command "service glance-api stop && service glance-api start && sleep 5"
+    restart_command "(service glance-api stop || true) && service glance-api start && sleep 5"
 end
 
 template "/etc/glance/glance-api.conf" do
