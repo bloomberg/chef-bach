@@ -161,4 +161,15 @@ if get_head_nodes.length == 1; then
     end
 end
 
+%w{mon mds}.each do |svc|
+    %w{done upstart}.each do |name|
+        file "/var/lib/ceph/#{svc}/ceph-#{node.hostname}/#{name}" do
+            owner "root"
+            group "root"
+            mode "0644"
+            action :create
+        end
+    end
+end
+
 include_recipe "bcpc::ceph-work"
