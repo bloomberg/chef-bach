@@ -48,6 +48,7 @@ package "fio"
 package "bc"
 package "htop"
 package "sysstat"
+package "iperf"
 
 # Remove spurious logging failures from this package
 package "powernap" do
