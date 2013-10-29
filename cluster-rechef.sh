@@ -12,7 +12,7 @@ if [[ -z "$1" ]]; then
 else
 	ENVIRONMENT="$1"
 fi
-$ROLE_REQUESTED="$2"
+ROLE_REQUESTED="$2"
 if [[ -f cluster.txt ]]; then
     while read HOSTNAME MACADDR IPADDR ILOIPADDR DOMAIN ROLE; do
 		if [[ $HOSTNAME = "end" ]]; then
