@@ -27,6 +27,7 @@ default['bcpc']['vms_key'] = nil
 ###########################################
 default['bcpc']['ceph']['hdd_disks'] = [ "sdb", "sdc" ]
 default['bcpc']['ceph']['ssd_disks'] = [ "sdd", "sde" ]
+default['bcpc']['ceph']['enabled_pools'] = [ "ssd", "hdd" ]
 default['bcpc']['management']['interface'] = "eth0"
 default['bcpc']['storage']['interface'] = "eth1"
 default['bcpc']['floating']['interface'] = "eth2"

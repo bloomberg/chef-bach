@@ -85,7 +85,7 @@ bash "cinder-database-sync" do
     notifies :restart, "service[cinder-scheduler]", :immediately
 end
 
-%w{ssd hdd}.each do |type|
+node[:bcpc][:ceph][:enabled_pools].each do |type|
     bash "create-cinder-rados-pool-#{type}" do
         user "root"
         optimal = power_of_2(get_all_nodes.length*node[:bcpc][:ceph][:pgs_per_node]/node[:bcpc][:ceph][:volumes][:replicas]*node[:bcpc][:ceph][:volumes][:portion]/100/2)
