@@ -73,7 +73,7 @@ bash "set-rgw-rados-pool-pgs" do
     user "root"
     optimal = power_of_2(get_all_nodes.length*node[:bcpc][:ceph][:pgs_per_node]/node[:bcpc][:ceph][:rgw][:replicas]*node[:bcpc][:ceph][:rgw][:portion]/100)
     code "ceph osd pool set #{node[:bcpc][:ceph][:rgw][:name]} pg_num #{optimal}"
-    not_if "ceph osd pool get #{node[:bcpc][:ceph][:rgw][:name]} pg_num | grep #{optimal}"
+    not_if "((`ceph osd pool get #{node[:bcpc][:ceph][:rgw][:name]} pg_num | awk '{print $2}'` >= #{optimal}))"
 end
 
 %w{.rgw .rgw.control .rgw.gc .rgw.root .users.uid .users.email .users .usage .log .intent-log}.each do |pool|

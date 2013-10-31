@@ -106,7 +106,7 @@ node[:bcpc][:ceph][:enabled_pools].each do |type|
         user "root"
         optimal = power_of_2(get_all_nodes.length*node[:bcpc][:ceph][:pgs_per_node]/node[:bcpc][:ceph][:volumes][:replicas]*node[:bcpc][:ceph][:volumes][:portion]/100/node[:bcpc][:ceph][:enabled_pools].length)
         code "ceph osd pool set #{node[:bcpc][:ceph][:volumes][:name]}-#{type} pg_num #{optimal}"
-        not_if "ceph osd pool get #{node[:bcpc][:ceph][:volumes][:name]}-#{type} pg_num | grep #{optimal}"
+        not_if "((`ceph osd pool get #{node[:bcpc][:ceph][:volumes][:name]}-#{type} pg_num | awk '{print $2}'` >= #{optimal}))"
     end
 
     bash "cinder-make-type-#{type}" do
