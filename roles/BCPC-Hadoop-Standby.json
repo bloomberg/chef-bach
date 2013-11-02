@@ -6,7 +6,8 @@
   "run_list": [
     "role[Basic]",
     "role[BCPC-Hadoop-Head]",
-    "recipe[resource_manager]"
+    "recipe[bcpc-hadoop::resource_manager]",
+    "recipe[bcpc-hadoop::hive_metastore]"
   ],
   "description": "A highly-available head node in a BCPC Hadoop cluster",
   "chef_type": "role",

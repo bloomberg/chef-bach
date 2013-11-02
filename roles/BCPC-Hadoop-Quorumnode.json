@@ -10,7 +10,8 @@
     "recipe[bcpc::mysql]",
     "recipe[bcpc-hadoop::base]",
     "recipe[bcpc-hadoop::journalnode]",
-    "recipe[bcpc-hadoop::zookeeper_server]"
+    "recipe[bcpc-hadoop::zookeeper_server]",
+    "recipe[bcpc-hadoop::hive]"
   ],
   "description": "A highly-available quorum node in a BCPC Hadoop cluster",
   "chef_type": "role",

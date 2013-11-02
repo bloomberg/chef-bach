@@ -62,7 +62,11 @@ when "rhel"
   # do things on RHEL platforms (redhat, centos, scientific, etc)
 end
 
-
+ruby_block "initialize-rabbitmq-config" do
+    block do
+      make_config('mysql-hive-password', secure_password)
+    end
+end
 
 
 %w{capacity-scheduler.xml
@@ -123,13 +127,26 @@ end
    hbase-site.xml
    log4j.properties
    regionservers}.each do |t|
-  template "/etc/hbase/conf/#{t}" do
-   source "hb_#{t}.erb"
-   variables(:nn_hosts => get_nodes_for("namenode"), 
-             :zk_hosts => get_nodes_for("zookeeper_server"), 
-             :jn_hosts => get_nodes_for("journalnode"),
-             :rs_hosts => get_nodes_for("region_server"),
-             :mounts => node[:bcpc][:hadoop][:mounts])
+   template "/etc/hbase/conf/#{t}" do
+     source "hb_#{t}.erb"
+     mode 0644
+     variables(:nn_hosts => get_nodes_for("namenode"), 
+               :zk_hosts => get_nodes_for("zookeeper_server"), 
+               :jn_hosts => get_nodes_for("journalnode"),
+               :rs_hosts => get_nodes_for("region_server"),
+               :mounts => node[:bcpc][:hadoop][:mounts])
+  end
+end
+
+%w{hive-exec-log4j.properties
+   hive-log4j.properties 
+   hive-site.xml }.each do |t| 
+   template "/etc/hive/conf/#{t}" do
+     source "hv_#{t}.erb"
+     mode 0644
+     variables(:mysql_hosts => get_mysql_nodes.map{ |m| m.hostname },
+               :zk_hosts => get_nodes_for("zookeeper_server"), 
+               :hive_host => get_nodes_for("hive_metastore"))
   end
 end
 
