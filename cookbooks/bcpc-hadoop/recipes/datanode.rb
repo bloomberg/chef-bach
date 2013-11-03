@@ -1,5 +1,11 @@
 
-%w{hadoop-yarn-nodemanager hadoop-hdfs-datanode hadoop-mapreduce hadoop-client}.each do |pkg|
+%w{hadoop-yarn-nodemanager 
+   hadoop-hdfs-datanode 
+   hadoop-mapreduce 
+   hadoop-client 
+   impala-server 
+   impala
+   impala-shell}.each do |pkg|
   package pkg do
     action :upgrade
   end

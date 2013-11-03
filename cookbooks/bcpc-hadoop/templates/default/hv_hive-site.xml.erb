@@ -28,6 +28,17 @@
 <!-- Hive Execution Parameters -->
 
 <property>
+  <name>hive.metastore.local</name>
+  <value>false</value>
+</property>
+
+<property>
+  <name>hive.metastore.client.socket.timeout</name>
+  <value>3600</value>
+  <description>MetaStore Client socket timeout in seconds</description>
+</property>
+
+<property>
   <name>javax.jdo.option.ConnectionURL</name>
   <value>jdbc:mysql:loadbalance://<%=@mysql_hosts.join(',')%>/metastore?loadBalanceBlacklistTimeout=5000</value>
   <description>the URL of the MySQL database</description>
@@ -75,5 +86,6 @@
   <description>Zookeeper quorum used by Hive's Table Lock Manager</description>
   <value><%= @zk_hosts.map{ |s| float_host(s[:hostname]) }.join(",")%></value>
 </property>
+
 
 </configuration>

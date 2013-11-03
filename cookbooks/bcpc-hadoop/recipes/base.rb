@@ -40,7 +40,7 @@ when "debian"
     key "cloudera-archive.key"
   end
 
-  %w{hadoop hbase hive oozie pig zookeeper}.each do |w|
+  %w{hadoop hbase hive oozie pig zookeeper impala}.each do |w|
     directory "/etc/#{w}/conf.bcpc" do
       owner "root"
       group "root"
@@ -62,13 +62,16 @@ when "rhel"
   # do things on RHEL platforms (redhat, centos, scientific, etc)
 end
 
-ruby_block "initialize-rabbitmq-config" do
+ruby_block "initialize-hadoop-configs" do
     block do
       make_config('mysql-hive-password', secure_password)
+      make_config('oozie-keystore-password', secure_password)
     end
 end
 
-
+#
+#set up hadoop conf
+#
 %w{capacity-scheduler.xml
    container-executor.cfg
    core-site.xml
@@ -107,6 +110,9 @@ end
  end
 end
 
+#
+# Set up zookeeper configs
+#
 %w{zoo.cfg
   log4j.properties
   configuration.xsl
@@ -121,6 +127,9 @@ end
  end
 end
 
+#
+# Set up hbase configs
+#
 %w{hadoop-metrics.properties
    hbase-env.sh
    hbase-policy.xml
@@ -138,6 +147,9 @@ end
   end
 end
 
+#
+# Set up hive configs
+#
 %w{hive-exec-log4j.properties
    hive-log4j.properties 
    hive-site.xml }.each do |t| 
@@ -150,6 +162,50 @@ end
   end
 end
 
+#
+# Set up oozie configs
+#
+%w{
+  oozie-env.sh            
+  oozie-site.xml
+  adminusers.txt   
+  oozie-default.xml  
+  oozie-log4j.properties
+  }.each do |t|
+  template "/etc/oozie/conf/#{t}" do
+    source "ooz_#{t}.erb"
+    mode 0644
+    variables(:mysql_hosts => get_mysql_nodes.map{ |m| m.hostname },
+              :zk_hosts => get_nodes_for("zookeeper_server"), 
+              :hive_host => get_nodes_for("hive_metastore"))
+  end
+end
+link "/etc/oozie/conf.bcpc/hive-site.xml" do
+  to "/etc/hive/conf.bcpc/hive-site.xml"
+end
+link "/etc/oozie/conf.bcpc/core-site.xml" do
+  to "/etc/hadoop/conf.bcpc/core-site.xml"
+end
+link "/etc/oozie/conf.bcpc/yarn-site.xml" do
+  to "/etc/hadoop/conf.bcpc/yarn-site.xml"
+end
+
+#
+# Set up impala configs
+#
+
+link "/etc/impala/conf.bcpc/hive-site.xml" do
+  to "/etc/hive/conf.bcpc/hive-site.xml"
+end
+link "/etc/impala/conf.bcpc/core-site.xml" do
+  to "/etc/hadoop/conf.bcpc/core-site.xml"
+end
+link "/etc/impala/conf.bcpc/hdfs-site.xml" do
+  to "/etc/hadoop/conf.bcpc/hdfs-site.xml"
+end
+link "/etc/impala/conf.bcpc/hbase-site.xml" do
+  to "/etc/hbase/conf.bcpc/hbase-site.xml"
+end
 
 package "openjdk-7-jdk" do
   action :upgrade
