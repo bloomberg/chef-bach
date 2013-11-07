@@ -6,10 +6,10 @@
   "run_list": [
     "role[Basic]",
     "role[BCPC-Hadoop-Head]",
-    "role[namenode]",
-    "recipe[oozie]",
-    "recipe[journalnode]",
-    "recipe[historyserver]"
+    "role[bcpc-hadoop::namenode]",
+    "recipe[bcpc-hadoop::oozie]",
+    "recipe[bcpc-hadoop::journalnode]",
+    "recipe[bcpc-hadoop::historyserver]"
   ],
   "description": "A highly-available head node in a BCPC Hadoop cluster",
   "chef_type": "role",
