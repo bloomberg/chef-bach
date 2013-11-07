@@ -112,15 +112,15 @@ FILES="elasticsearch-plugins.tgz $FILES"
 
 # Fetch pyrabbit
 if [ ! -f pyrabbit-1.0.1.tar.gz ]; then
-    $CURL -O -L https://pypi.python.org/packages/source/p/pyrabbit/pyrabbit-1.0.1.tar.gz
+    $CURL -O -L http://pypi.python.org/packages/source/p/pyrabbit/pyrabbit-1.0.1.tar.gz
 fi
 FILES="pyrabbit-1.0.1.tar.gz $FILES"
 
 # Build graphite packages
 if [ ! -f python-carbon_0.9.10_all.deb ] || [ ! -f python-whisper_0.9.10_all.deb ] || [ ! -f python-graphite-web_0.9.10_all.deb ]; then
-    $CURL -L -O http://pypi.python.org/packages/source/c/carbon/carbon-0.9.10.tar.gz
-    $CURL -L -O http://pypi.python.org/packages/source/w/whisper/whisper-0.9.10.tar.gz
-    $CURL -L -O http://pypi.python.org/packages/source/g/graphite-web/graphite-web-0.9.10.tar.gz
+#    $CURL -L -O http://pypi.python.org/packages/source/c/carbon/carbon-0.9.10.tar.gz
+#    $CURL -L -O http://pypi.python.org/packages/source/w/whisper/whisper-0.9.10.tar.gz
+#    $CURL -L -O http://pypi.python.org/packages/source/g/graphite-web/graphite-web-0.9.10.tar.gz
     tar zxf carbon-0.9.10.tar.gz
     tar zxf whisper-0.9.10.tar.gz
     tar zxf graphite-web-0.9.10.tar.gz

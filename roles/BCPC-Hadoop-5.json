@@ -1,19 +1,18 @@
 {
-  "name": "BCPC-Hadoop-Head",
+  "name": "BCPC-Hadoop-5",
   "default_attributes": {
   },
   "json_class": "Chef::Role",
   "run_list": [
     "role[Basic]",
-    "recipe[bcpc::default]",
-    "recipe[bcpc::networking]",
-    "recipe[bcpc::mysql]",
-    "recipe[bcpc-hadoop::base]",
-    "recipe[bcpc-hadoop::zookeeper_server]",
-    "recipe[bcpc-hadoop::namenode]"
+    "role[BCPC-Hadoop-Head]",
+    "recipe[bcpc-hadoop::resource_manager]",
+    "recipe[bcpc-hadoop::hue]",
+    "recipe[bcpc-hadoop::hcatalog_server]"
   ],
   "description": "A highly-available head node in a BCPC Hadoop cluster",
   "chef_type": "role",
   "override_attributes": {
+    "bcpc" : { "hadoop" : { "standby" : true } }
   }
 }

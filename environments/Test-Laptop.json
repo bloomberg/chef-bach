@@ -34,7 +34,14 @@
       },
       "dns_servers" : [ "160.43.8.240", "160.43.12.249" ],
       "hadoop" : {
-        "min_node_count" : 2
+        "min_node_count" : 2,
+        "distribution" : { 
+          "version" : "-cdh5",
+          "key" : "cloudera-archive-5.key"
+        }
+      },
+      "repos" : {
+        "cloudera" : "http://archive.cloudera.com/cdh5/ubuntu/precise/amd64/cdh"
       }
     },
     "ntp": {

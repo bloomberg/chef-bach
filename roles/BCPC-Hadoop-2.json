@@ -1,19 +1,19 @@
 {
-  "name": "BCPC-Hadoop-Head",
+  "name": "BCPC-Hadoop-Standby",
   "default_attributes": {
   },
   "json_class": "Chef::Role",
   "run_list": [
     "role[Basic]",
-    "recipe[bcpc::default]",
-    "recipe[bcpc::networking]",
-    "recipe[bcpc::mysql]",
-    "recipe[bcpc-hadoop::base]",
-    "recipe[bcpc-hadoop::zookeeper_server]",
-    "recipe[bcpc-hadoop::namenode]"
+    "role[BCPC-Hadoop-Head]",
+    "role[namenode]",
+    "recipe[oozie]",
+    "recipe[journalnode]",
+    "recipe[historyserver]"
   ],
   "description": "A highly-available head node in a BCPC Hadoop cluster",
   "chef_type": "role",
   "override_attributes": {
+    "bcpc" : { "hadoop" : { "standby" : true } }
   }
 }

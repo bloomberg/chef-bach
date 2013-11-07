@@ -34,10 +34,10 @@ case node["platform_family"]
 when "debian"
   apt_repository "cloudera" do
     uri node['bcpc']['repos']['cloudera']
-    distribution node['lsb']['codename'] + '-cdh4'
+    distribution node['lsb']['codename'] + node[:bcpc][:hadoop][:distribution][:version]
     components ["contrib"]
     arch "amd64"
-    key "cloudera-archive.key"
+    key node[:bcpc][:hadoop][:distribution][:key]
   end
 
   %w{hadoop hbase hive oozie pig zookeeper impala}.each do |w|
@@ -89,8 +89,8 @@ end
    template "/etc/hadoop/conf/#{t}" do
      source "hdp_#{t}.erb"
      mode 0644
-     variables(:nn_hosts => get_nodes_for("namenode") , 
-               :zk_hosts => get_nodes_for("zookeeper_server"), 
+     variables(:nn_hosts => get_nodes_for("namenode") ,
+               :zk_hosts => get_nodes_for("zookeeper_server"),
                :jn_hosts => get_nodes_for("journalnode"),
                :rm_host  => get_nodes_for("resource_manager"),
                :dn_hosts => get_nodes_for("datanode"),
@@ -103,8 +103,8 @@ end
  template "/etc/hadoop/conf/#{t}" do
    source "hdp_#{t}.erb"
    mode 0644
-   variables(:nn_hosts => get_nodes_for("namenode"), 
-             :zk_hosts => get_nodes_for("zookeeper_server"), 
+   variables(:nn_hosts => get_nodes_for("namenode"),
+             :zk_hosts => get_nodes_for("zookeeper_server"),
              :jn_hosts => get_nodes_for("journalnode"),
              :mounts => node[:bcpc][:hadoop][:mounts])
  end
@@ -120,8 +120,8 @@ end
  template "/etc/zookeeper/conf/#{t}" do
    source "zk_#{t}.erb"
    mode 0644
-   variables(:nn_hosts => get_nodes_for("namenode"), 
-             :zk_hosts => get_nodes_for("zookeeper_server"), 
+   variables(:nn_hosts => get_nodes_for("namenode"),
+             :zk_hosts => get_nodes_for("zookeeper_server"),
              :jn_hosts => get_nodes_for("journalnode"),
              :mounts => node[:bcpc][:hadoop][:mounts])
  end
@@ -139,8 +139,8 @@ end
    template "/etc/hbase/conf/#{t}" do
      source "hb_#{t}.erb"
      mode 0644
-     variables(:nn_hosts => get_nodes_for("namenode"), 
-               :zk_hosts => get_nodes_for("zookeeper_server"), 
+     variables(:nn_hosts => get_nodes_for("namenode"),
+               :zk_hosts => get_nodes_for("zookeeper_server"),
                :jn_hosts => get_nodes_for("journalnode"),
                :rs_hosts => get_nodes_for("region_server"),
                :mounts => node[:bcpc][:hadoop][:mounts])
@@ -151,13 +151,13 @@ end
 # Set up hive configs
 #
 %w{hive-exec-log4j.properties
-   hive-log4j.properties 
-   hive-site.xml }.each do |t| 
+   hive-log4j.properties
+   hive-site.xml }.each do |t|
    template "/etc/hive/conf/#{t}" do
      source "hv_#{t}.erb"
      mode 0644
      variables(:mysql_hosts => get_mysql_nodes.map{ |m| m.hostname },
-               :zk_hosts => get_nodes_for("zookeeper_server"), 
+               :zk_hosts => get_nodes_for("zookeeper_server"),
                :hive_host => get_nodes_for("hive_metastore"))
   end
 end
@@ -166,17 +166,17 @@ end
 # Set up oozie configs
 #
 %w{
-  oozie-env.sh            
+  oozie-env.sh
   oozie-site.xml
-  adminusers.txt   
-  oozie-default.xml  
+  adminusers.txt
+  oozie-default.xml
   oozie-log4j.properties
   }.each do |t|
   template "/etc/oozie/conf/#{t}" do
     source "ooz_#{t}.erb"
     mode 0644
     variables(:mysql_hosts => get_mysql_nodes.map{ |m| m.hostname },
-              :zk_hosts => get_nodes_for("zookeeper_server"), 
+              :zk_hosts => get_nodes_for("zookeeper_server"),
               :hive_host => get_nodes_for("hive_metastore"))
   end
 end
