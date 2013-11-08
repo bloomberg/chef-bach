@@ -6,7 +6,7 @@
 end
 
 service "hadoop-yarn-historyserver" do
-  action [:enable, :restart]
+  action [:enable, :start]
 end
 
 

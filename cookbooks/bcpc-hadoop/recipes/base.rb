@@ -89,7 +89,7 @@ end
    template "/etc/hadoop/conf/#{t}" do
      source "hdp_#{t}.erb"
      mode 0644
-     variables(:nn_hosts => get_nodes_for("namenode") ,
+     variables(:nn_hosts => get_nodes_for("namenode*") ,
                :zk_hosts => get_nodes_for("zookeeper_server"),
                :jn_hosts => get_nodes_for("journalnode"),
                :rm_host  => get_nodes_for("resource_manager"),

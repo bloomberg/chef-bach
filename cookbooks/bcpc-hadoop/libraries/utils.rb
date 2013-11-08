@@ -107,10 +107,10 @@ def get_hadoop_workers
   return results
 end
 
-def get_nodes_for(recipe, include_self = false)
+def get_nodes_for(recipe)
   results = search(:node, "recipes:bcpc-hadoop\\:\\:#{recipe} AND chef_environment:#{node.chef_environment}")
   results.map!{ |x| x.hostname == node.hostname ? node : x }
-  return (results.empty? and include_self) ? [node] : results
+  return results
 end
 
 

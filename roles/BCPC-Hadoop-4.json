@@ -8,8 +8,7 @@
     "role[BCPC-Hadoop-Head]",
     "recipe[bcpc-hadoop::master]",
     "recipe[bcpc-hadoop::impala_statestore]",
-    "recipe[bcpc-hadoop::hive_server]",
-    "recipe[bcpc-hadoop::journalnode]"
+    "recipe[bcpc-hadoop::hive]"
   ],
   "description": "A highly-available head node in a BCPC Hadoop cluster",
   "chef_type": "role",

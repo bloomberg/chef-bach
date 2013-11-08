@@ -9,7 +9,8 @@
     "recipe[bcpc-hadoop::resource_manager]",
     "recipe[bcpc-hadoop::hue]",
     "recipe[bcpc-hadoop::hcatalog_server]",
-    "recipe[bcpc-hadoop::httpfs]"
+    "recipe[bcpc-hadoop::httpfs]",
+    "recipe[bcpc-hadoop::historyserver]"
   ],
   "description": "A highly-available head node in a BCPC Hadoop cluster",
   "chef_type": "role",
