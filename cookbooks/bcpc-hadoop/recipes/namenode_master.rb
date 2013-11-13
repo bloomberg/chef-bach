@@ -91,26 +91,26 @@ end
 # We'd prefer to do it after all nodes are members of the HDFS system
 #
 bash "create-hdfs-temp" do
-  code "hdfs hadoop fs -mkdir /tmp; hdfs hadoop fs -chmod -R 1777 /tmp"
+  code "hadoop fs -mkdir /tmp; hadoop fs -chmod -R 1777 /tmp"
   user "hdfs"
-  not_if "sudo -u hdfs hdfs hadoop fs -test /tmp"
+  not_if "sudo -u hdfs hadoop fs -test -d /tmp"
+end
+
+bash "create-hdfs-user" do
+  code "hadoop fs -mkdir /user; hadoop fs -chmod -R 0755 /user"
+  user "hdfs"
+  not_if "sudo -u hdfs hadoop fs -test -d /user"
 end
 
 bash "create-hdfs-history" do
-  code "hdfs hadoop fs -mkdir /user; hdfs hadoop fs -chmod -R 0755 /user"
+  code "hadoop fs -mkdir /user/history; hadoop fs -chmod -R 1777 /user/history; hadoop fs -chown yarn /user/history"
   user "hdfs"
-  not_if "sudo -u hdfs hdfs hadoop fs -test /user"
-end
-
-bash "create-hdfs-history" do
-  code "hdfs hadoop fs -mkdir /user/history; hdfs hadoop fs -chmod -R 1777 /user/history; hdfs hadoop fs -chown yarn /user/history"
-  user "hdfs"
-  not_if "sudo -u hdfs hdfs hadoop fs -test /user/history"
+  not_if "sudo -u hdfs hadoop fs -test -d /user/history"
 end
 
 bash "create-hdfs-yarn-log" do
-  code "hdfs hadoop fs -mkdir /var/log/hadoop-yarn; hdfs hadoop fs chown yarn:mapred /var/log/hadoop-yarn"
+  code "hadoop fs -mkdir -p /var/log/hadoop-yarn; hadoop fs -chown yarn:mapred /var/log/hadoop-yarn"
   user "hdfs"
-  not_if "sudo -u hdfs hdfs hadoop fs -test /var/log/hadoop-yarn"
+  not_if "sudo -u hdfs hadoop fs -test -d /var/log/hadoop-yarn"
 end
 

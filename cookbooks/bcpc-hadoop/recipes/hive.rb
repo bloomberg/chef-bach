@@ -1,5 +1,5 @@
 
-%w{hive-server2}.each do |pkg|
+%w{hive-server2 hive-hbase}.each do |pkg|
   package pkg do
     action :upgrade
   end

@@ -2,6 +2,7 @@
 %w{hadoop-yarn-nodemanager
    hadoop-hdfs-datanode
    hadoop-mapreduce
+   hbase-regionserver
    hadoop-client
    impala-server
    impala
@@ -31,4 +32,12 @@ end
   end
 end
 
+%w{hbase-regionserver impala-server}.each do |svc|
+  service svc do
+    action [:enable, :start]
+      subscribes :restart, "template[/etc/hadoop/conf/hdfs-site.xml]", :delayed
+      subscribes :restart, "template[/etc/hadoop/conf/yarn-site.xml]", :delayed
+      subscribes :restart, "template[/etc/hadoop/conf/hbase-site.xml]", :delayed
+  end
+end
 

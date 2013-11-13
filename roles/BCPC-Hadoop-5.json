@@ -7,10 +7,10 @@
     "role[Basic]",
     "role[BCPC-Hadoop-Head]",
     "recipe[bcpc-hadoop::resource_manager]",
-    "recipe[bcpc-hadoop::hue]",
-    "recipe[bcpc-hadoop::hcatalog_server]",
+    "recipe[bcpc-hadoop::webhcat]",
     "recipe[bcpc-hadoop::httpfs]",
-    "recipe[bcpc-hadoop::historyserver]"
+    "recipe[bcpc-hadoop::historyserver]",
+    "recipe[bcpc-hadoop::hue]"
   ],
   "description": "A highly-available head node in a BCPC Hadoop cluster",
   "chef_type": "role",

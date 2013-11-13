@@ -3,7 +3,7 @@ package "impala-state-store" do
   action :upgrade
 end
 
-service "hadoop-hdfs-namenode" do
+service "impala-state-store" do
   action [:enable, :start]
   subscribes :restart, "template[/etc/hadoop/conf/hdfs-site.xml]", :delayed
   subscribes :restart, "template[/etc/hadoop/conf/hdfs-policy.xml]", :delayed

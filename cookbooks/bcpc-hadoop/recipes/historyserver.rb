@@ -5,7 +5,7 @@
   end
 end
 
-service "hadoop-yarn-historyserver" do
+service "hadoop-mapreduce-historyserver" do
   action [:enable, :start]
 end
 

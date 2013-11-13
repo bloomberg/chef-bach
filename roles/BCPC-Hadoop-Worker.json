@@ -9,9 +9,6 @@
     "recipe[bcpc::networking]",
     "recipe[bcpc-hadoop::base]",
     "recipe[bcpc-hadoop::datanode]",
-    "recipe[bcpc-hadoop::regionserver]",
-    "recipe[bcpc-hadoop::impala]",
-    "recipe[bcpc-hadoop::nodemanager]",
     "recipe[bcpc-hadoop::spark]"
   ],
   "description": "A highly-available head node in a BCPC Hadoop cluster",

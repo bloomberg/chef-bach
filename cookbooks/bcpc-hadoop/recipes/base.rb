@@ -40,7 +40,17 @@ when "debian"
     key node[:bcpc][:hadoop][:distribution][:key]
   end
 
-  %w{hadoop hbase hive oozie pig zookeeper impala}.each do |w|
+  %w{hadoop
+     hbase
+     hive
+     oozie
+     pig
+     zookeeper
+     impala
+     webhcat
+     hadoop-httpfs
+     hive-hcatalog
+     hue}.each do |w|
     directory "/etc/#{w}/conf.bcpc" do
       owner "root"
       group "root"
@@ -66,6 +76,8 @@ ruby_block "initialize-hadoop-configs" do
     block do
       make_config('mysql-hive-password', secure_password)
       make_config('oozie-keystore-password', secure_password)
+      make_config('mysql-hue-password', secure_password)
+      make_config('hue-session-key', secure_password)
     end
 end
 
@@ -205,6 +217,44 @@ link "/etc/impala/conf.bcpc/hdfs-site.xml" do
 end
 link "/etc/impala/conf.bcpc/hbase-site.xml" do
   to "/etc/hbase/conf.bcpc/hbase-site.xml"
+end
+
+#
+# HTTPFS and Hue configs
+#
+%w{
+  httpfs-env.sh
+  httpfs-log4j.properties
+  httpfs-signature.secret
+  httpfs-site.xml
+   }.each do |t|
+   template "/etc/hadoop-httpfs/conf/#{t}" do
+     source "#{t}.erb"
+     mode 0644
+  end
+end
+
+link "/etc/hive-hcatalog/conf.bcpc/hive-site.xml" do
+  to "/etc/hive/conf.bcpc/hive-site.xml"
+end
+
+#
+# HUE Configs
+#
+%w{
+  hue.ini
+  log4j.properties
+  log.conf}.each do |t|
+   template "/etc/hue/conf/#{t}" do
+     source "hue_#{t}.erb"
+     mode 0644
+     variables(:impala_hosts => get_nodes_for("datanode") ,
+               :zk_hosts => get_nodes_for("zookeeper_server"),
+               :rm_host  => get_nodes_for("resource_manager"),
+               :hive_host  => get_nodes_for("hive"),
+               :oozie_host  => get_nodes_for("oozie"),
+               :hb_host  => get_nodes_for("master"))
+  end
 end
 
 package "openjdk-7-jdk" do
