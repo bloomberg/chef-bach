@@ -108,7 +108,7 @@ ruby_block "initialize-radosgw-admin-user" do
   block do
     make_config('radosgw-admin-user', "radosgw")
     make_config('radosgw-admin-access-key', secure_password_alphanum_upper(20))
-    make_config('radosgw-admin-secret-key', secure_password_len(40))
+    make_config('radosgw-admin-secret-key', secure_password(40))
     rgw_admin = JSON.parse(%x[radosgw-admin user create --display-name="Admin" --uid="radosgw" --access_key=#{get_config('radosgw-admin-access-key')} --secret=#{get_config('radosgw-admin-secret-key')}])
   end
   not_if "radosgw-admin user info --uid='radosgw'"

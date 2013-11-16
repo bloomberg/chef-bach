@@ -97,23 +97,15 @@ def power_of_2(number)
 	return result
 end
 
-def secure_password
-	pw = String.new
-	while pw.length < 20
-		pw << ::OpenSSL::Random.random_bytes(1).gsub(/\W/, '')
-	end
-	pw
-end
-
-def secure_password_len(len)
-	pw = String.new
+def secure_password(len=20)
+	secure_password_pw = String.new
 	while pw.length < len
 		pw << ::OpenSSL::Random.random_bytes(1).gsub(/\W/, '')
 	end
 	pw
 end
 
-def secure_password_alphanum_upper(len)
+def secure_password_alphanum_upper(len=20)
     # Chef's syntax checker doesn't like multiple exploders in same line. Sigh.
     alphanum_upper = [*'0'..'9']
     alphanum_upper += [*'A'..'Z']
