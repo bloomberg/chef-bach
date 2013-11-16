@@ -43,7 +43,6 @@ default['bcpc']['ceph']['pgs_per_node'] = 1024
 default['bcpc']['ceph']['rgw']['replicas'] = 3
 default['bcpc']['ceph']['rgw']['portion'] = 33
 default['bcpc']['ceph']['rgw']['type'] = 'hdd'
-default['bcpc']['ceph']['rgw']['name'] = '.rgw.buckets'
 default['bcpc']['ceph']['images']['replicas'] = 3
 default['bcpc']['ceph']['images']['portion'] = 33
 default['bcpc']['ceph']['images']['type'] = 'ssd'

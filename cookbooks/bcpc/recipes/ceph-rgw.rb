@@ -27,6 +27,25 @@ package "radosgw" do
    action :upgrade
 end
 
+package "python-boto"
+
+ruby_block "initialize-radosgw-admin-user" do
+  block do
+    rgw_admin = JSON.parse(%x[radosgw-admin user create --display-name="Admin" --uid="radosgw"])
+    make_config('radosgw-admin-user', "radosgw")
+    make_config('radosgw-admin-access-key', rgw_admin['keys'][0]['access_key'])
+    make_config('radosgw-admin-secret-key', rgw_admin['keys'][0]['secret_key'])
+  end
+  not_if "radosgw-admin user info --uid='radosgw'"
+end
+
+template "/usr/local/bin/radosgw_check.py" do
+  source "radosgw_check.py.erb"
+  mode 0700
+  owner "root"
+  group "root"
+end
+
 directory "/var/lib/ceph/radosgw/ceph-radosgw.gateway" do
   owner "root"
   group "root"
@@ -49,42 +68,31 @@ bash "write-client-radosgw-key" do
             --create-keyring \
             --name=client.radosgw.gateway \
             --add-key="$RGW_KEY"
+        chmod 644 /var/lib/ceph/radosgw/ceph-radosgw.gateway/keyring
     EOH
-    not_if "test -f /var/lib/ceph/radosgw/ceph-radosgw.gateway/keyring && chmod 644 /var/lib/ceph/radosgw/ceph-radosgw.gateway/keyring"
+    not_if "test -f /var/lib/ceph/radosgw/ceph-radosgw.gateway/keyring"
 end
 
-bash "create-rgw-rados-pool" do
-    user "root"
-    optimal = power_of_2(get_all_nodes.length*node[:bcpc][:ceph][:pgs_per_node]/node[:bcpc][:ceph][:rgw][:replicas]*node[:bcpc][:ceph][:rgw][:portion]/100)
-    code <<-EOH
-        ceph osd pool create #{node[:bcpc][:ceph][:rgw][:name]} #{optimal}
-        ceph osd pool set #{node[:bcpc][:ceph][:rgw][:name]} crush_ruleset #{(node[:bcpc][:ceph][:rgw][:type]=="ssd")?3:4}
-    EOH
-    not_if "rados lspools | grep #{node[:bcpc][:ceph][:rgw][:name]}"
-end
+rgw_optimal_pg = power_of_2(get_all_nodes.length*node[:bcpc][:ceph][:pgs_per_node]/node[:bcpc][:ceph][:rgw][:replicas]*node[:bcpc][:ceph][:rgw][:portion]/100)
 
-bash "set-rgw-rados-pool-replicas" do
-    user "root"
-    code "ceph osd pool set #{node[:bcpc][:ceph][:rgw][:name]} size #{node[:bcpc][:ceph][:rgw][:replicas]}"
-    not_if "ceph osd pool get #{node[:bcpc][:ceph][:rgw][:name]} size | grep #{node[:bcpc][:ceph][:rgw][:replicas]}"
-end
+rgw_crush_ruleset = (node[:bcpc][:ceph][:rgw][:type] == "ssd") ? 3 : 4
 
-bash "set-rgw-rados-pool-pgs" do
-    user "root"
-    optimal = power_of_2(get_all_nodes.length*node[:bcpc][:ceph][:pgs_per_node]/node[:bcpc][:ceph][:rgw][:replicas]*node[:bcpc][:ceph][:rgw][:portion]/100)
-    code "ceph osd pool set #{node[:bcpc][:ceph][:rgw][:name]} pg_num #{optimal}"
-    not_if "((`ceph osd pool get #{node[:bcpc][:ceph][:rgw][:name]} pg_num | awk '{print $2}'` >= #{optimal}))"
-end
-
-%w{.rgw .rgw.control .rgw.gc .rgw.root .users.uid .users.email .users .usage .log .intent-log}.each do |pool|
+%w{.rgw .rgw.control .rgw.gc .rgw.root .users.uid .users.email .users .usage .log .intent-log .rgw.buckets .rgw.buckets.index}.each do |pool|
     bash "create-rados-pool-#{pool}" do
         code <<-EOH
-            ceph osd pool create #{pool} 128
-            ceph osd pool set #{pool} crush_ruleset #{(node[:bcpc][:ceph][:rgw][:type]=="ssd")?3:4}
+            ceph osd pool create #{pool} #{rgw_optimal_pg}
+            ceph osd pool set #{pool} crush_ruleset #{rgw_crush_ruleset}
             ceph osd pool set #{pool} size #{node[:bcpc][:ceph][:rgw][:replicas]}
         EOH
-        not_if "rados df | grep .intent-log"
+        not_if "rados df | grep #{pool}"
     end
+end
+
+# check to see if we should up the number of pg's now for the core buckets pool
+bash "update-rgw-buckets-pgs" do
+    user "root"
+    code "ceph osd pool set .rgw.buckets pg_num #{rgw_optimal_pg}"
+    not_if "((`ceph osd pool get .rgw.buckets pg_num | awk '{print $2}'` >= #{rgw_optimal_pg}))"
 end
 
 file "/var/www/s3gw.fcgi" do
