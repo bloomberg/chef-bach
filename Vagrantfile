@@ -38,7 +38,9 @@ Vagrant.configure("2") do |config|
 
     # since we are creating the server and the validation keys on this new
     # machine itself, we can't use Vagrant's built-in chef provisioning.
-    bootstrap.vm.provision :shell, :inline => "/chef-bcpc-host/bootstrap_chef.sh --vagrant-local 10.0.100.3 #{$local_environment}"
+    # We actually prefer to do this in vbox_create.sh as we do some fixups
+    # and register our VMs in cobbler after we're done.
+    #bootstrap.vm.provision :shell, :inline => "/chef-bcpc-host/bootstrap_chef.sh --vagrant-local 10.0.100.3 #{$local_environment}"
   end
 
   #config.vm.define :mirror do |mirror|
