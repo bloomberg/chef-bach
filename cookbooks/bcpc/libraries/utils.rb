@@ -104,3 +104,28 @@ def secure_password
 	end
 	pw
 end
+
+def secure_password_len(len)
+	pw = String.new
+	while pw.length < len
+		pw << ::OpenSSL::Random.random_bytes(1).gsub(/\W/, '')
+	end
+	pw
+end
+
+def secure_password_alphanum_upper(len)
+    # Chef's syntax checker doesn't like multiple exploders in same line. Sigh.
+    alphanum_upper = [*'0'..'9']
+    alphanum_upper += [*'A'..'Z']
+    # We could probably optimize this to be in one pass if we could easily
+    # handle the case where random_bytes doesn't return a rejected char.
+    raw_pw = String.new
+    while raw_pw.length < len
+        raw_pw << ::OpenSSL::Random.random_bytes(1).gsub(/\W/, '')
+    end
+    pw = String.new
+    while pw.length < len
+        pw << alphanum_upper[raw_pw.getbyte(pw.length) % alphanum_upper.length]
+    end
+    pw
+end

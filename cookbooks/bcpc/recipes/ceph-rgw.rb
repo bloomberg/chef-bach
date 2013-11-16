@@ -29,23 +29,6 @@ end
 
 package "python-boto"
 
-ruby_block "initialize-radosgw-admin-user" do
-  block do
-    rgw_admin = JSON.parse(%x[radosgw-admin user create --display-name="Admin" --uid="radosgw"])
-    make_config('radosgw-admin-user', "radosgw")
-    make_config('radosgw-admin-access-key', rgw_admin['keys'][0]['access_key'])
-    make_config('radosgw-admin-secret-key', rgw_admin['keys'][0]['secret_key'])
-  end
-  not_if "radosgw-admin user info --uid='radosgw'"
-end
-
-template "/usr/local/bin/radosgw_check.py" do
-  source "radosgw_check.py.erb"
-  mode 0700
-  owner "root"
-  group "root"
-end
-
 directory "/var/lib/ceph/radosgw/ceph-radosgw.gateway" do
   owner "root"
   group "root"
@@ -84,7 +67,7 @@ rgw_crush_ruleset = (node[:bcpc][:ceph][:rgw][:type] == "ssd") ? 3 : 4
             ceph osd pool set #{pool} crush_ruleset #{rgw_crush_ruleset}
             ceph osd pool set #{pool} size #{node[:bcpc][:ceph][:rgw][:replicas]}
         EOH
-        not_if "rados df | grep #{pool}"
+        not_if "rados lspools | grep ^#{pool}$"
     end
 end
 
@@ -119,4 +102,21 @@ end
 
 execute "radosgw-all-starter" do
     command "start radosgw-all-starter"
+end
+
+ruby_block "initialize-radosgw-admin-user" do
+  block do
+    make_config('radosgw-admin-user', "radosgw")
+    make_config('radosgw-admin-access-key', secure_password_alphanum_upper(20))
+    make_config('radosgw-admin-secret-key', secure_password_len(40))
+    rgw_admin = JSON.parse(%x[radosgw-admin user create --display-name="Admin" --uid="radosgw" --access_key=#{get_config('radosgw-admin-access-key')} --secret=#{get_config('radosgw-admin-secret-key')}])
+  end
+  not_if "radosgw-admin user info --uid='radosgw'"
+end
+
+template "/usr/local/bin/radosgw_check.py" do
+  source "radosgw_check.py.erb"
+  mode 0700
+  owner "root"
+  group "root"
 end
