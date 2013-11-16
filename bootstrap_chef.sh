@@ -35,11 +35,12 @@ if [[ $# -gt 1 ]]; then
     SSH_CMD="ssh -t -i $KEYFILE ${SSH_USER}@${IP}" 
     echo "SSHing to the non-Vagrant machine ${IP} as ${SSH_USER}"
   fi
-  if [[ $# -eq 3 ]]; then
+  if [[ $# -ge 3 ]]; then
       CHEF_ENVIRONMENT="$3"
   else
       CHEF_ENVIRONMENT="Test-Laptop"
   fi
+  echo "Chef environment: ${CHEF_ENVIRONMENT}"
 else
   echo "Usage: `basename $0` --vagrant-local|--vagrant-remote|<user name> IP-Address [chef environment]" >> /dev/stderr
   exit

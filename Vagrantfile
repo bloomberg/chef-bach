@@ -5,6 +5,7 @@
 # Chef server.
 # See http://www.vagrantup.com/ for info on Vagrant.
 
+$local_environment = "Test-Laptop"
 $local_mirror = nil
 #$local_mirror = "10.0.100.4"
 
@@ -37,7 +38,7 @@ Vagrant.configure("2") do |config|
 
     # since we are creating the server and the validation keys on this new
     # machine itself, we can't use Vagrant's built-in chef provisioning.
-    bootstrap.vm.provision :shell, :inline => "/chef-bcpc-host/bootstrap_chef.sh --vagrant-local 10.0.100.3"
+    bootstrap.vm.provision :shell, :inline => "/chef-bcpc-host/bootstrap_chef.sh --vagrant-local 10.0.100.3 #{$local_environment}"
   end
 
   #config.vm.define :mirror do |mirror|
