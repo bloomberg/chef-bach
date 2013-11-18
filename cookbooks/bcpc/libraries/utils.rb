@@ -98,7 +98,7 @@ def power_of_2(number)
 end
 
 def secure_password(len=20)
-	secure_password_pw = String.new
+	pw = String.new
 	while pw.length < len
 		pw << ::OpenSSL::Random.random_bytes(1).gsub(/\W/, '')
 	end
