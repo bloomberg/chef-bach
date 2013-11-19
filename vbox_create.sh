@@ -20,11 +20,18 @@ if ! hash $VBM ; then
   exit 1
 fi
 
+# Bootstrap VM Defaults (these need to be exported for Vagrant's Vagrantfile)
+export BOOTSTRAP_VM_MEM=2048
+export BOOTSTRAP_VM_CPUs=1
 # Use this if you intend to make an apt-mirror in this VM (see the
-#instructions on using an apt-mirror towards the end of bootstrap.md)
-#BOOTSTRAP_DRIVE_SIZE=120480
-BOOTSTRAP_DRIVE_SIZE=20480
-DRIVE_SIZE=20480
+# instructions on using an apt-mirror towards the end of bootstrap.md)
+# -- Vagrant VMs do not use this size --
+#BOOTSTRAP_VM_DRIVE_SIZE=120480
+
+# Cluster VM Defaults
+CLUSTER_VM_MEM=2048
+CLUSTER_VM_CPUs=1
+CLUSTER_VM_DRIVE_SIZE=20480
 
 VBOX_DIR=`dirname $0`/vbox
 P=`python -c "import os.path; print os.path.abspath(\"${VBOX_DIR}/\")"`
@@ -134,13 +141,14 @@ function create_bootstrap_VM {
       # Only if VM doesn't exist
       if ! $VBM list vms | grep "^\"${vm}\"" ; then
           $VBM createvm --name $vm --ostype Ubuntu_64 --basefolder $P --register
-          $VBM modifyvm $vm --memory 1024
+          $VBM modifyvm $vm --memory $BOOTSTRAP_VM_MEM
+          $VBM modifyvm $vm --cpus $BOOTSTRAP_VM_CPUs
           $VBM storagectl $vm --name "SATA Controller" --add sata
           $VBM storagectl $vm --name "IDE Controller" --add ide
           # Create a number of hard disks
           port=0
           for disk in a; do
-              $VBM createhd --filename $P/$vm/$vm-$disk.vdi --size $BOOTSTRAP_DRIVE_SIZE
+              $VBM createhd --filename $P/$vm/$vm-$disk.vdi --size ${BOOTSTRAP_VM_DRIVE_SIZE-20480}
               $VBM storageattach $vm --storagectl "SATA Controller" --device 0 --port $port --type hdd --medium $P/$vm/$vm-$disk.vdi
               port=$((port+1))
           done
@@ -176,12 +184,13 @@ function create_cluster_VMs {
       # Only if VM doesn't exist
       if ! $VBM list vms | grep "^\"${vm}\"" ; then
           $VBM createvm --name $vm --ostype Ubuntu_64 --basefolder $P --register
-          $VBM modifyvm $vm --memory 2048
+          $VBM modifyvm $vm --memory $CLUSTER_VM_MEM
+          $VBM modifyvm $vm --cpus $CLUSTER_VM_CPUs
           $VBM storagectl $vm --name "SATA Controller" --add sata
           # Create a number of hard disks
           port=0
           for disk in a b c d e; do
-              $VBM createhd --filename $P/$vm/$vm-$disk.vdi --size $DRIVE_SIZE
+              $VBM createhd --filename $P/$vm/$vm-$disk.vdi --size $CLUSTER_VM_DRIVE_SIZE
               $VBM storageattach $vm --storagectl "SATA Controller" --device 0 --port $port --type hdd --medium $P/$vm/$vm-$disk.vdi
               port=$((port+1))
           done
@@ -190,12 +199,14 @@ function create_cluster_VMs {
           $VBM setextradata $vm VBoxInternal/Devices/pcbios/0/Config/LanBootRom $P/gpxe-1.0.1-80861004.rom
           $VBM modifyvm $vm --nic2 hostonly --hostonlyadapter2 "$VBN1"
           $VBM modifyvm $vm --nic3 hostonly --hostonlyadapter3 "$VBN2"
-          #$VBM modifyvm $vm --largepages on --vtxvpid on --hwvirtexexcl on
+
+          # Set hardware acceleration options
+          $VBM modifyvm $vm --largepages on --vtxvpid on --hwvirtex on --nestedpaging on --ioapic on
       fi
   done
 }
 
-function vagrant_install {
+function install_cluster {
   # VMs are now created - if we are using Vagrant, finish the install process.
   if hash vagrant ; then
     pushd $P
@@ -223,5 +234,5 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
   download_VM_files
   create_bootstrap_VM
   create_cluster_VMs
-  vagrant_install
+  install_cluster
 fi
