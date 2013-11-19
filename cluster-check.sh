@@ -27,6 +27,10 @@ if [[ -z `which fping` ]]; then
     echo "This tool uses fping. You should be able to install fpring with `sudo apt-get install fping`"
     exit
 fi
+
+echo "$0 : Checking which hosts are online..."
+UPHOSTS=`./cluster-whatsup.sh`
+
 #set -x
 ENVIRONMENT="$1"
 HOSTWANTED="$2"
@@ -44,6 +48,22 @@ if [[ -f cluster.txt ]]; then
         if [[ $HOSTNAME = "end" ]]; then
             continue
         fi
+	if [[ "$ROLE" = "bootstrap" ]]; then
+	    continue
+	fi
+	THISUP="false"
+	for UPHOST in $UPHOSTS; do
+	    if [[ "$IPADDR" = "$UPHOST" ]]; then
+		THISUP="true"
+		UP=$[UP + 1]
+	    fi
+	done
+	if [[ "$THISUP" = "false" ]]; then
+	    echo "$HOSTNAME is down"
+	    continue
+	else
+	    vtrace "$HOSTNAME is up"
+	fi
         if [[ -z "$HOSTWANTED" || "$HOSTWANTED" = all || "$HOSTWANTED" = "$ROLE" || "$HOSTWANTED" = "$IPADDR" || "$HOSTWANTED" = "$HOSTNAME" ]]; then
 #       HOSTS="$HOSTS $HOSTNAME"
             HOSTS="$HOSTS $IPADDR"
@@ -52,22 +72,36 @@ if [[ -f cluster.txt ]]; then
     vtrace "HOSTS = $HOSTS"
     
     for HOST in $HOSTS; do
-        if [[ -z `fping -aq $HOST` ]]; then
-            echo $HOST is down
-            continue
-        else
-            vtrace "$HOST is up"
-            UP=$[UP + 1]
-        fi
 
 	ROOTSIZE=`./nodessh.sh $ENVIRONMENT $HOST "df -k / | grep -v Filesystem"`
 	ROOTSIZE=`echo $ROOTSIZE | awk '{print $4}'`
 	ROOTGIGS=$((ROOTSIZE/(1024*1024)))
-	if [[ $ROOTSIZE -lt 100*1024*1024 ]]; then
+	if [[ $ROOTSIZE -eq 0 ]]; then
+	    echo "Root fileystem size = $ROOTSIZE ($ROOTGIGS GB) !!WARNING!!"
+	    echo "Machine may still be installing the operating system ... skipping"
+	    continue
+	elif [[ $ROOTSIZE -lt 100*1024*1024 ]]; then
 	    echo "Root fileystem size = $ROOTSIZE ($ROOTGIGS GB) !!WARNING!!"
 	else
             vtrace "Root fileystem size = $ROOTSIZE ($ROOTGIGS GB) "
 	fi
+
+# ugh, so slow
+#	printf "Disks : "
+#	for DISK in sda sdb sdc sdd sde sdf sdg sdh sdi sdj sdk sdl sdm; do
+#	    DISKTHERE=`./nodessh.sh $ENVIRONMENT $HOST "/sbin/fdisk -l /dev/$DISK"`
+#	    # this is a bit tricksy. Invoking fdisk without root
+#	    # privilege on a disk that is present raises an error, but
+#	    # does nothing if the device is not there at all - so a
+#	    # "present/notpresent" check is implemented as
+#	    # non-null-string/null-string
+#	    if [[ ! -z "$DISKTHERE" ]]; then
+#	        printf "$DISK "
+#	    else
+#		printf "!$DISK "
+#	    fi
+#	done
+#	printf "\n"
 
         if [[ -z `./nodessh.sh $ENVIRONMENT $HOST "ip route show table mgmt | grep default"` ]]; then
             echo "$HOST no mgmt default route !!WARNING!!"
