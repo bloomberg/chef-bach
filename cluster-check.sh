@@ -59,6 +59,16 @@ if [[ -f cluster.txt ]]; then
             vtrace "$HOST is up"
             UP=$[UP + 1]
         fi
+
+	ROOTSIZE=`./nodessh.sh $ENVIRONMENT $HOST "df -k / | grep -v Filesystem"`
+	ROOTSIZE=`echo $ROOTSIZE | awk '{print $4}'`
+	ROOTGIGS=$((ROOTSIZE/(1024*1024)))
+	if [[ $ROOTSIZE -lt 100*1024*1024 ]]; then
+	    echo "Root fileystem size = $ROOTSIZE ($ROOTGIGS GB) !!WARNING!!"
+	else
+            vtrace "Root fileystem size = $ROOTSIZE ($ROOTGIGS GB) "
+	fi
+
         if [[ -z `./nodessh.sh $ENVIRONMENT $HOST "ip route show table mgmt | grep default"` ]]; then
             echo "$HOST no mgmt default route !!WARNING!!"
         else
