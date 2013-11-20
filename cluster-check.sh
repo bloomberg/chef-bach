@@ -60,13 +60,13 @@ if [[ -f cluster.txt ]]; then
 	done
         if [[ -z "$HOSTWANTED" || "$HOSTWANTED" = all || "$HOSTWANTED" = "$ROLE" || "$HOSTWANTED" = "$IPADDR" || "$HOSTWANTED" = "$HOSTNAME" ]]; then
 #       HOSTS="$HOSTS $HOSTNAME"
-            HOSTS="$HOSTS $IPADDR"
 	    if [[ "$THISUP" = "false" ]]; then
 		echo "$HOSTNAME is down"
 		continue
 	    else
 		vtrace "$HOSTNAME is up"
 	    fi
+            HOSTS="$HOSTS $IPADDR"
         fi
     done < cluster.txt
     vtrace "HOSTS = $HOSTS"
