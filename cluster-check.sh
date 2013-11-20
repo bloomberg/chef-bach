@@ -29,7 +29,7 @@ if [[ -z `which fping` ]]; then
 fi
 
 echo "$0 : Checking which hosts are online..."
-UPHOSTS=`./cluster-whatsup.sh`
+UPHOSTS=`./cluster-whatsup.sh $2`
 
 #set -x
 ENVIRONMENT="$1"
@@ -58,15 +58,15 @@ if [[ -f cluster.txt ]]; then
 		UP=$[UP + 1]
 	    fi
 	done
-	if [[ "$THISUP" = "false" ]]; then
-	    echo "$HOSTNAME is down"
-	    continue
-	else
-	    vtrace "$HOSTNAME is up"
-	fi
         if [[ -z "$HOSTWANTED" || "$HOSTWANTED" = all || "$HOSTWANTED" = "$ROLE" || "$HOSTWANTED" = "$IPADDR" || "$HOSTWANTED" = "$HOSTNAME" ]]; then
 #       HOSTS="$HOSTS $HOSTNAME"
             HOSTS="$HOSTS $IPADDR"
+	    if [[ "$THISUP" = "false" ]]; then
+		echo "$HOSTNAME is down"
+		continue
+	    else
+		vtrace "$HOSTNAME is up"
+	    fi
         fi
     done < cluster.txt
     vtrace "HOSTS = $HOSTS"

@@ -38,6 +38,11 @@ if [[ -f cluster.txt ]]; then
 	if [[ $HOSTNAME = "end" ]]; then
 	    continue
 	fi
+
+	if [[ "$ROLE" = "bootstrap" ]]; then
+	    # let's not try to cobbler boot ourselves
+	    continue
+	fi
 	
 	if [[ $1 = add ]];then
 		if [[ -z "$EXACTHOST" || "$EXACTHOST" = "$HOSTNAME" || "$EXACTHOST" = "$ROLE" ]]; then
