@@ -17,6 +17,8 @@ if [[ -f cluster.txt ]]; then
 	fi
     done < cluster.txt
 
+    if [[ -z "$ALLHOSTS" ]]; then exit; fi
+
     # fping is fast but might not be available
     if [[ -z `which fping` ]]; then
         # use standard ping instead 

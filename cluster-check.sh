@@ -43,6 +43,9 @@ function vtrace {
         done
     fi
 }
+
+declare -A HOSTNAMES
+
 if [[ -f cluster.txt ]]; then
     while read HOSTNAME MACADDR IPADDR ILOIPADDR DOMAIN ROLE; do
         if [[ $HOSTNAME = "end" ]]; then
@@ -67,11 +70,25 @@ if [[ -f cluster.txt ]]; then
 		vtrace "$HOSTNAME is up"
 	    fi
             HOSTS="$HOSTS $IPADDR"
+	    IDX=`echo $IPADDR | tr '.' '-'`
+	    HOSTNAMES["$IDX"]="$HOSTNAME"
         fi
     done < cluster.txt
     vtrace "HOSTS = $HOSTS"
+    echo
     
     for HOST in $HOSTS; do
+
+	echo "Checking name resolution"
+	./nodessh.sh $ENVIRONMENT $HOST "grep -m1 server /etc/ntp.conf | cut -f2 -d' ' > /tmp/clusterjunk.txt "
+	./nodessh.sh $ENVIRONMENT $HOST "cat /tmp/clusterjunk.txt | xargs -n1 host"
+
+	echo "checking NTP server"
+	./nodessh.sh $ENVIRONMENT $HOST "cat /tmp/clusterjunk.txt | xargs -n1 ping -c 1"
+
+	IDX=`echo $HOST | tr '.' '-'`
+	NAME=${HOSTNAMES["$IDX"]}
+	vtrace "Checking $NAME ($HOST)..."
 
 	ROOTSIZE=`./nodessh.sh $ENVIRONMENT $HOST "df -k / | grep -v Filesystem"`
 	ROOTSIZE=`echo $ROOTSIZE | awk '{print $4}'`
@@ -105,12 +122,14 @@ if [[ -f cluster.txt ]]; then
 
         if [[ -z `./nodessh.sh $ENVIRONMENT $HOST "ip route show table mgmt | grep default"` ]]; then
             echo "$HOST no mgmt default route !!WARNING!!"
+	    BADHOSTS="$BADHOSTS $HOST"
         else
             vtrace "$HOST has a default mgmt route"
             MG=$[MG + 1]
         fi
         if [[ -z `./nodessh.sh $ENVIRONMENT $HOST "ip route show table storage | grep default"` ]]; then
             echo "$HOST has no storage default route !!WARNING!!"
+	    BADHOSTS="$BADHOSTS $HOST"
         else
             vtrace "$HOST has a default storage route"
             SG=$[SG + 1]
@@ -140,7 +159,9 @@ if [[ -f cluster.txt ]]; then
         STAT=`./nodessh.sh $ENVIRONMENT $HOST "ps w -C ruby -C td-agent --no-heading | grep -v chef-client | wc -l" sudo`
         STAT=`echo $STAT | cut -f2 -d:`  
         if [[ "$STAT" =~ 2 ]]; then
-            vtrace "$HOST fluentd normal"
+            if [[ ! -z "$VERBOSE" ]]; then 
+		printf "$HOST %20s %s\n" "fluentd" "normal"
+	    fi
         else
             printf "$HOST %20s %s\n" fluentd "$FLUENTD"
         fi
@@ -150,6 +171,7 @@ if [[ -f cluster.txt ]]; then
                 STAT=`echo $STAT | cut -f2 -d":"`
                 if [[ ! "$STAT" =~ "start/running" ]]; then
                     printf "$HOST %20s %s\n" "$SERVICE" "$STAT"
+		    BADHOSTS="$BADHOSTS $HOST"
                 else
             # couldn't get a "verbose printf" function to work
                     if [[ ! -z "$VERBOSE" ]]; then
@@ -164,3 +186,7 @@ else
     echo "Warning 'cluster.txt' not found"
 fi
 echo "$ENVIRONMENT cluster summary: $UP hosts up. $MG hosts with default mgmt route. $SG hosts with default storage route"
+BADHOSTS=`echo $BADHOSTS | uniq | sort`
+if [[ ! -z "$BADHOSTS" ]]; then
+    echo "Bad hosts $BADHOSTS - definite issues on these"
+fi
