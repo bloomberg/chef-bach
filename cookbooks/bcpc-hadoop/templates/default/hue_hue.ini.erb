@@ -306,6 +306,7 @@
       # This should be the web service root URL, such as
       # http://namenode:50070/webhdfs/v1
       #webhdfs_url=http://
+      webhdfs_url=http://<%=float_host(@httpfs_host.first.hostname)%>:14000/webhdfs/v1/
 
       # Change this if your HDFS cluster is Kerberos-secured
       ## security_enabled=false

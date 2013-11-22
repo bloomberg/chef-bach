@@ -253,6 +253,7 @@ end
                :rm_host  => get_nodes_for("resource_manager"),
                :hive_host  => get_nodes_for("hive"),
                :oozie_host  => get_nodes_for("oozie"),
+               :httpfs_host => get_nodes_for("httpfs"),
                :hb_host  => get_nodes_for("master"))
   end
 end

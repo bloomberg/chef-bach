@@ -30,7 +30,7 @@ node[:bcpc][:hadoop][:mounts].each do |i|
   end
 end
 
-if node[:bcpc][:hadoop][:standby] and get_config("namenode_txn_fmt") then
+if get_config("namenode_txn_fmt") then
   file "/tmp/nn_fmt.tgz" do
     user "hdfs"
     group "hdfs"

@@ -6,6 +6,7 @@
    hadoop-client
    impala-server
    impala
+   hive
    impala-shell}.each do |pkg|
   package pkg do
     action :upgrade
@@ -24,12 +25,28 @@ node[:bcpc][:hadoop][:mounts].each do |i|
   end
 end
 
+%w{libmysql-java}.each do |pkg|
+  package pkg do
+    action :upgrade
+  end
+end
+
+link "/usr/lib/hive/lib/mysql.jar" do
+  to "/usr/share/java/mysql.jar"
+end
+
 %w{hadoop-yarn-nodemanager hadoop-hdfs-datanode}.each do |svc|
   service svc do
     action :enable
     subscribes :restart, "template[/etc/hadoop/conf/hdfs-site.xml]", :delayed
     subscribes :restart, "template[/etc/hadoop/conf/yarn-site.xml]", :delayed
   end
+end
+
+template "/etc/default/impala" do
+  mode 0755
+  source "impala.start.erb"
+  variables(:state_store => get_nodes_for("impala_statestore"))
 end
 
 %w{hbase-regionserver impala-server}.each do |svc|
@@ -40,4 +57,6 @@ end
       subscribes :restart, "template[/etc/hadoop/conf/hbase-site.xml]", :delayed
   end
 end
+
+
 
