@@ -145,17 +145,16 @@ bash "graphite-database-sync" do
     notifies :restart, "service[apache2]", :immediately
 end
 
-%w{carbon-cache carbon-relay}.each do |pkg|
-    template "/etc/init.d/#{pkg}" do
-        source "init.d-#{pkg}.erb"
+%w{cache relay}.each do |pkg|
+    template "/etc/init.d/carbon-#{pkg}" do
+        source "init.d-carbon.erb"
         owner "root"
         group "root"
         mode 00755
-        notifies :restart, "service[#{pkg}]", :delayed
+        notifies :restart, "service[carbon-#{pkg}]", :delayed
+        variables( :daemon => "#{pkg}" )
     end
-    service pkg do
-        supports :restart => true
-        restart_command "service #{pkg} stop && sleep 2 && service #{pkg} start"
+    service "carbon-#{pkg}" do
         action [ :enable, :start ]
     end
 end
