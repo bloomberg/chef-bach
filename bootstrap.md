@@ -76,7 +76,7 @@ This will create four VMs:
 - bcpc-vm3
 
 The ``[chef-environment]`` variable is optional and will default to
-``Test-Laptop`` is unspecfied. This is useful if you need to create the
+``Test-Laptop`` if unspecfied. This is useful if you need to create the
 bootstrap node with non-default settings such as a a local APT mirror
 (``node[:bcpc][:bootstrap][:mirror]``) or a local internet proxy
 (``node[:bcpc][:bootstrap][:proxy]``).

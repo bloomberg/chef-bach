@@ -56,13 +56,21 @@ Vagrant.configure("2") do |config|
   #config.vm.box_url = "http://cloud-images.ubuntu.com/precise/current/precise-server-cloudimg-amd64-vagrant-disk1.box"
   config.vm.box_url = "precise-server-cloudimg-amd64-vagrant-disk1.box"
 
+  memory = ENV["BOOTSTRAP_VM_MEM"] or "1024"
+  cpus = ENV["BOOTSTRAP_VM_CPUs"] or "1"
+
   config.vm.provider :virtualbox do |vb|
      # Don't boot with headless mode
      vb.gui = true
      vb.name = "bcpc-bootstrap"
      vb.customize ["modifyvm", :id, "--nictype2", "82543GC"]
-     vb.customize ["modifyvm", :id, "--memory", "1024"]
-     #vb.customize ["modifyvm", :id, "--ioapic", "on"]
+     vb.customize ["modifyvm", :id, "--memory", memory]
+     vb.customize ["modifyvm", :id, "--cpus", cpus]
+     vb.customize ["modifyvm", :id, "--largepages", "on"]
+     vb.customize ["modifyvm", :id, "--nestedpaging", "on"]
+     vb.customize ["modifyvm", :id, "--vtxvpid", "on"]
+     vb.customize ["modifyvm", :id, "--hwvirtex", "on"]
+     vb.customize ["modifyvm", :id, "--ioapic", "on"]
      #vb.customize ["modifyvm", :id, "--chipset", "ich9"]
    end
 
