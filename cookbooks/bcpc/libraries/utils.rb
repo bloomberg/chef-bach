@@ -117,7 +117,7 @@ def secure_password_alphanum_upper(len=20)
     end
     pw = String.new
     while pw.length < len
-        pw << alphanum_upper[raw_pw.getbyte(pw.length) % alphanum_upper.length]
+        pw << alphanum_upper[raw_pw.bytes().to_a()[pw.length] % alphanum_upper.length]
     end
     pw
 end
