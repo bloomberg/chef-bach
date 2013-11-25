@@ -56,7 +56,7 @@ bash "write-client-radosgw-key" do
     not_if "test -f /var/lib/ceph/radosgw/ceph-radosgw.gateway/keyring"
 end
 
-rgw_optimal_pg = power_of_2(get_all_nodes.length*node[:bcpc][:ceph][:pgs_per_node]/node[:bcpc][:ceph][:rgw][:replicas]*node[:bcpc][:ceph][:rgw][:portion]/100)
+rgw_optimal_pg = power_of_2(get_ceph_osd_nodes.length*node[:bcpc][:ceph][:pgs_per_node]/node[:bcpc][:ceph][:rgw][:replicas]*node[:bcpc][:ceph][:rgw][:portion]/100)
 
 rgw_crush_ruleset = (node[:bcpc][:ceph][:rgw][:type] == "ssd") ? 3 : 4
 
