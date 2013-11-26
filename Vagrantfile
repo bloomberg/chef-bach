@@ -56,8 +56,8 @@ Vagrant.configure("2") do |config|
   #config.vm.box_url = "http://cloud-images.ubuntu.com/precise/current/precise-server-cloudimg-amd64-vagrant-disk1.box"
   config.vm.box_url = "precise-server-cloudimg-amd64-vagrant-disk1.box"
 
-  memory = ENV["BOOTSTRAP_VM_MEM"] or "1024"
-  cpus = ENV["BOOTSTRAP_VM_CPUs"] or "1"
+  memory = ( ENV["BOOTSTRAP_VM_MEM"] or "1024" )
+  cpus = ( ENV["BOOTSTRAP_VM_CPUs"] or "1" )
 
   config.vm.provider :virtualbox do |vb|
      # Don't boot with headless mode
