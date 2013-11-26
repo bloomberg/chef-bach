@@ -1,7 +1,39 @@
 
-package "oozie" do
-	action :upgrade
+package "oozie libmysql-java" do
+  action :upgrade
 end
+
+link "/var/lib/oozie/mysql.jar" do
+  to "/usr/share/java/mysql.jar"
+end
+
+
+ruby_block "oozie-database-creation" do
+  cmd = "mysql -uroot -p#{get_config('mysql-root-password')} -e"
+  privs = "SELECT,INSERT,UPDATE,DELETE,LOCK TABLES,EXECUTE" # todo node[:bcpc][:hadoop][:hive_db_privs].join(",")
+  block do
+
+    if not system " #{cmd} 'SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = \"oozie\"' | grep oozie" then
+
+      code = <<-EOF
+                CREATE DATABASE oozie;
+                GRANT #{privs} ON oozie.* TO 'oozie'@'%' IDENTIFIED BY '#{get_config('mysql-oozie-password')}';
+                GRANT #{privs} ON oozie.* TO 'oozie'@'localhost' IDENTIFIED BY '#{get_config('mysql-oozie-password')}';
+                FLUSH PRIVILEGES;
+      EOF
+      IO.popen("mysql -uroot -p#{get_config('mysql-root-password')}", "r+") do |db|
+        db.write code
+      end
+      system "sudo -u oozie /usr/lib/oozie/bin/ooziedb.sh create -sqlfile /tmp/oozie-create.sql"
+      IO.popen("mysql -uroot -p#{get_config('mysql-root-password')}", "r+") do |db|
+        db.write "USE oozie; SOURCE /tmp/oozie-create.sql"
+      end
+      self.notifies :enable, "service[oozie]", :immediately
+      self.resolve_notification_references
+    end
+  end
+end
+
 
 #TODO, this probably has dependencies on external services such as yarn and hive as well
 #hopefully it starts up later :)
@@ -12,19 +44,19 @@ service "oozie" do
 end
 
 directory "/etc/oozie/conf.bcpc/action-conf" do
-      owner "root"
-      group "root"
-      mode 00755
-      action :create
-      recursive true
+  owner "root"
+  group "root"
+  mode 00755
+  action :create
+  recursive true
 end
 
 directory "/etc/oozie/conf.bcpc/hadoop-conf" do
-      owner "root"
-      group "root"
-      mode 00755
-      action :create
-      recursive true
+  owner "root"
+  group "root"
+  mode 00755
+  action :create
+  recursive true
 end
 
 link "/etc/oozie/conf.bcpc/hadoop-conf/core-site.xml" do

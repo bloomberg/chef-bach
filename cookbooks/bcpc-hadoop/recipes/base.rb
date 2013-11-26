@@ -78,6 +78,7 @@ ruby_block "initialize-hadoop-configs" do
       make_config('oozie-keystore-password', secure_password)
       make_config('mysql-hue-password', secure_password)
       make_config('hue-session-key', secure_password)
+      make_config('mysql-oozie-password', secure_password)
     end
 end
 
