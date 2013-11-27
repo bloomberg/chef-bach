@@ -44,6 +44,8 @@ end
 %w{ssd hdd}.each do |type|
     node['bcpc']['ceph']["#{type}_disks"].each do |disk|
         execute "ceph-disk-prepare-#{type}-#{disk}" do
+            rack_guess = node.hostname.match /.*-r(\d+)n\d+$/
+            rack_name = (rack_guess.nil?) ? "rack" : "rack-#{rack_guess[1].to_i}"
             command <<-EOH
                 ceph-disk-prepare /dev/#{disk}
                 ceph-disk-activate /dev/#{disk}
@@ -51,7 +53,7 @@ end
                 INFO=`df -k | grep /dev/#{disk} | awk '{print $2,$6}' | sed -e 's/\\/var\\/lib\\/ceph\\/osd\\/ceph-//'`
                 OSD=${INFO#* }
                 WEIGHT=`echo "scale=4; ${INFO% *}/1000000000.0" | bc -q`
-                ceph osd crush set $OSD $WEIGHT root=#{type} host=#{node.hostname}-#{type}
+                ceph osd crush set $OSD $WEIGHT root=#{type} rack=#{rack_name}-#{type} host=#{node.hostname}-#{type}
             EOH
             not_if "sgdisk -i1 /dev/#{disk} | grep -i 4fbd7e29-9d25-41b8-afd0-062c0ceff05d"
         end
