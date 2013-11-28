@@ -26,7 +26,7 @@ def init_config
 		bag = Chef::DataBag.new
 		bag.name("configs")
 		bag.save
-	end
+	end rescue nil
 	begin
 		$dbi = data_bag_item("configs", node.chef_environment)
 		puts "============ Loaded existing data_bag_item \"configs/#{node.chef_environment}\""
