@@ -142,6 +142,8 @@ service "xinetd" do
     action [ :enable, :start ]
 end
 
+package "debconf-utils"
+
 ruby_block "phpmyadmin-debconf-setup" do
     block do
         if not system "debconf-get-selections | grep phpmyadmin >/dev/null 2>&1" then
