@@ -5,7 +5,7 @@
 ################################################
 
 global_defs {
-  router_id <%="#{node.hostname}"%>
+  router_id <%="#{node[:hostname]}"%>
 }
 
 vrrp_script chk_haproxy {
