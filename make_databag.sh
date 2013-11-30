@@ -1,31 +1,35 @@
 #!/bin/bash
 
 if [ X"$1" = X ]; then
-  echo " ** one argument required (environment name)"
-  exit -1
+    echo " ** one argument required (environment name)"
+    exit -1
 fi
 
 if [ ! -f roles/$1.json ]; then
-  echo " ** must create roles/$1.json first"
-  exit -1
+    echo " ** must create roles/$1.json first..."
+    echo "    (try 'cp roles/Env-Example.json roles/$1.json' and editing)"
+    exit -1
 fi
 
 if [ -f data_bags/configs/$1.json ]; then
-  echo " ** file data_bags/configs/$1.json already exists"
-  exit -1
+    echo " ** file data_bags/configs/$1.json already exists"
+    exit -1
 fi
 
-erubis -c "context['environ']='$1'" <<EOH 2>/dev/null | knife solo data bag create configs $1 --json-file /dev/stdin --data-bag-path data_bags
+./make_secret.sh
+
+erubis -c "context['environ']='$1'" <<EOH 2>/dev/null | knife solo data bag create configs $1 --json-file /dev/stdin --data-bag-path data_bags --secret-file secret_file
 <%
 require 'openssl'
 require 'json'
 require 'net/ssh'
 require 'erubis'
-require 'cookbooks/bcpc/libraries/utils.rb'
 
 JSON.create_id = nil
 node = JSON.parse(IO.read("roles/#{@environ}.json"))['override_attributes']
 node['bcpc']['region_name'] = @environ
+
+require 'cookbooks/bcpc/libraries/utils.rb'
 
 ssl_conf = Erubis::Eruby.new(IO.read("cookbooks/bcpc/templates/default/openssl.cnf.erb")).result(:node=>node)
 File.open("/tmp/openssl.cnf", 'w') {|f| f.write(ssl_conf)}
@@ -108,6 +112,21 @@ File.open("/tmp/openssl.cnf", 'w') {|f| f.write(ssl_conf)}
     "zabbix-guest-user": "guest"
 }
 EOH
+
 cat data_bags/configs/$1.json | python -mjson.tool > data_bags/configs/$1.json.new
 mv -f data_bags/configs/$1.json.new data_bags/configs/$1.json
 echo " ** created data_bags/configs/$1.json"
+
+if [ ! -f id_rsa ]; then
+    touch id_rsa
+    chmod 600 id_rsa
+    erubis <<EOH 2>/dev/null >> id_rsa
+<%
+require 'json'
+JSON.create_id = nil
+bag = JSON.parse(%x[knife solo data bag show configs $1 --data-bag-path data_bags --secret-file secret_file -fjson])
+%>
+<%="#{bag['ssh-private-key']}"%>
+EOH
+    echo " ** created ./id_rsa with ssh key for BCPC nodes"
+fi

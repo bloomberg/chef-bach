@@ -15,9 +15,9 @@
     "platform": "ubuntu",
     "platform_family": "debian",
     "platform_version": "12.04",
-    "chef_environment" : "Env-Test",
+    "chef_environment" : "Env-Example",
     "run_list": [
-    	"role[Env-Test]",
+    	"role[Env-Example]",
     	"role[BCPC-Headnode]"
     ]
 }

@@ -20,6 +20,8 @@ default['bcpc']['domain_name'] = "bcpc.example.com"
 # Key if Cobalt+VMS is to be used
 default['bcpc']['vms_key'] = nil
 
+default['bcpc']['encrypt_data_bag'] = false
+
 ###########################################
 #
 #  Host-specific defaults for the cluster

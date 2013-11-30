@@ -14,23 +14,13 @@
             "domain_name" : "bcpc.example.com",
             "admin_email" : "admin@localhost.com",
             "virt_type" : "qemu",
-            "ceph": {
-                "hdd_disks" : [ "sdb", "sdc" ],
-                "ssd_disks" : [ "sdd", "sde" ]
-            },
-            "domain_name" : "bcpc.example.com",
+            "encrypt_data_bag" : true,
             "management": {
                 "vip" : "10.0.100.5",
                 "interface" : "eth0",
                 "netmask" : "255.255.255.0",
                 "cidr" : "10.0.100.0/24",
                 "gateway" : "10.0.100.3"
-            },
-            "storage": {
-                "interface" : "eth1",
-                "netmask" : "255.255.255.0",
-                "cidr" : "172.16.100.0/24",
-                "gateway" : "172.16.100.3"
             },
             "floating": {
                 "vip" : "192.168.100.5",
@@ -40,12 +30,22 @@
                 "gateway" : "192.168.100.3",
                 "available_subnet" : "192.168.100.128/25"
             },
+            "storage": {
+                "interface" : "eth1",
+                "netmask" : "255.255.255.0",
+                "cidr" : "172.16.100.0/24",
+                "gateway" : "172.16.100.3"
+            },
             "bootstrap": {
                 "interface" : "eth0",
                 "pxe_interface" : "eth1",
                 "server" : "10.0.100.3",
                 "dhcp_subnet" : "10.0.100.0",
                 "dhcp_range" : "10.0.100.14 10.0.100.250"
+            },
+            "ceph": {
+                "hdd_disks" : [ "sdb", "sdc" ],
+                "ssd_disks" : [ "sdd", "sde" ]
             },
             "dns_servers" : [ "8.8.8.8", "8.8.4.4" ],
             "repos": {
