@@ -18,6 +18,7 @@
 #
 
 require 'openssl'
+require 'base64'
 require 'thread'
 
 def init_config
@@ -131,3 +132,12 @@ def secure_password_alphanum_upper(len=20)
     end
     pw
 end
+
+def ceph_keygen()
+    key = "\x01\x00"
+    key += ::OpenSSL::Random.random_bytes(8)
+    key += "\x10\x00"
+    key += ::OpenSSL::Random.random_bytes(16)
+    Base64.encode64(key).strip
+end
+

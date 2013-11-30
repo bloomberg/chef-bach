@@ -22,8 +22,12 @@ include_recipe "bcpc::ceph-work"
 
 ruby_block "initialize-nova-work-config" do
     block do
-        make_config('ssh-nova-private-key', %x[printf 'y\n' | ssh-keygen -t rsa -N '' -q -f /dev/stdout | sed -e '1,1d' -e 's/.*-----BEGIN/-----BEGIN/'])
-        make_config('ssh-nova-public-key', %x[echo "#{get_config('ssh-nova-private-key')}" | ssh-keygen -y -f /dev/stdin])
+        require 'openssl'
+        require 'net/ssh'
+        key = OpenSSL::PKey::RSA.new 2048;
+        pubkey = "#{key.ssh_type} #{[ key.to_blob ].pack('m0')}"
+        make_config('ssh-nova-private-key', key.to_pem)
+        make_config('ssh-nova-public-key', pubkey)
     end
 end
 

@@ -1,12 +1,18 @@
 {
-    "name": "Env-Test",
+    "name": "Env-Example",
     "default_attributes": {
     },
     "json_class": "Chef::Role",
-    "description": "Test environment attributes",
+    "description": "Example 'environment' file for use in littlechef",
     "chef_type": "role",
     "override_attributes": {
         "bcpc": {
+            "country" : "US",
+            "state" : "NY",
+            "location" : "New York",
+            "organization" : "Bloomberg",
+            "domain_name" : "bcpc.example.com",
+            "admin_email" : "admin@localhost.com",
             "virt_type" : "qemu",
             "ceph": {
                 "hdd_disks" : [ "sdb", "sdc" ],
