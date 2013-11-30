@@ -51,7 +51,7 @@ File.open("/tmp/openssl.cnf", 'w') {|f| f.write(ssl_conf)}
     "haproxy-stats-user": "haproxy",
     "horizon-secret-key": "<%="#{secure_password}"%>",
     "keepalived-password": "<%="#{secure_password}"%>",
-    "keepalived-router-id": "<%="#{(rand * 1000).to_i%256/2*2}"%>",
+    "keepalived-router-id": "<%="#{(rand * 1000).to_i%254/2*2+1}"%>",
     "keystone-admin-password": "<%="#{secure_password}"%>",
     "keystone-admin-token": "<%="#{secure_password}"%>",
     "keystone-admin-user": "admin",
