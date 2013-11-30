@@ -21,7 +21,7 @@ include_recipe "bcpc::default"
 
 ruby_block "initialize-keepalived-config" do
     block do
-        make_config('keepalived-router-id', "#{(rand * 1000).to_i%256}/2*2")
+        make_config('keepalived-router-id', "#{(rand * 1000).to_i%256/2*2}")
         make_config('keepalived-password', secure_password)
     end
 end
