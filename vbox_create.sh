@@ -207,6 +207,8 @@ function create_cluster_VMs {
 }
 
 function install_cluster {
+environment=${1-Test-Laptop}
+ip=${2-10.0.100.3}
   # VMs are now created - if we are using Vagrant, finish the install process.
   if hash vagrant ; then
     pushd $P
@@ -224,7 +226,7 @@ function install_cluster {
     popd
     echo "Bootstrap complete - setting up Chef server"
     echo "N.B. This may take approximately 30-45 minutes to complete."
-    ./bootstrap_chef.sh --vagrant-remote 10.0.100.3 $1
+    ./bootstrap_chef.sh --vagrant-remote $ip $environment
     ./enroll_cobbler.sh
   fi
 }
