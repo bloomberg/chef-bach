@@ -2798,7 +2798,7 @@
             <name>Aborted MySQL Clients</name>
             <url/>
             <status>0</status>
-            <priority>4</priority>
+            <priority>2</priority>
             <description/>
             <type>0</type>
             <dependencies/>
@@ -2808,7 +2808,7 @@
             <name>Aborted MySQL Connections</name>
             <url/>
             <status>0</status>
-            <priority>4</priority>
+            <priority>2</priority>
             <description/>
             <type>0</type>
             <dependencies/>
