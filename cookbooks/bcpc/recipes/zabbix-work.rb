@@ -74,6 +74,20 @@ service "zabbix-agent" do
     action [ :enable, :start ]
 end
 
+directory "/usr/local/bin/checks" do
+  action :create
+  owner  node[:bcpc][:zabbix][:user]
+  group "root"
+  mode 00775
+end 
+
+directory "/usr/local/etc/checks" do
+  action  :create
+  owner  node[:bcpc][:zabbix][:user]
+  group "root"
+  mode 00775
+end 
+
 %w{ float_ips }.each do |cc| 
   template  "/usr/local/etc/checks/#{cc}.yml" do
     source "checks/#{cc}.yml.erb"
