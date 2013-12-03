@@ -739,6 +739,9 @@
                 </group>
             </groups>
             <applications>
+	        <application>
+                    <name>Functional Checks</name>
+                </application>
                 <application>
                     <name>MySQL</name>
                 </application>
@@ -1800,6 +1803,84 @@
                     </applications>
                     <valuemap/>
                 </item>
+		<item>
+                    <name>Functional Test: Nova</name>
+                    <type>2</type>
+                    <snmp_community/>
+                    <multiplier>0</multiplier>
+                    <snmp_oid/>
+                    <key>check.nova</key>
+                    <delay>0</delay>
+                    <history>90</history>
+                    <trends>365</trends>
+                    <status>0</status>
+                    <value_type>0</value_type>
+                    <allowed_hosts/>
+                    <units/>
+                    <delta>0</delta>
+                    <snmpv3_securityname/>
+                    <snmpv3_securitylevel>0</snmpv3_securitylevel>
+                    <snmpv3_authpassphrase/>
+                    <snmpv3_privpassphrase/>
+                    <formula>1</formula>
+                    <delay_flex/>
+                    <params/>
+                    <ipmi_sensor/>
+                    <data_type>0</data_type>
+                    <authtype>0</authtype>
+                    <username/>
+                    <password/>
+                    <publickey/>
+                    <privatekey/>
+                    <port/>
+                    <description/>
+                    <inventory_link>0</inventory_link>
+                    <applications>
+                        <application>
+                            <name>Functional Checks</name>
+                        </application>
+                    </applications>
+                    <valuemap/>
+		</item>
+		<item>
+                    <name>Functional Test: Rados Gateway</name>
+                    <type>2</type>
+                    <snmp_community/>
+                    <multiplier>0</multiplier>
+                    <snmp_oid/>
+                    <key>check.rgw</key>
+                    <delay>0</delay>
+                    <history>90</history>
+                    <trends>365</trends>
+                    <status>0</status>
+                    <value_type>0</value_type>
+                    <allowed_hosts/>
+                    <units/>
+                    <delta>0</delta>
+                    <snmpv3_securityname/>
+                    <snmpv3_securitylevel>0</snmpv3_securitylevel>
+                    <snmpv3_authpassphrase/>
+                    <snmpv3_privpassphrase/>
+                    <formula>1</formula>
+                    <delay_flex/>
+                    <params/>
+                    <ipmi_sensor/>
+                    <data_type>0</data_type>
+                    <authtype>0</authtype>
+                    <username/>
+                    <password/>
+                    <publickey/>
+                    <privatekey/>
+                    <port/>
+                    <description/>
+                    <inventory_link>0</inventory_link>
+                    <applications>
+                        <application>
+                            <name>Functional Checks</name>
+                        </application>
+                    </applications>
+                    <valuemap/>
+		</item>
                 <item>
                     <name>Process check: Apache</name>
                     <type>7</type>
@@ -2752,6 +2833,26 @@
             <type>0</type>
             <dependencies/>
         </trigger>
+	<trigger>
+	    <expression>{BCPC-Headnode:check.nova.last(#1)}&lt;0 | {BCPC-Headnode:check.nova.nodata(5400)}=1</expression>
+            <name>Functional Check Error: nova</name>
+            <url/>
+            <status>0</status>
+            <priority>4</priority>
+            <description>Unable to create/destroy new VMs</description>
+            <type>0</type>
+            <dependencies/>
+	</trigger>
+	<trigger>
+	    <expression>{BCPC-Headnode:check.rgw.last(#1)}&lt;0 | {BCPC-Headnode:check.rgw.nodata(5400)}=1</expression>
+            <name>Functional Check Error: RGW</name>
+            <url/>
+            <status>0</status>
+            <priority>4</priority>
+            <description>Unable to create/destroy new keys in RGW</description>
+            <type>0</type>
+            <dependencies/>
+	</trigger>
         <trigger>
             <expression>{BCPC-Headnode:mysql.ping.last(0)}#1</expression>
             <name>MySQL is not pingable from {HOST.NAME}</name>
