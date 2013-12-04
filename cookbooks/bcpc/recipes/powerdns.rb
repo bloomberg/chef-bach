@@ -76,7 +76,7 @@ ruby_block "powerdns-table-domains" do
                     primary key (id)
                 );
                 INSERT INTO domains_static (name, type) values ('#{node[:bcpc][:domain_name]}', 'NATIVE');
-                INSERT INTO domains_static (name, type) values ('#{floating_cidr.reverse}', 'NATIVE')
+                INSERT INTO domains_static (name, type) values ('#{floating_cidr.reverse}', 'NATIVE');
                 CREATE UNIQUE INDEX dom_name_index ON domains_static(name);
             ]
             self.notifies :restart, "service[pdns]", :delayed
@@ -239,11 +239,9 @@ ruby_block "powerdns-table-records_reverse-view" do
                 create or replace view records_reverse as
                 select r.id * -1 as id, d.id as domain_id,
                       ip4_to_ptr_name(r.content) as name,
-                      'PTR' as type, r.name as content, r.ttl, r.prio, r.change_date,
-                      ip4_to_ptr_name(r.content) as ordername,
-                      r.auth
+                      'PTR' as type, r.name as content, r.ttl, r.prio, r.change_date
                 from records_forward r, domains d
-                where r.type='A' and d.name = #{floating_cidr.reverse};
+                where r.type='A' and d.name = '#{floating_cidr.reverse}';
 
             ]
             self.notifies :restart, "service[pdns]", :delayed
@@ -261,9 +259,10 @@ ruby_block "powerdns-table-records-view" do
         if not $?.success? then
 
             %x[ mysql -uroot -p#{get_config('mysql-root-password')} #{node[:bcpc][:pdns_dbname]} <<-EOH
-                select id, domain_id, name, type, content, ttl, prio, change_date, ordername, auth from records_forward
+              create or replace view records as
+                select id, domain_id, name, type, content, ttl, prio, change_date from records_forward
                 union all
-                select id, domain_id, name, type, content, ttl, prio, change_date, ordername, auth from records_reverse
+                select id, domain_id, name, type, content, ttl, prio, change_date from records_reverse;
             ]
 
             self.notifies :restart, "service[pdns]", :delayed
