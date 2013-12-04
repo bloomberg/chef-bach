@@ -240,10 +240,9 @@ ruby_block "powerdns-table-records_reverse-view" do
                 select r.id * -1 as id, d.id as domain_id,
                       ip4_to_ptr_name(r.content) as name,
                       'PTR' as type, r.name as content, r.ttl, r.prio, r.change_date,
-                      ip4_to_ptr_name(r.content) as ordername,
-                      r.auth
+                      ip4_to_ptr_name(r.content) as ordername
                 from records_forward r, domains d
-                where r.type='A' and d.name = #{floating_cidr.reverse};
+                where r.type='A' and d.name = '#{floating_cidr.reverse}';
 
             ]
             self.notifies :restart, "service[pdns]", :delayed
@@ -261,9 +260,9 @@ ruby_block "powerdns-table-records-view" do
         if not $?.success? then
 
             %x[ mysql -uroot -p#{get_config('mysql-root-password')} #{node[:bcpc][:pdns_dbname]} <<-EOH
-                select id, domain_id, name, type, content, ttl, prio, change_date, ordername, auth from records_forward
+                select id, domain_id, name, type, content, ttl, prio, change_date, ordername from records_forward
                 union all
-                select id, domain_id, name, type, content, ttl, prio, change_date, ordername, auth from records_reverse
+                select id, domain_id, name, type, content, ttl, prio, change_date, ordername from records_reverse
             ]
 
             self.notifies :restart, "service[pdns]", :delayed
