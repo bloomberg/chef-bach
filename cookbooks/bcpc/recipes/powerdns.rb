@@ -260,9 +260,10 @@ ruby_block "powerdns-table-records-view" do
         if not $?.success? then
 
             %x[ mysql -uroot -p#{get_config('mysql-root-password')} #{node[:bcpc][:pdns_dbname]} <<-EOH
+              create or replace view records as
                 select id, domain_id, name, type, content, ttl, prio, change_date, ordername from records_forward
                 union all
-                select id, domain_id, name, type, content, ttl, prio, change_date, ordername from records_reverse
+                select id, domain_id, name, type, content, ttl, prio, change_date, ordername from records_reverse;
             ]
 
             self.notifies :restart, "service[pdns]", :delayed
