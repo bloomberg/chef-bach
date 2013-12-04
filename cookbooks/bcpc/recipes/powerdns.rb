@@ -239,8 +239,7 @@ ruby_block "powerdns-table-records_reverse-view" do
                 create or replace view records_reverse as
                 select r.id * -1 as id, d.id as domain_id,
                       ip4_to_ptr_name(r.content) as name,
-                      'PTR' as type, r.name as content, r.ttl, r.prio, r.change_date,
-                      ip4_to_ptr_name(r.content) as ordername
+                      'PTR' as type, r.name as content, r.ttl, r.prio, r.change_date
                 from records_forward r, domains d
                 where r.type='A' and d.name = '#{floating_cidr.reverse}';
 
@@ -261,9 +260,9 @@ ruby_block "powerdns-table-records-view" do
 
             %x[ mysql -uroot -p#{get_config('mysql-root-password')} #{node[:bcpc][:pdns_dbname]} <<-EOH
               create or replace view records as
-                select id, domain_id, name, type, content, ttl, prio, change_date, ordername from records_forward
+                select id, domain_id, name, type, content, ttl, prio, change_date from records_forward
                 union all
-                select id, domain_id, name, type, content, ttl, prio, change_date, ordername from records_reverse;
+                select id, domain_id, name, type, content, ttl, prio, change_date from records_reverse;
             ]
 
             self.notifies :restart, "service[pdns]", :delayed
