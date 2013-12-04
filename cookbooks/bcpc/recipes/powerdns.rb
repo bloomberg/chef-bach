@@ -76,7 +76,7 @@ ruby_block "powerdns-table-domains" do
                     primary key (id)
                 );
                 INSERT INTO domains_static (name, type) values ('#{node[:bcpc][:domain_name]}', 'NATIVE');
-                INSERT INTO domains_static (name, type) values ('#{floating_cidr.reverse}', 'NATIVE')
+                INSERT INTO domains_static (name, type) values ('#{floating_cidr.reverse}', 'NATIVE');
                 CREATE UNIQUE INDEX dom_name_index ON domains_static(name);
             ]
             self.notifies :restart, "service[pdns]", :delayed
