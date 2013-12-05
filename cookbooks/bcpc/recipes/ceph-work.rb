@@ -44,7 +44,7 @@ end
 %w{ssd hdd}.each do |type|
     node['bcpc']['ceph']["#{type}_disks"].each do |disk|
         execute "ceph-disk-prepare-#{type}-#{disk}" do
-            rack_guess = node[:hostname].match /.*-r(\d+)n\d+$/
+            rack_guess = node[:hostname].match /.*-r(\d+)[a-d]?n\d+$/
             rack_name = (rack_guess.nil?) ? "rack" : "rack-#{rack_guess[1].to_i}"
             command <<-EOH
                 ceph-disk-prepare /dev/#{disk}
