@@ -26,7 +26,7 @@ def init_config
     puts "************ Creating data_bag \"configs\""
     bag = Chef::DataBag.new
     bag.name("configs")
-    bag.save
+    bag.create
   end
   begin
     $dbi = data_bag_item("configs", node.chef_environment)
@@ -85,8 +85,6 @@ def get_hadoop_heads
   return results
 end
 
-
-
 def get_quorum_hosts
   results = search(:node, "(roles:BCPC-Hadoop-Quorumnode or role:BCPC-Hadoop-Head) AND chef_environment:#{node.chef_environment}")
   if results.any?{|x| x.hostname == node.hostname}
@@ -113,6 +111,10 @@ def get_nodes_for(recipe)
   return results
 end
 
+def get_binary_server_url
+  return("http://#{URI(Chef::Config['chef_server_url']).host}:8080") if node[:bcpc][:binary_server_url].nil?
+  return(node[:bcpc][:binary_server_url])
+end
 
 def secure_password
   pw = String.new

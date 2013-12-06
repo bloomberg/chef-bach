@@ -154,4 +154,11 @@ if [ ! -f zabbix-agent.tar.gz ] || [ ! -f zabbix-server.tar.gz ]; then
 fi
 FILES="zabbix-agent.tar.gz zabbix-server.tar.gz $FILES"
 
+[ ! -d gems ] && mkdir gems
+[ -n $(echo *.gem) ] && mv *.gem gems
+gem generate_index --legacy
+
+# serve the files if nothing else is already
+$(netstat -nlt4 | grep -q :8080) || nohup python -m SimpleHTTPServer 8080 &
+
 popd

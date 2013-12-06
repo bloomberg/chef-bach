@@ -109,8 +109,8 @@ bash "create-glance-rados-pool" do
     not_if "rados lspools | grep #{node[:bcpc][:glance_rbd_pool]}"
 end
 
-cookbook_file "/tmp/cirros-0.3.0-x86_64-disk.img" do
-    source "bins/cirros-0.3.0-x86_64-disk.img"
+remote_file "/tmp/cirros-0.3.0-x86_64-disk.img" do
+    source "#{get_binary_server_url}/cirros-0.3.0-x86_64-disk.img"
     owner "root"
     mode 00444
 end

@@ -97,123 +97,123 @@ bash "enable-mellanox" do
     only_if "lspci | grep Mellanox"
 end
 
-bash "enable-8021q" do
-    user "root"
-    code <<-EOH
-        modprobe 8021q
-        sed --in-place '/^8021q/d' /etc/modules
-        echo '8021q' >> /etc/modules
-    EOH
-    not_if "grep -e '^8021q' /etc/modules"
-end
-
-directory "/etc/network/interfaces.d" do
-  owner "root"
-  group "root"
-  mode 00755
-  action :create
-end
-
-bash "setup-interfaces-source" do
-  user "root"
-  code <<-EOH
-    echo "source /etc/network/interfaces.d/iface-*" >> /etc/network/interfaces
-  EOH
-  not_if "grep '^source /etc/network/interfaces.d/' /etc/network/interfaces"
-end
-
-template "/etc/network/interfaces.d/iface-#{node[:bcpc][:management][:interface]}" do
-  source "network.iface.erb"
-  owner "root"
-  group "root"
-  mode 00644
-  variables(
-    :interface => node[:bcpc][:management][:interface],
-    :ip => node[:bcpc][:management][:ip],
-    :netmask => node[:bcpc][:management][:netmask],
-    :gateway => node[:bcpc][:management][:gateway],
-    :metric => 100
-  )
-end
-
-template "/etc/network/interfaces.d/iface-#{node[:bcpc][:storage][:interface]}" do
-  source "network.iface.erb"
-  owner "root"
-  group "root"
-  mode 00644
-  variables(
-    :interface => node[:bcpc][:storage][:interface],
-    :ip => node[:bcpc][:storage][:ip],
-    :netmask => node[:bcpc][:storage][:netmask],
-    :gateway => node[:bcpc][:storage][:gateway],
-    :metric => 300
-  )
-end
+#bash "enable-8021q" do
+#    user "root"
+#    code <<-EOH
+#        modprobe 8021q
+#        sed --in-place '/^8021q/d' /etc/modules
+#        echo '8021q' >> /etc/modules
+#    EOH
+#    not_if "grep -e '^8021q' /etc/modules"
+#end
+#
+#directory "/etc/network/interfaces.d" do
+#  owner "root"
+##  group "root"
+#  mode 00755
+#  action :create
+#end
+#
+#bash "setup-interfaces-source" do
+#  user "root"
+#  code <<-EOH
+#    echo "source /etc/network/interfaces.d/iface-*" >> /etc/network/interfaces
+#  EOH
+#  not_if "grep '^source /etc/network/interfaces.d/' /etc/network/interfaces"
+#end
+#
+#template "/etc/network/interfaces.d/iface-#{node[:bcpc][:management][:interface]}" do
+#  source "network.iface.erb"
+#  owner "root"
+#  group "root"
+#  mode 00644
+#  variables(
+#    :interface => node[:bcpc][:management][:interface],
+#    :ip => node[:bcpc][:management][:ip],
+#    :netmask => node[:bcpc][:management][:netmask],
+#    :gateway => node[:bcpc][:management][:gateway],
+#    :metric => 100
+#  )
+#end
+#
+#template "/etc/network/interfaces.d/iface-#{node[:bcpc][:storage][:interface]}" do
+#  source "network.iface.erb"
+#  owner "root"
+#  group "root"
+#  mode 00644
+#  variables(
+#    :interface => node[:bcpc][:storage][:interface],
+#    :ip => node[:bcpc][:storage][:ip],
+#    :netmask => node[:bcpc][:storage][:netmask],
+#    :gateway => node[:bcpc][:storage][:gateway],
+#    :metric => 300
+#  )
+#end
 
 # set up the DNS resolvers
 # we want the VIP which will be running powerdns to be first on the list
 # but the first entry in our master list is also the only one in pdns,
 # so make that the last entry to minimize double failures when upstream dies.
-resolvers=node[:bcpc][:dns_servers].dup
-resolvers.push resolvers.shift
-resolvers.unshift node[:bcpc][:management][:vip]
+#resolvers=node[:bcpc][:dns_servers].dup
+#resolvers.push resolvers.shift
+#resolvers.unshift node[:bcpc][:management][:vip]
 
-template "/etc/network/interfaces.d/iface-#{node[:bcpc][:floating][:interface]}" do
-  source "network.iface.erb"
-  owner "root"
-  group "root"
-  mode 00644
-  variables(
-    :interface => node[:bcpc][:floating][:interface],
-    :ip => node[:bcpc][:floating][:ip],
-    :netmask => node[:bcpc][:floating][:netmask],
-    :gateway => node[:bcpc][:floating][:gateway],
-    :dns => resolvers,
-    :metric => 200
-  )
-end
-
-bash "interface-mgmt-make-static-if-dhcp" do
-    user "root"
-    code <<-EOH
-        sed --in-place '/\\(.*#{node[:bcpc][:management][:interface]}.*\\)/d' /etc/network/interfaces
-        resolvconf -d #{node[:bcpc][:management][:interface]}.dhclient
-    EOH
-    only_if "cat /etc/network/interfaces | grep #{node[:bcpc][:management][:interface]} | grep dhcp"
-end
-
-%w{ management storage floating }.each do |iface|
-  bash "#{iface} up" do
-    user "root"
-    code <<-EOH
-      ifup #{node[:bcpc][iface][:interface]}
-    EOH
-    not_if "ip link show up | grep #{node[:bcpc][iface][:interface]}"
-  end
-end
-
-bash "routing-management" do
-    user "root"
-    code "echo '1 mgmt' >> /etc/iproute2/rt_tables"
-    not_if "grep -e '^1 mgmt' /etc/iproute2/rt_tables"
-end
-
-bash "routing-storage" do
-    user "root"
-    code "echo '2 storage' >> /etc/iproute2/rt_tables"
-    not_if "grep -e '^2 storage' /etc/iproute2/rt_tables"
-end
-
-template "/etc/network/if-up.d/bcpc-routing" do
-    mode 00775
-    source "bcpc-routing.erb"
-    notifies :run, "execute[run-routing-script-once]", :immediately
-end
-
-execute "run-routing-script-once" do
-    action :nothing
-    command "/etc/network/if-up.d/bcpc-routing"
-end
+#template "/etc/network/interfaces.d/iface-#{node[:bcpc][:floating][:interface]}" do
+#  source "network.iface.erb"
+#  owner "root"
+#  group "root"
+#  mode 00644
+#  variables(
+#    :interface => node[:bcpc][:floating][:interface],
+#    :ip => node[:bcpc][:floating][:ip],
+#    :netmask => node[:bcpc][:floating][:netmask],
+#    :gateway => node[:bcpc][:floating][:gateway],
+#    :dns => resolvers,
+#    :metric => 200
+#  )
+#end
+#
+#bash "interface-mgmt-make-static-if-dhcp" do
+#    user "root"
+#    code <<-EOH
+#        sed --in-place '/\\(.*#{node[:bcpc][:management][:interface]}.*\\)/d' /etc/network/interfaces
+#        resolvconf -d #{node[:bcpc][:management][:interface]}.dhclient
+#    EOH
+#    only_if "cat /etc/network/interfaces | grep #{node[:bcpc][:management][:interface]} | grep dhcp"
+#end
+#
+#%w{ management storage floating }.each do |iface|
+#  bash "#{iface} up" do
+#    user "root"
+#    code <<-EOH
+#      ifup #{node[:bcpc][iface][:interface]}
+#    EOH
+#    not_if "ip link show up | grep #{node[:bcpc][iface][:interface]}"
+#  end
+#end
+#
+#bash "routing-management" do
+#    user "root"
+#    code "echo '1 mgmt' >> /etc/iproute2/rt_tables"
+##    not_if "grep -e '^1 mgmt' /etc/iproute2/rt_tables"
+#end
+#
+#bash "routing-storage" do
+#    user "root"
+#    code "echo '2 storage' >> /etc/iproute2/rt_tables"
+#    not_if "grep -e '^2 storage' /etc/iproute2/rt_tables"
+#end
+#
+#template "/etc/network/if-up.d/bcpc-routing" do
+#    mode 00775
+#    source "bcpc-routing.erb"
+#    notifies :run, "execute[run-routing-script-once]", :immediately
+#end
+#
+#execute "run-routing-script-once" do
+#    action :nothing
+#    command "/etc/network/if-up.d/bcpc-routing"
+#end
 
 bash "disable-noninteractive-pam-logging" do
     user "root"

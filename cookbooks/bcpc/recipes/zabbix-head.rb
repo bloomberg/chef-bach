@@ -32,17 +32,9 @@ ruby_block "initialize-zabbix-config" do
     end
 end
 
-cookbook_file "/tmp/zabbix-server.tar.gz" do
-    source "bins/zabbix-server.tar.gz"
-    owner "root"
-    mode 00444
-end
-
-bash "install-zabbix-server" do
-    code <<-EOH
-        tar zxf /tmp/zabbix-server.tar.gz -C /usr/local/
-    EOH
-    not_if "test -f /usr/local/sbin/zabbix_server"
+python_pip "zabbix-server" do
+    options "#{get_binary_server_url}/zabbix-server.tar.gz"
+    action :install
 end
 
 user node[:bcpc][:zabbix][:user] do

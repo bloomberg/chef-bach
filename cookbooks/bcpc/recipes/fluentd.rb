@@ -38,14 +38,10 @@ bash "set-td-agent-user" do
 end
 
 %w{elasticsearch tail-multiline tail-ex record-reformer rewrite}.each do |pkg|
-    cookbook_file "/tmp/fluent-plugin-#{pkg}.gem" do
-        source "bins/fluent-plugin-#{pkg}.gem"
-        owner "root"
-        mode 00444
-    end
-    bash "install-fluent-plugin-#{pkg}" do
-        code "/usr/lib/fluent/ruby/bin/fluent-gem install --local --no-ri --no-rdoc /tmp/fluent-plugin-#{pkg}.gem"
-        not_if "/usr/lib/fluent/ruby/bin/fluent-gem list --local | grep fluent-plugin-#{pkg}"
+    package "fluent-plugin-#{pkg}.gem" do
+        provider Chef::Provider::Package::Rubygems
+        options "--no-http-proxy --clear-sources --source #{get_binary_server_url}"
+        action :install
     end
 end
 
@@ -62,7 +58,7 @@ bash "patch-for-fluentd-plugin" do
         patch < /tmp/fluentd.patch
         cp /tmp/fluentd.patch .
     EOH
-    not_if "test -f /usr/lib/fluent/ruby/lib/ruby/gems/*/gems/fluent-plugin-elasticsearch-*/lib/fluent/plugin/fluentd.patch"
+    not_if File.exist? "/usr/lib/fluent/ruby/lib/ruby/gems/*/gems/fluent-plugin-elasticsearch-*/lib/fluent/plugin/fluentd.patch"
     notifies :restart, "service[td-agent]", :delayed
 end
 

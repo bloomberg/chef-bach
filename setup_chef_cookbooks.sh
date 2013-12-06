@@ -38,7 +38,7 @@ fi
 cd cookbooks
 
 # allow versions on cookbooks so 
-for cookbook in "apt 1.10.0" ubuntu cron chef-client ntp yum logrotate; do
+for cookbook in "apt 1.10.0" python build-essential ubuntu cron chef-client ntp "yum 2.4.2" logrotate; do
   if [[ ! -d ${cookbook% *} ]]; then
      # unless the proxy was defined this knife config will be the same as the one generated above
     knife cookbook site download $cookbook --config ../.chef/knife-proxy.rb
