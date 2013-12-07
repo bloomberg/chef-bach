@@ -81,7 +81,6 @@ default['bcpc']['floating']['netmask'] = "255.255.255.0"
 default['bcpc']['floating']['cidr'] = "192.168.43.0/24"
 default['bcpc']['floating']['gateway'] = "192.168.43.2"
 default['bcpc']['floating']['available_subnet'] = "192.168.43.128/25"
-default['bcpc']['floating']['reverse_dns_zone'] = calc_reverse_dns_zone(node['bcpc']['floating']['cidr'])
 
 default['bcpc']['fixed']['cidr'] = "1.127.0.0/16"
 default['bcpc']['fixed']['vlan_start'] = "1000"

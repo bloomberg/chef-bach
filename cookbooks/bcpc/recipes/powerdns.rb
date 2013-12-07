@@ -59,6 +59,9 @@ end
 
 ruby_block "powerdns-table-domains" do
     block do
+
+        reverse_dns_zone = calc_reverse_dns_zone(node['bcpc']['floating']['cidr'])
+
         system "mysql -uroot -p#{get_config('mysql-root-password')} -e 'SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = \"#{node[:bcpc][:pdns_dbname]}\" AND TABLE_NAME=\"domains_static\"' | grep -q \"domains_static\""
         if not $?.success? then
             %x[ mysql -uroot -p#{get_config('mysql-root-password')} #{node[:bcpc][:pdns_dbname]} <<-EOH
@@ -73,7 +76,7 @@ ruby_block "powerdns-table-domains" do
                     primary key (id)
                 );
                 INSERT INTO domains_static (name, type) values ('#{node[:bcpc][:domain_name]}', 'NATIVE');
-                INSERT INTO domains_static (name, type) values ('#{node[:bcpc][:floating][:reverse_dns_zone]}', 'NATIVE');
+                INSERT INTO domains_static (name, type) values ('#{reverse_dns_zone}', 'NATIVE');
                 CREATE UNIQUE INDEX dom_name_index ON domains_static(name);
             ]
             self.notifies :restart, "service[pdns]", :delayed
@@ -84,6 +87,9 @@ end
 
 ruby_block "powerdns-table-records" do
     block do
+
+        reverse_dns_zone = calc_reverse_dns_zone(node['bcpc']['floating']['cidr'])
+
         system "mysql -uroot -p#{get_config('mysql-root-password')} -e 'SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = \"#{node[:bcpc][:pdns_dbname]}\" AND TABLE_NAME=\"records_static\"' | grep -q \"records_static\""
         if not $?.success? then
             %x[ mysql -uroot -p#{get_config('mysql-root-password')} #{node[:bcpc][:pdns_dbname]} <<-EOH
@@ -102,8 +108,8 @@ ruby_block "powerdns-table-records" do
                     INSERT INTO records_static (domain_id, name, content, type, ttl, prio) VALUES ((SELECT id FROM domains_static WHERE name='#{node[:bcpc][:domain_name]}'),'#{node[:bcpc][:domain_name]}','#{node[:bcpc][:management][:vip]}','NS',300,NULL);
                     INSERT INTO records_static (domain_id, name, content, type, ttl, prio) VALUES ((SELECT id FROM domains_static WHERE name='#{node[:bcpc][:domain_name]}'),'#{node[:bcpc][:domain_name]}','#{node[:bcpc][:management][:vip]}','A',300,NULL);
                     
-                    INSERT INTO records_static (domain_id, name, content, type, ttl, prio) VALUES ((SELECT id FROM domains_static WHERE name='#{node[:bcpc][:floating][:reverse_dns_zone]}'),'#{node[:bcpc][:floating][:reverse_dns_zone]}', '#{node[:bcpc][:floating][:reverse_dns_zone]} root@#{node[:bcpc][:domain_name]} 1','SOA',300,NULL);
-                    INSERT INTO records_static (domain_id, name, content, type, ttl, prio) VALUES ((SELECT id FROM domains_static WHERE name='#{node[:bcpc][:floating][:reverse_dns_zone]}'),'#{node[:bcpc][:floating][:reverse_dns_zone]}','#{node[:bcpc][:management][:vip]}','NS',300,NULL);
+                    INSERT INTO records_static (domain_id, name, content, type, ttl, prio) VALUES ((SELECT id FROM domains_static WHERE name='#{reverse_dns_zone}'),'#{reverse_dns_zone}', '#{reverse_dns_zone} root@#{node[:bcpc][:domain_name]} 1','SOA',300,NULL);
+                    INSERT INTO records_static (domain_id, name, content, type, ttl, prio) VALUES ((SELECT id FROM domains_static WHERE name='#{reverse_dns_zone}'),'#{reverse_dns_zone}','#{node[:bcpc][:management][:vip]}','NS',300,NULL);
                     
                     CREATE INDEX rec_name_index ON records_static(name);
                     CREATE INDEX nametype_index ON records_static(name,type);
@@ -222,6 +228,9 @@ end
 
 ruby_block "powerdns-table-records_reverse-view" do
     block do
+
+        reverse_dns_zone = calc_reverse_dns_zone(node['bcpc']['floating']['cidr'])
+
         system "mysql -uroot -p#{get_config('mysql-root-password')} -e 'SELECT TABLE_NAME FROM INFORMATION_SCHEMA.VIEWS WHERE TABLE_SCHEMA = \"#{node[:bcpc][:pdns_dbname]}\" AND TABLE_NAME=\"records_reverse\"' | grep -q \"records_reverse\""
         if not $?.success? then
 
@@ -232,8 +241,8 @@ ruby_block "powerdns-table-records_reverse-view" do
                       'PTR' as type, r.name as content, r.ttl, r.prio, r.change_date
                 from records_forward r, domains d
                 where r.type='A' 
-                  and d.name = '#{node[:bcpc][:floating][:reverse_dns_zone]}'
-                  and ip4_to_ptr_name(r.content) like '%.#{node[:bcpc][:floating][:reverse_dns_zone]}';
+                  and d.name = '#{reverse_dns_zone}'
+                  and ip4_to_ptr_name(r.content) like '%.#{reverse_dns_zone}';
 
             ]
             self.notifies :restart, "service[pdns]", :delayed
