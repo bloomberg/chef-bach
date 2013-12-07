@@ -46,3 +46,4 @@ for cookbook in "apt 1.10.0" python build-essential ubuntu cron chef-client ntp 
     rm ${cookbook% *}*.tar.gz
   fi
 done
+git clone https://github.com/hw-cookbooks/dpkg_autostart.git
