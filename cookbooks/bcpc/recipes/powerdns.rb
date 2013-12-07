@@ -60,7 +60,7 @@ end
 ruby_block "powerdns-table-domains" do
     block do
 
-        reverse_dns_zone = calc_reverse_dns_zone(node['bcpc']['floating']['cidr'])
+        reverse_dns_zone = node['bcpc']['floating']['reverse_dns_zone'] || calc_reverse_dns_zone(node['bcpc']['floating']['cidr'])
 
         system "mysql -uroot -p#{get_config('mysql-root-password')} -e 'SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = \"#{node[:bcpc][:pdns_dbname]}\" AND TABLE_NAME=\"domains_static\"' | grep -q \"domains_static\""
         if not $?.success? then
@@ -88,7 +88,7 @@ end
 ruby_block "powerdns-table-records" do
     block do
 
-        reverse_dns_zone = calc_reverse_dns_zone(node['bcpc']['floating']['cidr'])
+        reverse_dns_zone = node['bcpc']['floating']['reverse_dns_zone'] || calc_reverse_dns_zone(node['bcpc']['floating']['cidr'])
 
         system "mysql -uroot -p#{get_config('mysql-root-password')} -e 'SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = \"#{node[:bcpc][:pdns_dbname]}\" AND TABLE_NAME=\"records_static\"' | grep -q \"records_static\""
         if not $?.success? then
@@ -229,7 +229,7 @@ end
 ruby_block "powerdns-table-records_reverse-view" do
     block do
 
-        reverse_dns_zone = calc_reverse_dns_zone(node['bcpc']['floating']['cidr'])
+        reverse_dns_zone = node['bcpc']['floating']['reverse_dns_zone'] || calc_reverse_dns_zone(node['bcpc']['floating']['cidr'])
 
         system "mysql -uroot -p#{get_config('mysql-root-password')} -e 'SELECT TABLE_NAME FROM INFORMATION_SCHEMA.VIEWS WHERE TABLE_SCHEMA = \"#{node[:bcpc][:pdns_dbname]}\" AND TABLE_NAME=\"records_reverse\"' | grep -q \"records_reverse\""
         if not $?.success? then
