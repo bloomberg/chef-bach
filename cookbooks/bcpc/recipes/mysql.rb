@@ -43,25 +43,24 @@ bash "workaround-mysql-deps-problem" do
         VERSION=`apt-cache policy libmysqlclient18 | grep -B1 percona | head -1 | awk '{print $1}'`
         DEBIAN_FRONTEND=noninteractive apt-get -y install libmysqlclient18=$VERSION
     EOH
-    not_if "dpkg -l |grep libmysqlclient18"
+    not_if "dpkg -l libmysqlclient18 2>&1 >/dev/null"
 end
 
 package "percona-xtradb-cluster-server-5.5" do
     action :upgrade
 end
 
-ruby_block "initial-mysql-config" do
-    block do
-        if not system "mysql -uroot -p#{get_config('mysql-root-password')} -e 'SELECT user from mysql.user where User=\"haproxy\"'" then
-            %x[ mysql -u root -e "UPDATE mysql.user SET password=PASSWORD('#{get_config('mysql-root-password')}') WHERE user='root'; FLUSH PRIVILEGES;"
-                mysql -u root -p#{get_config('mysql-root-password')} -e "UPDATE mysql.user SET host='%' WHERE user='root' and host='localhost'; FLUSH PRIVILEGES;"
-                mysql -u root -p#{get_config('mysql-root-password')} -e "GRANT USAGE ON *.* to #{get_config('mysql-galera-user')}@'%' IDENTIFIED BY '#{get_config('mysql-galera-password')}';"
-                mysql -u root -p#{get_config('mysql-root-password')} -e "GRANT ALL PRIVILEGES on *.* TO #{get_config('mysql-galera-user')}@'%' IDENTIFIED BY '#{get_config('mysql-galera-password')}';"
-                mysql -u root -p#{get_config('mysql-root-password')} -e "GRANT PROCESS ON *.* to '#{get_config('mysql-check-user')}'@'localhost' IDENTIFIED BY '#{get_config('mysql-check-password')}';"
-                mysql -u root -p#{get_config('mysql-root-password')} -e "FLUSH PRIVILEGES;"
-            ]
-        end
-    end
+bash "initial-mysql-config" do
+    code <<-EOH
+        set -e
+        mysql -u root -e "UPDATE mysql.user SET password=PASSWORD('#{get_config('mysql-root-password')}') WHERE user='root'; FLUSH PRIVILEGES;"
+        mysql -u root -p#{get_config('mysql-root-password')} -e "UPDATE mysql.user SET host='%' WHERE user='root' and host='localhost'; FLUSH PRIVILEGES;"
+        mysql -u root -p#{get_config('mysql-root-password')} -e "GRANT USAGE ON *.* to #{get_config('mysql-galera-user')}@'%' IDENTIFIED BY '#{get_config('mysql-galera-password')}';"
+        mysql -u root -p#{get_config('mysql-root-password')} -e "GRANT ALL PRIVILEGES on *.* TO #{get_config('mysql-galera-user')}@'%' IDENTIFIED BY '#{get_config('mysql-galera-password')}';"
+        mysql -u root -p#{get_config('mysql-root-password')} -e "GRANT PROCESS ON *.* to '#{get_config('mysql-check-user')}'@'localhost' IDENTIFIED BY '#{get_config('mysql-check-password')}';"
+        mysql -u root -p#{get_config('mysql-root-password')} -e "FLUSH PRIVILEGES;"
+    EOH
+    not_if "mysql -uroot -p#{get_config('mysql-root-password')} -e 'SELECT user from mysql.user where User=\"haproxy\"'"
 end
 
 directory "/etc/mysql" do
@@ -141,17 +140,15 @@ service "xinetd" do
     action [ :enable, :start ]
 end
 
-ruby_block "phpmyadmin-debconf-setup" do
-    block do
-        if not system "debconf-get-selections | grep phpmyadmin >/dev/null 2>&1" then
-            puts %x[
-                echo 'phpmyadmin phpmyadmin/dbconfig-install boolean true' | debconf-set-selections
-                echo 'phpmyadmin phpmyadmin/mysql/admin-pass password #{get_config('mysql-root-password')}' | debconf-set-selections
-                echo 'phpmyadmin phpmyadmin/mysql/app-pass password #{get_config('mysql-phpmyadmin-password')}' | debconf-set-selections
-                echo 'phpmyadmin phpmyadmin/reconfigure-webserver multiselect apache2' | debconf-set-selections
-            ]
-        end
-    end
+bash "phpmyadmin-debconf-setup" do
+    code <<-EOH
+        set -e
+        echo 'phpmyadmin phpmyadmin/dbconfig-install boolean true' | debconf-set-selections
+        echo 'phpmyadmin phpmyadmin/mysql/admin-pass password #{get_config('mysql-root-password')}' | debconf-set-selections
+        echo 'phpmyadmin phpmyadmin/mysql/app-pass password #{get_config('mysql-phpmyadmin-password')}' | debconf-set-selections
+        echo 'phpmyadmin phpmyadmin/reconfigure-webserver multiselect apache2' | debconf-set-selections
+    EOH
+    not_if "debconf-get-selections | grep phpmyadmin >/dev/null 2>&1"
 end
 
 package "phpmyadmin" do
@@ -163,5 +160,5 @@ bash "phpmyadmin-config-setup" do
     code <<-EOH
         echo '$cfg["AllowArbitraryServer"] = TRUE;' >> /etc/phpmyadmin/config.inc.php
     EOH
-    not_if "cat /etc/phpmyadmin/config.inc.php | grep AllowArbitraryServer"
+    not_if "grep -q AllowArbitraryServer /etc/phpmyadmin/config.inc.php"
 end
