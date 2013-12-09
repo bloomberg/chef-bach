@@ -1,6 +1,17 @@
 include_recipe 'dpkg_autostart'
 require "base64"
 
+template "/etc/hadoop/conf/hdfs-site.xml" do
+  source "hdp_hdfs-site.xml.erb"
+  mode 0644
+  variables(:nn_hosts => get_nodes_for("namenode*") ,
+       :zk_hosts => get_nodes_for("zookeeper_server"),
+       :jn_hosts => get_nodes_for("journalnode"),
+       :rm_host  => get_nodes_for("resource_manager"),
+       :dn_hosts => get_nodes_for("datanode"),
+       :mounts => node[:bcpc][:hadoop][:mounts])
+end
+
 %w{hadoop-hdfs-namenode hadoop-hdfs-zkfc}.each do |pkg|
   dpkg_autostart pkg do
     allow false

@@ -5,14 +5,10 @@ template "/etc/hadoop/conf/hdfs-site.xml" do
   source "hdp_hdfs-site.xml.erb"
   mode 0644
   variables(:nn_hosts => get_nodes_for("namenode*") ,
-       :zk_hosts => get_nodes_for("zookeeper_server"),
-       :jn_hosts => get_nodes_for("journalnode"),
-       :rm_host  => get_nodes_for("resource_manager"),
-       :dn_hosts => get_nodes_for("datanode"),
-       :mounts => node[:bcpc][:hadoop][:mounts])
+            :mounts => node[:bcpc][:hadoop][:mounts])
 end
 
-%w{hadoop-hdfs-namenode hadoop-hdfs-zkfc}.each do |pkg|
+%w{hadoop-hdfs-namenode}.each do |pkg|
   dpkg_autostart pkg do
     allow false
   end
@@ -44,15 +40,6 @@ node[:bcpc][:hadoop][:mounts].each do |i|
   end
 end
 
-if node[:bcpc][:hadoop][:standby] and get_config("namenode_txn_fmt") then
-  file "/tmp/nn_fmt.tgz" do
-    user "hdfs"
-    group "hdfs"
-    user 0644
-    content Base64.decode64(get_config("namenode_txn_fmt"))
-  end
-end
-
 bash "format namenode" do
   code "hdfs namenode -format -nonInteractive -force"
   user "hdfs"
@@ -61,43 +48,10 @@ bash "format namenode" do
   not_if { File.exists?("/disk/#{node[:bcpc][:hadoop][:mounts][0]}/dfs/nn/current/VERSION")  }
 end
 
-bash "format-zk-hdfs-ha" do
-  code "hdfs zkfc -formatZK"
-  action :run
-  user "hdfs"
-  not_if { zk_formatted? }
-end
-
-service "hadoop-hdfs-zkfc" do
-  action [:enable, :start]
-  subscribes :restart, "template[/etc/hadoop/conf/hdfs-site.xml]", :delayed
-  subscribes :restart, "template[/etc/hadoop/conf/hdfs-policy.xml]", :delayed
-end
-
 service "hadoop-hdfs-namenode" do
   action [:enable, :start]
   subscribes :restart, "template[/etc/hadoop/conf/hdfs-site.xml]", :delayed
   subscribes :restart, "template[/etc/hadoop/conf/hdfs-policy.xml]", :delayed
-end
-
-
-## We need to bootstrap the standby and journal node transaction logs
-# The -bootstrapStandby and -initializeSharedEdits don't actually work
-# when the namenode starts up, because it is in safemode and won't commit
-# a txn.
-# So we fake the formatting of the txn directories by copying over current/VERSION
-# this tricks the journalnodes and namenodes into thinking they've been formatted.
-
-ruby_block "grab the format UUID File" do
-  block do
-    Dir.chdir("/disk/#{node[:bcpc][:hadoop][:mounts][0]}/dfs/") do
-      system("tar czvf /tmp/nn_fmt.tgz nn/")
-    end
-    make_config("namenode_txn_fmt", Base64.encode64(IO.read("/tmp/nn_fmt.tgz")));
-  end
-  action :nothing
-  subscribes :create, "service[hadoop-hdfs-namenode]", :immediate
-  only_if { File.exists?("/disk/#{node[:bcpc][:hadoop][:mounts][0]}/dfs/nn/current/VERSION") }
 end
 
 ###

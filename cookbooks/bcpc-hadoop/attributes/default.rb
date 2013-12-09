@@ -14,3 +14,4 @@ default[:bcpc][:repos][:cloudera] = 'http://archive.cloudera.com/cdh4/ubuntu/pre
 default[:bcpc][:hadoop][:disks] = []
 default[:bcpc][:hadoop][:oozie][:admins] = []
 default[:bcpc][:hadoop][:min_node_count] = 3
+default[:bcpc][:hadoop][:hdfs][:HA] = false

@@ -12,7 +12,7 @@
 
   <property>
     <name>dfs.name.dir</name>
-    <value><%=@mounts.map{ |d| "/disk/#{d}/dfs/namedir" }.join(",")%></value>
+    <value><%=@mounts.map{ |d| "file:///disk/#{d}/dfs/namedir" }.join(",")%></value>
   </property>
 
   <property>
@@ -22,11 +22,11 @@
 
   <property>
     <name>dfs.nameservices</name>
-    <value>bcpc</value>
+    <value><%= node.chef_environment %></value>
   </property>
 
   <property>
-    <name>dfs.ha.namenodes.bcpc</name>
+    <name>dfs.ha.namenodes.<%= node.chef_environment %></name>
     <value><%=@nn_hosts.map{ |s| "namenode#{s[:bcpc][:node_number]}" }.join(",") %></value>
   </property>
 
@@ -42,58 +42,39 @@
 
   <% @nn_hosts.each do |h| %>	
     <property>
-      <name>dfs.namenode.rpc-address.bcpc.namenode<%=h[:bcpc][:node_number] %></name>
+      <name>dfs.namenode.rpc-address.<%= "#{node.chef_environment}.namenode#{h[:bcpc][:node_number]}" %></name>
       <value><%=float_host(h[:hostname]) %>:8020</value>
     </property>
   <% end %>
 
   <% @nn_hosts.each do |h| %>	
     <property>
-      <name>dfs.namenode.http-address.bcpc.namenode<%=h[:bcpc][:node_number] %></name>
+      <name>dfs.namenode.http-address.<%= "#{node.chef_environment}.namenode#{h[:bcpc][:node_number]}" %></name>
       <value><%=float_host(h[:hostname]) %>:50070</value>
     </property>
   <% end %>
 
   <% @nn_hosts.each do |h| %>	
     <property>
-      <name>dfs.namenode.https-address.bcpc.namenode<%=h[:bcpc][:node_number] %></name>
+      <name>dfs.namenode.https-address.<%= "#{node.chef_environment}.namenode#{h[:bcpc][:node_number]}" %></name>
       <value><%=float_host(h[:hostname]) %>:50080</value>
     </property>
   <% end %>
 
   <property>
-    <name>dfs.client.failover.proxy.provider.bcpc</name>
+    <name>dfs.client.failover.proxy.provider.<%= node.chef_environment %></name>
     <value>org.apache.hadoop.hdfs.server.namenode.ha.ConfiguredFailoverProxyProvider</value>
   </property>
 
-  <property>
-    <name>dfs.ha.automatic-failover.enabled</name>
-    <value>true</value>
-  </property>
-
-  <property>
-    <name>ha.zookeeper.quorum</name>
-    <value><%= @zk_hosts.map{ |s| float_host(s[:hostname]) + ":2181" }.join(",") %></value> 
-  </property>
-
-  <property>
-    <name>dfs.namenode.shared.edits.dir</name>
-    <value>qjournal://<%= @zk_hosts.map{ |s| float_host(s[:hostname]) + ":8485" }.join(";") %>/bcpc</value>
-  </property>
-
-  <property>
-    <name>dfs.journalnode.edits.dir</name>
-    <value><%="/disk/#{@mounts[1]}/dfs/jn"%></value>
-  </property>
+  <%
+    if node[:bcpc][:hadoop][:hdfs][:HA]
+      render "hdp_hdfs-site_HA.xml.erb" 
+    end
+  =%>
 
   <property>
     <name>dfs.webhdfs.enabled</name>
     <value>false</value>
-  </property>
-
-  <property>
-    <name>dfs.ha.fencing.methods</name>
-    <value>shell(/bin/true)</value>
   </property>
 
   <property>

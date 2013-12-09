@@ -1,4 +1,6 @@
-
+package "xfsprogs" do
+  action :install
+end
 
 directory "/disk" do
   owner "root"
@@ -8,16 +10,7 @@ directory "/disk" do
 end
 
 if node[:bcpc][:hadoop][:disks].length > 0 then
-  node[:bcpc][:hadoop][:disks].each do |d|
-    mount "/disk/#{d}" do
-      device "/dev/#{d}"
-      fstype "xfs"
-      options "noatime,nodiratime,inode64"
-    end
-  end
-  node.set[:bcpc][:hadoop][:mounts] = node[:bcpc][:hadoop][:disks]
-else
-  (1..4).each do |i|
+  node[:bcpc][:hadoop][:disks].each_index do |i|
     directory "/disk/#{i}" do
       owner "root"
       group "root"
@@ -25,8 +18,22 @@ else
       action :create
       recursive true
     end
+   
+    d = node[:bcpc][:hadoop][:disks][i]
+    execute "mkfs -t xfs /dev/#{d}" do
+      not_if "file -s /dev/#{d} | grep -q 'SGI XFS filesystem'"
+    end
+ 
+    mount "/disk/#{i}" do
+      device "/dev/#{d}"
+      fstype "xfs"
+      options "noatime,nodiratime,inode64"
+      action [:enable, :mount]
+    end
   end
-  node.set[:bcpc][:hadoop][:mounts] = ["1", "2", "3", "4"]
+  node.set[:bcpc][:hadoop][:mounts] = (0..node[:bcpc][:hadoop][:disks].length-1).to_a
+else
+  Chef::Log.fatal!('Please specify some node[:bcpc][:hadoop][:disks]!')
 end
 
 
@@ -91,7 +98,6 @@ end
    hadoop-metrics2.properties
    hadoop-metrics.properties
    hadoop-policy.xml
-   hdfs-site.xml
    log4j.properties
    mapred-site.xml
    slaves
