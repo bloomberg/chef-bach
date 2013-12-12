@@ -10,7 +10,7 @@ include_recipe 'dpkg_autostart'
 end
 
 node[:bcpc][:hadoop][:mounts].each do |i|
-  directory "/disk/#{i}/dfs/jn" do
+  directory "/disk/#{i}/dfs/jn/#{node.chef_environment}" do
     owner "hdfs"
     group "hdfs"
     mode 0755
@@ -19,9 +19,16 @@ node[:bcpc][:hadoop][:mounts].each do |i|
   end
 end
 
+bash "initialize-shared-edits" do
+  command "hdfs namenode -initializeSharedEdits"
+  not_if { node[:bcpc][:hadoop][:mounts].all? { |i| Dir.entries("/disk/#{i}/dfs/jn/#{node.chef_environment}").length > 2 } }
+end
+
 service "hadoop-hdfs-journalnode" do
   action [:enable, :start]
   subscribes :restart, "template[/etc/hadoop/conf/hdfs-site.xml]", :delayed
+  subscribes :restart, "bash[initialize-shared-edits]", :delayed
+  subscribes :restart, "template[/etc/hadoop/conf/hdfs-site_HA.xml]", :delayed
 end
 
 

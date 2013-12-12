@@ -8,7 +8,7 @@
 -->
 <?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
 
-<configuration>
+<configuration xmlns:xi="http://www.w3.org/2001/XInclude">
 
   <property>
     <name>dfs.name.dir</name>
@@ -17,7 +17,7 @@
 
   <property>
     <name>dfs.namenode.name.dir</name>
-    <value><%=@mounts.map{ |d| "/disk/#{d}/dfs/nn" }.join(",")%></value>
+    <value><%=@mounts.map{ |d| "file:///disk/#{d}/dfs/nn" }.join(",")%></value>
   </property>
 
   <property>
@@ -32,7 +32,7 @@
 
   <property>
     <name>dfs.datanode.data.dir</name>
-    <value><%=@mounts.map{ |d| "/disk/#{d}/dfs/dn" }.join(",")%></value>
+    <value><%=@mounts.map{ |d| "file:///disk/#{d}/dfs/dn" }.join(",")%></value>
   </property>
 
   <property>
@@ -66,11 +66,9 @@
     <value>org.apache.hadoop.hdfs.server.namenode.ha.ConfiguredFailoverProxyProvider</value>
   </property>
 
-  <%
-    if node[:bcpc][:hadoop][:hdfs][:HA]
-      render "hdp_hdfs-site_HA.xml.erb" 
-    end
-  =%>
+  <% if node[:bcpc][:hadoop][:hdfs][:HA] == true then %>
+  <%=  '<xi:include href="file:///etc/hadoop/conf/hdfs-site_HA.xml"/>' %>
+  <% end %>
 
   <property>
     <name>dfs.webhdfs.enabled</name>

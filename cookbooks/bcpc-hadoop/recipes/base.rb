@@ -92,19 +92,23 @@ end
 #
 #set up hadoop conf
 #
-%w{capacity-scheduler.xml
+hadoop_conf_files = %w{capacity-scheduler.xml
    container-executor.cfg
    core-site.xml
    hadoop-metrics2.properties
    hadoop-metrics.properties
    hadoop-policy.xml
+   hdfs-site.xml
    log4j.properties
    mapred-site.xml
    slaves
    ssl-client.xml
    ssl-server.xml
    yarn-site.xml
-  }.each do |t|
+  }
+node[:bcpc][:hadoop][:hdfs][:HA] == true and hadoop_conf_files.insert(-1,"hdfs-site_HA.xml")
+
+hadoop_conf_files.each do |t|
    template "/etc/hadoop/conf/#{t}" do
      source "hdp_#{t}.erb"
      mode 0644
@@ -272,4 +276,3 @@ end
 package "zookeeper" do
   action :upgrade
 end
-

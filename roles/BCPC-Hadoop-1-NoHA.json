@@ -12,5 +12,12 @@
   "description": "Non-HA version of Hadoop 1 role in a BCPC Hadoop cluster",
   "chef_type": "role",
   "override_attributes": {
+    "bcpc": {
+      "hadoop": {
+        "hdfs": {
+          "HA": false
+        }
+      }
+    }
   }
 }
