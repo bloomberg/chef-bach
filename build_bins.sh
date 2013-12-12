@@ -41,19 +41,19 @@ FILES="kibana3.tgz $FILES"
 
 # Grab plugins for fluentd
 for i in elasticsearch tail-multiline tail-ex record-reformer rewrite; do
-    if [ ! -f fluent-plugin-${i}.gem ]; then
+    if [ ! -f fluent-plugin-${i}*.gem ]; then
         gem fetch fluent-plugin-${i}
-        mv fluent-plugin-${i}-*.gem fluent-plugin-${i}.gem
+        ln -s fluent-plugin-${i}-*.gem fluent-plugin-${i}.gem
     fi
-    FILES="fluent-plugin-${i}.gem $FILES"
+    FILES="fluent-plugin-${i}*.gem $FILES"
 done
 
 # Get the Rubygem for zookeeper
-if [ ! -f zookeeper.gem ]; then
+if [ ! -f zookeeper*.gem ]; then
     gem fetch zookeeper
-    mv zookeeper-*.gem zookeeper.gem
+    ln -s zookeeper-*.gem zookeeper.gem
 fi
-FILES="zookeeper.gem $FILES"
+FILES="zookeeper*.gem $FILES"
 
 
 # Fetch the cirros image for testing
@@ -154,11 +154,11 @@ if [ ! -f zabbix-agent.tar.gz ] || [ ! -f zabbix-server.tar.gz ]; then
 fi
 FILES="zabbix-agent.tar.gz zabbix-server.tar.gz $FILES"
 
-[ ! -d gems ] && mkdir gems
-[ -n $(echo *.gem) ] && mv *.gem gems
-gem generate_index --legacy
+[ ! -d gems ] && mkdir -p $(ruby -e "p RUBY_VERSION")/gems
+[ -n "$(echo *.gem)" ] && mv *.gem $(ruby -e "p RUBY_VERSION")/gems
+( cd $(ruby -e "p RUBY_VERSION"); gem generate_index --legacy )
 
-# serve the files if nothing else is already
+# serve the files if nothing else is doing so already
 $(netstat -nlt4 | grep -q :8080) || nohup python -m SimpleHTTPServer 8080 &
 
 popd

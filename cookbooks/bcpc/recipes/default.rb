@@ -39,7 +39,8 @@ node.set['bcpc']['floating']['ip'] = ((IPAddr.new(node['bcpc']['floating']['cidr
 
 node.save
 
-gem_package "zookeeper" do
+# ensure the Zookeeper Gem is available for use in later recipes
+chef_gem "zookeeper" do
     options "--no-http-proxy --clear-sources --source #{get_binary_server_url}"
     action :install
 end
