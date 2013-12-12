@@ -1,4 +1,8 @@
+include_recipe 'dpkg_autostart'
 
+dpkg_autostart "oozie" do
+  allow false
+end
 package "oozie libmysql-java" do
   action :upgrade
 end
@@ -34,15 +38,6 @@ ruby_block "oozie-database-creation" do
   end
 end
 
-
-#TODO, this probably has dependencies on external services such as yarn and hive as well
-#hopefully it starts up later :)
-service "oozie" do
-  action [:enable, :start]
-  subscribes :restart, "template[/etc/oozie/conf/oozie-site.xml]", :delayed
-  subscribes :restart, "template[/etc/oozie/conf/oozie-env.sh]", :delayed
-end
-
 directory "/etc/oozie/conf.bcpc/action-conf" do
   owner "root"
   group "root"
@@ -71,3 +66,12 @@ template "/etc/oozie/conf.bcpc/action-conf/hive.xml" do
   mode 0644
   source "ooz_action_hive.xml.erb"
 end
+
+#TODO, this probably has dependencies on external services such as yarn and hive as well
+#hopefully it starts up later :)
+service "oozie" do
+  action [:enable, :start]
+  subscribes :restart, "template[/etc/oozie/conf/oozie-site.xml]", :delayed
+  subscribes :restart, "template[/etc/oozie/conf/oozie-env.sh]", :delayed
+end
+
