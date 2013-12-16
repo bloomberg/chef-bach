@@ -58,7 +58,7 @@ when "debian"
      hadoop-httpfs
      hive-hcatalog
      hue}.each do |w|
-    directory "/etc/#{w}/conf.bcpc" do
+    directory "/etc/#{w}/conf.#{node.chef_environment}" do
       owner "root"
       group "root"
       mode 00755
@@ -68,8 +68,8 @@ when "debian"
 
     bash "update-#{w}-conf-alternatives" do
       code %Q{
-       update-alternatives --install /etc/#{w}/conf #{w}-conf /etc/#{w}/conf.bcpc 50
-       update-alternatives --set #{w}-conf /etc/#{w}/conf.bcpc
+       update-alternatives --install /etc/#{w}/conf #{w}-conf /etc/#{w}/conf.#{node.chef_environment} 50
+       update-alternatives --set #{w}-conf /etc/#{w}/conf.#{node.chef_environment}
       }
     end
   end
@@ -203,31 +203,31 @@ end
               :hive_host => get_nodes_for("hive_metastore"))
   end
 end
-link "/etc/oozie/conf.bcpc/hive-site.xml" do
-  to "/etc/hive/conf.bcpc/hive-site.xml"
+link "/etc/oozie/conf.#{node.chef_environment}/hive-site.xml" do
+  to "/etc/hive/conf.#{node.chef_environment}/hive-site.xml"
 end
-link "/etc/oozie/conf.bcpc/core-site.xml" do
-  to "/etc/hadoop/conf.bcpc/core-site.xml"
+link "/etc/oozie/conf.#{node.chef_environment}/core-site.xml" do
+  to "/etc/hadoop/conf.#{node.chef_environment}/core-site.xml"
 end
-link "/etc/oozie/conf.bcpc/yarn-site.xml" do
-  to "/etc/hadoop/conf.bcpc/yarn-site.xml"
+link "/etc/oozie/conf.#{node.chef_environment}/yarn-site.xml" do
+  to "/etc/hadoop/conf.#{node.chef_environment}/yarn-site.xml"
 end
 
 #
 # Set up impala configs
 #
 
-link "/etc/impala/conf.bcpc/hive-site.xml" do
-  to "/etc/hive/conf.bcpc/hive-site.xml"
+link "/etc/impala/conf.#{node.chef_environment}/hive-site.xml" do
+  to "/etc/hive/conf.#{node.chef_environment}/hive-site.xml"
 end
-link "/etc/impala/conf.bcpc/core-site.xml" do
-  to "/etc/hadoop/conf.bcpc/core-site.xml"
+link "/etc/impala/conf.#{node.chef_environment}/core-site.xml" do
+  to "/etc/hadoop/conf.#{node.chef_environment}/core-site.xml"
 end
-link "/etc/impala/conf.bcpc/hdfs-site.xml" do
-  to "/etc/hadoop/conf.bcpc/hdfs-site.xml"
+link "/etc/impala/conf.#{node.chef_environment}/hdfs-site.xml" do
+  to "/etc/hadoop/conf.#{node.chef_environment}/hdfs-site.xml"
 end
-link "/etc/impala/conf.bcpc/hbase-site.xml" do
-  to "/etc/hbase/conf.bcpc/hbase-site.xml"
+link "/etc/impala/conf.#{node.chef_environment}/hbase-site.xml" do
+  to "/etc/hbase/conf.#{node.chef_environment}/hbase-site.xml"
 end
 
 #
@@ -245,8 +245,8 @@ end
   end
 end
 
-link "/etc/hive-hcatalog/conf.bcpc/hive-site.xml" do
-  to "/etc/hive/conf.bcpc/hive-site.xml"
+link "/etc/hive-hcatalog/conf.#{node.chef_environment}/hive-site.xml" do
+  to "/etc/hive/conf.#{node.chef_environment}/hive-site.xml"
 end
 
 #
