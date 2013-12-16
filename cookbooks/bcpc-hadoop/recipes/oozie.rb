@@ -4,9 +4,9 @@ dpkg_autostart "oozie" do
   allow false
 end
 
-%w{libmysql-java oozie}.each do |pkg|
+%w{libmysql-java oozie oozie-client}.each do |pkg|
   package pkg do
-    action :install
+    action :upgrade
   end
 end
 
