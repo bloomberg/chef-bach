@@ -10,6 +10,13 @@ include_recipe 'dpkg_autostart'
 end
 
 node[:bcpc][:hadoop][:mounts].each do |i|
+  directory "/disk/#{i}/dfs/jn/" do
+    owner "hdfs"
+    group "hdfs"
+    mode 0755
+    action :create
+    recursive true
+  end
   directory "/disk/#{i}/dfs/jn/#{node.chef_environment}" do
     owner "hdfs"
     group "hdfs"

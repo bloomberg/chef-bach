@@ -83,7 +83,7 @@ fi
 FILES="centos-6-vmlinuz $FILES"
 
 # Make the diamond package
-if [ ! -f diamond.deb ]; then
+if [ ! -f diamond*.deb ]; then
     git clone https://github.com/BrightcoveOS/Diamond.git
     cd Diamond
     git checkout $VER_DIAMOND
@@ -112,22 +112,29 @@ FILES="elasticsearch-plugins.tgz $FILES"
 
 # Fetch pyrabbit
 if [ ! -f pyrabbit-1.0.1.tar.gz ]; then
-    $CURL -O -L http://pypi.python.org/packages/source/p/pyrabbit/pyrabbit-1.0.1.tar.gz
+    while ! $(file pyrabbit-1.0.1.tar.gz | grep -q 'gzip compressed data'); do
+        $CURL -O -L http://pypi.python.org/packages/source/p/pyrabbit/pyrabbit-1.0.1.tar.gz
+    done
 fi
 FILES="pyrabbit-1.0.1.tar.gz $FILES"
 
 # Build graphite packages
 if [ ! -f python-carbon_0.9.10_all.deb ] || [ ! -f python-whisper_0.9.10_all.deb ] || [ ! -f python-graphite-web_0.9.10_all.deb ]; then
-#    $CURL -L -O http://pypi.python.org/packages/source/c/carbon/carbon-0.9.10.tar.gz
-#    $CURL -L -O http://pypi.python.org/packages/source/w/whisper/whisper-0.9.10.tar.gz
-#    $CURL -L -O http://pypi.python.org/packages/source/g/graphite-web/graphite-web-0.9.10.tar.gz
+    while ! $(file carbon-0.9.10.tar.gz | grep -q 'gzip compressed data'); do
+        $CURL -L -O http://pypi.python.org/packages/source/c/carbon/carbon-0.9.10.tar.gz
+    done
+    while ! $(file whisper-0.9.10.tar.gz | grep -q 'gzip compressed data'); do
+        $CURL -L -O http://pypi.python.org/packages/source/w/whisper/whisper-0.9.10.tar.gz
+    done
+    while ! $(file graphite-web-0.9.10.tar.gz | grep -q 'gzip compressed data'); do
+        $CURL -L -O http://pypi.python.org/packages/source/g/graphite-web/graphite-web-0.9.10.tar.gz
+    done
     tar zxf carbon-0.9.10.tar.gz
     tar zxf whisper-0.9.10.tar.gz
     tar zxf graphite-web-0.9.10.tar.gz
     fpm --python-install-bin /opt/graphite/bin -s python -t deb carbon-0.9.10/setup.py
     fpm --python-install-bin /opt/graphite/bin  -s python -t deb whisper-0.9.10/setup.py
     fpm --python-install-lib /opt/graphite/webapp -s python -t deb graphite-web-0.9.10/setup.py
-    rm -rf carbon-0.9.10 carbon-0.9.10.tar.gz whisper-0.9.10 whisper-0.9.10.tar.gz graphite-web-0.9.10 graphite-web-0.9.10.tar.gz
 fi
 FILES="python-carbon_0.9.10_all.deb python-whisper_0.9.10_all.deb python-graphite-web_0.9.10_all.deb $FILES"
 
@@ -154,9 +161,16 @@ if [ ! -f zabbix-agent.tar.gz ] || [ ! -f zabbix-server.tar.gz ]; then
 fi
 FILES="zabbix-agent.tar.gz zabbix-server.tar.gz $FILES"
 
-[ ! -d gems ] && mkdir -p $(ruby -e "p RUBY_VERSION")/gems
-[ -n "$(echo *.gem)" ] && mv *.gem $(ruby -e "p RUBY_VERSION")/gems
-( cd $(ruby -e "p RUBY_VERSION"); gem generate_index --legacy )
+# need the builder gem to generate a gem index
+gem install builder --no-ri --no-rdoc
+
+[ ! -d gems ] && mkdir gems
+[ -n "$(echo *.gem)" ] && mv *.gem gems
+gem generate_index --legacy
+#[ ! -d gems ] && mkdir -p $(ruby -e "print RUBY_VERSION")/gems
+#[ -n "$(echo *.gem)" ] && mv *.gem $(ruby -e "print RUBY_VERSION")/gems
+#ln -s $(ruby -e "print RUBY_VERSION")/gems gems
+#( cd $(ruby -e "print RUBY_VERSION"); gem generate_index --legacy )
 
 # serve the files if nothing else is doing so already
 $(netstat -nlt4 | grep -q :8080) || nohup python -m SimpleHTTPServer 8080 &
