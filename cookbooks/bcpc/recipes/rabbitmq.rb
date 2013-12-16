@@ -100,15 +100,15 @@ service "rabbitmq-server" do
 end
 
 get_head_nodes.each do |server|
-    if server.hostname != node.hostname
-        bash "rabbitmq-clustering-with-#{server.hostname}" do
+    if server['hostname'] != node[:hostname]
+        bash "rabbitmq-clustering-with-#{server['hostname']}" do
             code <<-EOH
                 rabbitmqctl stop_app
                 rabbitmqctl reset
-                rabbitmqctl join_cluster rabbit@#{server.hostname}
+                rabbitmqctl join_cluster rabbit@#{server['hostname']}
                 rabbitmqctl start_app
             EOH
-            not_if "rabbitmqctl cluster_status | grep rabbit@#{server.hostname}"
+            not_if "rabbitmqctl cluster_status | grep rabbit@#{server['hostname']}"
         end
     end
 end
@@ -159,7 +159,7 @@ end
 
 ruby_block "reap-dead-rabbitmq-servers" do
     block do
-        head_names = get_head_nodes.collect{|x| x.hostname}
+        head_names = get_head_nodes.collect{|x| x['hostname']}
         status = %x[ rabbitmqctl cluster_status | grep nodes | grep disc ].strip
         status.scan(/(?:'rabbit@([a-zA-Z0-9-]+)',?)+?/).each do |server|
             if not head_names.include?(server[0])

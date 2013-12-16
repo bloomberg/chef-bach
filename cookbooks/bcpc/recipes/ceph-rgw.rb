@@ -27,6 +27,8 @@ package "radosgw" do
    action :upgrade
 end
 
+package "python-boto"
+
 directory "/var/lib/ceph/radosgw/ceph-radosgw.gateway" do
   owner "root"
   group "root"
@@ -49,17 +51,31 @@ bash "write-client-radosgw-key" do
             --create-keyring \
             --name=client.radosgw.gateway \
             --add-key="$RGW_KEY"
+        chmod 644 /var/lib/ceph/radosgw/ceph-radosgw.gateway/keyring
     EOH
-    not_if "test -f /var/lib/ceph/radosgw/ceph-radosgw.gateway/keyring && chmod 644 /var/lib/ceph/radosgw/ceph-radosgw.gateway/keyring"
+    not_if "test -f /var/lib/ceph/radosgw/ceph-radosgw.gateway/keyring"
 end
 
-bash "pre-alloc-rgwspools" do
-    flags '-x'
-    pools = %w{ .rgw.buckets .log .rgw .rgw.control .users.uid .users.email .users .usage .intent-log }
-    code pools.map { |pool|
-    "ceph osd pool create #{pool} #{get_num_pgs(node[:bcpc][:rgw_pool_multiplier][pool])};ceph osd pool set #{pool} size #{node[:bcpc][:ceph_s3_replica_count]}"
-    }.join("\n")
-    not_if "rados df | grep .rgw.buckets"
+rgw_optimal_pg = power_of_2(get_ceph_osd_nodes.length*node[:bcpc][:ceph][:pgs_per_node]/node[:bcpc][:ceph][:rgw][:replicas]*node[:bcpc][:ceph][:rgw][:portion]/100)
+
+rgw_crush_ruleset = (node[:bcpc][:ceph][:rgw][:type] == "ssd") ? 3 : 4
+
+%w{.rgw .rgw.control .rgw.gc .rgw.root .users.uid .users.email .users .usage .log .intent-log .rgw.buckets .rgw.buckets.index}.each do |pool|
+    bash "create-rados-pool-#{pool}" do
+        code <<-EOH
+            ceph osd pool create #{pool} #{rgw_optimal_pg}
+            ceph osd pool set #{pool} crush_ruleset #{rgw_crush_ruleset}
+            ceph osd pool set #{pool} size #{node[:bcpc][:ceph][:rgw][:replicas]}
+        EOH
+        not_if "rados lspools | grep ^#{pool}$"
+    end
+end
+
+# check to see if we should up the number of pg's now for the core buckets pool
+bash "update-rgw-buckets-pgs" do
+    user "root"
+    code "ceph osd pool set .rgw.buckets pg_num #{rgw_optimal_pg}"
+    not_if "((`ceph osd pool get .rgw.buckets pg_num | awk '{print $2}'` >= #{rgw_optimal_pg}))"
 end
 
 file "/var/www/s3gw.fcgi" do
@@ -86,4 +102,31 @@ end
 
 execute "radosgw-all-starter" do
     command "start radosgw-all-starter"
+end
+
+ruby_block "initialize-radosgw-admin-user" do
+  block do
+    make_config('radosgw-admin-user', "radosgw")
+    make_config('radosgw-admin-access-key', secure_password_alphanum_upper(20))
+    make_config('radosgw-admin-secret-key', secure_password(40))
+    rgw_admin = JSON.parse(%x[radosgw-admin user create --display-name="Admin" --uid="radosgw" --access_key=#{get_config('radosgw-admin-access-key')} --secret=#{get_config('radosgw-admin-secret-key')}])
+  end
+  not_if "radosgw-admin user info --uid='radosgw'"
+end
+
+ruby_block "initialize-radosgw-test-user" do
+  block do
+    make_config('radosgw-test-user', "tester")
+    make_config('radosgw-test-access-key', secure_password_alphanum_upper(20))
+    make_config('radosgw-test-secret-key', secure_password(40))
+    rgw_admin = JSON.parse(%x[radosgw-admin user create --display-name="Tester" --uid="tester" --max-buckets=3 --access_key=#{get_config('radosgw-test-access-key')} --secret=#{get_config('radosgw-test-secret-key')}])
+  end
+  not_if "radosgw-admin user info --uid='tester'"
+end
+
+template "/usr/local/bin/radosgw_check.py" do
+  source "radosgw_check.py.erb"
+  mode 0700
+  owner "root"
+  group "root"
 end

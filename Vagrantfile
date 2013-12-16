@@ -5,6 +5,7 @@
 # Chef server.
 # See http://www.vagrantup.com/ for info on Vagrant.
 
+$local_environment = "Test-Laptop"
 $local_mirror = nil
 #$local_mirror = "10.0.100.4"
 
@@ -37,7 +38,9 @@ Vagrant.configure("2") do |config|
 
     # since we are creating the server and the validation keys on this new
     # machine itself, we can't use Vagrant's built-in chef provisioning.
-    bootstrap.vm.provision :shell, :inline => "/chef-bcpc-host/bootstrap_chef.sh --vagrant-local 10.0.100.3"
+    # We actually prefer to do this in vbox_create.sh as we do some fixups
+    # and register our VMs in cobbler after we're done.
+    #bootstrap.vm.provision :shell, :inline => "/chef-bcpc-host/bootstrap_chef.sh --vagrant-local 10.0.100.3 #{$local_environment}"
   end
 
   #config.vm.define :mirror do |mirror|
@@ -53,13 +56,21 @@ Vagrant.configure("2") do |config|
   #config.vm.box_url = "http://cloud-images.ubuntu.com/precise/current/precise-server-cloudimg-amd64-vagrant-disk1.box"
   config.vm.box_url = "precise-server-cloudimg-amd64-vagrant-disk1.box"
 
+  memory = ( ENV["BOOTSTRAP_VM_MEM"] or "1024" )
+  cpus = ( ENV["BOOTSTRAP_VM_CPUs"] or "1" )
+
   config.vm.provider :virtualbox do |vb|
      # Don't boot with headless mode
      vb.gui = true
      vb.name = "bcpc-bootstrap"
      vb.customize ["modifyvm", :id, "--nictype2", "82543GC"]
-     vb.customize ["modifyvm", :id, "--memory", "1024"]
-     #vb.customize ["modifyvm", :id, "--ioapic", "on"]
+     vb.customize ["modifyvm", :id, "--memory", memory]
+     vb.customize ["modifyvm", :id, "--cpus", cpus]
+     vb.customize ["modifyvm", :id, "--largepages", "on"]
+     vb.customize ["modifyvm", :id, "--nestedpaging", "on"]
+     vb.customize ["modifyvm", :id, "--vtxvpid", "on"]
+     vb.customize ["modifyvm", :id, "--hwvirtex", "on"]
+     vb.customize ["modifyvm", :id, "--ioapic", "on"]
      #vb.customize ["modifyvm", :id, "--chipset", "ich9"]
    end
 

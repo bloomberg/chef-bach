@@ -2,6 +2,26 @@
 
 These instructions assume that you basically know what you are doing.  =)
 
+### 20131026
+
+The Ceph storage back-end was revamped to allow for multiple storage tiers, namely keeping SSD and HDD separate
+in ceph avoid performance hits. So for each node, there is no longer a ``node[:bcpc][:ceph_disks]`` parameter
+but instead ``node[:bcpc][:ceph][:ssd_disks]`` and ``node[:bcpc][:ceph][:hdd_disks]``. Disks of each type are
+automatically added to their respective storage branches (see ``ceph osd tree`` after bringing up a cluster).
+Each disk will also have it's ``weight`` setting in CRUSH changed to match the drives size in TB (in floating
+point).
+
+Also, in the BCPC cookbook's ``attributes/default.rb``, there are new configurables to tune the replica count
+and the relative size of each pool BCPC creates (target making the ``portion`` attributes add up to ~100, but
+it is not a strict limit). As of Dumpling, both replica counts and pg_num are stable enough to change on-th-fly,
+so automatically calculate both based on the target number of placement groups per node. Roughly, the ratio of
+pgs:osds is 100:1, so use an appropriate number for ``node[:bcpc][:ceph][:pgs_per_node]``based on the average
+number of disks in your hosts. NOTE: this means ``node[:bcpc][:ceph_node_count]`` and
+``node[:bcpc][:ceph_s3_replica_count]`` have gone away.
+
+Also, cinder has been configured to have multiple back-ends to take advantage of the two storage tiers, so now
+when allocating a volume, you can choose the "Type" of either SSD of HDD.
+
 ### 20131021
 
 The Ceph S3 component relies on several pools which it will happily create using the incorrect defaults. 

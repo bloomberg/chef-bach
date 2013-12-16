@@ -29,7 +29,7 @@ ruby_block "initialize-keystone-config" do
         make_config('keystone-admin-user', "admin")
         make_config('keystone-admin-password', secure_password)
         if get_config('keystone-pki-certificate').nil? then
-            temp = %x[openssl req -new -x509 -passout pass:temp_passwd -newkey rsa:2048 -out /dev/stdout -keyout /dev/stdout -days 1095 -subj "/C=#{node[:bcpc][:country]}/ST=#{node[:bcpc][:state]}/L=#{node[:bcpc][:location]}/O=#{node[:bcpc][:organization]}/OU=#{node[:bcpc][:region_name]}/CN=keystone.#{node[:bcpc][:domain_name]}/emailAddress=#{node[:bcpc][:admin_email]}"]
+            temp = %x[openssl req -new -x509 -passout pass:temp_passwd -newkey rsa:2048 -out /dev/stdout -keyout /dev/stdout -days 1095 -subj "/C=#{node['bcpc']['country']}/ST=#{node['bcpc']['state']}/L=#{node['bcpc']['location']}/O=#{node['bcpc']['organization']}/OU=#{node['bcpc']['region_name']}/CN=keystone.#{node['bcpc']['domain_name']}/emailAddress=#{node['bcpc']['admin_email']}"]
             make_config('keystone-pki-private-key', %x[echo "#{temp}" | openssl rsa -passin pass:temp_passwd -out /dev/stdout])
             make_config('keystone-pki-certificate', %x[echo "#{temp}" | openssl x509])
         end
@@ -267,4 +267,21 @@ bash "keystone-create-users-tenants" do
         # keystone user-role-add --user_id $KEYSTONE_QUANTUM_USER_ID --role_id $KEYSTONE_ROLE_ADMIN_ID --tenant_id $KEYSTONE_SERVICE_TENANT_ID
     EOH
     only_if ". /root/keystonerc; . /root/adminrc; keystone user-get $OS_USERNAME 2>&1 | grep -e '^No user'"
+end
+
+
+ruby_block "initialize-keystone-test-config" do
+    block do
+        make_config('keystone-test-user', "tester")
+        make_config('keystone-test-password', secure_password)
+    end
+end
+
+bash "keystone-create-test-tenants" do
+  code <<-EOH
+        . /root/adminrc
+        export KEYSTONE_ADMIN_TENANT_ID=`keystone tenant-get "#{node['bcpc']['admin_tenant']}" | grep " id " | awk '{print $4}'`
+        keystone user-create --name #{get_config('keystone-test-user')} --tenant-id $KEYSTONE_ADMIN_TENANT_ID --pass  #{get_config('keystone-test-password')} --enabled true
+  EOH
+  only_if ". /root/keystonerc; . /root/adminrc; keystone user-get #{get_config('keystone-test-user')} 2>&1 | grep -e '^No user'"
 end

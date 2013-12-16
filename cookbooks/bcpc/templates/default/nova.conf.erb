@@ -57,6 +57,7 @@ force_dhcp_release=True
 share_dhcp_address=True
 teardown_unused_network_gateway=True
 fixed_ip_disassociate_timeout=30
+dhcp_lease_time=604800
 send_arp_for_ha=True
 my_ip=<%="#{node[:bcpc][:management][:ip]}"%>
 routing_source_ip=<%="#{node[:bcpc][:floating][:ip]}"%>

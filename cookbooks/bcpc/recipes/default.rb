@@ -37,7 +37,7 @@ node.set['bcpc']['node_number'] = mgmt_hostaddr.to_i.to_s
 node.set['bcpc']['storage']['ip'] = ((IPAddr.new(node['bcpc']['storage']['cidr'])>>(32-stor_bitlen)<<(32-stor_bitlen))|stor_hostaddr).to_s
 node.set['bcpc']['floating']['ip'] = ((IPAddr.new(node['bcpc']['floating']['cidr'])>>(32-flot_bitlen)<<(32-flot_bitlen))|flot_hostaddr).to_s
 
-node.save
+node.save rescue nil
 
 # ensure the Zookeeper Gem is available for use in later recipes
 chef_gem "zookeeper" do

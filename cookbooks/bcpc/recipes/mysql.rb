@@ -94,12 +94,13 @@ template "/etc/mysql/conf.d/wsrep.cnf" do
     results = get_mysql_nodes
     # If we are the first one, special case
     seed = ""
-    if ((results.length == 1) && (results[0].hostname == node.hostname)) then
+    if ((results.length == 1) && (results[0]['hostname'] == node[:hostname])) then
         seed = "gcomm://"
         # Commented out to prevent mysql from always restarting when 1 head-node
         notifies :run, "bash[remove-bare-gcomm]", :delayed
     end
     variables( :seed => seed,
+               :max_connections => [get_head_nodes.length*50+get_all_nodes.length*5, 200].max,
                :servers => results )
 end
 
@@ -139,6 +140,8 @@ end
 service "xinetd" do
     action [ :enable, :start ]
 end
+
+package "debconf-utils"
 
 bash "phpmyadmin-debconf-setup" do
     code <<-EOH

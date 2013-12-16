@@ -16,7 +16,7 @@ if [[ -z "$1" || -z "$2" || -z "$3" ]]; then
 	if [[ "$NAME" = nodescp ]]; then		
 		echo "Usage: $0 'environment' 'nodename|IP address' 'from' 'to'"
 	else
-		echo "Usage: $0 'environment 'nodename|IP address' 'command' (sudo)"
+		echo "Usage: $0 'environment' 'nodename|IP address' 'command' (sudo)"
     fi
 	exit
 fi

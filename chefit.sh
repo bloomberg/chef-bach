@@ -16,6 +16,12 @@ $SCPCMD install-chef.sh   ubuntu@$IP:/home/ubuntu
 $SCPCMD finish-worker.sh  ubuntu@$IP:/home/ubuntu
 $SCPCMD finish-head.sh    ubuntu@$IP:/home/ubuntu
 
+if [[ -n "$(source proxy_setup.sh >/dev/null; echo $PROXY)" ]]; then
+  PROXY=$(source proxy_setup.sh >/dev/null; echo $PROXY)
+  echo "setting up .wgetrc's to $PROXY"
+  $SSHCMD "echo \"http_proxy = http://$PROXY\" > .wgetrc"
+fi
+
 echo "setup chef"
 $SSHCMD  "/home/ubuntu/install-chef.sh" sudo
 
