@@ -59,13 +59,13 @@ end
 template "/etc/mysql/my.cnf" do
     source "my.cnf.erb"
     mode 00644
-    notifies :restart, "service[mysql]", :delayed
+    notifies :reload, "service[mysql]", :delayed
 end
 
 template "/etc/mysql/debian.cnf" do
     source "my-debian.cnf.erb"
     mode 00644
-    notifies :restart, "service[mysql]", :delayed
+    notifies :reload, "service[mysql]", :delayed
 end
 
 directory "/etc/mysql/conf.d" do
@@ -74,10 +74,15 @@ directory "/etc/mysql/conf.d" do
     mode 00755
 end
 
+bash "initialize-db" do
+    code "mysql_install_db --defaults-file=/etc/mysql/my.cnf"
+    user "mysql"
+    not_if { get_mysql_nodes.length > 2 or Dir.entries("/var/lib/mysql/mysql/").length > 2 }
+end
+
 template "/etc/mysql/conf.d/wsrep.cnf" do
     source "wsrep.cnf.erb"
     mode 00644
-    notifies :restart, "service[mysql]", :immediately
     results = get_mysql_nodes
     # If we are the first one, special case
     seed = ""
@@ -89,6 +94,7 @@ template "/etc/mysql/conf.d/wsrep.cnf" do
     variables( :seed => seed,
                :max_connections => [get_head_nodes.length*50+get_all_nodes.length*5, 200].max,
                :servers => results )
+    notifies :reload, "service[mysql]", :delayed
 end
 
 bash "remove-bare-gcomm" do
@@ -101,20 +107,20 @@ end
 
 service "mysql" do
     action [ :enable, :start ]
-    start_command "service mysql start || true"
+    start_command "service mysql start"
 end
 
 bash "initial-mysql-config" do
     code <<-EOH
             set -e
-            mysql -h 127.0.0.1 -u root -e "UPDATE mysql.user SET password=PASSWORD('#{get_config('mysql-root-password')}') WHERE user='root'; FLUSH PRIVILEGES;"
-            mysql -h 127.0.0.1 -u root -p#{get_config('mysql-root-password')} -e "UPDATE mysql.user SET host='%' WHERE user='root' and host='localhost'; FLUSH PRIVILEGES;"
-            mysql -h 127.0.0.1 -u root -p#{get_config('mysql-root-password')} -e "GRANT USAGE ON *.* to #{get_config('mysql-galera-user')}@'%' IDENTIFIED BY '#{get_config('mysql-galera-password')}';"
-            mysql -h 127.0.0.1 -u root -p#{get_config('mysql-root-password')} -e "GRANT ALL PRIVILEGES on *.* TO #{get_config('mysql-galera-user')}@'%' IDENTIFIED BY '#{get_config('mysql-galera-password')}';"
-            mysql -h 127.0.0.1 -u root -p#{get_config('mysql-root-password')} -e "GRANT PROCESS ON *.* to '#{get_config('mysql-check-user')}'@'localhost' IDENTIFIED BY '#{get_config('mysql-check-password')}';"
-            mysql -h 127.0.0.1 -u root -p#{get_config('mysql-root-password')} -e "FLUSH PRIVILEGES;"
+            mysql -u root -e "UPDATE mysql.user SET password=PASSWORD('#{get_config('mysql-root-password')}') WHERE user='root'; FLUSH PRIVILEGES;"
+            mysql -u root -p#{get_config('mysql-root-password')} -e "UPDATE mysql.user SET host='%' WHERE user='root' and host='localhost'; FLUSH PRIVILEGES;"
+            mysql -u root -p#{get_config('mysql-root-password')} -e "GRANT USAGE ON *.* to #{get_config('mysql-galera-user')}@'%' IDENTIFIED BY '#{get_config('mysql-galera-password')}';"
+            mysql -u root -p#{get_config('mysql-root-password')} -e "GRANT ALL PRIVILEGES on *.* TO #{get_config('mysql-galera-user')}@'%' IDENTIFIED BY '#{get_config('mysql-galera-password')}';"
+            mysql -u root -p#{get_config('mysql-root-password')} -e "GRANT PROCESS ON *.* to '#{get_config('mysql-check-user')}'@'localhost' IDENTIFIED BY '#{get_config('mysql-check-password')}';"
+            mysql -u root -p#{get_config('mysql-root-password')} -e "FLUSH PRIVILEGES;"
     EOH
-    not_if "mysql -h 127.0.0.1 -uroot -p#{get_config('mysql-root-password')} -e 'SELECT user from mysql.user where User=\"haproxy\"'"
+    not_if "mysql -u root -p#{get_config('mysql-root-password')} -e 'SELECT user from mysql.user where User=\"haproxy\"'"
 end
 
 package "xinetd" do
@@ -134,7 +140,7 @@ template "/etc/xinetd.d/mysqlchk" do
     owner "root"
     group "root"
     mode 00440
-    notifies :restart, "service[xinetd]", :immediately
+    notifies :reload, "service[xinetd]", :immediately
 end
 
 service "xinetd" do

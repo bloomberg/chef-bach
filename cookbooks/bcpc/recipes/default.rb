@@ -50,6 +50,7 @@ gem_path = Pathname.new(Gem.ruby).dirname.join("gem").to_s
 gem_package "zookeeper" do
     gem_binary gem_path
     options "--no-http-proxy --clear-sources --source #{get_binary_server_url}"
+    version "1.4.7"
     action :nothing
 end.run_action(:install)
 
