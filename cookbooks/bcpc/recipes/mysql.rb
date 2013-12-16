@@ -50,19 +50,6 @@ package "percona-xtradb-cluster-server-5.5" do
     action :install
 end
 
-bash "initial-mysql-config" do
-    code <<-EOH
-            set -e
-            mysql -h 127.0.0.1 -u root -e "UPDATE mysql.user SET password=PASSWORD('#{get_config('mysql-root-password')}') WHERE user='root'; FLUSH PRIVILEGES;"
-            mysql -h 127.0.0.1 -u root -p#{get_config('mysql-root-password')} -e "UPDATE mysql.user SET host='%' WHERE user='root' and host='localhost'; FLUSH PRIVILEGES;"
-            mysql -h 127.0.0.1 -u root -p#{get_config('mysql-root-password')} -e "GRANT USAGE ON *.* to #{get_config('mysql-galera-user')}@'%' IDENTIFIED BY '#{get_config('mysql-galera-password')}';"
-            mysql -h 127.0.0.1 -u root -p#{get_config('mysql-root-password')} -e "GRANT ALL PRIVILEGES on *.* TO #{get_config('mysql-galera-user')}@'%' IDENTIFIED BY '#{get_config('mysql-galera-password')}';"
-            mysql -h 127.0.0.1 -u root -p#{get_config('mysql-root-password')} -e "GRANT PROCESS ON *.* to '#{get_config('mysql-check-user')}'@'localhost' IDENTIFIED BY '#{get_config('mysql-check-password')}';"
-            mysql -h 127.0.0.1 -u root -p#{get_config('mysql-root-password')} -e "FLUSH PRIVILEGES;"
-    EOH
-    not_if "mysql -h 127.0.0.1 -uroot -p#{get_config('mysql-root-password')} -e 'SELECT user from mysql.user where User=\"haproxy\"'"
-end
-
 directory "/etc/mysql" do
     owner "root"
     group "root"
@@ -115,6 +102,19 @@ end
 service "mysql" do
     action [ :enable, :start ]
     start_command "service mysql start || true"
+end
+
+bash "initial-mysql-config" do
+    code <<-EOH
+            set -e
+            mysql -h 127.0.0.1 -u root -e "UPDATE mysql.user SET password=PASSWORD('#{get_config('mysql-root-password')}') WHERE user='root'; FLUSH PRIVILEGES;"
+            mysql -h 127.0.0.1 -u root -p#{get_config('mysql-root-password')} -e "UPDATE mysql.user SET host='%' WHERE user='root' and host='localhost'; FLUSH PRIVILEGES;"
+            mysql -h 127.0.0.1 -u root -p#{get_config('mysql-root-password')} -e "GRANT USAGE ON *.* to #{get_config('mysql-galera-user')}@'%' IDENTIFIED BY '#{get_config('mysql-galera-password')}';"
+            mysql -h 127.0.0.1 -u root -p#{get_config('mysql-root-password')} -e "GRANT ALL PRIVILEGES on *.* TO #{get_config('mysql-galera-user')}@'%' IDENTIFIED BY '#{get_config('mysql-galera-password')}';"
+            mysql -h 127.0.0.1 -u root -p#{get_config('mysql-root-password')} -e "GRANT PROCESS ON *.* to '#{get_config('mysql-check-user')}'@'localhost' IDENTIFIED BY '#{get_config('mysql-check-password')}';"
+            mysql -h 127.0.0.1 -u root -p#{get_config('mysql-root-password')} -e "FLUSH PRIVILEGES;"
+    EOH
+    not_if "mysql -h 127.0.0.1 -uroot -p#{get_config('mysql-root-password')} -e 'SELECT user from mysql.user where User=\"haproxy\"'"
 end
 
 package "xinetd" do

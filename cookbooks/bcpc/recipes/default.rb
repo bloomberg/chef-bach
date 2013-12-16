@@ -40,7 +40,18 @@ node.set['bcpc']['floating']['ip'] = ((IPAddr.new(node['bcpc']['floating']['cidr
 node.save rescue nil
 
 # ensure the Zookeeper Gem is available for use in later recipes
-chef_gem "zookeeper" do
+# it seems chef_gem fails to use the embedded gem(1) binary so use gem_package
+# and a hack to use rubygems to find the current Ruby binary;
+# assume gem is in the same dir (valid for Chef 10, Chef 11 dpkg and Chef 11 Omnibus)
+require 'pathname'
+require 'rubygems'
+gem_path = Pathname.new(Gem.ruby).dirname.join("gem").to_s
+
+gem_package "zookeeper" do
+    gem_binary gem_path
     options "--no-http-proxy --clear-sources --source #{get_binary_server_url}"
-    action :install
-end
+    action :nothing
+end.run_action(:install)
+
+Gem.clear_paths
+require 'zookeeper'

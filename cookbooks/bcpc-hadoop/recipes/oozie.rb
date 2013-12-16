@@ -3,8 +3,11 @@ include_recipe 'dpkg_autostart'
 dpkg_autostart "oozie" do
   allow false
 end
-package "oozie libmysql-java" do
-  action :upgrade
+
+%w{libmysql-java oozie}.each do |pkg|
+  package pkg do
+    action :install
+  end
 end
 
 link "/var/lib/oozie/mysql.jar" do
