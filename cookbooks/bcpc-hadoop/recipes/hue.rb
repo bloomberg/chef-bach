@@ -1,17 +1,20 @@
+include_recipe 'dpkg_autostart'
 
-%w{
-hue
-hue-beeswax
-hue-common
-hue-hbase
-hue-impala
-hue-pig
-hue-plugins
-hue-server
-hue-sqoop
-hue-zookeeper
-}.each do |s|
-  package s do
+%w{hue
+   hue-beeswax
+   hue-common
+   hue-hbase
+   hue-impala
+   hue-pig
+   hue-plugins
+   hue-server
+   hue-sqoop
+   hue-zookeeper
+}.each do |pkg|
+  dpkg_autostart pkg do
+    allow false
+  end
+  package pkg do
     action :upgrade
   end
 end

@@ -120,7 +120,7 @@ bash "initial-mysql-config" do
             mysql -u root -p#{get_config('mysql-root-password')} -e "GRANT PROCESS ON *.* to '#{get_config('mysql-check-user')}'@'localhost' IDENTIFIED BY '#{get_config('mysql-check-password')}';"
             mysql -u root -p#{get_config('mysql-root-password')} -e "FLUSH PRIVILEGES;"
     EOH
-    not_if "mysql -u root -p#{get_config('mysql-root-password')} -e 'SELECT user from mysql.user where User=\"haproxy\"'"
+    only_if "mysql -u root -e 'SELECT COUNT(*) FROM mysql.user'"
 end
 
 package "xinetd" do

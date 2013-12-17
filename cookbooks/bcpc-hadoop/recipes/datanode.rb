@@ -15,7 +15,6 @@ end
 
 
 node[:bcpc][:hadoop][:mounts].each do |i|
-
   directory "/disk/#{i}/dfs/dn" do
     owner "hdfs"
     group "hdfs"
@@ -23,6 +22,10 @@ node[:bcpc][:hadoop][:mounts].each do |i|
     action :create
     recursive true
   end
+end
+
+if node[:bcpc][:hadoop][:mounts].length <= node[:bcpc][:hadoop][:hdfs][:failed_volumes_tolerated]
+  Chef::Log.fatal!('You have fewer node[:bcpc][:hadoop][:disks] than node[:bcpc][:hadoop][:hdfs][:failed_volumes_tolerated]! See comments of HDFS-4442.')
 end
 
 %w{libmysql-java}.each do |pkg|

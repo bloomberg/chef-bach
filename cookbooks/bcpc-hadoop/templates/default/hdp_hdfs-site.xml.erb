@@ -32,12 +32,12 @@
 
   <property>
     <name>dfs.datanode.data.dir</name>
-    <value><%=@mounts.map{ |d| "file:///disk/#{d}/dfs/dn" }.join(",")%></value>
+    <value><%=@mounts.map{ |d| "/disk/#{d}/dfs/dn" }.join(",")%></value>
   </property>
 
   <property>
     <name>dfs.datanode.failed.volumes.tolerated</name>
-    <value>3</value>
+    <value><%= node[:bcpc][:hadoop][:hdfs][:failed_volumes_tolerated] %></value>
   </property>
 
   <% @nn_hosts.each do |h| %>	
