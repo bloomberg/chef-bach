@@ -29,7 +29,7 @@ end
 bash "initialize-shared-edits" do
   command "hdfs namenode -initializeSharedEdits"
   # need more than ., .., in_use.lock
-  not_if { node[:bcpc][:hadoop][:mounts].all? { |i| Dir.entries("/disk/#{i}/dfs/jn/#{node.chef_environment}").length > 3 } }
+  not_if { node[:bcpc][:hadoop][:mounts].all? { |i| Dir.entries("/disk/#{i}/dfs/jn/#{node.chef_environment}").include?("current") } }
 end
 
 service "hadoop-hdfs-journalnode" do
