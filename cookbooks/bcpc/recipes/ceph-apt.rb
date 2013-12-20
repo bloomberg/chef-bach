@@ -24,6 +24,13 @@ apt_repository "ceph" do
     key "ceph-release.key"
 end
 
+apt_repository "ceph-extras" do
+    uri node['bcpc']['repos']['ceph-extras']
+    distribution node['lsb']['codename']
+    components ["main"]
+    key "ceph-release.key"
+end
+
 apt_repository "ceph-fcgi" do
     uri node['bcpc']['repos']['ceph-fcgi']
     distribution node['lsb']['codename']
