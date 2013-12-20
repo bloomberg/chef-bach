@@ -6,6 +6,10 @@ import subprocess
 import time
 import uuid 
 import copy
+import stat
+import os
+
+
 default_config = { 
    "timeout" : 120, }
 
@@ -14,8 +18,11 @@ def run_test(stack_test, config):
    """ Run test. At some point this will become threaded to allow
    many tests to run //.
    """
+   
+   
    fname = os.path.join("/tmp", str(uuid.uuid1()))
-   with open(fname, "w") as fout :
+   mode = stat.S_IRUSR | stat.S_IWUSR  
+   with open(fname, "w", mode) as fout :
        yaml.dump(config, fout)
 
    start = time.time()
@@ -56,6 +63,7 @@ def run_test(stack_test, config):
       result["value"] = "ERROR"
       result["message"] = "Test exited with code (%d)" % (result["rcode"])
 
+   os.remove(fname) # if function is throwing, prob want the yml to debugger
    return result
 
 
