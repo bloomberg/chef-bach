@@ -177,9 +177,10 @@ if __name__ == '__main__':
     if reporter not in globals():
        raise Exception("Whoops! reporter %s not defined" % reporter)
 
-    if not args:
-        print "Please supply at least one check"
-        sys.exit(1)
+    if not args or "all" in args:
+       bin_path = os.environ.get("BCPC_CHECK_BIN", "/usr/local/bin/checks")
+       args = [f for f in os.listdir(bin_path) if f[0] not in [".", "#"]]
+
     results = [ ClusterCheck(c).run() for c in args]
     globals()[reporter](results)
         
