@@ -68,8 +68,10 @@ else
   $SSH_CMD "rsync $RSYNCEXTRA -avP --exclude vbox --exclude .chef /chef-bcpc-host/ /home/vagrant/chef-bcpc/"
 fi
 
+echo "Building bins"
+$SSH_CMD "cd $BCPC_DIR && ./build_bins.sh"
 echo "Setting up chef server"
-$SSH_CMD "cd $BCPC_DIR && sudo ./setup_chef_server.sh"
+$SSH_CMD "cd $BCPC_DIR && sudo ./setup_chef_server.sh ${CHEF_ENVIRONMENT}"
 echo "Setting up chef cookbooks"
 $SSH_CMD "cd $BCPC_DIR && ./setup_chef_cookbooks.sh ${IP} ${SSH_USER}"
 echo "Setting up chef environment, roles, and uploading cookbooks"

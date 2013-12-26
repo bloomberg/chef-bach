@@ -14,6 +14,7 @@ if [ -n "$PROXY" ]; then
   
   export http_proxy=http://${PROXY}
   export https_proxy=https://${PROXY}
+  export no_proxy="localhost,$(hostname),$(hostname -f),.$(domainname),10.0.100."
   
   # to ignore SSL errors
   export GIT_SSL_NO_VERIFY=true

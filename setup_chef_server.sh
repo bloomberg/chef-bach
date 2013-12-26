@@ -6,49 +6,48 @@
 
 set -e
 
+# Default to Test-Laptop if environmnet not passed in
+ENVIRONMENT="${1-Test-Laptop}"
+
+# We may need the proxy for apt-get later
 if [[ -f ./proxy_setup.sh ]]; then
   . ./proxy_setup.sh
 fi
 
-# needed within build_bins which we call
 if [[ -z "$CURL" ]]; then
-	echo "CURL is not defined"
-	exit
+  echo "CURL is not defined"
+  exit
 fi
 
-if [[ ! -f /etc/apt/sources.list.d/opscode.list ]]; then
-  cp opscode.list /etc/apt/sources.list.d/
-fi
+if [[ ! -f /etc/apt/sources.list.d/bcpc.list ]]; then
+  # Ensure we are set to use the bootstrap server's repo
+  bootstrap_server_key='["override_attributes"]["bcpc"]["bootstrap"]["server"]'
+  binary_server_key='["override_attributes"]["bcpc"]["binary_server_url"]'
+  load_json_frag="import json; print json.load(file('environments/${ENVIRONMENT}.json'))"
+  # return a full URL (e.g. http://127.0.0.1:8080)
+  apt_server=$(python -c "${load_json_frag}$binary_server_key" 2>/dev/null||\
+               (echo -n "http://"; \
+                python -c "${load_json_frag}${bootstrap_server_key}+':8080'"))
+  # create an Apt repo entry
+  echo "deb ${apt_server} /" > /etc/apt/sources.list.d/bcpc.list
+  # update only the BCPC local repo
+  apt-get -o Dir::Etc::SourceList=/etc/apt/sources.list.d/bcpc.list,Dir::Etc::SourceParts= update
+fi 
 
-# When rerunning a bootstrap, the 'apt-get update' gets very slow if
-# the bootstrap node happens to be our apt mirror, so only do this if
-# the package we're after is not installed at all
-#
-# See http://askubuntu.com/questions/44122/upgrade-a-single-package-with-apt-get
-#
-if dpkg -s opscode-keyring 2>/dev/null | grep -q Status.*installed; then
-  echo opscode-keyring is installed
-else 
-  apt-get update
-  apt-get --allow-unauthenticated -y install opscode-keyring
-  apt-get update
-fi
-
-if dpkg -s chef 2>/dev/null | grep -q Status.*installed; then
+if dpkg -s chef 2>/dev/null | grep -q ^Status.*installed && \
+   dpkg -s chef 2>/dev/null | grep -q ^Version.*11; then
   echo chef is installed
 else
-  DEBCONF_DB_FALLBACK=File{$(pwd)/debconf-chef.conf} DEBIAN_FRONTEND=noninteractive apt-get -y --force-yes install chef
+  apt-get -y install chef
 fi
 
-if dpkg -s chef-server 2>/dev/null | grep -q Status.*installed; then
+if dpkg -s chef-server 2>/dev/null | grep -q ^Status.*installed && \
+   dpkg -s chef 2>/dev/null | grep -q ^Version.*11; then
   echo chef-server is installed
 else
-  DEBCONF_DB_FALLBACK=File{$(pwd)/debconf-chef.conf} DEBIAN_FRONTEND=noninteractive apt-get -y --force-yes install chef-server
+  apt-get -y install chef-server
+  chef-server-ctl reconfigure
 fi
-
-
-chmod +r /etc/chef/validation.pem
-chmod +r /etc/chef/webui.pem
 
 # copy our ssh-key to be authorized for root
 if [[ -f $HOME/.ssh/authorized_keys && ! -f /root/.ssh/authorized_keys ]]; then
@@ -57,5 +56,3 @@ if [[ -f $HOME/.ssh/authorized_keys && ! -f /root/.ssh/authorized_keys ]]; then
   fi
   cp $HOME/.ssh/authorized_keys /root/.ssh/authorized_keys
 fi
-
-./build_bins.sh

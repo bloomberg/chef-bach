@@ -7,11 +7,14 @@ VER_KIBANA=d1495fbf6e9c20c707ecd4a77444e1d486a1e7d6
 VER_DIAMOND=d64cc5cbae8bee93ef444e6fa41b4456f89c6e12
 VER_ESPLUGIN=c3635657f4bb5eca0d50afa8545ceb5da8ca223a
 
-# we now define CURL previously in proxy_setup.sh (called from
-# setup_chef_server which calls this script. Default definition is
-# CURL=curl
-if [ -z "$CURL" ]; then
-  CURL=curl
+# The proxy and $CURL will be needed later
+if [[ -f ./proxy_setup.sh ]]; then
+  . ./proxy_setup.sh
+fi
+
+if [[ -z "$CURL" ]]; then
+  echo "CURL is not defined"
+  exit
 fi
 
 DIR=`dirname $0`
@@ -24,6 +27,7 @@ apt-get -y update
 apt-get -y dist-upgrade
 
 # Install tools needed for packaging
+apt-get -y install dpkg-dev
 apt-get -y install git rubygems make pbuilder python-mock python-configobj python-support cdbs python-all-dev python-stdeb libmysqlclient-dev libldap2-dev
 if [ -z `gem list --local fpm | grep fpm | cut -f1 -d" "` ]; then
   gem install fpm --no-ri --no-rdoc
@@ -160,6 +164,18 @@ if [ ! -f zabbix-agent.tar.gz ] || [ ! -f zabbix-server.tar.gz ]; then
     rm -rf zabbix-2.0.7 zabbix-2.0.7.tar.gz
 fi
 FILES="zabbix-agent.tar.gz zabbix-server.tar.gz $FILES"
+
+# Gather the Chef packages and provide a dpkg repo
+opscode_urls="https://opscode-omnibus-packages.s3.amazonaws.com/ubuntu/12.04/x86_64/chef_11.8.0-1.ubuntu.12.04_amd64.deb
+https://opscode-omnibus-packages.s3.amazonaws.com/ubuntu/12.04/x86_64/chef-server_11.0.8-1.ubuntu.12.04_amd64.deb"
+for url in $opscode_urls; do
+    if [ ! -f $(basename $url) ]; then
+        $CURL -L -O $url
+    fi
+done
+
+# generate apt-repo
+dpkg-scanpackages . | gzip -c > Packages.gz
 
 # need the builder gem to generate a gem index
 gem install builder --no-ri --no-rdoc
