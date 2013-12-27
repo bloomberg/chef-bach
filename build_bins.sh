@@ -1,5 +1,6 @@
-#!/bin/bash -e
+#!/bin/bash 
 
+set -e
 set -x
 
 # Define the appropriate version of each binary to grab/build
@@ -22,12 +23,16 @@ DIR=`dirname $0`
 mkdir -p $DIR/bins
 pushd $DIR/bins/
 
+# serve the files if nothing else is doing so already
+netstat -nlt4 | grep -q ':8080' || nohup python -m SimpleHTTPServer 8080 &
+# wait for python to come-up (as we may need it during apt-get update)
+sleep 5
+
 # Get up to date
 apt-get -y update
-apt-get -y dist-upgrade
 
 # Install tools needed for packaging
-apt-get -y install dpkg-dev
+apt-get -y install dpkg-dev apt-utils
 apt-get -y install git rubygems make pbuilder python-mock python-configobj python-support cdbs python-all-dev python-stdeb libmysqlclient-dev libldap2-dev
 if [ -z `gem list --local fpm | grep fpm | cut -f1 -d" "` ]; then
   gem install fpm --no-ri --no-rdoc
@@ -45,17 +50,17 @@ FILES="kibana3.tgz $FILES"
 
 # Grab plugins for fluentd
 for i in elasticsearch tail-multiline tail-ex record-reformer rewrite; do
-    if [ ! -f fluent-plugin-${i}*.gem ]; then
+    if [[ ! -f fluent-plugin-${i}*.gem && ! -f gems/fluent-plugin-${i}*.gem ]]; then
         gem fetch fluent-plugin-${i}
-        ln -s fluent-plugin-${i}-*.gem fluent-plugin-${i}.gem
+        ln -s fluent-plugin-${i}-*.gem fluent-plugin-${i}.gem || true
     fi
     FILES="fluent-plugin-${i}*.gem $FILES"
 done
 
 # Get the Rubygem for zookeeper
-if [ ! -f zookeeper*.gem ]; then
+if [[ ! -f zookeeper*.gem && ! -f gems/zookeeper*.gem ]]; then
     gem fetch zookeeper
-    ln -s zookeeper-*.gem zookeeper.gem
+    ln -s zookeeper-*.gem zookeeper.gem || true
 fi
 FILES="zookeeper*.gem $FILES"
 
@@ -174,8 +179,28 @@ for url in $opscode_urls; do
     fi
 done
 
+# need a key to sign repo
+if [[ ! -f /home/ubuntu/apt_key.sec && ! -f apt_key.pub ]]; then
+  gpg --batch --gen-key << EOF
+    Key-Type: DSA
+    Key-Length: 1024
+    Key-Usage: sign
+    Name-Real: Local BCPC Repo
+    Name-Comment: For dpkg repo signing
+    Expire-Date: 0
+    %pubring apt_key.pub
+    %secring /home/ubuntu/apt_key.sec
+    %commit
+EOF
+  chmod 700 /home/ubuntu/apt_key.sec
+fi
+
 # generate apt-repo
-dpkg-scanpackages . | gzip -c > Packages.gz
+dpkg-scanpackages . > Packages
+gzip -c Packages > Packages.gz
+apt-ftparchive release . > Release
+rm -f Release.gpg
+gpg -abs --keyring ./apt_key.pub --secret-keyring /home/ubuntu/apt_key.sec -o Release.gpg Release
 
 # need the builder gem to generate a gem index
 gem install builder --no-ri --no-rdoc
@@ -187,8 +212,5 @@ gem generate_index --legacy
 #[ -n "$(echo *.gem)" ] && mv *.gem $(ruby -e "print RUBY_VERSION")/gems
 #ln -s $(ruby -e "print RUBY_VERSION")/gems gems
 #( cd $(ruby -e "print RUBY_VERSION"); gem generate_index --legacy )
-
-# serve the files if nothing else is doing so already
-$(netstat -nlt4 | grep -q :8080) || nohup python -m SimpleHTTPServer 8080 &
 
 popd

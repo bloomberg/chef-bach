@@ -5,6 +5,7 @@
 #
 
 set -e
+set -x
 
 # Default to Test-Laptop if environmnet not passed in
 ENVIRONMENT="${1-Test-Laptop}"
@@ -20,16 +21,19 @@ if [[ -z "$CURL" ]]; then
 fi
 
 if [[ ! -f /etc/apt/sources.list.d/bcpc.list ]]; then
-  # Ensure we are set to use the bootstrap server's repo
-  bootstrap_server_key='["override_attributes"]["bcpc"]["bootstrap"]["server"]'
-  binary_server_key='["override_attributes"]["bcpc"]["binary_server_url"]'
-  load_json_frag="import json; print json.load(file('environments/${ENVIRONMENT}.json'))"
-  # return a full URL (e.g. http://127.0.0.1:8080)
-  apt_server=$(python -c "${load_json_frag}$binary_server_key" 2>/dev/null||\
-               (echo -n "http://"; \
-                python -c "${load_json_frag}${bootstrap_server_key}+':8080'"))
+  load_binary_server_info "$ENVIRONMENT"
+
   # create an Apt repo entry
-  echo "deb ${apt_server} /" > /etc/apt/sources.list.d/bcpc.list
+  echo "deb ${binary_server_url} /" > /etc/apt/sources.list.d/bcpc.list
+
+  # add repo key
+  apt-key add bins/apt_key.pub
+
+  # ensure we do not have a proxy set for the local repo
+  proxy_line="Acquire::http::Proxy::${binary_server_host} 'DIRECT';"
+  grep -q "$proxy_line" /etc/apt/apt.conf || \
+    echo "$proxy_line" >> /etc/apt/apt.conf
+
   # update only the BCPC local repo
   apt-get -o Dir::Etc::SourceList=/etc/apt/sources.list.d/bcpc.list,Dir::Etc::SourceParts= update
 fi 

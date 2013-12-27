@@ -76,10 +76,6 @@ d-i     mirror/http/directory string /ubuntu
 d-i     apt-setup/security_host <%= @node[:bcpc][:bootstrap][:mirror] %>
 d-i     apt-setup/security_path string /ubuntu
 <% end %>
-d-i     apt-setup/local0/comment string BCPC
-d-i     apt-setup/local0/repository string \
-          deb <%= get_binary_server_url %> /
-d-i     apt-setup/local0/source boolean false
 d-i     debian-installer/allow_unauthenticated  string false
 d-i     pkgsel/upgrade  select safe-upgrade
 d-i     pkgsel/language-packs   multiselect
