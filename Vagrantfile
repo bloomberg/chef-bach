@@ -10,9 +10,7 @@ $local_mirror = nil
 #$local_mirror = "10.0.100.4"
 
 if $local_mirror.nil?
-  $repos_script = <<EOH
-    echo "deb http://apt.opscode.com precise-0.10 main" > /etc/apt/sources.list.d/opscode.list
-EOH
+  $repos_script = "/bin/true"
 else
   $repos_script = <<EOH
     sed -i s/archive.ubuntu.com/#{$local_mirror}/g /etc/apt/sources.list
