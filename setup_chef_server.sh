@@ -50,6 +50,8 @@ if dpkg -s chef-server 2>/dev/null | grep -q ^Status.*installed && \
   echo chef-server is installed
 else
   apt-get -y install chef-server
+  echo "nginx['enable_non_ssl'] = false" > /etc/chef-server/chef-server.rb
+  echo "nginx['non_ssl_port'] = 4000" >> /etc/chef-server/chef-server.rb
   chef-server-ctl reconfigure
 fi
 
