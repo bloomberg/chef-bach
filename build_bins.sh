@@ -180,7 +180,8 @@ for url in $opscode_urls; do
 done
 
 # need a key to sign repo
-if [[ ! -f /home/ubuntu/apt_key.sec && ! -f apt_key.pub ]]; then
+if [[ ! -f /home/ubuntu/apt_key.sec || ! -f apt_key.pub ]]; then
+  rm -rf /home/ubuntu/apt_key.sec apt_key.pub
   gpg --batch --gen-key << EOF
     Key-Type: DSA
     Key-Length: 1024
