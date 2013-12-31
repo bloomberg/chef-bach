@@ -18,7 +18,7 @@ CHEF_ENVIRONMENT=$2
 # Assume we are running in the chef-bcpc directory
 
 # Are we running under Vagrant?  If so, jump through some extra hoops.
-sudo chef-client -c .chef/knife.rb
+sudo chef-client -E "$CHEF_ENVIRONMENT" -c .chef/knife.rb
 sudo chown $(whoami):root .chef/$(hostname -f).pem
 sudo chmod 550 .chef/$(hostname -f).pem
 
