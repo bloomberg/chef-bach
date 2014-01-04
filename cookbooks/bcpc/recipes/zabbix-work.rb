@@ -106,6 +106,7 @@ end
     home "/var/lib/zabbix"
     user "zabbix"
     minute "0"
+    path "/usr/local/bin:/usr/bin:/bin"
     command "zabbix_sender -c /usr/local/etc/zabbix_agentd.conf --key 'check.#{cc}' --value `check -f timeonly #{cc}`"
   end
 end
