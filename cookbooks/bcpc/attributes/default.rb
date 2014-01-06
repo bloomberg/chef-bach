@@ -132,5 +132,5 @@ default['bcpc']['zabbix']['group'] = "adm"
 
 default[:bcpc][:ports][:apache][:radosgw] = 8080
 default[:bcpc][:ports][:apache][:radosgw_https] = 8443
-default[:bcpc][:ports][:haproxy][:radosgw] = 10080
-default[:bcpc][:ports][:haproxy][:radosgw_https] = 10443
+default[:bcpc][:ports][:haproxy][:radosgw] = 80
+default[:bcpc][:ports][:haproxy][:radosgw_https] = 443
