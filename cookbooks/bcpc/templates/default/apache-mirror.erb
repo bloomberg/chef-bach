@@ -15,16 +15,26 @@
         <Directory /var/www/>
                 Options Indexes FollowSymLinks MultiViews
                 AllowOverride None
-                Order allow,deny
-                allow from all
+                <IfVersion < 2.3>
+                        Order allow,deny
+                        allow from all
+                </IfVersion>
+                <IfVersion > 2.3>
+                        Require all granted
+                </IfVersion>
         </Directory>
 
         ScriptAlias /cgi-bin/ /usr/lib/cgi-bin/
         <Directory "/usr/lib/cgi-bin">
                 AllowOverride None
                 Options +ExecCGI -MultiViews +SymLinksIfOwnerMatch
-                Order allow,deny
-                Allow from all
+                <IfVersion < 2.3>
+                        Order allow,deny
+                        allow from all
+                </IfVersion>
+                <IfVersion > 2.3>
+                        Require all granted
+                </IfVersion>
         </Directory>
 
         ErrorLog ${APACHE_LOG_DIR}/error.log
@@ -38,8 +48,13 @@
     <Directory /var/spool/apt-mirror/mirror/>
         Options Indexes FollowSymLinks MultiViews
         AllowOverride None
-        Order allow,deny
-        allow from all
+        <IfVersion < 2.3>
+                Order allow,deny
+                allow from all
+        </IfVersion>
+        <IfVersion > 2.3>
+                Require all granted
+        </IfVersion>
     </Directory>
     Alias /chef /var/spool/apt-mirror/mirror/apt.opscode.com
     Alias /ceph-dumpling /var/spool/apt-mirror/mirror/ceph.com/debian-dumpling
