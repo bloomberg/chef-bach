@@ -110,3 +110,9 @@ end
     command "zabbix_sender -c /usr/local/etc/zabbix_agentd.conf --key 'check.#{cc}' --value `check -f timeonly #{cc}`"
   end
 end
+
+cookbook_file "/usr/local/bin/zabbix_discover_buckets" do
+  source "zabbix_discover_buckets"
+  owner "root"
+  mode "00755"
+end

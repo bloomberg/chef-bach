@@ -146,4 +146,7 @@ if [ ! -f zabbix-agent.tar.gz ] || [ ! -f zabbix-server.tar.gz ]; then
 fi
 FILES="zabbix-agent.tar.gz zabbix-server.tar.gz $FILES"
 
+# Get some python libs 
+fpm -s python -t deb requests-aws
+
 popd
