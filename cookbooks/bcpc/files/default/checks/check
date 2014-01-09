@@ -63,12 +63,12 @@ def run_test(stack_test, config):
       result["value"] = "ERROR"
       result["message"] = "Test exited with code (%d)" % (result["rcode"])
 
-   os.remove(fname) # if function is throwing, prob want the yml to debugger
+   os.remove(fname) # if function is throwing, prob want the yml to debug
    return result
 
 
 class ClusterCheck(object):
-    def __init__(self, name):
+    def __init__(self, name, debug=False):
         self.name = name 
 
         self.config = copy.deepcopy(default_config)
@@ -88,7 +88,10 @@ class ClusterCheck(object):
         if not os.path.exists(bin_path):
             raise Exception("No such check: %s " % bin_path )        
         self.bin_path = bin_path
-
+        
+        if debug:
+           self.config["debug"] = True
+        
     def _style_yaml(self, result):
         import yaml
         return yaml.dump(result)
@@ -171,6 +174,9 @@ if __name__ == '__main__':
     parser.add_option("-f", "--format", dest="format", type="choice",
                       choices=["table", "timeonly", "raw", "json"], default="raw",
                       help="the report format")
+    parser.add_option("--debug", dest="debug", action="store_true",
+                      default=False,
+                      help="Allow expcetions")
     (options, args) = parser.parse_args()
 
     reporter = "report_%s" % options.format
@@ -181,7 +187,7 @@ if __name__ == '__main__':
        bin_path = os.environ.get("BCPC_CHECK_BIN", "/usr/local/bin/checks")
        args = [f for f in os.listdir(bin_path) if f[0] not in [".", "#"]]
 
-    results = [ ClusterCheck(c).run() for c in args]
+    results = [ ClusterCheck(c, debug=options.debug).run() for c in args]
     globals()[reporter](results)
         
 
