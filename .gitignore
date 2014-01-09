@@ -10,3 +10,4 @@ cookbooks/ubuntu/
 cookbooks/yum/
 environments/*
 .*.sw*
+*~
