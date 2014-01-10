@@ -30,8 +30,7 @@
         "pxe_interface" : "eth1",
         "server" : "10.0.100.3",
         "dhcp_subnet" : "10.0.100.0",
-        "dhcp_range" : "10.0.100.14 10.0.100.250",
-        "proxy" : "http://proxy.bloomberg.com:81"
+        "dhcp_range" : "10.0.100.14 10.0.100.250"
       },
       "dns_servers" : ["10.16.23.33", "10.16.23.17", "172.20.58.129"],
       "hadoop" : {
