@@ -273,10 +273,12 @@ done
 
 gem generate_index --legacy
 ( pushd ${RUBY18_ver} &&
+  RUBYLIB=`pwd`/../${RUBY18_ver}_gem_compile/lib ../${RUBY18_ver}_gem_compile/bin/$GEM18 install builder --no-ri --no-rdoc &&
   RUBYLIB=`pwd`/../${RUBY18_ver}_gem_compile/lib ../${RUBY18_ver}_gem_compile/bin/$GEM18 generate_index --legacy &&
   popd
 )
 ( pushd ${RUBY19_ver} &&
+  RUBYLIB=`pwd`/../${RUBY19_ver}_gem_compile/lib ../${RUBY19_ver}_gem_compile/bin/$GEM19 install builder --no-ri --no-rdoc &&
   RUBYLIB=`pwd`/../${RUBY19_ver}_gem_compile/lib ../${RUBY19_ver}_gem_compile/bin/$GEM19 generate_index --legacy &&
   popd
 )
