@@ -119,7 +119,7 @@ ruby_block "initialize-radosgw-test-user" do
     make_config('radosgw-test-user', "tester")
     make_config('radosgw-test-access-key', secure_password_alphanum_upper(20))
     make_config('radosgw-test-secret-key', secure_password(40))
-    rgw_admin = JSON.parse(%x[radosgw-admin user create --display-name="Tester" --uid="tester" --max-buckets=3 --access_key=#{get_config('radosgw-test-access-key')} --secret=#{get_config('radosgw-test-secret-key')}])
+    rgw_admin = JSON.parse(%x[radosgw-admin user create --display-name="Tester" --uid="tester" --max-buckets=3 --access_key=#{get_config('radosgw-test-access-key')} --secret=#{get_config('radosgw-test-secret-key')} --caps="usage=read; user=read; bucket=read;" ])
   end
   not_if "radosgw-admin user info --uid='tester'"
 end

@@ -12,7 +12,7 @@ Listen <%="#{node[:bcpc][:floating][:ip]}:#{node[:bcpc][:ports][:apache][:radosg
 Listen <%="#{node[:bcpc][:metadata][:ip]}:#{node[:bcpc][:ports][:apache][:radosgw]}"%>
 Listen <%="#{node[:bcpc][:metadata][:ip]}:#{node[:bcpc][:ports][:apache][:radosgw_https]}"%>
 
-FastCgiExternalServer /var/www/s3gw.fcgi -socket /var/lib/ceph/radosgw/rgw_fcgi.sock
+FastCgiExternalServer /var/www/s3gw.fcgi -socket /var/lib/ceph/radosgw/rgw_fcgi.sock -idle-timeout 60
 
 <VirtualHost  <%="#{node[:bcpc][:floating][:ip]}:#{node[:bcpc][:ports][:apache][:radosgw]}"%> >
 	    ServerName <%="s3.#{node[:bcpc][:domain_name]}"%>

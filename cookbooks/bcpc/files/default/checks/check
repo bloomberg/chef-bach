@@ -6,6 +6,10 @@ import subprocess
 import time
 import uuid 
 import copy
+import stat
+import os
+
+
 default_config = { 
    "timeout" : 120, }
 
@@ -14,8 +18,11 @@ def run_test(stack_test, config):
    """ Run test. At some point this will become threaded to allow
    many tests to run //.
    """
+   
+   
    fname = os.path.join("/tmp", str(uuid.uuid1()))
-   with open(fname, "w") as fout :
+   mode = stat.S_IRUSR | stat.S_IWUSR  
+   with open(fname, "w", mode) as fout :
        yaml.dump(config, fout)
 
    start = time.time()
@@ -56,11 +63,12 @@ def run_test(stack_test, config):
       result["value"] = "ERROR"
       result["message"] = "Test exited with code (%d)" % (result["rcode"])
 
+   os.remove(fname) # if function is throwing, prob want the yml to debug
    return result
 
 
 class ClusterCheck(object):
-    def __init__(self, name):
+    def __init__(self, name, debug=False):
         self.name = name 
 
         self.config = copy.deepcopy(default_config)
@@ -80,7 +88,10 @@ class ClusterCheck(object):
         if not os.path.exists(bin_path):
             raise Exception("No such check: %s " % bin_path )        
         self.bin_path = bin_path
-
+        
+        if debug:
+           self.config["debug"] = True
+        
     def _style_yaml(self, result):
         import yaml
         return yaml.dump(result)
@@ -163,16 +174,20 @@ if __name__ == '__main__':
     parser.add_option("-f", "--format", dest="format", type="choice",
                       choices=["table", "timeonly", "raw", "json"], default="raw",
                       help="the report format")
+    parser.add_option("--debug", dest="debug", action="store_true",
+                      default=False,
+                      help="Allow expcetions")
     (options, args) = parser.parse_args()
 
     reporter = "report_%s" % options.format
     if reporter not in globals():
        raise Exception("Whoops! reporter %s not defined" % reporter)
 
-    if not args:
-        print "Please supply at least one check"
-        sys.exit(1)
-    results = [ ClusterCheck(c).run() for c in args]
+    if not args or "all" in args:
+       bin_path = os.environ.get("BCPC_CHECK_BIN", "/usr/local/bin/checks")
+       args = [f for f in os.listdir(bin_path) if f[0] not in [".", "#"]]
+
+    results = [ ClusterCheck(c, debug=options.debug).run() for c in args]
     globals()[reporter](results)
         
 
