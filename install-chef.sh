@@ -12,6 +12,5 @@ BINARY_SERVER_URL=${2:?"Need a Binary Server URL"}
 grep -q $BINARY_SERVER_HOST /etc/apt/apt.conf || echo "Acquire::http::Proxy::$BINARY_SERVER_HOST 'DIRECT';" >> /etc/apt/apt.conf
 echo "deb $BINARY_SERVER_URL /" > /etc/apt/sources.list.d/bcpc.list
 wget --no-proxy -O - ${BINARY_SERVER_URL}/apt_key.pub | apt-key add -
-# update only the BCPC repo
-apt-get -o Dir::Etc::SourceList=/etc/apt/sources.list.d/bcpc.list,Dir::Etc::SourceParts= update
+apt-get update
 apt-get install -y chef

@@ -51,14 +51,12 @@ remote_file "/tmp/elasticsearch-plugins.tgz" do
     source "#{get_binary_server_url}/elasticsearch-plugins.tgz"
     owner "root"
     mode 00444
-    not_if { File.exists?("/usr/share/elasticsearch/plugins/head") }
+    not_if { Dir.exists?("/usr/share/elasticsearch/plugins/head") }
 end
 
 bash "install-elasticsearch-plugins" do
-    code <<-EOH
-        tar zxf /tmp/elasticsearch-plugins.tgz -C /usr/share/elasticsearch/plugins/
-    EOH
-    not_if { File.exists?("/usr/share/elasticsearch/plugins/head") }
+    code "tar zxf /tmp/elasticsearch-plugins.tgz -C /usr/share/elasticsearch/plugins/ && rm -rf /tmp/elasticsearch-plugins.tgz"
+    not_if { Dir.exists?("/usr/share/elasticsearch/plugins/head") }
 end
 
 package "curl" do
