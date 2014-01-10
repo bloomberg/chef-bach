@@ -83,12 +83,6 @@ def get_ceph_osd_nodes
 	return results
 end
 
-def get_head_nodes
-	results = search(:node, "role:BCPC-Headnode AND chef_environment:#{node.chef_environment}")
-	results.map!{ |x| x['hostname'] == node[:hostname] ? node : x }
-	return (results == []) ? [node] : results
-end
-
 def get_cached_head_node_names
   headnodes = []
   begin 
