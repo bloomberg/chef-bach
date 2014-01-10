@@ -1,20 +1,25 @@
 #!/bin/bash
-#
-# 
-#
-#set -x
-IP="$1"
-ENVIRONMENT="$2"
+
+set -e
+
+IP="${1:?"Need the IP of a machine to install"}"
+ENVIRONMENT="${2:?"Need the Chef environment to use"}"
+
 echo "initial configuration of $IP"
+
+if [[ -f ./proxy_setup.sh ]]; then
+  . ./proxy_setup.sh
+fi
+
+load_binary_server_info $ENVIRONMENT
 
 SCPCMD="./nodescp    $ENVIRONMENT $IP"
 SSHCMD="./nodessh.sh $ENVIRONMENT $IP"
 
 echo "copy files..."
-$SCPCMD zap-ceph-disks.sh ubuntu@$IP:/home/ubuntu
-$SCPCMD install-chef.sh   ubuntu@$IP:/home/ubuntu
-$SCPCMD finish-worker.sh  ubuntu@$IP:/home/ubuntu
-$SCPCMD finish-head.sh    ubuntu@$IP:/home/ubuntu
+for f in zap-ceph-disks.sh install-chef.sh finish-worker.sh finish-head.sh; do
+  $SCPCMD $f ubuntu@$IP:/home/ubuntu || (echo "copying $f failed" > /dev/stderr; exit 1)
+done
 
 if [[ -n "$(source proxy_setup.sh >/dev/null; echo $PROXY)" ]]; then
   PROXY=$(source proxy_setup.sh >/dev/null; echo $PROXY)
@@ -23,7 +28,7 @@ if [[ -n "$(source proxy_setup.sh >/dev/null; echo $PROXY)" ]]; then
 fi
 
 echo "setup chef"
-$SSHCMD  "/home/ubuntu/install-chef.sh" sudo
+$SSHCMD  "/home/ubuntu/install-chef.sh $binary_server_host $binary_server_url" sudo
 
 echo "zap disks"
 $SSHCMD "/home/ubuntu/zap-ceph-disks.sh" sudo

@@ -31,8 +31,6 @@ end
 %w{python-whisper_0.9.10_all.deb python-carbon_0.9.10_all.deb python-graphite-web_0.9.10_all.deb}.each do |pkg|
     # split package name on the first underscore to get the package name for dpkg to look-up
     package "#{pkg.split('_',2)[0]}" do
-        source "#{get_binary_server_url}/#{pkg}"
-        provider Chef::Provider::Package::Dpkg
         action :install
     end
 end

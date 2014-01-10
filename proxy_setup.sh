@@ -6,7 +6,7 @@
 
 # sample setup using a local squid cache at 10.0.1.2 - the hypervisor
 # change to reflect your real proxy info
-# export PROXY="proxy.example.com:80"
+#export PROXY="proxy.example.com:80"
 
 export CURL='curl'
 if [ -n "$PROXY" ]; then

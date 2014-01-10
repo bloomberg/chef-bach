@@ -31,9 +31,9 @@
         "server" : "10.0.100.3",
         "dhcp_subnet" : "10.0.100.0",
         "dhcp_range" : "10.0.100.14 10.0.100.250",
-        "proxy" : "http://199.172.169.11:80"
+        "proxy" : "http://proxy.bloomberg.com:81"
       },
-      "dns_servers" : [ "160.43.8.240", "160.43.12.249" ],
+      "dns_servers" : ["10.16.23.33", "10.16.23.17", "172.20.58.129"],
       "hadoop" : {
         "min_node_count" : 2,
         "distribution" : { 

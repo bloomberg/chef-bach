@@ -26,8 +26,6 @@ include_recipe "bcpc::default"
 end
 
 package "diamond" do
-    source "#{get_binary_server_url}/diamond.deb"
-    provider Chef::Provider::Package::Dpkg
     action :install
 end
 
@@ -41,7 +39,7 @@ if node[:bcpc][:virt_type] == "kvm"
 end
 
 python_pip "pyrabbit" do
-    options "#{get_binary_server_url}/pyrabbit-1.0.1.tar.gz"
+    options "--index #{get_binary_server_url}/python/simple"
     action :install
 end
 

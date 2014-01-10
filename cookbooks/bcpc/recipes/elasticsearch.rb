@@ -24,8 +24,6 @@ package "openjdk-7-jre-headless" do
 end
 
 package "elasticsearch" do
-    source "#{get_binary_server_url}/elasticsearch-0.90.3.deb"
-    provider Chef::Provider::Package::Dpkg
     action :install
 end
 
@@ -53,14 +51,14 @@ remote_file "/tmp/elasticsearch-plugins.tgz" do
     source "#{get_binary_server_url}/elasticsearch-plugins.tgz"
     owner "root"
     mode 00444
-    not_if File.exist? "/usr/share/elasticsearch/plugins/head"
+    not_if { File.exists?("/usr/share/elasticsearch/plugins/head") }
 end
 
 bash "install-elasticsearch-plugins" do
     code <<-EOH
         tar zxf /tmp/elasticsearch-plugins.tgz -C /usr/share/elasticsearch/plugins/
     EOH
-    not_if File.exist? "/usr/share/elasticsearch/plugins/head"
+    not_if { File.exists?("/usr/share/elasticsearch/plugins/head") }
 end
 
 package "curl" do

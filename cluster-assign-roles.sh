@@ -17,6 +17,7 @@
 #   useful for nodes that have been completed
 
 set -e
+
 if [[ -z "$1" ]]; then
     echo "Usage : $0 environment (hostname)"
     exit 1
@@ -29,7 +30,6 @@ if [[ ! -f "environments/$ENVIRONMENT.json" ]]; then
     echo "Error: Couldn't find '$ENVIRONMENT.json'. Did you forget to pass the environment as first param?"
     exit 1
 fi
-
 
 while read HOST MACADDR IPADDR ILOIPADDR DOMAIN ROLE; do
     if [[ -z "$EXACTHOST" || "$EXACTHOST" = "$HOST" || "$EXACTHOST" = "$IPADDR" || "$EXACTHOST" = "heads" && "$ROLE" = "head" || "$EXACTHOST" = "workers" && "$ROLE" = "work" ]]; then
@@ -49,16 +49,16 @@ for HEAD in $HEADS; do
     MATCH=$HEAD
     echo "About to bootstrap head node $HEAD..."
     ./chefit.sh $HEAD $ENVIRONMENT
-    echo $PASSWD | sudo knife bootstrap -E $ENVIRONMENT -r 'role[BCPC-Headnode]' $HEAD -x ubuntu  -P $PASSWD --sudo
     SSHCMD="./nodessh.sh $ENVIRONMENT $HEAD"
+    echo $PASSWD | sudo knife bootstrap -E $ENVIRONMENT -r 'role[BCPC-Headnode]' $HEAD -x ubuntu  -P $PASSWD -u admin -k /etc/chef-server/admin.pem --sudo
     $SSHCMD "/home/ubuntu/finish-head.sh" sudo	
 done
 for WORKER in $WORKERS; do
     MATCH=$WORKER
     echo "About to bootstrap worker worker $WORKER..."
     ./chefit.sh $WORKER $ENVIRONMENT
-    echo $PASSWD | sudo knife bootstrap -E $ENVIRONMENT -r 'role[BCPC-Worknode]' $WORKER -x ubuntu -P $PASSWD --sudo
     SSHCMD="./nodessh.sh $ENVIRONMENT $WORKER"
+    echo $PASSWD | sudo knife bootstrap -E $ENVIRONMENT -r 'role[BCPC-Worknode]' $WORKER -x ubuntu -P $PASSWD --sudo
     $SSHCMD "/home/ubuntu/finish-worker.sh" sudo	
 done
 if [[ -z "$MATCH" ]]; then

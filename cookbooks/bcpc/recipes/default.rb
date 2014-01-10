@@ -19,7 +19,16 @@
 
 require 'ipaddr'
 
-node.set['bcpc']['management']['ip'] = node['network']['interfaces'][node['bcpc']['management']['interface']]['addresses'].select {|k,v| v['family'] == "inet" and k != node['bcpc']['management']['vip'] }.first[0]
+mgmt_cidr = IPAddr.new(node['bcpc']['management']['cidr'])
+
+ips=Hash.new()
+ifs=node[:network][:interfaces].keys
+ifs.map{|a| ips.update(node[:network][:interfaces][a][:addresses])}
+
+# select the first IP address which is on the management network
+node.set['bcpc']['management']['ip'] = ips.select {|k,v| v['family'] == "inet" and
+                                                   k != node['bcpc']['management']['vip'] and
+                                                   mgmt_cidr===k}.first[0]
 
 mgmt_bitlen = (node['bcpc']['management']['cidr'].match /\d+\.\d+\.\d+\.\d+\/(\d+)/)[1].to_i
 mgmt_hostaddr = IPAddr.new(node['bcpc']['management']['ip'])<<mgmt_bitlen>>mgmt_bitlen
@@ -50,6 +59,7 @@ gem_path = Pathname.new(Gem.ruby).dirname.join("gem").to_s
 gem_package "zookeeper" do
     gem_binary gem_path
     options "--no-http-proxy --clear-sources --source #{get_binary_server_url}"
+    # workaround for CHEF-3912 is to include versions from build_bins.sh
     version "1.4.7"
     action :nothing
 end.run_action(:install)

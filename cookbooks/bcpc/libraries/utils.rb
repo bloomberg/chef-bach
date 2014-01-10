@@ -162,6 +162,14 @@ def ceph_keygen()
     Base64.encode64(key).strip
 end
 
+def float_host(*args)
+  "f-" + args.join('.')
+end
+
+def storage_host(*args)
+  "s-" + args.join('.')
+end
+
 # requires cidr in form '1.2.3.0/24', where 1.2.3.0 is a dotted quad ip4 address 
 # and 24 is a number of netmask bits (e.g. 8, 16, 24)
 def calc_reverse_dns_zone(cidr)

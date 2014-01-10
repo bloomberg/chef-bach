@@ -125,13 +125,11 @@ def secure_password
 end
 
 def float_host(*args)
-  #XXX "f-" + args.join('.')
-  args.join('.')
+  "f-" + args.join('.')
 end
 
 def storage_host(*args)
-  #XXX "s-" + args.join('.')
-  args.join('.')
+  "s-" + args.join('.')
 end
 
 def zk_formatted?

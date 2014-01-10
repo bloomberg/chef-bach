@@ -22,6 +22,7 @@ DIR=`dirname $0`
 
 mkdir -p $DIR/bins
 pushd $DIR/bins/
+mkdir -p python
 
 # serve the files if nothing else is doing so already
 netstat -nlt4 | grep -q ':8080' || nohup python -m SimpleHTTPServer 8080 &
@@ -32,10 +33,34 @@ sleep 5
 apt-get -y update
 
 # Install tools needed for packaging
-apt-get -y install dpkg-dev apt-utils haveged
-apt-get -y install git rubygems make pbuilder python-mock python-configobj python-support cdbs python-all-dev python-stdeb libmysqlclient-dev libldap2-dev
+apt-get -y install git rubygems make pbuilder python-mock python-configobj python-support cdbs python-all-dev python-stdeb libmysqlclient-dev libldap2-dev ruby-dev gcc patch rake ruby1.9.3 ruby1.9.1-dev python-pip python-setuptools dpkg-dev apt-utils haveged
 if [ -z `gem list --local fpm | grep fpm | cut -f1 -d" "` ]; then
   gem install fpm --no-ri --no-rdoc
+fi
+
+RUBY19=ruby1.9.3
+RUBY18=ruby1.8
+GEM19=gem1.9.1
+GEM18=gem1.8
+RUBY19_ver=$($RUBY19 -e "print RUBY_VERSION")
+RUBY18_ver=$(ruby -e "print RUBY_VERSION")
+
+# need to use gem-compile for gems with native code
+# provide a Ruby 1.9.1 and Ruby 1.8 gem-compile capable RubyGem
+if ! ${RUBY19_ver}_gem_compile/bin/$GEM19 list --local gem-compiler || \
+   ! ${RUBY18_ver}_gem_compile/bin/$GEM18 list --local gem-compiler; then
+  # need a RubyGems > 1.8.25 for gem-compile (not available via apt-get)
+  $CURL -O http://production.cf.rubygems.org/rubygems/rubygems-update-1.8.29.gem
+  gem unpack rubygems-update-1.8.29.gem
+  pushd rubygems*
+  $RUBY18 setup.rb --prefix `pwd`/../${RUBY18_ver}_gem_compile
+  $RUBY19 setup.rb --prefix `pwd`/../${RUBY19_ver}_gem_compile
+  popd
+  export RUBYLIB=`pwd`/${RUBY18_ver}_gem_compile/lib
+  `pwd`/${RUBY18_ver}_gem_compile/bin/$GEM18 install gem-compile
+  export RUBYLIB=`pwd`/${RUBY19_ver}_gem_compile/lib
+  `pwd`/${RUBY19_ver}_gem_compile/bin/$GEM19 install gem-compile
+  unset RUBYLIB
 fi
 
 # Build kibana3 installable bundle
@@ -63,7 +88,6 @@ if [[ ! -f zookeeper*.gem && ! -f gems/zookeeper*.gem ]]; then
     ln -s zookeeper-*.gem zookeeper.gem || true
 fi
 FILES="zookeeper*.gem $FILES"
-
 
 # Fetch the cirros image for testing
 if [ ! -f cirros-0.3.0-x86_64-disk.img ]; then
@@ -120,9 +144,9 @@ fi
 FILES="elasticsearch-plugins.tgz $FILES"
 
 # Fetch pyrabbit
-if [ ! -f pyrabbit-1.0.1.tar.gz ]; then
-    while ! $(file pyrabbit-1.0.1.tar.gz | grep -q 'gzip compressed data'); do
-        $CURL -O -L http://pypi.python.org/packages/source/p/pyrabbit/pyrabbit-1.0.1.tar.gz
+if [ ! -f python/pyrabbit-1.0.1.tar.gz ]; then
+    while ! $(file python/pyrabbit-1.0.1.tar.gz | grep -q 'gzip compressed data'); do
+        (cd python && $CURL -O -L http://pypi.python.org/packages/source/p/pyrabbit/pyrabbit-1.0.1.tar.gz)
     done
 fi
 FILES="pyrabbit-1.0.1.tar.gz $FILES"
@@ -196,6 +220,7 @@ EOF
   chmod 700 /home/ubuntu/apt_key.sec
 fi
 
+###################
 # generate apt-repo
 dpkg-scanpackages . > Packages
 gzip -c Packages > Packages.gz
@@ -203,15 +228,51 @@ apt-ftparchive release . > Release
 rm -f Release.gpg
 gpg -abs --keyring ./apt_key.pub --secret-keyring /home/ubuntu/apt_key.sec -o Release.gpg Release
 
-# need the builder gem to generate a gem index
-gem install builder --no-ri --no-rdoc
+####################
+# generate Pypi repo
+pip install setuptools --no-use-wheel --upgrade
+pip install pip2pi
+dir2pi python
 
+#########################
+# generate rubygems repos
+
+# need the builder gem to generate a gem index
+RUBYLIB=`pwd`/${RUBY19_ver}_gem_compile/lib `pwd`/${RUBY19_ver}_gem_compile/bin/$GEM19 install builder --no-ri --no-rdoc
+RUBYLIB=`pwd`/${RUBY18_ver}_gem_compile/lib `pwd`/${RUBY18_ver}_gem_compile/bin/$GEM18 install builder --no-ri --no-rdoc
+
+# place all gems into the server normally
 [ ! -d gems ] && mkdir gems
 [ -n "$(echo *.gem)" ] && mv *.gem gems
+
+# compile gems for specific Ruby versions
+[ ! -d ${RUBY19_ver}/gems ] && mkdir -p ${RUBY19_ver}/gems
+[ ! -d ${RUBY18_ver}/gems ] && mkdir -p ${RUBY18_ver}/gems
+
+# copy & compile gems which need compilation
+for g in zookeeper-1.4.7; do
+  [ -f "${RUBY18_ver}/gems/${g}.gem" ] && [ -f "${RUBY19_ver}/gems/${g}.gem" ] && continue
+  export RUBYLIB=`pwd`/${RUBY18_ver}_gem_compile/lib
+  pushd ${RUBY18_ver}/gems
+  cp ../../gems/${g}.gem .
+  ../../${RUBY18_ver}_gem_compile/bin/$GEM18 compile ${g}.gem
+  popd
+  export RUBYLIB=`pwd`/${RUBY19_ver}_gem_compile/lib
+  pushd ${RUBY19_ver}/gems
+  cp ../../gems/${g}.gem .
+  ../../${RUBY19_ver}_gem_compile/bin/$GEM19 compile ${g}.gem
+  popd
+  unset RUBYLIB
+done
+
 gem generate_index --legacy
-#[ ! -d gems ] && mkdir -p $(ruby -e "print RUBY_VERSION")/gems
-#[ -n "$(echo *.gem)" ] && mv *.gem $(ruby -e "print RUBY_VERSION")/gems
-#ln -s $(ruby -e "print RUBY_VERSION")/gems gems
-#( cd $(ruby -e "print RUBY_VERSION"); gem generate_index --legacy )
+( pushd ${RUBY18_ver} &&
+  RUBYLIB=`pwd`/../${RUBY18_ver}_gem_compile/lib ../${RUBY18_ver}_gem_compile/bin/$GEM18 generate_index --legacy &&
+  popd
+)
+( pushd ${RUBY19_ver} &&
+  RUBYLIB=`pwd`/../${RUBY19_ver}_gem_compile/lib ../${RUBY19_ver}_gem_compile/bin/$GEM19 generate_index --legacy &&
+  popd
+)
 
 popd
