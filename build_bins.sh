@@ -230,16 +230,22 @@ gpg -abs --keyring ./apt_key.pub --secret-keyring /home/ubuntu/apt_key.sec -o Re
 
 ####################
 # generate Pypi repo
+
+# not sure why but the pip2pi will bail out with:
+# Wheel installs require setuptools >= 0.8 for dist-info support.
+# can then follow http://askubuntu.com/questions/399446
+# but can't upgrade setuptools first as:
+# "/usr/bin/pip install: error: no such option: --no-use-wheel"
+pip install pip2pi || /bin/true
 pip install setuptools --no-use-wheel --upgrade
-pip install pip2pi
+pip install pip2pi 
 dir2pi python
 
 #########################
 # generate rubygems repos
 
 # need the builder gem to generate a gem index
-RUBYLIB=`pwd`/${RUBY19_ver}_gem_compile/lib `pwd`/${RUBY19_ver}_gem_compile/bin/$GEM19 install builder --no-ri --no-rdoc
-RUBYLIB=`pwd`/${RUBY18_ver}_gem_compile/lib `pwd`/${RUBY18_ver}_gem_compile/bin/$GEM18 install builder --no-ri --no-rdoc
+gem install builder --no-ri --no-rdoc
 
 # place all gems into the server normally
 [ ! -d gems ] && mkdir gems
