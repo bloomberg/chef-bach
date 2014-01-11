@@ -171,6 +171,12 @@ if [ ! -f python-carbon_0.9.10_all.deb ] || [ ! -f python-whisper_0.9.10_all.deb
 fi
 FILES="python-carbon_0.9.10_all.deb python-whisper_0.9.10_all.deb python-graphite-web_0.9.10_all.deb $FILES"
 
+# Download Python requests-aws for Zabbix monitoring
+if [ ! -f python-requests-aws_0.1.5_all.deb ]; then
+    fpm -s python -t deb -v 0.1.5 requests-aws
+fi
+FILES="python-requests-aws_0.1.5_all.deb $FILES"
+
 # Build the zabbix packages
 if [ ! -f zabbix-agent.tar.gz ] || [ ! -f zabbix-server.tar.gz ]; then
     $CURL -L -O http://sourceforge.net/projects/zabbix/files/ZABBIX%20Latest%20Stable/2.0.7/zabbix-2.0.7.tar.gz
