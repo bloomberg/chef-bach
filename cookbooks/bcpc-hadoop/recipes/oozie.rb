@@ -41,7 +41,7 @@ ruby_block "oozie-database-creation" do
   end
 end
 
-directory "/etc/oozie/conf.bcpc/action-conf" do
+directory "/etc/oozie/conf.#{node.chef_environment}/action-conf" do
   owner "root"
   group "root"
   mode 00755
@@ -49,7 +49,7 @@ directory "/etc/oozie/conf.bcpc/action-conf" do
   recursive true
 end
 
-directory "/etc/oozie/conf.bcpc/hadoop-conf" do
+directory "/etc/oozie/conf.#{node.chef_environment}/hadoop-conf" do
   owner "root"
   group "root"
   mode 00755
@@ -57,15 +57,15 @@ directory "/etc/oozie/conf.bcpc/hadoop-conf" do
   recursive true
 end
 
-link "/etc/oozie/conf.bcpc/hadoop-conf/core-site.xml" do
-  to "/etc/hadoop/conf.bcpc/core-site.xml"
+link "/etc/oozie/conf.#{node.chef_environment}/hadoop-conf/core-site.xml" do
+  to "/etc/hadoop/conf.#{node.chef_environment}/core-site.xml"
 end
 
-link "/etc/oozie/conf.bcpc/hadoop-conf/hdfs-site.xml" do
-  to "/etc/hadoop/conf.bcpc/hdfs-site.xml"
+link "/etc/oozie/conf.#{node.chef_environment}/hadoop-conf/hdfs-site.xml" do
+  to "/etc/hadoop/conf.#{node.chef_environment}/hdfs-site.xml"
 end
 
-template "/etc/oozie/conf.bcpc/action-conf/hive.xml" do
+template "/etc/oozie/conf.#{node.chef_environment}/action-conf/hive.xml" do
   mode 0644
   source "ooz_action_hive.xml.erb"
 end
