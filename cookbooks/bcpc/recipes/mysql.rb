@@ -77,7 +77,7 @@ end
 bash "initialize-db" do
     code "mysql_install_db --defaults-file=/etc/mysql/my.cnf"
     user "mysql"
-    not_if { get_mysql_nodes.length > 2 or Dir.entries("/var/lib/mysql/mysql/").length > 2 }
+    not_if { get_mysql_nodes.length >= 2 or Dir.entries("/var/lib/mysql/mysql/").length > 2 }
 end
 
 template "/etc/mysql/conf.d/wsrep.cnf" do
@@ -94,7 +94,7 @@ template "/etc/mysql/conf.d/wsrep.cnf" do
     variables( :seed => seed,
                :max_connections => [get_head_nodes.length*50+get_all_nodes.length*5, 200].max,
                :servers => results )
-    notifies :reload, "service[mysql]", :delayed
+    notifies :restart, "service[mysql]", :immediate
 end
 
 bash "remove-bare-gcomm" do

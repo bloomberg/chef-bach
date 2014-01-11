@@ -196,7 +196,7 @@ end
 bash "routing-management" do
     user "root"
     code "echo '1 mgmt' >> /etc/iproute2/rt_tables"
-#    not_if "grep -e '^1 mgmt' /etc/iproute2/rt_tables"
+    not_if "grep -e '^1 mgmt' /etc/iproute2/rt_tables"
 end
 
 bash "routing-storage" do
