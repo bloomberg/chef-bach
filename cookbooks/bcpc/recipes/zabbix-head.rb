@@ -202,16 +202,7 @@ end
   end
 end
 
-cookbook_file "/tmp/python-requests-aws_0.1.5_all.deb" do
-    source "bins/python-requests-aws_0.1.5_all.deb"
-    owner "root"
-    mode 00444
-end
-
-package "requests-aws" do
-    provider Chef::Provider::Package::Dpkg
-    source "/tmp/python-requests-aws_0.1.5_all.deb"
-    action :install
+package "python-requests-aws" do
 end
 
 template "/usr/local/bin/zabbix_bucket_stats" do
