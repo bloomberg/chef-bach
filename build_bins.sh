@@ -237,6 +237,9 @@ gpg -abs --keyring ./apt_key.pub --secret-keyring /home/ubuntu/apt_key.sec -o Re
 # but can't upgrade setuptools first as:
 # "/usr/bin/pip install: error: no such option: --no-use-wheel"
 pip install pip2pi || /bin/true
+# have been hitting issue of:
+# ./build_bins.sh: line 240: /usr/bin/pip: No such file or directory
+sleep 5
 pip install setuptools --no-use-wheel --upgrade
 pip install pip2pi 
 dir2pi python
