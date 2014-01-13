@@ -12,6 +12,7 @@ if [[ -f ./proxy_setup.sh ]]; then
 fi
 
 load_binary_server_info $ENVIRONMENT
+load_chef_server_ip
 
 SCPCMD="./nodescp    $ENVIRONMENT $IP"
 SSHCMD="./nodessh.sh $ENVIRONMENT $IP"
@@ -28,7 +29,7 @@ if [[ -n "$(source proxy_setup.sh >/dev/null; echo $PROXY)" ]]; then
 fi
 
 echo "setup chef"
-$SSHCMD  "/home/ubuntu/install-chef.sh $binary_server_host $binary_server_url" sudo
+$SSHCMD  "/home/ubuntu/install-chef.sh $binary_server_host $binary_server_url $chef_server_ip `hostname`" sudo
 
 echo "zap disks"
 $SSHCMD "/home/ubuntu/zap-ceph-disks.sh" sudo

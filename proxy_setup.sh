@@ -6,7 +6,7 @@
 
 # sample setup using a local squid cache at 10.0.1.2 - the hypervisor
 # change to reflect your real proxy info
-#export PROXY="proxy.example.com:80"
+export PROXY="proxy.bloomberg.com:81"
 
 export CURL='curl'
 if [ -n "$PROXY" ]; then
@@ -41,4 +41,18 @@ function load_binary_server_info {
     (echo -n "http://"; python -c "${load_json_frag}${bootstrap_server_key}+':8080'"))
   # return only a host (e.g. 127.0.0.1)
   export binary_server_host=$(ruby -e "require 'uri'; print URI('$binary_server_url').host")
+}
+
+# the bootstrap node may have multiple IP's we 
+# load_chef_server_ip
+# Arguments: None
+# Pre-Condition: Chef has been run on bootstrap node
+# Post-Conditions: sets $chef_server_ip
+# Raises: Error if Knife fails to run
+function load_chef_server_ip {
+  export chef_server_ip=$(knife node show $(hostname) -a 'bcpc.management.ip' | tail -1 | sed 's/.* //')
+  if [[ -z "$chef_server_ip" ]]; then
+    echo 'Failed to load $chef_server_ip!' > /dev/stderr
+    exit 1
+  fi
 }

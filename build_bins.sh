@@ -25,7 +25,7 @@ pushd $DIR/bins/
 mkdir -p python
 
 # serve the files if nothing else is doing so already
-netstat -nlt4 | grep -q ':8080' || nohup python -m SimpleHTTPServer 8080 &
+netstat -nlt4 | grep -q ':8080' || nohup python -m SimpleHTTPServer 8080 > ../python_server.log 2>&1 &
 # wait for python to come-up (as we may need it during apt-get update)
 sleep 5
 
@@ -237,17 +237,13 @@ gpg -abs --keyring ./apt_key.pub --secret-keyring /home/ubuntu/apt_key.sec -o Re
 ####################
 # generate Pypi repo
 
-# not sure why but the pip2pi will bail out with:
 # Wheel installs require setuptools >= 0.8 for dist-info support.
 # can then follow http://askubuntu.com/questions/399446
 # but can't upgrade setuptools first as:
 # "/usr/bin/pip install: error: no such option: --no-use-wheel"
-pip install pip2pi || /bin/true
-# have been hitting issue of:
-# ./build_bins.sh: line 240: /usr/bin/pip: No such file or directory
-sleep 5
-pip install setuptools --no-use-wheel --upgrade
-pip install pip2pi 
+/usr/bin/pip install pip2pi || /bin/true
+/usr/local/bin/pip install setuptools --no-use-wheel --upgrade
+/usr/local/bin/pip install pip2pi 
 dir2pi python
 
 #########################
