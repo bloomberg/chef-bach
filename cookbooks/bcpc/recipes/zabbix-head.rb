@@ -32,17 +32,16 @@ ruby_block "initialize-zabbix-config" do
     end
 end
 
-cookbook_file "/tmp/zabbix-server.tar.gz" do
-    source "bins/zabbix-server.tar.gz"
+remote_file "/tmp/zabbix-server.tar.gz" do
+    source "#{get_binary_server_url}/zabbix-server.tar.gz"
     owner "root"
     mode 00444
+    not_if { File.exists?("/usr/local/sbin/zabbix_server") }
 end
 
 bash "install-zabbix-server" do
-    code <<-EOH
-        tar zxf /tmp/zabbix-server.tar.gz -C /usr/local/
-    EOH
-    not_if "test -f /usr/local/sbin/zabbix_server"
+    code "tar zxf /tmp/zabbix-server.tar.gz -C /usr/local/ && rm /tmp/zabbix-server.tar.gz"
+    not_if { File.exists?("/usr/local/sbin/zabbix_server") }
 end
 
 user node[:bcpc][:zabbix][:user] do
@@ -151,3 +150,65 @@ template "/usr/local/etc/zabbix_agentd.conf.d/zabbix-openstack.conf" do
     mode 00600
     notifies :restart, "service[zabbix-agent]", :immediately
 end
+
+
+directory "/usr/local/bin/checks" do
+  action :create
+  owner  node[:bcpc][:zabbix][:user]
+  group "root"
+  mode 00775
+end 
+
+directory "/usr/local/etc/checks" do
+  action  :create
+  owner  node[:bcpc][:zabbix][:user]
+  group "root"
+  mode 00775
+end 
+
+template  "/usr/local/etc/checks/default.yml" do
+  source "checks/default.yml.erb"
+  owner node[:bcpc][:zabbix][:user]
+  group "root"
+  mode 00640
+end
+
+cookbook_file "/usr/local/bin/check" do
+  source "checks/check"
+  owner "root"
+  mode "00755"
+end
+
+%w{ nova rgw }.each do |cc| 
+  template  "/usr/local/etc/checks/#{cc}.yml" do
+    source "checks/#{cc}.yml.erb"
+    owner node[:bcpc][:zabbix][:user]
+    group "root"
+    mode 00640
+  end
+  
+  cookbook_file "/usr/local/bin/checks/#{cc}" do
+    source "checks/#{cc}"
+    owner "root"
+    mode "00755"
+  end
+
+  cron "check-#{cc}" do
+    home "/var/lib/zabbix"
+    user "zabbix"
+    minute "0"
+    path "/usr/local/bin:/usr/bin:/bin"
+    command "zabbix_sender -c /usr/local/etc/zabbix_agentd.conf --key 'check.#{cc}' --value `check -f timeonly #{cc}`"
+  end
+end
+
+package "python-requests-aws" do
+end
+
+template "/usr/local/bin/zabbix_bucket_stats" do
+  source "zabbix_bucket_stats.erb"
+  owner "root"
+  group "root"
+  mode "00755"
+end
+

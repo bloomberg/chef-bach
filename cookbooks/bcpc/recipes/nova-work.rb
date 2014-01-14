@@ -22,8 +22,12 @@ include_recipe "bcpc::ceph-work"
 
 ruby_block "initialize-nova-work-config" do
     block do
-        make_config('ssh-nova-private-key', %x[printf 'y\n' | ssh-keygen -t rsa -N '' -q -f /dev/stdout | sed -e '1,1d' -e 's/.*-----BEGIN/-----BEGIN/'])
-        make_config('ssh-nova-public-key', %x[echo "#{get_config('ssh-nova-private-key')}" | ssh-keygen -y -f /dev/stdin])
+        require 'openssl'
+        require 'net/ssh'
+        key = OpenSSL::PKey::RSA.new 2048;
+        pubkey = "#{key.ssh_type} #{[ key.to_blob ].pack('m0')}"
+        make_config('ssh-nova-private-key', key.to_pem)
+        make_config('ssh-nova-public-key', pubkey)
     end
 end
 
@@ -63,6 +67,17 @@ end
 
 template "/etc/nova/api-paste.ini" do
     source "nova.api-paste.ini.erb"
+    owner "nova"
+    group "nova"
+    mode 00600
+    notifies :restart, "service[nova-api]", :delayed
+    notifies :restart, "service[nova-compute]", :delayed
+    notifies :restart, "service[nova-network]", :delayed
+    notifies :restart, "service[nova-novncproxy]", :delayed
+end
+
+template "/etc/nova/policy.json" do
+    source "policy.json.erb"
     owner "nova"
     group "nova"
     mode 00600
@@ -175,6 +190,7 @@ cookbook_file "/tmp/nova.patch" do
     source "nova.patch"
     owner "root"
     mode 00644
+    not_if { File.exists?("/usr/lib/python2.7/dist-packages/nova/nova.patch") }
 end
 
 bash "patch-for-nova-bugs" do
@@ -184,7 +200,7 @@ bash "patch-for-nova-bugs" do
         patch -p1 < /tmp/nova.patch
         cp /tmp/nova.patch .
     EOH
-    not_if "test -f /usr/lib/python2.7/dist-packages/nova/nova.patch"
+    not_if { File.exists?("/usr/lib/python2.7/dist-packages/nova/nova.patch") }
     notifies :restart, "service[nova-api]", :immediately
 end
 
@@ -192,6 +208,7 @@ cookbook_file "/tmp/grizzly-volumes.patch" do
     source "grizzly-volumes.patch"
     owner "root"
     mode 00644
+    not_if { File.exists?("/usr/lib/python2.7/dist-packages/nova/grizzly-volumes.patch") }
 end
 
 bash "patch-for-grizzly-volumes" do
@@ -201,7 +218,7 @@ bash "patch-for-grizzly-volumes" do
         patch -p2 < /tmp/grizzly-volumes.patch
         cp /tmp/grizzly-volumes.patch .
     EOH
-    not_if "test -f /usr/lib/python2.7/dist-packages/nova/grizzly-volumes.patch"
+    not_if { File.exists?("/usr/lib/python2.7/dist-packages/nova/grizzly-volumes.patch") }
     notifies :restart, "service[nova-compute]", :delayed
 end
 

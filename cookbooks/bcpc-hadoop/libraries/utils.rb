@@ -26,7 +26,7 @@ def init_config
     puts "************ Creating data_bag \"configs\""
     bag = Chef::DataBag.new
     bag.name("configs")
-    bag.save
+    bag.create
   end
   begin
     $dbi = data_bag_item("configs", node.chef_environment)
@@ -61,8 +61,8 @@ end
 
 def get_all_nodes
   results = search(:node, "role:BCPC* AND chef_environment:#{node.chef_environment}")
-  if results.any?{|x| x.hostname == node.hostname}
-    results.map!{|x| x.hostname == node.hostname ? node : x}
+  if results.any?{|x| x['hostname'] == node[:hostname]}
+    results.map!{|x| x[:hostname] == node[:hostname] ? node : x}
   else
     results.push(node)
   end
@@ -71,26 +71,24 @@ end
 
 def get_head_nodes
   results = search(:node, "role:BCPC-Headnode AND chef_environment:#{node.chef_environment}")
-  results.map!{ |x| x.hostname == node.hostname ? node : x }
+  results.map!{ |x| x['hostname'] == node[:hostname] ? node : x }
   return (results == []) ? [node] : results
 end
 
 def get_hadoop_heads
   results = search(:node, "role:BCPC-Hadoop-Head AND chef_environment:#{node.chef_environment}")
-  if results.any?{|x| x.hostname == node.hostname}
-    results.map!{|x| x.hostname == node.hostname ? node : x}
+  if results.any?{|x| x['hostname'] == node[:hostname]}
+    results.map!{|x| x['hostname'] == node[:hostname] ? node : x}
   else
     results.push(node) if node[:roles].include? "BCPC-Hadoop-Head"
   end
   return results
 end
 
-
-
 def get_quorum_hosts
   results = search(:node, "(roles:BCPC-Hadoop-Quorumnode or role:BCPC-Hadoop-Head) AND chef_environment:#{node.chef_environment}")
-  if results.any?{|x| x.hostname == node.hostname}
-    results.map!{|x| x.hostname == node.hostname ? node : x}
+  if results.any?{|x| x['hostname'] == node[:hostname]}
+    results.map!{|x| x['hostname'] == node[:hostname] ? node : x}
   else
     results.push(node) if node[:roles].include? "BCPC-Hadoop-Quorumnode"
   end
@@ -99,8 +97,8 @@ end
 
 def get_hadoop_workers
   results = search(:node, "role:BCPC-Hadoop-Worker AND chef_environment:#{node.chef_environment}")
-  if results.any?{|x| x.hostname == node.hostname}
-    results.map!{|x| x.hostname == node.hostname ? node : x}
+  if results.any?{|x| x['hostname'] == node[:hostname]}
+    results.map!{|x| x['hostname'] == node[:hostname] ? node : x}
   else
     results.push(node) if node[:roles].include? "BCPC-Hadoop-Worker"
   end
@@ -109,10 +107,14 @@ end
 
 def get_nodes_for(recipe)
   results = search(:node, "recipes:bcpc-hadoop\\:\\:#{recipe} AND chef_environment:#{node.chef_environment}")
-  results.map!{ |x| x.hostname == node.hostname ? node : x }
+  results.map!{ |x| x['hostname'] == node[:hostname] ? node : x }
   return results
 end
 
+def get_binary_server_url
+  return("http://#{URI(Chef::Config['chef_server_url']).host}:8080") if node[:bcpc][:binary_server_url].nil?
+  return(node[:bcpc][:binary_server_url])
+end
 
 def secure_password
   pw = String.new
@@ -134,6 +136,6 @@ def zk_formatted?
   require 'rubygems'
   require 'zookeeper'
   z = Zookeeper.new("localhost:2181")
-  r = z.get_children(:path => "/hadoop-ha/bcpc")
-  r[:rc] == 0
+  r = z.get_children(:path => "/hadoop-ha/#{node.chef_environment}")
+  return (r[:rc] == 0)
 end

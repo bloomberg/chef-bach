@@ -53,20 +53,20 @@ bash "setup-389ds-server" do
         sed --in-place '/^MinSpareThreads/d' /etc/dirsrv/admin-serv/httpd.conf
         sed --in-place '/^MaxSpareThreads/d' /etc/dirsrv/admin-serv/httpd.conf
         sed --in-place '/^ThreadsPerChild/d' /etc/dirsrv/admin-serv/httpd.conf
-        sed --in-place 's/^nsslapd-port.*/nsslapd-listenhost: #{node[:bcpc][:management][:ip]}\\nnsslapd-port: 389/' /etc/dirsrv/slapd-#{node.hostname}/dse.ldif
-        echo "dn: cn=Replication Manager,cn=config" >> /etc/dirsrv/slapd-#{node.hostname}/dse.ldif
-        echo "objectClass: inetorgperson" >> /etc/dirsrv/slapd-#{node.hostname}/dse.ldif
-        echo "objectClass: person" >> /etc/dirsrv/slapd-#{node.hostname}/dse.ldif
-        echo "objectClass: top" >> /etc/dirsrv/slapd-#{node.hostname}/dse.ldif
-        echo "cn: Replication Manager" >> /etc/dirsrv/slapd-#{node.hostname}/dse.ldif
-        echo "sn: RM" >> /etc/dirsrv/slapd-#{node.hostname}/dse.ldif
-        echo "userPassword: #{get_config('389ds-replication-password')}" >> /etc/dirsrv/slapd-#{node.hostname}/dse.ldif
-        echo "passwordExpirationTime: 20380119031407Z" >> /etc/dirsrv/slapd-#{node.hostname}/dse.ldif
-        echo "nsIdleTimeout: 0" >> /etc/dirsrv/slapd-#{node.hostname}/dse.ldif
+        sed --in-place 's/^nsslapd-port.*/nsslapd-listenhost: #{node[:bcpc][:management][:ip]}\\nnsslapd-port: 389/' /etc/dirsrv/slapd-#{node[:hostname]}/dse.ldif
+        echo "dn: cn=Replication Manager,cn=config" >> /etc/dirsrv/slapd-#{node[:hostname]}/dse.ldif
+        echo "objectClass: inetorgperson" >> /etc/dirsrv/slapd-#{node[:hostname]}/dse.ldif
+        echo "objectClass: person" >> /etc/dirsrv/slapd-#{node[:hostname]}/dse.ldif
+        echo "objectClass: top" >> /etc/dirsrv/slapd-#{node[:hostname]}/dse.ldif
+        echo "cn: Replication Manager" >> /etc/dirsrv/slapd-#{node[:hostname]}/dse.ldif
+        echo "sn: RM" >> /etc/dirsrv/slapd-#{node[:hostname]}/dse.ldif
+        echo "userPassword: #{get_config('389ds-replication-password')}" >> /etc/dirsrv/slapd-#{node[:hostname]}/dse.ldif
+        echo "passwordExpirationTime: 20380119031407Z" >> /etc/dirsrv/slapd-#{node[:hostname]}/dse.ldif
+        echo "nsIdleTimeout: 0" >> /etc/dirsrv/slapd-#{node[:hostname]}/dse.ldif
         service dirsrv start
         service dirsrv-admin start
 	EOH
-	not_if "test -d /etc/dirsrv/slapd-#{node.hostname}"
+	not_if "test -d /etc/dirsrv/slapd-#{node[:hostname]}"
 end
 
 ruby_block "create-ldap-changelog" do
@@ -78,7 +78,7 @@ changetype: add
 objectclass: top
 objectclass: extensibleObject
 cn: changelog5
-nsslapd-changelogdir: /var/lib/dirsrv/slapd-#{node.hostname}/changelogdb
+nsslapd-changelogdir: /var/lib/dirsrv/slapd-#{node[:hostname]}/changelogdb
 
             ]
         end
@@ -109,23 +109,23 @@ nsds5ReplicaBindDN: #{get_config('389ds-replication-user')},cn=config
 end
 
 get_head_nodes.each do |server|
-    if server.hostname != node.hostname
-        ruby_block "setup-ldap-consumption-from-#{server.hostname}" do
+    if server['hostname'] != node[:hostname]
+        ruby_block "setup-ldap-consumption-from-#{server['hostname']}" do
             block do
-                if not system "ldapsearch -h #{server[:bcpc][:management][:ip]} -p 389  -D \"#{get_config('389ds-rootdn-user')}\" -w \"#{get_config('389ds-rootdn-password')}\" -b cn=config \"(cn=To-#{node.hostname})\" | grep -v filter | grep #{node.hostname} > /dev/null 2>&1" then
+                if not system "ldapsearch -h #{server['bcpc']['management']['ip']} -p 389  -D \"#{get_config('389ds-rootdn-user')}\" -w \"#{get_config('389ds-rootdn-password')}\" -b cn=config \"(cn=To-#{node[:hostname]})\" | grep -v filter | grep #{node[:hostname]} > /dev/null 2>&1" then
                     domain = node[:bcpc][:domain_name].split('.').collect{|x| 'dc='+x}.join(',')
-                    %x[ ldapmodify -h #{server[:bcpc][:management][:ip]} -p 389  -D \"#{get_config('389ds-rootdn-user')}\" -w \"#{get_config('389ds-rootdn-password')}\" << EOH
-dn: cn=To-#{node.hostname},cn=replica,cn="#{domain}",cn=mapping tree,cn=config
+                    %x[ ldapmodify -h #{server['bcpc']['management']['ip']} -p 389  -D \"#{get_config('389ds-rootdn-user')}\" -w \"#{get_config('389ds-rootdn-password')}\" << EOH
+dn: cn=To-#{node[:hostname]},cn=replica,cn="#{domain}",cn=mapping tree,cn=config
 changetype: add
 objectclass: top
 objectclass: nsds5replicationagreement
-cn: To-#{node.hostname}
+cn: To-#{node[:hostname]}
 nsds5replicahost: #{node[:bcpc][:management][:ip]}
 nsds5replicaport: 389
 nsds5ReplicaBindDN: #{get_config('389ds-replication-user')},cn=config
 nsds5replicabindmethod: SIMPLE
 nsds5replicaroot: #{domain}
-description: Agreement to sync from #{server.hostname} to #{node.hostname}
+description: Agreement to sync from #{server['hostname']} to #{node[:hostname]}
 nsds5replicatedattributelist: (objectclass=*) $ EXCLUDE authorityRevocationList
 nsds5replicacredentials: #{get_config('389ds-replication-password')}
 nsds5BeginReplicaRefresh: start

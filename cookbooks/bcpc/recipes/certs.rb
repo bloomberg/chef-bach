@@ -28,10 +28,14 @@ end
 
 ruby_block "initialize-ssh-keys" do
     block do
-        make_config('ssh-private-key', %x[printf 'y\n' | ssh-keygen -t rsa -N '' -q -f /dev/stdout | sed -e '1,1d' -e 's/.*-----BEGIN/-----BEGIN/'])
-        make_config('ssh-public-key', %x[echo "#{get_config('ssh-private-key')}" | ssh-keygen -y -f /dev/stdin])
+        require 'openssl'
+        require 'net/ssh'
+        key = OpenSSL::PKey::RSA.new 2048;
+        pubkey = "#{key.ssh_type} #{[ key.to_blob ].pack('m0')}"
+        make_config('ssh-private-key', key.to_pem)
+        make_config('ssh-public-key', pubkey)
         if get_config('ssl-certificate').nil? then
-            temp = %x[openssl req -config /tmp/openssl.cnf -extensions v3_req -new -x509 -passout pass:temp_passwd -newkey rsa:4096 -out /dev/stdout -keyout /dev/stdout -days 1095 -subj "/C=#{node[:bcpc][:country]}/ST=#{node[:bcpc][:state]}/L=#{node[:bcpc][:organization]}/O=#{node[:bcpc][:company]}/OU=#{node[:bcpc][:region_name]}/CN=#{node[:bcpc][:domain_name]}/emailAddress=#{node[:bcpc][:admin_email]}"]
+            temp = %x[openssl req -config /tmp/openssl.cnf -extensions v3_req -new -x509 -passout pass:temp_passwd -newkey rsa:4096 -out /dev/stdout -keyout /dev/stdout -days 1095 -subj "/C=#{node['bcpc']['country']}/ST=#{node['bcpc']['state']}/L=#{node['bcpc']['location']}/O=#{node['bcpc']['organization']}/OU=#{node['bcpc']['region_name']}/CN=#{node['bcpc']['domain_name']}/emailAddress=#{node['bcpc']['admin_email']}"]
             make_config('ssl-private-key', %x[echo "#{temp}" | openssl rsa -passin pass:temp_passwd -out /dev/stdout])
             make_config('ssl-certificate', %x[echo "#{temp}" | openssl x509])
         end

@@ -17,19 +17,28 @@ else
     echo "install gdisk..."
     apt-get install --allow-unauthenticated -y gdisk
 fi
-
 if [[ -z `which $DISKCOMMAND` ]]; then
     echo "can't find '$DISKCOMMAND'"
     exit
 fi
 
+# Run zap command for all disks present which are not mounted
 if [[ ! -f $GUARDFILE ]]; then
-    for DISK in b c d e f g h; do
-	COMMAND="$TOOLPATH/$DISKCOMMAND $ZAPFLAGS /dev/sd$DISK"
-	echo $COMMAND
-	$COMMAND
+    # get all /dev/sd[a-z] devices mounted
+    mounted_whole_disks=$(df -kh | cut -f 1 -d' ' | tail -n+2 | grep '^/dev/sd' | sed 's/[0-9]/|/' | sort -u)
+    # make a regular expression of disks (e.g. /dev/sda|/dev/sdd|...|)
+    mounted_disk_regex=$(for disk in $mounted_whole_disks; do echo -n $disk; done)
+
+    for disk in $(ls /dev/sd[a-z]); do
+        if ! echo "$disk" | egrep -q "${mounted_disk_regex:0:-1}"; then
+            echo "#### Overwriting $disk with $DISKCOMMAND $ZAPFLAGS"
+            $TOOLPATH/$DISKCOMMAND $ZAPFLAGS $disk
+        else
+            echo "#### Skipping mounted disk $disk"
+        fi
     done
 else
     echo "disks look zapped already"
 fi
 touch /etc/ceph-disks-zapped
+

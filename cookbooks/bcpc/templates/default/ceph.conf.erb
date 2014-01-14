@@ -26,8 +26,11 @@
     filestore_xattr_use_omap = true
     osd_fs_type = xfs
     osd_fs_mount_options_xfs = noexec,nodev,noatime,nodiratime,barrier=0,discard
+    osd_crush_update_on_start = false
 
 [client.radosgw.gateway]
     keyring = /var/lib/ceph/radosgw/$cluster-$id/keyring
     log file = /var/log/ceph/radosgw.log
+    rgw enable ops log = true
+    rgw enable usage log = true
 

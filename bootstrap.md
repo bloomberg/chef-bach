@@ -76,7 +76,7 @@ This will create four VMs:
 - bcpc-vm3
 
 The ``[chef-environment]`` variable is optional and will default to
-``Test-Laptop`` is unspecfied. This is useful if you need to create the
+``Test-Laptop`` if unspecfied. This is useful if you need to create the
 bootstrap node with non-default settings such as a a local APT mirror
 (``node[:bcpc][:bootstrap][:mirror]``) or a local internet proxy
 (``node[:bcpc][:bootstrap][:proxy]``).
@@ -414,7 +414,7 @@ diff --git a/environments/Test-Laptop.json b/environments/Test-Laptop.json
 index d844783..9a9e53a 100644
 --- a/environments/Test-Laptop.json
 +++ b/environments/Test-Laptop.json
-@@ -28,12 +28,26 @@
+@@ -28,12 +28,27 @@
          "interface" : "eth0",
          "pxe_interface" : "eth1",
          "server" : "10.0.100.3",
@@ -424,6 +424,7 @@ index d844783..9a9e53a 100644
        },
 +      "repos": {
 +        "ceph": "http://10.0.100.3/ceph-dumpling",
++        "ceph-extras": "http://10.0.100.3/ceph-extras",
 +        "rabbitmq": "http://10.0.100.3/rabbitmq",
 +        "mysql": "http://10.0.100.3/percona",
 +        "openstack": "http://10.0.100.3/ubuntu-cloud",
@@ -497,7 +498,7 @@ You also need to build the installer bins for a number of external
 dependencies, and there's a script to help (tested on Ubuntu 12.04)
 
 ```
- $ ./cookbooks/bcpc/files/default/build_bins.sh
+ $ ./build_bins.sh
 ```
 
 If you're planning to run OpenStack on top of VirtualBox, be sure to build the base VirtualBox images first:

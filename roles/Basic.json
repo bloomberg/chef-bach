@@ -4,8 +4,9 @@
     },
     "json_class": "Chef::Role",
     "run_list": [
-      "recipe[ubuntu::default]",
-      "recipe[ntp::default]",
+      "recipe[apt]",
+      "recipe[ubuntu]",
+      "recipe[ntp]",
       "recipe[chef-client::delete_validation]",
       "recipe[chef-client::config]"
     ],

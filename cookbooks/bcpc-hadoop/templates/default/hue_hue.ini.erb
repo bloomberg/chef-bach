@@ -305,8 +305,12 @@
       # Use WebHdfs/HttpFs as the communication mechanism.
       # This should be the web service root URL, such as
       # http://namenode:50070/webhdfs/v1
-      #webhdfs_url=http://
-      webhdfs_url=http://<%=float_host(@httpfs_host.first.hostname)%>:14000/webhdfs/v1/
+      <%=
+          if defined?(httpfs_host) then
+            "webhdfs_url=http://#{float_host(httpfs_host.first.hostname)}:14000/webhdfs/v1/"
+          else "#webhdfs_url=http://"
+          end
+      %>
 
       # Change this if your HDFS cluster is Kerberos-secured
       ## security_enabled=false
@@ -329,7 +333,13 @@
 
     [[[default]]]
       # Enter the host on which you are running the ResourceManager
-      resourcemanager_host=<%=float_host(@rm_host.first.hostname) %>
+      <%=
+          if defined?(rm_host) then
+            "resourcemanager_host=#{float_host(@rm_host.first.hostname)}"
+          else
+            "#resourcemanager_host="
+          end
+      %>
 
       # The port where the ResourceManager IPC listens on
       resourcemanager_port=8032
@@ -354,7 +364,12 @@
 
       # URL of the ResourceManager API
       #resourcemanager_api_url=http://localhost:8088
-      resourcemanager_api_url=<%="http://#{float_host(@rm_host.first.hostname)}8088" %>
+      <%= if defined?(rm_host) then
+            "resourcemanager_api_url=http://#{float_host(@rm_host.first.hostname)}8088"
+          else
+            "#resourcemanager_api_url="
+          end
+      %>
 
       # URL of the ProxyServer API
       ## proxy_api_url=http://localhost:8088
@@ -409,8 +424,13 @@
 [liboozie]
   # The URL where the Oozie service runs on. This is required in order for
   # users to submit jobs.
-  #oozie_url=http://localhost:11000/oozie
-  oozie_url=<%="http://#{float_host(@oozie_host.first.hostname)}:11000/oozie" %>
+  <%=
+      if defined?(oozie_host) then
+        "#oozie_url="
+      else
+        "oozie_url=\"http://#{float_host(@oozie_host.first.hostname)}:11000/oozie\""
+      end
+  %>
 
   # Requires FQDN in oozie_url if enabled
   ## security_enabled=false
@@ -445,7 +465,13 @@
 
   # Host where Hive server Thrift daemon is running.
   # If Kerberos security is enabled, use fully-qualified domain name (FQDN).
-  hive_server_host=<%=float_host(@hive_host.first.hostname) %>
+  <%=
+      if defined?(hive_host) then
+        "hive_server_host=#{float_host(@hive_host.first.hostname)}"
+      else
+        "#hive_server_host="
+      end
+  %>
 
   # Port where HiveServer2 Thrift server runs on.
   hive_server_port=10000
@@ -506,8 +532,13 @@
 
 [impala]
   # Host of the Impala Server (one of the Impalad)
-  #server_host=localhost
-  server_host=<%=float_host(@impala_hosts.sample.hostname) %>
+  <%=
+      if defined?(hb_host) then
+        "server_hosts=#{float_host(@impala_hosts.sample.hostname)}"
+      else
+  	"#server_host=localhost"
+      end
+  %>
 
   # Port of the Impala Server
   server_port=21050
@@ -526,8 +557,13 @@
 [hbase]
   # Comma-separated list of HBase Thrift servers for
   # clusters in the format of '(name|host:port)'.
-  #hbase_clusters=(Cluster|localhost:9090)
-  hbase_clusters=<%="(bcpc|#{@hb_host.first.hostname})" %>
+  <%=
+      if defined?(hb_host) then
+        "hbase_clusters=(bcpc|#{@hb_host.first.hostname})"
+      else
+        "#hbase_clusters=(Cluster|localhost:9090)="
+      end
+  %>
   # Hard limit of rows or columns per row fetched before truncating.
   ## truncate_limit = 500
 

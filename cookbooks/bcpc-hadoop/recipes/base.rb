@@ -1,4 +1,6 @@
-
+package "xfsprogs" do
+  action :install
+end
 
 directory "/disk" do
   owner "root"
@@ -8,16 +10,7 @@ directory "/disk" do
 end
 
 if node[:bcpc][:hadoop][:disks].length > 0 then
-  node[:bcpc][:hadoop][:disks].each do |d|
-    mount "/disk/#{d}" do
-      device "/dev/#{d}"
-      fstype "xfs"
-      options "noatime,nodiratime,inode64"
-    end
-  end
-  node.set[:bcpc][:hadoop][:mounts] = node[:bcpc][:hadoop][:disks]
-else
-  (1..4).each do |i|
+  node[:bcpc][:hadoop][:disks].each_index do |i|
     directory "/disk/#{i}" do
       owner "root"
       group "root"
@@ -25,8 +18,22 @@ else
       action :create
       recursive true
     end
+   
+    d = node[:bcpc][:hadoop][:disks][i]
+    execute "mkfs -t xfs /dev/#{d}" do
+      not_if "file -s /dev/#{d} | grep -q 'SGI XFS filesystem'"
+    end
+ 
+    mount "/disk/#{i}" do
+      device "/dev/#{d}"
+      fstype "xfs"
+      options "noatime,nodiratime,inode64"
+      action [:enable, :mount]
+    end
   end
-  node.set[:bcpc][:hadoop][:mounts] = ["1", "2", "3", "4"]
+  node.set[:bcpc][:hadoop][:mounts] = (0..node[:bcpc][:hadoop][:disks].length-1).to_a
+else
+  Chef::Log.fatal!('Please specify some node[:bcpc][:hadoop][:disks]!')
 end
 
 
@@ -51,7 +58,7 @@ when "debian"
      hadoop-httpfs
      hive-hcatalog
      hue}.each do |w|
-    directory "/etc/#{w}/conf.bcpc" do
+    directory "/etc/#{w}/conf.#{node.chef_environment}" do
       owner "root"
       group "root"
       mode 00755
@@ -61,8 +68,8 @@ when "debian"
 
     bash "update-#{w}-conf-alternatives" do
       code %Q{
-       update-alternatives --install /etc/#{w}/conf #{w}-conf /etc/#{w}/conf.bcpc 50
-       update-alternatives --set #{w}-conf /etc/#{w}/conf.bcpc
+       update-alternatives --install /etc/#{w}/conf #{w}-conf /etc/#{w}/conf.#{node.chef_environment} 50
+       update-alternatives --set #{w}-conf /etc/#{w}/conf.#{node.chef_environment}
       }
     end
   end
@@ -85,7 +92,7 @@ end
 #
 #set up hadoop conf
 #
-%w{capacity-scheduler.xml
+hadoop_conf_files = %w{capacity-scheduler.xml
    container-executor.cfg
    core-site.xml
    hadoop-metrics2.properties
@@ -98,7 +105,10 @@ end
    ssl-client.xml
    ssl-server.xml
    yarn-site.xml
-  }.each do |t|
+  }
+node[:bcpc][:hadoop][:hdfs][:HA] == true and hadoop_conf_files.insert(-1,"hdfs-site_HA.xml")
+
+hadoop_conf_files.each do |t|
    template "/etc/hadoop/conf/#{t}" do
      source "hdp_#{t}.erb"
      mode 0644
@@ -193,31 +203,31 @@ end
               :hive_host => get_nodes_for("hive_metastore"))
   end
 end
-link "/etc/oozie/conf.bcpc/hive-site.xml" do
-  to "/etc/hive/conf.bcpc/hive-site.xml"
+link "/etc/oozie/conf.#{node.chef_environment}/hive-site.xml" do
+  to "/etc/hive/conf.#{node.chef_environment}/hive-site.xml"
 end
-link "/etc/oozie/conf.bcpc/core-site.xml" do
-  to "/etc/hadoop/conf.bcpc/core-site.xml"
+link "/etc/oozie/conf.#{node.chef_environment}/core-site.xml" do
+  to "/etc/hadoop/conf.#{node.chef_environment}/core-site.xml"
 end
-link "/etc/oozie/conf.bcpc/yarn-site.xml" do
-  to "/etc/hadoop/conf.bcpc/yarn-site.xml"
+link "/etc/oozie/conf.#{node.chef_environment}/yarn-site.xml" do
+  to "/etc/hadoop/conf.#{node.chef_environment}/yarn-site.xml"
 end
 
 #
 # Set up impala configs
 #
 
-link "/etc/impala/conf.bcpc/hive-site.xml" do
-  to "/etc/hive/conf.bcpc/hive-site.xml"
+link "/etc/impala/conf.#{node.chef_environment}/hive-site.xml" do
+  to "/etc/hive/conf.#{node.chef_environment}/hive-site.xml"
 end
-link "/etc/impala/conf.bcpc/core-site.xml" do
-  to "/etc/hadoop/conf.bcpc/core-site.xml"
+link "/etc/impala/conf.#{node.chef_environment}/core-site.xml" do
+  to "/etc/hadoop/conf.#{node.chef_environment}/core-site.xml"
 end
-link "/etc/impala/conf.bcpc/hdfs-site.xml" do
-  to "/etc/hadoop/conf.bcpc/hdfs-site.xml"
+link "/etc/impala/conf.#{node.chef_environment}/hdfs-site.xml" do
+  to "/etc/hadoop/conf.#{node.chef_environment}/hdfs-site.xml"
 end
-link "/etc/impala/conf.bcpc/hbase-site.xml" do
-  to "/etc/hbase/conf.bcpc/hbase-site.xml"
+link "/etc/impala/conf.#{node.chef_environment}/hbase-site.xml" do
+  to "/etc/hbase/conf.#{node.chef_environment}/hbase-site.xml"
 end
 
 #
@@ -235,8 +245,8 @@ end
   end
 end
 
-link "/etc/hive-hcatalog/conf.bcpc/hive-site.xml" do
-  to "/etc/hive/conf.bcpc/hive-site.xml"
+link "/etc/hive-hcatalog/conf.#{node.chef_environment}/hive-site.xml" do
+  to "/etc/hive/conf.#{node.chef_environment}/hive-site.xml"
 end
 
 #
@@ -266,4 +276,3 @@ end
 package "zookeeper" do
   action :upgrade
 end
-

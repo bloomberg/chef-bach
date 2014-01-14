@@ -135,7 +135,7 @@
 
 <source>
     type tail_multiline
-    path /var/lib/mysql/<%="#{node.hostname}"%>.err
+    path /var/lib/mysql/<%="#{node[:hostname]}"%>.err
     pos_file /var/log/td-agent/mysql.pos
     tag pre.mysql
     format /^(?<ident>[0-9]+)\s*(?<time>[0-9]+:[0-9]+:[0-9]+)\s*(\[(?<level>[^ ]+)\])?\s*(?<message>.*)$/
@@ -144,7 +144,7 @@
 
 <source>
     type tail_multiline
-    path /var/log/rabbitmq/rabbit@<%="#{node.hostname}"%>.log
+    path /var/log/rabbitmq/rabbit@<%="#{node[:hostname]}"%>.log
     pos_file /var/log/td-agent/rabbitmq.pos
     tag pre.rabbitmq
     format /^=(?<level>[^ ]*)\s*REPORT====\s*(?<time>[^ ]*)\s*===\s*(?<message>.*)$/
@@ -199,7 +199,7 @@
 <match pre.**>
     type record_reformer
     output_tag post.${tag}
-    src_host <%="#{node.hostname}"%>
+    src_host <%="#{node[:hostname]}"%>
 </match>
 
 <match post.**>

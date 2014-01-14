@@ -1,13 +1,16 @@
+include_recipe 'dpkg_autostart'
 require "base64"
 
 %w{hadoop-hdfs-namenode hadoop-hdfs-zkfc}.each do |pkg|
+  dpkg_autostart pkg do
+    allow false
+  end
   package pkg do
     action :upgrade
   end
 end
 
 node[:bcpc][:hadoop][:mounts].each do |i|
-
   directory "/disk/#{i}/dfs/nn" do
     owner "hdfs"
     group "hdfs"
@@ -48,7 +51,7 @@ bash "format namenode" do
 end
 
 bash "format-zk-hdfs-ha" do
-  code "hdfs zkfc -formatZK"
+  code "yes | hdfs zkfc -formatZK"
   action :run
   user "hdfs"
   not_if { zk_formatted? }

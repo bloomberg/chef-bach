@@ -29,15 +29,8 @@ ruby_block "initialize-graphite-config" do
 end
 
 %w{python-whisper_0.9.10_all.deb python-carbon_0.9.10_all.deb python-graphite-web_0.9.10_all.deb}.each do |pkg|
-    cookbook_file "/tmp/#{pkg}" do
-        source "bins/#{pkg}"
-        owner "root"
-        mode 00444
-    end
-
-    package "#{pkg}" do
-        provider Chef::Provider::Package::Dpkg
-        source "/tmp/#{pkg}"
+    # split package name on the first underscore to get the package name for dpkg to look-up
+    package "#{pkg.split('_',2)[0]}" do
         action :install
     end
 end
@@ -145,17 +138,16 @@ bash "graphite-database-sync" do
     notifies :restart, "service[apache2]", :immediately
 end
 
-%w{carbon-cache carbon-relay}.each do |pkg|
-    template "/etc/init.d/#{pkg}" do
-        source "init.d-#{pkg}.erb"
+%w{cache relay}.each do |pkg|
+    template "/etc/init.d/carbon-#{pkg}" do
+        source "init.d-carbon.erb"
         owner "root"
         group "root"
         mode 00755
-        notifies :restart, "service[#{pkg}]", :delayed
+        notifies :restart, "service[carbon-#{pkg}]", :delayed
+        variables( :daemon => "#{pkg}" )
     end
-    service pkg do
-        supports :restart => true
-        restart_command "service #{pkg} stop && sleep 2 && service #{pkg} start"
+    service "carbon-#{pkg}" do
         action [ :enable, :start ]
     end
 end

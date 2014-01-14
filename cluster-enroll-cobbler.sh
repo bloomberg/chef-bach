@@ -27,6 +27,10 @@ if [[ ! -z "$2" ]]; then
     EXACTHOST=$2
 fi
 
+TRANSCRIPT="cobbler-transcript.txt"
+if [[ -f $TRANSCRIPT ]]; then
+    touch $TRANSCRIPT
+fi
 
 if [[ -f cluster.txt ]]; then
     echo "Using cluster definition from cluster.txt"
@@ -34,17 +38,24 @@ if [[ -f cluster.txt ]]; then
 	if [[ $HOSTNAME = "end" ]]; then
 	    continue
 	fi
+
+	if [[ "$ROLE" = "bootstrap" ]]; then
+	    # let's not try to cobbler boot ourselves
+	    continue
+	fi
 	
 	if [[ $1 = add ]];then
 		if [[ -z "$EXACTHOST" || "$EXACTHOST" = "$HOSTNAME" || "$EXACTHOST" = "$ROLE" ]]; then
 		MATCH="$HOSTNAME"
-		echo "adding $HOSTNAME.$DOMAIN ($IPADDR,$MACADDR) to cobbler..."
+		ACTIONSTRING="adding $HOSTNAME.$DOMAIN ($IPADDR,$MACADDR) to cobbler..."
+		echo $ACTIONSTRING | tee -a $TRANSCRIPT
 		sudo cobbler system add --name=$HOSTNAME --hostname=$HOSTNAME.$DOMAIN --profile=bcpc_host --ip-address=$IPADDR --mac=$MACADDR
 	    fi
 	elif [[ $1 == remove ]]; then
 		if [[ -z "$EXACTHOST" || "$EXACTHOST" = "$HOSTNAME" || "$EXACTHOST" = "$ROLE" ]]; then
 		MATCH="$HOSTNAME"
-		echo "removing $HOSTNAME from cobbler..."
+		ACTIONSTRING="removing $HOSTNAME from cobbler..."
+		echo $ACTIONSTRING | tee -a $TRANSCRIPT
 		sudo cobbler system remove --name=$HOSTNAME
 	    fi
 	else

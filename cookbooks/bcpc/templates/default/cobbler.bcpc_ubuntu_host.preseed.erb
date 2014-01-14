@@ -19,6 +19,11 @@ d-i     netcfg/get_netmask      string 255.255.255.0
 d-i     netcfg/get_gateway      string 
 d-i     netcfg/confirm_static   boolean true
 
+d-i     partman/early_command string \
+          udevadm trigger; udevadm settle --timeout=30 \
+          for d in $(ls /dev/sd[a-z]); do \
+            dd if=/dev/zero of=$d bs=4M count=16 || echo "Write to $d failed" \
+          done
 d-i     partman-auto/disk string /dev/sda
 d-i     partman-auto/method string regular
 d-i     partman-auto/expert_recipe string root :: 5000 100000 10000000000 ext4 \
@@ -71,7 +76,6 @@ d-i     mirror/http/directory string /ubuntu
 d-i     apt-setup/security_host <%= @node[:bcpc][:bootstrap][:mirror] %>
 d-i     apt-setup/security_path string /ubuntu
 <% end %>
-
 d-i     debian-installer/allow_unauthenticated  string false
 d-i     pkgsel/upgrade  select safe-upgrade
 d-i     pkgsel/language-packs   multiselect

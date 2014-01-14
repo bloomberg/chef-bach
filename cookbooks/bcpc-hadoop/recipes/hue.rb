@@ -1,34 +1,37 @@
+include_recipe 'dpkg_autostart'
 
-%w{
-hue
-hue-beeswax
-hue-common
-hue-hbase
-hue-impala
-hue-pig
-hue-plugins
-hue-server
-hue-sqoop
-hue-zookeeper
-}.each do |s|
-  package s do
+%w{hue
+   hue-beeswax
+   hue-common
+   hue-hbase
+   hue-impala
+   hue-pig
+   hue-plugins
+   hue-server
+   hue-sqoop
+   hue-zookeeper
+}.each do |pkg|
+  dpkg_autostart pkg do
+    allow false
+  end
+  package pkg do
     action :upgrade
   end
 end
 
 ruby_block "hue-database-creation" do
-  cmd = "mysql -uroot -p#{get_config('mysql-root-password')} -e"
+  cmd = "mysql -u root -p#{get_config('mysql-root-password')} -e"
   privs = "ALL" # todo node[:bcpc][:hadoop][:hue_db_privs].join(",")
   block do
 
-    if not system " #{cmd} 'SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = \"desktop\"' | grep desktop" then
+    if not system " #{cmd} 'SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = \"desktop\"' | grep -q desktop" then
            code = <<-EOF
                 CREATE DATABASE desktop;
                 GRANT #{privs} ON desktop.* TO 'hue'@'%' IDENTIFIED BY '#{get_config('mysql-hue-password')}';
                 GRANT #{privs} ON desktop.* TO 'hue'@'localhost' IDENTIFIED BY '#{get_config('mysql-hue-password')}';
                 FLUSH PRIVILEGES;
                 EOF
-           IO.popen("mysql -uroot -p#{get_config('mysql-root-password')}", "r+") do |db|
+           IO.popen("mysql -u root -p#{get_config('mysql-root-password')}", "r+") do |db|
              db.write code
            end
             self.notifies :enable, "service[hue]", :immediately

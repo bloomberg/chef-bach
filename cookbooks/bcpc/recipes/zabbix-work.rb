@@ -19,17 +19,16 @@
 
 include_recipe "bcpc::default"
 
-cookbook_file "/tmp/zabbix-agent.tar.gz" do
-    source "bins/zabbix-agent.tar.gz"
+remote_file "/tmp/zabbix-agent.tar.gz" do
+    source "#{get_binary_server_url}/zabbix-agent.tar.gz"
     owner "root"
     mode 00444
+    not_if { File.exists?("/usr/local/sbin/zabbix_agentd") }
 end
 
 bash "install-zabbix-agent" do
-    code <<-EOH
-        tar zxf /tmp/zabbix-agent.tar.gz -C /usr/local/
-    EOH
-    not_if "test -f /usr/local/sbin/zabbix_agentd"
+    code "tar zxf /tmp/zabbix-agent.tar.gz -C /usr/local/ && rm /tmp/zabbix-agent.tar.gz"
+    not_if { File.exists?("/usr/local/sbin/zabbix_agentd") }
 end
 
 user node[:bcpc][:zabbix][:user] do
@@ -72,4 +71,47 @@ end
 service "zabbix-agent" do
     provider Chef::Provider::Service::Upstart
     action [ :enable, :start ]
+end
+
+directory "/usr/local/bin/checks" do
+  action :create
+  owner  node[:bcpc][:zabbix][:user]
+  group "root"
+  mode 00775
+end 
+
+directory "/usr/local/etc/checks" do
+  action  :create
+  owner  node[:bcpc][:zabbix][:user]
+  group "root"
+  mode 00775
+end 
+
+%w{ float_ips }.each do |cc| 
+  template  "/usr/local/etc/checks/#{cc}.yml" do
+    source "checks/#{cc}.yml.erb"
+    owner node[:bcpc][:zabbix][:user]
+    group "root"
+    mode 00640
+  end
+  
+  cookbook_file "/usr/local/bin/checks/#{cc}" do
+    source "checks/#{cc}"
+    owner "root"
+    mode "00755"
+  end
+
+  cron "check-#{cc}" do
+    home "/var/lib/zabbix"
+    user "zabbix"
+    minute "0"
+    path "/usr/local/bin:/usr/bin:/bin"
+    command "zabbix_sender -c /usr/local/etc/zabbix_agentd.conf --key 'check.#{cc}' --value `check -f timeonly #{cc}`"
+  end
+end
+
+cookbook_file "/usr/local/bin/zabbix_discover_buckets" do
+  source "zabbix_discover_buckets"
+  owner "root"
+  mode "00755"
 end

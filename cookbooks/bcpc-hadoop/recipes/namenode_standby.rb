@@ -1,13 +1,16 @@
+include_recipe 'dpkg_autostart'
 require "base64"
 
 %w{hadoop-hdfs-namenode hadoop-hdfs-zkfc}.each do |pkg|
+  dpkg_autostart pkg do
+    allow false
+  end
   package pkg do
     action :upgrade
   end
 end
 
 node[:bcpc][:hadoop][:mounts].each do |i|
-
   directory "/disk/#{i}/dfs/nn" do
     owner "hdfs"
     group "hdfs"
@@ -55,9 +58,14 @@ node[:bcpc][:hadoop][:mounts].each do |d|
     code ["pushd /disk/#{d}/dfs/",
           "tar xzvf /tmp/nn_fmt.tgz",
           "popd"].join("\n")
-    only_if { not get_config("namenode_txn_fmt").nil? }
+    only_if { not get_config("namenode_txn_fmt").nil? and not Dir.entries("/disk/#{d}/dfs/nn").include?("current") }
   end
 end
+
+bash "hdfs namenode -bootstrapStandby" do
+  user "hdfs"
+  only_if { get_config("namenode_txn_fmt").nil? and not node[:bcpc][:hadoop][:mounts].all? { |d| Dir.entries("/disk/#{d}/dfs/nn/").include?("current") } }
+end  
 
 service "hadoop-hdfs-zkfc" do
   action [:enable, :start]
