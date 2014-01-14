@@ -9,15 +9,12 @@ $local_environment = "Test-Laptop"
 $local_mirror = nil
 #$local_mirror = "10.0.100.4"
 
-if $local_mirror.nil?
-  $repos_script = "/bin/true"
-else
-  $repos_script = <<EOH
+if $local_mirror
+  $repos_script = <<-EOH
     sed -i s/archive.ubuntu.com/#{$local_mirror}/g /etc/apt/sources.list
     sed -i s/security.ubuntu.com/#{$local_mirror}/g /etc/apt/sources.list
     sed -i s/^deb-src/\#deb-src/g /etc/apt/sources.list
-    echo "deb http://#{$local_mirror}/chef precise-0.10 main" > /etc/apt/sources.list.d/opscode.list
-EOH
+  EOH
 end
 
 Vagrant.configure("2") do |config|
@@ -43,12 +40,12 @@ Vagrant.configure("2") do |config|
 
   #config.vm.define :mirror do |mirror|
   #  mirror.vm.hostname = "bcpc-mirror-vagrant"
-#
-#    mirror.vm.network :private_network, ip: "10.0.100.4", netmask: "255.255.255.0", adapter_ip: "10.0.100.2"
-#    mirror.vm.network :private_network, ip: "172.16.100.4", netmask: "255.255.255.0", adapter_ip: "172.16.100.2"
-#    mirror.vm.network :private_network, ip: "192.168.100.4", netmask: "255.255.255.0", adapter_ip: "192.168.100.2"
-#
-#  end
+  #
+  #  mirror.vm.network :private_network, ip: "10.0.100.4", netmask: "255.255.255.0", adapter_ip: "10.0.100.2"
+  #  mirror.vm.network :private_network, ip: "172.16.100.4", netmask: "255.255.255.0", adapter_ip: "172.16.100.2"
+  #  mirror.vm.network :private_network, ip: "192.168.100.4", netmask: "255.255.255.0", adapter_ip: "192.168.100.2"
+  #
+  #end
 
   config.vm.box = "precise64"
   #config.vm.box_url = "http://cloud-images.ubuntu.com/precise/current/precise-server-cloudimg-amd64-vagrant-disk1.box"
