@@ -32,6 +32,7 @@ end
     # split package name on the first underscore to get the package name for dpkg to look-up
     package "#{pkg.split('_',2)[0]}" do
         action :install
+        version "0.9.10"
     end
 end
 

@@ -56,6 +56,13 @@ require 'pathname'
 require 'rubygems'
 gem_path = Pathname.new(Gem.ruby).dirname.join("gem").to_s
 
+# build requirements for zookeeper
+%w{make patch gcc}.each do |pkg|
+  package pkg do
+    action :nothing
+  end.run_action(:install)
+end
+
 gem_package "zookeeper" do
     gem_binary gem_path
     options "--no-http-proxy --clear-sources --source #{get_binary_server_url}"

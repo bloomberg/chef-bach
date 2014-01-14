@@ -107,7 +107,6 @@ end
 
 service "mysql" do
     action [ :enable, :start ]
-    start_command "service mysql start"
 end
 
 bash "initial-mysql-config" do
