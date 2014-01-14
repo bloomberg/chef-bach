@@ -4,6 +4,7 @@
    hadoop-mapreduce
    hbase-regionserver
    hadoop-client
+   hadoop-lzo
    impala-server
    impala
    hive

@@ -80,6 +80,10 @@ deb-i386 http://packages.treasure-data.com/precise precise contrib
 deb http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.16/repos/ubuntu12 HDP-UTILS main
 deb http://public-repo-1.hortonworks.com/HDP/ubuntu12/2.x HDP main
 
+deb [arch=amd64] http://archive.cloudera.com/cdh5/ubuntu/precise/amd64/cdh precise-cdh5 contrib 
+
+deb http://archive.cloudera.com/gplextras5/ubuntu/lucid/amd64/gplextras lucid-gplextras5 contrib
+
 clean http://us.archive.ubuntu.com/ubuntu
 clean http://ceph.com
 clean http://gitbuilder.ceph.com/libapache-mod-fastcgi-deb-precise-x86_64-basic/
@@ -91,3 +95,4 @@ clean http://apt.opscode.com
 clean http://www.rabbitmq.com/debian
 clean http://packages.treasure-data.com/precise
 clean http://public-repo-1.hortonworks.com
+clean http://archive.cloudera.com
