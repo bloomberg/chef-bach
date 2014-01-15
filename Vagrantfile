@@ -9,14 +9,6 @@ $local_environment = "Test-Laptop"
 $local_mirror = nil
 #$local_mirror = "10.0.100.4"
 
-if $local_mirror
-  $repos_script = <<-EOH
-    sed -i s/archive.ubuntu.com/#{$local_mirror}/g /etc/apt/sources.list
-    sed -i s/security.ubuntu.com/#{$local_mirror}/g /etc/apt/sources.list
-    sed -i s/^deb-src/\#deb-src/g /etc/apt/sources.list
-  EOH
-end
-
 Vagrant.configure("2") do |config|
 
   config.vm.define :bootstrap do |bootstrap|
@@ -29,7 +21,13 @@ Vagrant.configure("2") do |config|
     bootstrap.vm.synced_folder "../", "/chef-bcpc-host"
 
     # set up repositories
-    bootstrap.vm.provision :shell, :inline => $repos_script
+    if $local_mirror then
+      bootstrap.vm.provision :shell, :inline => <<-EOH
+        sed -i s/archive.ubuntu.com/#{$local_mirror}/g /etc/apt/sources.list
+        sed -i s/security.ubuntu.com/#{$local_mirror}/g /etc/apt/sources.list
+        sed -i s/^deb-src/\#deb-src/g /etc/apt/sources.list
+      EOH
+    end
 
     # since we are creating the server and the validation keys on this new
     # machine itself, we can't use Vagrant's built-in chef provisioning.
