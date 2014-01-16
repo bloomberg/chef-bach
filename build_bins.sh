@@ -84,7 +84,7 @@ done
 
 # Get the Rubygem for zookeeper
 if [[ ! -f zookeeper*.gem && ! -f gems/zookeeper*.gem ]]; then
-    gem fetch zookeeper
+    gem fetch zookeeper -v 1.4.7
     ln -s zookeeper-*.gem zookeeper.gem || true
 fi
 FILES="zookeeper*.gem $FILES"
