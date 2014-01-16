@@ -210,8 +210,8 @@ for url in $opscode_urls; do
 done
 
 # need a key to sign repo
-if [[ ! -f /home/ubuntu/apt_key.sec || ! -f apt_key.pub ]]; then
-  rm -rf /home/ubuntu/apt_key.sec apt_key.pub
+if [[ ! -f ${HOME}/apt_key.sec || ! -f apt_key.pub ]]; then
+  rm -rf ${HOME}/apt_key.sec apt_key.pub
   gpg --batch --gen-key << EOF
     Key-Type: DSA
     Key-Length: 1024
@@ -220,10 +220,10 @@ if [[ ! -f /home/ubuntu/apt_key.sec || ! -f apt_key.pub ]]; then
     Name-Comment: For dpkg repo signing
     Expire-Date: 0
     %pubring apt_key.pub
-    %secring /home/ubuntu/apt_key.sec
+    %secring ${HOME}/apt_key.sec
     %commit
 EOF
-  chmod 700 /home/ubuntu/apt_key.sec
+  chmod 700 ${HOME}/apt_key.sec
 fi
 
 ###################
@@ -232,7 +232,7 @@ dpkg-scanpackages . > Packages
 gzip -c Packages > Packages.gz
 apt-ftparchive release . > Release
 rm -f Release.gpg
-gpg -abs --keyring ./apt_key.pub --secret-keyring /home/ubuntu/apt_key.sec -o Release.gpg Release
+gpg -abs --keyring ./apt_key.pub --secret-keyring ${HOME}/apt_key.sec -o Release.gpg Release
 
 ####################
 # generate Pypi repo
