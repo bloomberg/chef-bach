@@ -47,8 +47,8 @@ RUBY18_ver=$(ruby -e "print RUBY_VERSION")
 
 # need to use gem-compile for gems with native code
 # provide a Ruby 1.9.1 and Ruby 1.8 gem-compile capable RubyGem
-if ! ${RUBY19_ver}_gem_compile/bin/$GEM19 list --local gem-compiler || \
-   ! ${RUBY18_ver}_gem_compile/bin/$GEM18 list --local gem-compiler; then
+if ! ${RUBY19_ver}_gem_compile/bin/$GEM19 list --local gem-compiler | grep -q gem-compiler || \
+   ! ${RUBY18_ver}_gem_compile/bin/$GEM18 list --local gem-compiler | grep -q gem-compiler; then
   # need a RubyGems > 1.8.25 for gem-compile (not available via apt-get)
   $CURL -O http://production.cf.rubygems.org/rubygems/rubygems-update-1.8.29.gem
   gem unpack rubygems-update-1.8.29.gem
