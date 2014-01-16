@@ -7,12 +7,12 @@
 <VirtualHost *:80>
         ServerAdmin webmaster@localhost
 
-        DocumentRoot /ubuntu/chef-bcpc/bins/
+        DocumentRoot /home/ubuntu/chef-bcpc/bins/
         <Directory />
                 Options FollowSymLinks
                 AllowOverride None
         </Directory>
-        <Directory /ubuntu/chef-bcpc/bins/>
+        <Directory /home/ubuntu/chef-bcpc/bins/>
                 Options Indexes FollowSymLinks MultiViews
                 AllowOverride None
                 <IfVersion < 2.3>
