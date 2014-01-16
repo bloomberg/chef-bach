@@ -5,45 +5,57 @@
 ################################################
 <%=
   if Dir.exists?("/home/ubuntu/chef-bcpc/bins/")
-    $bin_dir="/home/ubuntu/chef-bcpc/bins/"
+    bin_dir="/home/ubuntu/chef-bcpc/bins/"
   elsif Dir.exists?("/home/vagrant/chef-bcpc/bins/") 
-    $bin_dir="/home/vagrant/chef-bcpc/bins/"
+    bin_dir="/home/vagrant/chef-bcpc/bins/"
   else
-    $bin_dir="/var/www"
+    bin_dir="/var/www"
   end
 -%>
 
 <VirtualHost *:80>
         ServerAdmin webmaster@localhost
 
-        DocumentRoot <%= $bin_dir %>
+        DocumentRoot "<%= bin_dir %>"
         <Directory />
                 Options FollowSymLinks
                 AllowOverride None
         </Directory>
-        <%= "<Directory #{$bin_dir}>" %>
+        <%= "<Directory \"#{bin_dir}\">" %>
                 Options Indexes FollowSymLinks MultiViews
                 AllowOverride None
-                <IfVersion < 2.3>
+                <IfModule mod_version.c> 
+                    <IfVersion < 2.3>
                         Order allow,deny
                         allow from all
-                </IfVersion>
-                <IfVersion > 2.3>
+                    </IfVersion>
+                    <IfVersion > 2.3>
                         Require all granted
-                </IfVersion>
+                    </IfVersion>
+                </IfModule>
+                <IfModule !mod_version.c> 
+                    Order allow,deny
+                    allow from all
+                </IfModule>
         </Directory>
 
         ScriptAlias /cgi-bin/ /usr/lib/cgi-bin/
         <Directory "/usr/lib/cgi-bin">
                 AllowOverride None
                 Options +ExecCGI -MultiViews +SymLinksIfOwnerMatch
-                <IfVersion < 2.3>
+                <IfModule mod_version.c> 
+                    <IfVersion < 2.3>
                         Order allow,deny
                         allow from all
-                </IfVersion>
-                <IfVersion > 2.3>
+                    </IfVersion>
+                    <IfVersion > 2.3>
                         Require all granted
-                </IfVersion>
+                    </IfVersion>
+                </IfModule>
+                <IfModule !mod_version.c> 
+                    Order allow,deny
+                    allow from all
+                </IfModule>
         </Directory>
 
         ErrorLog ${APACHE_LOG_DIR}/error.log
@@ -57,13 +69,19 @@
     <Directory /var/spool/apt-mirror/mirror/>
         Options Indexes FollowSymLinks MultiViews
         AllowOverride None
-        <IfVersion < 2.3>
+        <IfModule mod_version.c> 
+            <IfVersion < 2.3>
                 Order allow,deny
                 allow from all
-        </IfVersion>
-        <IfVersion > 2.3>
+            </IfVersion>
+            <IfVersion > 2.3>
                 Require all granted
-        </IfVersion>
+            </IfVersion>
+        </IfModule>
+        <IfModule !mod_version.c> 
+            Order allow,deny
+            allow from all
+        </IfModule>
     </Directory>
     Alias /ceph-dumpling /var/spool/apt-mirror/mirror/ceph.com/debian-dumpling
     Alias /ceph-extras /var/spool/apt-mirror/mirror/ceph.com/packages/ceph-extras/debian
