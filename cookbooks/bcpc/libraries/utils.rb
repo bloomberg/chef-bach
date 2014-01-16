@@ -65,8 +65,8 @@ end
 
 def get_all_nodes
 	results = search(:node, "role:BCPC* AND chef_environment:#{node.chef_environment}")
-	if results.any?{|x| x['hostname'] == node[:hostname]}
-		results.map!{|x| x['hostname'] == node[:hostname] ? node : x}
+	if results.any?{|x| x['hostname'] == node['hostname']}
+		results.map!{|x| x['hostname'] == node['hostname'] ? node : x}
 	else
 		results.push(node)
 	end
