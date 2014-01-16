@@ -46,6 +46,12 @@ when "debian"
     arch "amd64"
     key node[:bcpc][:hadoop][:distribution][:key]
   end
+  apt_repository "cloudera-lzo" do
+    uri node['bcpc']['repos']['cloudera-lzo']
+    distribution "lucid-gplextras4"
+    components ["contrib"]
+    key "cloudera-archive-4.key"
+  end
 
   %w{hadoop
      hbase
