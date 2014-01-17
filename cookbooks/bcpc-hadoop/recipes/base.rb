@@ -20,7 +20,7 @@ if node[:bcpc][:hadoop][:disks].length > 0 then
     end
    
     d = node[:bcpc][:hadoop][:disks][i]
-    execute "mkfs -t xfs /dev/#{d}" do
+    execute "mkfs -t xfs -f /dev/#{d}" do
       not_if "file -s /dev/#{d} | grep -q 'SGI XFS filesystem'"
     end
  
