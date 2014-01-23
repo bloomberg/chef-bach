@@ -32,7 +32,7 @@ fi
 $SSHCMD "sed -i 's/^deb-src/\#deb-src/g' /etc/apt/sources.list" sudo
 
 echo "setup chef"
-$SSHCMD  "/home/ubuntu/install-chef.sh $binary_server_host $binary_server_url $chef_server_ip `hostname`" sudo
+$SSHCMD "/home/ubuntu/install-chef.sh $binary_server_host $binary_server_url $chef_server_ip `hostname`" sudo
 
 echo "zap disks"
 $SSHCMD "/home/ubuntu/zap-ceph-disks.sh" sudo
