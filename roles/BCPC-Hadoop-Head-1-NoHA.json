@@ -1,5 +1,5 @@
 {
-  "name": "BCPC-Hadoop-1-NoHA",
+  "name": "BCPC-Hadoop-Head-1-NoHA",
   "default_attributes": {
   },
   "json_class": "Chef::Role",

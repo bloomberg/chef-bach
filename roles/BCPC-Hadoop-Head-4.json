@@ -1,23 +1,16 @@
 {
-  "name": "BCPC-Hadoop-1",
+  "name": "BCPC-Hadoop-Head-4",
   "default_attributes": {
   },
   "json_class": "Chef::Role",
   "run_list": [
     "role[Basic]",
     "role[BCPC-Hadoop-Head]",
-    "recipe[bcpc-hadoop::namenode_master]",
-    "recipe[bcpc-hadoop::oozie]"
+    "recipe[bcpc-hadoop::impala_statestore]",
+    "recipe[bcpc-hadoop::hive]"
   ],
   "description": "A highly-available head node in a BCPC Hadoop cluster",
   "chef_type": "role",
   "override_attributes": {
-    "bcpc": {
-      "hadoop": {
-        "hdfs": {
-          "HA": true
-        }
-      }
-    }
   }
 }
