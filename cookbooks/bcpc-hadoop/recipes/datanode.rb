@@ -26,7 +26,7 @@ node[:bcpc][:hadoop][:mounts].each do |i|
 end
 
 if node[:bcpc][:hadoop][:mounts].length <= node[:bcpc][:hadoop][:hdfs][:failed_volumes_tolerated]
-  Chef::Log.fatal!('You have fewer node[:bcpc][:hadoop][:disks] than node[:bcpc][:hadoop][:hdfs][:failed_volumes_tolerated]! See comments of HDFS-4442.')
+  Chef::Application.fatal!('You have fewer node[:bcpc][:hadoop][:disks] than node[:bcpc][:hadoop][:hdfs][:failed_volumes_tolerated]! See comments of HDFS-4442.')
 end
 
 %w{libmysql-java}.each do |pkg|

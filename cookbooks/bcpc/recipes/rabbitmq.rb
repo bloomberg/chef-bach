@@ -19,13 +19,9 @@
 
 include_recipe "bcpc::default"
 
-ruby_block "initialize-rabbitmq-config" do
-    block do
-        make_config('rabbitmq-user', "guest")
-        make_config('rabbitmq-password', secure_password)
-        make_config('rabbitmq-cookie', secure_password)
-    end
-end
+make_config('rabbitmq-user', "guest")
+make_config('rabbitmq-password', secure_password)
+make_config('rabbitmq-cookie', secure_password)
 
 apt_repository "rabbitmq" do
     uri node['bcpc']['repos']['rabbitmq']

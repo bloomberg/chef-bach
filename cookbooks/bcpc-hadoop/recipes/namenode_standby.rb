@@ -62,20 +62,29 @@ node[:bcpc][:hadoop][:mounts].each do |d|
   end
 end
 
-bash "hdfs namenode -bootstrapStandby" do
+bash "hdfs namenode -bootstrapStandby -force -nonInteractive" do
   user "hdfs"
   only_if { get_config("namenode_txn_fmt").nil? and not node[:bcpc][:hadoop][:mounts].all? { |d| Dir.entries("/disk/#{d}/dfs/nn/").include?("current") } }
 end  
 
-service "hadoop-hdfs-zkfc" do
-  action [:enable, :start]
-  subscribes :restart, "template[/etc/hadoop/conf/hdfs-site.xml]", :delayed
-  subscribes :restart, "template[/etc/hadoop/conf/hdfs-policy.xml]", :delayed
-end
+if node['bcpc']['hadoop']['hdfs']['ha'] then
+  Chef::Log.info "Not running standby namenode services yet -- HA disabled!"
+  service "hadoop-hdfs-zkfc" do
+    action [:enable, :start]
+    subscribes :restart, "template[/etc/hadoop/conf/hdfs-site.xml]", :delayed
+    subscribes :restart, "template[/etc/hadoop/conf/hdfs-policy.xml]", :delayed
+  end
 
-service "hadoop-hdfs-namenode" do
-  action [:enable, :start]
-  subscribes :restart, "template[/etc/hadoop/conf/hdfs-site.xml]", :delayed
-  subscribes :restart, "template[/etc/hadoop/conf/hdfs-policy.xml]", :delayed
+  service "hadoop-hdfs-namenode" do
+    action [:enable, :start]
+    subscribes :restart, "template[/etc/hadoop/conf/hdfs-site.xml]", :delayed
+    subscribes :restart, "template[/etc/hadoop/conf/hdfs-policy.xml]", :delayed
+  end
+else
+  service "hadoop-hdfs-zkfc" do
+    action [:disable, :stop]
+  end
+  service "hadoop-hdfs-namenode" do
+    action [:disable, :stop]
+  end
 end
-

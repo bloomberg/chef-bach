@@ -19,12 +19,8 @@
 
 include_recipe "bcpc::nova-head"
 
-ruby_block "initialize-powerdns-config" do
-    block do
-        make_config('mysql-pdns-user', "pdns")
-        make_config('mysql-pdns-password', secure_password)
-    end
-end
+make_config('mysql-pdns-user', "pdns")
+make_config('mysql-pdns-password', secure_password)
 
 %w{pdns-server pdns-backend-mysql}.each do |pkg|
     package pkg do

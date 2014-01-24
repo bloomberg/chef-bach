@@ -20,13 +20,9 @@
 include_recipe "bcpc::mysql"
 include_recipe "bcpc::openstack"
 
-ruby_block "initialize-nova-config" do
-    block do
-        make_config('mysql-nova-user', "nova")
-        make_config('mysql-nova-password', secure_password)
-        make_config('glance-cloudpipe-uuid', %x[uuidgen -r].strip)
-    end
-end
+make_config('mysql-nova-user', "nova")
+make_config('mysql-nova-password', secure_password)
+make_config('glance-cloudpipe-uuid', %x[uuidgen -r].strip)
 
 package "python-memcache"
 

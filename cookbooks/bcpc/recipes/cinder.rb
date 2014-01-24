@@ -21,13 +21,9 @@ include_recipe "bcpc::mysql"
 include_recipe "bcpc::ceph-head"
 include_recipe "bcpc::openstack"
 
-ruby_block "initialize-cinder-config" do
-    block do
-        make_config('mysql-cinder-user', "cinder")
-        make_config('mysql-cinder-password', secure_password)
-        make_config('libvirt-secret-uuid', %x[uuidgen -r].strip)
-    end
-end
+make_config('mysql-cinder-user', "cinder")
+make_config('mysql-cinder-password', secure_password)
+make_config('libvirt-secret-uuid', %x[uuidgen -r].strip)
 
 %w{cinder-api cinder-volume cinder-scheduler}.each do |pkg|
     package pkg do

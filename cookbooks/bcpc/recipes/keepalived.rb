@@ -19,12 +19,8 @@
 
 include_recipe "bcpc::default"
 
-ruby_block "initialize-keepalived-config" do
-    block do
-        make_config('keepalived-router-id', "#{(rand * 1000).to_i%254/2*2+1}")
-        make_config('keepalived-password', secure_password)
-    end
-end
+make_config('keepalived-router-id', "#{(rand * 1000).to_i%254/2*2+1}")
+make_config('keepalived-password', secure_password)
 
 package "keepalived" do
     action :upgrade

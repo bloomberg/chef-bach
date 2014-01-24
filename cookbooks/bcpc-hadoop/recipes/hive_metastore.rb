@@ -1,9 +1,3 @@
-include_recipe 'dpkg_autostart'
-
-dpkg_autostart "hive-metastore" do
-  allow false
-end
-
 %w{hive-metastore libmysql-java}.each do |pkg|
   package pkg do
     action :upgrade

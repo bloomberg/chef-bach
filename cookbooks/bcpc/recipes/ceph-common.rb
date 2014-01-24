@@ -34,12 +34,8 @@ end
     end
 end
 
-ruby_block "initialize-ceph-common-config" do
-    block do
-        make_config('ceph-fs-uuid', %x[uuidgen -r].strip)
-        make_config('ceph-mon-key', ceph_keygen)
-    end
-end
+make_config('ceph-fs-uuid', %x[uuidgen -r].strip)
+make_config('ceph-mon-key', ceph_keygen)
 
 ruby_block 'write-ceph-mon-key' do
     block do

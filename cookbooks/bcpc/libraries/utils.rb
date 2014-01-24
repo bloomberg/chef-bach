@@ -24,7 +24,7 @@ require 'ipaddr'
 
 def init_config
 	if not Chef::DataBag.list.key?('configs')
-		puts "************ Creating data_bag \"configs\""
+		Chef::Log.info "************ Creating data_bag \"configs\""
 		bag = Chef::DataBag.new
 		bag.name("configs")
 		bag.create
@@ -32,35 +32,42 @@ def init_config
 	begin
 		$dbi = Chef::DataBagItem.load('configs', node.chef_environment)
 		$edbi = Chef::EncryptedDataBagItem.load('configs', node.chef_environment) if node['bcpc']['encrypt_data_bag']
-		puts "============ Loaded existing data_bag_item \"configs/#{node.chef_environment}\""
+		Chef::Log.info "============ Loaded existing data_bag_item \"configs/#{node.chef_environment}\""
 	rescue
 		$dbi = Chef::DataBagItem.new
 		$dbi.data_bag('configs')
 		$dbi.raw_data = { 'id' => node.chef_environment }
 		$dbi.save
 		$edbi = Chef::EncryptedDataBagItem.load('configs', node.chef_environment) if node['bcpc']['encrypt_data_bag']
-		puts "++++++++++++ Created new data_bag_item \"configs/#{node.chef_environment}\""
+		Chef::Log.info "++++++++++++ Created new data_bag_item \"configs/#{node.chef_environment}\""
 	end
 end
 
 def make_config(key, value)
 	init_config if $dbi.nil?
 	if $dbi[key].nil?
-		$dbi[key] = (node['bcpc']['encrypt_data_bag']) ? Chef::EncryptedDataBagItem.encrypt_value(value, Chef::EncryptedDataBagItem.load_secret) : value
+		$dbi[key] = (node['bcpc']['encrypt_data_bag'] ? Chef::EncryptedDataBagItem.encrypt_value(value, Chef::EncryptedDataBagItem.load_secret) : value)
 		$dbi.save
 		$edbi = Chef::EncryptedDataBagItem.load('configs', node.chef_environment) if node['bcpc']['encrypt_data_bag']
-		puts "++++++++++++ Creating new item with key \"#{key}\""
+		Chef::Log.info "++++++++++++ Creating new item with key \"#{key}\""
 		return value
 	else
-		puts "============ Loaded existing item with key \"#{key}\""
-		return (node['bcpc']['encrypt_data_bag']) ? $edbi[key] : $dbi[key]
+		Chef::Log.info "============ Loaded existing item with key \"#{key}\""
+		return (node['bcpc']['encrypt_data_bag'] ? $edbi[key] : $dbi[key])
 	end
 end
 
 def get_config(key)
 	init_config if $dbi.nil?
-	puts "------------ Fetching value for key \"#{key}\""
-	return (node['bcpc']['encrypt_data_bag']) ? $edbi[key] : $dbi[key]
+	Chef::Log.info  "------------ Fetching value for key \"#{key}\""
+	value = node['bcpc']['encrypt_data_bag'] ? $edbi[key] : $dbi[key]
+	return value
+end
+
+def get_config!(key)
+        value = get_config(key)
+        Chef::Application.fatal!("Failed to find value for #{key}!") if value.nil?
+	return value
 end
 
 def get_all_nodes
@@ -102,6 +109,7 @@ end
 
 def get_head_nodes
   results = search(:node, "role:BCPC-Headnode AND chef_environment:#{node.chef_environment}")
+  # this returns the node object for the current host before it has been set in Postgress
   results.map!{ |x| x.hostname == node.hostname ? node : x }
   return (results.empty?) ? [node] : results
 end

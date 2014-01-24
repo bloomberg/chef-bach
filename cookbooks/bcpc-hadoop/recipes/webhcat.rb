@@ -1,4 +1,3 @@
-
 %w{hive-webhcat hive-hcatalog-server hive-hcatalog libmysql-java}.each do |p|
   package p do
     action :upgrade

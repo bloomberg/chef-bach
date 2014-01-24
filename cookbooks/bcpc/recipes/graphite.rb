@@ -21,12 +21,8 @@ include_recipe "bcpc::default"
 include_recipe "bcpc::ceph-head"
 include_recipe "bcpc::apache2"
 
-ruby_block "initialize-graphite-config" do
-    block do
-        make_config('mysql-graphite-user', "graphite")
-        make_config('mysql-graphite-password', secure_password)
-    end
-end
+make_config('mysql-graphite-user', "graphite")
+make_config('mysql-graphite-password', secure_password)
 
 %w{python-whisper_0.9.10_all.deb python-carbon_0.9.10_all.deb python-graphite-web_0.9.10_all.deb}.each do |pkg|
     # split package name on the first underscore to get the package name for dpkg to look-up

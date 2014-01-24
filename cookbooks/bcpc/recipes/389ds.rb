@@ -19,16 +19,12 @@
 
 include_recipe "bcpc::default"
 
-ruby_block "initialize-389ds-config" do
-    block do
-        make_config('389ds-admin-user', "admin")
-        make_config('389ds-admin-password', secure_password)
-        make_config('389ds-rootdn-user', "cn=Directory Manager")
-        make_config('389ds-rootdn-password', secure_password)
-        make_config('389ds-replication-user', "cn=Replication Manager")
-        make_config('389ds-replication-password', secure_password)
-    end
-end
+make_config('389ds-admin-user', "admin")
+make_config('389ds-admin-password', secure_password)
+make_config('389ds-rootdn-user', "cn=Directory Manager")
+make_config('389ds-rootdn-password', secure_password)
+make_config('389ds-replication-user', "cn=Replication Manager")
+make_config('389ds-replication-password', secure_password)
 
 %w{389-ds ldap-utils}.each do |pkg|
     package pkg do

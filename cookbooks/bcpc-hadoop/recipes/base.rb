@@ -33,7 +33,7 @@ if node[:bcpc][:hadoop][:disks].length > 0 then
   end
   node.set[:bcpc][:hadoop][:mounts] = (0..node[:bcpc][:hadoop][:disks].length-1).to_a
 else
-  Chef::Log.fatal!('Please specify some node[:bcpc][:hadoop][:disks]!')
+  Chef::Application.fatal!('Please specify some node[:bcpc][:hadoop][:disks]!')
 end
 
 
@@ -48,9 +48,9 @@ when "debian"
   end
   apt_repository "cloudera-lzo" do
     uri node['bcpc']['repos']['cloudera-lzo']
-    distribution "lucid-gplextras4"
+    distribution "lucid-gplextras5"
     components ["contrib"]
-    key "cloudera-archive-4.key"
+    key node[:bcpc][:hadoop][:distribution][:key]
   end
 
   %w{hadoop
@@ -85,15 +85,11 @@ when "rhel"
   # do things on RHEL platforms (redhat, centos, scientific, etc)
 end
 
-ruby_block "initialize-hadoop-configs" do
-    block do
-      make_config('mysql-hive-password', secure_password)
-      make_config('oozie-keystore-password', secure_password)
-      make_config('mysql-hue-password', secure_password)
-      make_config('hue-session-key', secure_password)
-      make_config('mysql-oozie-password', secure_password)
-    end
-end
+make_config('mysql-hive-password', secure_password)
+make_config('oozie-keystore-password', secure_password)
+make_config('mysql-hue-password', secure_password)
+make_config('hue-session-key', secure_password)
+make_config('mysql-oozie-password', secure_password)
 
 #
 #set up hadoop conf
@@ -114,11 +110,17 @@ hadoop_conf_files = %w{capacity-scheduler.xml
   }
 node[:bcpc][:hadoop][:hdfs][:HA] == true and hadoop_conf_files.insert(-1,"hdfs-site_HA.xml")
 
+if node['bcpc']['hadoop']['hdfs']['HA'] then
+  nn_hosts = get_nodes_for("namenode*")
+else
+  nn_hosts = get_nodes_for("namenode_no_HA")
+end
+
 hadoop_conf_files.each do |t|
    template "/etc/hadoop/conf/#{t}" do
      source "hdp_#{t}.erb"
      mode 0644
-     variables(:nn_hosts => get_nodes_for("namenode*") ,
+     variables(:nn_hosts => nn_hosts,
                :zk_hosts => get_nodes_for("zookeeper_server"),
                :jn_hosts => get_nodes_for("journalnode"),
                :rm_host  => get_nodes_for("resource_manager"),
@@ -132,7 +134,7 @@ end
  template "/etc/hadoop/conf/#{t}" do
    source "hdp_#{t}.erb"
    mode 0644
-   variables(:nn_hosts => get_nodes_for("namenode"),
+   variables(:nn_hosts => nn_hosts,
              :zk_hosts => get_nodes_for("zookeeper_server"),
              :jn_hosts => get_nodes_for("journalnode"),
              :mounts => node[:bcpc][:hadoop][:mounts])
@@ -149,7 +151,7 @@ end
  template "/etc/zookeeper/conf/#{t}" do
    source "zk_#{t}.erb"
    mode 0644
-   variables(:nn_hosts => get_nodes_for("namenode"),
+   variables(:nn_hosts => nn_hosts,
              :zk_hosts => get_nodes_for("zookeeper_server"),
              :jn_hosts => get_nodes_for("journalnode"),
              :mounts => node[:bcpc][:hadoop][:mounts])
@@ -168,7 +170,7 @@ end
    template "/etc/hbase/conf/#{t}" do
      source "hb_#{t}.erb"
      mode 0644
-     variables(:nn_hosts => get_nodes_for("namenode"),
+     variables(:nn_hosts => nn_hosts,
                :zk_hosts => get_nodes_for("zookeeper_server"),
                :jn_hosts => get_nodes_for("journalnode"),
                :rs_hosts => get_nodes_for("region_server"),

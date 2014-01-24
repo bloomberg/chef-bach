@@ -22,12 +22,8 @@ include_recipe "bcpc::openstack"
 include_recipe "bcpc::apache2"
 include_recipe "bcpc::cobalt"
 
-ruby_block "initialize-horizon-config" do
-    block do
-        make_config('mysql-horizon-user', "horizon")
-        make_config('mysql-horizon-password', secure_password)
-    end
-end
+make_config('mysql-horizon-user', "horizon")
+make_config('mysql-horizon-password', secure_password)
 
 package "openstack-dashboard" do
     action :upgrade

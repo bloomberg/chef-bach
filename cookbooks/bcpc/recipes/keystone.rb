@@ -22,12 +22,12 @@ include_recipe "bcpc::openstack"
 include_recipe "bcpc::apache2"
 
 ruby_block "initialize-keystone-config" do
+    make_config('mysql-keystone-user', "keystone")
+    make_config('mysql-keystone-password', secure_password)
+    make_config('keystone-admin-token', secure_password)
+    make_config('keystone-admin-user', "admin")
+    make_config('keystone-admin-password', secure_password)
     block do
-        make_config('mysql-keystone-user', "keystone")
-        make_config('mysql-keystone-password', secure_password)
-        make_config('keystone-admin-token', secure_password)
-        make_config('keystone-admin-user', "admin")
-        make_config('keystone-admin-password', secure_password)
         if get_config('keystone-pki-certificate').nil? then
             temp = %x[openssl req -new -x509 -passout pass:temp_passwd -newkey rsa:2048 -out /dev/stdout -keyout /dev/stdout -days 1095 -subj "/C=#{node['bcpc']['country']}/ST=#{node['bcpc']['state']}/L=#{node['bcpc']['location']}/O=#{node['bcpc']['organization']}/OU=#{node['bcpc']['region_name']}/CN=keystone.#{node['bcpc']['domain_name']}/emailAddress=#{node['bcpc']['admin_email']}"]
             make_config('keystone-pki-private-key', %x[echo "#{temp}" | openssl rsa -passin pass:temp_passwd -out /dev/stdout])
@@ -270,14 +270,10 @@ bash "keystone-create-users-tenants" do
 end
 
 
-ruby_block "initialize-keystone-test-config" do
-    block do
-        make_config('keystone-test-user', "tester")
-        make_config('keystone-test-password', secure_password)
-    end
-end
 
 bash "keystone-create-test-tenants" do
+  make_config('keystone-test-user', "tester")
+  make_config('keystone-test-password', secure_password)
   code <<-EOH
         . /root/adminrc
         export KEYSTONE_ADMIN_TENANT_ID=`keystone tenant-get "#{node['bcpc']['admin_tenant']}" | grep " id " | awk '{print $4}'`

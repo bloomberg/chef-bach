@@ -21,16 +21,12 @@ include_recipe "bcpc::mysql"
 include_recipe "bcpc::horizon"
 include_recipe "bcpc::apache2"
 
-ruby_block "initialize-zabbix-config" do
-    block do
-        make_config('mysql-zabbix-user', "zabbix")
-        make_config('mysql-zabbix-password', secure_password)
-        make_config('zabbix-admin-user', "admin")
-        make_config('zabbix-admin-password', secure_password)
-        make_config('zabbix-guest-user', "guest")
-        make_config('zabbix-guest-password', secure_password)
-    end
-end
+make_config('mysql-zabbix-user', "zabbix")
+make_config('mysql-zabbix-password', secure_password)
+make_config('zabbix-admin-user', "admin")
+make_config('zabbix-admin-password', secure_password)
+make_config('zabbix-guest-user', "guest")
+make_config('zabbix-guest-password', secure_password)
 
 remote_file "/tmp/zabbix-server.tar.gz" do
     source "#{get_binary_server_url}/zabbix-server.tar.gz"

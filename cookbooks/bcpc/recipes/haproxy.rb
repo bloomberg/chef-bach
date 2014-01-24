@@ -19,12 +19,8 @@
 
 include_recipe "bcpc::default"
 
-ruby_block "initialize-haproxy-config" do
-    block do
-        make_config('haproxy-stats-user', "haproxy")
-        make_config('haproxy-stats-password', secure_password)
-    end
-end
+make_config('haproxy-stats-user', "haproxy")
+make_config('haproxy-stats-password', secure_password)
 
 package "haproxy" do
     action :upgrade

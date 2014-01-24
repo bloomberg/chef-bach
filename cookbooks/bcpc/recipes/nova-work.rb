@@ -20,16 +20,12 @@
 include_recipe "bcpc::openstack"
 include_recipe "bcpc::ceph-work"
 
-ruby_block "initialize-nova-work-config" do
-    block do
-        require 'openssl'
-        require 'net/ssh'
-        key = OpenSSL::PKey::RSA.new 2048;
-        pubkey = "#{key.ssh_type} #{[ key.to_blob ].pack('m0')}"
-        make_config('ssh-nova-private-key', key.to_pem)
-        make_config('ssh-nova-public-key', pubkey)
-    end
-end
+require 'openssl'
+require 'net/ssh'
+key = OpenSSL::PKey::RSA.new 2048;
+pubkey = "#{key.ssh_type} #{[ key.to_blob ].pack('m0')}"
+make_config('ssh-nova-private-key', key.to_pem)
+make_config('ssh-nova-public-key', pubkey)
 
 package "nova-compute-#{node[:bcpc][:virt_type]}" do
     action :upgrade
