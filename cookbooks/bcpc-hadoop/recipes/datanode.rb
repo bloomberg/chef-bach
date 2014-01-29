@@ -41,7 +41,7 @@ end
 
 %w{hadoop-yarn-nodemanager hadoop-hdfs-datanode}.each do |svc|
   service svc do
-    action :enable
+    action [:enable, :start]
     subscribes :restart, "template[/etc/hadoop/conf/hdfs-site.xml]", :delayed
     subscribes :restart, "template[/etc/hadoop/conf/yarn-site.xml]", :delayed
   end
@@ -56,10 +56,10 @@ end
 %w{hbase-regionserver impala-server}.each do |svc|
   service svc do
     action [:enable, :start]
-      subscribes :restart, "template[/etc/default/impalad]", :delayed
-      subscribes :restart, "template[/etc/hadoop/conf/hdfs-site.xml]", :delayed
-      subscribes :restart, "template[/etc/hadoop/conf/yarn-site.xml]", :delayed
-      subscribes :restart, "template[/etc/hadoop/conf/hbase-site.xml]", :delayed
+    subscribes :restart, "template[/etc/default/impalad]", :delayed
+    subscribes :restart, "template[/etc/hadoop/conf/hdfs-site.xml]", :delayed
+    subscribes :restart, "template[/etc/hadoop/conf/yarn-site.xml]", :delayed
+    subscribes :restart, "template[/etc/hadoop/conf/hbase-site.xml]", :delayed
   end
 end
 

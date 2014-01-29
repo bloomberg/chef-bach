@@ -68,7 +68,6 @@ bash "hdfs namenode -bootstrapStandby -force -nonInteractive" do
 end  
 
 if node['bcpc']['hadoop']['hdfs']['ha'] then
-  Chef::Log.info "Not running standby namenode services yet -- HA disabled!"
   service "hadoop-hdfs-zkfc" do
     action [:enable, :start]
     subscribes :restart, "template[/etc/hadoop/conf/hdfs-site.xml]", :delayed
@@ -81,6 +80,7 @@ if node['bcpc']['hadoop']['hdfs']['ha'] then
     subscribes :restart, "template[/etc/hadoop/conf/hdfs-policy.xml]", :delayed
   end
 else
+  Chef::Log.info "Not running standby namenode services yet -- HA disabled!"
   service "hadoop-hdfs-zkfc" do
     action [:disable, :stop]
   end

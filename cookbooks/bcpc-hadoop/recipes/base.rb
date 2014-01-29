@@ -277,10 +277,8 @@ end
   end
 end
 
-package "openjdk-7-jdk" do
-  action :upgrade
-end
-
-package "zookeeper" do
-  action :upgrade
+%w{openjdk-7-jdk zookeeper}.each do |pkg|
+  package pkg do
+    action :upgrade
+  end
 end
