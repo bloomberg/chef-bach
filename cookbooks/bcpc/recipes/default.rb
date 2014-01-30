@@ -67,7 +67,7 @@ gem_package "zookeeper" do
     gem_binary gem_path
     options "--no-http-proxy --clear-sources --source #{get_binary_server_url}"
     # workaround for CHEF-3912 is to include versions from build_bins.sh
-    version "1.4.7"
+    version ">=1.4.7"
     action :nothing
 end.run_action(:install)
 
