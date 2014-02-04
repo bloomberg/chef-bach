@@ -14,11 +14,29 @@
   end
 end
 
-
+# Build nodes for HDFS storage
 node[:bcpc][:hadoop][:mounts].each do |i|
   directory "/disk/#{i}/dfs/dn" do
     owner "hdfs"
     group "hdfs"
+    mode 0700
+    action :create
+    recursive true
+  end
+end
+
+# Build nodes for Yarn log storage
+node[:bcpc][:hadoop][:mounts].each do |i|
+  directory "/disk/#{i}/yarn/local" do
+    owner "yarn"
+    group "yarn"
+    mode 0700
+    action :create
+    recursive true
+  end
+  directory "/disk/#{i}/yarn/logs" do
+    owner "yarn"
+    group "yarn"
     mode 0700
     action :create
     recursive true

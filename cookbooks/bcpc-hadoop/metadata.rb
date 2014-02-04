@@ -7,3 +7,4 @@ version          "0.1.0"
 
 depends "bcpc", ">= 0.5.0"
 depends "dpkg_autostart"
+depends "sysctl"

@@ -1,5 +1,25 @@
+depends "sysctl"
+
 package "xfsprogs" do
   action :install
+end
+
+# set vm.swapiness to 0 (to lessen swapping)
+sysctl_param 'vm.swappiness' do
+  value 0
+end
+
+# disable IPv6 (e.g. for HADOOP-8568)
+%w{net.ipv6.conf.all.disable_ipv6 net.ipv6.conf.default.disable_ipv6 net.ipv6.conf.lo.disable_ipv6}.each do |param|
+  sysctl_param param do
+    value 1
+    notifies :run, "bash[restart_networking]", :delayed
+  end
+end
+
+bash "restart_networking" do
+  code "service networking restart"
+  action :nothing
 end
 
 directory "/disk" do
@@ -30,12 +50,12 @@ if node[:bcpc][:hadoop][:disks].length > 0 then
       options "noatime,nodiratime,inode64"
       action [:enable, :mount]
     end
+
   end
   node.set[:bcpc][:hadoop][:mounts] = (0..node[:bcpc][:hadoop][:disks].length-1).to_a
 else
   Chef::Application.fatal!('Please specify some node[:bcpc][:hadoop][:disks]!')
 end
-
 
 case node["platform_family"]
 when "debian"
