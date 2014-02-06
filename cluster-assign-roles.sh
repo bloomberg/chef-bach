@@ -16,22 +16,29 @@
 #
 # - A node may be excluded by setting its action to SKIP
 
-set -e
 set -x
+set -o errtrace
+set -o errexit
 set -o nounset
+
+# We use eclamation point as a separator but it is a pain to use in strings with variables
+# make it a variable to include in strings
+BANG='!'
+# Global Regular Expression for parsing parse_cluster_txt output
+REGEX='(.*)!(.*)!(.*)'
 
 ########################################################################
 # install_machines -  Install a set of machines (will run chefit.sh if no node object for machine)
 # Argument: $1 - a string of role!IP!FQDN pairs separated by white space
-# Will install the machine with role $role
+# Will install the machine with role $role in the order passed (left to right)
 function install_machines {
   passwd=`knife data bag show configs $ENVIRONMENT | grep "cobbler-root-password:" | awk ' {print $2}'`
   for h in $(sort <<< ${*// /\\n}); do
-    local regEx='(.*)!(.*)!.*'
-    [[ "$h" =~ $regEx ]]
+    [[ "$h" =~ $REGEX ]]
     local run_list="${BASH_REMATCH[1]}"
     local ip="${BASH_REMATCH[2]}"
-    printf "About to bootstrap node $ip to $ENVIRONMENT ${run_list}...\n"
+    local fqdn="${BASH_REMATCH[3]}"
+    printf "About to bootstrap node $fqdn to $ENVIRONMENT ${run_list}...\n"
     knife node show $fqdn 2>/dev/null >/dev/null || ./chefit.sh $ip $ENVIRONMENT
     local SSHCMD="./nodessh.sh $ENVIRONMENT $ip"
     sudo knife bootstrap -E $ENVIRONMENT -r "$run_list" $ip -x ubuntu  -P $passwd -u admin -k /etc/chef-server/admin.pem --sudo <<< $passwd
@@ -50,14 +57,12 @@ function parse_cluster_txt {
     shopt -s nocasematch
     if [[ -z "${match_text-}" || "$match_text" = "$host" || "$match_text" = "$ipaddr" || "$match_text" = "$role" ]] && \
        [[ ! "|$role" =~ '|SKIP' ]]; then
-      hosts="$hosts ${role}!${ipaddr}!${host}.$domain"
+      hosts="$hosts ${role}${BANG}${ipaddr}${BANG}${host}.$domain"
     fi
     shopt -u nocasematch
   done < cluster.txt
   printf "$hosts"
 }
-# Global Regular Expression for parsing parse_cluster_txt output
-REGEX='(.*)!(.*)!(.*)'
 
 ##########################################
 # Install Machine Stub
@@ -72,7 +77,7 @@ function install_stub {
     local role="${BASH_REMATCH[1]}"
     local ip="${BASH_REMATCH[2]}"
     local fqdn="${BASH_REMATCH[3]}"
-    knife node show $fqdn 2>/dev/null >/dev/null ||  install_machines "role[Basic],recipe[bcpc::default],recipe[bcpc::networking]!$ip!NONE" &
+    knife node show $fqdn 2>/dev/null >/dev/null ||  install_machines "role[Basic],recipe[bcpc::default],recipe[bcpc::networking]${BANG}${ip}${BANG}${fqdn}" &
   done
   wait
 }
@@ -88,16 +93,18 @@ function install_stub {
 # Lastly, install workers in parallel)
 function openstack_install {
   local hosts="$*"
-  local err_trap="$(trap ERR)"
-  trap '$err_trap; echo -e "####\n#### Failed installing $host\n####"' ERR
   shopt -u nocasematch
   printf "Doing OpenStack style install...\n"
 
-  [[ "$(printf ${hosts// /\\n} | grep -i "head" | sort | head -1)" =~ $REGEX ]] && first_head_node="${BASH_REMATCH[3]}" || \
+  first_head_node=$(printf ${hosts// /\\n} | grep -i "head" | sort | head -1)
+  [[ "$first_head_node" =~ $REGEX ]] && first_head_node_fqdn="${BASH_REMATCH[3]}" || \
     (printf "Failed to parse hosts\n"; exit 1 )
-  install_stub $first_head_node
+  # chef does not always use the same hostname as cluster.txt (be fast and loose and find the chef hostname)
+  first_head_node_hostname=${first_head_node_fqdn%%.*}
+  chef_head_node_name=$(knife client list | egrep "^${first_head_node_hostname}\..*$|^${first_head_node_hostname}$")
+  install_stub "$first_head_node"
   # set the first node to admin for creating data bags (short-circuit failures in-case machine already is an admin)
-  printf "/\"admin\": false\ns/false/true\nw\nq\n" | EDITOR=ed knife client edit $first_head_node || /bin/true
+  printf "/\"admin\": false\ns/false/true\nw\nq\n" | EDITOR=ed knife client edit $chef_head_node_name || /bin/true
 
   # Do head nodes first and group by type of head
   printf "Installing heads...\n"
@@ -112,7 +119,8 @@ function openstack_install {
     ( install_machines $m || exit 1 )&
   done
   wait
-  trap "$err_trap" ERR
+  # remove admin from first headnode
+  printf "/\"admin\": true\ns/true/false\nw\nq\n" | EDITOR=ed knife client edit "$chef_head_node_name"
 }
 
 ########################################################################
