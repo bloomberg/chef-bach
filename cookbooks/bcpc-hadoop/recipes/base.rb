@@ -1,5 +1,3 @@
-depends "sysctl"
-
 package "xfsprogs" do
   action :install
 end
@@ -10,16 +8,23 @@ sysctl_param 'vm.swappiness' do
 end
 
 # disable IPv6 (e.g. for HADOOP-8568)
-%w{net.ipv6.conf.all.disable_ipv6 net.ipv6.conf.default.disable_ipv6 net.ipv6.conf.lo.disable_ipv6}.each do |param|
-  sysctl_param param do
-    value 1
-    notifies :run, "bash[restart_networking]", :delayed
-  end
-end
+case node["platform_family"]
+  when "debian"
+    %w{net.ipv6.conf.all.disable_ipv6
+       net.ipv6.conf.default.disable_ipv6
+       net.ipv6.conf.lo.disable_ipv6}.each do |param|
+      sysctl_param param do
+        value 1
+        notifies :run, "bash[restart_networking]", :delayed
+      end
+    end
 
-bash "restart_networking" do
-  code "service networking restart"
-  action :nothing
+    bash "restart_networking" do
+      code "service networking restart"
+      action :nothing
+    end
+  else
+    Chef::Log.warn "============ Unable to disable IPv6 for non-Debian systems"
 end
 
 directory "/disk" do
@@ -58,32 +63,32 @@ else
 end
 
 case node["platform_family"]
-when "debian"
-  apt_repository "cloudera" do
-    uri node['bcpc']['repos']['cloudera']
-    distribution node['lsb']['codename'] + node[:bcpc][:hadoop][:distribution][:version]
-    components ["contrib"]
-    arch "amd64"
-    key node[:bcpc][:hadoop][:distribution][:key]
-  end
-  apt_repository "cloudera-lzo" do
-    uri node['bcpc']['repos']['cloudera-lzo']
-    distribution "lucid-gplextras5"
-    components ["contrib"]
-    key node[:bcpc][:hadoop][:distribution][:key]
-  end
+  when "debian"
+    apt_repository "cloudera" do
+      uri node['bcpc']['repos']['cloudera']
+      distribution node['lsb']['codename'] + node[:bcpc][:hadoop][:distribution][:version]
+      components ["contrib"]
+      arch "amd64"
+      key node[:bcpc][:hadoop][:distribution][:key]
+    end
+    apt_repository "cloudera-lzo" do
+      uri node['bcpc']['repos']['cloudera-lzo']
+      distribution "lucid-gplextras5"
+      components ["contrib"]
+      key node[:bcpc][:hadoop][:distribution][:key]
+    end
 
-  %w{hadoop
-     hbase
-     hive
-     oozie
-     pig
-     zookeeper
-     impala
-     webhcat
-     hadoop-httpfs
-     hive-hcatalog
-     hue}.each do |w|
+    %w{hadoop
+       hbase
+       hive
+       oozie
+       pig
+       zookeeper
+       impala
+       webhcat
+       hadoop-httpfs
+       hive-hcatalog
+       hue}.each do |w|
     directory "/etc/#{w}/conf.#{node.chef_environment}" do
       owner "root"
       group "root"
@@ -100,9 +105,9 @@ when "debian"
     end
   end
 
-when "rhel"
-  ""
-  # do things on RHEL platforms (redhat, centos, scientific, etc)
+  when "rhel"
+    ""
+    # do things on RHEL platforms (redhat, centos, scientific, etc)
 end
 
 make_config('mysql-hive-password', secure_password)

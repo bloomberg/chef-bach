@@ -1,6 +1,7 @@
 #!/bin/bash
 
 set -e
+set -o nounset
 
 IP="${1:?"Need the IP of a machine to install"}"
 ENVIRONMENT="${2:?"Need the Chef environment to use"}"

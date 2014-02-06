@@ -18,6 +18,7 @@
 
 set -e
 set -x
+set -o nounset
 
 ########################################################################
 # install_machines -  Install a set of machines (will run chefit.sh if no node object for machine)
@@ -30,7 +31,7 @@ function install_machines {
     [[ "$h" =~ $regEx ]]
     local run_list="${BASH_REMATCH[1]}"
     local ip="${BASH_REMATCH[2]}"
-    printf "About to bootstrap node ${run_list}...\n"
+    printf "About to bootstrap node $ip to $ENVIRONMENT ${run_list}...\n"
     knife node show $fqdn 2>/dev/null >/dev/null || ./chefit.sh $ip $ENVIRONMENT
     local SSHCMD="./nodessh.sh $ENVIRONMENT $ip"
     sudo knife bootstrap -E $ENVIRONMENT -r "$run_list" $ip -x ubuntu  -P $passwd -u admin -k /etc/chef-server/admin.pem --sudo <<< $passwd
@@ -43,11 +44,11 @@ function install_machines {
 # Returns: List of matching hosts (or all non-skipped hosts) one host per line with ! delimited fileds
 # (Note: if you want to skip a machine, set its role to SKIP in cluster.txt)
 function parse_cluster_txt {
-  local match_text=$1
+  local match_text=${1-}
   local hosts=""
   while read host macaddr ipaddr iloipaddr domain role; do
     shopt -s nocasematch
-    if [[ -z "$match_text" || "$match_text" = "$host" || "$match_text" = "$ipaddr" || "$match_text" = "$role" ]] && \
+    if [[ -z "${match_text-}" || "$match_text" = "$host" || "$match_text" = "$ipaddr" || "$match_text" = "$role" ]] && \
        [[ ! "|$role" =~ '|SKIP' ]]; then
       hosts="$hosts ${role}!${ipaddr}!${host}.$domain"
     fi
@@ -55,6 +56,8 @@ function parse_cluster_txt {
   done < cluster.txt
   printf "$hosts"
 }
+# Global Regular Expression for parsing parse_cluster_txt output
+REGEX='(.*)!(.*)!(.*)'
 
 ##########################################
 # Install Machine Stub
@@ -125,7 +128,6 @@ function openstack_install {
 function hadoop_install {
   local hosts="$*"
   shopt -u nocasematch
-  local regEx='(.*)!(.*)!(.*)'
   printf "Doing Hadoop style install...\n"
   # to prevent needing to re-chef headnodes the Hadoop code base assumes
   # all nodes and clients have been created and further that all roles
@@ -134,7 +136,7 @@ function hadoop_install {
 
   printf "Assigning roles for headnodes...\n"
   for h in $(printf ${hosts// /\\n} | grep -i "head" | sort); do
-    [[ "$h" =~ $regEx ]]
+    [[ "$h" =~ $REGEX ]]
     local role="${BASH_REMATCH[1]}"
     local ip="${BASH_REMATCH[2]}"
     local fqdn="${BASH_REMATCH[3]}"
@@ -143,7 +145,7 @@ function hadoop_install {
 
   # set the headnodes to admin for creating data bags
   for h in $(printf ${hosts// /\\n} | grep -i "head" | sort); do
-    [[ "$h" =~ $regEx ]]
+    [[ "$h" =~ $REGEX ]]
     printf "/\"admin\": false\ns/false/true\nw\nq\n" | EDITOR=ed knife client edit "${BASH_REMATCH[3]}" || /bin/true
   done
 
@@ -152,7 +154,7 @@ function hadoop_install {
 
   # remove admin from the headnodes
   for h in $(printf ${hosts// /\\n} | grep -i "head" | sort); do
-    [[ "$h" =~ $regEx ]]
+    [[ "$h" =~ $REGEX ]]
     printf "/\"admin\": true\ns/true/false\nw\nq\n" | EDITOR=ed knife client edit "${BASH_REMATCH[3]}"
   done
 
@@ -166,14 +168,14 @@ function hadoop_install {
 # Main Below
 #
 
-if [[ -z "$2" ]]; then
+if [[ "${#*}" -lt "2" ]]; then
   printf "Usage : $0 environment install_type (hostname)\n" > /dev/stderr
   exit 1
 fi
 
 ENVIRONMENT=$1
 INSTALL_TYPE=$2
-MATCHKEY=$3
+MATCHKEY=${3-}
 
 shopt -s nocasematch
 if [[ ! "$INSTALL_TYPE" =~ (openstack|hadoop) ]]; then
@@ -190,15 +192,14 @@ fi
 # Report which hosts were found
 hosts="$(parse_cluster_txt $MATCHKEY)"
 for h in $hosts; do
-  regEx='(.*)!(.*)!(.*)'
-  [[ "$h" =~ $regEx ]]
+  [[ "$h" =~ $REGEX ]]
   role="${BASH_REMATCH[1]}"
   ip="${BASH_REMATCH[2]}"
   fqdn="${BASH_REMATCH[3]}"
   printf "%s\t-\t%s\n" $role $fqdn
 done | sort 
 
-if [[ -z "$hosts" ]]; then
+if [[ -z "${hosts-}" ]]; then
   printf "Warning: No nodes found\n" > /dev/stderr
   exit 0
 fi

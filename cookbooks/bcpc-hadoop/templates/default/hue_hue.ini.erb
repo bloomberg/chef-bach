@@ -306,7 +306,7 @@
       # This should be the web service root URL, such as
       # http://namenode:50070/webhdfs/v1
       <%=
-          if defined?(httpfs_host) then
+          if defined?(httpfs_host) and not @httpfs_host.empty? then
             "webhdfs_url=http://#{float_host(httpfs_host.first.hostname)}:14000/webhdfs/v1/"
           else "#webhdfs_url=http://"
           end
@@ -334,7 +334,7 @@
     [[[default]]]
       # Enter the host on which you are running the ResourceManager
       <%=
-          if defined?(rm_host) then
+          if defined?(rm_host) and not @rm_host.empty? then
             "resourcemanager_host=#{float_host(@rm_host.first.hostname)}"
           else
             "#resourcemanager_host="
@@ -364,7 +364,7 @@
 
       # URL of the ResourceManager API
       #resourcemanager_api_url=http://localhost:8088
-      <%= if defined?(rm_host) then
+      <%= if defined?(rm_host) and not @rm_host.empty? then
             "resourcemanager_api_url=http://#{float_host(@rm_host.first.hostname)}8088"
           else
             "#resourcemanager_api_url="
@@ -425,7 +425,7 @@
   # The URL where the Oozie service runs on. This is required in order for
   # users to submit jobs.
   <%=
-      if defined?(oozie_host) then
+      if defined?(oozie_host) and not @oozie_host.empty? then
         "#oozie_url="
       else
         "oozie_url=\"http://#{float_host(@oozie_host.first.hostname)}:11000/oozie\""
@@ -466,7 +466,7 @@
   # Host where Hive server Thrift daemon is running.
   # If Kerberos security is enabled, use fully-qualified domain name (FQDN).
   <%=
-      if defined?(hive_host) then
+      if defined?(hive_host) and not @hive_host.empty? then
         "hive_server_host=#{float_host(@hive_host.first.hostname)}"
       else
         "#hive_server_host="
@@ -533,7 +533,7 @@
 [impala]
   # Host of the Impala Server (one of the Impalad)
   <%=
-      if defined?(hb_host) then
+      if defined?(impala_hosts) and not @impala_hosts.empty? then
         "server_hosts=#{float_host(@impala_hosts.sample.hostname)}"
       else
   	"#server_host=localhost"
@@ -558,7 +558,7 @@
   # Comma-separated list of HBase Thrift servers for
   # clusters in the format of '(name|host:port)'.
   <%=
-      if defined?(hb_host) then
+      if defined?(hb_host) and not @hb_host.empty? then
         "hbase_clusters=(bcpc|#{@hb_host.first.hostname})"
       else
         "#hbase_clusters=(Cluster|localhost:9090)="
