@@ -101,9 +101,9 @@ function openstack_install {
     (printf "Failed to parse hosts\n"; exit 1 )
   # chef does not always use the same hostname as cluster.txt (be fast and loose and find the chef hostname)
   first_head_node_hostname=${first_head_node_fqdn%%.*}
-  chef_head_node_name=$(knife client list | egrep "^${first_head_node_hostname}\..*$|^${first_head_node_hostname}$")
   install_stub "$first_head_node"
   # set the first node to admin for creating data bags (short-circuit failures in-case machine already is an admin)
+  chef_head_node_name=$(knife client list | egrep "^${first_head_node_hostname}\..*$|^${first_head_node_hostname}$")
   printf "/\"admin\": false\ns/false/true\nw\nq\n" | EDITOR=ed knife client edit $chef_head_node_name || /bin/true
 
   # Do head nodes first and group by type of head
