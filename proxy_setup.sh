@@ -4,9 +4,8 @@
 # Only define http_proxy if you will be using a proxy
 #
 
-# sample setup using a local squid cache at 10.0.1.2 - the hypervisor
-# change to reflect your real proxy info
-export PROXY="proxy.bloomberg.com:81"
+#export PROXY="proxy.example.com:80"
+export PROXY=""
 
 export CURL='curl'
 if [ -n "$PROXY" ]; then
