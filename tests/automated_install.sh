@@ -70,19 +70,12 @@ printf "Snapshotting post-Cobbler\n"
 printf "#### Chef all the nodes\n"
 vagrant ssh -c "sudo apt-get install -y sshpass"
 
-cobbler_pass=$(vagrant ssh -c "cd chef-bcpc; knife data bag show configs $ENVIRONMENT | grep 'cobbler-root-password:'|sed 's/.* //'")
-
-printf "#### Chef the first headnode(s)\n"
-if ! vagrant ssh -c "cd chef-bcpc; ./cluster-assign-roles.sh $ENVIRONMENT bcpc-vm1"; then 
-  printf "## set the first machine to admin\n"
-  vagrant ssh -c 'cd chef-bcpc; echo -e "/\"admin\": false\ns/false/true\nw\nq\n" | EDITOR=ed knife client edit `knife client list | grep bcpc-vm1`'
-  # re-run chef
-  vagrant ssh -c "cd chef-bcpc; echo $cobbler_pass | sudo knife bootstrap -E $ENVIRONMENT -r 'role[BCPC-Headnode]' 10.0.100.11 -x ubuntu --sudo"
-fi
+printf "#### Chef the headnode\n"
+vagrant ssh -c "cd chef-bcpc; ./cluster-assign-roles.sh $ENVIRONMENT OpenStack bcpc-vm1"
 
 for i in 2 3; do
-  printf "## Machine bcpc-vm${i}\n"
-  vagrant ssh -c "cd chef-bcpc; ./cluster-assign-roles.sh $ENVIRONMENT bcpc-vm$i"
+  printf "#### Chef machine bcpc-vm${i}\n"
+  vagrant ssh -c "cd chef-bcpc; ./cluster-assign-roles.sh $ENVIRONMENT OpenStack bcpc-vm$i"
 done
 
 printf "Snapshotting post-Cobbler\n"
