@@ -26,7 +26,7 @@ printf "#### Setup configuration files\n"
 sed -i 's/vb.gui = true/vb.gui = false/' Vagrantfile
 
 # setup proxy_setup.sh
-sed -i "s/#export PROXY=.*\"/export PROXY=\"$PROXY\"/" proxy_setup.sh
+[[ -n "$PROXY" ]] && sed -i "s/#export PROXY=.*\"/export PROXY=\"$PROXY\"/" proxy_setup.sh
 
 # setup environment file
 sed -i "s/\"dns_servers\" : \[ \"8.8.8.8\", \"8.8.4.4\" \]/\"dns_servers\" : \[ $DNS_SERVERS \]/" environments/${ENVIRONMENT}.json
