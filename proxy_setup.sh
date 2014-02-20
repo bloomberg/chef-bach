@@ -5,10 +5,9 @@
 #
 
 #export PROXY="proxy.example.com:80"
-export PROXY=""
 
 export CURL='curl'
-if [ -n "$PROXY" ]; then
+if [ -n "${PROXY-}" ]; then
   echo "Using a proxy at $PROXY"
 
   local_ips=$(ip addr list |grep 'inet '|sed -e 's/.* inet //' -e 's#/.*#,#')
