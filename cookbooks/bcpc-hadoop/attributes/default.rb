@@ -14,5 +14,4 @@ default["bcpc"]["repos"]["cloudera"] = 'http://archive.cloudera.com/cdh5/ubuntu/
 default["bcpc"]["repos"]["cloudera-lzo"] = 'http://archive.cloudera.com/gplextras5/ubuntu/lucid/amd64/gplextras'
 default["bcpc"]["hadoop"]["disks"] = []
 default["bcpc"]["hadoop"]["oozie"]["admins"] = []
-default["bcpc"]["hadoop"]["min_node_count"] = 3
 default["bcpc"]["hadoop"]["hdfs"]["failed_volumes_tolerated"] = 3

@@ -38,7 +38,6 @@
       },
       "dns_servers" : ["8.8.8.8", "8.8.4.4"],
       "hadoop" : {
-        "min_node_count" : 2,
         "distribution" : { 
           "version" : "-cdh5",
           "key" : "cloudera-archive-5.key"
