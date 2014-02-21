@@ -75,6 +75,7 @@ case node["platform_family"]
       uri node['bcpc']['repos']['cloudera-lzo']
       distribution "lucid-gplextras5"
       components ["contrib"]
+      arch "amd64"
       key node[:bcpc][:hadoop][:distribution][:key]
     end
 
