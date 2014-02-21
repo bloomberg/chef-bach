@@ -151,6 +151,7 @@ hadoop_conf_files.each do |t|
                :jn_hosts => get_nodes_for("journalnode"),
                :rm_host  => get_nodes_for("resource_manager"),
                :dn_hosts => get_nodes_for("datanode"),
+               :hs_host => get_nodes_for("history_server"),
                :mounts => node[:bcpc][:hadoop][:mounts])
    end
 end

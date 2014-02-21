@@ -67,11 +67,11 @@
   </property>
   <property>
     <name>mapreduce.jobhistory.address</name>
-    <value>10020</value>
+    <value><%="#{float_host(@hs_host.first[:hostname])}:10020" if not @hs_host.empty?%></value>
   </property>
   <property>
     <name>mapreduce.jobhistory.webapp.address</name>
-    <value>19888</value>
+    <value><%="#{float_host(@hs_host.first[:hostname])}:19888" if not @hs_host.empty?%></value>
   </property>
 
 </configuration>
