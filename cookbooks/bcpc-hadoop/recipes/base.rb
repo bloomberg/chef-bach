@@ -298,7 +298,7 @@ end
                :hive_host  => get_nodes_for("hive"),
                :oozie_host  => get_nodes_for("oozie"),
                :httpfs_host => get_nodes_for("httpfs"),
-               :hb_host  => get_nodes_for("master"))
+               :hb_host  => get_nodes_for("hbase_master"))
   end
 end
 
