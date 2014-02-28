@@ -1,12 +1,3 @@
-package "xfsprogs" do
-  action :install
-end
-
-# set vm.swapiness to 0 (to lessen swapping)
-sysctl_param 'vm.swappiness' do
-  value 0
-end
-
 # disable IPv6 (e.g. for HADOOP-8568)
 case node["platform_family"]
   when "debian"
@@ -24,72 +15,42 @@ case node["platform_family"]
       action :nothing
     end
   else
-    Chef::Log.warn "============ Unable to disable IPv6 for non-Debian systems"
+   Chef::Log.warn "============ Unable to disable IPv6 for non-Debian systems"
 end
 
-directory "/disk" do
-  owner "root"
-  group "root"
-  mode 00755
-  action :create
-end
-
-if node[:bcpc][:hadoop][:disks].length > 0 then
-  node[:bcpc][:hadoop][:disks].each_index do |i|
-    directory "/disk/#{i}" do
-      owner "root"
-      group "root"
-      mode 00755
-      action :create
-      recursive true
-    end
-   
-    d = node[:bcpc][:hadoop][:disks][i]
-    execute "mkfs -t xfs -f /dev/#{d}" do
-      not_if "file -s /dev/#{d} | grep -q 'SGI XFS filesystem'"
-    end
- 
-    mount "/disk/#{i}" do
-      device "/dev/#{d}"
-      fstype "xfs"
-      options "noatime,nodiratime,inode64"
-      action [:enable, :mount]
-    end
-
-  end
-  node.set[:bcpc][:hadoop][:mounts] = (0..node[:bcpc][:hadoop][:disks].length-1).to_a
-else
-  Chef::Application.fatal!('Please specify some node[:bcpc][:hadoop][:disks]!')
+# set vm.swapiness to 0 (to lessen swapping)
+sysctl_param 'vm.swappiness' do
+  value 0
 end
 
 case node["platform_family"]
-  when "debian"
-    apt_repository "cloudera" do
-      uri node['bcpc']['repos']['cloudera']
-      distribution node['lsb']['codename'] + node[:bcpc][:hadoop][:distribution][:version]
-      components ["contrib"]
-      arch "amd64"
-      key node[:bcpc][:hadoop][:distribution][:key]
-    end
-    apt_repository "cloudera-lzo" do
-      uri node['bcpc']['repos']['cloudera-lzo']
-      distribution "lucid-gplextras5"
-      components ["contrib"]
-      arch "amd64"
-      key node[:bcpc][:hadoop][:distribution][:key]
-    end
+when "debian"
+  apt_repository "cloudera" do
+    uri node['bcpc']['repos']['cloudera']
+    distribution node['lsb']['codename'] + node[:bcpc][:hadoop][:distribution][:version]
+    components ["contrib"]
+    arch "amd64"
+    key node[:bcpc][:hadoop][:distribution][:key]
+  end
+  apt_repository "cloudera-lzo" do
+    uri node['bcpc']['repos']['cloudera-lzo']
+    distribution "lucid-gplextras5"
+    components ["contrib"]
+    arch "amd64"
+    key node[:bcpc][:hadoop][:distribution][:key]
+  end
 
-    %w{hadoop
-       hbase
-       hive
-       oozie
-       pig
-       zookeeper
-       impala
-       webhcat
-       hadoop-httpfs
-       hive-hcatalog
-       hue}.each do |w|
+  %w{hadoop
+     hbase
+     hive
+     oozie
+     pig
+     zookeeper
+     impala
+     webhcat
+     hadoop-httpfs
+     hive-hcatalog
+     hue}.each do |w|
     directory "/etc/#{w}/conf.#{node.chef_environment}" do
       owner "root"
       group "root"
@@ -106,9 +67,9 @@ case node["platform_family"]
     end
   end
 
-  when "rhel"
-    ""
-    # do things on RHEL platforms (redhat, centos, scientific, etc)
+when "rhel"
+  ""
+  # do things on RHEL platforms (redhat, centos, scientific, etc)
 end
 
 make_config('mysql-hive-password', secure_password)
@@ -142,16 +103,23 @@ else
   nn_hosts = get_nodes_for("namenode_no_HA")
 end
 
+zk_hosts = get_nodes_for("zookeeper_server")
+jn_hosts = get_nodes_for("journalnode")
+rm_hosts = get_nodes_for("resource_manager")
+hs_hosts = get_nodes_for("history_server")
+dn_hosts = get_nodes_for("datanode")
+hive_host = get_nodes_for("hive_metastore")
+
 hadoop_conf_files.each do |t|
    template "/etc/hadoop/conf/#{t}" do
      source "hdp_#{t}.erb"
      mode 0644
      variables(:nn_hosts => nn_hosts,
-               :zk_hosts => get_nodes_for("zookeeper_server"),
-               :jn_hosts => get_nodes_for("journalnode"),
-               :rm_host  => get_nodes_for("resource_manager"),
-               :dn_hosts => get_nodes_for("datanode"),
-               :hs_host => get_nodes_for("history_server"),
+               :zk_hosts => zk_hosts,
+               :jn_hosts => jn_hosts,
+               :rm_hosts => rm_hosts,
+               :hs_hosts => hs_hosts,
+               :dn_hosts => dn_hosts,
                :mounts => node[:bcpc][:hadoop][:mounts])
    end
 end
@@ -162,8 +130,8 @@ end
    source "hdp_#{t}.erb"
    mode 0644
    variables(:nn_hosts => nn_hosts,
-             :zk_hosts => get_nodes_for("zookeeper_server"),
-             :jn_hosts => get_nodes_for("journalnode"),
+             :zk_hosts => zk_hosts,
+             :jn_hosts => jn_hosts,
              :mounts => node[:bcpc][:hadoop][:mounts])
  end
 end
@@ -179,8 +147,8 @@ end
    source "zk_#{t}.erb"
    mode 0644
    variables(:nn_hosts => nn_hosts,
-             :zk_hosts => get_nodes_for("zookeeper_server"),
-             :jn_hosts => get_nodes_for("journalnode"),
+             :zk_hosts => zk_hosts,
+             :jn_hosts => jn_hosts,
              :mounts => node[:bcpc][:hadoop][:mounts])
  end
 end
@@ -198,8 +166,8 @@ end
      source "hb_#{t}.erb"
      mode 0644
      variables(:nn_hosts => nn_hosts,
-               :zk_hosts => get_nodes_for("zookeeper_server"),
-               :jn_hosts => get_nodes_for("journalnode"),
+               :zk_hosts => zk_hosts,
+               :jn_hosts => jn_hosts,
                :rs_hosts => get_nodes_for("region_server"),
                :mounts => node[:bcpc][:hadoop][:mounts])
   end
@@ -215,8 +183,8 @@ end
      source "hv_#{t}.erb"
      mode 0644
      variables(:mysql_hosts => get_mysql_nodes.map{ |m| m.hostname },
-               :zk_hosts => get_nodes_for("zookeeper_server"),
-               :hive_host => get_nodes_for("hive_metastore"))
+               :zk_hosts => zk_hosts,
+               :hive_host => hive_host)
   end
 end
 
@@ -234,8 +202,8 @@ end
     source "ooz_#{t}.erb"
     mode 0644
     variables(:mysql_hosts => get_mysql_nodes.map{ |m| m.hostname },
-              :zk_hosts => get_nodes_for("zookeeper_server"),
-              :hive_host => get_nodes_for("hive_metastore"))
+              :hive_host => hive_host,
+              :zk_hosts => zk_hosts)
   end
 end
 link "/etc/oozie/conf.#{node.chef_environment}/hive-site.xml" do
@@ -295,12 +263,12 @@ end
      source "hue_#{t}.erb"
      mode 0644
      variables(:impala_hosts => get_nodes_for("datanode") ,
-               :zk_hosts => get_nodes_for("zookeeper_server"),
-               :rm_host  => get_nodes_for("resource_manager"),
-               :hive_host  => get_nodes_for("hive"),
+               :zk_hosts => zk_hosts,
+               :rm_host  => rm_hosts,
+               :hive_host  => hive_host,
                :oozie_host  => get_nodes_for("oozie"),
                :httpfs_host => get_nodes_for("httpfs"),
-               :hb_host  => get_nodes_for("hbase_master"))
+               :hb_host  => get_nodes_for("master"))
   end
 end
 
