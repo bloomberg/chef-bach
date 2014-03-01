@@ -23,7 +23,7 @@ for f in zap-ceph-disks.sh install-chef.sh finish-worker.sh finish-head.sh; do
   $SCPCMD $f ubuntu@$IP:/home/ubuntu || (echo "copying $f failed" > /dev/stderr; exit 1)
 done
 
-if [[ -n "$(source proxy_setup.sh >/dev/null; echo $PROXY)" ]]; then
+if [[ -n "$(source proxy_setup.sh >/dev/null; echo ${PROXY-})" ]]; then
   PROXY=$(source proxy_setup.sh >/dev/null; echo $PROXY)
   echo "setting up .wgetrc's to $PROXY"
   $SSHCMD "echo \"http_proxy = http://$PROXY\" > .wgetrc"
