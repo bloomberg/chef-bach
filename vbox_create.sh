@@ -33,7 +33,7 @@ CLUSTER_VM_MEM=2048
 CLUSTER_VM_CPUs=1
 CLUSTER_VM_DRIVE_SIZE=20480
 
-VBOX_DIR=`dirname $0`/vbox
+VBOX_DIR=`dirname ${BASH_SOURCE[0]}`/vbox
 P=`python -c "import os.path; print os.path.abspath(\"${VBOX_DIR}/\")"`
 
 ######################################################
