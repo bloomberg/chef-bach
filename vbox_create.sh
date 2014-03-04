@@ -69,7 +69,15 @@ function download_VM_files {
 # 
 function create_bootstrap_VM {
   pushd $P
-  if hash vagrant ; then
+
+  local _dummy
+  local network_name
+  $VBM list dhcpservers | grep -E "^NetworkName:\s+HostInterfaceNetworking" |
+  while read -r _dummy network_name; do
+    $VBM dhcpserver remove --netname "$network_name"
+  done
+
+  if hash vagrant 2> /dev/null ; then
     echo "Vagrant detected - using Vagrant to initialize bcpc-bootstrap VM"
     cp ../Vagrantfile .
     if [[ ! -f insecure_private_key ]]; then
@@ -101,10 +109,6 @@ function create_bootstrap_VM {
           $VBM hostonlyif remove "$IF"
         fi
       done
-    fi
-
-    if [[ ! -z `$VBM list dhcpservers` ]]; then
-      $VBM list dhcpservers | grep NetworkName | awk '{print $2}' | xargs -n1 $VBM dhcpserver remove --netname
     fi
   
     $VBM hostonlyif create
