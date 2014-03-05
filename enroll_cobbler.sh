@@ -2,6 +2,9 @@
 
 set -e
 
+# bash imports
+source ./virtualbox_env.sh
+
 if ! hash vagrant 2>/dev/null; then
     if [[ -z "$1" ]]; then
 	# only if vagrant not available do we need the param
@@ -28,7 +31,7 @@ KEYFILE=bootstrap_chef.id_rsa
 subnet=10.0.100
 node=11
 for i in bcpc-vm1 bcpc-vm2 bcpc-vm3; do
-  MAC=`VBoxManage showvminfo --machinereadable $i | grep macaddress1 | cut -d \" -f 2 | sed 's/.\{2\}/&:/g;s/:$//'`
+  MAC=`$VBM showvminfo --machinereadable $i | grep macaddress1 | cut -d \" -f 2 | sed 's/.\{2\}/&:/g;s/:$//'`
   if [ -z "$MAC" ]; then 
     echo "***ERROR: Unable to get MAC address for $i"
     exit 1 

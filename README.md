@@ -139,7 +139,7 @@ BCPC currently relies upon a number of open-source packages:
  - [RabbitMQ](http://www.rabbitmq.com/)
  - [Ubuntu](http://www.ubuntu.com/)
  - [Vagrant](http://www.vagrantup.com/) - Verified with version 1.2.2
- - [VirtualBox](https://www.virtualbox.org/) - Verified with version 4.2.12
+ - [VirtualBox](https://www.virtualbox.org/) - >= 4.3.x supported
  - [Zabbix](http://www.zabbix.com/)
 
 Thanks to all of these communities for producing this software!

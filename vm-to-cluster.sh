@@ -8,14 +8,16 @@
 # cluster automation tasks, see cluster-readme.txt
 #
 #set -x
+
+# bash imports
+source ./virtualbox_env.sh
+
 if [[ -z "$1" ]]; then
 	echo "Usage: $0 domain"
 	exit
 fi
 
 DOMAIN=$1
-
-VBM=VBoxManage
 
 function getvminfo {
 	# extract the first mac address for this VM
@@ -28,7 +30,7 @@ function getvminfo {
 		-e 's/_\([0-9A-Fa-f]\{2\}\)/:\1_/' \
 		-e 's/_\([0-9A-Fa-f]\{2\}\)/:\1/'`
 	# now get the IP address
-	PROPERTY=`VBoxManage guestproperty get $1 "/VirtualBox/GuestInfo/Net/0/V4/IP"`
+	PROPERTY=`$VBM guestproperty get $1 "/VirtualBox/GuestInfo/Net/0/V4/IP"`
 	if [[ "$PROPERTY" = "No value set!" ]]; then
 	    echo "$VM not booted yet" >&2
 	    IP="IP unavailable - has this VM been booted?"

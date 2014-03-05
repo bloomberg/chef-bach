@@ -1,5 +1,8 @@
 #!/bin/bash -e
 
+# bash imports
+source ./virtualbox_env.sh
+
 if [[ "$OSTYPE" == msys || "$OSTYPE" == cygwin ]]; then
   WIN=TRUE
 fi
@@ -12,12 +15,6 @@ fi
 if [[ -z "$CURL" ]]; then
   echo "CURL is not defined"
   exit
-fi
-
-VBM=VBoxManage
-if ! hash $VBM ; then
-  echo "You do not appear to have $VBM from VirtualBox"
-  exit 1
 fi
 
 # Bootstrap VM Defaults (these need to be exported for Vagrant's Vagrantfile)
