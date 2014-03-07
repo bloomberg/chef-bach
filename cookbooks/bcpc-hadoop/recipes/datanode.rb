@@ -4,6 +4,7 @@
    hadoop-mapreduce
    hbase-regionserver
    hadoop-client
+   lzop
    hadoop-lzo
    hive}.each do |pkg|
   package pkg do
