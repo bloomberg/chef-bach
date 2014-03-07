@@ -9,18 +9,24 @@
 <?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
 
 <configuration>
-	<property>
+  <property>
     <name>mapreduce.framework.name</name>
     <value>yarn</value>
-	</property>
+  </property>
 
-	<property>
+  <property>
     <name>mapreduce.map.output.compress</name>  
     <value>true</value>
   </property>
-	
-	<property>
+
+  <property>
     <name>mapred.map.output.compress.codec</name>  
     <value>org.apache.hadoop.io.compress.SnappyCodec</value>
   </property>
+
+  <property>
+    <name>yarn.app.mapreduce.am.log.level</name>
+    <value>DEBUG</value>
+  </property>
+
 </configuration>

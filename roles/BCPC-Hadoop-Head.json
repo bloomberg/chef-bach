@@ -8,10 +8,8 @@
     "recipe[bcpc::default]",
     "recipe[bcpc::networking]",
     "recipe[bcpc::mysql]",
-    "recipe[bcpc-hadoop::disks]",
-    "recipe[bcpc-hadoop::configs]",
-    "recipe[bcpc-hadoop::zookeeper_server]",
-    "recipe[bcpc-hadoop::journalnode]"
+    "recipe[bcpc-hadoop::base]",
+    "recipe[bcpc-hadoop::zookeeper_server]"
   ],
   "description": "A highly-available head node in a BCPC Hadoop cluster",
   "chef_type": "role",

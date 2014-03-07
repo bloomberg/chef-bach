@@ -7,7 +7,6 @@
     "role[Basic]",
     "role[BCPC-Hadoop-Head]",
     "recipe[bcpc-hadoop::resource_manager]",
-    "recipe[bcpc-hadoop::webhcat]",
     "recipe[bcpc-hadoop::httpfs]",
     "recipe[bcpc-hadoop::historyserver]"
   ],

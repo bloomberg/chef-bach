@@ -1,3 +1,4 @@
+include_recipe 'dpkg_autostart'
 
 node[:bcpc][:hadoop][:mounts].each do |i|
 
@@ -21,6 +22,9 @@ end
 
 
 %w{hadoop-yarn-resourcemanager hadoop-client hadoop-mapreduce}.each do |pkg|
+  dpkg_autostart pkg do
+    allow false
+  end
   package pkg do
     action :upgrade
   end

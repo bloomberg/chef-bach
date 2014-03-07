@@ -1,8 +1,13 @@
 
+include_recipe 'dpkg_autostart'
 
-
-package "zookeeper-server" do
-  action :upgrade
+%w{zookeeper-server}.each do |pkg|
+  dpkg_autostart pkg do
+    allow false
+  end
+  package  pkg do
+    action :upgrade
+  end
 end
 
 directory "/var/lib/zookeeper" do

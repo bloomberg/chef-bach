@@ -8,6 +8,7 @@
     "role[BCPC-Hadoop-Head]",
     "recipe[bcpc-hadoop::namenode_standby]",
     "recipe[bcpc-hadoop::oozie]",
+    "recipe[bcpc-hadoop::resource_manager]",
     "recipe[bcpc-hadoop::historyserver]"
   ],
   "description": "A highly-available head node in a BCPC Hadoop cluster",

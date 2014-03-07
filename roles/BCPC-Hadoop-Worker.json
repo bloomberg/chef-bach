@@ -7,10 +7,9 @@
     "role[Basic]",
     "recipe[bcpc::default]",
     "recipe[bcpc::networking]",
-    "recipe[bcpc-hadoop::disks]",
-    "recipe[bcpc-hadoop::configs]",
+    "recipe[bcpc-hadoop::base]",
     "recipe[bcpc-hadoop::datanode]",
-    "recipe[bcpc-hadoop::spark]",
+    "recipe[bcpc-hadoop::region_server]",
     "recipe[bcpc-hadoop::pig]",
     "recipe[bcpc-hadoop::mahout]"
   ],

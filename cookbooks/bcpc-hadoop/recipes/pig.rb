@@ -1,4 +1,4 @@
-%w{pig pig-udf-datafu}.each do |pkg|
+%w{pig }.each do |pkg|
   package pkg do
     action :upgrade
   end
