@@ -1,10 +1,12 @@
 #!/bin/bash
+set -e
+set -o nounset
 
 # Source this file at the top of your script when needing VBoxManage
 # e.g.,
 # source ./virtualbox_env.sh
 
-if [[ -z "$VBM" ]]; then
+if [[ -z "${VBM-}" ]]; then
 
     if ! command -v VBoxManage >& /dev/null; then
         echo "VBoxManage not found!" >&2
@@ -19,7 +21,7 @@ if [[ -z "$VBM" ]]; then
         local IFS='.'
         local version="$(VBoxManage --version)"
         local version_array
-        read -a version_array <<< "$($VBM --version)"
+        read -a version_array <<< "$version"
 
         if ! [[ "${version_array[0]}" -ge "$MIN_MAJOR" && \
                 "${version_array[1]}" -ge "$MIN_MINOR" ]]
