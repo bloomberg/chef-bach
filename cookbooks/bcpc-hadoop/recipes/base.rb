@@ -163,6 +163,10 @@ end
   end
 end
 
+link "/usr/lib/hadoop-hdfs/libexec" do
+  to "/usr/lib/hadoop/libexec"
+end
+
 #
 # Set up hive configs
 #
