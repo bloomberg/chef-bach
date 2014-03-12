@@ -45,4 +45,8 @@
     <name>io.compression.codecs</name>
     <value>org.apache.hadoop.io.compress.DefaultCodec,org.apache.hadoop.io.compress.GzipCodec, org.apache.hadoop.io.compress.BZip2Codec,com.hadoop.compression.lzo.LzoCodec, com.hadoop.compression.lzo.LzopCodec,org.apache.hadoop.io.compress.SnappyCodec</value>
   </property>
+  <property>
+    <name>dfs.journalnode.edits.dir</name>
+    <value><%="/disk/#{@mounts[0]}/dfs/jn"%></value>
+  </property>
 </configuration>

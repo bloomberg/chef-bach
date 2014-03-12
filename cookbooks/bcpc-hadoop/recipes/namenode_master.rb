@@ -63,6 +63,14 @@ service "hadoop-hdfs-zkfc" do
   subscribes :restart, "template[/etc/hadoop/conf/hdfs-policy.xml]", :delayed
 end
 
+bash "initialize-shared-edits" do
+  code "hdfs namenode -initializeSharedEdits"
+  user "hdfs"
+  action :run
+  # need more than ., .., in_use.lock
+  not_if { node[:bcpc][:hadoop][:mounts].all? { |i| Dir.entries("/disk/#{i}/dfs/nn").include?("current") } }
+end
+
 service "hadoop-hdfs-namenode" do
   action [:enable, :start]
   subscribes :restart, "template[/etc/hadoop/conf/hdfs-site.xml]", :delayed
