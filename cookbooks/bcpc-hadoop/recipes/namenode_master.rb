@@ -68,7 +68,8 @@ bash "initialize-shared-edits" do
   user "hdfs"
   action :run
   # need more than ., .., in_use.lock
-  not_if { node[:bcpc][:hadoop][:mounts].all? { |i| Dir.entries("/disk/#{i}/dfs/nn").include?("current") } }
+#  not_if { node[:bcpc][:hadoop][:mounts].all? { |i| Dir.entries("/disk/#{i}/dfs/nn").include?("current") } }
+  not_if { node[:bcpc][:hadoop][:mounts].all? { |i| Dir.entries("/disk/#{i}/dfs/jn/#{node.chef_environment}").include?("current") } }
 end
 
 service "hadoop-hdfs-namenode" do
