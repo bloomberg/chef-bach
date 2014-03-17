@@ -67,7 +67,6 @@ bash "hdfs namenode -bootstrapStandby -force -nonInteractive" do
   only_if { get_config("namenode_txn_fmt").nil? and not node[:bcpc][:hadoop][:mounts].all? { |d| Dir.entries("/disk/#{d}/dfs/nn/").include?("current") } }
 end  
 
-#if node['bcpc']['hadoop']['hdfs']['ha'] then
 if node['bcpc']['hadoop']['hdfs']['HA'] then
   service "hadoop-hdfs-zkfc" do
     action [:enable, :start]

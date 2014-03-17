@@ -98,6 +98,9 @@ if node['bcpc']['hadoop']['hdfs']['HA'] then
   nn_hosts = get_nodes_for("namenode*")
 else
   nn_hosts = get_nodes_for("namenode_no_HA")
+  if nn_hosts.length == 0 then 
+     nn_hosts = get_nodes_for("namenode*")
+  end
 end
 
 hadoop_conf_files.each do |t|
@@ -163,9 +166,6 @@ end
   end
 end
 
-link "/usr/lib/hadoop-hdfs/libexec" do
-  to "/usr/lib/hadoop/libexec"
-end
 
 #
 # Set up hive configs
