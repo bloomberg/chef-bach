@@ -10,7 +10,10 @@ end
   end
 end
 
-directory "/usr/lib/oozie/libext" do
+OOZIE_LIB_PATH='/usr/lib/oozie'
+OOZIE_SERVER_PATH='/var/lib/oozie/oozie-server'
+
+directory "#{OOZIE_LIB_PATH}/libext" do
   owner "root"
   group "root"
   mode 00755
@@ -18,17 +21,18 @@ directory "/usr/lib/oozie/libext" do
   recursive true
 end
 
-link "/usr/lib/oozie/libext/mysql-connector-java.jar" do
+link "#{OOZIE_LIB_PATH}/libext/mysql-connector-java.jar" do
   to "/usr/share/java/mysql-connector-java.jar"
 end
 
 bash "oozie_setup_war" do
-  code "/usr/lib/oozie/bin/oozie-setup.sh prepare-war"
+  code "#{OOZIE_LIB_PATH}/bin/oozie-setup.sh prepare-war"
   user "root"
   action :run
+  not_if do FileTest.file?("#{OOZIE_SERVER_PATH}/webapps/oozie.war") end
 end
 
-directory "/var/lib/oozie/oozie-server/work/Catalina/localhost" do
+directory "#{OOZIE_SERVER_PATH}/work/Catalina/localhost" do
   owner "oozie"
   group "oozie"
   recursive true
@@ -40,7 +44,7 @@ directory "/var/log/oozie" do
   recursive true
 end
 
-file "/usr/lib/oozie/oozie.sql" do
+file "#{OOZIE_LIB_PATH}/oozie.sql" do
   owner "oozie"
   group "oozie"
 end
@@ -61,7 +65,7 @@ ruby_block "oozie-database-creation" do
       IO.popen("mysql -uroot -p#{get_config('mysql-root-password')}", "r+") do |db|
         db.write code
       end
-      system "sudo -u oozie /usr/lib/oozie/bin/ooziedb.sh create -sqlfile /usr/lib/oozie/oozie.sql -run Validate DB Connection"
+      system "sudo -u oozie #{OOZIE_LIB_PATH}/bin/ooziedb.sh create -sqlfile #{OOZIE_LIB_PATH}/oozie.sql -run Validate DB Connection"
 #      IO.popen("mysql -uroot -p#{get_config('mysql-root-password')}", "r+") do |db|
 #        db.write "USE oozie; SOURCE /tmp/oozie-create.sql"
 #      end
