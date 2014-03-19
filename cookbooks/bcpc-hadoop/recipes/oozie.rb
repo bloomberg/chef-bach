@@ -21,6 +21,10 @@ directory "#{OOZIE_LIB_PATH}/libext" do
   recursive true
 end
 
+link "#{OOZIE_LIB_PATH}/libext/ext-2.2.zip" do
+  to "/usr/share/HDP-oozie/ext-2.2.zip"
+end
+
 link "#{OOZIE_LIB_PATH}/libext/mysql-connector-java.jar" do
   to "/usr/share/java/mysql-connector-java.jar"
 end
