@@ -173,6 +173,7 @@ end
 #
 %w{hive-exec-log4j.properties
    hive-log4j.properties
+   hive-env.sh
    hive-site.xml }.each do |t|
    template "/etc/hive/conf/#{t}" do
      source "hv_#{t}.erb"
