@@ -18,7 +18,6 @@
 #
 
 include_recipe "bcpc::default"
-include_recipe "bcpc::ceph-head"
 include_recipe "bcpc::apache2"
 
 make_config('mysql-graphite-user', "graphite")
@@ -32,7 +31,7 @@ make_config('mysql-graphite-password', secure_password)
     end
 end
 
-%w{python-pip python-cairo python-django python-django-tagging python-ldap python-twisted python-memcache}.each do |pkg|
+%w{python-mysqldb python-pip python-cairo python-django python-django-tagging python-ldap python-twisted python-memcache}.each do |pkg|
     package pkg do
         action :upgrade
     end
