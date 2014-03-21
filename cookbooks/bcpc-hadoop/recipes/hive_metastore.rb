@@ -1,4 +1,4 @@
-%w{hive-metastore libmysql-java}.each do |pkg|
+%w{hive-metastore hcatalog libmysql-java}.each do |pkg|
   package pkg do
     action :upgrade
   end
@@ -8,7 +8,14 @@ link "/usr/lib/hive/lib/mysql.jar" do
   to "/usr/share/java/mysql.jar"
 end
 
-
+template "hive-config" do
+  path "/usr/lib/hive/bin/hive-config.sh"
+  source "hv_hive-config.sh.erb"
+  owner "root"
+  group "root"
+  mode "0755"
+end
+  
 ruby_block "hive-metastore-database-creation" do
   cmd = "mysql -uroot -p#{get_config('mysql-root-password')} -e"
   privs = "SELECT,INSERT,UPDATE,DELETE,LOCK TABLES,EXECUTE" # todo node[:bcpc][:hadoop][:hive_db_privs].join(",")
@@ -20,7 +27,7 @@ ruby_block "hive-metastore-database-creation" do
         GRANT #{privs} ON metastore.* TO 'hive'@'localhost' IDENTIFIED BY '#{get_config('mysql-hive-password')}';
         FLUSH PRIVILEGES;
         USE metastore;
-        SOURCE /usr/lib/hive/scripts/metastore/upgrade/mysql/hive-schema-0.11.0-c5b1.mysql.sql;
+        SOURCE /usr/lib/hive/scripts/metastore/upgrade/mysql/hive-schema-0.12.0.mysql.sql;
         EOF
       IO.popen("mysql -uroot -p#{get_config('mysql-root-password')}", "r+") do |db|
         db.write code
@@ -36,7 +43,6 @@ bash "create-hive-warehouse" do
   user "hdfs"
   not_if "sudo -u hdfs hadoop fs -test -d /user/hive/warehouse"
 end
-
 
 service "hive-metastore" do
   action [:enable, :start]
