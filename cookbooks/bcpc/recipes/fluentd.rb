@@ -38,9 +38,14 @@ bash "set-td-agent-user" do
 end
 
 # workaround for CHEF-3912 is to include versions from build_bins.sh
-%w{elasticsearch!>=0.2.0 tail-multiline!>=0.1.5 tail-ex!>=0.1.1 record-reformer!>=0.2.2 rewrite!>=0.0.12}.each do |pkg|
+%w{fluent-plugin-elasticsearch!>=0.2.0
+   patron!>=0
+   fluent-plugin-tail-multiline!>=0.1.5
+   fluent-plugin-tail-ex!>=0.1.1
+   fluent-plugin-record-reformer!>=0.2.2
+   fluent-plugin-rewrite!>=0.0.12}.each do |pkg|
     # split on the first exclaimation point to get the package name for Gem to look-up and the version for Gem
-    gem_package "fluent-plugin-#{pkg.split('!',2)[0]}" do
+    gem_package pkg.split('!',2)[0] do
         gem_binary "/usr/lib/fluent/ruby/bin/fluent-gem"
         version pkg.split('!',2)[1]
         options "--no-ri --no-rdoc --no-http-proxy --clear-sources --source #{get_binary_server_url}"

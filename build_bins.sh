@@ -51,12 +51,12 @@ fi
 FILES="kibana3.tgz $FILES"
 
 # Grab plugins for fluentd
-for i in elasticsearch tail-multiline tail-ex record-reformer rewrite; do
-  if ! [[ -f gems/fluent-plugin-${i}.gem ]]; then
-    gem fetch fluent-plugin-${i}
-    ln -s fluent-plugin-${i}-*.gem fluent-plugin-${i}.gem || true
+for i in elasticsearch elasticsearch-api elasticsearch-transport patron fluent-plugin-elasticsearch fluent-plugin-tail-multiline fluent-plugin-tail-ex fluent-plugin-record-reformer fluent-plugin-rewrite; do
+  if ! [[ -f gems/${i}.gem ]]; then
+    gem fetch ${i}
+    ln -s ${i}-*.gem ${i}.gem || true
   fi
-  FILES="fluent-plugin-${i}*.gem $FILES"
+  FILES="${i}*.gem $FILES"
 done
 
 # Get the Rubygem for zookeeper
