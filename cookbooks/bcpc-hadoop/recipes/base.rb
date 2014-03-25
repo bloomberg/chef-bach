@@ -45,6 +45,7 @@ case node["platform_family"]
        pig
        zookeeper
        webhcat
+       hcat
        hadoop-httpfs
        hive-hcatalog
        hue}.each do |w|
