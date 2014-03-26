@@ -9,6 +9,10 @@
 <?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
 
 <configuration xmlns:xi="http://www.w3.org/2001/XInclude">
+  <property>
+    <name>dfs.replication</name>
+    <value><%= node[:bcpc][:hadoop][:hdfs][:dfs_replication_factor] %></value>
+  </property>
 
   <property>
     <name>dfs.name.dir</name>
