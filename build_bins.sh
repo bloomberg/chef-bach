@@ -26,10 +26,11 @@ pushd $DIR/bins/
 # create directory for Python bins
 mkdir -p python
 
-# serve the files if nothing else is doing so already
-netstat -nlt4 | grep -q ':8080' || nohup python -m SimpleHTTPServer 8080 > ../python_server.log 2>&1 &
-# wait for python to come-up (as we may need it during apt-get update)
-sleep 5
+# create directory for dpkg's
+APT_REPO_VERSION=0.5.0
+APT_REPO="dists/${APT_REPO_VERSION}/"
+APT_REPO_BINS="${APT_REPO}/main/binary-amd64/"
+mkdir -p $APT_REPO_BINS
 
 # Get up to date
 apt-get -y update
@@ -189,17 +190,21 @@ done
 
 ###################
 # generate apt-repo
-dpkg-scanpackages . > Packages
-gzip -c Packages > Packages.gz
-apt-ftparchive release . > Release
-rm -f Release.gpg
+dpkg-scanpackages . > ${APT_REPO_BINS}/Packages
+gzip -c ${APT_REPO_BINS}/Packages > ${APT_REPO_BINS}/Packages.gz
+tempfile=$(mktemp)
+rm -f ${APT_REPO}/Release
+rm -f ${APT_REPO}/Release.gpg
+echo -e "Version: ${APT_REPO_VERSION}\nSuite: ${APT_REPO_VERSION}\nComponent: main\nArchitecture: amd64" > ${APT_REPO_BINS}/Release
+apt-ftparchive -o APT::FTPArchive::Release::Version=${APT_REPO_VERSION} -o APT::FTPArchive::Release::Suite=${APT_REPO_VERSION} -o APT::FTPArchive::Release::Architectures=amd64 -o APT::FTPArchive::Release::Components=main release dists/${APT_REPO_VERSION} > $tempfile
+mv $tempfile ${APT_REPO}/Release
 
 # generate a key and sign repo
 if ! [[ -f ${HOME}/apt_key.sec && -f apt_key.pub ]]; then
   rm -rf ${HOME}/apt_key.sec apt_key.pub
   gpg --batch --gen-key << EOF
     Key-Type: DSA
-    Key-Length: 1024
+    Key-Length: 4096
     Key-Usage: sign
     Name-Real: Local BCPC Repo
     Name-Comment: For dpkg repo signing
@@ -210,8 +215,13 @@ if ! [[ -f ${HOME}/apt_key.sec && -f apt_key.pub ]]; then
 EOF
   chmod 700 ${HOME}/apt_key.sec
 fi
-gpg -abs --keyring ./apt_key.pub --secret-keyring ${HOME}/apt_key.sec -o Release.gpg Release
+gpg --no-tty -abs --keyring ./apt_key.pub --secret-keyring ${HOME}/apt_key.sec -o ${APT_REPO}/Release.gpg ${APT_REPO}/Release
 
+# generate ASCII armored GPG key
+gpg --import ./apt_key.pub
+gpg -a --export $(gpg --list-public-keys --with-colons | grep 'Local BCPC Repo' | cut -f 5 -d ':') > apt_key.asc
+# ensure everything is readable in the bins directory
+chmod -R 755 .
 
 ####################
 # generate Pypi repo

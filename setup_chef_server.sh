@@ -21,22 +21,13 @@ if [[ -z "$CURL" ]]; then
 fi
 
 if [[ ! -f /etc/apt/sources.list.d/bcpc.list ]]; then
-  load_binary_server_info "$ENVIRONMENT"
-
-  # create an Apt repo entry
-  echo "deb ${binary_server_url} /" > /etc/apt/sources.list.d/bcpc.list
-
+  # Create an Apt repo entry
+  echo "deb [arch=amd64] file://$(pwd)/bins/ 0.5.0 main" > /etc/apt/sources.list.d/bcpc.list
   # add repo key
   apt-key add bins/apt_key.pub
-
-  # ensure we do not have a proxy set for the local repo
-  proxy_line="Acquire::http::Proxy::${binary_server_host} 'DIRECT';"
-  grep -q "$proxy_line" /etc/apt/apt.conf || \
-    echo "$proxy_line" >> /etc/apt/apt.conf
-
   # update only the BCPC local repo
   apt-get -o Dir::Etc::SourceList=/etc/apt/sources.list.d/bcpc.list,Dir::Etc::SourceParts= update
-fi 
+fi
 
 if dpkg -s chef 2>/dev/null | grep -q ^Status.*installed && \
    dpkg -s chef 2>/dev/null | grep -q ^Version.*11; then
@@ -64,4 +55,15 @@ if [[ -f $HOME/.ssh/authorized_keys && ! -f /root/.ssh/authorized_keys ]]; then
     mkdir /root/.ssh
   fi
   cp $HOME/.ssh/authorized_keys /root/.ssh/authorized_keys
+fi
+
+./build_bins.sh
+
+if [[ ! -f /etc/apt/sources.list.d/bcpc.list ]]; then
+  # Create an Apt repo entry
+  echo "deb [arch=amd64] file://$(pwd)/bins/ 0.5.0 main" > /etc/apt/sources.list.d/bcpc.list
+  # add repo key
+  apt-key add bins/apt_key.pub
+  # update only the BCPC local repo
+  apt-get -o Dir::Etc::SourceList=/etc/apt/sources.list.d/bcpc.list,Dir::Etc::SourceParts= update
 fi

@@ -36,7 +36,7 @@ function load_binary_server_info {
   load_json_frag="import json; print json.load(file('environments/${environment}.json'))"
   # return a full URL (e.g. http://127.0.0.1:8080)
   export binary_server_url=$(python -c "${load_json_frag}$binary_server_key" 2>/dev/null || \
-    (echo -n "http://"; python -c "${load_json_frag}${bootstrap_server_key}+':8080'"))
+    (echo -n "http://"; python -c "${load_json_frag}${bootstrap_server_key}+':80'"))
   # return only a host (e.g. 127.0.0.1)
   export binary_server_host=$(ruby -e "require 'uri'; print URI('$binary_server_url').host")
 }

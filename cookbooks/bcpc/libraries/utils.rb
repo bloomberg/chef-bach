@@ -127,7 +127,7 @@ def get_nodes_for(recipe)
 end
 
 def get_binary_server_url
-  return("http://#{URI(Chef::Config['chef_server_url']).host}:8080") if node[:bcpc][:binary_server_url].nil?
+  return("http://#{URI(Chef::Config['chef_server_url']).host}/") if node[:bcpc][:binary_server_url].nil?
   return(node[:bcpc][:binary_server_url])
 end
 
