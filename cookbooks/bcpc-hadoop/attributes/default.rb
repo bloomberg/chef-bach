@@ -1,4 +1,3 @@
-
 #############################################
 #
 #  Hadoop specific configs
@@ -14,3 +13,4 @@ default["bcpc"]["repos"]["hortonworks"] = 'http://public-repo-1.hortonworks.com/
 default["bcpc"]["hadoop"]["disks"] = []
 default["bcpc"]["hadoop"]["oozie"]["admins"] = []
 default["bcpc"]["hadoop"]["hdfs"]["failed_volumes_tolerated"] = 1
+default["bcpc"]["hadoop"]["hdfs"]["dfs_replication_factor"] = 1

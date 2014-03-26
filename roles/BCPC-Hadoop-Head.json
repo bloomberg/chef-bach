@@ -8,6 +8,7 @@
     "recipe[bcpc::default]",
     "recipe[bcpc::networking]",
     "recipe[bcpc::mysql]",
+    "recipe[bcpc-hadoop::disks]",
     "recipe[bcpc-hadoop::base]",
     "recipe[bcpc-hadoop::zookeeper_server]",
     "recipe[bcpc-hadoop::journalnode]"

@@ -42,8 +42,8 @@ end
 
 
 service "hadoop-hdfs-journalnode" do
-  action [:enable, :start]
-#  action [:nothing]
+  action :nothing
+  supports :status => true, :restart => true, :reload => false
   subscribes :restart, "template[/etc/hadoop/conf/hdfs-site.xml]", :delayed
   subscribes :restart, "bash[initialize-shared-edits]", :delayed
   subscribes :restart, "template[/etc/hadoop/conf/hdfs-site_HA.xml]", :delayed
