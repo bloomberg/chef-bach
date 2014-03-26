@@ -37,6 +37,41 @@ end
     end
 end
 
+%w{cache relay}.each do |pkg|
+    template "/etc/init.d/carbon-#{pkg}" do
+        source "init.d-carbon.erb"
+        owner "root"
+        group "root"
+        mode 00755
+        notifies :restart, "service[carbon-#{pkg}]", :delayed
+        variables( :daemon => "#{pkg}" )
+    end
+    service "carbon-#{pkg}" do
+        action [ :enable, :start ]
+    end
+end
+
+# #### #
+# Adding this to set the graphite ip
+# #### #
+ruby_block "graphite_ip" do
+  block do
+    if (node[:bcpc].attribute?(:graphite) \
+        and node[:bcpc][:graphite].attribute?(:ip) \
+        and node[:bcpc][:graphite][:ip]) \
+    then
+      Chef::Log.info("graphite ip = '#{node[:bcpc][:graphite][:ip]}'")
+    else
+      Chef::Log.info("node[:bcpc][:graphite][:ip] is not set")
+      if not node[:bcpc][:management][:vip] then
+        Chef::Application.fatal!("No graphite ip or management vip!", 1)
+      else
+        node.override[:bcpc][:graphite][:ip] = node[:bcpc][:management][:vip]
+      end
+    end
+  end
+end
+
 template "/opt/graphite/conf/carbon.conf" do
     source "carbon.conf.erb"
     owner "root"
@@ -132,18 +167,4 @@ bash "graphite-database-sync" do
         python /opt/graphite/webapp/graphite/manage.py createsuperuser --username=admin --email=#{node[:bcpc][:admin_email]} --noinput
     EOH
     notifies :restart, "service[apache2]", :immediately
-end
-
-%w{cache relay}.each do |pkg|
-    template "/etc/init.d/carbon-#{pkg}" do
-        source "init.d-carbon.erb"
-        owner "root"
-        group "root"
-        mode 00755
-        notifies :restart, "service[carbon-#{pkg}]", :delayed
-        variables( :daemon => "#{pkg}" )
-    end
-    service "carbon-#{pkg}" do
-        action [ :enable, :start ]
-    end
 end

@@ -40,7 +40,7 @@
 # You should not use the loopback address (127.0.0.1) here if using clustering
 # as every webapp in the cluster should use the exact same values to prevent
 # unneeded cache misses. Set to [] to disable caching of images and fetched data
-MEMCACHE_HOSTS = ['<%="#{node[:bcpc][:management][:vip]}"%>:11211']
+MEMCACHE_HOSTS = ['<%="#{node[:bcpc][:graphite][:ip]}"%>:11211']
 #DEFAULT_CACHE_DURATION = 60 # Cache images and data for 1 minute
 
 
@@ -131,7 +131,7 @@ DATABASES = {
         'NAME': '<%="#{node['bcpc']['graphite_dbname']}"%>',
         'USER': '<%="#{get_config('mysql-graphite-user')}"%>',
         'PASSWORD': '<%="#{get_config('mysql-graphite-password')}"%>',
-        'HOST': '<%="#{node[:bcpc][:management][:vip]}"%>',
+        'HOST': '<%="#{node[:bcpc][:graphite][:ip]}"%>',
         'default-character-set': 'utf8'
     },
 }
