@@ -36,7 +36,7 @@ bash "oozie_setup_war" do
   not_if do FileTest.file?("#{OOZIE_SERVER_PATH}/webapps/oozie.war") end
 end
 
-directory "#{OOZIE_SERVER_PATH}/work/Catalina/localhost" do
+directory "#{OOZIE_SERVER_PATH}" do
   owner "oozie"
   group "oozie"
   recursive true
