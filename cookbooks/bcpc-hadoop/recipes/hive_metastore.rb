@@ -1,4 +1,4 @@
-%w{hive-metastore hcatalog libmysql-java}.each do |pkg|
+%w{hive-metastore libmysql-java}.each do |pkg|
   package pkg do
     action :upgrade
   end
