@@ -126,7 +126,9 @@ end
    variables(:nn_hosts => nn_hosts,
              :zk_hosts => get_nodes_for("zookeeper_server"),
              :jn_hosts => get_nodes_for("journalnode"),
-             :mounts => node[:bcpc][:hadoop][:mounts])
+             :mounts => node[:bcpc][:hadoop][:mounts],
+             :nn_jmx_port => node[:bcpc][:hadoop][:jmx][:port][:namenode]
+   )
  end
 end
 

@@ -1,0 +1,131 @@
+{
+    "servers": [
+        {
+            "port": "<%= node[:bcpc][:hadoop][:jmx][:port][:namenode] %>",
+            "host": "<%= node[:bcpc][:management][:ip] %>",
+            "queries": [
+                {
+                    "outputWriters": [
+                        {
+                            "@class": "com.googlecode.jmxtrans.model.output.GraphiteWriter",
+                            "settings": {
+                                "port": "2003",
+                                "host": "<%= node[:bcpc][:management][:vip] %>"
+                            }
+                        }
+                    ],
+                    "obj": "hadoop:service=NameNode,name=FSNamesystemState",
+                    "resultAlias": "NameNodeFSNamesystemState",
+                    "attr": [
+                          "CapacityTotal",
+                          "CapacityUsed",
+                          "CapacityRemaining",
+                          "TotalLoad",
+                          "BlocksTotal",
+                          "FilesTotal",
+                          "PendingReplicationBlocks",
+                          "UnderReplicatedBlocks",
+                          "ScheduledReplicationBlocks"
+                    ]
+                },
+                {
+                    "outputWriters": [
+                        {
+                            "@class": "com.googlecode.jmxtrans.model.output.GraphiteWriter",
+                            "settings": {
+                                "port": "2003",
+                                "host": "<%= node[:bcpc][:management][:vip] %>"
+                            }
+                        }
+                    ],
+                    "obj": "hadoop:service=NameNode,name=NameNodeActivity",
+                    "resultAlias": "NameNodeActivity",
+                    "attr": [
+                          "AddBlockOps",
+                          "fsImageLoadTime",
+                          "FilesRenamed",
+                          "SyncsNumOps",
+                          "SyncsAvgTime",
+                          "SyncsMinTime",
+                          "SyncsMaxTime",
+                          "JournalTransactionsBatchedInSync",
+                          "FileInfoOps",
+                          "CreateFileOps",
+                          "GetListingOps",
+                          "TransactionsNumOps",
+                          "TransactionsAvgTime",
+                          "TransactionsMinTime",
+                          "TransactionsMaxTime",
+                          "GetBlockLocations",
+                          "BlocksCorrupted",
+                          "FilesInGetListingOps",
+                          "SafemodeTime",
+                          "FilesCreated",
+                          "FilesAppended",
+                          "DeleteFileOps",
+                          "blockReportNumOps",
+                          "blockReportAvgTime",
+                          "blockReportMinTime",
+                          "blockReportMaxTime"
+                    ]
+                },
+                {
+                    "outputWriters": [
+                        {
+                            "@class": "com.googlecode.jmxtrans.model.output.GraphiteWriter",
+                            "settings": {
+                                "port": "2003",
+                                "host": "<%= node[:bcpc][:management][:vip] %>"
+                            }
+                        }
+                    ],
+                    "obj": "hadoop:service=NameNode,name=NameNodeInfo",
+                    "resultAlias": "NameNodeInfo",
+                    "attr": [
+                          "Threads",
+                          "Used",
+                          "Total",
+                          "Free",
+                          "NonDfsUsedSpace",
+                          "PercentUsed",
+                          "PercentRemaining",
+                          "TotalBlocks",
+                          "TotalFiles"
+                    ]
+                },
+                {
+                    "outputWriters": [
+                        {
+                            "@class": "com.googlecode.jmxtrans.model.output.GraphiteWriter",
+                            "settings": {
+                                "port": "2003",
+                                "host": "<%= node[:bcpc][:management][:vip] %>"
+                            }
+                        }
+                    ],
+                    "obj": "hadoop:service=NameNode,name=RpcActivityForPort8020",
+                    "resultAlias": "NameNodeRpcActivity",
+                    "attr": [
+                          "rpcAuthorizationSuccesses",
+                          "rpcAuthorizationFailures",
+                          "SentBytes",
+                          "ReceivedBytes",
+                          "NumOpenConnections",
+                          "callQueueLen",
+                          "rpcAuthenticationSuccesses",
+                          "rpcAuthenticationFailures",
+                          "RpcQueueTimeNumOps",
+                          "RpcQueueTimeAvgTime",
+                          "RpcQueueTimeMinTime",
+                          "RpcQueueTimeMaxTime",
+                          "RpcProcessingTimeNumOps",
+                          "RpcProcessingTimeAvgTime",
+                          "RpcProcessingTimeMinTime",
+                          "RpcProcessingTimeMaxTime"
+                    ]
+                }
+            ],
+            "numQueryThreads": 2
+        }
+    ]
+}

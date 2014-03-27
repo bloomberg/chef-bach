@@ -132,7 +132,9 @@ end
    variables(:nn_hosts => nn_hosts,
              :zk_hosts => zk_hosts,
              :jn_hosts => jn_hosts,
-             :mounts => node[:bcpc][:hadoop][:mounts])
+             :mounts => node[:bcpc][:hadoop][:mounts],
+             :nn_jmx_port => node[:bcpc][:hadoop][:jmx][:port][:namenode]
+   )
  end
 end
 

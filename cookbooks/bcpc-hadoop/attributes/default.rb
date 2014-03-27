@@ -14,3 +14,5 @@ default["bcpc"]["hadoop"]["disks"] = []
 default["bcpc"]["hadoop"]["oozie"]["admins"] = []
 default["bcpc"]["hadoop"]["hdfs"]["failed_volumes_tolerated"] = 1
 default["bcpc"]["hadoop"]["hdfs"]["dfs_replication_factor"] = 1
+default["bcpc"]["hadoop"]["jmx_enabled"] = false
+default["bcpc"]["hadoop"]["jmx"]["port"]["namenode"] = 3010
