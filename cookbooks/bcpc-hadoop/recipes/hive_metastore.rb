@@ -4,6 +4,15 @@
   end
 end
 
+user "hcat" do
+  comment "hcat user"
+#  gid "hcat"
+  home "/home/hcat"
+  shell "/bin/noshell"
+  supports :manage_home => false
+end
+
+
 link "/usr/lib/hive/lib/mysql.jar" do
   to "/usr/share/java/mysql.jar"
 end
@@ -42,6 +51,12 @@ bash "create-hive-warehouse" do
   code "hadoop fs -mkdir -p /user/hive/warehouse; hadoop fs -chmod -R 1777 /user/hive/warehouse; hadoop fs -chown -R hive /user/hive"
   user "hdfs"
   not_if "sudo -u hdfs hadoop fs -test -d /user/hive/warehouse"
+end
+
+bash "create-hive-scratch" do
+  code "hadoop fs -mkdir -p /tmp/scratch; hadoop fs -chmod -R 1777 /tmp/scratch; hadoop fs -chown -R hive /tmp/scratch"
+  user "hdfs"
+  not_if "sudo -u hdfs hadoop fs -test -d /tmp/scratch"
 end
 
 service "hive-metastore" do

@@ -42,6 +42,7 @@ if get_config("namenode_txn_fmt") then
   end
 end
 
+if false
 node[:bcpc][:hadoop][:mounts].each do |d|
 
   directory "/disk/#{d}/dfs/" do
@@ -61,13 +62,17 @@ node[:bcpc][:hadoop][:mounts].each do |d|
     only_if { not get_config("namenode_txn_fmt").nil? and not Dir.entries("/disk/#{d}/dfs/nn").include?("current") }
   end
 end
+end
 
 bash "hdfs namenode -bootstrapStandby -force -nonInteractive" do
+  code "hdfs namenode -bootstrapStandby -force -nonInteractive"
   user "hdfs"
-  only_if { get_config("namenode_txn_fmt").nil? and not node[:bcpc][:hadoop][:mounts].all? { |d| Dir.entries("/disk/#{d}/dfs/nn/").include?("current") } }
+  cwd  "/var/lib/hadoop-hdfs"
+  action :run
+  not_if { node[:bcpc][:hadoop][:mounts].all? { |d| Dir.entries("/disk/#{d}/dfs/nn/").include?("current") } }
 end  
 
-if node['bcpc']['hadoop']['hdfs']['HA'] then
+if @node['bcpc']['hadoop']['hdfs']['HA'] == true then
   service "hadoop-hdfs-zkfc" do
     action [:enable, :start]
     subscribes :restart, "template[/etc/hadoop/conf/hdfs-site.xml]", :delayed

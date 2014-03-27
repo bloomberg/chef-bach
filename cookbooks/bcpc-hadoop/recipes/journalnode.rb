@@ -47,6 +47,5 @@ service "hadoop-hdfs-journalnode" do
   subscribes :restart, "template[/etc/hadoop/conf/hdfs-site.xml]", :delayed
   subscribes :restart, "bash[initialize-shared-edits]", :delayed
   subscribes :restart, "template[/etc/hadoop/conf/hdfs-site_HA.xml]", :delayed
-  subscribes :restart, "template[hadoop-hdfs-journalnode]", :immediately
 end
 
