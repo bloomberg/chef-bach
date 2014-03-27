@@ -16,3 +16,5 @@ default["bcpc"]["hadoop"]["hdfs"]["failed_volumes_tolerated"] = 1
 default["bcpc"]["hadoop"]["hdfs"]["dfs_replication_factor"] = 1
 default["bcpc"]["hadoop"]["jmx_enabled"] = false
 default["bcpc"]["hadoop"]["jmx"]["port"]["namenode"] = 3010
+default["bcpc"]["hadoop"]["jmx"]["port"]["datanode"] = 3010
+default["bcpc"]["hadoop"]["jmx"]["port"]["hbase_master"] = 3010

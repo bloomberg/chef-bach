@@ -133,7 +133,8 @@ end
              :zk_hosts => zk_hosts,
              :jn_hosts => jn_hosts,
              :mounts => node[:bcpc][:hadoop][:mounts],
-             :nn_jmx_port => node[:bcpc][:hadoop][:jmx][:port][:namenode]
+             :nn_jmx_port => node[:bcpc][:hadoop][:jmx][:port][:namenode],
+             :dn_jmx_port => node[:bcpc][:hadoop][:jmx][:port][:datanode]
    )
  end
 end
@@ -171,7 +172,9 @@ end
                :zk_hosts => zk_hosts,
                :jn_hosts => jn_hosts,
                :rs_hosts => get_nodes_for("region_server"),
-               :mounts => node[:bcpc][:hadoop][:mounts])
+               :mounts => node[:bcpc][:hadoop][:mounts],
+               :hbm_jmx_port => node[:bcpc][:hadoop][:jmx][:port][:hbase_master]
+     )
   end
 end
 

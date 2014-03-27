@@ -1,0 +1,65 @@
+{
+    "servers": [
+        {
+            "port": "<%= node[:bcpc][:hadoop][:jmx][:port][:datanode] %>",
+            "host": "<%= node[:bcpc][:management][:ip] %>",
+            "queries": [
+                {
+                    "outputWriters": [
+                        {
+                            "@class": "com.googlecode.jmxtrans.model.output.GraphiteWriter",
+                            "settings": {
+                                "port": "2003",
+                                "host": "<%= node[:bcpc][:management][:vip] %>"
+                            }
+                        }
+                    ],
+                    "obj": "Hadoop:name=JvmMetrics,service=DataNode",
+                    "resultAlias": "dn_jvm_metrics",
+                    "attr": [
+                      "GcCount",
+                      "GcTimeMillis",
+                      "LogError",
+                      "LogFatal",
+                      "LogInfo",
+                      "LogWarn",
+                      "MemHeapCommittedM",
+                      "MemHeapUsedM",
+                      "MemMaxM",
+                      "MemNonHeapCommittedM",
+                      "MemNonHeapUsedM",
+                      "ThreadsBlocked",
+                      "ThreadsNew",
+                      "ThreadsRunnable",
+                      "ThreadsTerminated",
+                      "ThreadsTimedWaiting",
+                      "ThreadsWaiting"
+                    ]
+                },
+                {
+                    "outputWriters": [
+                        {
+                            "@class": "com.googlecode.jmxtrans.model.output.GraphiteWriter",
+                            "settings": {
+                                "port": "2003",
+                                "host": "<%= node[:bcpc][:management][:vip] %>"
+                            }
+                        }
+                    ],
+                    "obj": "Hadoop:name=DataNodeInfo,service=DataNode",
+                    "resultAlias": "dn_data_node_info",
+                    "attr": [
+                      "ClusterId",
+                      "HttpPort",
+                      "NamenodeAddresses",
+                      "RpcPort",
+                      "Version",
+                      "VolumeInfo",
+                      "XceiverCount"
+                    ]
+                }
+            ],
+            "numQueryThreads": 2
+        }
+    ]
+}
