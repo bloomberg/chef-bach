@@ -101,6 +101,9 @@ if node['bcpc']['hadoop']['hdfs']['HA'] then
   nn_hosts = get_nodes_for("namenode*")
 else
   nn_hosts = get_nodes_for("namenode_no_HA")
+  if nn_hosts.length == 0 then
+     nn_hosts = get_nodes_for("namenode*")
+  end
 end
 
 zk_hosts = get_nodes_for("zookeeper_server")
