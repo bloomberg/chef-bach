@@ -165,13 +165,11 @@ def ceph_keygen()
 end
 
 def float_host(*args)
-  #"f-" + args.join('.')
-  args.join('.')
+  "f-" + args.join('.')
 end
 
 def storage_host(*args)
-  #"s-" + args.join('.')
-  args.join('.')
+  "s-" + args.join('.')
 end
 
 # requires cidr in form '1.2.3.0/24', where 1.2.3.0 is a dotted quad ip4 address 

@@ -128,12 +128,12 @@ def secure_password(len=20)
 end
 
 def float_host(*args)
-  #"f-" + args.join('.')
+  "f-" + args.join('.')
   args.join('.')
 end
 
 def storage_host(*args)
-  #"s-" + args.join('.')
+  "s-" + args.join('.')
   args.join('.')
 end
 
