@@ -24,33 +24,31 @@ sysctl_param 'vm.swappiness' do
 end
 
 case node["platform_family"]
-when "debian"
-  apt_repository "cloudera" do
-    uri node['bcpc']['repos']['cloudera']
-    distribution node['lsb']['codename'] + node[:bcpc][:hadoop][:distribution][:version]
-    components ["contrib"]
-    arch "amd64"
-    key node[:bcpc][:hadoop][:distribution][:key]
-  end
-  apt_repository "cloudera-lzo" do
-    uri node['bcpc']['repos']['cloudera-lzo']
-    distribution "lucid-gplextras5"
-    components ["contrib"]
-    arch "amd64"
-    key node[:bcpc][:hadoop][:distribution][:key]
-  end
+  when "debian"
+    apt_repository "hortonworks" do
+      uri node['bcpc']['repos']['hortonworks']
+      distribution node[:bcpc][:hadoop][:distribution][:version]
+      components ["main"]
+      key node[:bcpc][:hadoop][:distribution][:key]
+    end
+    apt_repository "hdp-utils" do
+      uri node['bcpc']['repos']['hdp_utils']
+      distribution "HDP-UTILS"
+      components ["main"]
+      key node[:bcpc][:hadoop][:distribution][:key]
+    end
 
-  %w{hadoop
-     hbase
-     hive
-     oozie
-     pig
-     zookeeper
-     impala
-     webhcat
-     hadoop-httpfs
-     hive-hcatalog
-     hue}.each do |w|
+   %w{hadoop
+      hbase
+      hive
+      oozie
+      pig
+      zookeeper
+      webhcat
+      hcat
+      hadoop-httpfs
+      hive-hcatalog
+      hue}.each do |w|
     directory "/etc/#{w}/conf.#{node.chef_environment}" do
       owner "root"
       group "root"
@@ -67,9 +65,9 @@ when "debian"
     end
   end
 
-when "rhel"
-  ""
-  # do things on RHEL platforms (redhat, centos, scientific, etc)
+  when "rhel"
+    ""
+    # do things on RHEL platforms (redhat, centos, scientific, etc)
 end
 
 make_config('mysql-hive-password', secure_password)
@@ -101,7 +99,7 @@ if node['bcpc']['hadoop']['hdfs']['HA'] then
   nn_hosts = get_nodes_for("namenode*")
 else
   nn_hosts = get_nodes_for("namenode_no_HA")
-  if nn_hosts.length == 0 then
+  if nn_hosts.length == 0 then 
      nn_hosts = get_nodes_for("namenode*")
   end
 end
@@ -120,9 +118,9 @@ hadoop_conf_files.each do |t|
      variables(:nn_hosts => nn_hosts,
                :zk_hosts => zk_hosts,
                :jn_hosts => jn_hosts,
-               :rm_hosts => rm_hosts,
-               :hs_hosts => hs_hosts,
+               :rm_host  => rm_hosts,
                :dn_hosts => dn_hosts,
+               :hs_host => hs_hosts,
                :mounts => node[:bcpc][:hadoop][:mounts])
    end
 end
@@ -181,11 +179,13 @@ end
   end
 end
 
+
 #
 # Set up hive configs
 #
 %w{hive-exec-log4j.properties
    hive-log4j.properties
+   hive-env.sh
    hive-site.xml }.each do |t|
    template "/etc/hive/conf/#{t}" do
      source "hv_#{t}.erb"
@@ -210,8 +210,8 @@ end
     source "ooz_#{t}.erb"
     mode 0644
     variables(:mysql_hosts => get_mysql_nodes.map{ |m| m.hostname },
-              :hive_host => hive_host,
-              :zk_hosts => zk_hosts)
+              :zk_hosts => zk_hosts,
+              :hive_host => hive_host)
   end
 end
 link "/etc/oozie/conf.#{node.chef_environment}/hive-site.xml" do
@@ -222,23 +222,6 @@ link "/etc/oozie/conf.#{node.chef_environment}/core-site.xml" do
 end
 link "/etc/oozie/conf.#{node.chef_environment}/yarn-site.xml" do
   to "/etc/hadoop/conf.#{node.chef_environment}/yarn-site.xml"
-end
-
-#
-# Set up impala configs
-#
-
-link "/etc/impala/conf.#{node.chef_environment}/hive-site.xml" do
-  to "/etc/hive/conf.#{node.chef_environment}/hive-site.xml"
-end
-link "/etc/impala/conf.#{node.chef_environment}/core-site.xml" do
-  to "/etc/hadoop/conf.#{node.chef_environment}/core-site.xml"
-end
-link "/etc/impala/conf.#{node.chef_environment}/hdfs-site.xml" do
-  to "/etc/hadoop/conf.#{node.chef_environment}/hdfs-site.xml"
-end
-link "/etc/impala/conf.#{node.chef_environment}/hbase-site.xml" do
-  to "/etc/hbase/conf.#{node.chef_environment}/hbase-site.xml"
 end
 
 #
@@ -263,6 +246,7 @@ end
 #
 # HUE Configs
 #
+if false
 %w{
   hue.ini
   log4j.properties
@@ -270,14 +254,15 @@ end
    template "/etc/hue/conf/#{t}" do
      source "hue_#{t}.erb"
      mode 0644
-     variables(:impala_hosts => get_nodes_for("datanode") ,
+     variables(
                :zk_hosts => zk_hosts,
                :rm_host  => rm_hosts,
-               :hive_host  => hive_host,
+               :hive_host  => get_nodes_for("hive"),
                :oozie_host  => get_nodes_for("oozie"),
                :httpfs_host => get_nodes_for("httpfs"),
-               :hb_host  => get_nodes_for("master"))
+               :hb_host  => get_nodes_for("hbase_master"))
   end
+end
 end
 
 %w{openjdk-7-jdk zookeeper}.each do |pkg|
