@@ -64,15 +64,15 @@ node[:bcpc][:hadoop][:mounts].each do |d|
 end
 end
 
-bash "hdfs namenode -bootstrapStandby -force -nonInteractive" do
-  code "hdfs namenode -bootstrapStandby -force -nonInteractive"
-  user "hdfs"
-  cwd  "/var/lib/hadoop-hdfs"
-  action :run
-  not_if { node[:bcpc][:hadoop][:mounts].all? { |d| Dir.entries("/disk/#{d}/dfs/nn/").include?("current") } }
-end  
-
 if @node['bcpc']['hadoop']['hdfs']['HA'] == true then
+  bash "hdfs namenode -bootstrapStandby -force -nonInteractive" do
+    code "hdfs namenode -bootstrapStandby -force -nonInteractive"
+    user "hdfs"
+    cwd  "/var/lib/hadoop-hdfs"
+    action :run
+    not_if { node[:bcpc][:hadoop][:mounts].all? { |d| Dir.entries("/disk/#{d}/dfs/nn/").include?("current") } }
+  end  
+
   service "hadoop-hdfs-zkfc" do
     action [:enable, :start]
     subscribes :restart, "template[/etc/hadoop/conf/hdfs-site.xml]", :delayed
