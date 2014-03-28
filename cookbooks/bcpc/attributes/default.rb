@@ -22,6 +22,8 @@ default['bcpc']['vms_key'] = nil
 
 default['bcpc']['encrypt_data_bag'] = false
 
+default['bcpc']['bootstrap']['preseed']['late_command'] = "true"
+
 ###########################################
 #
 #  Host-specific defaults for the cluster
