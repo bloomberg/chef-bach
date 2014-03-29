@@ -156,8 +156,10 @@ end
 # but the first entry in our master list is also the only one in pdns,
 # so make that the last entry to minimize double failures when upstream dies.
 resolvers=node[:bcpc][:dns_servers].dup
-resolvers.push resolvers.shift
-resolvers.unshift node[:bcpc][:management][:vip]
+if node[:bcpc][:management][:vip] and get_nodes_for("powerdns").length() > 0
+  resolvers.push resolvers.shift
+  resolvers.unshift node[:bcpc][:management][:vip]
+end
 
 template "/etc/network/interfaces.d/iface-#{node[:bcpc][:floating][:interface]}" do
   source "network.iface.erb"

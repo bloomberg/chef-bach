@@ -120,6 +120,12 @@ def get_mysql_nodes
   return (results.empty?) ? [node] : results
 end
 
+def get_nodes_for(recipe)
+  results = search(:node, "recipes:bcpc\\:\\:#{recipe} AND chef_environment:#{node.chef_environment}")
+  results.map!{ |x| x['hostname'] == node[:hostname] ? node : x }
+  return results
+end
+
 def get_binary_server_url
   return("http://#{URI(Chef::Config['chef_server_url']).host}:8080") if node[:bcpc][:binary_server_url].nil?
   return(node[:bcpc][:binary_server_url])
