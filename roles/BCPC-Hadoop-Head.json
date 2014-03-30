@@ -6,6 +6,7 @@
   "run_list": [
     "role[Basic]",
     "recipe[bcpc::default]",
+    "recipe[bcpc-hadoop::default]",
     "recipe[bcpc::networking]",
     "recipe[bcpc::mysql]",
     "recipe[bcpc-hadoop::disks]",
