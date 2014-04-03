@@ -13,7 +13,7 @@ CHEF_SERVER_HOSTNAME=${4:?"Need a Chef Server hostname"}
 
 echo -e "${CHEF_SERVER_IP}\t$CHEF_SERVER_HOSTNAME" >> /etc/hosts
 grep -q $BINARY_SERVER_HOST /etc/apt/apt.conf || echo "Acquire::http::Proxy::$BINARY_SERVER_HOST 'DIRECT';" >> /etc/apt/apt.conf
-echo "deb $BINARY_SERVER_URL 0.5.0 main" > /etc/apt/sources.list.d/bcpc.list
+echo "deb [arch=amd64] $BINARY_SERVER_URL 0.5.0 main" > /etc/apt/sources.list.d/bcpc.list
 wget --no-proxy -O - ${BINARY_SERVER_URL}/apt_key.pub | apt-key add -
 apt-get update
 apt-get install -y chef
