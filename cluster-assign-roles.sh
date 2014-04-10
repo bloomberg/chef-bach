@@ -38,10 +38,16 @@ function install_machines {
     local run_list="${BASH_REMATCH[1]}"
     local ip="${BASH_REMATCH[2]}"
     local fqdn="${BASH_REMATCH[3]}"
-    printf "About to bootstrap node $fqdn to $ENVIRONMENT ${run_list}...\n"
-    knife node show $fqdn 2>/dev/null >/dev/null || ./chefit.sh $ip $ENVIRONMENT
-    local SSHCMD="./nodessh.sh $ENVIRONMENT $ip"
-    sudo knife bootstrap -E $ENVIRONMENT -r "$run_list" $ip -x ubuntu  -P $passwd -u admin -k /etc/chef-server/admin.pem --sudo <<< $passwd
+    if knife node show $fqdn 2>/dev/null >/dev/null; then
+      printf "Running chef for node $fqdn in $ENVIRONMENT run_list ${run_list}...\n"
+      local SSHCMD="./nodessh.sh $ENVIRONMENT $ip"
+      knife node run_list set $fqdn "$run_list"
+      $SSHCMD "chef-client" sudo
+    else
+      printf "About to bootstrap node $fqdn in $ENVIRONMENT run_list ${run_list}...\n"
+      ./chefit.sh $ip $ENVIRONMENT
+      sudo knife bootstrap -E $ENVIRONMENT -r "$run_list" $ip -x ubuntu  -P $passwd -u admin -k /etc/chef-server/admin.pem --sudo <<< $passwd
+    fi
   done
 }
 
@@ -55,7 +61,7 @@ function parse_cluster_txt {
   local hosts=""
   while read host macaddr ipaddr iloipaddr domain role; do
     shopt -s nocasematch
-    if [[ -z "${match_text-}" || "$match_text" = "$host" || "$match_text" = "$ipaddr" || "$match_text" = "$role" ]] && \
+    if [[ -z "${match_text-}" || "$match_text" = "$host" || "$match_text" = "$ipaddr" || "$role" =~ $match_text ]] && \
        [[ ! "|$role" =~ '|SKIP' ]]; then
       hosts="$hosts ${role}${BANG}${ipaddr}${BANG}${host}.$domain"
     fi
