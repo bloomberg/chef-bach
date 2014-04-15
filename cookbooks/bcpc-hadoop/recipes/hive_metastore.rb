@@ -4,15 +4,6 @@
   end
 end
 
-user "hcat" do
-  comment "hcat user"
-#  gid "hcat"
-  home "/home/hcat"
-  shell "/bin/noshell"
-  supports :manage_home => false
-end
-
-
 link "/usr/lib/hive/lib/mysql.jar" do
   to "/usr/share/java/mysql.jar"
 end

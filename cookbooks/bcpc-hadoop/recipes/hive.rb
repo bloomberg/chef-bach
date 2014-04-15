@@ -1,5 +1,13 @@
+# workaround for hcatalog dpkg not creating the hcat user it requires
+user "hcat" do 
+  username "hcat"
+  system true
+  shell "/bin/bash"
+  home "/usr/lib/hcatalog"
+  supports :manage_home => false
+end
 
-%w{hive }.each do |pkg|
+%w{hive hcatalog}.each do |pkg|
   package pkg do
     action :upgrade
   end
