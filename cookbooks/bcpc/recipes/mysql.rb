@@ -176,3 +176,11 @@ bash "phpmyadmin-config-setup" do
   EOH
   not_if "grep -q AllowArbitraryServer /etc/phpmyadmin/config.inc.php"
 end
+
+template "/etc/apache2/vhost-ssl-root.d/phpmyadmin.conf" do
+    source "apache-vhost-ssl-root-phpmyadmin.conf.erb"
+    owner "root"
+    group "root"
+    mode 00644
+    notifies :restart, "service[apache2]", :delayed
+end
