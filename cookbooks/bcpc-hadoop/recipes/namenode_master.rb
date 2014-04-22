@@ -10,8 +10,8 @@ require "base64"
   end
 end
 
-node[:bcpc][:hadoop][:mounts].each do |i|
-  directory "/disk/#{i}/dfs/nn" do
+node[:bcpc][:hadoop][:mounts].each do |d|
+  directory "/disk/#{d}/dfs/nn" do
     owner "hdfs"
     group "hdfs"
     mode 0755
@@ -19,7 +19,7 @@ node[:bcpc][:hadoop][:mounts].each do |i|
     recursive true
   end
 
-  directory "/disk/#{i}/dfs/namedir" do
+  directory "/disk/#{d}/dfs/namedir" do
     owner "hdfs"
     group "hdfs"
     mode 0700
@@ -28,17 +28,8 @@ node[:bcpc][:hadoop][:mounts].each do |i|
   end
 
   execute "fixup nn owner" do
-    command "chown -Rf hdfs:hdfs /disk/#{i}/dfs"
-    only_if { Etc.getpwuid(File.stat("/disk/#{i}/dfs/").uid).name != "hdfs" }
-  end
-end
-
-if node[:bcpc][:hadoop][:standby] and get_config("namenode_txn_fmt") then
-  file "/tmp/nn_fmt.tgz" do
-    user "hdfs"
-    group "hdfs"
-    user 0644
-    content Base64.decode64(get_config("namenode_txn_fmt"))
+    command "chown -Rf hdfs:hdfs /disk/#{d}/dfs"
+    only_if { Etc.getpwuid(File.stat("/disk/#{d}/dfs/").uid).name != "hdfs" }
   end
 end
 
@@ -47,44 +38,41 @@ bash "format namenode" do
   user "hdfs"
   action :run
   creates "/disk/#{node[:bcpc][:hadoop][:mounts][0]}/dfs/nn/current/VERSION"
-  notifies :create, "ruby_block[grab the format UUID File]", :immediately
-  not_if { File.exists?("/disk/#{node[:bcpc][:hadoop][:mounts][0]}/dfs/nn/current/VERSION")  }
+  not_if { node[:bcpc][:hadoop][:mounts].any? { |d| File.exists?("/disk/#{d}/dfs/nn/current/VERSION") } }
 end
 
 bash "format-zk-hdfs-ha" do
   code "yes | hdfs zkfc -formatZK"
   action :run
   user "hdfs"
+  notifies :restart, "service[hadoop-hdfs-namenode]", :delayed
   not_if { zk_formatted? }
 end
 
 service "hadoop-hdfs-zkfc" do
+  supports :status => true, :restart => true, :reload => false
   action [:enable, :start]
   subscribes :restart, "template[/etc/hadoop/conf/hdfs-site.xml]", :delayed
+  subscribes :restart, "template[/etc/hadoop/conf/hdfs-site_HA.xml]", :delayed
   subscribes :restart, "template[/etc/hadoop/conf/hdfs-policy.xml]", :delayed
-end
-
-service "hadoop-hdfs-namenode" do
-    supports :status => true
-    action :stop
-  only_if "service hadoop-hdfs-namenode status"
 end
 
 bash "initialize-shared-edits" do
   code "hdfs namenode -initializeSharedEdits"
   user "hdfs"
-  action :run
-  # need more than ., .., in_use.lock
-  not_if { Dir.entries("/disk/#{node[:bcpc][:hadoop][:mounts][0]}/dfs/jn/#{node.chef_environment}").include?("current") }
+  notifies :create, "ruby_block[grab the format UUID File]", :immediately
+  notifies :restart, "service[hadoop-hdfs-namenode]", :delayed
+  not_if { node[:bcpc][:hadoop][:mounts].any? { |d| File.exists?("/disk/#{d}/dfs/jn/#{node.chef_environment}/current/VERSION") } }
 end
 
 service "hadoop-hdfs-namenode" do
   action [:enable, :start]
+  supports :status => true, :restart => true, :reload => false
   subscribes :restart, "template[/etc/hadoop/conf/hdfs-site.xml]", :delayed
+  subscribes :restart, "template[/etc/hadoop/conf/hdfs-site_HA.xml]", :delayed
   subscribes :restart, "template[/etc/hadoop/conf/hdfs-policy.xml]", :delayed
   subscribes :restart, "bash[initialize-shared-edits]", :immediate
 end
-
 
 ## We need to bootstrap the standby and journal node transaction logs
 # The -bootstrapStandby and -initializeSharedEdits don't actually work
@@ -96,9 +84,9 @@ end
 ruby_block "grab the format UUID File" do
   block do
     Dir.chdir("/disk/#{node[:bcpc][:hadoop][:mounts][0]}/dfs/") do
-      system("tar czvf /tmp/nn_fmt.tgz nn/")
+      system("tar czvf #{Chef::Config[:file_cache_path]}/nn_fmt.tgz nn/current/VERSION jn/#{node.chef_environment}/current/VERSION")
     end
-    make_config("namenode_txn_fmt", Base64.encode64(IO.read("/tmp/nn_fmt.tgz")));
+    make_config("namenode_txn_fmt", Base64.encode64(IO.read("#{Chef::Config[:file_cache_path]}/nn_fmt.tgz")));
   end
   action :nothing
   subscribes :create, "service[hadoop-hdfs-namenode]", :immediate
@@ -132,4 +120,3 @@ bash "create-hdfs-yarn-log" do
   user "hdfs"
   not_if "sudo -u hdfs hadoop fs -test -d /var/log/hadoop-yarn"
 end
-

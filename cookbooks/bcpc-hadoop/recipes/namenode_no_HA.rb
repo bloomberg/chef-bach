@@ -10,8 +10,8 @@ require "base64"
   end
 end
 
-node[:bcpc][:hadoop][:mounts].each do |i|
-  directory "/disk/#{i}/dfs/nn" do
+node[:bcpc][:hadoop][:mounts].each do |d|
+  directory "/disk/#{d}/dfs/nn" do
     owner "hdfs"
     group "hdfs"
     mode 0755
@@ -19,7 +19,7 @@ node[:bcpc][:hadoop][:mounts].each do |i|
     recursive true
   end
 
-  directory "/disk/#{i}/dfs/namedir" do
+  directory "/disk/#{d}/dfs/namedir" do
     owner "hdfs"
     group "hdfs"
     mode 0700
@@ -28,8 +28,8 @@ node[:bcpc][:hadoop][:mounts].each do |i|
   end
 
   execute "fixup nn owner" do
-    command "chown -Rf hdfs:hdfs /disk/#{i}/dfs"
-    only_if { Etc.getpwuid(File.stat("/disk/#{i}/dfs/").uid).name != "hdfs" }
+    command "chown -Rf hdfs:hdfs /disk/#{d}/dfs"
+    only_if { Etc.getpwuid(File.stat("/disk/#{d}/dfs/").uid).name != "hdfs" }
   end
 end
 
@@ -38,10 +38,11 @@ bash "format namenode" do
   user "hdfs"
   action :run
   creates "/disk/#{node[:bcpc][:hadoop][:mounts][0]}/dfs/nn/current/VERSION"
-  not_if { File.exists?("/disk/#{node[:bcpc][:hadoop][:mounts][0]}/dfs/nn/current/VERSION")  }
+  not_if { node[:bcpc][:hadoop][:mounts].any? { |d| File.exists?("/disk/#{d}/dfs/nn/current/VERSION") } }
 end
 
 service "hadoop-hdfs-namenode" do
+  supports :restart => true, :status => true, :reload => false
   action [:enable, :start]
   subscribes :restart, "template[/etc/hadoop/conf/hdfs-site.xml]", :delayed
   subscribes :restart, "template[/etc/hadoop/conf/hdfs-policy.xml]", :delayed

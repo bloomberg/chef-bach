@@ -10,8 +10,8 @@ require "base64"
   end
 end
 
-node[:bcpc][:hadoop][:mounts].each do |i|
-  directory "/disk/#{i}/dfs/nn" do
+node[:bcpc][:hadoop][:mounts].each do |d|
+  directory "/disk/#{d}/dfs/nn" do
     owner "hdfs"
     group "hdfs"
     mode 0755
@@ -19,7 +19,7 @@ node[:bcpc][:hadoop][:mounts].each do |i|
     recursive true
   end
 
-  directory "/disk/#{i}/dfs/namedir" do
+  directory "/disk/#{d}/dfs/namedir" do
     owner "hdfs"
     group "hdfs"
     mode 0700
@@ -28,40 +28,9 @@ node[:bcpc][:hadoop][:mounts].each do |i|
   end
 
   execute "fixup nn owner" do
-    command "chown -Rf hdfs:hdfs /disk/#{i}/dfs/"
-    only_if { Etc.getpwuid(File.stat("/disk/#{i}/dfs/").uid).name != "hdfs" }
+    command "chown -Rf hdfs:hdfs /disk/#{d}/dfs/"
+    only_if { Etc.getpwuid(File.stat("/disk/#{d}/dfs/").uid).name != "hdfs" }
   end
-end
-
-if get_config("namenode_txn_fmt") then
-  file "/tmp/nn_fmt.tgz" do
-    user "hdfs"
-    group "hdfs"
-    user 0644
-    content Base64.decode64(get_config("namenode_txn_fmt"))
-  end
-end
-
-if false
-node[:bcpc][:hadoop][:mounts].each do |d|
-
-  directory "/disk/#{d}/dfs/" do
-    owner "hdfs"
-    group "hdfs"
-    mode 0755
-    action :create
-    recursive true
-  end
-
-  bash "unpack nn fmt image" do
-    user "hdfs"
-    get_config("namenode_txn_fmt")
-    code ["pushd /disk/#{d}/dfs/",
-          "tar xzvf /tmp/nn_fmt.tgz",
-          "popd"].join("\n")
-    only_if { not get_config("namenode_txn_fmt").nil? and not Dir.entries("/disk/#{d}/dfs/nn").include?("current") }
-  end
-end
 end
 
 if @node['bcpc']['hadoop']['hdfs']['HA'] == true then
