@@ -38,6 +38,9 @@
       },
       "dns_servers" : [ "8.8.8.8", "8.8.4.4" ],
       "hadoop" : {
+        "hdfs" : {
+          "dfs_replication_factor" : 1
+        },
         "disks" : ["sdb" , "sdc" ],
         "distribution" : {
           "version" : "HDP",
