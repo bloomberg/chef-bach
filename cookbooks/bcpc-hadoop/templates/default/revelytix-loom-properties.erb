@@ -1,0 +1,135 @@
+# LOOM SERVER CONFIGURATION PROPERTIES
+# These should be set up before starting the Loom Server.
+
+# LOOM ACTIVESCAN
+# ===============
+
+# Enable table metadata and column statistics scanning
+activeScan.table.enabled=<%= node.bcpc.revelytix.activescan-table-enabled %>
+
+# Enable active scanning of potential sources in HDFS.
+activeScan.hdfs.enabled=<%= node.bcpc.revelytix.activescan-hdfs-enabled %>
+
+# A comma-separated list of directories under which to scan for potential sources
+# in HDFS. Directories may be specified as an absolute hdfs:// URL or a relative
+# path that will be resolved against the Loom working directory. The scan is
+# recursive, so all sub-directories of each configured directory will be scanned.
+# Defaults to the Loom working directory if not set.
+activeScan.hdfs.baseDir=hdfs://<%= node.chef_environment %>/user,hdfs://<%= node.chef_environment %>/projects
+
+# The username to run the potential-source scanner service as. A Loom account is
+# created with this username when the Loom server is launched, and that account
+# will be registered as the owner of any potential sources detected by the scanner.
+# When Loom is running with security enabled, this is also the username that will
+# be used to access HDFS to detect potential sources, and therefore must have at
+# least read access to directories listed in activeScan.hdfs.baseDir.
+activeScan.hdfs.scanUser=<%= node.bcpc.revelytix.activescan-hdfs-user %>active-scan
+
+# Set the interval, in minutes, at which Loom will scan HDFS for potential
+# sources.
+activeScan.hdfs.scanIntervalMinutes=<%= node.bcpc.revelytix.hdfs-scan-interval %>
+
+# The number of records to parse from a file in HDFS to determine whether it's
+# a potential source.
+activeScan.hdfs.parseLines=<%= node.bcpc.revelytix.parse-lines %>
+
+# The threshold above which the confidence level must be for a file in HDFS
+# to be considered a potential source.
+# The confidence level is a computed value between 0 and 1.
+activeScan.hdfs.scoreThreshold=<%= node.bcpc.revelytix.score-threshold %>
+
+# The maximum amount of data to read into memory from an HDFS file to determine
+# whether it's a potential source.
+activeScan.hdfs.maxBufferSize=<%= node.bcpc.revelytix.max-buffer-size %>
+
+# LOOM PERSISTENCE
+# ================
+
+# Set the dataset persistence mode.
+#   hdfs - use HDFS file system and Loom-controlled files (default if not set).
+#   hive - use Hive tables.
+persist.mode=<%= node.bcpc.revelytix.persist-mode %>
+
+# Sets the location in HDFS where Loom-managed datasets are created, when
+# running with 'hdfs' persist mode.
+# Defaults to a directory named 'loom-datasets' in the HDFS working directory.
+dataset.persist.dir=<%= node.bcpc.revelytix.dataset-persist-dir %>
+
+# Sets the location in HDFS where temporary files live.
+# Defaults to a directory named 'loom-temp' in the HDFS working directory.
+temporary.file.dir=<%= node.bcpc.revelytix.temporary-file-dir %>
+
+# LOOM JOB EXECUTION
+# ==================
+
+# Sets the thread pool size used by the job service for executed processes.
+jobService.threadPool.size=<%= node.bcpc.revelytix.job-service-thread-pool-size %>
+
+# LOOM SECURITY AND SSL
+# =====================
+
+# Note that some of these properties are commented out.
+
+# Enables or disables Loom security.
+# If security is enabled, user impersonation is performed.
+security.enabled=<%= node.bcpc.revelytix.security.enabled %>
+
+# Configures how authentication is done: does the user exist and have permission?
+# Username and password will always be requested in order to get a session.
+#   jaas     - (default) Use JAAS. JAAS is configured in security-unix.conf.
+#                Must have a valid session to access API.
+#   loom     - Use Loom username/password for a valid session.
+#                API rejects requests without a valid session.
+#   disabled - Use Loom username/password to get a session.
+#                Valid session not required to access API.
+security.authentication=<%= node.bcpc.revelytix.security.authentication %>
+
+# Enables SSL (https) support.  Disabled by default.
+#
+ssl.enabled=<%= node.bcpc.revelytix.ssl.enabled %>
+
+# Configures the SSL port.  Defaults to 8443.
+#
+ssl.port=<%= node.bcpc.revelytix.ssl.port %>
+
+# Configures the SSL certificate keystore.  Defaults to config/keystore.
+#
+ssl.keystore=<%= node.bcpc.revelytix.ssl.keystore %>
+
+# Configures the SSL keystore password.  Defaults to "changeit".
+# The password can be stored either as plain text or in obfuscated form.
+# An obfuscated password is stored by prefixing the password with "OBF:".
+# The password can be obfuscated with the bin/password.sh script.
+#
+ssl.key-password=get_config('revelytix-loom-ssl-password')
+
+# Configures the SSL truststore.  No default.
+# If nothing is specified, the keystore is used.
+#
+# ssl.truststore=<%= node.bcpc.revelytix.ssl.trust-store %>
+
+# Configures the SSL truststore password.  No default.
+#
+# ssl.trust-password=get_config("revelitix-ssl-trust-password")
+
+# HADOOP INTEGRATION
+# ==================
+
+# Sets the location in HDFS where Loom manages the distributed cache that it
+# uses to configure MapReduce jobs that it submits. The Loom server process
+# must have permission to write in this location.
+loom.dist.cache=loom-dist-cache
+
+# HIVE INTEGRATION
+# ================
+
+# These properties apply when Loom is configured to use Hive for persistence.
+# See the persist.mode property for configuring Loom persistence.
+
+# A list of comma separated strings representing URIs (JARs) that don't belong
+# in the embedded hive classloader. Checked by a simple String.contains().
+hive.classloader.blacklistJars=slf4j,log4j,commons-logging
+
+
+# Custom port
+port=8080
