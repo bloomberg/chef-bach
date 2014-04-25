@@ -128,11 +128,19 @@ def secure_password(len=20)
 end
 
 def float_host(*args)
-  return ("f-" + args.join('.'))
+  if node[:bcpc][:management][:ip] == node[:bcpc][:float][:ip]
+    return args.join('.')
+  else
+    return ("f-" + args.join('.'))
+  end
 end
 
 def storage_host(*args)
-  return ("s-" + args.join('.'))
+  if node[:bcpc][:management][:ip] == node[:bcpc][:float][:ip]
+    return args.join('.')
+  else
+    return ("s-" + args.join('.'))
+  end
 end
 
 def zk_formatted?

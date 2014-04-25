@@ -171,11 +171,19 @@ def ceph_keygen()
 end
 
 def float_host(*args)
-  "f-" + args.join('.')
+  if node[:bcpc][:management][:ip] == node[:bcpc][:float][:ip]
+    return args.join('.')
+  else
+    return ("f-" + args.join('.'))
+  end
 end
 
 def storage_host(*args)
-  "s-" + args.join('.')
+  if node[:bcpc][:management][:ip] == node[:bcpc][:float][:ip]
+    return args.join('.')
+  else
+    return ("s-" + args.join('.'))
+  end
 end
 
 # requires cidr in form '1.2.3.0/24', where 1.2.3.0 is a dotted quad ip4 address 
