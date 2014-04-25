@@ -17,3 +17,7 @@ echo "deb [arch=amd64] $BINARY_SERVER_URL 0.5.0 main" > /etc/apt/sources.list.d/
 wget --no-proxy -O - ${BINARY_SERVER_URL}/apt_key.pub | apt-key add -
 apt-get update
 apt-get install -y chef
+
+# setup OpenStack hint
+mkdir -p /etc/chef/ohai/hints/
+touch /etc/chef/ohai/hints/openstack.json

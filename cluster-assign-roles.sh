@@ -26,27 +26,29 @@ set -o nounset
 BANG='!'
 # Global Regular Expression for parsing parse_cluster_txt output
 REGEX='(.*)!(.*)!(.*)'
+# Knife administrative credentials
+KNIFE_ADMIN="-u admin -k /etc/chef-server/admin.pem"
 
 ########################################################################
 # install_machines -  Install a set of machines (will run chefit.sh if no node object for machine)
 # Argument: $1 - a string of role!IP!FQDN pairs separated by white space
 # Will install the machine with role $role in the order passed (left to right)
 function install_machines {
-  passwd=`knife data bag show configs $ENVIRONMENT | grep "cobbler-root-password:" | awk ' {print $2}'`
+  passwd="- P `sudo knife data bag show configs $ENVIRONMENT $KNIFE_ADMIN | grep "cobbler-root-password:" | awk ' {print $2}'`"
   for h in $(sort <<< ${*// /\\n}); do
     [[ "$h" =~ $REGEX ]]
     local run_list="${BASH_REMATCH[1]}"
     local ip="${BASH_REMATCH[2]}"
     local fqdn="${BASH_REMATCH[3]}"
-    if knife node show $fqdn 2>/dev/null >/dev/null; then
+    if sudo knife node show $fqdn $KNIFE_ADMIN 2>/dev/null >/dev/null; then
       printf "Running chef for node $fqdn in $ENVIRONMENT run_list ${run_list}...\n"
       local SSHCMD="./nodessh.sh $ENVIRONMENT $ip"
-      knife node run_list set $fqdn "$run_list"
+      sudo knife node run_list set $fqdn "$run_list" $KNIFE_ADMIN
       $SSHCMD "chef-client" sudo
     else
       printf "About to bootstrap node $fqdn in $ENVIRONMENT run_list ${run_list}...\n"
       ./chefit.sh $ip $ENVIRONMENT
-      sudo knife bootstrap -E $ENVIRONMENT -r "$run_list" $ip -x ubuntu  -P $passwd -u admin -k /etc/chef-server/admin.pem --sudo <<< $passwd
+      sudo -E knife bootstrap -E $ENVIRONMENT -r "$run_list" $ip -x ubuntu  $passwd $KNIFE_ADMIN --sudo <<< $passwd
     fi
   done
 }
@@ -83,7 +85,7 @@ function install_stub {
     local role="${BASH_REMATCH[1]}"
     local ip="${BASH_REMATCH[2]}"
     local fqdn="${BASH_REMATCH[3]}"
-    knife node show $fqdn 2>/dev/null >/dev/null ||  install_machines "role[Basic],recipe[bcpc::default],recipe[bcpc::networking]${BANG}${ip}${BANG}${fqdn}" &
+    sudo knife node show $fqdn $KNIFE_ADMIN 2>/dev/null >/dev/null ||  install_machines "role[Basic],recipe[bcpc::default],recipe[bcpc::networking]${BANG}${ip}${BANG}${fqdn}" &
   done
   wait
 }
@@ -109,8 +111,8 @@ function openstack_install {
   first_head_node_hostname=${first_head_node_fqdn%%.*}
   install_stub "$first_head_node"
   # set the first node to admin for creating data bags (short-circuit failures in-case machine already is an admin)
-  chef_head_node_name=$(knife client list | egrep "^${first_head_node_hostname}\..*$|^${first_head_node_hostname}$")
-  printf "/\"admin\": false\ns/false/true\nw\nq\n" | EDITOR=ed knife client edit $chef_head_node_name || /bin/true
+  chef_head_node_name=$(sudo knife client list $KNIFE_ADMIN | egrep "^${first_head_node_hostname}\..*$|^${first_head_node_hostname}$")
+  printf "/\"admin\": false\ns/false/true\nw\nq\n" | EDITOR=ed sudo -E knife client edit $chef_head_node_name $KNIFE_ADMIN || /bin/true
 
   # Do head nodes first and group by type of head
   printf "Installing heads...\n"
@@ -126,7 +128,7 @@ function openstack_install {
   done
   wait
   # remove admin from first headnode
-  printf "/\"admin\": true\ns/true/false\nw\nq\n" | EDITOR=ed knife client edit "$chef_head_node_name"
+  printf "/\"admin\": true\ns/true/false\nw\nq\n" | EDITOR=ed sudo -E knife client edit "$chef_head_node_name" $KNIFE_ADMIN 
 }
 
 ########################################################################
@@ -154,13 +156,13 @@ function hadoop_install {
     local role="${BASH_REMATCH[1]}"
     local ip="${BASH_REMATCH[2]}"
     local fqdn="${BASH_REMATCH[3]}"
-    knife node run_list add $fqdn "$role" &
+    sudo knife node run_list add $fqdn "$role" $KNIFE_ADMIN &
   done
 
   # set the headnodes to admin for creating data bags
   for h in $(printf ${hosts// /\\n} | grep -i "head" | sort); do
     [[ "$h" =~ $REGEX ]]
-    printf "/\"admin\": false\ns/false/true\nw\nq\n" | EDITOR=ed knife client edit "${BASH_REMATCH[3]}" || /bin/true
+    printf "/\"admin\": false\ns/false/true\nw\nq\n" | EDITOR=ed sudo -E knife client edit "${BASH_REMATCH[3]}" $KNIFE_ADMIN || /bin/true
   done
 
   printf "Installing heads...\n"
@@ -169,7 +171,7 @@ function hadoop_install {
   # remove admin from the headnodes
   for h in $(printf ${hosts// /\\n} | grep -i "head" | sort); do
     [[ "$h" =~ $REGEX ]]
-    printf "/\"admin\": true\ns/true/false\nw\nq\n" | EDITOR=ed knife client edit "${BASH_REMATCH[3]}"
+    printf "/\"admin\": true\ns/true/false\nw\nq\n" | EDITOR=ed sudo -E knife client edit "${BASH_REMATCH[3]}" $KNIFE_ADMIN 
   done
 
   printf "Installing workers...\n"

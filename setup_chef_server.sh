@@ -36,6 +36,10 @@ else
   apt-get -y install chef
 fi
 
+# setup OpenStack hint
+mkdir -p /etc/chef/ohai/hints/
+touch /etc/chef/ohai/hints/openstack.json
+
 if dpkg -s chef-server 2>/dev/null | grep -q ^Status.*installed && \
    dpkg -s chef 2>/dev/null | grep -q ^Version.*11; then
   echo chef-server is installed
