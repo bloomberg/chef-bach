@@ -60,6 +60,30 @@ function download_VM_files {
   popd
 }
 
+################################################################################
+# Function to VirtualBox DHCP servers
+# By default, checks for any DHCP server on networks without VM's & removes them
+# If a network is provided, removes that network's DHCP server
+# (or passes the VBM error up to the caller)
+# 
+function remove_DHCPservers {
+  local network_name=${1-}
+  if [[ -z "$network_name" ]]; then
+    local vms=$(vboxmanage list vms|sed 's/^.*{\([0-9a-f-]*\)}/\1/')
+    # will produce a list of networks like ^vboxnet0$|^vboxnet1$ which are in use by VMs
+    local existing_nets_reg_ex=$(sed -e 's/^/^/' -e '/$/$/' -e 's/ /$|^/g' <<< $(for vm in $vms; do vboxmanage showvminfo --details --machinereadable $vm | grep -i 'adapter[2-9]=' | sed -e 's/^.*=//' -e 's/"//g'; done | sort -u))
+
+    $VBM list dhcpservers | grep -E "^NetworkName:\s+HostInterfaceNetworking" | sed 's/^.*-//' |
+    while read -r network_name; do
+      [[ -n $existing_nets_reg_ex ]] && ! egrep -q $existing_nets_reg_ex <<< $network_name && continue
+      remove_DHCPservers $network_name
+    done
+  else
+    $VBM dhcpserver remove --ifname "$network_name" && local return=0 || local return=$?
+    return $return
+  fi
+}
+
 ###################################################################
 # Function to create the bootstrap VM
 # uses Vagrant or stands-up the VM in VirtualBox for manual install
@@ -67,12 +91,7 @@ function download_VM_files {
 function create_bootstrap_VM {
   pushd $P
 
-  local _dummy
-  local network_name
-  $VBM list dhcpservers | grep -E "^NetworkName:\s+HostInterfaceNetworking" |
-  while read -r _dummy network_name; do
-    $VBM dhcpserver remove --netname "$network_name"
-  done
+  remove_DHCPservers
 
   if hash vagrant 2> /dev/null ; then
     echo "Vagrant detected - using Vagrant to initialize bcpc-bootstrap VM"
@@ -113,13 +132,9 @@ function create_bootstrap_VM {
     $VBM hostonlyif create
   
     if [[ -z "$WIN" ]]; then
-      $VBM dhcpserver remove --ifname vboxnet0 || true
-      $VBM dhcpserver remove --ifname vboxnet1 || true
-      $VBM dhcpserver remove --ifname vboxnet2 || true
-      # FIX: VBox 4.2.4 had dhcpserver operating without the below.
-      $VBM dhcpserver remove --netname HostInterfaceNetworking-vboxnet0 || true
-      $VBM dhcpserver remove --netname HostInterfaceNetworking-vboxnet1 || true
-      $VBM dhcpserver remove --netname HostInterfaceNetworking-vboxnet2 || true
+      remove_DHCPservers vboxnet0 || true
+      remove_DHCPservers vboxnet1 || true
+      remove_DHCPservers vboxnet2 || true
       # use variable names to refer to our three interfaces to disturb
       # the remaining code that refers to these as little as possible -
       # the names are compact on Unix :
