@@ -171,18 +171,18 @@ def ceph_keygen()
 end
 
 def float_host(*args)
-  if node[:bcpc][:management][:ip] == node[:bcpc][:float][:ip]
-    return args.join('.')
-  else
+  if node[:bcpc][:management][:ip] != node[:bcpc][:floating][:ip]
     return ("f-" + args.join('.'))
+  else
+    return args.join('.')
   end
 end
 
 def storage_host(*args)
-  if node[:bcpc][:management][:ip] == node[:bcpc][:float][:ip]
-    return args.join('.')
-  else
+  if node[:bcpc][:management][:ip] != node[:bcpc][:floating][:ip]
     return ("s-" + args.join('.'))
+  else
+    return args.join('.')
   end
 end
 
