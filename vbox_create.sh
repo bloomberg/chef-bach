@@ -61,10 +61,11 @@ function download_VM_files {
 }
 
 ################################################################################
-# Function to VirtualBox DHCP servers
+# Function to remove VirtualBox DHCP servers
 # By default, checks for any DHCP server on networks without VM's & removes them
+# (expecting if a remove fails the function should bail)
 # If a network is provided, removes that network's DHCP server
-# (or passes the VBM error up to the caller)
+# (or passes the vboxmanage error and return code up to the caller)
 # 
 function remove_DHCPservers {
   local network_name=${1-}
