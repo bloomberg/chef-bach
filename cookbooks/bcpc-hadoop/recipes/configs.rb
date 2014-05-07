@@ -173,6 +173,7 @@ end
                :zk_hosts => zk_hosts,
                :jn_hosts => jn_hosts,
                :rs_hosts => get_nodes_for("region_server"),
+               :master_hosts => get_nodes_for("hbase_master"),
                :mounts => node[:bcpc][:hadoop][:mounts],
                :hbm_jmx_port => node[:bcpc][:hadoop][:jmx][:port][:hbase_master]
      )
