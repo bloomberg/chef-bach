@@ -42,3 +42,5 @@ default["bcpc"]["revelytix"]["ssl-trust-password"] = ""
 default["bcpc"]["revelytix"]["loom-dist-cache"] = "loom-dist-cache"
 default["bcpc"]["revelytix"]["hive-classloader-blacklist-jars"] = "slf4j,log4j,commons-logging"
 default["bcpc"]["revelytix"]["port"] = 8080
+
+default["bcpc"]["keepalived"]["config_template"] = "keepalived.conf_hadoop"
