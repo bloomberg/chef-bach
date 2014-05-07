@@ -88,7 +88,7 @@ template "/etc/mysql/conf.d/wsrep.cnf" do
     notifies :run, "bash[remove-bare-gcomm]", :delayed
   end
   variables( :seed => seed,
-             :max_connections => [get_head_nodes.length*50+get_all_nodes.length*5, 200].max,
+             :max_connections => [get_mysql_nodes.length*50+get_all_nodes.length*5, 200].max,
              :servers => results )
   notifies :restart, "service[mysql]", :immediate
 end
@@ -138,6 +138,7 @@ template "/etc/xinetd.d/mysqlchk" do
 end
 
 service "xinetd" do
+  supports :stats => true, :restart => true, :reload => true
   action [ :enable, :start ]
 end
 
