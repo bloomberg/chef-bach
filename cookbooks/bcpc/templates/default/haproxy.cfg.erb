@@ -52,18 +52,21 @@ listen memcached <%="#{node[:bcpc][:management][:vip]}"%>:11211
   option tcpka
   server myself 127.0.0.1:11211
 
+<% if @mysql_servers.length > 0 -%>
 listen mysql-galera <%="#{node[:bcpc][:management][:vip]}"%>:3306
   timeout  client 24h
   timeout  server 24h
   mode tcp
   balance leastconn
   option  tcplog
-  option tcpka
+option tcpka
   option httpchk
-<% @servers.each do |server| -%>
+<% @mysql_servers.each do |server| -%>
   <%= "server #{server['hostname']} #{server['bcpc']['management']['ip']}:3306 check port 3307 inter 1s rise 1 fall 1 observe layer4 backup" %>
 <% end -%>
-
+<% end -%>
+  
+<% if @rabbitmq_servers.length > 0 -%>
 listen rabbitmq-amqp <%="#{node[:bcpc][:management][:vip]}"%>:5672
   timeout  client 24h
   timeout  server 24h
@@ -72,7 +75,7 @@ listen rabbitmq-amqp <%="#{node[:bcpc][:management][:vip]}"%>:5672
   option  tcplog
   option tcpka
   option httpchk
-<% @servers.each do |server| -%>
+<% @rabbitmq_servers.each do |server| -%>
   <%= "server #{server['hostname']} #{server['bcpc']['management']['ip']}:5672 check port 5673 inter 1s rise 1 fall 1 observe layer4" %>
 <% end -%>
 
@@ -81,10 +84,12 @@ listen rabbitmq-web <%="#{node[:bcpc][:management][:vip]}"%>:55672
   option  tcplog
   option httpchk GET /
   http-check expect status 200
-<% @servers.each do |server| -%>
+<% @rabbitmq_servers.each do |server| -%>
   <%= "server #{server['hostname']} #{server['bcpc']['management']['ip']}:55672 check inter 1s rise 1 fall 1" %>
 <% end -%>
+<% end -%>
 
+<% if @ldap_servers.length > 0 -%>
 listen ldap-389ds <%="#{node[:bcpc][:management][:vip]}"%>:389
   timeout  client 1h
   timeout  server 1h
@@ -92,16 +97,18 @@ listen ldap-389ds <%="#{node[:bcpc][:management][:vip]}"%>:389
   balance leastconn
   option  tcplog
   option tcpka
-<% @servers.each do |server| -%>
+<% @ldap_servers.each do |server| -%>
   <%= "server #{server['hostname']} #{server['bcpc']['management']['ip']}:389 check inter 1s rise 1 fall 1 observe layer4" %>
 <% end -%>
+<% end -%>
 
+<% if @keystone_servers.length > 0 -%>
 listen keystone-api-ssl <%="#{node[:bcpc][:management][:vip]}"%>:5000
   mode tcp
   balance source
   option  tcplog
   option tcpka
-<% @servers.each do |server| -%>
+<% @keystone_servers.each do |server| -%>
   <%= "server #{server['hostname']} #{server['bcpc']['management']['ip']}:5000 check inter 1s rise 1 fall 1 observe layer4" %>
 <% end -%>
 
@@ -110,16 +117,18 @@ listen keystone-admin-ssl <%="#{node[:bcpc][:management][:vip]}"%>:35357
   balance source
   option  tcplog
   option tcpka
-<% @servers.each do |server| -%>
+<% @keystone_servers.each do |server| -%>
   <%= "server #{server['hostname']} #{server['bcpc']['management']['ip']}:35357 check inter 1s rise 1 fall 1 observe layer4" %>
 <% end -%>
+<% end -%>
 
+<% if @glance_servers.length > 0 -%>
 listen glance-api <%="#{node[:bcpc][:management][:vip]}"%>:9292
   balance  source
   option  tcplog
   option httpchk GET /
   http-check expect status 300
-<% @servers.each do |server| -%>
+<% @glance_servers.each do |server| -%>
   <%= "server #{server['hostname']} #{server['bcpc']['management']['ip']}:9292 check inter 1s rise 1 fall 1" %>
 <% end -%>
 
@@ -128,25 +137,29 @@ listen glance-registry <%="#{node[:bcpc][:management][:vip]}"%>:9191
   option  tcplog
   option httpchk GET /
   http-check expect status 401
-<% @servers.each do |server| -%>
+<% @glance_servers.each do |server| -%>
   <%= "server #{server['hostname']} #{server['bcpc']['management']['ip']}:9191 check inter 1s rise 1 fall 1" %>
 <% end -%>
+<% end -%>
 
+<% if @cinder_servers.length > 0 -%>
 listen cinder-api <%="#{node[:bcpc][:management][:vip]}"%>:8776
   balance  source
   option  tcplog
   option httpchk GET /
   http-check expect status 200
-<% @servers.each do |server| -%>
+<% @cinder_servers.each do |server| -%>
   <%= "server #{server['hostname']} #{server['bcpc']['management']['ip']}:8776 check inter 1s rise 1 fall 1" %>
 <% end -%>
+<% end -%>
 
+<% if @keystone_servers.length > 0 -%>
 listen nova-ec2 <%="#{node[:bcpc][:management][:vip]}"%>:8773
   balance  source
   option  tcplog
   option httpchk GET /
   http-check expect status 404
-<% @servers.each do |server| -%>
+<% @keystone_servers.each do |server| -%>
   <%= "server #{server['hostname']} #{server['bcpc']['management']['ip']}:8773 check inter 1s rise 1 fall 1" %>
 <% end -%>
 
@@ -155,16 +168,18 @@ listen nova-compute <%="#{node[:bcpc][:management][:vip]}"%>:8774
   option  tcplog
   option httpchk GET /
   http-check expect status 200
-<% @servers.each do |server| -%>
+<% @keystone_servers.each do |server| -%>
   <%= "server #{server['hostname']} #{server['bcpc']['management']['ip']}:8774 check inter 1s rise 1 fall 1" %>
 <% end -%>
+<% end -%>
 
+<% if @horizon_servers.length > 0 -%>
 listen horizon-http <%="#{node[:bcpc][:management][:vip]}"%>:80
   balance  source
   option  tcplog
   option httpchk GET /
   http-check expect status 200
-<% @servers.each do |server| -%>
+<% @horizon_servers.each do |server| -%>
   <%= "server #{server['hostname']} #{server['bcpc']['management']['ip']}:80 check inter 1s rise 1 fall 1" %>
 <% end -%>
 
@@ -174,27 +189,31 @@ listen horizon-https <%="#{node[:bcpc][:management][:vip]}"%>:443
   option  tcplog
   option tcpka
   option httpchk GET /
-  http-check expect status 200
-<% @servers.each do |server| -%>
+http-check expect status 200
+<% @horizon_servers.each do |server| -%>
   <%= "server #{server['hostname']} #{server['bcpc']['management']['ip']}:443 check port 80 inter 1s rise 1 fall 1 observe layer4" %>
 <% end -%>
+<% end -%>
 
+<% if @elasticsearch_servers.length > 0 -%>
 listen elasticsearch <%="#{node[:bcpc][:management][:vip]}"%>:9200
   balance  source
   option  tcplog
   option httpchk GET /
   http-check expect status 200
-<% @servers.each do |server| -%>
+<% @elasticsearch_servers.each do |server| -%>
   <%= "server #{server['hostname']} #{server['bcpc']['management']['ip']}:9200 check inter 1s rise 1 fall 1" %>
 <% end -%>
+<% end -%>
 
+<% if @radosgw_servers.length > 0 -%>
 listen radosgw-passthru-http  <%="#{node[:bcpc][:floating][:vip]}:#{node[:bcpc][:ports][:haproxy][:radosgw]}"%>
   balance leastconn
   option tcplog
   option httpchk GET /
   http-check expect status 200
   source <%="#{node[:bcpc][:floating][:vip]}"%>
-<% @all_servers.each do |server| -%>
+<% @radosgw_servers.each do |server| -%>
   <%= "server #{server['hostname']} #{server['bcpc']['floating']['ip']}:#{node[:bcpc][:ports][:apache][:radosgw]} check inter 1s rise 1 fall 1 observe layer7" %>
 <% end -%>
 
@@ -206,7 +225,8 @@ listen radosgw-passthru-https  <%="#{node[:bcpc][:floating][:vip]}:#{node[:bcpc]
   option httpchk GET /
   http-check expect status 200
   source <%="#{node[:bcpc][:floating][:vip]}"%>
-<% @all_servers.each do |server| -%>
+<% @radosgw_servers.each do |server| -%>
   <%= "server #{server['hostname']} #{server['bcpc']['floating']['ip']}:#{node[:bcpc][:ports][:apache][:radosgw_https]} check port #{node[:bcpc][:ports][:apache][:radosgw]} inter 1s rise 1 fall 1 observe layer4" %>
+<% end -%>
 <% end -%>
 
