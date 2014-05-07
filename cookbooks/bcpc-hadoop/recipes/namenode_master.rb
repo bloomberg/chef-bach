@@ -57,12 +57,19 @@ service "hadoop-hdfs-zkfc" do
   subscribes :restart, "template[/etc/hadoop/conf/hdfs-policy.xml]", :delayed
 end
 
+# need to bring the namenode down to initialize shared edits
+service "hadoop-hdfs-namenode" do
+  action :stop
+  only_if { node[:bcpc][:hadoop][:mounts].all? { |d| not File.exists?("/disk/#{d}/dfs/jn/#{node.chef_environment}/current/VERSION") } }
+  notifies :create, "bash[initialize-shared-edits]", :immediately
+end
+
 bash "initialize-shared-edits" do
   code "hdfs namenode -initializeSharedEdits"
   user "hdfs"
   notifies :create, "ruby_block[grab the format UUID File]", :immediately
   notifies :restart, "service[hadoop-hdfs-namenode]", :delayed
-  not_if { node[:bcpc][:hadoop][:mounts].any? { |d| File.exists?("/disk/#{d}/dfs/jn/#{node.chef_environment}/current/VERSION") } }
+  action :nothing
 end
 
 service "hadoop-hdfs-namenode" do
