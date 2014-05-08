@@ -36,7 +36,7 @@ bash "enable-defaults-haproxy" do
 end
 
 template "/etc/haproxy/haproxy.cfg" do
-    source node[:bcpc][:haproxy][:config]
+    source "haproxy.cfg.erb"
     mode 00644
 	variables( :nova_servers => get_nodes_for("nova-work","bcpc"),
                    :mysql_servers => get_nodes_for("mysql","bcpc"),
