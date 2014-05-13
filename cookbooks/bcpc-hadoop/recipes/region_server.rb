@@ -1,5 +1,7 @@
-package "hbase-regionserver libsnappy1" do
-  action :install
+%w{hbase-regionserver libsnappy1}.each do |pkg|
+  package pkg do
+    action :install
+  end
 end
 
 directory "/usr/lib/hbase/lib/native/Linux-amd64-64/" do
