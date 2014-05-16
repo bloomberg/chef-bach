@@ -26,13 +26,6 @@ make_config('mysql-galera-password', secure_password)
 make_config('mysql-check-user', "check")
 make_config('mysql-check-password', secure_password)
 
-apt_repository "percona" do
-  uri node['bcpc']['repos']['mysql']
-  distribution node['lsb']['codename']
-  components ["main"]
-  key "percona-release.key"
-end
-
 bash "workaround-mysql-deps-problem" do
   user "root"
   code <<-EOH
@@ -167,3 +160,11 @@ bash "phpmyadmin-config-setup" do
   EOH
   not_if "grep -q AllowArbitraryServer /etc/phpmyadmin/config.inc.php"
 end
+
+ruby_block "fail run if not in quorum" do
+  block do
+    raise Chef::Application.fatal! "MySQL is not in a ready state per wsrep_ready -- we have a zombie!"
+  end
+  not_if "mysql -u root -p#{get_config('mysql-root-password')} -e \"SHOW STATUS LIKE 'wsrep_ready' \\G\" | grep -vq 'Value: OFF'"
+end
+
