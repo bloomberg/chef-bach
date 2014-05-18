@@ -41,7 +41,7 @@ node[:bcpc][:hadoop][:mounts].each do |d|
           "tar xzvf #{Chef::Config[:file_cache_path]}/nn_fmt.tgz",
           "popd"].join("\n")
     notifies :restart, "service[hadoop-hdfs-journalnode]"
-    only_if { not get_config("namenode_txn_fmt").nil? and not File.exists("/disk/#{d}/dfs/jn/#{node.chef_environment}/current/VERSION") }
+    only_if { not get_config("namenode_txn_fmt").nil? and not File.exists?("/disk/#{d}/dfs/jn/#{node.chef_environment}/current/VERSION") }
   end
 end
 
