@@ -107,7 +107,7 @@ end
 zk_hosts = get_nodes_for("zookeeper_server")
 jn_hosts = get_nodes_for("journalnode")
 rm_hosts = get_nodes_for("resource_manager")
-hs_hosts = get_nodes_for("history_server")
+hs_hosts = get_nodes_for("historyserver")
 dn_hosts = get_nodes_for("datanode")
 hive_host = get_nodes_for("hive_metastore")
 
@@ -120,7 +120,7 @@ hadoop_conf_files.each do |t|
                :jn_hosts => jn_hosts,
                :rm_host  => rm_hosts,
                :dn_hosts => dn_hosts,
-               :hs_host => hs_hosts,
+               :hs_hosts => hs_hosts,
                :mounts => node[:bcpc][:hadoop][:mounts])
    end
 end
