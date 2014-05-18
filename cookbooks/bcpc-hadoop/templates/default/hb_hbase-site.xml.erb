@@ -22,10 +22,10 @@
   </property>
   <property>
     <name>fail.fast.expired.active.master</name>
-    <value><%= #{@master_hosts.length > 1 ? "true" : "false"} %></value>
+    <value><%= @master_hosts.length > 1 ? "true" : "false" %></value>
   </property>
   <property>
     <name>hbase.master.wait.on.regionservers.mintostart</name>
-    <value><%= #{@rs_hosts.length/2+1} %></value>
+    <value><%= @rs_hosts.length/2+1 %></value>
   </property>
 </configuration>
