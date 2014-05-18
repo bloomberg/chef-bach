@@ -9,12 +9,18 @@
 
 set -e
 
+if [ "$(uname)" == "Darwin" ]; then
+  SEDINPLACE='sed -i ""'
+else
+  SEDINPLACE='sed -i'
+fi
+
 if [[ "$(pwd)" != "$(git rev-parse --show-toplevel)" ]]; then
   printf '#### WARNING: This should be run in the git top level directory! ####\n' > /dev/stderr
 fi
 
 ENVIRONMENT=Test-Laptop
-PROXY=proxy.example.com:80
+#PROXY=proxy.example.com:80
 DNS_SERVERS='"8.8.8.8", "8.8.4.4"'
 export BOOTSTRAP_VM_MEM=3096
 export BOOTSTRAP_VM_CPUs=2
@@ -23,14 +29,14 @@ export CLUSTER_VM_CPUs=4
 
 printf "#### Setup configuration files\n"
 # setup vagrant
-sed -i 's/vb.gui = true/vb.gui = false/' Vagrantfile
+$SEDINPLACE 's/vb.gui = true/vb.gui = false/' Vagrantfile
 
 # setup proxy_setup.sh
-[[ -n "$PROXY" ]] && sed -i "s/#export PROXY=.*\"/export PROXY=\"$PROXY\"/" proxy_setup.sh
+[[ -n "$PROXY" ]] && $SEDINPLACE "s/#export PROXY=.*\"/export PROXY=\"$PROXY\"/" proxy_setup.sh
 
 # setup environment file
-sed -i "s/\"dns_servers\" : \[ \"8.8.8.8\", \"8.8.4.4\" \]/\"dns_servers\" : \[ $DNS_SERVERS \]/" environments/${ENVIRONMENT}.json
-sed -i "s#\(\"bootstrap\": {\)#\1\n\"proxy\" : \"http://$PROXY\",\n#" environments/${ENVIRONMENT}.json
+$SEDINPLACE "s/\"dns_servers\" : \[ \"8.8.8.8\", \"8.8.4.4\" \]/\"dns_servers\" : \[ $DNS_SERVERS \]/" environments/${ENVIRONMENT}.json
+[[ -n "$PROXY" ]] && $SEDINPLACE "s#\(\"bootstrap\": {\)#\1\n\"proxy\" : \"http://$PROXY\",\n#" environments/${ENVIRONMENT}.json
 
 printf "#### Setup VB's and Bootstrap\n"
 source ./vbox_create.sh
@@ -50,14 +56,14 @@ for i in 1 2 3; do
 done
 
 printf "Checking VMs are up: \n"
-while ! nc -w 1 -q 0 10.0.100.11 22 || \
-         !  nc -w 1 -q 0 10.0.100.12 22 || \
-         !  nc -w 1 -q 0 10.0.100.13 22
+while ! nc -w 1 10.0.100.11 22 || \
+         !  nc -w 1 10.0.100.12 22 || \
+         !  nc -w 1 10.0.100.13 22
 do
   sleep 60
   printf "Hosts down: "
   for m in 11 12 13; do
-    nc -w 1 -q 0 10.0.100.$m 22 > /dev/null || echo -n "10.0.100.$m "
+    nc -w 1 10.0.100.$m 22 > /dev/null || echo -n "10.0.100.$m "
   done
   printf "\n"
 done
