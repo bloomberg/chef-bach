@@ -77,7 +77,7 @@ def get_all_nodes
 	else
 		results.push(node)
 	end
-	return results
+	return results.sort
 end
 
 def get_ceph_osd_nodes
@@ -87,7 +87,7 @@ def get_ceph_osd_nodes
 	else
 		results.push(node)
 	end
-	return results
+	return results.sort
 end
 
 def get_cached_head_node_names
@@ -104,26 +104,26 @@ def get_cached_head_node_names
   rescue Errno::ENOENT
     # assume first run   
   end
-  return headnodes  
+  return headnodes.sort
 end
 
 def get_head_nodes
   results = search(:node, "role:BCPC-Headnode AND chef_environment:#{node.chef_environment}")
   # this returns the node object for the current host before it has been set in Postgress
   results.map!{ |x| x.hostname == node.hostname ? node : x }
-  return (results.empty?) ? [node] : results
+  return (results.empty?) ? [node] : results.sort
 end
 
 def get_mysql_nodes
   results = search(:node, "recipes:bcpc\\:\\:mysql AND chef_environment:#{node.chef_environment}")
   results.map!{ |x| x.hostname == node.hostname ? node : x }
-  return (results.empty?) ? [node] : results
+  return (results.empty?) ? [node] : results.sort
 end
 
 def get_nodes_for(recipe, cookbook="bcpc")
   results = search(:node, "recipes:#{cookbook}\\:\\:#{recipe} AND chef_environment:#{node.chef_environment}")
   results.map!{ |x| x['hostname'] == node[:hostname] ? node : x }
-  return results
+  return results.sort
 end
 
 def get_binary_server_url

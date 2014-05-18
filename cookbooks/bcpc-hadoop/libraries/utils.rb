@@ -69,13 +69,13 @@ def get_all_nodes
   else
     results.push(node)
   end
-  return results
+  return results.sort
 end
 
 def get_head_nodes
   results = search(:node, "role:BCPC-Headnode AND chef_environment:#{node.chef_environment}")
   results.map!{ |x| x['hostname'] == node[:hostname] ? node : x }
-  return (results == []) ? [node] : results
+  return (results == []) ? [node] : results.sort
 end
 
 def get_hadoop_heads
@@ -85,7 +85,7 @@ def get_hadoop_heads
   else
     results.push(node) if node[:roles].include? "BCPC-Hadoop-Head"
   end
-  return results
+  return results.sort
 end
 
 def get_quorum_hosts
@@ -95,7 +95,7 @@ def get_quorum_hosts
   else
     results.push(node) if node[:roles].include? "BCPC-Hadoop-Quorumnode"
   end
-  return results
+  return results.sort
 end
 
 def get_hadoop_workers
@@ -105,13 +105,13 @@ def get_hadoop_workers
   else
     results.push(node) if node[:roles].include? "BCPC-Hadoop-Worker"
   end
-  return results
+  return results.sort
 end
 
 def get_nodes_for(recipe, cookbook="bcpc-hadoop")
   results = search(:node, "recipes:#{cookbook}\\:\\:#{recipe} AND chef_environment:#{node.chef_environment}")
   results.map!{ |x| x['hostname'] == node[:hostname] ? node : x }
-  return results
+  return results.sort
 end
 
 def get_binary_server_url
