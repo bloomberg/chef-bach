@@ -13,6 +13,7 @@ default["bcpc"]["repos"]["hortonworks"] = 'http://public-repo-1.hortonworks.com/
 default["bcpc"]["repos"]["hdp_utils"] = 'http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.16/repos/ubuntu12'
 default["bcpc"]["hadoop"]["disks"] = []
 default["bcpc"]["hadoop"]["oozie"]["admins"] = []
+default["bcpc"]["hadoop"]["hdfs"]["HA"] = false
 default["bcpc"]["hadoop"]["hdfs"]["failed_volumes_tolerated"] = 1
 default["bcpc"]["hadoop"]["hdfs"]["dfs_replication_factor"] = 3
 default["bcpc"]["hadoop"]["jmx_enabled"] = false
