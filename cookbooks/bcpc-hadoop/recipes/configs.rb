@@ -95,15 +95,7 @@ hadoop_conf_files = %w{capacity-scheduler.xml
   }
 node[:bcpc][:hadoop][:hdfs][:HA] == true and hadoop_conf_files.insert(-1,"hdfs-site_HA.xml")
 
-if node['bcpc']['hadoop']['hdfs']['HA'] then
-  nn_hosts = get_nodes_for("namenode*")
-else
-  nn_hosts = get_nodes_for("namenode_no_HA")
-  if nn_hosts.length == 0 then 
-     nn_hosts = get_nodes_for("namenode*")
-  end
-end
-
+nn_hosts = get_nodes_for("namenode*")
 zk_hosts = get_nodes_for("zookeeper_server")
 jn_hosts = get_nodes_for("journalnode")
 rm_hosts = get_nodes_for("resource_manager")

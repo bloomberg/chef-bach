@@ -45,7 +45,7 @@ bash "format-zk-hdfs-ha" do
   code "yes | hdfs zkfc -formatZK"
   action :run
   user "hdfs"
-  notifies :restart, "service[hadoop-hdfs-namenode]", :delayed
+  notifies :restart, "service[generally run hadoop-hdfs-namenode]", :delayed
   not_if { zk_formatted? }
 end
 
@@ -58,27 +58,28 @@ service "hadoop-hdfs-zkfc" do
 end
 
 # need to bring the namenode down to initialize shared edits
-service "hadoop-hdfs-namenode" do
+service "bring hadoop-hdfs-namenode down for shared edits and HA transition" do
+  service_name "hadoop-hdfs-namenode"
   action :stop
+  supports :status => true
+  notifies :run, "bash[initialize-shared-edits]", :immediately
   only_if { node[:bcpc][:hadoop][:mounts].all? { |d| not File.exists?("/disk/#{d}/dfs/jn/#{node.chef_environment}/current/VERSION") } }
-  notifies :create, "bash[initialize-shared-edits]", :immediately
 end
 
 bash "initialize-shared-edits" do
   code "hdfs namenode -initializeSharedEdits"
   user "hdfs"
-  notifies :create, "ruby_block[grab the format UUID File]", :immediately
-  notifies :restart, "service[hadoop-hdfs-namenode]", :delayed
   action :nothing
 end
 
-service "hadoop-hdfs-namenode" do
-  action [:enable, :start]
-  supports :status => true, :restart => true, :reload => false
-  subscribes :restart, "template[/etc/hadoop/conf/hdfs-site.xml]", :delayed
-  subscribes :restart, "template[/etc/hadoop/conf/hdfs-site_HA.xml]", :delayed
-  subscribes :restart, "template[/etc/hadoop/conf/hdfs-policy.xml]", :delayed
-  subscribes :restart, "bash[initialize-shared-edits]", :immediate
+service "generally run hadoop-hdfs-namenode" do
+   action [:enable, :start]
+   supports :status => true, :restart => true, :reload => false
+   service_name "hadoop-hdfs-namenode"
+   subscribes :restart, "template[/etc/hadoop/conf/hdfs-site.xml]", :delayed
+   subscribes :restart, "template[/etc/hadoop/conf/hdfs-policy.xml]", :delayed
+   subscribes :restart, "template[/etc/hadoop/conf/hdfs-site_HA.xml]", :delayed
+   subscribes :restart, "bash[initialize-shared-edits]", :immediately
 end
 
 ## We need to bootstrap the standby and journal node transaction logs
@@ -96,7 +97,7 @@ ruby_block "grab the format UUID File" do
     make_config("namenode_txn_fmt", Base64.encode64(IO.read("#{Chef::Config[:file_cache_path]}/nn_fmt.tgz")));
   end
   action :nothing
-  subscribes :create, "service[hadoop-hdfs-namenode]", :immediate
+  subscribes :run, "service[generally run hadoop-hdfs-namenode]", :immediately
   only_if { File.exists?("/disk/#{node[:bcpc][:hadoop][:mounts][0]}/dfs/nn/current/VERSION") }
 end
 
