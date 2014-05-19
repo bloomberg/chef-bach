@@ -29,7 +29,7 @@ make_config('mysql-check-password', secure_password)
 bash "workaround-mysql-deps-problem" do
   user "root"
   code <<-EOH
-    VERSION=`apt-cache policy libmysqlclient18 | grep -B1 percona | head -1 | awk '{print $1}'`
+    VERSION=`apt-cache policy libmysqlclient18 |grep -v ubuntu | grep -A1 \.precise | head -1 | awk '{print $1}'`
     DEBIAN_FRONTEND=noninteractive apt-get -y install libmysqlclient18=$VERSION
   EOH
   not_if "dpkg -l libmysqlclient18 2>&1 >/dev/null"
