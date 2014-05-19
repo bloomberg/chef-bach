@@ -71,7 +71,7 @@
 
 <property>
   <name>hive.metastore.uris</name>
-  <value>thrift://<%=@hive_host.map{ |s| float_host(s[:hostname]) + ":9083" }.join(",") %> </value>
+  <value>thrift://<%=@hive_host.map{ |s| float_host(s[:hostname]) + ":9083" }.join(",") %></value>
   <description>IP address (or fully-qualified domain name) and port of the metastore host</description>
 </property>
 
