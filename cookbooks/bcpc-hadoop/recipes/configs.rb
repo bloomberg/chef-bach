@@ -95,7 +95,7 @@ hadoop_conf_files = %w{capacity-scheduler.xml
   }
 node[:bcpc][:hadoop][:hdfs][:HA] == true and hadoop_conf_files.insert(-1,"hdfs-site_HA.xml")
 
-nn_hosts = get_nodes_for("namenode*")
+nn_hosts = get_namenodes()
 zk_hosts = get_nodes_for("zookeeper_server")
 jn_hosts = get_nodes_for("journalnode")
 rm_hosts = get_nodes_for("resource_manager")

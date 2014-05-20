@@ -108,6 +108,18 @@ def get_hadoop_workers
   return results.sort
 end
 
+def get_namenodes()
+  # Logic to get all namenodes if running in HA
+  # or to get only the master namenode if not running in HA
+  if node['bcpc']['hadoop']['hdfs']['HA'] then
+    nn_hosts = get_nodes_for("namenode*")
+  else
+    nn_hosts = get_nodes_for("namenode_no_HA")
+  end
+  return nn_hosts.sort
+end
+
+
 def get_nodes_for(recipe, cookbook="bcpc-hadoop")
   results = search(:node, "recipes:#{cookbook}\\:\\:#{recipe} AND chef_environment:#{node.chef_environment}")
   results.map!{ |x| x['hostname'] == node[:hostname] ? node : x }
