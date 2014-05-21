@@ -40,5 +40,13 @@ gem_package "zookeeper" do
     action :nothing
 end.run_action(:install)
 
+gem_package "webhdfs" do
+    gem_binary gem_path
+    options "--no-http-proxy --clear-sources --source #{get_binary_server_url}"
+    # workaround for CHEF-3912 is to include versions from build_bins.sh
+    version ">=0.0.0"
+    action :nothing
+end.run_action(:install)
+
 Gem.clear_paths
 require 'zookeeper'

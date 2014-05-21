@@ -67,6 +67,13 @@ if ! [[ -f gems/zookeeper.gem ]]; then
 fi
 FILES="zookeeper*.gem $FILES"
 
+# Get the Rubygem for webhdfs
+if ! [[ -f gems/webhdfs.gem ]]; then
+  gem fetch webhdfs -v 0.5.5
+  ln -s webhdfs-*.gem webhdfs.gem || true
+fi
+FILES="webhdfs*.gem $FILES"
+
 # Fetch the cirros image for testing
 if ! [[ -f cirros-0.3.0-x86_64-disk.img ]]; then
   $CURL -O -L https://launchpad.net/cirros/trunk/0.3.0/+download/cirros-0.3.0-x86_64-disk.img
