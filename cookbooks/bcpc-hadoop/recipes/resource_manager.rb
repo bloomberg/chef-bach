@@ -36,4 +36,9 @@ service "hadoop-yarn-resourcemanager" do
   subscribes :restart, "template[/etc/hadoop/conf/yarn-policy.xml]", :delayed
 end
 
-
+bash "reload mapreduce nodes" do
+  code "yarn rmadmin -refreshNodes"
+  user "mapred"
+  action :nothing
+  subscribes :run, "template[/etc/hadoop/conf/mapred.exclude]", :immediately
+end

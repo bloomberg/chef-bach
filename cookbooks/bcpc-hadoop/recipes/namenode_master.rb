@@ -101,6 +101,13 @@ ruby_block "grab the format UUID File" do
   only_if { File.exists?("/disk/#{node[:bcpc][:hadoop][:mounts][0]}/dfs/nn/current/VERSION") }
 end
 
+bash "reload hdfs nodes" do
+  code "hdfs dfsadmin -refreshNodes"
+  user "hdfs"
+  action :nothing
+  subscribes :run, "template[/etc/hadoop/conf/dfs.exclude]", :immediately
+end
+
 ###
 # We only want to execute this once, as it is setup of dirs within HDFS.
 # We'd prefer to do it after all nodes are members of the HDFS system

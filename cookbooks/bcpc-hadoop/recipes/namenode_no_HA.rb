@@ -48,6 +48,13 @@ service "hadoop-hdfs-namenode" do
   subscribes :restart, "template[/etc/hadoop/conf/hdfs-policy.xml]", :delayed
 end
 
+bash "reload hdfs nodes" do
+  code "hdfs dfsadmin -refreshNodes"
+  user "hdfs"
+  action :nothing
+  subscribes :run, "template[/etc/hadoop/conf/dfs.exclude]", :immediately
+end
+
 ###
 # We only want to execute this once, as it is setup of dirs within HDFS.
 # We'd prefer to do it after all nodes are members of the HDFS system
