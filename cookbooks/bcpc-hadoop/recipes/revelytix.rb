@@ -1,8 +1,8 @@
 
 ruby_block "initialize-revelytix-config" do
     block do
-      make_config('revelytix-loom-ssl-password', secure_password)
-      make_config('revelitix-ssl-trust-password', secure_password)
+      make_config('revelytix_loom_ssl_password', secure_password)
+      make_config('revelitix_ssl_trust_password', secure_password)
     end
 end
 
@@ -10,33 +10,33 @@ directory "/var/lib/loom" do
   action :create
 end
 
-directory "/tmp/#{node["bcpc"]["revelytix"]["loom-username"]}" do
+directory "/tmp/#{node["bcpc"]["revelytix"]["loom_username"]}" do
   action :create
 end
 
-user node["bcpc"]["revelytix"]["loom-username"] do
+user node["bcpc"]["revelytix"]["loom_username"] do
   action :create
   shell "/bin/false"
   home "/var/lib/loom"
 end
 
 bash "create-loom-dir" do
-  uname = node["bcpc"]["revelytix"]["loom-username"]
+  uname = node["bcpc"]["revelytix"]["loom_username"]
   code "hadoop fs -mkdir -p /user/#{uname}; hadoop fs -chown #{uname} /user/#{uname}"
   user "hdfs"
   not_if "sudo -u hdfs hadoop fs -test -d /user/#{uname}"
 end
 
 bash "create-loom-tmpdir" do
-  uname = node["bcpc"]["revelytix"]["loom-username"]
+  uname = node["bcpc"]["revelytix"]["loom_username"]
   code "hadoop fs -mkdir -p /tmp/hive-#{uname}; hadoop fs -chown #{uname} /tmp/hive-#{uname}"
   user "hdfs"
   not_if "sudo -u hdfs hadoop fs -test -d /tmp/hive-#{uname}"
 end
 
 
-dpkg_package "loom_2.2.0rc2-rpm-1_all.deb" do
-  action :install
+package "loom" do
+  action :upgrade
 end
 
 template "loom-properties" do
@@ -54,3 +54,6 @@ template "loom-security-unix-conf" do
   source "revelytix-loom-security.erb"
 end
 
+service "revelytix-loom" do
+  action [:enable, :start]
+end
