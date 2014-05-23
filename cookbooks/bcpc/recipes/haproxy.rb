@@ -38,7 +38,16 @@ end
 template "/etc/haproxy/haproxy.cfg" do
     source "haproxy.cfg.erb"
     mode 00644
-	variables( :servers => get_head_nodes, :all_servers => get_all_nodes )
+	variables( :nova_servers => get_nodes_for("nova-work","bcpc"),
+                   :mysql_servers => get_nodes_for("mysql","bcpc"),
+                   :rabbitmq_servers => get_nodes_for("rabbitmq","bcpc"),
+                   :ldap_servers => get_nodes_for("389ds","bcpc"),
+                   :keystone_servers => get_nodes_for("keystone","bcpc"),
+                   :glance_servers => get_nodes_for("glance","bcpc"),
+                   :cinder_servers => get_nodes_for("cinder","bcpc"),
+                   :horizon_servers => get_nodes_for("horizon","bcpc"),
+                   :elasticsearch_servers => get_nodes_for("elasticsearch","bcpc"),
+                   :radosgw_servers => get_nodes_for("ceph-rgw","bcpc"))
 	notifies :restart, "service[haproxy]", :immediately
 end
 

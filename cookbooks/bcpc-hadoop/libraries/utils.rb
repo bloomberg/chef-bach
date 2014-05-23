@@ -108,8 +108,8 @@ def get_hadoop_workers
   return results
 end
 
-def get_nodes_for(recipe)
-  results = search(:node, "recipes:bcpc-hadoop\\:\\:#{recipe} AND chef_environment:#{node.chef_environment}")
+def get_nodes_for(recipe, cookbook="bcpc-hadoop")
+  results = search(:node, "recipes:#{cookbook}\\:\\:#{recipe} AND chef_environment:#{node.chef_environment}")
   results.map!{ |x| x['hostname'] == node[:hostname] ? node : x }
   return results
 end

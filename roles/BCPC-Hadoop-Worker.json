@@ -12,7 +12,8 @@
     "recipe[bcpc-hadoop::datanode]",
     "recipe[bcpc-hadoop::region_server]",
     "recipe[bcpc-hadoop::pig]",
-    "recipe[bcpc-hadoop::mahout]"
+    "recipe[bcpc-hadoop::mahout]",
+    "recipe[bcpc::zabbix-work]"
   ],
   "description": "A highly-available head node in a BCPC Hadoop cluster",
   "chef_type": "role",

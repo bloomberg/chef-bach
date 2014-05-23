@@ -27,7 +27,7 @@ package "keepalived" do
 end
 
 template "/etc/keepalived/keepalived.conf" do
-    source "keepalived.conf.erb"
+    source "#{node[:bcpc][:keepalived][:config_template]}.erb"
     mode 00644
     notifies :restart, "service[keepalived]", :delayed
     notifies :restart, "service[keepalived]", :immediately

@@ -20,6 +20,8 @@ default["bcpc"]["hadoop"]["jmx"]["port"]["namenode"] = 3010
 default["bcpc"]["hadoop"]["jmx"]["port"]["datanode"] = 3010
 default["bcpc"]["hadoop"]["jmx"]["port"]["hbase_master"] = 3010
 
+default["bcpc"]["keepalived"]["config_template"] = "keepalived.conf_hadoop"
+
 default["bcpc"]["revelytix"]["loom_username"] = "loom"
 default["bcpc"]["revelytix"]["activescan_hdfs_user"] = "activescan-user"
 default["bcpc"]["revelytix"]["activescan_hdfs_enabled"] = "true"

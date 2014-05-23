@@ -120,8 +120,8 @@ def get_mysql_nodes
   return (results.empty?) ? [node] : results
 end
 
-def get_nodes_for(recipe)
-  results = search(:node, "recipes:bcpc\\:\\:#{recipe} AND chef_environment:#{node.chef_environment}")
+def get_nodes_for(recipe, cookbook="bcpc")
+  results = search(:node, "recipes:#{cookbook}\\:\\:#{recipe} AND chef_environment:#{node.chef_environment}")
   results.map!{ |x| x['hostname'] == node[:hostname] ? node : x }
   return results
 end
