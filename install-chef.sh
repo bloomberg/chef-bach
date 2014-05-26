@@ -21,3 +21,7 @@ apt-get install -y chef
 # setup OpenStack hint
 mkdir -p /etc/chef/ohai/hints/
 touch /etc/chef/ohai/hints/openstack.json
+
+# remove rubygems and install only our gemserver
+/opt/chef/embedded/bin/gem sources --add ${BINARY_SERVER_URL}
+/opt/chef/embedded/bin/gem sources --remove http://rubygems.org/
