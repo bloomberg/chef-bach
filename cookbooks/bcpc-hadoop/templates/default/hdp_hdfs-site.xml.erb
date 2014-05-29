@@ -123,4 +123,10 @@
     <name>dfs.hosts.exclude</name>
     <value>/etc/hadoop/conf/dfs.exclude</value>
   </property>
+
+  <property>
+    <name>dfs.datanode.du.reserved</name>
+    <!-- Reserve 1GB on each datanode -->
+    <value>1073741824</value>
+  </property>
 </configuration>
