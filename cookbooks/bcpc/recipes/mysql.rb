@@ -95,6 +95,7 @@ bash "remove-bare-gcomm" do
 end
 
 service "mysql" do
+  supports :status => true, :restart => true, :reload => false
   action [ :enable, :start ]
 end
 
@@ -108,6 +109,29 @@ bash "initial-mysql-config" do
                           FLUSH PRIVILEGES;"
         EOH
   only_if "mysql -u root -e 'SELECT COUNT(*) FROM mysql.user'"
+end
+
+ruby_block "Check MySQL Quorum Status" do
+  status_cmd="mysql -u root -p#{get_config('mysql-root-password')} -e \"SHOW STATUS LIKE 'wsrep_ready' \\G\" | grep -v 'Value: OFF'"
+  iter = 0
+  poll_time = 0.5
+  block do
+    status=`#{status_cmd}`
+    while $?.to_i
+      status=`#{status_cmd}`
+      if $?.to_i != 0 and i < 10
+        sleep(poll_time)
+        i += 1
+        Chef::Log.debug("MySQL is down #{iter*poll_time} seconds - #{status}")
+      elsif $?.to_i != 0
+        raise Chef::Application.fatal! "MySQL is not in a ready state per wsrep_ready for #{iter*poll_time} seconds!"
+      else
+        Chef::Log.debug("MySQL status is not failing - #{status}")
+      end
+    end
+    Chef::Log.info("MySQL is up after #{iter*poll_time} seconds - #{status}")
+  end
+  not_if "#{status_cmd}"
 end
 
 package "xinetd" do
@@ -131,7 +155,7 @@ template "/etc/xinetd.d/mysqlchk" do
 end
 
 service "xinetd" do
-  supports :stats => true, :restart => true, :reload => true
+  supports :status => true, :restart => true, :reload => true
   action [ :enable, :start ]
 end
 
@@ -160,11 +184,3 @@ bash "phpmyadmin-config-setup" do
   EOH
   not_if "grep -q AllowArbitraryServer /etc/phpmyadmin/config.inc.php"
 end
-
-ruby_block "fail run if not in quorum" do
-  block do
-    raise Chef::Application.fatal! "MySQL is not in a ready state per wsrep_ready -- we have a zombie!"
-  end
-  not_if "mysql -u root -p#{get_config('mysql-root-password')} -e \"SHOW STATUS LIKE 'wsrep_ready' \\G\" | grep -vq 'Value: OFF'"
-end
-
