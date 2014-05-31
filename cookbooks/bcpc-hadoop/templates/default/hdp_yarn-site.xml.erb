@@ -58,10 +58,6 @@
     <value>/var/log/hadoop-yarn/apps</value>
   </property>
   <property>
-    <name>yarn.app.mapreduce.am.staging-dir</name>
-    <value>/user</value>
-  </property>
-  <property>
     <name>mapreduce.jobhistory.address</name>
     <value><%="#{float_host(@hs_hosts.first[:hostname])}:10020" if not @hs_hosts.empty?%></value>
   </property>
@@ -69,5 +65,16 @@
     <name>mapreduce.jobhistory.webapp.address</name>
     <value><%="#{float_host(@hs_hosts.first[:hostname])}:19888" if not @hs_hosts.empty?%></value>
   </property>
-
+  <property>
+    <name>yarn.nodemanager.hostname</name>
+    <value><%= node[:bcpc][:floating][:ip] %></value>
+  </property>
+  <property>
+    <name>yarn.nodemanager.container-executor.class</name>      
+    <value>org.apache.hadoop.yarn.server.nodemanager.LinuxContainerExecutor</value>
+  </property>  
+  <property>
+    <name>yarn.nodemanager.linux-container-executor.group</name>
+    <value>yarn</value>
+  </property>
 </configuration>

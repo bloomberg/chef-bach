@@ -80,7 +80,6 @@ make_config('mysql-oozie-password', secure_password)
 #set up hadoop conf
 #
 hadoop_conf_files = %w{capacity-scheduler.xml
-   container-executor.cfg
    core-site.xml
    hadoop-metrics2.properties
    hadoop-metrics.properties
@@ -117,6 +116,23 @@ hadoop_conf_files.each do |t|
                :hs_hosts => hs_hosts,
                :mounts => node[:bcpc][:hadoop][:mounts])
    end
+end
+
+template "/etc/hadoop/conf/container-executor.cfg" do
+  source "hdp_container-executor.cfg.erb"
+  owner "root"
+  group "yarn"
+  mode "0400"
+  variables(:mounts => node[:bcpc][:hadoop][:mounts])
+  action :create
+  notifies :run, "bash[verify-container-executor]", :immediate
+end
+
+bash "verify-container-executor" do
+  code "/usr/lib/hadoop-yarn/bin/container-executor --checksetup"
+  user "yarn"
+  action :nothing
+  only_if { File.exists?("/usr/lib/hadoop-yarn/bin/container-executor") }
 end
 
 %w{yarn-env.sh

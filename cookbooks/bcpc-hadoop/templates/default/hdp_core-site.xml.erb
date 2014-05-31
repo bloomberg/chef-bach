@@ -58,5 +58,15 @@
   <property>
      <name>yarn.nodemanager.log-dirs</name>
     <value><%=@mounts.map{ |d| "file:///disk/#{d}/yarn/logs" }.join(",")%></value>
-   </property>
+  </property>
+
+  <property>
+    <name>yarn.nodemanager.linux-container-executor.group</name>
+    <value>yarn</value>
+  </property>
+
+  <property>
+    <name>mapreduce.framework.name</name>
+    <value>yarn</value>
+  </property>
 </configuration>

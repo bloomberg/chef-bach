@@ -1,3 +1,5 @@
-yarn.nodemanager.linux-container-executor.group=#configured value of yarn.nodemanager.linux-container-executor.group
-banned.users=#comma separated list of users who can not run applications
-min.user.id=1000#Prevent other super-users
+yarn.nodemanager.local-dirs=<%=@mounts.map{ |d| "file:///disk/#{d}/yarn/local" }.join(",")%>
+yarn.nodemanager.linux-container-executor.group=yarn
+yarn.nodemanager.log-dirs=<%=@mounts.map{ |d| "file:///disk/#{d}/yarn/logs" }.join(",")%>
+banned.users=hdfs,yarn,mapred,bin      
+min.user.id=1000
