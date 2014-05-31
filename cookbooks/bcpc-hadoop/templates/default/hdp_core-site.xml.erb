@@ -49,4 +49,14 @@
     <name>dfs.journalnode.edits.dir</name>
     <value><%="/disk/#{@mounts[0]}/dfs/jn"%></value>
   </property>
+
+  <property>
+    <name>mapreduce.cluster.local.dir</name>
+    <value><%=@mounts.map{ |d| "file:///disk/#{d}/yarn/mapred-local" }.join(",")%></value>
+  </property>
+
+  <property>
+     <name>yarn.nodemanager.log-dirs</name>
+    <value><%=@mounts.map{ |d| "file:///disk/#{d}/yarn/logs" }.join(",")%></value>
+   </property>
 </configuration>

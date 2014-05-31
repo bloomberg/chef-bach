@@ -46,7 +46,7 @@
   </property>
   <property>
     <name>yarn.nodemanager.local-dirs</name>
-    <value><%=@mounts.map{ |d| "/disk/#{d}/yarn/local" }.join(",")%></value>
+    <value><%=@mounts.map{ |d| "file:///disk/#{d}/yarn/local" }.join(",")%></value>
   </property>
   <property>
     <name>yarn.nodemanager.log-dirs</name>

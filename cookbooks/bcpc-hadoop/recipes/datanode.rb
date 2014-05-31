@@ -58,10 +58,10 @@ node[:bcpc][:hadoop][:mounts].each do |i|
     mode 0700
     action :create
   end
-  %w{local logs}.each do |d|
+  %w{mapred-local local logs}.each do |d|
     directory "/disk/#{i}/yarn/#{d}" do
       owner "yarn"
-      group "yarn"
+      group "hadoop"
       mode 0700
       action :create
     end
