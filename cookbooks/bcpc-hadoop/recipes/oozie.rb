@@ -125,8 +125,8 @@ service "generally run oozie" do
   action [:enable, :start]
   service_name "oozie"
   supports :status => true, :restart => true, :reload => false
-  subscribes :restart, "template[/etc/oozie/conf/oozie-site.xml]", :immediate
-  subscribes :restart, "template[/etc/oozie/conf/oozie-env.sh]", :immediate
+  subscribes :restart, "template[/etc/oozie/conf/oozie-site.xml]", :delayed
+  subscribes :restart, "template[/etc/oozie/conf/oozie-env.sh]", :delayed
 end
 
 ruby_block "Oozie Down" do

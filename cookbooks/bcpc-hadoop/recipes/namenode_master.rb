@@ -105,7 +105,7 @@ bash "reload hdfs nodes" do
   code "hdfs dfsadmin -refreshNodes"
   user "hdfs"
   action :nothing
-  subscribes :run, "template[/etc/hadoop/conf/dfs.exclude]", :immediately
+  subscribes :run, "template[/etc/hadoop/conf/dfs.exclude]", :delayed
 end
 
 ###

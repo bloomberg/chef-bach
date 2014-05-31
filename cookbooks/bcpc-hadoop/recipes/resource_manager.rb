@@ -40,5 +40,5 @@ bash "reload mapreduce nodes" do
   code "yarn rmadmin -refreshNodes"
   user "mapred"
   action :nothing
-  subscribes :run, "template[/etc/hadoop/conf/mapred.exclude]", :immediately
+  subscribes :run, "template[/etc/hadoop/conf/mapred.exclude]", :delayed
 end
