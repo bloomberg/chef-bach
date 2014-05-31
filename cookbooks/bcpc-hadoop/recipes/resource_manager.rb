@@ -1,7 +1,6 @@
 include_recipe 'dpkg_autostart'
 
 node[:bcpc][:hadoop][:mounts].each do |i|
-
   directory "/disk/#{i}/yarn/local" do
     owner "yarn"
     group "yarn"
@@ -17,9 +16,21 @@ node[:bcpc][:hadoop][:mounts].each do |i|
     action :create
     recursive true
   end
-
 end
 
+["", "done", "done_intermediate"].each do |dir|
+  bash "create-hdfs-history-dir #{dir}" do
+    code "hadoop fs -mkdir /user/history/#{dir} && hadoop fs -chmod 1777 /user/history/#{dir} && hadoop fs -chown yarn:mapred /user/history/#{dir}"
+    user "hdfs"
+    not_if "sudo -u hdfs hadoop fs -test -d /user/history/#{dir}"
+  end
+end
+
+bash "create-hdfs-yarn-log" do
+  code "hadoop fs -mkdir -p /var/log/hadoop-yarn && hadoop fs -chmod 1777 /var/log/hadoop-yarn && hadoop fs -chown yarn:mapred /var/log/hadoosp-yarn"
+  user "hdfs"
+  not_if "sudo -u hdfs hadoop fs -test -d /var/log/hadoop-yarn"
+end
 
 %w{hadoop-yarn-resourcemanager hadoop-client hadoop-mapreduce}.each do |pkg|
   dpkg_autostart pkg do

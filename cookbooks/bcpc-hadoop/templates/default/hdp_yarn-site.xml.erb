@@ -70,6 +70,14 @@
     <value><%= node[:bcpc][:floating][:ip] %></value>
   </property>
   <property>
+    <name>yarn.log-aggregation-enable</name>
+    <value>true</value>
+  </property>
+  <property>
+    <name>yarn.nodemanager.log-aggregation.compression-type</name>
+    <value>gz</value>
+  </property>
+  <property>
     <name>yarn.nodemanager.container-executor.class</name>      
     <value>org.apache.hadoop.yarn.server.nodemanager.LinuxContainerExecutor</value>
   </property>  
