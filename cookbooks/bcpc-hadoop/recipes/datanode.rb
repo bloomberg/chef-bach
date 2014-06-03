@@ -2,6 +2,7 @@
    hadoop-hdfs-datanode
    hadoop-mapreduce
    hadoop-client
+   sqoop
    lzop
    hadoop-lzo}.each do |pkg|
   package pkg do
@@ -25,6 +26,13 @@ bash "verify-container-executor" do
   user "yarn"
   action :nothing
   only_if { File.exists?("/usr/lib/hadoop-yarn/bin/container-executor") }
+end
+
+# Install Sqoop Bits
+template "/etc/sqoop/conf/sqoop-env.sh" do
+  source "sq_sqoop-env.sh.erb"
+  mode "0444"
+  action :create
 end
 
 # Install Hive Bits
@@ -68,7 +76,7 @@ node[:bcpc][:hadoop][:mounts].each do |i|
   end
 end
 
-# Build nodes for Yarn log storage
+# Build nodes for YARN log storage
 node[:bcpc][:hadoop][:mounts].each do |i|
   directory "/disk/#{i}/yarn/" do
     owner "yarn"
