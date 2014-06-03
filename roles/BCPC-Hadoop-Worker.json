@@ -10,6 +10,7 @@
     "recipe[bcpc-hadoop::disks]",
     "recipe[bcpc-hadoop::configs]",
     "recipe[bcpc-hadoop::datanode]",
+    "recipe[bcpc-hadoop::httpfs]",
     "recipe[bcpc-hadoop::region_server]",
     "recipe[bcpc-hadoop::pig]",
     "recipe[bcpc-hadoop::mahout]",

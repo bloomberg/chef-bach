@@ -1,15 +1,14 @@
 {
-  "name": "BCPC-Hadoop-Head-2",
+  "name": "BCPC-Hadoop-Head-MapReduce",
   "default_attributes": {
   },
   "json_class": "Chef::Role",
   "run_list": [
     "role[Basic]",
     "role[BCPC-Hadoop-Head]",
-    "recipe[bcpc-hadoop::namenode_standby]",
-    "recipe[bcpc-hadoop::oozie]",
     "recipe[bcpc-hadoop::resource_manager]",
-    "recipe[bcpc-hadoop::historyserver]"
+    "recipe[bcpc-hadoop::historyserver]",
+    "recipe[bcpc-hadoop::oozie]"
   ],
   "description": "A highly-available head node in a BCPC Hadoop cluster",
   "chef_type": "role",
