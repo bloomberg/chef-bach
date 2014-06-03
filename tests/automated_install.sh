@@ -35,10 +35,10 @@ sed -i "s#\(\"bootstrap\": {\)#\1\n\"proxy\" : \"http://$PROXY\",\n#" environmen
 printf "#### Setup VB's and Bootstrap\n"
 source ./vbox_create.sh
 
-download_VM_files || ( echo "############## VBOX DOWNLOAD VM FILES RETURNED $? ##############" && exit 1 )
+download_VM_files || ( echo "############## VBOX CREATE DOWNLOAD VM FILES RETURNED $? ##############" && exit 1 )
 create_bootstrap_VM || ( echo "############## VBOX CREATE BOOTSTRAP VM RETURNED $? ##############" && exit 1 )
 create_cluster_VMs || ( echo "############## VBOX CREATE CLUSTER VMs RETURNED $? ##############" && exit 1 )
-install_cluster || ( echo "############## bootstrap_chef.sh returned $? ##############" && exit 1 )
+install_cluster || ( echo "############## VBOX CREATE INSTALL CLUSTER RETURNED $? ##############" && exit 1 )
 
 printf "#### Cobbler Boot\n"
 printf "Snapshotting pre-Cobbler and booting (unless already running)\n"
@@ -70,12 +70,9 @@ printf "Snapshotting post-Cobbler\n"
 printf "#### Chef all the nodes\n"
 vagrant ssh -c "sudo apt-get install -y sshpass"
 
-printf "#### Chef the headnode\n"
-vagrant ssh -c "cd chef-bcpc; ./cluster-assign-roles.sh $ENVIRONMENT OpenStack bcpc-vm1"
-
-for i in 2 3; do
+for i in 1 2 3; do
   printf "#### Chef machine bcpc-vm${i}\n"
-  vagrant ssh -c "cd chef-bcpc; ./cluster-assign-roles.sh $ENVIRONMENT OpenStack bcpc-vm$i"
+  vagrant ssh -c "cd chef-bcpc; ./cluster-assign-roles.sh $ENVIRONMENT Hadoop bcpc-vm$i"
 done
 
 printf "Snapshotting post-Cobbler\n"

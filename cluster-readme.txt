@@ -30,7 +30,9 @@ cluster-enroll-cobbler.sh
 
 cluster-assign-roles.sh
 
-  Using cluster.txt, this tool assigns roles to node using Chef.
+  Using cluster.txt, this tool assigns roles to nodes using Chef. This script
+  is also the best way to ensure a node is re-Chefed with its correct role as
+  certain operations (e.g. 'chef-client -o [...]') will change a nodes role.
 
 cluster-whatsup.sh
 
@@ -39,8 +41,9 @@ cluster-whatsup.sh
 
 cluster-check.sh
 
+  *OpenStack Specific*
   Checks nodes list in cluster.txt for being up, having default routes
-  on the storage and management networks and running well-known
+  on the storage and management networks and running well-known OpenStack
   services. Pass a role to limit the checks to machines in that
   role. Useful after bringing up a cluster to verify the basic health
   of all nodes.
