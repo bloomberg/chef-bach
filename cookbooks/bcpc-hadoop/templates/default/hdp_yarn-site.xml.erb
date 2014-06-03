@@ -9,26 +9,86 @@
 <?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
 
 <configuration>
-<property>
-    <name>yarn.resourcemanager.resource-tracker.address</name>
-    <value><%="#{float_host(@rm_host.first[:hostname])}:8031" if not @rm_host.empty?%></value>
-  </property>
+  <% if @rm_hosts.length > 2 %>
+    <property> 
+      <name>yarn.resourcemanager.ha.enabled</name> 
+      <value>true</value>
+    </property> 
+
+    <property>
+      <name>yarn.resourcemanager.ha.rm-ids</name>
+      <value><%=@nn_hosts.map{ |s| "rm#{node.chef_environment}#{s[:bcpc][:node_number]}" }.join(",") %></value>
+    </property>
+
+    <% @nn_hosts.each do |h| %>   
+      <property>
+        <name>yarn.resourcemanager.hostname.rm<%= "#{node.chef_environment}#{h[:bcpc][:node_number]}" %></name>
+        <value><%=float_host(h[:hostname]) %>:8020</value>
+      </property>
+    <% end %>
+
+    <property> 
+      <name>yarn.resourcemanager.recovery.enabled</name> 
+      <value>true</value> 
+    </property> 
+ 
+    <property> 
+       <name>yarn.resourcemanager.store.class</name> 
+       <value>org.apache.hadoop.yarn.server.resourcemanager.recovery.ZKRMStateStore</value> 
+    </property> 
+ 
+    <property> 
+      <name>yarn.resourcemanager.zk-address</name>
+      <value><%= @zk_hosts.map{ |s| float_host(s[:hostname]) + ":2181" }.join(",") %></value>
+    </property>
+ 
+    <property> 
+      <name>yarn.client.failover-proxy-provider</name> 
+      <value>org.apache.hadoop.yarn.client.ConfiguredRMFailoverProxyProvider</value> 
+    </property>
+  <% else %>
+
+    <property>
+      <name>yarn.resourcemanager.resource-tracker.address</name>
+      <value><%="#{float_host(@rm_hosts.first[:hostname])}:8031" if not @rm_hosts.empty?%></value>
+    </property>
+
+    <property>
+      <name>yarn.resourcemanager.address</name>
+      <value><%="#{float_host(@rm_hosts.first[:hostname])}:8032" if not @rm_hosts.empty?%></value>
+    </property>
+
+    <property>
+      <name>yarn.resourcemanager.scheduler.address</name>
+      <value><%="#{float_host(@rm_hosts.first[:hostname])}:8030" if not @rm_hosts.empty?%></value>
+    </property>
+
+    <property>
+      <name>yarn.resourcemanager.admin.address</name>
+      <value><%="#{float_host(@rm_hosts.first[:hostname])}:8033" if not @rm_hosts.empty?%></value>
+    </property>
+
+    <property>
+      <name>yarn.resourcemanager.webapp.address</name>
+      <value><%="#{float_host(@rm_hosts.first[:hostname])}:8088" if not @rm_hosts.empty?%></value>
+    </property>
+  <% end %>
+
   <property>
-    <name>yarn.resourcemanager.address</name>
-    <value><%="#{float_host(@rm_host.first[:hostname])}:8032" if not @rm_host.empty?%></value>
+    <name>mapreduce.jobhistory.address</name>
+    <value><%="#{float_host(@hs_hosts.first[:hostname])}:10020" if not @hs_hosts.empty?%></value>
   </property>
+
   <property>
-    <name>yarn.resourcemanager.scheduler.address</name>
-    <value><%="#{float_host(@rm_host.first[:hostname])}:8030" if not @rm_host.empty?%></value>
+    <name>mapreduce.jobhistory.webapp.address</name>
+    <value><%="#{float_host(@hs_hosts.first[:hostname])}:19888" if not @hs_hosts.empty?%></value>
   </property>
+
   <property>
-    <name>yarn.resourcemanager.admin.address</name>
-    <value><%="#{float_host(@rm_host.first[:hostname])}:8033" if not @rm_host.empty?%></value>
+    <name>yarn.nodemanager.hostname</name>
+    <value><%= float_host(node[:hostname]) %></value>
   </property>
-  <property>
-    <name>yarn.resourcemanager.webapp.address</name>
-    <value><%="#{float_host(@rm_host.first[:hostname])}:8088" if not @rm_host.empty?%></value>
-  </property>
+
   <property>
     <description>Classpath for typical applications.</description>
     <name>yarn.application.classpath</name>
@@ -36,51 +96,48 @@
       /etc/hadoop/conf,/usr/lib/hadoop/*,/usr/lib/hadoop/lib/*,/usr/lib/hadoop-hdfs/*,/usr/lib/hadoop-hdfs/lib/*,/usr/lib/hadoop-yarn/*,/usr/lib/hadoop-yarn/lib/*,/usr/lib/hadoop-mapreduce/*,/usr/lib/hadoop-mapreduce/lib/*,/usr/lib/pig/*,/usr/lib/pig/lib/*
     </value>
   </property>
+
   <property>
     <name>yarn.nodemanager.aux-services</name>
     <value>mapreduce_shuffle</value>
   </property>
+
   <property>
     <name>yarn.nodemanager.aux-services.mapreduce.shuffle.class</name>
     <value>org.apache.hadoop.mapred.ShuffleHandler</value>
   </property>
+
   <property>
     <name>yarn.nodemanager.local-dirs</name>
     <value><%=@mounts.map{ |d| "file:///disk/#{d}/yarn/local" }.join(",")%></value>
   </property>
+
   <property>
     <name>yarn.nodemanager.log-dirs</name>
     <value><%=@mounts.map{ |d| "/disk/#{d}/yarn/logs" }.join(",")%></value>
   </property>
+
   <property>
-    <description>Where to aggregate logs</description>
     <name>yarn.nodemanager.remote-app-log-dir</name>
     <value>/var/log/hadoop-yarn/apps</value>
+    <description>Where to aggregate logs on HDFS</description>
   </property>
-  <property>
-    <name>mapreduce.jobhistory.address</name>
-    <value><%="#{float_host(@hs_hosts.first[:hostname])}:10020" if not @hs_hosts.empty?%></value>
-  </property>
-  <property>
-    <name>mapreduce.jobhistory.webapp.address</name>
-    <value><%="#{float_host(@hs_hosts.first[:hostname])}:19888" if not @hs_hosts.empty?%></value>
-  </property>
-  <property>
-    <name>yarn.nodemanager.hostname</name>
-    <value><%= node[:bcpc][:floating][:ip] %></value>
-  </property>
+
   <property>
     <name>yarn.log-aggregation-enable</name>
     <value>true</value>
   </property>
+
   <property>
     <name>yarn.nodemanager.log-aggregation.compression-type</name>
     <value>gz</value>
   </property>
+
   <property>
     <name>yarn.nodemanager.container-executor.class</name>      
     <value>org.apache.hadoop.yarn.server.nodemanager.LinuxContainerExecutor</value>
   </property>  
+
   <property>
     <name>yarn.nodemanager.linux-container-executor.group</name>
     <value>yarn</value>

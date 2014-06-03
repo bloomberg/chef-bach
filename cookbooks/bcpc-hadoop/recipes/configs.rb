@@ -102,7 +102,8 @@ jn_hosts = get_nodes_for("journalnode")
 rm_hosts = get_nodes_for("resource_manager")
 hs_hosts = get_nodes_for("historyserver")
 dn_hosts = get_nodes_for("datanode")
-hive_host = get_nodes_for("hive_metastore")
+hb_hosts = get_nodes_for("hbase_master")
+hive_hosts = get_nodes_for("hive_metastore")
 
 hadoop_conf_files.each do |t|
    template "/etc/hadoop/conf/#{t}" do
@@ -111,7 +112,7 @@ hadoop_conf_files.each do |t|
      variables(:nn_hosts => nn_hosts,
                :zk_hosts => zk_hosts,
                :jn_hosts => jn_hosts,
-               :rm_host  => rm_hosts,
+               :rm_hosts => rm_hosts,
                :dn_hosts => dn_hosts,
                :hs_hosts => hs_hosts,
                :mounts => node[:bcpc][:hadoop][:mounts])
@@ -166,7 +167,7 @@ end
                :zk_hosts => zk_hosts,
                :jn_hosts => jn_hosts,
                :rs_hosts => get_nodes_for("region_server"),
-               :master_hosts => get_nodes_for("hbase_master"),
+               :master_hosts => hb_hosts,
                :mounts => node[:bcpc][:hadoop][:mounts],
                :hbm_jmx_port => node[:bcpc][:hadoop][:jmx][:port][:hbase_master]
      )
@@ -186,7 +187,7 @@ end
      mode 0644
      variables(:mysql_hosts => get_mysql_nodes.map{ |m| m.hostname },
                :zk_hosts => zk_hosts,
-               :hive_host => hive_host)
+               :hive_hosts => hive_hosts)
   end
 end
 
@@ -205,7 +206,7 @@ end
     mode 0644
     variables(:mysql_hosts => get_mysql_nodes.map{ |m| m.hostname },
               :zk_hosts => zk_hosts,
-              :hive_host => hive_host)
+              :hive_hosts => hive_hosts)
   end
 end
 link "/etc/oozie/conf.#{node.chef_environment}/hive-site.xml" do
@@ -250,11 +251,11 @@ if false
      mode 0644
      variables(
                :zk_hosts => zk_hosts,
-               :rm_host  => rm_hosts,
-               :hive_host  => get_nodes_for("hive"),
-               :oozie_host  => get_nodes_for("oozie"),
-               :httpfs_host => get_nodes_for("httpfs"),
-               :hb_host  => get_nodes_for("hbase_master"))
+               :rm_hosts  => rm_hosts,
+               :hive_hosts  => hive_hosts,
+               :oozie_hosts  => get_nodes_for("oozie"),
+               :httpfs_hosts => get_nodes_for("httpfs"),
+               :hb_hosts  => hb_hosts)
   end
 end
 end

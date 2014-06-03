@@ -207,7 +207,7 @@
   [[smtp]]
 
     # The SMTP server information for email notification delivery
-    host=relayblk.bloomberg.com
+    host=smtp.example.com
     port=25
     user=
     password=
@@ -306,8 +306,8 @@
       # This should be the web service root URL, such as
       # http://namenode:50070/webhdfs/v1
       <%=
-          if defined?(httpfs_host) and not @httpfs_host.empty? then
-            "webhdfs_url=http://#{float_host(httpfs_host.first.hostname)}:14000/webhdfs/v1/"
+          if defined?(httpfs_hosts) and not @httpfs_hosts.empty? then
+            "webhdfs_url=http://#{float_host(httpfs_hosts.first.hostname)}:14000/webhdfs/v1/"
           else "#webhdfs_url=http://"
           end
       %>
@@ -334,8 +334,8 @@
     [[[default]]]
       # Enter the host on which you are running the ResourceManager
       <%=
-          if defined?(rm_host) and not @rm_host.empty? then
-            "resourcemanager_host=#{float_host(@rm_host.first.hostname)}"
+          if defined?(rm_hosts) and not @rm_hosts.empty? then
+            "resourcemanager_host=#{float_host(@rm_hosts.first.hostname)}"
           else
             "#resourcemanager_host="
           end
@@ -364,8 +364,8 @@
 
       # URL of the ResourceManager API
       #resourcemanager_api_url=http://localhost:8088
-      <%= if defined?(rm_host) and not @rm_host.empty? then
-            "resourcemanager_api_url=http://#{float_host(@rm_host.first.hostname)}8088"
+      <%= if defined?(rm_hosts) and not @rm_hosts.empty? then
+            "resourcemanager_api_url=http://#{float_host(@rm_hosts.first.hostname)}8088"
           else
             "#resourcemanager_api_url="
           end
@@ -425,10 +425,10 @@
   # The URL where the Oozie service runs on. This is required in order for
   # users to submit jobs.
   <%=
-      if defined?(oozie_host) and not @oozie_host.empty? then
+      if defined?(oozie_hosts) and not @oozie_hosts.empty? then
         "#oozie_url="
       else
-        "oozie_url=\"http://#{float_host(@oozie_host.first.hostname)}:11000/oozie\""
+        "oozie_url=\"http://#{float_host(@oozie_hosts.first.hostname)}:11000/oozie\""
       end
   %>
 
@@ -466,8 +466,8 @@
   # Host where Hive server Thrift daemon is running.
   # If Kerberos security is enabled, use fully-qualified domain name (FQDN).
   <%=
-      if defined?(hive_host) and not @hive_host.empty? then
-        "hive_server_host=#{float_host(@hive_host.first.hostname)}"
+      if defined?(hive_hosts) and not @hive_hosts.empty? then
+        "hive_server_host=#{float_host(@hive_hosts.first.hostname)}"
       else
         "#hive_server_host="
       end
@@ -558,8 +558,8 @@
   # Comma-separated list of HBase Thrift servers for
   # clusters in the format of '(name|host:port)'.
   <%=
-      if defined?(hb_host) and not @hb_host.empty? then
-        "hbase_clusters=(bcpc|#{@hb_host.first.hostname})"
+      if defined?(hb_hosts) and not @hb_hosts.empty? then
+        "hbase_clusters=(bcpc|#{@hb_hosts.first.hostname})"
       else
         "#hbase_clusters=(Cluster|localhost:9090)="
       end
