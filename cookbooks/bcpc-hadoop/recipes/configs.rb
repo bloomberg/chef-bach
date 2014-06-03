@@ -118,23 +118,6 @@ hadoop_conf_files.each do |t|
    end
 end
 
-template "/etc/hadoop/conf/container-executor.cfg" do
-  source "hdp_container-executor.cfg.erb"
-  owner "root"
-  group "yarn"
-  mode "0400"
-  variables(:mounts => node[:bcpc][:hadoop][:mounts])
-  action :create
-  notifies :run, "bash[verify-container-executor]", :immediate
-end
-
-bash "verify-container-executor" do
-  code "/usr/lib/hadoop-yarn/bin/container-executor --checksetup"
-  user "yarn"
-  action :nothing
-  only_if { File.exists?("/usr/lib/hadoop-yarn/bin/container-executor") }
-end
-
 %w{yarn-env.sh
   hadoop-env.sh}.each do |t|
  template "/etc/hadoop/conf/#{t}" do

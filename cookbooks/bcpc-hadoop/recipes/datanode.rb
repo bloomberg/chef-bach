@@ -9,6 +9,24 @@
   end
 end
 
+# Install YARN Bits
+template "/etc/hadoop/conf/container-executor.cfg" do
+  source "hdp_container-executor.cfg.erb"
+  owner "root"
+  group "yarn"
+  mode "0400"
+  variables(:mounts => node[:bcpc][:hadoop][:mounts])
+  action :create
+  notifies :run, "bash[verify-container-executor]", :immediate
+end
+
+bash "verify-container-executor" do
+  code "/usr/lib/hadoop-yarn/bin/container-executor --checksetup"
+  user "yarn"
+  action :nothing
+  only_if { File.exists?("/usr/lib/hadoop-yarn/bin/container-executor") }
+end
+
 # Install Hive Bits
 # workaround for hcatalog dpkg not creating the hcat user it requires
 user "hcat" do 
