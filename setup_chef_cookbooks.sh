@@ -55,7 +55,7 @@ EOF
 cd cookbooks
 
 # allow versions on cookbooks via "cookbook version"
-for cookbook in apt python build-essential ubuntu cron "chef-client 3.0.6" ntp yum logrotate yum-epel "sysctl 0.3.5"; do
+for cookbook in apt python build-essential ubuntu cron "chef-client 3.0.6" ntp yum logrotate yum-epel "sysctl 0.3.5" 7-zip chef_handler 7-zip windows ark; do
   if [[ ! -d ${cookbook% *} ]]; then
      # unless the proxy was defined this knife config will be the same as the one generated above
     knife cookbook site download $cookbook --config ../.chef/knife.rb
@@ -66,3 +66,4 @@ done
 [[ -d dpkg_autostart ]] || git clone https://github.com/hw-cookbooks/dpkg_autostart.git
 [[ -d kafka ]] || git clone https://github.com/mthssdrbrg/kafka-cookbook.git kafka
 [[ -d java ]] || git clone https://github.com/socrata-cookbooks/java.git java
+[[ -d jmxtrans ]] || git clone https://github.com/bijugs/chef-jmxtrans.git jmxtrans
