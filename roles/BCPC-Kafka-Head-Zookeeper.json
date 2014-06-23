@@ -1,5 +1,5 @@
 {
-  "name": "BCPC-Kafka-Zookeeper",
+  "name": "BCPC-Kafka-Head-Zookeeper",
   "default_attributes": {
   },
   "json_class": "Chef::Role",

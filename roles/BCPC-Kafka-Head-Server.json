@@ -1,5 +1,5 @@
 {
-  "name": "BCPC-Kafka-Server",
+  "name": "BCPC-Kafka-Head-Server",
   "default_attributes": {
   },
   "json_class": "Chef::Role",
