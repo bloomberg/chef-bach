@@ -5,7 +5,7 @@ This file is used to list changes made in each version of the kafka-bcpc cookboo
 
 0.1.0
 -----
-- [your_name] - Initial release of kafka-bcpc
+- [Bloomberg Finance L.P.] - Initial release of kafka-bcpc
 
 - - -
 Check the [Markdown Syntax Guide](http://daringfireball.net/projects/markdown/syntax) for help with Markdown.

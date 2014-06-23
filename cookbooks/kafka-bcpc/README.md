@@ -1,1 +1,1 @@
-Ad-Hoc Recipe to Quickly Set-up Kafka Machines
+Cookbook to complete prerequisites for setting up chef-bcpc specific Kafka Cluster
