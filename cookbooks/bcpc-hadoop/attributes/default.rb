@@ -16,10 +16,12 @@ default["bcpc"]["hadoop"]["oozie"]["admins"] = []
 default["bcpc"]["hadoop"]["hdfs"]["HA"] = false
 default["bcpc"]["hadoop"]["hdfs"]["failed_volumes_tolerated"] = 1
 default["bcpc"]["hadoop"]["hdfs"]["dfs_replication_factor"] = 3
-default["bcpc"]["hadoop"]["jmx_enabled"] = false
-default["bcpc"]["hadoop"]["jmx"]["port"]["namenode"] = 3010
-default["bcpc"]["hadoop"]["jmx"]["port"]["datanode"] = 3010
-default["bcpc"]["hadoop"]["jmx"]["port"]["hbase_master"] = 3010
+default["bcpc"]["hadoop"]["jmx_enabled"] = true
+default["bcpc"]["hadoop"]["namenode"]["jmx"]["port"] = 10111
+default["bcpc"]["hadoop"]["datanode"]["jmx"]["port"] = 10112
+default["bcpc"]["hadoop"]["hbase_master"]["jmx"]["port"] = 10101
+default["bcpc"]["hadoop"]["hbase_rs"]["jmx"]["port"] = 10102
+default["bcpc"]["hadoop"]["kafka"]["jmx"]["port"] = 9995
 
 default["bcpc"]["keepalived"]["config_template"] = "keepalived.conf_hadoop"
 

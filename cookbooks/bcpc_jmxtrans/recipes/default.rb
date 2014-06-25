@@ -14,6 +14,7 @@ vservers = node['jmxtrans']['servers'].dup
 
 vservers.each do |vserver|
   vserver['name']=node['bcpc']['management']['ip']
+  vserver['port']=node["bcpc"]["hadoop"][vserver['type']]["jmx"]["port"]
 end
 
 node.override['jmxtrans']['servers']=vservers
