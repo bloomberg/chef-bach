@@ -6,10 +6,20 @@
   "run_list": [
     "role[Basic]",
     "role[BCPC-Hadoop-Head]",
-    "recipe[bcpc-hadoop::namenode_standby]"
+    "recipe[bcpc-hadoop::namenode_standby]",
+    "recipe[bcpc_jmxtrans]"
   ],
   "description": "A highly-available head node in a BCPC Hadoop cluster",
   "chef_type": "role",
+  "default_attributes" : {
+    "jmxtrans":  {
+      "servers": [
+                 {
+                    "type": "namenode"
+                 }
+        ]
+      }
+  },
   "override_attributes": {
   }
 }
