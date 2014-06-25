@@ -13,12 +13,6 @@
 vservers = node['jmxtrans']['servers'].dup
 
 vservers.each do |vserver|
-  category=vserver['type']
-  log '*******************************************'
-  log "category "+category
-  log "type "+vserver['type']
-  log "port "+node["bcpc"]["hadoop"]["#{vserver['type']}"]["jmx"]["port"].to_s
-  log '*******************************************'
   vserver['name']=node['bcpc']['management']['ip']
   vserver['port']=node["bcpc"]["hadoop"]["#{vserver['type']}"]["jmx"]["port"]
 end
