@@ -15,6 +15,17 @@
   ],
   "description": "Role to setup Kafka Server",
   "chef_type": "role",
+  "default_attributes" : {
+    "jmxtrans":  {
+      "servers":  [
+                 {
+                    "name": "",
+                    "port": "9999",
+                    "type": "kafka"
+                  }
+        ]
+      }
+  },
   "override_attributes": {
     "kafka": {
       "version": "0.8.1",
