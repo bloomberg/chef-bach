@@ -4,7 +4,7 @@
 #
 # Copyright 2014, Bloomberg L.P
 #
-# All rights reserved - Do Not Redistribute
+# All rights reserved 
 #
 
 #
@@ -24,9 +24,11 @@ node.override['jmxtrans']['servers']=vservers
 
 if node['jmxtrans']['graphite']['host'].nil? || node['jmxtrans']['graphite']['host'] == 'graphite'
    node.default['jmxtrans']['graphite']['host'] = node['bcpc']['management']['vip']
-   node.default['jmxtrans']['graphite']['port'] = node['bcpc']['graphite']['relay-port']
 end
 
+if node.default['jmxtrans']['graphite']['port'] != node['bcpc']['graphite']['relay-port']
+   node.default['jmxtrans']['graphite']['port'] = node['bcpc']['graphite']['relay-port']
+end
 #
 # Logic to set the URL from where the jmxtrans software need to be downloaded
 #
