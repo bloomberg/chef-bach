@@ -11,12 +11,22 @@ default['jmxtrans']['default_queries']['kafka'] = [
   {
      'obj' => "\\\"kafka.server\\\":type=\\\"BrokerTopicMetrics\\\",name=*",
      'result_alias' => "kafka.BrokerTopicMetrics",
-     'attr' => [ "Count", "MeanRate", "OneMinuteRate", "FiveMinuteRate", "FifteenMinuteRate" ]
+     'attr' => [ "Count", 
+                 "MeanRate", 
+                 "OneMinuteRate", 
+                 "FiveMinuteRate", 
+                 "FifteenMinuteRate" 
+               ]
   },
   {
      'obj' => "\\\"kafka.server\\\":type=\\\"DelayedFetchRequestMetrics\\\",name=*",
      'result_alias' => "kafka.server.DelayedFetchRequestMetrics",
-     'attr' => [ "Count", "MeanRate", "OneMinuteRate", "FiveMinuteRate", "FifteenMinuteRate" ]
+     'attr' => [ "Count", 
+                 "MeanRate", 
+                 "OneMinuteRate", 
+                 "FiveMinuteRate", 
+                 "FifteenMinuteRate"
+               ]
   }
 ]
 default['jmxtrans']['default_queries']['datanode'] = [
