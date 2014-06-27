@@ -1,0 +1,3 @@
+<% if node[:bcpc][:hadoop].attribute?(:jmx_enabled) and node[:bcpc][:hadoop][:jmx_enabled] %>
+export JMXPORT=<%= @zk_jmx_port %>
+<% end %>

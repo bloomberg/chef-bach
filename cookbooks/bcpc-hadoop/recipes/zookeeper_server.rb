@@ -7,7 +7,31 @@ include_recipe 'dpkg_autostart'
   end
   package  pkg do
     action :upgrade
+    notifies :create, "template[/tmp/zkServer.sh]", :immediately
+    notifies :create, "ruby_block[Compare_zookeeper_server_start_shell_script]", :immediately
   end
+end
+
+template "/tmp/zkServer.sh" do
+  source "hdp_zkServer.sh.orig.erb"
+  mode 0644
+end
+
+ruby_block "Compare_zookeeper_server_start_shell_script" do
+  block do
+    require "digest"
+    orig_checksum=Digest::MD5.hexdigest(File.read("/tmp/zkServer.sh"))
+    new_checksum=Digest::MD5.hexdigest(File.read("/usr/lib/zookeeper/bin/zkServer.sh"))
+    if orig_checksum != new_checksum
+      Chef::Application.fatal!("zookeeper-server:New version of zkServer.sh need to be created and used")
+    end
+  end
+  action :nothing
+end
+
+template "/etc/init.d/zookeeper-server" do
+  source "hdp_zookeeper-server.start.erb"
+  mode 0655
 end
 
 directory "/var/lib/zookeeper" do
@@ -15,6 +39,16 @@ directory "/var/lib/zookeeper" do
   owner "zookeeper"
   group "zookeeper"
   mode 0755
+end
+
+template "/etc/default/zookeeper-server" do
+  source "hdp_zookeeper-server.default.erb"
+  mode 0644
+  variables(:zk_jmx_port => node[:bcpc][:hadoop][:zookeeper][:jmx][:port])
+end
+
+template "/usr/lib/zookeeper/bin/zkServer.sh" do
+  source "hdp_zkServer.sh.erb"
 end
 
 bash "init-zookeeper" do

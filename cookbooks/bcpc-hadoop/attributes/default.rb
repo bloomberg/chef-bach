@@ -22,6 +22,7 @@ default["bcpc"]["hadoop"]["datanode"]["jmx"]["port"] = 10112
 default["bcpc"]["hadoop"]["hbase_master"]["jmx"]["port"] = 10101
 default["bcpc"]["hadoop"]["hbase_rs"]["jmx"]["port"] = 10102
 default["bcpc"]["hadoop"]["kafka"]["jmx"]["port"] = 9995
+default["bcpc"]["hadoop"]["zookeeper"]["jmx"]["port"] = 10113
 
 default["bcpc"]["keepalived"]["config_template"] = "keepalived.conf_hadoop"
 
