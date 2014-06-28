@@ -28,4 +28,12 @@
     <name>hbase.master.wait.on.regionservers.mintostart</name>
     <value><%= @rs_hosts.length/2+1 %></value>
   </property>
+  <property>
+    <name>hbase.regionserver.dns.interface</name>
+    <value><%= node["bcpc"]["floating"]["interface"] %></value> 
+  </property>
+  <property>
+    <name>hbase.master.dns.interface</name>
+    <value><%= node["bcpc"]["floating"]["interface"] %></value> 
+  </property>
 </configuration>
