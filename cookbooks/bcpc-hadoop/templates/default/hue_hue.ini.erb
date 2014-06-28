@@ -426,9 +426,9 @@
   # users to submit jobs.
   <%=
       if defined?(oozie_hosts) and not @oozie_hosts.empty? then
-        "#oozie_url="
-      else
         "oozie_url=\"http://#{float_host(@oozie_hosts.first.hostname)}:11000/oozie\""
+      else
+        "#oozie_url="
       end
   %>
 
@@ -559,7 +559,7 @@
   # clusters in the format of '(name|host:port)'.
   <%=
       if defined?(hb_hosts) and not @hb_hosts.empty? then
-        "hbase_clusters=(bcpc|#{@hb_hosts.first.hostname})"
+        "hbase_clusters=(#{node.chef_environment}|#{@hb_hosts.first.hostname})"
       else
         "#hbase_clusters=(Cluster|localhost:9090)="
       end
