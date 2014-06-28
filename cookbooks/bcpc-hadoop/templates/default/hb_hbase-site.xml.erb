@@ -36,4 +36,12 @@
     <name>hbase.master.dns.interface</name>
     <value><%= node["bcpc"]["floating"]["interface"] %></value> 
   </property>
+  <property>
+    <name>hbase.regionserver.ipc.address</name>
+    <value><%= node["bcpc"]["floating"]["ip"] %></value> 
+  </property>
+  <property>
+    <name>hbase.master.ipc.address</name>
+    <value><%= node["bcpc"]["floating"]["ip"] %></value> 
+  </property>
 </configuration>
