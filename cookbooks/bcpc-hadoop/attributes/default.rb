@@ -16,6 +16,7 @@ default["bcpc"]["hadoop"]["oozie"]["admins"] = []
 default["bcpc"]["hadoop"]["hdfs"]["HA"] = false
 default["bcpc"]["hadoop"]["hdfs"]["failed_volumes_tolerated"] = 1
 default["bcpc"]["hadoop"]["hdfs"]["dfs_replication_factor"] = 3
+default["bcpc"]["hadoop"]["java"] = "/usr/lib/jvm/java-1.7.0-openjdk-amd64"
 default["bcpc"]["hadoop"]["jmx_enabled"] = false
 default["bcpc"]["hadoop"]["jmx"]["port"]["namenode"] = 3010
 default["bcpc"]["hadoop"]["jmx"]["port"]["datanode"] = 3010

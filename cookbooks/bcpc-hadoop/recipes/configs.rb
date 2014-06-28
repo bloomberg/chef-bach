@@ -79,6 +79,17 @@ make_config('mysql-oozie-password', secure_password)
 #
 #set up hadoop conf
 #
+
+package "bigtop-jsvc"
+
+template "hadoop-detect-javahome" do
+  path "/usr/lib/bigtop-utils/bigtop-detect-javahome"
+  source "hdp_bigtop-detect-javahome.erb"
+  owner "root"
+  group "root"
+  mode "0755"
+end
+
 hadoop_conf_files = %w{capacity-scheduler.xml
    core-site.xml
    hadoop-metrics2.properties
