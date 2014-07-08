@@ -180,6 +180,62 @@ function hadoop_install {
   done
 }
 
+########################################################################
+# Perform Kafka install
+# Arguments: $* - hosts (as output from parse_cluster_txt)
+# Method:
+# * Installs stubs (create chef nodes and setup networking) for all machines in parallel
+# * Set all kafka headnode to admins
+# * Assigns kafka roles for headnodes
+# * Waits for solr index to get updated run list for search
+# * Installs kafka zookeepeer headnodes sorted by role
+# * Installs kafka server headnodes sorted by role
+# * Unsets all headnode from being admins
+function kafka_install {
+  local hosts="$*"
+  shopt -u nocasematch
+  printf "Doing Kafka install...\n"
+
+  install_stub $(printf ${hosts// /\\n} | sort)
+
+  # set the headnodes to admin for creating data bags
+  for h in $(printf ${hosts// /\\n} | grep -i "BCPC-Kafka-Head" | sort); do
+    [[ "$h" =~ $REGEX ]]
+    printf "/\"admin\": false\ns/false/true\nw\nq\n" | EDITOR=ed sudo -E knife client edit "${BASH_REMATCH[3]}" $KNIFE_ADMIN || /bin/true
+  done
+
+  # Setting run list for Kafka-Zookeeper and Kafka-Server head nodes that allows Solr to get updated
+  # before chef-client runs and searches for nodes
+  printf "Assigning roles for Kafka head nodes...\n"
+  for h in $(printf ${hosts// /\\n} | grep -i "BCPC-Kafka-Head" | sort); do
+    [[ "$h" =~ $REGEX ]]
+    local role="${BASH_REMATCH[1]}"
+    local ip="${BASH_REMATCH[2]}"
+    local fqdn="${BASH_REMATCH[3]}"
+    sudo knife node run_list set $fqdn "$role" $KNIFE_ADMIN &
+  done
+  
+  # Making sure that the run_list is updated in solr index and is available for search during chef-client run 
+  num_hosts=$(printf ${hosts// /\\n} | grep -i "BCPC-Kafka-Head-Zookeeper" | wc -l)
+  while true; do
+    printf "Waiting for Chef Solr to update\n"
+    sleep 0.5
+    [[ $num_hosts -eq $(sudo knife search node "role:BCPC-Kafka-Head-Zookeeper" $KNIFE_ADMIN | grep '^Node Name:' | wc -l) ]] && break
+  done
+
+  printf "Installing kafka zookeeper heads...\n"
+  install_machines $(printf ${hosts// /\\n} | grep -i "BCPC-Kafka-Head-Zookeeper" | sort)
+
+  printf "Installing kafka server heads...\n"
+  install_machines $(printf ${hosts// /\\n} | grep -i "BCPC-Kafka-Head-Server" | sort)
+
+  # remove admin from the headnodes
+  for h in $(printf ${hosts// /\\n} | grep -i "BCPC-Kafka-Head" | sort); do
+    [[ "$h" =~ $REGEX ]]
+    printf "/\"admin\": true\ns/true/false\nw\nq\n" | EDITOR=ed sudo -E knife client edit "${BASH_REMATCH[3]}" $KNIFE_ADMIN
+  done
+}
+
 ############
 # Main Below
 #
@@ -194,8 +250,8 @@ INSTALL_TYPE=$2
 MATCHKEY=${3-}
 
 shopt -s nocasematch
-if [[ ! "$INSTALL_TYPE" =~ (openstack|hadoop) ]]; then
-  printf "Error: Need install type of OpenStack or Hadoop\n" > /dev/stderr
+if [[ ! "$INSTALL_TYPE" =~ (openstack|hadoop|kafka) ]]; then
+  printf "Error: Need install type of OpenStack, Hadoop or Kafka\n" > /dev/stderr
   exit 1
 fi
 shopt -u nocasematch
@@ -226,6 +282,8 @@ if [[ "$INSTALL_TYPE" = "OpenStack" ]]; then
 ### Hadoop Install Method
 elif [[ "$INSTALL_TYPE" = "Hadoop" ]]; then
   hadoop_install $hosts
+elif [[ "$INSTALL_TYPE" = "Kafka" ]]; then
+  kafka_install $hosts
 fi
 
 printf "#### Install finished\n"
