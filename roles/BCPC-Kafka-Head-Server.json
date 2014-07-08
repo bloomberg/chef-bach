@@ -11,7 +11,8 @@
     "recipe[kafka-bcpc]", 
     "recipe[kafka-bcpc::setattr]",
     "recipe[java::oracle]", 
-    "recipe[kafka]"
+    "recipe[kafka]",
+    "recipe[bcpc_jmxtrans]"
   ],
   "description": "Role to setup Kafka Server",
   "chef_type": "role",
@@ -19,10 +20,8 @@
     "jmxtrans":  {
       "servers":  [
                  {
-                    "name": "",
-                    "port": "9999",
                     "type": "kafka"
-                  }
+		 }
         ]
       }
   },
