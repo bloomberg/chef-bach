@@ -58,14 +58,15 @@ fi
 FILES="kibana3.tgz $FILES"
 
 # Fetch Kafka Tar
-mkdir -p kafka/0.8.1/
-
-if ! [[ -f kafka/0.8.1/kafka_2.9.2-0.8.1.tgz ]]; then
-  cd kafka/0.8.1/ 
-  $CURL -O -L https://archive.apache.org/dist/kafka/0.8.1/kafka_2.9.2-0.8.1.tgz
-  cd ../../
-fi
-FILES="kafka_2.9.2-0.8.1.tgz $FILES"
+for version in 0.8.1 0.8.1.1; do
+  mkdir -p kafka/${version}/
+  if ! [[ -f kafka/${version}/kafka_2.9.2-${version}.tgz ]]; then
+    pushd kafka/${version}/
+    $CURL -O -L https://archive.apache.org/dist/kafka/${version}/kafka_2.9.2-${version}.tgz
+    popd
+  fi
+  FILES="kafka_2.9.2-${version}.tgz $FILES"
+done
 
 # Fetch Java Tar
 if ! [[ -f jdk-7u51-linux-x64.tar.gz ]]; then
