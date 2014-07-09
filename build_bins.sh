@@ -58,14 +58,15 @@ fi
 FILES="kibana3.tgz $FILES"
 
 # Fetch Kafka Tar
-mkdir -p kafka/0.8.1/
-
-if ! [[ -f kafka/0.8.1/kafka_2.9.2-0.8.1.tgz ]]; then
-  cd kafka/0.8.1/ 
-  $CURL -O -L https://archive.apache.org/dist/kafka/0.8.1/kafka_2.9.2-0.8.1.tgz
-  cd ../../
-fi
-FILES="kafka_2.9.2-0.8.1.tgz $FILES"
+for version in 0.8.1 0.8.1.1; do
+  mkdir -p kafka/${version}/
+  if ! [[ -f kafka/${version}/kafka_2.9.2-${version}.tgz ]]; then
+    pushd kafka/${version}/
+    $CURL -O -L https://archive.apache.org/dist/kafka/${version}/kafka_2.9.2-${version}.tgz
+    popd
+  fi
+  FILES="kafka_2.9.2-${version}.tgz $FILES"
+done
 
 # Fetch Java Tar
 if ! [[ -f jdk-7u51-linux-x64.tar.gz ]]; then
@@ -187,25 +188,25 @@ fi
 FILES="python-requests-aws_0.1.5_all.deb $FILES"
 
 # Build the zabbix packages
-if ! [[ -f zabbix-agent.tar.gz && -f zabbix-server.tar.gz ]]; then
-  $CURL -L -O http://sourceforge.net/projects/zabbix/files/ZABBIX%20Latest%20Stable/2.0.7/zabbix-2.0.7.tar.gz
-  tar zxf zabbix-2.0.7.tar.gz
-  rm -rf /tmp/zabbix-install && mkdir -p /tmp/zabbix-install
-  cd zabbix-2.0.7
-  ./configure --prefix=/tmp/zabbix-install --enable-agent --with-ldap
-  make install
-  tar zcf zabbix-agent.tar.gz -C /tmp/zabbix-install .
-  rm -rf /tmp/zabbix-install && mkdir -p /tmp/zabbix-install
-  ./configure --prefix=/tmp/zabbix-install --enable-server --with-mysql --with-ldap
-  make install
-  cp -a frontends/php /tmp/zabbix-install/share/zabbix/
-  cp database/mysql/* /tmp/zabbix-install/share/zabbix/
-  tar zcf zabbix-server.tar.gz -C /tmp/zabbix-install .
-  rm -rf /tmp/zabbix-install
-  cd ..
-  cp zabbix-2.0.7/zabbix-agent.tar.gz .
-  cp zabbix-2.0.7/zabbix-server.tar.gz .
-  rm -rf zabbix-2.0.7 zabbix-2.0.7.tar.gz
+if [ ! -f zabbix-agent.tar.gz ] || [ ! -f zabbix-server.tar.gz ]; then
+    $CURL -L -O http://sourceforge.net/projects/zabbix/files/ZABBIX%20Latest%20Stable/2.2.2/zabbix-2.2.2.tar.gz
+    tar zxf zabbix-2.2.2.tar.gz
+    rm -rf /tmp/zabbix-install && mkdir -p /tmp/zabbix-install
+    cd zabbix-2.2.2
+    ./configure --prefix=/tmp/zabbix-install --enable-agent --with-ldap
+    make install
+    tar zcf zabbix-agent.tar.gz -C /tmp/zabbix-install .
+    rm -rf /tmp/zabbix-install && mkdir -p /tmp/zabbix-install
+    ./configure --prefix=/tmp/zabbix-install --enable-server --with-mysql --with-ldap
+    make install
+    cp -a frontends/php /tmp/zabbix-install/share/zabbix/
+    cp database/mysql/* /tmp/zabbix-install/share/zabbix/
+    tar zcf zabbix-server.tar.gz -C /tmp/zabbix-install .
+    rm -rf /tmp/zabbix-install
+    cd ..
+    cp zabbix-2.2.2/zabbix-agent.tar.gz .
+    cp zabbix-2.2.2/zabbix-server.tar.gz .
+    rm -rf zabbix-2.2.2 zabbix-2.2.2.tar.gz
 fi
 FILES="zabbix-agent.tar.gz zabbix-server.tar.gz $FILES"
 

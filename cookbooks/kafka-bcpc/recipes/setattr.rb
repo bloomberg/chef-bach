@@ -27,6 +27,9 @@ log "Mounts are : #{node[:bcpc][:hadoop][:mounts]}"
 
 node.override[:kafka][:host_name] = float_host(node[:fqdn])
 node.override[:kafka][:advertised_host_name] = float_host(node[:fqdn])
+node.override[:kafka][:advertised_port] = 9092
 
 log "Kafka host name is : #{node[:kafka][:host_name]}"
 log "Kafka advertised host name is : #{node[:kafka][:advertised_host_name]}"
+log "Kafka advertised port is : #{node[:kafka][:advertised_port]}"
+
