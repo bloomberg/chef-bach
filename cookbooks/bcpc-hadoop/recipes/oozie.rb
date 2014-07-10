@@ -43,15 +43,15 @@ end
 service "stop-oozie-for-war-setup" do
   action :stop
   service_name "oozie"
+  supports :status => true, :restart => true, :reload => false
   only_if {not File.exists?("#{OOZIE_SERVER_PATH}/webapps/oozie.war") or
-           File.atime("#{OOZIE_LIB_PATH}/libext/") > File.atime("#{OOZIE_SERVER_PATH}/webapps/oozie.war") and
-           `service oozie status` }
+           File.mtime("#{OOZIE_LIB_PATH}/libext/") > File.mtime("#{OOZIE_SERVER_PATH}/webapps/oozie.war") }
 end
 
 bash "oozie_setup_war" do
   code "#{OOZIE_LIB_PATH}/bin/oozie-setup.sh prepare-war"
   only_if {not File.exists?("#{OOZIE_SERVER_PATH}/webapps/oozie.war") or
-           File.atime("#{OOZIE_LIB_PATH}/libext/") > File.atime("#{OOZIE_SERVER_PATH}/webapps/oozie.war") }
+           File.mtime("#{OOZIE_LIB_PATH}/libext/") > File.mtime("#{OOZIE_SERVER_PATH}/webapps/oozie.war") }
 end
 
 bash "make_shared_libs_dir" do
