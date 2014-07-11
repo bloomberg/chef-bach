@@ -24,7 +24,9 @@
 
 def get_zk_nodes
   rl_results = search(:node, "role:*Zookeeper* AND chef_environment:#{node.chef_environment}")
+  rl_results.map!{|x| x['hostname'] == node[:hostname] ? node : x}
   ro_results = search(:node, "roles:*Zookeeper* AND chef_environment:#{node.chef_environment}")
+  ro_results.map!{|x| x['hostname'] == node[:hostname] ? node : x}
   re_results = get_nodes_for("zookeeper", "kafka")
   results = (rl_results.concat ro_results).concat re_results
   return results.uniq{|x| x.bcpc.management.ip}.sort
