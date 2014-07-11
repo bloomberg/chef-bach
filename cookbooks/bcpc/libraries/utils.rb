@@ -124,6 +124,9 @@ end
 def get_nodes_for(recipe, cookbook="bcpc")
   results = search(:node, "recipes:#{cookbook}\\:\\:#{recipe} AND chef_environment:#{node.chef_environment}")
   results.map!{ |x| x['hostname'] == node[:hostname] ? node : x }
+  if node.run_list.expand(node.chef_environment).recipes.include?("#{cookbook}::#{recipe}") and not results.include?(node)
+    results.push(node)
+  end
   return results.sort
 end
 
