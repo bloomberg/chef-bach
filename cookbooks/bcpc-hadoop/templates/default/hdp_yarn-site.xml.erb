@@ -17,10 +17,10 @@
 
     <property>
       <name>yarn.resourcemanager.ha.rm-ids</name>
-      <value><%=@nn_hosts.map{ |s| "rm#{node.chef_environment}#{s[:bcpc][:node_number]}" }.join(",") %></value>
+      <value><%=@rm_hosts.map{ |s| "rm#{node.chef_environment}#{s[:bcpc][:node_number]}" }.join(",") %></value>
     </property>
 
-    <% @nn_hosts.each do |h| %>   
+    <% @rm_hosts.each do |h| %>   
       <property>
         <name>yarn.resourcemanager.hostname.rm<%= "#{node.chef_environment}#{h[:bcpc][:node_number]}" %></name>
         <value><%=float_host(h[:hostname]) %>:8020</value>

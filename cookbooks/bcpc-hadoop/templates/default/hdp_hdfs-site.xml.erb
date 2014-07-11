@@ -129,4 +129,9 @@
     <!-- Reserve 1GB on each datanode -->
     <value>1073741824</value>
   </property>
+
+  <property>
+    <name>dfs.journalnode.edits.dir</name>
+    <value><%="/disk/#{@mounts[0]}/dfs/jn"%></value>
+  </property>
 </configuration>
