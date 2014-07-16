@@ -146,7 +146,7 @@ DATABASES = {
 # remote server in the cluster. These servers must each have local access to
 # metric data. Note that the first server to return a match for a query will be
 # used.
-#CLUSTER_SERVERS = [ <%="#{@servers.collect{|x| "\""+x['bcpc']['management']['ip']+":8888\""}.join(', ')}"%> ]
+#CLUSTER_SERVERS = [ <%="#{@servers.collect{|x| "\""+x['bcpc']['management']['ip']+":"+x['bcpc']['graphite']['web_port'].to_s+"\""}.join(', ')}"%> ]
 
 ## These are timeout values (in seconds) for requests to remote webapps
 #REMOTE_STORE_FETCH_TIMEOUT = 6   # Timeout to fetch series data

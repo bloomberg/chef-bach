@@ -139,7 +139,8 @@ default['bcpc']['zabbix']['user'] = "zabbix"
 default['bcpc']['zabbix']['group'] = "adm"
 
 default['bcpc']['keepalived']['config_template'] = "keepalived.conf_openstack"
-default['bcpc']['graphite']['relay-port'] = 2013
+default['bcpc']['graphite']['relay_port'] = 2013
+default['bcpc']['graphite']['web_port'] = 8888
 
 default[:bcpc][:ports][:apache][:radosgw] = 8080
 default[:bcpc][:ports][:apache][:radosgw_https] = 8443
