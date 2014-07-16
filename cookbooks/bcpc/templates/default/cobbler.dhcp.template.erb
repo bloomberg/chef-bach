@@ -27,7 +27,9 @@ subnet <%= @subnet %> netmask <%="#{node[:bcpc][:management][:netmask]}"%> {
      option domain-name-servers <%="#{@node[:bcpc][:dns_servers].join(', ')}" %>;
      option subnet-mask         <%="#{node[:bcpc][:management][:netmask]}"%>;
      option domain-name         "<%="#{node[:bcpc][:domain_name]}"%>";
-     range dynamic-bootp        <%= @range %>;
+     <% if @range %>
+     <%= "range dynamic-bootp        #{@range};" %>
+     <% end %>
      filename                   "/pxelinux.0";
      default-lease-time         21600;
      max-lease-time             43200;
