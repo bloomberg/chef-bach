@@ -27,8 +27,8 @@ if node['jmxtrans']['graphite']['host'].nil? || node['jmxtrans']['graphite']['ho
    node.default['jmxtrans']['graphite']['host'] = node['bcpc']['management']['vip']
 end
 
-if node.default['jmxtrans']['graphite']['port'] != node['bcpc']['graphite']['relay-port']
-   node.default['jmxtrans']['graphite']['port'] = node['bcpc']['graphite']['relay-port']
+if node.default['jmxtrans']['graphite']['port'] != node['bcpc']['graphite']['relay_port']
+   node.default['jmxtrans']['graphite']['port'] = node['bcpc']['graphite']['relay_port']
 end
 #
 # Logic to set the URL from where the jmxtrans software need to be downloaded
