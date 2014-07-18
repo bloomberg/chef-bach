@@ -13,19 +13,24 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-maxClientCnxns=<% node["bcpc"]["hadoop"]["zookeeper"]["maxClientCnxns"] %>
+maxClientCnxns=<%= node[:bcpc][:zookeeper][:maxClientCnxns] %>
+
 # The number of milliseconds of each tick
-tickTime=2000
+tickTime=<%= node[:bcpc][:zookeeper][:tick_time] %>
+
 # The number of ticks that the initial 
 # synchronization phase can take
-initLimit=10
+initLimit=<%= node[:bcpc][:zookeeper][:init_limit] %>
+
 # The number of ticks that can pass between 
 # sending a request and getting an acknowledgement
-syncLimit=5
+syncLimit=<%= node[:bcpc][:zookeeper][:sync_limit] %>
+
 # the directory where the snapshot is stored.
-dataDir=/var/lib/zookeeper
+dataDir=<%= node[:bcpc][:zookeeper][:data_dir] %>
+
 # the port at which the clients will connect
-clientPort=2181
+clientPort=<%= node[:bcpc][:zookeeper][:port] %>
 
 <% @zk_hosts.each do |s| %> 
 <%="server.#{s[:bcpc][:node_number]}=#{float_host(s[:hostname])}:2888:3888" %>

@@ -8,6 +8,7 @@
     "recipe[bcpc::default]",
     "recipe[bcpc::networking]",
     "recipe[bcpc-hadoop::disks]",
+    "recipe[bcpc-hadoop::hdp_repo]",
     "recipe[bcpc-hadoop::configs]",
     "recipe[bcpc-hadoop::datanode]",
     "recipe[bcpc-hadoop::httpfs]",
