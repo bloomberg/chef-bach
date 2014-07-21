@@ -42,6 +42,7 @@ end
 
 service "stop-oozie-for-war-setup" do
   action :stop
+  supports :status => true, :restart => true, :reload => false
   service_name "oozie"
   supports :status => true, :restart => true, :reload => false
   only_if {not File.exists?("#{OOZIE_SERVER_PATH}/webapps/oozie.war") or
@@ -70,7 +71,7 @@ bash "oozie_update_shared_libs" do
   not_if { require 'time'
            hdfs_mtime=`hdfs dfs -stat #{share_dir_url}`.strip
            Time.parse("#{hdfs_mtime} UTC") >
-           File.atime("#{OOZIE_LIB_PATH}/oozie-sharelib.tar.gz") }
+           File.mtime("#{OOZIE_LIB_PATH}/oozie-sharelib.tar.gz") }
 end
 
 file "#{OOZIE_LIB_PATH}/oozie.sql" do

@@ -1,4 +1,4 @@
-export JAVA_HOME=/usr/lib/jvm/java-1.7.0-openjdk-amd64
+export JAVA_HOME=<%= node["bcpc"]["hadoop"]["java"] %>
 export MAPREDUCE_LIBS=/usr/lib/hadoop-mapreduce/*
 export HADOOP_CLASSPATH=$HADOOP_CLASSPATH:${MAPREDUCE_LIBS}
 

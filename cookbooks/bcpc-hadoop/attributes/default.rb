@@ -23,6 +23,8 @@ default["bcpc"]["hadoop"]["hbase_master"]["jmx"]["port"] = 10101
 default["bcpc"]["hadoop"]["hbase_rs"]["jmx"]["port"] = 10102
 default["bcpc"]["hadoop"]["kafka"]["jmx"]["port"] = 9995
 default["bcpc"]["hadoop"]["zookeeper"]["jmx"]["port"] = 10113
+default["bcpc"]["hadoop"]["zookeeper"]["maxClientCnxns"] = 500
+default["bcpc"]["hadoop"]["java"] = "/usr/lib/jvm/java-1.7.0-openjdk-amd64"
 
 default["bcpc"]["keepalived"]["config_template"] = "keepalived.conf_hadoop"
 

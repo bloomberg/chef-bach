@@ -88,6 +88,12 @@ function install_stub {
     sudo knife node show $fqdn $KNIFE_ADMIN 2>/dev/null >/dev/null ||  install_machines "role[Basic],recipe[bcpc::default],recipe[bcpc::networking]${BANG}${ip}${BANG}${fqdn}" &
   done
   wait
+  # verify all nodes created knife node objects -- and thus installed
+  local installed_hosts=$(sudo knife node list $KNIFE_ADMIN)
+  for h in $*; do
+    local fqdn="${BASH_REMATCH[3]}"
+    egrep "(^| )$fqdn( |$)" <<< $installed_hosts || ( printf "Failed to create a node object for $fqdn\n" >&2; exit 1)
+  done
 }
 
 ########################################################################
