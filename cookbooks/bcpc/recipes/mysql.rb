@@ -39,7 +39,8 @@ end
 
 bash "initial-mysql-config" do
   code <<-EOH
-        mysql -u root -e "GRANT USAGE ON *.* to '#{get_config('mysql-galera-user')}'@'%' IDENTIFIED BY '#{get_config('mysql-galera-password')}';
+        mysql -u root -e "DROP USER ''@'localhost';
+                          GRANT USAGE ON *.* to '#{get_config('mysql-galera-user')}'@'%' IDENTIFIED BY '#{get_config('mysql-galera-password')}';
                           GRANT ALL PRIVILEGES on *.* TO '#{get_config('mysql-galera-user')}'@'%' IDENTIFIED BY '#{get_config('mysql-galera-password')}';
                           GRANT PROCESS ON *.* to '#{get_config('mysql-check-user')}'@'localhost' IDENTIFIED BY '#{get_config('mysql-check-password')}';
                           UPDATE mysql.user SET password=PASSWORD('#{get_config('mysql-root-password')}') WHERE user='root'; FLUSH PRIVILEGES;
