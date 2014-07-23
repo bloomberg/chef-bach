@@ -1,3 +1,4 @@
+name             "bcpc-hadoop"
 maintainer       "Bloomberg Finance L.P."
 maintainer_email "rrichardson6@bloomberg.net"
 license          "Apache License 2.0"

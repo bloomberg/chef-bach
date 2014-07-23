@@ -1,3 +1,4 @@
+name             "bcpc"
 maintainer       "Bloomberg Finance L.P."
 maintainer_email "pchandra7@bloomberg.net"
 license          "Apache License 2.0"
