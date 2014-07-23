@@ -36,7 +36,7 @@
 
   <property>
     <name>dfs.datanode.data.dir</name>
-    <value><%=@mounts.map{ |d| "/disk/#{d}/dfs/dn" }.join(",")%></value>
+    <value><%=@mounts.map{ |d| "file:///disk/#{d}/dfs/dn" }.join(",")%></value>
   </property>
 
   <property>
