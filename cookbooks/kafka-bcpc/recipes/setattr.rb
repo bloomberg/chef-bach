@@ -14,4 +14,5 @@ node.override[:kafka][:base_url] = get_binary_server_url + "kafka"
 node.override[:kafka][:host_name] = float_host(node[:fqdn])
 node.override[:kafka][:advertised_host_name] = float_host(node[:fqdn])
 node.override[:kafka][:advertised_port] = 9092
-
+node.override[:kafka][:jmx_port] = node[:bcpc][:hadoop][:kafka][:jmx][:port]
+node.override[:zookeeper][:jmx_port] = node[:bcpc][:hadoop][:zookeeper][:jmx][:port]
