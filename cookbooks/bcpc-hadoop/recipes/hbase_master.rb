@@ -8,6 +8,10 @@ hbase-thrift
   end
 end
 
+service "hbase-thrift" do
+  action :disable
+end 
+
 bash "create-hbase-dir" do
   code "hadoop fs -mkdir -p /hbase; hadoop fs -chown hbase:hadoop /hbase"
   user "hdfs"
