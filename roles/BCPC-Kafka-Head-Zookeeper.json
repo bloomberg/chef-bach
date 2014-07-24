@@ -10,9 +10,10 @@
     "recipe[bcpc-hadoop::disks]",
     "recipe[kafka-bcpc::default]", 
     "recipe[kafka-bcpc::setattr]",
-    "recipe[kafka-bcpc::zookeeper]", 
-    "recipe[java::oracle]", 
-    "recipe[kafka::zookeeper]"
+    "recipe[java::oracle]",
+    "recipe[bcpc-hadoop::hdp_repo]",
+    "recipe[bcpc-hadoop::zookeeper_config]", 
+    "recipe[bcpc-hadoop::zookeeper_server]"
   ],
   "description": "Zookeeper Role for Kafka Machines",
   "chef_type": "role",
@@ -23,11 +24,7 @@
       "checksum": "",
       "md5_checksum": "",
       "log_dir": "/disk/0"
-    }, 
-    "zookeeper": {
-      "data_dir": "/disk/1",
-      "max_client_connections": 50
-    }  
+    }
   }
 }
 

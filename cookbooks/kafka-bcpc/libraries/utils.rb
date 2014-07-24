@@ -17,17 +17,16 @@
 # limitations under the License.
 #
 
-# The method GET_ZK_NODES searches for Zookeeper nodes at all levels (Run List, Roles, Recipes).
+# The method GET_ZK_NODES searches for Zookeeper nodes at two levels (Run List and Roles).
 # During a chef-client run a run list is updated before the chef-client run and is available for 
 # searching nodes. Roles and recipes are updated after the chef-client run completes and commits 
 # data back to the chef-server
 
 def get_zk_nodes
-  rl_results = search(:node, "role:*Zookeeper* AND chef_environment:#{node.chef_environment}")
-  rl_results.map!{|x| x['hostname'] == node[:hostname] ? node : x}
-  ro_results = search(:node, "roles:*Zookeeper* AND chef_environment:#{node.chef_environment}")
-  ro_results.map!{|x| x['hostname'] == node[:hostname] ? node : x}
-  re_results = get_nodes_for("zookeeper", "kafka")
-  results = (rl_results.concat ro_results).concat re_results
-  return results.uniq{|x| x.bcpc.management.ip}.sort
+  rl_results = search(:node, "role:BCPC-Kafka-Head-Zookeeper AND chef_environment:#{node.chef_environment}")
+  rl_results.map!{|x| x[:hostname] == node[:hostname] ? node : x}
+  ro_results = search(:node, "roles:BCPC-Kafka-Head-Zookeeper AND chef_environment:#{node.chef_environment}")
+  ro_results.map!{|x| x[:hostname] == node[:hostname] ? node : x}
+  results = rl_results.concat ro_results
+  return results.uniq{|x| float_host(x[:hostname])}.sort
 end
