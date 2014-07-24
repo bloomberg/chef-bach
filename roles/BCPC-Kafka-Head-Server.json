@@ -34,11 +34,7 @@
       "checksum": "",
       "md5_checksum": "",
       "log_dir": "/disk/0"
-    }, 
-    "zookeeper": {
-      "data_dir": "/disk/1",
-      "max_client_connections": 50
-    }  
+    }
   }
 }
 
