@@ -23,51 +23,30 @@ sysctl_param 'vm.swappiness' do
   value 0
 end
 
-case node["platform_family"]
-  when "debian"
-    apt_repository "hortonworks" do
-      uri node['bcpc']['repos']['hortonworks']
-      distribution node[:bcpc][:hadoop][:distribution][:version]
-      components ["main"]
-      key node[:bcpc][:hadoop][:distribution][:key]
-    end
-    apt_repository "hdp-utils" do
-      uri node['bcpc']['repos']['hdp_utils']
-      distribution "HDP-UTILS"
-      components ["main"]
-      key node[:bcpc][:hadoop][:distribution][:key]
-    end
-
-   %w{hadoop
-      hbase
-      hive
-      oozie
-      pig
-      zookeeper
-      webhcat
-      hcat
-      hadoop-httpfs
-      hive-hcatalog
-      hue}.each do |w|
-    directory "/etc/#{w}/conf.#{node.chef_environment}" do
-      owner "root"
-      group "root"
-      mode 00755
-      action :create
-      recursive true
-    end
-
-    bash "update-#{w}-conf-alternatives" do
-      code %Q{
-       update-alternatives --install /etc/#{w}/conf #{w}-conf /etc/#{w}/conf.#{node.chef_environment} 50
-       update-alternatives --set #{w}-conf /etc/#{w}/conf.#{node.chef_environment}
-      }
-    end
+%w{hadoop
+  hbase
+  hive
+  oozie
+  pig
+  webhcat
+  hcat
+  hadoop-httpfs
+  hive-hcatalog
+  hue}.each do |w|
+  directory "/etc/#{w}/conf.#{node.chef_environment}" do
+    owner "root"
+    group "root"
+    mode 00755
+    action :create
+    recursive true
   end
 
-  when "rhel"
-    ""
-    # do things on RHEL platforms (redhat, centos, scientific, etc)
+  bash "update-#{w}-conf-alternatives" do
+    code %Q{
+     update-alternatives --install /etc/#{w}/conf #{w}-conf /etc/#{w}/conf.#{node.chef_environment} 50
+     update-alternatives --set #{w}-conf /etc/#{w}/conf.#{node.chef_environment}
+    }
+  end
 end
 
 make_config('mysql-hive-password', secure_password)
@@ -108,7 +87,7 @@ hadoop_conf_files = %w{capacity-scheduler.xml
 node[:bcpc][:hadoop][:hdfs][:HA] == true and hadoop_conf_files.insert(-1,"hdfs-site_HA.xml")
 
 nn_hosts = get_namenodes()
-zk_hosts = get_nodes_for("zookeeper_server")
+node.default[:bcpc][:zookeeper][:servers] = get_nodes_for("zookeeper_server")
 jn_hosts = get_nodes_for("journalnode")
 rm_hosts = get_nodes_for("resource_manager")
 hs_hosts = get_nodes_for("historyserver")
@@ -121,7 +100,7 @@ hadoop_conf_files.each do |t|
      source "hdp_#{t}.erb"
      mode 0644
      variables(:nn_hosts => nn_hosts,
-               :zk_hosts => zk_hosts,
+               :zk_hosts => node[:bcpc][:zookeeper][:servers],
                :jn_hosts => jn_hosts,
                :rm_hosts => rm_hosts,
                :dn_hosts => dn_hosts,
@@ -136,29 +115,12 @@ end
    source "hdp_#{t}.erb"
    mode 0644
    variables(:nn_hosts => nn_hosts,
-             :zk_hosts => zk_hosts,
+             :zk_hosts => node[:bcpc][:zookeeper][:servers],
              :jn_hosts => jn_hosts,
              :mounts => node[:bcpc][:hadoop][:mounts],
              :nn_jmx_port => node[:bcpc][:hadoop][:namenode][:jmx][:port],
              :dn_jmx_port => node[:bcpc][:hadoop][:datanode][:jmx][:port]
    )
- end
-end
-
-#
-# Set up zookeeper configs
-#
-%w{zoo.cfg
-  log4j.properties
-  configuration.xsl
- }.each do |t|
- template "/etc/zookeeper/conf/#{t}" do
-   source "zk_#{t}.erb"
-   mode 0644
-   variables(:nn_hosts => nn_hosts,
-             :zk_hosts => zk_hosts,
-             :jn_hosts => jn_hosts,
-             :mounts => node[:bcpc][:hadoop][:mounts])
  end
 end
 
@@ -175,7 +137,7 @@ end
      source "hb_#{t}.erb"
      mode 0644
      variables(:nn_hosts => nn_hosts,
-               :zk_hosts => zk_hosts,
+               :zk_hosts => node[:bcpc][:zookeeper][:servers],
                :jn_hosts => jn_hosts,
                :rs_hosts => get_nodes_for("region_server"),
                :master_hosts => hb_hosts,
@@ -184,7 +146,6 @@ end
      )
   end
 end
-
 
 #
 # Set up hive configs
@@ -197,7 +158,7 @@ end
      source "hv_#{t}.erb"
      mode 0644
      variables(:mysql_hosts => get_mysql_nodes.map{ |m| m.hostname },
-               :zk_hosts => zk_hosts,
+               :zk_hosts => node[:bcpc][:zookeeper][:servers],
                :hive_hosts => hive_hosts)
   end
 end
@@ -216,7 +177,7 @@ end
     source "ooz_#{t}.erb"
     mode 0644
     variables(:mysql_hosts => get_mysql_nodes.map{ |m| m.hostname },
-              :zk_hosts => zk_hosts,
+              :zk_hosts => node[:bcpc][:zookeeper][:servers],
               :hive_hosts => hive_hosts)
   end
 end
@@ -261,7 +222,7 @@ if false
      source "hue_#{t}.erb"
      mode 0644
      variables(
-               :zk_hosts => zk_hosts,
+               :zk_hosts => node[:bcpc][:zookeeper][:servers],
                :rm_hosts  => rm_hosts,
                :hive_hosts  => hive_hosts,
                :oozie_hosts  => get_nodes_for("oozie"),

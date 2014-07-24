@@ -1,15 +1,14 @@
 
 include_recipe 'dpkg_autostart'
 
-%w{zookeeper-server}.each do |pkg|
-  dpkg_autostart pkg do
-    allow false
-  end
-  package  pkg do
-    action :upgrade
-    notifies :create, "template[/tmp/zkServer.sh]", :immediately
-    notifies :create, "ruby_block[Compare_zookeeper_server_start_shell_script]", :immediately
-  end
+dpkg_autostart "zookeeper-server" do
+  allow false
+end
+
+package  "zookeeper-server" do
+  action :upgrade
+  notifies :create, "template[/tmp/zkServer.sh]", :immediately
+  notifies :create, "ruby_block[Compare_zookeeper_server_start_shell_script]", :immediately
 end
 
 template "/tmp/zkServer.sh" do
@@ -34,17 +33,17 @@ template "/etc/init.d/zookeeper-server" do
   mode 0655
 end
 
-directory "/var/lib/zookeeper" do
+directory node[:bcpc][:zookeeper][:data_dir] do
   recursive true
-  owner "zookeeper"
-  group "zookeeper"
+  owner node[:bcpc][:zookeeper][:owner]
+  group node[:bcpc][:zookeeper][:group]
   mode 0755
 end
 
 template "/etc/default/zookeeper-server" do
   source "hdp_zookeeper-server.default.erb"
   mode 0644
-  variables(:zk_jmx_port => node[:bcpc][:hadoop][:zookeeper][:jmx][:port])
+  variables(:zk_jmx_port => node[:bcpc][:zookeeper][:jmx_port])
 end
 
 template "/usr/lib/zookeeper/bin/zkServer.sh" do
@@ -53,13 +52,13 @@ end
 
 bash "init-zookeeper" do
   code "service zookeeper-server init --myid=#{node[:bcpc][:node_number]}"
-  creates "/var/lib/zookeeper/myid"
+  creates "#{node[:bcpc][:zookeeper][:data_dir]}/myid"
 end
 
-file "/var/lib/zookeeper/myid" do
+file "#{node[:bcpc][:zookeeper][:data_dir]}/myid" do
   content node[:bcpc][:node_number]
-  owner "zookeeper"
-  group "zookeeper"
+  owner node[:bcpc][:zookeeper][:owner]
+  group node[:bcpc][:zookeeper][:group]
   mode 0644
 end
 
@@ -67,4 +66,3 @@ service "zookeeper-server" do
   action [:enable, :start]
   subscribes :restart, "template[/etc/zookeeper/conf/zoo.cfg]", :delayed
 end
-
