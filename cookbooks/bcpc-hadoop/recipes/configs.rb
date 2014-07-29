@@ -142,7 +142,8 @@ end
                :rs_hosts => get_nodes_for("region_server"),
                :master_hosts => hb_hosts,
                :mounts => node[:bcpc][:hadoop][:mounts],
-               :hbm_jmx_port => node[:bcpc][:hadoop][:hbase_master][:jmx][:port]
+               :hbm_jmx_port => node[:bcpc][:hadoop][:hbase_master][:jmx][:port],
+               :hbrs_jmx_port => node[:bcpc][:hadoop][:hbase_rs][:jmx][:port]
      )
   end
 end
