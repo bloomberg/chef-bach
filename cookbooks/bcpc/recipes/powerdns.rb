@@ -17,8 +17,6 @@
 # limitations under the License.
 #
 
-include_recipe "bcpc::nova-head"
-
 make_config('mysql-pdns-user', "pdns")
 make_config('mysql-pdns-password', secure_password)
 
@@ -43,7 +41,19 @@ ruby_block "powerdns-database-creation" do
             %x[ mysql -uroot -p#{get_config('mysql-root-password')} -e "CREATE DATABASE #{node[:bcpc][:pdns_dbname]} CHARACTER SET utf8 COLLATE utf8_general_ci;"
                 mysql -uroot -p#{get_config('mysql-root-password')} -e "GRANT ALL ON #{node[:bcpc][:pdns_dbname]}.* TO '#{get_config('mysql-pdns-user')}'@'%' IDENTIFIED BY '#{get_config('mysql-pdns-password')}';"
                 mysql -uroot -p#{get_config('mysql-root-password')} -e "GRANT ALL ON #{node[:bcpc][:pdns_dbname]}.* TO '#{get_config('mysql-pdns-user')}'@'localhost' IDENTIFIED BY '#{get_config('mysql-pdns-password')}';"
-                mysql -uroot -p#{get_config('mysql-root-password')} -e "GRANT ALL ON #{node[:bcpc][:nova_dbname]}.* TO '#{get_config('mysql-pdns-user')}'@'%' IDENTIFIED BY '#{get_config('mysql-pdns-password')}';"
+                mysql -uroot -p#{get_config('mysql-root-password')} -e "FLUSH PRIVILEGES;"
+            ]
+            self.notifies :restart, "service[pdns]", :delayed
+            self.resolve_notification_references
+        end
+    end
+end
+
+ruby_block "powerdns-database-creation-nova-grant" do
+    block do
+        system "mysql -uroot -p#{get_config('mysql-root-password')} -e 'SHOW GRANTS for \"#{get_config('mysql-pdns-user')}\";' #{node[:bcpc][:nova_dbname]}'"
+        if not $?.success? then
+            %x[ mysql -uroot -p#{get_config('mysql-root-password')} -e "GRANT ALL ON #{node[:bcpc][:nova_dbname]}.* TO '#{get_config('mysql-pdns-user')}'@'%' IDENTIFIED BY '#{get_config('mysql-pdns-password')}';"
                 mysql -uroot -p#{get_config('mysql-root-password')} -e "GRANT ALL ON #{node[:bcpc][:nova_dbname]}.* TO '#{get_config('mysql-pdns-user')}'@'localhost' IDENTIFIED BY '#{get_config('mysql-pdns-password')}';"
                 mysql -uroot -p#{get_config('mysql-root-password')} -e "FLUSH PRIVILEGES;"
             ]
@@ -51,6 +61,31 @@ ruby_block "powerdns-database-creation" do
             self.resolve_notification_references
         end
     end
+    only_if { get_nodes_for("openstack").length >= 1 }
+end
+
+ruby_block "powerdns-function-dns-name" do
+    block do
+        system "mysql -uroot -p#{get_config('mysql-root-password')} -e 'SELECT name FROM mysql.proc WHERE name = \"dns_name\" AND db = \"#{node[:bcpc][:pdns_dbname]}\";' \"#{node[:bcpc][:pdns_dbname]}\" | grep -q \"dns_name\""
+        if not $?.success? then
+            %x[ mysql -uroot -p#{get_config('mysql-root-password')} #{node[:bcpc][:pdns_dbname]} <<-EOH
+                delimiter //
+                CREATE FUNCTION dns_name (tenant VARCHAR(64) CHARACTER SET latin1) RETURNS VARCHAR(64)
+                COMMENT 'Returns the project name in a DNS acceptable format. Roughly RFC 1035.'
+                DETERMINISTIC
+                BEGIN
+                  SELECT LOWER(tenant) INTO tenant;
+                  SELECT REPLACE(tenant, '&', 'and') INTO tenant;
+                  SELECT REPLACE(tenant, '_', '-') INTO tenant;
+                  SELECT REPLACE(tenant, ' ', '-') INTO tenant;
+                  RETURN tenant;
+                END//
+            ]
+            self.notifies :restart, "service[pdns]", :delayed
+            self.resolve_notification_references
+        end
+    end
+    only_if { get_nodes_for("openstack").length >= 1 }
 end
 
 ruby_block "powerdns-table-domains" do
@@ -117,29 +152,6 @@ ruby_block "powerdns-table-records" do
     end
 end
 
-ruby_block "powerdns-function-dns-name" do
-    block do
-        system "mysql -uroot -p#{get_config('mysql-root-password')} -e 'SELECT name FROM mysql.proc WHERE name = \"dns_name\" AND db = \"#{node[:bcpc][:pdns_dbname]}\";' \"#{node[:bcpc][:pdns_dbname]}\" | grep -q \"dns_name\""
-        if not $?.success? then
-            %x[ mysql -uroot -p#{get_config('mysql-root-password')} #{node[:bcpc][:pdns_dbname]} <<-EOH
-                delimiter //
-                CREATE FUNCTION dns_name (tenant VARCHAR(64) CHARACTER SET latin1) RETURNS VARCHAR(64)
-                COMMENT 'Returns the project name in a DNS acceptable format. Roughly RFC 1035.'
-                DETERMINISTIC
-                BEGIN
-                  SELECT LOWER(tenant) INTO tenant;
-                  SELECT REPLACE(tenant, '&', 'and') INTO tenant;
-                  SELECT REPLACE(tenant, '_', '-') INTO tenant;
-                  SELECT REPLACE(tenant, ' ', '-') INTO tenant;
-                  RETURN tenant;
-                END//
-            ]
-            self.notifies :restart, "service[pdns]", :delayed
-            self.resolve_notification_references
-        end
-    end
-end
-
 ruby_block "powerdns-function-ip4_to_ptr_name" do
     block do
         system "mysql -uroot -p#{get_config('mysql-root-password')} -e 'SELECT name FROM mysql.proc WHERE name = \"ip4_to_ptr_name\" AND db = \"#{node[:bcpc][:pdns_dbname]}\";' \"#{node[:bcpc][:pdns_dbname]}\" | grep -q \"ip4_to_ptr_name\""
@@ -164,23 +176,29 @@ ruby_block "powerdns-function-ip4_to_ptr_name" do
     end
 end
 
+
+openstack_domain_view=<<-OS_DOMAIN_VIEW
+    UNION SELECT
+        # rank each project to create an ID and add the maximum ID from the static table
+        (SELECT COUNT(*) FROM keystone.project WHERE y.id <= id) + (SELECT MAX(id) FROM domains_static) AS id,
+        CONCAT(CONCAT(dns_name(y.name), '.'),'#{node[:bcpc][:domain_name]}') AS name,
+        NULL AS master,
+        NULL AS last_check,
+        'NATIVE' AS type,
+        NULL AS notified_serial,
+        NULL AS account
+        FROM keystone.project y
+OS_DOMAIN_VIEW
 ruby_block "powerdns-table-domains-view" do
     block do
+        if get_nodes_for("openstack").length < 1 then
+            openstack_domain_view=""
+        end 
         system "mysql -uroot -p#{get_config('mysql-root-password')} -e 'SELECT TABLE_NAME FROM INFORMATION_SCHEMA.VIEWS WHERE TABLE_SCHEMA = \"#{node[:bcpc][:pdns_dbname]}\" AND TABLE_NAME=\"domains\"' | grep -q \"domains\""
         if not $?.success? then
             %x[ mysql -uroot -p#{get_config('mysql-root-password')} #{node[:bcpc][:pdns_dbname]} <<-EOH
                 CREATE OR REPLACE VIEW domains AS
-                    SELECT id,name,master,last_check,type,notified_serial,account FROM domains_static UNION
-                    SELECT
-                        # rank each project to create an ID and add the maximum ID from the static table
-                        (SELECT COUNT(*) FROM keystone.project WHERE y.id <= id) + (SELECT MAX(id) FROM domains_static) AS id,
-                        CONCAT(CONCAT(dns_name(y.name), '.'),'#{node[:bcpc][:domain_name]}') AS name,
-                        NULL AS master,
-                        NULL AS last_check,
-                        'NATIVE' AS type,
-                        NULL AS notified_serial,
-                        NULL AS account
-                        FROM keystone.project y;
+                    SELECT id,name,master,last_check,type,notified_serial,account FROM domains_static #{openstack_domain_view};
             ]
             self.notifies :restart, "service[pdns]", :delayed
             self.resolve_notification_references
@@ -188,33 +206,40 @@ ruby_block "powerdns-table-domains-view" do
     end
 end
 
+
+openstack_records_view=<<-OS_RECORDS_VIEW
+    UNION  
+        # assume we only have 500 or less static records
+        SELECT domains.id+500 AS id, domains.id AS domain_id, domains.name AS name, 'NS' AS type, '#{node[:bcpc][:management][:vip]}' AS content, 300 AS ttl, NULL AS prio, NULL AS change_date FROM domains WHERE id > (SELECT MAX(id) FROM domains_static) UNION
+        # assume we only have 250 or less static domains
+        SELECT domains.id+750 AS id, domains.id AS domain_id, domains.name AS name, 'SOA' AS type, 'localhost root@#{node[:bcpc][:domain_name]} 1' AS content, 300 AS ttl, NULL AS prio, NULL AS change_date FROM domains WHERE id > (SELECT MAX(id) FROM domains_static) UNION
+        # again, assume we only have 250 or less static domains
+        SELECT nova.instances.id+10000 AS id,
+            # query the domain ID from the domains view
+            (SELECT id FROM domains WHERE name=CONCAT(CONCAT((SELECT dns_name(name) FROM keystone.project WHERE id = nova.instances.project_id),
+                                                      '.'),'#{node[:bcpc][:domain_name]}')) AS domain_id,
+            # create the FQDN of the record
+            CONCAT(nova.instances.hostname,
+              CONCAT('.',
+                CONCAT((SELECT dns_name(name) FROM keystone.project WHERE id = nova.instances.project_id),
+                  CONCAT('.','#{node[:bcpc][:domain_name]}')))) AS name,
+            'A' AS type,
+            nova.floating_ips.address AS content,
+            300 AS ttl,
+            NULL AS type,
+            NULL AS change_date FROM nova.instances, nova.fixed_ips, nova.floating_ips
+            WHERE nova.instances.uuid = nova.fixed_ips.instance_uuid AND nova.floating_ips.fixed_ip_id = nova.fixed_ips.id
+OS_RECORDS_VIEW
 ruby_block "powerdns-table-records_forward-view" do
     block do
+        if get_nodes_for("openstack").length < 1 then
+            openstack_records_view=""
+        end 
         system "mysql -uroot -p#{get_config('mysql-root-password')} -e 'SELECT TABLE_NAME FROM INFORMATION_SCHEMA.VIEWS WHERE TABLE_SCHEMA = \"#{node[:bcpc][:pdns_dbname]}\" AND TABLE_NAME=\"records_forward\"' | grep -q \"records_forward\""
         if not $?.success? then
             %x[ mysql -uroot -p#{get_config('mysql-root-password')} #{node[:bcpc][:pdns_dbname]} <<-EOH
                 CREATE OR REPLACE VIEW records_forward AS
-                    SELECT id,domain_id,name,type,content,ttl,prio,change_date FROM records_static UNION  
-                    # assume we only have 500 or less static records
-                    SELECT domains.id+500 AS id, domains.id AS domain_id, domains.name AS name, 'NS' AS type, '#{node[:bcpc][:management][:vip]}' AS content, 300 AS ttl, NULL AS prio, NULL AS change_date FROM domains WHERE id > (SELECT MAX(id) FROM domains_static) UNION
-                    # assume we only have 250 or less static domains
-                    SELECT domains.id+750 AS id, domains.id AS domain_id, domains.name AS name, 'SOA' AS type, 'localhost root@#{node[:bcpc][:domain_name]} 1' AS content, 300 AS ttl, NULL AS prio, NULL AS change_date FROM domains WHERE id > (SELECT MAX(id) FROM domains_static) UNION
-                    # again, assume we only have 250 or less static domains
-                    SELECT nova.instances.id+10000 AS id,
-                        # query the domain ID from the domains view
-                        (SELECT id FROM domains WHERE name=CONCAT(CONCAT((SELECT dns_name(name) FROM keystone.project WHERE id = nova.instances.project_id),
-                                                                  '.'),'#{node[:bcpc][:domain_name]}')) AS domain_id,
-                        # create the FQDN of the record
-                        CONCAT(nova.instances.hostname,
-                          CONCAT('.',
-                            CONCAT((SELECT dns_name(name) FROM keystone.project WHERE id = nova.instances.project_id),
-                              CONCAT('.','#{node[:bcpc][:domain_name]}')))) AS name,
-                        'A' AS type,
-                        nova.floating_ips.address AS content,
-                        300 AS ttl,
-                        NULL AS type,
-                        NULL AS change_date FROM nova.instances, nova.fixed_ips, nova.floating_ips
-                        WHERE nova.instances.uuid = nova.fixed_ips.instance_uuid AND nova.floating_ips.fixed_ip_id = nova.fixed_ips.id;
+                    SELECT id,domain_id,name,type,content,ttl,prio,change_date FROM records_static #{openstack_records_view};
             ]
             self.notifies :restart, "service[pdns]", :delayed
             self.resolve_notification_references
@@ -273,10 +298,24 @@ end
 get_all_nodes.each do |server|
     ruby_block "create-dns-entry-#{server['hostname']}" do
         block do
+            # check if we have a float address
+            float_host_A_record=""
+            if server['bcpc']['management']['ip'] != server['bcpc']['floating']['ip'] then
+                float_host_A_record="INSERT INTO records_static (domain_id, name, content, type, ttl, prio) VALUES ((SELECT id FROM domains WHERE name='#{node[:bcpc][:domain_name]}'),'#{float_host(server['hostname'])}.#{node[:bcpc][:domain_name]}','#{server['bcpc']['floating']['ip']}','A',300,NULL);"
+            end
+
+            # check if we have a storage address
+            storage_host_A_record=""
+            if server['bcpc']['management']['ip'] != server['bcpc']['storage']['ip'] then
+                storage_host_A_record="INSERT INTO records_static (domain_id, name, content, type, ttl, prio) VALUES ((SELECT id FROM domains WHERE name='#{node[:bcpc][:domain_name]}'),'#{storage_host(server['hostname'])}.#{node[:bcpc][:domain_name]}','#{server['bcpc']['storage']['ip']}','A',300,NULL);"
+            end
+
             system "mysql -uroot -p#{get_config('mysql-root-password')} #{node[:bcpc][:pdns_dbname]} -e 'SELECT name FROM records_static' | grep -q \"#{server['hostname']}.#{node[:bcpc][:domain_name]}\""
             if not $?.success? then
                 %x[ mysql -uroot -p#{get_config('mysql-root-password')} #{node[:bcpc][:pdns_dbname]} <<-EOH
                         INSERT INTO records_static (domain_id, name, content, type, ttl, prio) VALUES ((SELECT id FROM domains WHERE name='#{node[:bcpc][:domain_name]}'),'#{server['hostname']}.#{node[:bcpc][:domain_name]}','#{server['bcpc']['management']['ip']}','A',300,NULL);
+                        #{storage_host_A_record}
+                        #{float_host_A_record}
                 ]
             end
         end
@@ -286,11 +325,13 @@ end
 %w{openstack kibana graphite zabbix}.each do |static|
     ruby_block "create-management-dns-entry-#{static}" do
         block do
-            system "mysql -uroot -p#{get_config('mysql-root-password')} #{node[:bcpc][:pdns_dbname]} -e 'SELECT name FROM records_static' | grep -q \"#{static}.#{node[:bcpc][:domain_name]}\""
-            if not $?.success? then
-                %x[ mysql -uroot -p#{get_config('mysql-root-password')} #{node[:bcpc][:pdns_dbname]} <<-EOH
-                        INSERT INTO records_static (domain_id, name, content, type, ttl, prio) VALUES ((SELECT id FROM domains WHERE name='#{node[:bcpc][:domain_name]}'),'#{static}.#{node[:bcpc][:domain_name]}','#{node[:bcpc][:management][:vip]}','A',300,NULL);
-                ]
+            if get_nodes_for(static).length >= 1 then
+                system "mysql -uroot -p#{get_config('mysql-root-password')} #{node[:bcpc][:pdns_dbname]} -e 'SELECT name FROM records_static' | grep -q \"#{static}.#{node[:bcpc][:domain_name]}\""
+                if not $?.success? then
+                    %x[ mysql -uroot -p#{get_config('mysql-root-password')} #{node[:bcpc][:pdns_dbname]} <<-EOH
+                            INSERT INTO records_static (domain_id, name, content, type, ttl, prio) VALUES ((SELECT id FROM domains WHERE name='#{node[:bcpc][:domain_name]}'),'#{static}.#{node[:bcpc][:domain_name]}','#{node[:bcpc][:management][:vip]}','A',300,NULL);
+                    ]
+                end
             end
         end
     end
@@ -299,11 +340,13 @@ end
 %w{s3}.each do |static|
     ruby_block "create-floating-dns-entry-#{static}" do
         block do
-            system "mysql -uroot -p#{get_config('mysql-root-password')} #{node[:bcpc][:pdns_dbname]} -e 'SELECT name FROM records_static' | grep -q \"#{static}.#{node[:bcpc][:domain_name]}\""
-            if not $?.success? then
-                %x[ mysql -uroot -p#{get_config('mysql-root-password')} #{node[:bcpc][:pdns_dbname]} <<-EOH
-                        INSERT INTO records_static (domain_id, name, content, type, ttl, prio) VALUES ((SELECT id FROM domains WHERE name='#{node[:bcpc][:domain_name]}'),'#{static}.#{node[:bcpc][:domain_name]}','#{node[:bcpc][:floating][:vip]}','A',300,NULL);
-                ]
+            if get_nodes_for("ceph-rgw").length >= 1 then
+                system "mysql -uroot -p#{get_config('mysql-root-password')} #{node[:bcpc][:pdns_dbname]} -e 'SELECT name FROM records_static' | grep -q \"#{static}.#{node[:bcpc][:domain_name]}\""
+               if not $?.success? then
+                   %x[ mysql -uroot -p#{get_config('mysql-root-password')} #{node[:bcpc][:pdns_dbname]} <<-EOH
+                           INSERT INTO records_static (domain_id, name, content, type, ttl, prio) VALUES ((SELECT id FROM domains WHERE name='#{node[:bcpc][:domain_name]}'),'#{static}.#{node[:bcpc][:domain_name]}','#{node[:bcpc][:floating][:vip]}','A',300,NULL);
+                   ]
+               end
             end
         end
     end
