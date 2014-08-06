@@ -49,4 +49,48 @@ default["bcpc"]["revelytix"]["ssl_trust_password"] = ""
 default["bcpc"]["revelytix"]["loom_dist_cache"] = "loom-dist-cache"
 default["bcpc"]["revelytix"]["hive_classloader_blacklist_jars"] = "slf4j,log4j,commons-logging"
 default["bcpc"]["revelytix"]["port"] = 8080
-
+default["bcpc"]["hadoop"]["zabbix"]["history_days"] = 1
+default["bcpc"]["hadoop"]["zabbix"]["trend_days"] = 15
+default["bcpc"]["hadoop"]["zabbix"]["cron_check_time"] = 240
+default["bcpc"]["hadoop"]["graphite"]["queries"] = {
+  'hbase_master' => [
+    {
+      'type'  => "jmx",
+      'query' => "memory.NonHeapMemoryUsage_committed",
+      'key'   => "hbasenonheapmem",
+      'trigger_val' => "max(61,0)",
+      'trigger_cond' => "=0",
+      'trigger_name' => "HBaseMasterAvailability"
+    },
+    {
+      'type'  => "jmx",
+      'query' => "memory.HeapMemoryUsage_committed",
+      'key'   => "hbaseheapmem",
+      'history_days' => 2,
+      'trend_days' => 30
+    },
+    {
+      'type'  => "jmx",
+      'query' => "hbm_server.Master.numRegionServers",
+      'key'   => "numrsservers",
+      'trigger_val' => "max(61,0)",
+      'trigger_cond' => "=0",
+      'trigger_name' => "HBaseRSAvailability"
+    }
+  ],
+  'namenode' => [
+    {
+      'type'  => "jmx",
+      'query' => "memory.HeapMemoryUsage_committed",
+      'key'   => "nnheapmem",
+      'trigger_val' => "max(61,0)",
+      'trigger_cond' => "=0",
+      'trigger_name' => "NameNodeAvailability"
+    },
+    {
+      'type'  => "jmx",
+      'query' => "nn_fs_name_system_state.FSNamesystemState.NumStaleDataNodes",
+      'key'   => "numstaledn"
+    }
+  ]
+}

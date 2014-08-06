@@ -68,7 +68,7 @@
 			</div>
 			<div class="block">
 				<label>Zabbix</label>
-				<a href="https://<%="#{node[:bcpc][:management][:vip]}"%>:7777">https://<%="#{node[:bcpc][:management][:vip]}"%>:7777</a>
+				<a href="https://<%="#{node[:bcpc][:management][:vip]}"%>:<%="#{node[:bcpc][:zabbix][:web_port]}"%>">https://<%="#{node[:bcpc][:management][:vip]}"%>:<%="#{node[:bcpc][:zabbix][:web_port]}"%></a>
 				<a href="https://zabbix.<%="#{node[:bcpc][:domain_name]}"%>">https://zabbix.<%="#{node[:bcpc][:domain_name]}"%></a>
 			</div>
 

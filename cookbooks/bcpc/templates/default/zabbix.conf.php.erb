@@ -19,7 +19,7 @@ $DB['PASSWORD'] = '<%="#{get_config('mysql-zabbix-password')}"%>';
 $DB['SCHEMA'] = '';
 
 $ZBX_SERVER      = '<%="#{node[:bcpc][:management][:vip]}"%>';
-$ZBX_SERVER_PORT = '10051';
+$ZBX_SERVER_PORT = '<%="#{node[:bcpc][:zabbix][:server_port]}"%>';
 $ZBX_SERVER_NAME = '<%="#{node[:bcpc][:region_name]}"%>';
 
 $IMAGE_FORMAT_DEFAULT = IMAGE_FORMAT_PNG;

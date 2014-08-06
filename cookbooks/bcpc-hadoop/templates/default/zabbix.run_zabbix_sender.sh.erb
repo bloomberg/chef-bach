@@ -1,0 +1,5 @@
+#!/bin/bash
+if ip addr | grep <%= node[:bcpc][:management][:vip] %> > /dev/null
+then
+  python /usr/local/bin/query_graphite.py | /usr/local/bin/zabbix_sender -z <%= node[:bcpc][:management][:vip] %> -p <%= node[:bcpc][:zabbix][:server_port] %> -T -i - > /dev/null
+fi

@@ -91,6 +91,18 @@ if ! [[ -f gems/zookeeper.gem ]]; then
 fi
 FILES="zookeeper*.gem $FILES"
 
+# Generate Rubygem for zabbixapi
+if ! [[ -f gems/zabbixapi-2.2.0.gem ]]; then
+  git clone https://github.com/express42/zabbixapi.git
+  cd zabbixapi
+  gem build zabbixapi.gemspec
+  mv zabbix*.gem ../
+  cd ..
+  rm -rf zabbixapi
+  ln -s zabbix*.gem zabbixapi.gem || true
+fi
+FILES="zabbix*.gem $FILES"
+
 # Get the Rubygem for webhdfs
 if ! [[ -f gems/webhdfs.gem ]]; then
   gem fetch webhdfs -v 0.5.5
