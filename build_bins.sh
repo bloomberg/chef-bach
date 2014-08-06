@@ -76,7 +76,7 @@ FILES="jdk-7u51-linux-x64.tar.gz $FILES"
 
 
 # Grab plugins for fluentd
-for i in elasticsearch elasticsearch-api elasticsearch-transport patron fluent-plugin-elasticsearch fluent-plugin-tail-multiline fluent-plugin-tail-ex fluent-plugin-record-reformer fluent-plugin-rewrite; do
+for i in elasticsearch elasticsearch-api elasticsearch-transport patron fluent-plugin-elasticsearch fluent-plugin-tail-multiline fluent-plugin-tail-ex fluent-plugin-record-reformer fluent-plugin-rewrite wmi-lite; do
   if ! [[ -f gems/${i}.gem ]]; then
     gem fetch ${i}
     ln -s ${i}-*.gem ${i}.gem || true
