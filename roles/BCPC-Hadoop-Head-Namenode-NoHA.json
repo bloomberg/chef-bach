@@ -15,7 +15,8 @@
     "jmxtrans":  {
       "servers":  [
                  {
-                    "type": "namenode"
+                    "type": "namenode",
+                    "service": "hadoop-hdfs-namenode"
                  }
         ]
       }

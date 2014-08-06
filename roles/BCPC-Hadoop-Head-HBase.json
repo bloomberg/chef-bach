@@ -15,7 +15,8 @@
     "jmxtrans":  {
       "servers":  [
                  {
-                    "type": "hbase_master"
+                    "type": "hbase_master",
+                    "service": "hbase-master"
                  }
         ]
       }
