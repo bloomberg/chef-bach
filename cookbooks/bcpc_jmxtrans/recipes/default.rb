@@ -37,3 +37,27 @@ sw_download_url = get_binary_server_url
 node.default['jmxtrans']['url'] = "#{sw_download_url}"+"#{node['jmxtrans']['sw']}"
 
 include_recipe 'jmxtrans'
+
+graphite_hosts = get_nodes_for("graphite","bcpc").map{|x| x.bcpc.management.ip}
+
+jmx_services = Array.new
+
+graphite_hosts.each do |host|
+  if host == node['bcpc']['management']['ip']
+    jmx_services.push("carbon-relay")
+    jmx_services.push("carbon-cache")
+    break
+  end
+end
+
+node['jmxtrans']['servers'].each do |server|
+  jmx_services.push(server['service'])
+end
+
+jmx_services.each do |jmxservice| 
+  service "jmxtrans" do
+    supports :restart => true, :status => true, :reload => true
+    action   :nothing
+    subscribes :restart, "service[#{jmxservice}]", :delayed
+  end
+end

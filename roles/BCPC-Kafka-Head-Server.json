@@ -23,7 +23,8 @@
       "servers": [{
         "name": "",
         "port": "9999",
-        "type": "kafka"
+        "type": "kafka",
+        "service" : "kafka"
       }]
     }
   },
