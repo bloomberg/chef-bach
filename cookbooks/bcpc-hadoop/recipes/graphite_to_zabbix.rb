@@ -1,9 +1,14 @@
-template "/usr/local/bin/run_zabbix_sender.sh" do
+template "#{node['bcpc']['zabbix']['scripts_dir']}/run_zabbix_sender.sh" do
   source "zabbix.run_zabbix_sender.sh.erb"
   mode 0755
 end
 
-cookbook_file "/usr/local/bin/query_graphite.py" do
+template "#{node['bcpc']['zabbix']['scripts_dir']}/zbx_mail.sh" do
+  source "zabbix.zbx_mail.sh.erb"
+  mode 0755
+end
+
+cookbook_file "#{node['bcpc']['zabbix']['scripts_dir']}/query_graphite.py" do
   source "query_graphite.py"
   mode 0744
   owner "root"
@@ -60,7 +65,7 @@ ruby_block "zabbix_monitor" do
         #
         # Create zabbix items for each hosts which will accept data from zabbix sender processes
         # For details about the parameter values refer to Zabbix documentaton
-        # https://www.zabbix.com/documentation/1.8/api/item
+        # https://www.zabbix.com/documentation/2.2/manual/api/reference/item
         #
         if zbx.items.get_id(:name => "#{attr['key']}",:host => "#{host}" ).nil?
           Chef::Log.debug "Item #{attr['key']} not defined"
@@ -91,6 +96,13 @@ ruby_block "zabbix_monitor" do
             expr="{"+"#{host}"+":"+"#{attr['key']}"+"."+"#{attr['trigger_val']}"+"}"+"#{attr['trigger_cond']}"
             zbx.triggers.create(:description => "#{attr['trigger_name']}", :expression => expr, :comments => "Service down", :priority => 4, :status => 0)
             cron_check_cond << "{"+"#{host}"+":"+"#{attr['key']}"+".nodata(#{node["bcpc"]["hadoop"]["zabbix"]["cron_check_time"]})}=1"
+            #
+            # Create an action for each trigger which will inturn execute a shell script when the trigger status turns to PROBLEM state
+            #
+            zbx.query(method: 'action.create', params: {"name" => "#{attr['trigger_name']}_action","eventsource" =>  0,"evaltype" => 1,"status" =>  0,"esc_period" => 120, \
+'conditions' => [{"conditiontype" => 3,"operator" => 2,"value" => "#{attr['trigger_name']}"},{"conditiontype" => 5,"operator" => 0,"value" => 1},{"conditiontype" => 16,"operator" => 7}], \
+'operations' => [{"operationtype" => 1,"opcommand" => {"command" => "#{node['bcpc']['zabbix']['scripts_dir']}/zbx_mail.sh {TRIGGER.NAME} #{node.chef_environment}","type" => "0","execute_on" => "1"}, \
+"opcommand_hst" => [ "hostid" => 0]}]})
           else
             Chef::Log.debug "Trigger #{attr['trigger_name']} already defined"
           end

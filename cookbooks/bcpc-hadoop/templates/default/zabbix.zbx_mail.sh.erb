@@ -1,0 +1,4 @@
+#!/bin/bash
+trigger_name=$1
+cluster_name=$2
+echo "Please attend to issue with $trigger_name in $cluster_name" | logger -t "Zabbix-Trigger-Action"
