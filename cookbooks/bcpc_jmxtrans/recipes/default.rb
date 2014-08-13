@@ -37,11 +37,18 @@ sw_download_url = get_binary_server_url
 node.default['jmxtrans']['url'] = "#{sw_download_url}"+"#{node['jmxtrans']['sw']}"
 
 include_recipe 'jmxtrans'
-
+#
+# Get an array of hosts which are garphite heads
+#
 graphite_hosts = get_nodes_for("graphite","bcpc").map{|x| x.bcpc.management.ip}
-
+#
+# Array to store the list of services on which jxmtrans dependent on i.e. collects data from
+# If any of the services gets restarted jmxtrans process need to be restarted
+#
 jmx_services = Array.new
-
+#
+# If the current host is a graphite head add the carbon processes to the list of services array
+#
 graphite_hosts.each do |host|
   if host == node['bcpc']['management']['ip']
     jmx_services.push("carbon-relay")
@@ -49,11 +56,15 @@ graphite_hosts.each do |host|
     break
   end
 end
-
+#
+# Add services of processes on this node from which jmx data are collected by jmxtrans 
+#
 node['jmxtrans']['servers'].each do |server|
   jmx_services.push(server['service'])
 end
-
+#
+# Using the services array generate chef service resources to restart when the monitored services are restarted 
+#
 jmx_services.each do |jmxservice| 
   service "jmxtrans" do
     supports :restart => true, :status => true, :reload => true
