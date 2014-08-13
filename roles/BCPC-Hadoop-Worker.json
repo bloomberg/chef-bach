@@ -26,6 +26,10 @@
                  {
                     "type": "datanode",
                     "service": "hadoop-hdfs-datanode"
+                 },
+                 {
+                    "type": "hbase_rs",
+                    "service": "hbase-regionserver"
                  }
         ]
       }
