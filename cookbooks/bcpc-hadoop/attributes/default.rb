@@ -24,6 +24,19 @@ default["bcpc"]["hadoop"]["hbase_rs"]["jmx"]["port"] = 10102
 default["bcpc"]["hadoop"]["kafka"]["jmx"]["port"] = 9995
 default["bcpc"]["hadoop"]["java"] = "/usr/lib/jvm/java-1.7.0-openjdk-amd64"
 
+default[:bcpc][:hadoop][:nn_hosts] = []
+default[:bcpc][:hadoop][:jn_hosts] = []
+default[:bcpc][:hadoop][:rm_hosts] = []
+default[:bcpc][:hadoop][:hs_hosts] = []
+default[:bcpc][:hadoop][:dn_hosts] = []
+default[:bcpc][:hadoop][:hb_hosts] = []
+default[:bcpc][:hadoop][:hive_hosts] = []
+default[:bcpc][:hadoop][:oozie_hosts] = []
+default[:bcpc][:hadoop][:httpfs_hosts] = []
+default[:bcpc][:hadoop][:httpfs_hosts] = []
+default[:bcpc][:hadoop][:rs_hosts] = []
+default[:bcpc][:hadoop][:mysql_hosts] = []
+
 default["bcpc"]["keepalived"]["config_template"] = "keepalived.conf_hadoop"
 
 default["bcpc"]["revelytix"]["loom_username"] = "loom"

@@ -1,3 +1,5 @@
+include_recipe "bcpc-hadoop::hive_config"
+
 %w{hive-metastore libmysql-java}.each do |pkg|
   package pkg do
     action :upgrade
@@ -53,4 +55,3 @@ service "hive-metastore" do
   subscribes :restart, "template[/etc/hive/conf/hive-site.xml]", :delayed
   subscribes :restart, "template[/etc/hive/conf/hive-log4j.properties]", :delayed
 end
-

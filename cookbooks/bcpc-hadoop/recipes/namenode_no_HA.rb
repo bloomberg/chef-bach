@@ -1,6 +1,8 @@
 include_recipe 'dpkg_autostart'
 require "base64"
 
+include_recipe 'bcpc-hadoop::hadoop_config'
+
 %w{hadoop-hdfs-namenode}.each do |pkg|
   dpkg_autostart pkg do
     allow false
@@ -82,4 +84,3 @@ bash "create-hdfs-yarn-log" do
   user "hdfs"
   not_if "sudo -u hdfs hadoop fs -test -d /var/log/hadoop-yarn"
 end
-

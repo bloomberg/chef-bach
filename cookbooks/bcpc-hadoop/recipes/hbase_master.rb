@@ -1,3 +1,5 @@
+include_recipe 'bcpc-hadoop::hbase_config'
+
 %w{
 hbase
 hbase-master

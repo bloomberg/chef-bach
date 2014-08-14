@@ -2,8 +2,8 @@
 # Set up zookeeper configs
 #
 directory "/etc/zookeeper/conf.#{node.chef_environment}" do
-  owner node[:bcpc][:zookeeper][:owner] 
-  group node[:bcpc][:zookeeper][:group] 
+  owner node[:bcpc][:hadoop][:zookeeper][:owner] 
+  group node[:bcpc][:hadoop][:zookeeper][:group] 
   mode 00755
   action :create
   recursive true
@@ -23,7 +23,6 @@ end
   template "/etc/zookeeper/conf/#{t}" do
     source "zk_#{t}.erb"
     mode 0644
-    variables(:zk_hosts => node[:bcpc][:zookeeper][:servers])
+    variables(:zk_hosts => node[:bcpc][:hadoop][:zookeeper][:servers])
   end
 end
-

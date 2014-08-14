@@ -179,6 +179,21 @@ def znode_exists?(znode_path, zk_host="localhost:2181")
   return znode_found
 end
 
+def set_hosts
+  node.default[:bcpc][:hadoop][:nn_hosts] = get_namenodes()
+  node.default[:bcpc][:hadoop][:zookeeper][:servers] = get_nodes_for("zookeeper_server")
+  node.default[:bcpc][:hadoop][:jn_hosts] = get_nodes_for("journalnode")
+  node.default[:bcpc][:hadoop][:rm_hosts] = get_nodes_for("resource_manager")
+  node.default[:bcpc][:hadoop][:hs_hosts] = get_nodes_for("historyserver")
+  node.default[:bcpc][:hadoop][:dn_hosts] = get_nodes_for("datanode")
+  node.default[:bcpc][:hadoop][:hb_hosts] = get_nodes_for("hbase_master")
+  node.default[:bcpc][:hadoop][:hive_hosts] = get_nodes_for("hive_metastore")
+  node.default[:bcpc][:hadoop][:oozie_hosts]  = get_nodes_for("oozie"),
+  node.default[:bcpc][:hadoop][:httpfs_hosts] = get_nodes_for("httpfs")
+  node.default[:bcpc][:hadoop][:rs_hosts] = get_nodes_for("region_server")
+  node.default[:bcpc][:hadoop][:mysql_hosts] = get_mysql_nodes()
+end
+
 def zk_formatted?
   require 'rubygems'
   require 'zookeeper'

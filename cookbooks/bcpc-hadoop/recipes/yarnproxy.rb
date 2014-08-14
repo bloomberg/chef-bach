@@ -1,3 +1,4 @@
+include_recipe 'bcpc-hadoop::hadoop_config'
 
 %w{hadoop-mapreduce-historyserver hadoop-yarn-proxyserver}.each do |pkg|
     package pkg do
@@ -12,5 +13,3 @@ end
 service "hadoop-yarn-historyserver" do 
 	action [:enable, :restart]
 end
-
-

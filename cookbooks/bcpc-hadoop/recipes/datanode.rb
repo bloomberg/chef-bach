@@ -1,3 +1,5 @@
+include_recipe 'bcpc-hadoop::hadoop_config'
+
 %w{hadoop-yarn-nodemanager
    hadoop-hdfs-datanode
    hadoop-mapreduce
