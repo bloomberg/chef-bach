@@ -27,7 +27,7 @@ end
      source "hb_#{t}.erb"
      mode 0644
      variables(:nn_hosts => node[:bcpc][:hadoop][:nn_hosts],
-               :zk_hosts => node[:bcpc][:zookeeper][:servers],
+               :zk_hosts => node[:bcpc][:hadoop][:zookeeper][:servers],
                :jn_hosts => node[:bcpc][:hadoop][:jn_hosts],
                :rs_hosts => node[:bcpc][:hadoop][:rs_hosts],
                :master_hosts => node[:bcpc][:hadoop][:hb_hosts],

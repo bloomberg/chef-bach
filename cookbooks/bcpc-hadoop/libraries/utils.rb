@@ -181,7 +181,7 @@ end
 
 def set_hosts
   node.default[:bcpc][:hadoop][:nn_hosts] = get_namenodes()
-  node.default[:bcpc][:zookeeper][:servers] = get_nodes_for("zookeeper_server")
+  node.default[:bcpc][:hadoop][:zookeeper][:servers] = get_nodes_for("zookeeper_server")
   node.default[:bcpc][:hadoop][:jn_hosts] = get_nodes_for("journalnode")
   node.default[:bcpc][:hadoop][:rm_hosts] = get_nodes_for("resource_manager")
   node.default[:bcpc][:hadoop][:hs_hosts] = get_nodes_for("historyserver")

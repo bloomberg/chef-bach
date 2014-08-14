@@ -1,6 +1,6 @@
 
 include_recipe 'dpkg_autostart'
-
+include_recipe 'bcpc-hadoop::zookeeper_config'
 dpkg_autostart "zookeeper-server" do
   allow false
 end
@@ -33,17 +33,17 @@ template "/etc/init.d/zookeeper-server" do
   mode 0655
 end
 
-directory node[:bcpc][:zookeeper][:data_dir] do
+directory node[:bcpc][:hadoop][:zookeeper][:data_dir] do
   recursive true
-  owner node[:bcpc][:zookeeper][:owner]
-  group node[:bcpc][:zookeeper][:group]
+  owner node[:bcpc][:hadoop][:zookeeper][:owner]
+  group node[:bcpc][:hadoop][:zookeeper][:group]
   mode 0755
 end
 
 template "/etc/default/zookeeper-server" do
   source "hdp_zookeeper-server.default.erb"
   mode 0644
-  variables(:zk_jmx_port => node[:bcpc][:zookeeper][:jmx_port])
+  variables(:zk_jmx_port => node[:bcpc][:hadoop][:zookeeper][:jmx_port])
 end
 
 template "/usr/lib/zookeeper/bin/zkServer.sh" do
@@ -52,13 +52,13 @@ end
 
 bash "init-zookeeper" do
   code "service zookeeper-server init --myid=#{node[:bcpc][:node_number]}"
-  creates "#{node[:bcpc][:zookeeper][:data_dir]}/myid"
+  creates "#{node[:bcpc][:hadoop][:zookeeper][:data_dir]}/myid"
 end
 
-file "#{node[:bcpc][:zookeeper][:data_dir]}/myid" do
+file "#{node[:bcpc][:hadoop][:zookeeper][:data_dir]}/myid" do
   content node[:bcpc][:node_number]
-  owner node[:bcpc][:zookeeper][:owner]
-  group node[:bcpc][:zookeeper][:group]
+  owner node[:bcpc][:hadoop][:zookeeper][:owner]
+  group node[:bcpc][:hadoop][:zookeeper][:group]
   mode 0644
 end
 

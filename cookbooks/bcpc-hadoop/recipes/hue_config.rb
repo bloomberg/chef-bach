@@ -24,7 +24,7 @@ template "/etc/hue/conf/hue.ini" do
   source "hue_hue.ini.erb"
   mode 0644
   variables(
-    :zk_hosts => node[:bcpc][:zookeeper][:servers],
+    :zk_hosts => node[:bcpc][:hadoop][:zookeeper][:servers],
     :rm_hosts  => node[:bcpc][:hadoop][:rm_hosts],
     :hive_hosts => node[:bcpc][:hadoop][:hive_hosts],
     :oozie_hosts => node[:bcpc][:hadoop][:oozie_hosts],

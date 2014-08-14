@@ -35,7 +35,7 @@ hadoop_conf_files.each do |t|
      source "hdp_#{t}.erb"
      mode 0644
      variables(:nn_hosts => node[:bcpc][:hadoop][:nn_hosts],
-               :zk_hosts => node[:bcpc][:zookeeper][:servers],
+               :zk_hosts => node[:bcpc][:hadoop][:zookeeper][:servers],
                :jn_hosts => node[:bcpc][:hadoop][:jn_hosts],
                :rm_hosts => node[:bcpc][:hadoop][:rm_hosts],
                :dn_hosts => node[:bcpc][:hadoop][:dn_hosts],
@@ -50,7 +50,7 @@ end
    source "hdp_#{t}.erb"
    mode 0644
    variables(:nn_hosts => node[:bcpc][:hadoop][:nn_hosts],
-             :zk_hosts => node[:bcpc][:zookeeper][:servers],
+             :zk_hosts => node[:bcpc][:hadoop][:zookeeper][:servers],
              :jn_hosts => node[:bcpc][:hadoop][:jn_hosts],
              :mounts => node[:bcpc][:hadoop][:mounts],
              :nn_jmx_port => node[:bcpc][:hadoop][:namenode][:jmx][:port],
