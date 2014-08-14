@@ -1,3 +1,5 @@
+include_recipe "bcpc-hadoop::hive_config"
+
 # workaround for hcatalog dpkg not creating the hcat user it requires
 user "hcat" do 
   username "hcat"
@@ -27,11 +29,7 @@ template "hive-server2-service" do
   owner "root"
   group "root"
   mode "0755"
-#  notifies :enable, "service[hive-server2]"
-#  notifies :start, "service[hive-server2]"
 end
-
-
 
 bash "hiveserver2" do
   code "nohup /usr/lib/hive/bin/hiveserver2 -hiveconf hive.metastore.uris=\" \" > /var/log/hiveServer2.out 2>/var/log/hive/hiveServer2.log &"
@@ -40,12 +38,9 @@ bash "hiveserver2" do
   not_if { true }
 end
 
-
 service "hive-server2" do
-#  action [:enable, :start]
   action :nothing
   supports :status => true, :restart => true, :reload => false
   subscribes :restart, "template[/etc/hive/conf/hive-site.xml]", :delayed
   subscribes :restart, "template[/etc/hive/conf/hive-log4j.properties]", :delayed
 end
-

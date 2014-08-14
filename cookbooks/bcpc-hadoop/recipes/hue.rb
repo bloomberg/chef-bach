@@ -1,4 +1,5 @@
 include_recipe 'dpkg_autostart'
+include_recipe 'bcpc-hadoop::hue_config'
 
 make_config('mysql-hue-password', secure_password)
 make_config('hue-session-key', secure_password)

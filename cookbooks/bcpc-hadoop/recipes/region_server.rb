@@ -1,3 +1,5 @@
+include_recipe 'bcpc-hadoop::hbase_config'
+
 %w{hbase-regionserver libsnappy1}.each do |pkg|
   package pkg do
     action :install
@@ -20,4 +22,3 @@ service "hbase-regionserver" do
   subscribes :restart, "template[/etc/hbase/conf/hbase-policy.xml]", :delayed
   subscribes :restart, "template[/etc/hbase/conf/hbase-env.sh]", :delayed
 end
-

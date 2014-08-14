@@ -1,5 +1,6 @@
 require 'base64'
 include_recipe 'dpkg_autostart'
+include_recipe 'bcpc-hadoop::hadoop_config'
 
 %w{hadoop-hdfs-namenode }.each do |pkg|
   dpkg_autostart pkg do
@@ -64,4 +65,3 @@ service "hadoop-hdfs-journalnode" do
   subscribes :restart, "template[/etc/hadoop/conf/hdfs-site.xml]", :delayed
   subscribes :restart, "template[/etc/hadoop/conf/hdfs-site_HA.xml]", :delayed
 end
-

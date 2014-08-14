@@ -1,4 +1,5 @@
 include_recipe 'dpkg_autostart'
+include_recipe 'bcpc-hadoop::oozie_config'
 
 dpkg_autostart "oozie" do
   allow false
