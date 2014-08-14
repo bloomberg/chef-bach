@@ -53,6 +53,22 @@ default["bcpc"]["hadoop"]["zabbix"]["history_days"] = 1
 default["bcpc"]["hadoop"]["zabbix"]["trend_days"] = 15
 default["bcpc"]["hadoop"]["zabbix"]["cron_check_time"] = 240
 default["bcpc"]["hadoop"]["graphite"]["queries"] = {
+   'namenode' => [
+    {
+      'type'  => "jmx",
+      'query' => "memory.HeapMemoryUsage_committed",
+      'key'   => "nnheapmem",
+      'trigger_val' => "max(61,0)",
+      'trigger_cond' => "=0",
+      'trigger_name' => "NameNodeAvailability",
+      'trigger_enable' => true
+    },
+    {
+      'type'  => "jmx",
+      'query' => "nn_fs_name_system_state.FSNamesystemState.NumStaleDataNodes",
+      'key'   => "numstaledn"
+    }
+  ],
   'hbase_master' => [
     {
       'type'  => "jmx",
@@ -60,7 +76,8 @@ default["bcpc"]["hadoop"]["graphite"]["queries"] = {
       'key'   => "hbasenonheapmem",
       'trigger_val' => "max(61,0)",
       'trigger_cond' => "=0",
-      'trigger_name' => "HBaseMasterAvailability"
+      'trigger_name' => "HBaseMasterAvailability",
+      'trigger_dep' => ["NameNodeAvailability"]
     },
     {
       'type'  => "jmx",
@@ -75,22 +92,9 @@ default["bcpc"]["hadoop"]["graphite"]["queries"] = {
       'key'   => "numrsservers",
       'trigger_val' => "max(61,0)",
       'trigger_cond' => "=0",
-      'trigger_name' => "HBaseRSAvailability"
-    }
-  ],
-  'namenode' => [
-    {
-      'type'  => "jmx",
-      'query' => "memory.HeapMemoryUsage_committed",
-      'key'   => "nnheapmem",
-      'trigger_val' => "max(61,0)",
-      'trigger_cond' => "=0",
-      'trigger_name' => "NameNodeAvailability"
-    },
-    {
-      'type'  => "jmx",
-      'query' => "nn_fs_name_system_state.FSNamesystemState.NumStaleDataNodes",
-      'key'   => "numstaledn"
+      'trigger_name' => "HBaseRSAvailability",
+      'trigger_enable' => true,
+      'trigger_dep' => ["HBaseMasterAvailability"]
     }
   ]
 }

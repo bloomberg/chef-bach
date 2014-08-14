@@ -26,7 +26,9 @@ ruby_block "zabbix_monitor" do
     #
     # Make connection to zabbix api url
     #
-    zbx=ZabbixApi.connect(:url => "https://#{node['bcpc']['management']['vip']}:#{node['bcpc']['zabbix']['web_port']}/api_jsonrpc.php",:user => 'admin',:password => "#{get_config('zabbix-admin-password')}")
+    zbx=ZabbixApi.connect(:url => "https://#{node['bcpc']['management']['vip']}:#{node['bcpc']['zabbix']['web_port']}/api_jsonrpc.php", 
+                          :user => 'admin', 
+                          :password => "#{get_config('zabbix-admin-password')}")
     if zbx.nil?
       Chef::Log.fatal!("Fatal error: could not connect to Zabbix server")
     end
@@ -35,8 +37,8 @@ ruby_block "zabbix_monitor" do
     #
     graphite_hosts = (get_nodes_for("graphite","bcpc").map{|x| x.bcpc.management.ip}).join(",")
     cron_check_cond = Array.new
-    node['bcpc']['hadoop']['graphite']['queries'].each do |host, value|
-      value.each do |attr|    
+    node['bcpc']['hadoop']['graphite']['queries'].each do |trigger_host, trigger|
+      trigger.each do |trigger_attr|    
         #
         # Create zabbix host group same as the chef environment name
         # 
@@ -48,17 +50,20 @@ ruby_block "zabbix_monitor" do
         #
         # Create host entries in Zabbix. Note that these are dummy entries to define the required items and triggers
         #
-        if zbx.hosts.get_id(:host => "#{host}").nil?
-          zbx.hosts.create(:host => "#{host}",:interfaces => [ {:type => 1,:main => 1,:ip => '127.0.0.1', :dns => '127.0.0.1', :port => 10050, :useip => 0}],:groups => [ :groupid => zbx.hostgroups.get_id(:name => "#{node.chef_environment}") ])
+        if zbx.hosts.get_id(:host => "#{trigger_host}").nil?
+          zbx.hosts.create(:host => "#{trigger_host}", 
+                           :interfaces => [ {:type => 1,:main => 1,:ip => '127.0.0.1', :dns => '127.0.0.1', :port => 10050, :useip => 0}], 
+                           :groups => [ :groupid => zbx.hostgroups.get_id(:name => "#{node.chef_environment}") ])
         else
-          Chef::Log.debug "Zabbix host #{host} is already defined; no action taken"
+          Chef::Log.debug "Zabbix host #{trigger_host} is already defined; no action taken"
         end
         #
         # Define application which is used to group items 
         #
         if zbx.applications.get_id(:name => "hadoop").nil?
           Chef::Log.debug "Application hadoop not defined"
-          zbx.applications.create(:name => "hadoop", :hostid => zbx.hosts.get_id(:host => "#{host}"))
+          zbx.applications.create(:name => "hadoop", 
+                                  :hostid => zbx.hosts.get_id(:host => "#{trigger_host}"))
         else
           Chef::Log.debug "Application hadoop already defined; no action to be taken"
         end
@@ -67,44 +72,90 @@ ruby_block "zabbix_monitor" do
         # For details about the parameter values refer to Zabbix documentaton
         # https://www.zabbix.com/documentation/2.2/manual/api/reference/item
         #
-        if zbx.items.get_id(:name => "#{attr['key']}",:host => "#{host}" ).nil?
-          Chef::Log.debug "Item #{attr['key']} not defined"
-	  if attr['history_days'].nil?
+        if zbx.items.get_id(:name => "#{trigger_attr['key']}",:host => "#{trigger_host}" ).nil?
+          Chef::Log.debug "Item #{trigger_attr['key']} not defined"
+	  if trigger_attr['history_days'].nil?
 	    history_days = node['bcpc']['hadoop']['zabbix']['history_days']
 	  else
-	    history_days = attr['history_days']
+	    history_days = trigger_attr['history_days']
 	  end
-	  if attr['trend_days'].nil?
+	  if trigger_attr['trend_days'].nil?
 	    trend_days = node['bcpc']['hadoop']['zabbix']['trend_days']
 	  else
-	    trend_days = attr['trend_days']
+	    trend_days = trigger_attr['trend_days']
 	  end
-          zbx.items.create(:name => "#{attr['key']}", :description => "#{attr['key']}", :key_ => "#{attr['key']}", :type => 2, :value_type => 3, :data_type => 0, :history => history_days, :trends => trend_days,:hostid => zbx.hosts.get_id(:host => "#{host}"), :trapper_hosts => graphite_hosts)
+          zbx.items.create(:name => "#{trigger_attr['key']}", 
+                           :description => "#{trigger_attr['key']}", 
+                           :key_ => "#{trigger_attr['key']}", 
+                           :type => 2, 
+                           :value_type => 3, 
+                           :data_type => 0, 
+                           :history => history_days, 
+                           :trends => trend_days, 
+                           :hostid => zbx.hosts.get_id(:host => "#{trigger_host}"), 
+                           :trapper_hosts => graphite_hosts)
         else
-          Chef::Log.debug "Item #{attr['key']} already defined"
-          zbx.items.create_or_update(:name => "#{attr['key']}", :description => "#{attr['key']}", :key_ => "#{attr['key']}", :type => 2, :value_type => 3, :data_type => 0, :history => history_days, :trends => trend_days,:hostid => zbx.hosts.get_id(:host => "#{host}"), :trapper_hosts => graphite_hosts)
+          Chef::Log.debug "Item #{trigger_attr['key']} already defined"
+          zbx.items.create_or_update(:name => "#{trigger_attr['key']}", 
+                                     :description => "#{trigger_attr['key']}", 
+                                     :key_ => "#{trigger_attr['key']}", 
+                                     :type => 2, 
+                                     :value_type => 3, 
+                                     :data_type => 0, 
+                                     :history => history_days, 
+                                     :trends => trend_days, 
+                                     :hostid => zbx.hosts.get_id(:host => "#{trigger_host}"), 
+                                     :trapper_hosts => graphite_hosts)
         end
         #
         # Create zabbix triggers on the items so that actions can be taken if a trigger even occurs
         # For all triggers a companion trigger is created to check whether the zabbix sender cron job is active and sends data to zabbix
         #
-        if attr['trigger_name'].nil?
+        if trigger_attr['trigger_name'].nil?
           Chef::Log.debug "No triggers for this item"
 	else
-          if zbx.triggers.get_id(:description => "#{attr['trigger_name']}").nil?
-            Chef::Log.debug "Trigger #{attr['trigger_name']} not defined"
-            expr="{"+"#{host}"+":"+"#{attr['key']}"+"."+"#{attr['trigger_val']}"+"}"+"#{attr['trigger_cond']}"
-            zbx.triggers.create(:description => "#{attr['trigger_name']}", :expression => expr, :comments => "Service down", :priority => 4, :status => 0)
-            cron_check_cond << "{"+"#{host}"+":"+"#{attr['key']}"+".nodata(#{node["bcpc"]["hadoop"]["zabbix"]["cron_check_time"]})}=1"
+          if trigger_attr.attribute?(:trigger_dep)
+            dependencies = Array.new
+            trigger_attr['trigger_dep'].each do |dep|
+              dependency = Hash.new
+              dependency['triggerid'] = zbx.triggers.get_id(:description => dep)
+              dependencies.push(dependency)
+            end
+          end
+          #
+          # By default trigger is enabled which can be overwritten through attributes file
+          #
+          trigger_status = 0
+          if trigger_attr.attribute?(:trigger_enable)
+            if trigger_attr['trigger_enable']
+              trigger_status = 0
+            else
+              trigger_status = 1
+            end
+          end
+          if (trigger_id = zbx.triggers.get_id(:description => "#{trigger_attr['trigger_name']}")).nil?
+            Chef::Log.debug "Trigger #{trigger_attr['trigger_name']} not defined"
+            expr = "{"+"#{trigger_host}"+":"+"#{trigger_attr['key']}"+"."+"#{trigger_attr['trigger_val']}"+"}"+"#{trigger_attr['trigger_cond']}"
+            zbx.triggers.create(:description => "#{trigger_attr['trigger_name']}", 
+                                :expression => expr, 
+                                :comments => "Service down", 
+                                :priority => 4, 
+                                :status => trigger_status, 
+                                :dependencies => dependencies)
+            cron_check_cond << "{"+"#{trigger_host}"+":"+"#{trigger_attr['key']}"+".nodata(#{node["bcpc"]["hadoop"]["zabbix"]["cron_check_time"]})}=1"
             #
             # Create an action for each trigger which will inturn execute a shell script when the trigger status turns to PROBLEM state
             #
-            zbx.query(method: 'action.create', params: {"name" => "#{attr['trigger_name']}_action","eventsource" =>  0,"evaltype" => 1,"status" =>  0,"esc_period" => 120, \
-'conditions' => [{"conditiontype" => 3,"operator" => 2,"value" => "#{attr['trigger_name']}"},{"conditiontype" => 5,"operator" => 0,"value" => 1},{"conditiontype" => 16,"operator" => 7}], \
-'operations' => [{"operationtype" => 1,"opcommand" => {"command" => "#{node['bcpc']['zabbix']['scripts_dir']}/zbx_mail.sh {TRIGGER.NAME} #{node.chef_environment}","type" => "0","execute_on" => "1"}, \
-"opcommand_hst" => [ "hostid" => 0]}]})
+            zbx.query(method: 'action.create', 
+                      params: {"name" => "#{trigger_attr['trigger_name']}_action","eventsource" =>  0,"evaltype" => 1,"status" =>  0,"esc_period" => 120, 
+                      'conditions' => [{"conditiontype" => 3,"operator" => 2,"value" => "#{trigger_attr['trigger_name']}"}, 
+                                       {"conditiontype" => 5,"operator" => 0,"value" => 1}, 
+                                       {"conditiontype" => 16,"operator" => 7}], 
+                      'operations' => [{"operationtype" => 1,"opcommand" => {"command" => "#{node['bcpc']['zabbix']['scripts_dir']}/zbx_mail.sh {TRIGGER.NAME} #{node.chef_environment}","type" => "0","execute_on" => "1"}, 
+                      "opcommand_hst" => [ "hostid" => 0]}]})
           else
-            Chef::Log.debug "Trigger #{attr['trigger_name']} already defined"
+            Chef::Log.debug "Trigger #{trigger_attr['trigger_name']} already defined"
+            zbx.triggers.update(:triggerid => trigger_id, :expression => expr, :comments => "Service down", :priority => 4, :status => trigger_status, :dependencies => dependencies)
           end
         end
       end
