@@ -12,7 +12,7 @@ default[:bcpc][:hadoop][:zookeeper][:log_dir] = '/var/log/zookeeper'
 default[:bcpc][:hadoop][:zookeeper][:port] = 2181
 
 # JMX port for ZooKeeper.
-default[:bcpc][:hadoop][:zookeeper][:jmx_port] = 10113
+default[:bcpc][:hadoop][:zookeeper][:jmx][:port] = 10113
 
 #Limit on the number of connections
 default[:bcpc][:hadoop][:zookeeper][:maxClientCnxns] = 500

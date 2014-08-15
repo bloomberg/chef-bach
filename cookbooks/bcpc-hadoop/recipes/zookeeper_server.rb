@@ -43,7 +43,7 @@ end
 template "/etc/default/zookeeper-server" do
   source "hdp_zookeeper-server.default.erb"
   mode 0644
-  variables(:zk_jmx_port => node[:bcpc][:hadoop][:zookeeper][:jmx_port])
+  variables(:zk_jmx_port => node[:bcpc][:hadoop][:zookeeper][:jmx][:port])
 end
 
 template "/usr/lib/zookeeper/bin/zkServer.sh" do
