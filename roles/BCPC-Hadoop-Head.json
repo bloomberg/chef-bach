@@ -23,6 +23,16 @@
   ],
   "description": "A highly-available head node in a BCPC Hadoop cluster",
   "chef_type": "role",
+  "default_attributes" : {
+    "jmxtrans":  {
+      "servers":  [
+                 {
+                    "type": "zookeeper",
+                    "service": "zookeeper-server"
+                 }
+        ]
+      }
+  },
   "override_attributes": {
   }
 }
