@@ -7,6 +7,13 @@ default['jmxtrans']['sw']="jmxtrans-20120525-210643-4e956b1144.zip"
 # Also refer to the jmxtrans community cookbook if queries of the category you are planning to add is
 # already existing in the defualt attributes file
 #
+default['jmxtrans']['default_queries']['zookeeper'] = [
+  {
+     'obj' => "org.apache.ZooKeeperService:name0=ReplicatedServer_id*",
+     'result_alias' => "zookeeper",
+     'attr' => [ "QuorumSize" ]
+  }
+]
 default['jmxtrans']['default_queries']['kafka'] = [
   {
      'obj' => "\\\"kafka.server\\\":type=\\\"BrokerTopicMetrics\\\",name=*",
