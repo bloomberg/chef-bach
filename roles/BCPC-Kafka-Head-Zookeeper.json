@@ -12,7 +12,7 @@
     "recipe[kafka-bcpc::setattr]",
     "recipe[java::oracle]",
     "recipe[bcpc-hadoop::hdp_repo]",
-    "recipe[bcpc-hadoop::zookeeper_server]"
+    "recipe[kafka-bcpc::zookeeper_server]"
   ],
   "description": "Zookeeper Role for Kafka Machines",
   "chef_type": "role",
