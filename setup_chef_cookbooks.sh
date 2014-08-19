@@ -64,6 +64,9 @@ for cookbook in "apt 2.4.0" python build-essential ubuntu cron "chef-client 3.0.
   fi
 done
 [[ -d dpkg_autostart ]] || git clone https://github.com/hw-cookbooks/dpkg_autostart.git
-[[ -d kafka ]] || git clone https://github.com/mthssdrbrg/kafka-cookbook.git kafka
+if [[ ! -d kafka ]]; then
+  git clone https://github.com/mthssdrbrg/kafka-cookbook.git kafka
+  cd kafka && git checkout v0.4.1 && cd ..
+fi
 [[ -d java ]] || git clone https://github.com/socrata-cookbooks/java.git java
 [[ -d jmxtrans ]] || git clone https://github.com/bijugs/chef-jmxtrans.git jmxtrans
