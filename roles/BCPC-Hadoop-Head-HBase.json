@@ -16,7 +16,8 @@
       "servers":  [
                  {
                     "type": "hbase_master",
-                    "service": "hbase-master"
+                    "service": "hbase-master",
+                    "service_cmd": "org.apache.hadoop.hbase.master.HMaster"
                  }
         ]
       }

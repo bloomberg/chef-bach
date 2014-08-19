@@ -25,11 +25,13 @@
       "servers":  [
                  {
                     "type": "datanode",
-                    "service": "hadoop-hdfs-datanode"
+                    "service": "hadoop-hdfs-datanode",
+                    "service_cmd": "org.apache.hadoop.hdfs.server.datanode.DataNode"
                  },
                  {
                     "type": "hbase_rs",
-                    "service": "hbase-regionserver"
+                    "service": "hbase-regionserver",
+                    "service_cmd": "org.apache.hadoop.hbase.regionserver.HRegionServer"
                  }
         ]
       }
