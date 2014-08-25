@@ -61,7 +61,7 @@ function install_machines {
 function parse_cluster_txt {
   local match_text=${1-}
   local hosts=""
-  while read host macaddr ipaddr iloipaddr domain role; do
+  while read host macaddr ipaddr iloipaddr cobbler_profile domain role; do
     shopt -s nocasematch
     if [[ -z "${match_text-}" || "$match_text" = "$host" || "$match_text" = "$ipaddr" || "$role" =~ $match_text ]] && \
        [[ ! "|$role" =~ '|SKIP' ]]; then

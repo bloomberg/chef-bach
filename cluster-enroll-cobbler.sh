@@ -34,7 +34,7 @@ fi
 
 if [[ -f cluster.txt ]]; then
     echo "Using cluster definition from cluster.txt"
-    while read HOSTNAME MACADDR IPADDR ILOIPADDR DOMAIN ROLE; do
+    while read HOSTNAME MACADDR IPADDR ILOIPADDR PROFILE DOMAIN ROLE; do
 	if [[ $HOSTNAME = "end" ]]; then
 	    continue
 	fi
@@ -47,9 +47,9 @@ if [[ -f cluster.txt ]]; then
 	if [[ $1 = add ]];then
 		if [[ -z "$EXACTHOST" || "$EXACTHOST" = "$HOSTNAME" || "$EXACTHOST" = "$ROLE" ]]; then
 		MATCH="$HOSTNAME"
-		ACTIONSTRING="adding $HOSTNAME.$DOMAIN ($IPADDR,$MACADDR) to cobbler..."
+		ACTIONSTRING="adding $HOSTNAME.$DOMAIN ($IPADDR,$MACADDR) to cobbler with profile ${PROFILE}..."
 		echo $ACTIONSTRING | tee -a $TRANSCRIPT
-		sudo cobbler system add --name=$HOSTNAME --hostname=$HOSTNAME.$DOMAIN --profile=bcpc_host --ip-address=$IPADDR --mac=$MACADDR
+		sudo cobbler system add --name=$HOSTNAME --hostname=$HOSTNAME.$DOMAIN --profile=$PROFILE --ip-address=$IPADDR --mac=$MACADDR
 	    fi
 	elif [[ $1 == remove ]]; then
 		if [[ -z "$EXACTHOST" || "$EXACTHOST" = "$HOSTNAME" || "$EXACTHOST" = "$ROLE" ]]; then

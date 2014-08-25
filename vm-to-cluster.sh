@@ -40,7 +40,7 @@ function getvminfo {
 	# there's no IP address for the ILO for VMs, instead use
 	# VirtualBox's graphical console
 	ILOIPADDR="-"
-	echo "$1 $MAC1 $IP $ILOIPADDR $DOMAIN unknown"
+	echo "$1 $MAC1 $IP $ILOIPADDR bcpc_host $DOMAIN unknown"
 }
 
 if [[ -f cluster.txt ]]; then

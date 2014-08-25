@@ -57,7 +57,7 @@ EOF
 cd cookbooks
 
 # allow versions on cookbooks via "cookbook version"
-for cookbook in "apt 2.4.0" python build-essential ubuntu cron "chef-client 3.0.6" ntp yum logrotate yum-epel sysctl chef_handler 7-zip windows ark sudo ulimit pam ohai; do
+for cookbook in "apt 2.4.0" python build-essential ubuntu cron "chef-client 3.0.6" ntp yum logrotate yum-epel sysctl chef_handler 7-zip windows ark sudo ulimit pam ohai poise; do
   if [[ ! -d ${cookbook% *} ]]; then
      # unless the proxy was defined this knife config will be the same as the one generated above
     knife cookbook site download $cookbook --config ../.chef/knife.rb
@@ -72,3 +72,4 @@ if [[ ! -d kafka ]]; then
 fi
 [[ -d java ]] || git clone https://github.com/socrata-cookbooks/java.git java
 [[ -d jmxtrans ]] || git clone https://github.com/bijugs/chef-jmxtrans.git jmxtrans
+[[ -d cobblerd ]] || git clone https://github.com/cbaenziger/cobbler-cookbook.git cobblerd -b cobbler_profile

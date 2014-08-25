@@ -47,7 +47,7 @@ function vtrace {
 declare -A HOSTNAMES
 
 if [[ -f cluster.txt ]]; then
-    while read HOSTNAME MACADDR IPADDR ILOIPADDR DOMAIN ROLE; do
+    while read HOSTNAME MACADDR IPADDR ILOIPADDR PROFILE DOMAIN ROLE; do
         if [[ $HOSTNAME = "end" ]]; then
             continue
         fi
