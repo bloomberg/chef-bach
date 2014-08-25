@@ -92,7 +92,7 @@ fi
 FILES="zookeeper*.gem $FILES"
 
 # Generate Rubygem for zabbixapi
-if ! [[ -f gems/zabbixapi-2.2.0.gem ]]; then
+if ! [[ -f gems/zabbixapi.gem ]]; then
   git clone https://github.com/express42/zabbixapi.git
   cd zabbixapi
   gem build zabbixapi.gemspec
