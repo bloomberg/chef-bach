@@ -91,14 +91,9 @@ if ! [[ -f gems/zookeeper.gem ]]; then
 fi
 FILES="zookeeper*.gem $FILES"
 
-# Generate Rubygem for zabbixapi
+# Get Rubygem for zabbixapi
 if ! [[ -f gems/zabbixapi.gem ]]; then
-  git clone https://github.com/express42/zabbixapi.git
-  cd zabbixapi
-  gem build zabbixapi.gemspec
-  mv zabbix*.gem ../
-  cd ..
-  rm -rf zabbixapi
+  gem fetch zabbixapi
   ln -s zabbix*.gem zabbixapi.gem || true
 fi
 FILES="zabbix*.gem $FILES"
