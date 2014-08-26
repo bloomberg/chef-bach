@@ -46,6 +46,7 @@ graphite_hosts = get_nodes_for("graphite","bcpc").map{|x| x.bcpc.management.ip}
 # If any of the services gets restarted jmxtrans process need to be restarted
 #
 jmx_services = Array.new
+jmx_service_cmds = Hash.new
 #
 # If the current host is a graphite head add the carbon processes to the list of services array
 #
@@ -53,6 +54,8 @@ graphite_hosts.each do |host|
   if host == node['bcpc']['management']['ip']
     jmx_services.push("carbon-relay")
     jmx_services.push("carbon-cache")
+    jmx_service_cmds["carbon-relay"] = "carbon-relay.py"
+    jmx_service_cmds["carbon-cache"] = "carbon-cache.py"
     break
   end
 end
@@ -61,14 +64,26 @@ end
 #
 node['jmxtrans']['servers'].each do |server|
   jmx_services.push(server['service'])
+  jmx_service_cmds[server['service']] = server['service_cmd']
 end
 #
 # Using the services array generate chef service resources to restart when the monitored services are restarted 
 #
-jmx_services.each do |jmxservice| 
-  service "jmxtrans" do
+jmx_services.each do |jmx_dep_service| 
+  service "restart jmxtrans for #{jmx_dep_service}" do
+    service_name "jmxtrans"
     supports :restart => true, :status => true, :reload => true
     action   :nothing
-    subscribes :restart, "service[#{jmxservice}]", :delayed
+    subscribes :restart, "service[#{jmx_dep_service}]", :delayed
   end
+end
+
+#
+# Ruby block to restart jmxtrans if any of the dependent process is restarted manually
+#
+service "restart jmxtrans on dependent service manual restart" do
+  service_name "jmxtrans"
+  supports :restart => true, :status => true, :reload => true
+  action   :restart
+  only_if { process_require_restart?("jmxtrans","jmxtrans-all.jar",jmx_service_cmds) }
 end

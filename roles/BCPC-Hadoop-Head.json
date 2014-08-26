@@ -28,7 +28,8 @@
       "servers":  [
                  {
                     "type": "zookeeper",
-                    "service": "zookeeper-server"
+                    "service": "zookeeper-server",
+                    "service_cmd": "org.apache.zookeeper.server.quorum.QuorumPeerMain"
                  }
         ]
       }

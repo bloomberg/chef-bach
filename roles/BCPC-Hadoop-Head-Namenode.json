@@ -17,7 +17,8 @@
       "servers": [
                  {
                     "type": "namenode",
-                    "service": "hadoop-hdfs-namenode"
+                    "service": "hadoop-hdfs-namenode",
+                    "service_cmd": "org.apache.hadoop.hdfs.server.namenode.NameNode"
                  }
         ]
       }
