@@ -7,7 +7,6 @@
     "role[Basic]",
     "role[BCPC-Hadoop-Head]",
     "recipe[bcpc-hadoop::namenode_master]",
-    "recipe[bcpc-hadoop::oozie]",
     "recipe[bcpc_jmxtrans]"
   ],
   "description": "A highly-available head node in a BCPC Hadoop cluster",
