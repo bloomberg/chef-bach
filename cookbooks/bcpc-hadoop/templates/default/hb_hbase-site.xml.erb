@@ -44,4 +44,12 @@
     <name>hbase.master.ipc.address</name>
     <value><%= node["bcpc"]["floating"]["ip"] %></value> 
   </property>
+  <property>
+    <name>hbase.regionserver.dns.nameserver</name>
+    <value><%= @dns_server %></value> 
+  </property>
+  <property>
+    <name>hbase.master.dns.nameserver</name>
+    <value><%= @dns_server %></value> 
+  </property>
 </configuration>

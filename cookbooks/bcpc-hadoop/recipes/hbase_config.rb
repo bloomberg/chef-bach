@@ -17,6 +17,12 @@ bash "update-hbase-conf-alternatives" do
   }
 end
 
+if get_nodes_for("powerdns", "bcpc").length > 0
+ dns_server = node[:bcpc][:management][:vip]
+else
+ dns_server = node[:bcpc][:dns_servers][0]
+end
+
 %w{hadoop-metrics.properties
    hbase-env.sh
    hbase-policy.xml
@@ -33,7 +39,8 @@ end
                :master_hosts => node[:bcpc][:hadoop][:hb_hosts],
                :mounts => node[:bcpc][:hadoop][:mounts],
                :hbm_jmx_port => node[:bcpc][:hadoop][:hbase_master][:jmx][:port],
-               :hbrs_jmx_port => node[:bcpc][:hadoop][:hbase_rs][:jmx][:port]
+               :hbrs_jmx_port => node[:bcpc][:hadoop][:hbase_rs][:jmx][:port],
+               :dns_server => dns_server
      )
   end
 end
