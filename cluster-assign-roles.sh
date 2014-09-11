@@ -157,7 +157,7 @@ function hadoop_install {
   install_stub $(printf ${hosts// /\\n} | sort)
 
   printf "Assigning roles for headnodes...\n"
-  for h in $(printf ${hosts// /\\n} | grep -i "head" | sort); do
+  for h in $(printf ${hosts// /\\n} | grep -i "BCPC-Hadoop-Head" | sort); do
     [[ "$h" =~ $REGEX ]]
     local role="${BASH_REMATCH[1]}"
     local ip="${BASH_REMATCH[2]}"
@@ -166,22 +166,22 @@ function hadoop_install {
   done
 
   # set the headnodes to admin for creating data bags
-  for h in $(printf ${hosts// /\\n} | grep -i "head" | sort); do
+  for h in $(printf ${hosts// /\\n} | grep -i "BCPC-Hadoop-Head" | sort); do
     [[ "$h" =~ $REGEX ]]
     printf "/\"admin\": false\ns/false/true\nw\nq\n" | EDITOR=ed sudo -E knife client edit "${BASH_REMATCH[3]}" $KNIFE_ADMIN || /bin/true
   done
 
   printf "Installing heads...\n"
-  install_machines $(printf ${hosts// /\\n} | grep -i "head" | sort)
+  install_machines $(printf ${hosts// /\\n} | grep -i "BCPC-Hadoop-Head" | sort)
 
   # remove admin from the headnodes
-  for h in $(printf ${hosts// /\\n} | grep -i "head" | sort); do
+  for h in $(printf ${hosts// /\\n} | grep -i "BCPC-Hadoop-Head" | sort); do
     [[ "$h" =~ $REGEX ]]
     printf "/\"admin\": true\ns/true/false\nw\nq\n" | EDITOR=ed sudo -E knife client edit "${BASH_REMATCH[3]}" $KNIFE_ADMIN 
   done
 
   printf "Installing workers...\n"
-  for m in $(printf ${hosts// /\\n} | grep -vi "head" | sort); do
+  for m in $(printf ${hosts// /\\n} | grep -i "BCPC-Hadoop-Worker" | sort); do
     install_machines $m &
   done
 }
