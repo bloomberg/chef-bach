@@ -17,12 +17,12 @@
 
     <property>
       <name>yarn.resourcemanager.ha.rm-ids</name>
-      <value><%=@rm_hosts.map{ |s| "rm#{node.chef_environment}#{s[:bcpc][:node_number]}" }.join(",") %></value>
+      <value><%=@rm_hosts.map{ |s| "rm#{node.chef_environment}#{s[:node_number]}" }.join(",") %></value>
     </property>
 
     <% @rm_hosts.each do |h| %>   
       <property>
-        <name>yarn.resourcemanager.hostname.rm<%= "#{node.chef_environment}#{h[:bcpc][:node_number]}" %></name>
+        <name>yarn.resourcemanager.hostname.rm<%= "#{node.chef_environment}#{h[:node_number]}" %></name>
         <value><%=float_host(h[:hostname]) %>:8020</value>
       </property>
     <% end %>
@@ -39,7 +39,7 @@
  
     <property> 
       <name>yarn.resourcemanager.zk-address</name>
-      <value><%= @zk_hosts.map{ |s| float_host(s[:hostname]) + ":2181" }.join(",") %></value>
+      <value><%= @zk_hosts.map{ |s| float_host(s[:hostname]) + ":#{node[:bcpc][:hadoop][:zookeeper][:port]}" }.join(",") %></value>
     </property>
  
     <property> 

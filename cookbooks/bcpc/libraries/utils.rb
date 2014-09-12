@@ -22,6 +22,16 @@ require 'base64'
 require 'thread'
 require 'ipaddr'
 
+#
+# Constant string which defines the default attributes which need to be retrieved from node objects
+# The format is hash { key => value , key => value }
+# Key will be used as the key in the search result which is a hash and the value is the node attribute which needs
+# to be included in the result. Attribute hierarchy can be expressed as a dot seperated string. User the following
+# as an example
+#
+HOSTNAME_MGMT_IP_ATTR_SRCH_KEYS = {'hostname' => 'hostname', 'mgmt_ip' => 'bcpc.management.ip'}
+MGMT_IP_GRAPHITE_WEBPORT_ATTR_SRCH_KEYS = {'mgmt_ip' => 'bcpc.management.ip', 'graphite_webport' => 'bcpc.graphite.web_port'}
+
 def init_config
 	if not Chef::DataBag.list.key?('configs')
 		Chef::Log.info "************ Creating data_bag \"configs\""
@@ -115,19 +125,42 @@ def get_head_nodes
   return (results.empty?) ? [node] : results.sort
 end
 
-def get_mysql_nodes
-  results = search(:node, "recipes:bcpc\\:\\:mysql AND chef_environment:#{node.chef_environment}")
-  results.map!{ |x| x.hostname == node.hostname ? node : x }
-  return (results.empty?) ? [node] : results.sort
-end
-
-def get_nodes_for(recipe, cookbook="bcpc")
+def get_nodes_for(recipe, cookbook=cookbook_name)
   results = search(:node, "recipes:#{cookbook}\\:\\:#{recipe} AND chef_environment:#{node.chef_environment}")
   results.map!{ |x| x['hostname'] == node[:hostname] ? node : x }
   if node.run_list.expand(node.chef_environment).recipes.include?("#{cookbook}::#{recipe}") and not results.include?(node)
     results.push(node)
   end
   return results.sort
+end
+
+#
+# Library function to get attributes for nodes that executes a particular recipe
+#
+def get_node_attributes(srch_keys,recipe,cookbook=cookbook_name)
+  node_objects = get_nodes_for(recipe,cookbook)
+  ret = get_req_node_attributes(node_objects,srch_keys)
+  return ret
+end
+
+#
+# Library function to retrieve required attributes from a array of node objects passed
+# Takes in an array of node objects and a search hash. Refer to comments for the constant
+# DEFAULT_NODE_ATTR_SRCH_KEYS regarding the format of the hash
+# returns a array of hash with the requested attributes
+# [ { :node_number => "val", :hostname => "nameval" }, ...]
+#
+def get_req_node_attributes(node_objects,srch_keys)
+  result = Array.new
+  node_objects.each do |obj|
+    temp = Hash.new
+    srch_keys.each do |name, key|
+      val = key.split('.').reduce(obj) {|memo, key| memo[key]}
+      temp[name] = val
+    end
+    result.push(temp)
+  end
+  return result
 end
 
 def get_binary_server_url

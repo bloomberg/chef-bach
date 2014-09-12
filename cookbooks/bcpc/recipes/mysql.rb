@@ -77,7 +77,7 @@ end
 template "/etc/mysql/conf.d/wsrep.cnf" do
   source "wsrep.cnf.erb"
   mode 00644
-  results = get_mysql_nodes
+  results = get_node_attributes(HOSTNAME_MGMT_IP_ATTR_SRCH_KEYS,"mysql","bcpc")
   # If we are the first one, special case
   seed = ""
   if ((results.length == 1) && (results[0]['hostname'] == node[:hostname])) then
@@ -86,7 +86,7 @@ template "/etc/mysql/conf.d/wsrep.cnf" do
     notifies :run, "bash[remove-bare-gcomm]", :delayed
   end
   variables( :seed => seed,
-             :max_connections => [get_mysql_nodes.length*50+get_all_nodes.length*5, 200].max,
+             :max_connections => [results.length*50+get_all_nodes.length*5, 200].max,
              :servers => results )
   notifies :restart, "service[mysql]", :immediate
 end

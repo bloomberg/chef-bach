@@ -6,4 +6,4 @@
 
 [default]
 default = true
-destinations = <%= "#{@servers.collect{|x| x['bcpc']['management']['ip']+':2004'}.join(', ')}" %>
+destinations = <%= "#{@servers.map{|x| x['mgmt_ip']+':2004'}.join(', ')}" %>
