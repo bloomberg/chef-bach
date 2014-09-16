@@ -30,13 +30,6 @@
       }
   },
   "override_attributes": {
-    "kafka": {
-      "version": "0.8.1.1",
-      "scala_version": "2.9.2",
-      "checksum": "",
-      "md5_checksum": "",
-      "log_dir": "/disk/0"
-    }
   }
 }
 
