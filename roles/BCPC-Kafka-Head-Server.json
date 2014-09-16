@@ -1,7 +1,5 @@
 {
   "name": "BCPC-Kafka-Head-Server",
-  "default_attributes": {
-  },
   "json_class": "Chef::Role",
   "run_list": [
     "role[Basic]",
@@ -14,19 +12,22 @@
     "recipe[java::oracle]", 
     "recipe[kafka::default]",
     "recipe[bcpc_jmxtrans]",
-    "recipe[kafka-bcpc::kafka]"
+    "recipe[kafka-bcpc::kafka]",
+    "recipe[bcpc::diamond]",
+    "recipe[bcpc_jmxtrans]"
   ],
   "description": "Role to setup Kafka Server",
   "chef_type": "role",
   "default_attributes" : {
     "jmxtrans":  {
-      "servers": [{
-        "name": "",
-        "port": "9999",
-        "type": "kafka",
-        "service" : "kafka"
-      }]
-    }
+      "servers":  [
+                 {
+                    "type": "kafka",
+                    "service": "kafka",
+                    "service_cmd": "kafka.Kafka"
+                 }
+        ]
+      }
   },
   "override_attributes": {
     "kafka": {

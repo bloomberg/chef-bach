@@ -7,7 +7,8 @@
     "role[Basic]",
     "role[BCPC-Hadoop-Head]",
     "recipe[bcpc-hadoop::hbase_master]",
-    "recipe[bcpc_jmxtrans]"
+    "recipe[bcpc_jmxtrans]",
+    "recipe[bcpc::diamond]"
   ],
   "description": "A highly-available head node in a BCPC Hadoop cluster",
   "chef_type": "role",
