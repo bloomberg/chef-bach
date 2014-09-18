@@ -72,13 +72,15 @@ ruby_block "graphite_ip" do
   end
 end
 
+mysql_servers = get_node_attributes(MGMT_IP_GRAPHITE_WEBPORT_ATTR_SRCH_KEYS,"mysql","bcpc")
+
 template "/opt/graphite/conf/carbon.conf" do
     source "carbon.conf.erb"
     owner "root"
     group "root"
     mode 00644
-    variables( :servers => get_mysql_nodes,
-               :min_quorum => get_mysql_nodes.length/2 + 1 )
+    variables( :servers => mysql_servers,
+               :min_quorum => mysql_servers.length/2 + 1 )
     notifies :restart, "service[carbon-cache]", :delayed
     notifies :restart, "service[carbon-relay]", :delayed
 end
@@ -104,7 +106,7 @@ template "/opt/graphite/conf/relay-rules.conf" do
     owner "root"
     group "root"
     mode 00644
-    variables( :servers => get_mysql_nodes )
+    variables( :servers => mysql_servers )
     notifies :restart, "service[carbon-relay]", :delayed
 end
 
@@ -135,7 +137,7 @@ template "/opt/graphite/webapp/graphite/local_settings.py" do
     owner "root"
     group "root"
     mode 00644
-    variables( :servers => get_mysql_nodes )
+    variables( :servers => mysql_servers )
     notifies :restart, "service[apache2]", :delayed
 end
 

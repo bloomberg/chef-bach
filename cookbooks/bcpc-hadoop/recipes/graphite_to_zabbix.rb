@@ -35,7 +35,7 @@ ruby_block "zabbix_monitor" do
     #
     # Looping through the graphite queries attribute to define the required zabbix hosts, items and triggers
     #
-    graphite_hosts = (get_nodes_for("graphite","bcpc").map{|x| x.bcpc.management.ip}).join(",")
+    graphite_hosts = (get_node_attributes(MGMT_IP_ATTR_SRCH_KEYS,"graphite","bcpc").map {|v| v['mgmt_ip']}).join(",")
     cron_check_cond = Array.new
     node['bcpc']['hadoop']['graphite']['queries'].each do |trigger_host, trigger|
       trigger.each do |trigger_attr|    

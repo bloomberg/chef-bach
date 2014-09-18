@@ -20,6 +20,16 @@
 require 'openssl'
 require 'thread'
 
+#
+# Constant string which defines the default attributes which need to be retrieved from node objects
+# The format is hash { key => value , key => value }
+# Key will be used as the key in the search result which is a hash and the value is the node attribute which needs
+# to be included in the result. Attribute hierarchy can be expressed as a dot seperated string. User the following
+# as an example
+#
+HOSTNAME_ATTR_SRCH_KEYS = {'hostname' => 'hostname'}
+HOSTNAME_NODENO_ATTR_SRCH_KEYS = {'hostname' => 'hostname', 'node_number' => 'bcpc.node_number'}
+MGMT_IP_ATTR_SRCH_KEYS = {'mgmt_ip' => 'bcpc.management.ip'}
 
 def init_config
   if not Chef::DataBag.list.key?('configs')
@@ -119,8 +129,7 @@ def get_namenodes()
   return nn_hosts.sort
 end
 
-
-def get_nodes_for(recipe, cookbook="bcpc-hadoop")
+def get_nodes_for(recipe, cookbook=cookbook_name)
   results = search(:node, "recipes:#{cookbook}\\:\\:#{recipe} AND chef_environment:#{node.chef_environment}")
   results.map!{ |x| x['hostname'] == node[:hostname] ? node : x }
   if node.run_list.expand(node.chef_environment).recipes.include?("#{cookbook}::#{recipe}") and not results.include?(node)
@@ -179,19 +188,31 @@ def znode_exists?(znode_path, zk_host="localhost:2181")
   return znode_found
 end
 
+#
+# Library function to get attributes from all namenode node object
+#
+def get_namenode_attr
+  all_node_attr = get_namenodes()
+  ret = get_req_node_attributes(all_node_attr,HOSTNAME_NODENO_ATTR_SRCH_KEYS)
+  return ret
+end
+
+#
+# Function to retrieve commonly used node attributes so that the call to chef server is minimized
+#
 def set_hosts
-  node.default[:bcpc][:hadoop][:nn_hosts] = get_namenodes()
-  node.default[:bcpc][:hadoop][:zookeeper][:servers] = get_nodes_for("zookeeper_server")
-  node.default[:bcpc][:hadoop][:jn_hosts] = get_nodes_for("journalnode")
-  node.default[:bcpc][:hadoop][:rm_hosts] = get_nodes_for("resource_manager")
-  node.default[:bcpc][:hadoop][:hs_hosts] = get_nodes_for("historyserver")
-  node.default[:bcpc][:hadoop][:dn_hosts] = get_nodes_for("datanode")
-  node.default[:bcpc][:hadoop][:hb_hosts] = get_nodes_for("hbase_master")
-  node.default[:bcpc][:hadoop][:hive_hosts] = get_nodes_for("hive_metastore")
-  node.default[:bcpc][:hadoop][:oozie_hosts]  = get_nodes_for("oozie"),
-  node.default[:bcpc][:hadoop][:httpfs_hosts] = get_nodes_for("httpfs")
-  node.default[:bcpc][:hadoop][:rs_hosts] = get_nodes_for("region_server")
-  node.default[:bcpc][:hadoop][:mysql_hosts] = get_mysql_nodes()
+  node.default[:bcpc][:hadoop][:nn_hosts] = get_namenode_attr()
+  node.default[:bcpc][:hadoop][:zookeeper][:servers] = get_node_attributes(HOSTNAME_NODENO_ATTR_SRCH_KEYS,"zookeeper_server","bcpc-hadoop")
+  node.default[:bcpc][:hadoop][:jn_hosts] = get_node_attributes(HOSTNAME_ATTR_SRCH_KEYS,"journalnode","bcpc-hadoop")
+  node.default[:bcpc][:hadoop][:rm_hosts] = get_node_attributes(HOSTNAME_NODENO_ATTR_SRCH_KEYS,"resource_manager","bcpc-hadoop")
+  node.default[:bcpc][:hadoop][:hs_hosts] = get_node_attributes(HOSTNAME_ATTR_SRCH_KEYS,"historyserver","bcpc-hadoop")
+  node.default[:bcpc][:hadoop][:dn_hosts] = get_node_attributes(HOSTNAME_ATTR_SRCH_KEYS,"datanode","bcpc-hadoop")
+  node.default[:bcpc][:hadoop][:hb_hosts] = get_node_attributes(HOSTNAME_ATTR_SRCH_KEYS,"hbase_master","bcpc-hadoop")
+  node.default[:bcpc][:hadoop][:hive_hosts] = get_node_attributes(HOSTNAME_ATTR_SRCH_KEYS,"hive_metastore","bcpc-hadoop")
+  node.default[:bcpc][:hadoop][:oozie_hosts]  = get_node_attributes(HOSTNAME_ATTR_SRCH_KEYS,"oozie","bcpc-hadoop")
+  node.default[:bcpc][:hadoop][:httpfs_hosts] = get_node_attributes(HOSTNAME_ATTR_SRCH_KEYS,"httpfs","bcpc-hadoop")
+  node.default[:bcpc][:hadoop][:rs_hosts] = get_node_attributes(HOSTNAME_ATTR_SRCH_KEYS,"region_server","bcpc-hadoop")
+  node.default[:bcpc][:hadoop][:mysql_hosts] = get_node_attributes(HOSTNAME_ATTR_SRCH_KEYS,"mysql","bcpc")
 end
 
 def zk_formatted?
@@ -200,4 +221,33 @@ def zk_formatted?
   z = Zookeeper.new("localhost:2181")
   r = z.get_children(:path => "/hadoop-ha/#{node.chef_environment}")
   return (r[:rc] == 0)
+end
+
+#
+# Library function to get attributes for nodes that executes a particular recipe
+#
+def get_node_attributes(srch_keys,recipe,cookbook=cookbook_name)
+  node_objects = get_nodes_for(recipe,cookbook)
+  ret = get_req_node_attributes(node_objects,srch_keys)
+  return ret
+end
+
+#
+# Library function to retrieve required attributes from a array of node objects passed
+# Takes in an array of node objects and a search hash. Refer to comments for the constant
+# DEFAULT_NODE_ATTR_SRCH_KEYS regarding the format of the hash
+# returns a array of hash with the requested attributes
+# [ { :node_number => "val", :hostname => "nameval" }, ...]
+#
+def get_req_node_attributes(node_objects,srch_keys)
+  result = Array.new
+  node_objects.each do |obj|
+    temp = Hash.new
+    srch_keys.each do |name, key|
+      val = key.split('.').reduce(obj) {|memo, key| memo[key]}
+      temp[name] = val
+    end
+    result.push(temp)
+  end
+  return result
 end

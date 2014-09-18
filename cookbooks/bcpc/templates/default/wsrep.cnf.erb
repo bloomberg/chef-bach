@@ -14,7 +14,7 @@
 # The rest of defaults should work out of the box.
 
 [mysqld_safe]
-wsrep_urls="<%= "#{@servers.sort.collect{|x| 'gcomm://'+x['bcpc']['management']['ip']+':4567'}.join(',')},#{@seed}" %>"
+wsrep_urls="<%= "#{@servers.map{|x| 'gcomm://'+x['mgmt_ip']+':4567'}.join(',')},#{@seed}" %>"
 
 ##
 ## mysqld options _MANDATORY_ for correct opration of the cluster
