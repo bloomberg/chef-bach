@@ -15,6 +15,7 @@ end
 
 hadoop_conf_files = %w{capacity-scheduler.xml
    core-site.xml
+   fair-scheduler.xml
    hadoop-metrics2.properties
    hadoop-metrics.properties
    hadoop-policy.xml
