@@ -23,7 +23,7 @@
 # Below are what we set by default.  May only work with SUN JVM.
 # For more on why as well as other possible settings,
 # see http://wiki.apache.org/hadoop/PerformanceTuning
-export HBASE_OPTS="-XX:+UseConcMarkSweepGC"
+export HBASE_OPTS="-Djava.net.preferIPv4Stack=true -XX:+UseConcMarkSweepGC"
 
 # Uncomment below to enable java garbage collection logging for the server-side processes
 # this enables basic gc logging for the server processes to the .out file
