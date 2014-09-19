@@ -18,6 +18,7 @@
     "recipe[bcpc-hadoop::disks]",
     "recipe[bcpc-hadoop::hdp_repo]",
     "recipe[bcpc-hadoop::configs]",
+    "recipe[pam::default]",
     "recipe[bcpc-hadoop::zookeeper_server]",
     "recipe[bcpc-hadoop::journalnode]",
     "recipe[bcpc-hadoop::graphite_to_zabbix]",
