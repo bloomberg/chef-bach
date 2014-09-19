@@ -2,6 +2,11 @@
 # Cookbook Name:: kafka-bcpc 
 # Recipe: Kafka
 
+user_ulimit "kafka" do
+  filehandle_limit 32768
+  notifies :restart, "service[kafka-broker]", :immediately
+end
+
 ruby_block "kafkaup" do
   i = 0
   block do

@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<allocations>
+  <queue name="default">
+    <weight>1.0</weight>
+    <schedulingPolicy>fair</schedulingPolicy>
+    <fairSharePreemptionTimeout>150</fairSharePreemptionTimeout>
+  </queue>
+
+  <queuePlacementPolicy>
+    <rule name="specified" />
+    <rule name="secondaryGroupExistingQueue" create="false" />
+    <rule name="default" />
+  </queuePlacementPolicy>
+</allocations>
