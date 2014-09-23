@@ -23,11 +23,26 @@ default["bcpc"]["hadoop"]["hdfs"]["failed_volumes_tolerated"] = 1
 default["bcpc"]["hadoop"]["hdfs"]["dfs_replication_factor"] = 3
 default["bcpc"]["hadoop"]["jmx_enabled"] = true
 default["bcpc"]["hadoop"]["namenode"]["jmx"]["port"] = 10111
+default["bcpc"]["hadoop"]["namenode"]["rpc"]["port"] = 8020
+default["bcpc"]["hadoop"]["namenode"]["http"]["port"] = 50070 
+default["bcpc"]["hadoop"]["namenode"]["https"]["port"] = 50080 
 default["bcpc"]["hadoop"]["datanode"]["jmx"]["port"] = 10112
 default["bcpc"]["hadoop"]["hbase_master"]["jmx"]["port"] = 10101
 default["bcpc"]["hadoop"]["hbase_rs"]["jmx"]["port"] = 10102
 default["bcpc"]["hadoop"]["kafka"]["jmx"]["port"] = 9995
 default["bcpc"]["hadoop"]["java"] = "/usr/lib/jvm/java-1.7.0-openjdk-amd64"
+#
+# Attributes for service rolling restart process
+#
+# Number of tries to acquire the lock required to restart the process
+default["bcpc"]["hadoop"]["restart_lock_acquire"]["max_tries"] = 5
+# The path in ZK where the restart locks (znodes)  need to be created
+# The path should exist in ZooKeeper e.g. "/lock" and the default is "/"
+default["bcpc"]["hadoop"]["restart_lock"]["root"] = "/"
+# Sleep time in seconds between tries to acquire the lock for restart
+default["bcpc"]["hadoop"]["restart_lock_acquire"]["sleep_time"] = 2
+# Flag to set whether the restart process was successful or not
+default["bcpc"]["hadoop"]["datanode"]["restart_failed"] = false
 
 default[:bcpc][:hadoop][:nn_hosts] = []
 default[:bcpc][:hadoop][:jn_hosts] = []
