@@ -52,7 +52,7 @@ end
 
 bash "init-zookeeper" do
   code "service zookeeper-server init --myid=#{node[:bcpc][:node_number]}"
-  creates "#{node[:bcpc][:hadoop][:zookeeper][:data_dir]}/myid"
+  not_if { ::File.exists?("#{node[:bcpc][:hadoop][:zookeeper][:data_dir]}/myid") }
 end
 
 file "#{node[:bcpc][:hadoop][:zookeeper][:data_dir]}/myid" do
@@ -63,6 +63,10 @@ file "#{node[:bcpc][:hadoop][:zookeeper][:data_dir]}/myid" do
 end
 
 service "zookeeper-server" do
+  supports :status => true, :restart => true, :reload => false
   action [:enable, :start]
   subscribes :restart, "template[/etc/zookeeper/conf/zoo.cfg]", :delayed
+  subscribes :restart, "template[/usr/lib/zookeeper/bin/zkServer.sh]", :delayed
+  subscribes :restart, "template[/etc/default/zookeeper-server]", :delayed
+  subscribes :restart, "file[#{node[:bcpc][:hadoop][:zookeeper][:data_dir]}/myid]", :delayed
 end
