@@ -23,6 +23,7 @@ default['bcpc']['hadoop']['yarn']['historyserver']['heap']["ratio"] = 0
 default["bcpc"]["hadoop"]["hdfs"]["HA"] = false
 default["bcpc"]["hadoop"]["hdfs"]["failed_volumes_tolerated"] = 1
 default["bcpc"]["hadoop"]["hdfs"]["dfs_replication_factor"] = 3
+default["bcpc"]["hadoop"]["hdfs"]["dfs_blocksize"] = "128m"
 default["bcpc"]["hadoop"]["jmx_enabled"] = true
 default["bcpc"]["hadoop"]["namenode"]["jmx"]["port"] = 10111
 default["bcpc"]["hadoop"]["namenode"]["rpc"]["port"] = 8020
