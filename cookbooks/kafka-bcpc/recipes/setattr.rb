@@ -21,4 +21,4 @@ node.override[:kafka][:automatic_start] = true
 node.override[:kafka][:automatic_restart] = true
 
 # Override Zookeeper related node attributes
-node.override[:bcpc][:hadoop][:zookeeper][:servers] = zk_hosts
+node.override[:bcpc][:hadoop][:zookeeper][:servers] = get_req_node_attributes(get_zk_nodes,HOSTNAME_NODENO_ATTR_SRCH_KEYS)
