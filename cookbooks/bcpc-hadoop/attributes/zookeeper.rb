@@ -34,3 +34,9 @@ default[:bcpc][:hadoop][:zookeeper][:owner] = 'zookeeper'
 
 #ZooKeeper group
 default[:bcpc][:hadoop][:zookeeper][:group] = 'zookeeper'
+
+#Port to connect to the leader in the Quorum
+default[:bcpc][:hadoop][:zookeeper][:leader_connect][:port] = 2888
+
+#Port for leader election in the Quorum
+default[:bcpc][:hadoop][:zookeeper][:leader_elect][:port] = 3888

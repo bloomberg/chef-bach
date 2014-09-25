@@ -14,6 +14,7 @@ bash "update-zookeeper-conf-alternatives" do
     update-alternatives --install /etc/zookeeper/conf zookeeper-conf /etc/zookeeper/conf.#{node.chef_environment} 50
     update-alternatives --set zookeeper-conf /etc/zookeeper/conf.#{node.chef_environment}
   }
+  not_if "update-alternatives --query zookeeper-conf | grep #{node.chef_environment}"
 end
 
 %w{zoo.cfg

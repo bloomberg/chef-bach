@@ -33,6 +33,6 @@ dataDir=<%= node[:bcpc][:hadoop][:zookeeper][:data_dir] %>
 clientPort=<%= node[:bcpc][:hadoop][:zookeeper][:port] %>
 
 <% @zk_hosts.each do |s| %> 
-<%="server.#{s[:node_number]}=#{float_host(s[:hostname])}:2888:3888" %>
+<%="server.#{s[:node_number]}=#{float_host(s[:hostname])}:#{node[:bcpc][:hadoop][:zookeeper][:leader_connect][:port]}:#{node[:bcpc][:hadoop][:zookeeper][:leader_elect][:port]}" %>
 <% end %>
 
