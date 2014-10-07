@@ -23,7 +23,7 @@
     <% @rm_hosts.each do |h| %>   
       <property>
         <name>yarn.resourcemanager.hostname.rm<%= "#{node.chef_environment}#{h[:node_number]}" %></name>
-        <value><%=float_host(h[:hostname]) %>:8020</value>
+        <value><%=float_host(h[:hostname]) %>:8032</value>
       </property>
     <% end %>
 

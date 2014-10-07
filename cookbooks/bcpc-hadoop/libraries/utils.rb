@@ -251,3 +251,122 @@ def get_req_node_attributes(node_objects,srch_keys)
   end
   return result
 end
+
+#
+# Restarting of hadoop processes need to be controlled in a way that all the nodes
+# are not down at the sametime, the consequence of which will impact users. In order
+# to achieve this, nodes need to acquire a lock before restarting the process of interest.
+# This function is to acquire the lock which is a znode in zookeeper. The znode name is the name  
+# of the service to be restarted for e.g "hadoop-hdfs-datanode" and is located by default at "/".
+# The imput parameters are service name along with the ZK path (znode name), string of zookeeper 
+# servers ("zk_host1:port,sk_host2:port"), and the fqdn of the node acquiring the lock
+#
+def acquire_restart_lock(znode_path, zk_hosts="localhost:2181",node_name)
+  require 'zookeeper'
+  lock_acquired = false
+  zk = nil
+  begin
+    zk = Zookeeper.new(zk_hosts)
+    if !zk.connected?
+      raise "acquire_restart_lock : unable to connect to ZooKeeper"
+    end
+    ret = zk.create(:path => znode_path, :data => node_name)
+    if ret[:rc] == 0
+      lock_acquired = true
+    end
+  rescue Exception => e
+    puts e.message
+  ensure
+    if !zk.nil?
+      zk.close unless zk.closed? 
+    end
+  end
+  return lock_acquired
+end
+
+#
+# This function is to check whether the lock to restart a particular service is held by a node.
+# The input parameters are the path to the znode used to restart a hadoop service, a string containing the 
+# host port values of the ZooKeeper nodes "host1:port, host2:port" and the fqdn of the host
+#
+def my_restart_lock?(znode_path,zk_hosts="localhost:2181",node_name)
+  require 'zookeeper'
+  my_lock = false
+  zk = nil
+  begin
+    zk = Zookeeper.new(zk_hosts)
+    if !zk.connected?
+      raise "my_restart_lock?: unable to connect to ZooKeeper"
+    end
+    ret = zk.get(:path => znode_path)
+    val = ret[:data]
+    if val == node_name
+      my_lock = true
+    end
+  rescue Exception => e
+    puts e.message
+  ensure
+    if !zk.nil?
+      zk.close unless zk.closed?
+    end
+  end
+  return my_lock
+end
+
+#
+# Function to release the lock held by the node to restart a particular hadoop service
+# The input parameters are the name of the path to znode which was used to lock for restarting service,
+# string containing the zookeeper host and port ("host1:port,host2:port") and the fqdn
+# of the node trying to release the lock.
+#
+def rel_restart_lock(znode_path, zk_hosts="localhost:2181",node_name)
+  require 'zookeeper'
+  lock_released = false
+  zk = nil
+  begin
+    zk = Zookeeper.new(zk_hosts)
+    if !zk.connected?
+      raise "rel_restart_lock : unable to connect to ZooKeeper"
+    end
+    if my_restart_lock?(znode_path, zk_hosts, node_name)
+      ret = zk.delete(:path => znode_path)
+    else
+      raise "rel_restart_lock : node who is not the owner is trying to release the lock"
+    end
+    if ret[:rc] == 0
+      lock_released = true
+    end
+  rescue Exception => e
+    puts e.message
+  ensure
+    if !zk.nil?
+      zk.close unless zk.closed? 
+    end
+  end
+  return lock_released
+end
+
+#
+# Function to get the node name which is holding a particular service restart lock
+# Input parameters: The path to the znode (lock) and the string of zookeeper hosts:port 
+#
+def get_restart_lock_holder(znode_path, zk_hosts="localhost:2181")
+  require 'zookeeper'
+  begin
+    zk = Zookeeper.new(zk_hosts)
+    if !zk.connected?
+      raise "get_restart_lock_holder : unable to connect to ZooKeeper"
+    end
+    ret = zk.get(:path => znode_path)
+    if ret[:rc] == 0
+      val = ret[:data]
+    end
+  rescue Exception => e
+    puts e.message
+  ensure
+    if !zk.nil?
+      zk.close unless zk.closed?
+    end
+  end
+  return val
+end
