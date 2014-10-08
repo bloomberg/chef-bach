@@ -3,6 +3,10 @@
 set -e
 set -x
 
+# Define the version of Zabbix server and zabbixapi gem to be downloaded
+# Refer https://github.com/bloomberg/chef-bcpc/issues/343
+ZABBIX_VERSION=2.2.2   
+
 # Define the appropriate version of each binary to grab/build
 VER_KIBANA=d1495fbf6e9c20c707ecd4a77444e1d486a1e7d6
 VER_DIAMOND=d64cc5cbae8bee93ef444e6fa41b4456f89c6e12
@@ -93,7 +97,7 @@ FILES="zookeeper*.gem $FILES"
 
 # Get Rubygem for zabbixapi
 if ! [[ -f gems/zabbixapi.gem ]]; then
-  gem fetch zabbixapi
+  gem fetch zabbixapi -v ${ZABBIX_VERSION}
   ln -s zabbix*.gem zabbixapi.gem || true
 fi
 FILES="zabbix*.gem $FILES"
@@ -196,10 +200,10 @@ FILES="python-requests-aws_0.1.5_all.deb $FILES"
 
 # Build the zabbix packages
 if [ ! -f zabbix-agent.tar.gz ] || [ ! -f zabbix-server.tar.gz ]; then
-    $CURL -L -O http://sourceforge.net/projects/zabbix/files/ZABBIX%20Latest%20Stable/2.2.2/zabbix-2.2.2.tar.gz
-    tar zxf zabbix-2.2.2.tar.gz
+    $CURL -L -O http://sourceforge.net/projects/zabbix/files/ZABBIX%20Latest%20Stable/${ZABBIX_VERSION}/zabbix-${ZABBIX_VERSION}.tar.gz
+    tar zxf zabbix-${ZABBIX_VERSION}.tar.gz
     rm -rf /tmp/zabbix-install && mkdir -p /tmp/zabbix-install
-    cd zabbix-2.2.2
+    cd zabbix-${ZABBIX_VERSION}
     ./configure --prefix=/tmp/zabbix-install --enable-agent --with-ldap
     make install
     tar zcf zabbix-agent.tar.gz -C /tmp/zabbix-install .
@@ -211,9 +215,9 @@ if [ ! -f zabbix-agent.tar.gz ] || [ ! -f zabbix-server.tar.gz ]; then
     tar zcf zabbix-server.tar.gz -C /tmp/zabbix-install .
     rm -rf /tmp/zabbix-install
     cd ..
-    cp zabbix-2.2.2/zabbix-agent.tar.gz .
-    cp zabbix-2.2.2/zabbix-server.tar.gz .
-    rm -rf zabbix-2.2.2 zabbix-2.2.2.tar.gz
+    cp zabbix-${ZABBIX_VERSION}/zabbix-agent.tar.gz .
+    cp zabbix-${ZABBIX_VERSION}/zabbix-server.tar.gz .
+    rm -rf zabbix-${ZABBIX_VERSION} zabbix-${ZABBIX_VERSION}.tar.gz
 fi
 FILES="zabbix-agent.tar.gz zabbix-server.tar.gz $FILES"
 
