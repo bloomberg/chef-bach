@@ -172,18 +172,20 @@ def znode_exists?(znode_path, zk_host="localhost:2181")
   require 'zookeeper'
   znode_found = false
   begin
-    @zk = Zookeeper.new(zk_host)
-    if !@zk.connected?
-      raise "znode_exists : Unable to connect to zookeeper"
+    zk = Zookeeper.new(zk_host)
+    if !zk.connected?
+      raise "znode_exists : Unable to connect to zookeeper quorum #{zk_host}"
     end 
-    r = @zk.get(:path => znode_path)
+    r = zk.get(:path => znode_path)
     if r[:rc] == 0
       znode_found = true
     end 
   rescue Exception => e
     puts e.message
   ensure
-    @zk.close unless @zk.closed?
+    if !zk.nil?
+      zk.close unless zk.closed?
+    end
   end
   return znode_found
 end
