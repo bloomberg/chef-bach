@@ -184,6 +184,7 @@ function hadoop_install {
   for m in $(printf ${hosts// /\\n} | grep -i "BCPC-Hadoop-Worker" | sort); do
     install_machines $m &
   done
+  wait
 }
 
 ########################################################################
