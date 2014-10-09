@@ -1,7 +1,5 @@
 {
   "name": "BCPC-Hadoop-Head-Namenode-Standby",
-  "default_attributes": {
-  },
   "json_class": "Chef::Role",
   "run_list": [
     "role[Basic]",

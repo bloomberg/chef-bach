@@ -1,7 +1,5 @@
 {
   "name": "BCPC-Hadoop-Head-Namenode-NoHA",
-  "default_attributes": {
-  },
   "json_class": "Chef::Role",
   "run_list": [
     "role[Basic]",
