@@ -20,7 +20,4 @@ node.override[:kafka][:zookeeper][:connect] = zk_hosts.map{|x| float_host(x['hos
 node.override[:kafka][:base_url] = get_binary_server_url + "kafka"
 node.override[:kafka][:host_name] = float_host(node[:fqdn])
 node.override[:kafka][:advertised_host_name] = float_host(node[:fqdn])
-node.override[:kafka][:advertised_port] = 6667
 node.override[:kafka][:jmx_port] = node[:bcpc][:hadoop][:kafka][:jmx][:port]
-node.override[:kafka][:automatic_start] = true
-node.override[:kafka][:automatic_restart] = true
