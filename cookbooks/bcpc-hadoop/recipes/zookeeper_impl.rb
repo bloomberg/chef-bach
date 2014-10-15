@@ -62,11 +62,12 @@ file "#{node[:bcpc][:hadoop][:zookeeper][:data_dir]}/myid" do
   mode 0644
 end
 
-service "zookeeper-server" do
-  supports :status => true, :restart => true, :reload => false
-  action [:enable, :start]
-  subscribes :restart, "template[/etc/zookeeper/conf/zoo.cfg]", :delayed
-  subscribes :restart, "template[/usr/lib/zookeeper/bin/zkServer.sh]", :delayed
-  subscribes :restart, "template[/etc/default/zookeeper-server]", :delayed
-  subscribes :restart, "file[#{node[:bcpc][:hadoop][:zookeeper][:data_dir]}/myid]", :delayed
+zk_service_dep = ["template[/etc/zookeeper/conf/zoo.cfg]",
+                  "template[/usr/lib/zookeeper/bin/zkServer.sh]",
+                  "template[/etc/default/zookeeper-server]",
+                  "file[#{node[:bcpc][:hadoop][:zookeeper][:data_dir]}/myid]"]
+
+hadoop_service "zookeeper-server" do
+  dependencies zk_service_dep
+  process_identifier "org.apache.zookeeper.server.quorum.QuorumPeerMain"
 end
