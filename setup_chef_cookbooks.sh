@@ -51,13 +51,13 @@ ENV['no_proxy'] = no_proxy_string
 http_proxy ENV['http_proxy']
 https_proxy ENV['https_proxy']
 no_proxy no_proxy_string
-
+ENV['GIT_SSL_NO_VERIFY'] = 'true'
 File.umask(0007)
 EOF
 cd cookbooks
 
 # allow versions on cookbooks via "cookbook version"
-for cookbook in "apt 2.4.0" python build-essential ubuntu cron "chef-client 3.0.6" ntp yum logrotate yum-epel sysctl chef_handler 7-zip windows ark sudo ulimit pam ohai poise chef_handler graphite_handler; do
+for cookbook in "apt 2.4.0" python build-essential ubuntu cron "chef-client 3.0.6" ntp yum logrotate yum-epel sysctl chef_handler 7-zip windows ark sudo ulimit pam ohai poise graphite_handler java maven; do
   if [[ ! -d ${cookbook% *} ]]; then
      # unless the proxy was defined this knife config will be the same as the one generated above
     knife cookbook site download $cookbook --config ../.chef/knife.rb
@@ -69,6 +69,5 @@ done
 if [[ ! -d kafka ]]; then
   git clone https://github.com/mthssdrbrg/kafka-cookbook.git kafka
 fi
-[[ -d java ]] || git clone https://github.com/socrata-cookbooks/java.git java
 [[ -d jmxtrans ]] || git clone https://github.com/bijugs/jmxtrans-cookbook.git jmxtrans
 [[ -d cobblerd ]] || git clone https://github.com/cbaenziger/cobbler-cookbook.git cobblerd -b cobbler_profile

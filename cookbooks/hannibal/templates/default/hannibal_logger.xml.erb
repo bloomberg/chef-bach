@@ -1,0 +1,42 @@
+<configuration>
+
+    <appender name="FILE_ROLL_TIME" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file><%= node[:hannibal][:log_dir] %>/application.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern><%= node[:hannibal][:log_dir] %>/application.log.%d{yyyy-MM-dd}.gz</fileNamePattern>
+            <maxHistory>7</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%date{yyyy-MM-dd HH:mm:ss ZZZZ} - [%level] - from %logger in %thread %n%message%n%xException%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="FILE_ROLL_SIZE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file><%= node[:hannibal][:log_dir] %>/application.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
+            <fileNamePattern><%= node[:hannibal][:log_dir] %>/application.log.%i.gz</fileNamePattern>
+            <minIndex>1</minIndex>
+            <maxIndex>4</maxIndex>
+        </rollingPolicy>
+        <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+            <maxFileSize>25MB</maxFileSize>
+        </triggeringPolicy>
+        <encoder>
+            <pattern>%date{yyyy-MM-dd HH:mm:ss ZZZZ} - [%level] - from %logger in %thread %n%message%n%xException%n</pattern>
+        </encoder>
+    </appender>
+
+    <logger name="org.apache" additivity="true">
+      <level value="INFO" />
+      <appender-ref ref="FILE_ROLE_TIME" />
+    </logger>
+
+    <logger name="akka" level=<%= node[:hannibal][:akka][:loglevel] %>>
+        <appender-ref ref="FILE_ROLL_TIME" />
+    </logger>
+
+    <root level="INFO">
+        <appender-ref ref="FILE_ROLL_TIME"/>
+    </root>
+
+</configuration>
