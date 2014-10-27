@@ -15,7 +15,7 @@ else
 fi
 ROLE_REQUESTED="$2"
 if [[ -f cluster.txt ]]; then
-    while read HOSTNAME MACADDR IPADDR ILOIPADDR DOMAIN ROLE; do
+    while read HOSTNAME MACADDR IPADDR ILOIPADDR PROFILE DOMAIN ROLE; do
 	if [[ $HOSTNAME = "end" ]]; then
 	    continue
 	fi

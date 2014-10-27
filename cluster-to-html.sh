@@ -27,7 +27,7 @@ echo -e "<head>\n<title>Cluster $CLUSTERNAME members</title></head>"
 echo -e "<body>"
 echo -e "<font color=slategray>\n<h2>Cluster $CLUSTERNAME members</h2>\n</font>"
 echo -e "<table border=\"1\">"
-while read HOSTNAME MACADDR IPADDR ILOIPADDR DOMAIN ROLE; do
+while read HOSTNAME MACADDR IPADDR ILOIPADDR PROFILE DOMAIN ROLE; do
 	if [[ "$ROLE" = "head" ]]; then
 		COLOR=red
 	elif [[ "$ROLE" = "bootstrap" ]]; then
