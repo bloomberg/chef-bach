@@ -1,0 +1,80 @@
+<workflow-app xmlns='uri:oozie:workflow:0.3' name="<%= node[:hdfsdu][:workflow_job_name] %>">
+   <start to="fetch_fsimage"/>
+   <action name="fetch_fsimage">
+      <shell xmlns="uri:oozie:shell-action:0.1">
+         <job-tracker>${jobTracker}</job-tracker>
+         <name-node>${nameNode}</name-node>
+         <prepare>
+            <delete path="${fsimageInputPath}"/>
+            <mkdir path="${fsimageInputPath}"/>
+         </prepare>
+         <configuration>
+            <property>
+               <name>mapred.job.queue.name</name>
+               <value>${queueName}</value>
+            </property>
+         </configuration>
+         <exec>${fetchFsimageScriptName}</exec>
+         <argument>${fsimageDelimitedFileName}</argument>
+         <argument>${fsimageInputPath}</argument>
+         <file>${fetchFsimageScriptPath}#${fetchFsimageScriptName}</file>
+         <capture-output/>
+      </shell>
+      <ok to="process_usage_data"/>
+      <error to="fail"/>
+   </action>
+
+   <action name="process_usage_data">
+      <pig>
+         <job-tracker>${jobTracker}</job-tracker>
+         <name-node>${nameNode}</name-node>
+         <prepare>
+            <delete path="${fsimageOutputPath}"/>
+            <mkdir path="${fsimageOutputPath}"/>
+         </prepare>
+         <configuration>
+            <property>
+               <name>mapred.job.queue.name</name>
+               <value>${queueName}</value>
+            </property>
+         </configuration>
+         <script>${processFsimageScriptPath}</script>
+         <param>INPUT=${processFsimageInput}</param>
+         <param>OUTPUT=${processFsimageOutput}</param>
+         <param>customJobName=${processFsimageJobName}</param>
+      </pig>
+      <ok to="format_usage_data"/>
+      <error to="fail"/>
+   </action>
+
+   <action name="format_usage_data">
+      <shell xmlns="uri:oozie:shell-action:0.1">
+         <job-tracker>${jobTracker}</job-tracker>
+         <name-node>${nameNode}</name-node>
+         <prepare>
+            <delete path="${usageDataOutputPath}"/>
+            <mkdir path="${usageDataOutputPath}"/>
+         </prepare>
+         <configuration>
+            <property>
+               <name>mapred.job.queue.name</name>
+               <value>${queueName}</value>
+            </property>
+         </configuration>
+         <exec>${formatUsageDataStarterScriptName} </exec>
+         <argument>${formatUsageDataScriptName} </argument>
+         <argument>${processFsimageOutput}</argument>
+         <argument>${usageDataOutputPath}</argument>
+         <file>${formatUsageDataStarterScriptPath}#${formatUsageDataStarterScriptName}</file>
+         <file>${formatUsageDataScriptPath}#${formatUsageDataScriptName}</file>
+         <capture-output/>
+      </shell>
+      <ok to="end"/>
+      <error to="fail"/>
+   </action>
+
+   <kill name="fail">
+      <message>Fetch fsimage failed, error message[${wf:errorMessage(wf:lastErrorNode())}]</message>
+   </kill>
+   <end name="end"/>
+</workflow-app>

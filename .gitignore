@@ -16,6 +16,7 @@ cookbooks/*/
 !cookbooks/bcpc-hadoop
 !cookbooks/bcpc_jmxtrans
 !cookbooks/hannibal
+!cookbooks/hdfsdu
 !cookbooks/kafka-bcpc
 !cookbooks/bach_krb5
 cookbooks/*/coverage

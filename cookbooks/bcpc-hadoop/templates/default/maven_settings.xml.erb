@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>                                          
+<settings xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.1.0 http://maven.apache.org/xsd/settings-1.1.0.xsd" xmlns="http://maven.apache.org/SETTINGS/1.1.0"
+     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">                      
+<% if ( node[:bcpc][:bootstrap][:proxy] != nil && uri = URI(node[:bcpc][:bootstrap][:proxy]) ) %>
+  <proxies>                                                                     
+    <proxy>
+      <id><%= uri.scheme %>proxy</id>                                                                     
+      <active>true</active>                                                    
+      <protocol><%= uri.scheme %></protocol>                                             
+      <host><%= uri.host %></host>                                      
+      <port><%= uri.port %></port>                                                       
+      <nonProxyHosts>localhost|127.0.0.1|localaddress|.localdomain.com</nonProxyHosts>
+    </proxy>                                                                    
+  </proxies>                                                                    
+<% end %>
+<% if ( node[:maven][:repositories] != nil ) %>
+  <mirrors>                                                                     
+    <mirror>                                                                    
+      <mirrorOf>*</mirrorOf>                                                    
+      <name>repo_mirror</name>                                                   
+      <url><%= node[:maven][:repositories].first %></url>
+      <id>repo_mirror</id>                                                       
+    </mirror>                                                                   
+  </mirrors>                                                                    
+<% end %>
+</settings>
