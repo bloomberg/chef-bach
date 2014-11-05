@@ -56,6 +56,10 @@ default["bcpc"]["hadoop"]["hbase_regionserver"]["restart_failed_time"] = ""
 default["bcpc"]["hadoop"]["zookeeper_server"]["restart_failed"] = false
 # Attribute to save the time when ZooKeeper server restart process failed
 default["bcpc"]["hadoop"]["zookeeper_server"]["restart_failed_time"] = ""
+# Flag to set whether Yarn nodemanager server restart process was successful or not
+default["bcpc"]["hadoop"]["hadoop_yarn_nodemanager"]["restart_failed"] = false
+# Attribute to save the time when Yarn nodemanager server restart process failed
+default["bcpc"]["hadoop"]["hadoop_yarn_nodemanager"]["restart_failed_time"] = ""
 
 default[:bcpc][:hadoop][:nn_hosts] = []
 default[:bcpc][:hadoop][:jn_hosts] = []

@@ -1,8 +1,6 @@
 include_recipe 'bcpc-hadoop::hadoop_config'
 
-%w{hadoop-yarn-nodemanager
-   hadoop-hdfs-datanode
-   hadoop-mapreduce
+%w{hadoop-hdfs-datanode
    hadoop-client
    sqoop
    lzop
@@ -10,24 +8,6 @@ include_recipe 'bcpc-hadoop::hadoop_config'
   package pkg do
     action :upgrade
   end
-end
-
-# Install YARN Bits
-template "/etc/hadoop/conf/container-executor.cfg" do
-  source "hdp_container-executor.cfg.erb"
-  owner "root"
-  group "yarn"
-  mode "0400"
-  variables(:mounts => node[:bcpc][:hadoop][:mounts])
-  action :create
-  notifies :run, "bash[verify-container-executor]", :immediate
-end
-
-bash "verify-container-executor" do
-  code "/usr/lib/hadoop-yarn/bin/container-executor --checksetup"
-  group "yarn"
-  action :nothing
-  only_if { File.exists?("/usr/lib/hadoop-yarn/bin/container-executor") }
 end
 
 # Install Sqoop Bits
@@ -57,7 +37,7 @@ link "/usr/lib/hive/lib/mysql.jar" do
   to "/usr/share/java/mysql.jar"
 end
 
-# Setup datanode and nodemanager bits
+# Setup HDFS datanode bits
 if node[:bcpc][:hadoop][:mounts].length <= node[:bcpc][:hadoop][:hdfs][:failed_volumes_tolerated]
   Chef::Application.fatal!("You have fewer #{node[:bcpc][:hadoop][:disks]} than #{node[:bcpc][:hadoop][:hdfs][:failed_volumes_tolerated]}! See comments of HDFS-4442.")
 end
@@ -78,34 +58,10 @@ node[:bcpc][:hadoop][:mounts].each do |i|
   end
 end
 
-# Build nodes for YARN log storage
-node[:bcpc][:hadoop][:mounts].each do |i|
-  directory "/disk/#{i}/yarn/" do
-    owner "yarn"
-    group "yarn"
-    mode 0755
-    action :create
-  end
-  %w{mapred-local local logs}.each do |d|
-    directory "/disk/#{i}/yarn/#{d}" do
-      owner "yarn"
-      group "hadoop"
-      mode 0755
-      action :create
-    end
-  end
-end
-
 dep = ["template[/etc/hadoop/conf/hdfs-site.xml]",
        "template[/etc/hadoop/conf/hadoop-env.sh]"]
 
 hadoop_service "hadoop-hdfs-datanode" do
   dependencies dep
   process_identifier "org.apache.hadoop.hdfs.server.datanode.DataNode"
-end
-
-service "hadoop-yarn-nodemanager" do
-  supports :status => true, :restart => true, :reload => false
-  action [:enable, :start]
-  subscribes :restart, "template[/etc/hadoop/conf/yarn-site.xml]", :delayed
 end
