@@ -52,6 +52,10 @@ default["bcpc"]["hadoop"]["skip_restart_coordination"] = false
 default["bcpc"]["hadoop"]["hbase_regionserver"]["restart_failed"] = false
 # Attribute to save the time when HBase region server restart process failed
 default["bcpc"]["hadoop"]["hbase_regionserver"]["restart_failed_time"] = ""
+# Flag to set whether the ZooKeeper server restart process was successful or not
+default["bcpc"]["hadoop"]["zookeeper_server"]["restart_failed"] = false
+# Attribute to save the time when ZooKeeper server restart process failed
+default["bcpc"]["hadoop"]["zookeeper_server"]["restart_failed_time"] = ""
 
 default[:bcpc][:hadoop][:nn_hosts] = []
 default[:bcpc][:hadoop][:jn_hosts] = []
