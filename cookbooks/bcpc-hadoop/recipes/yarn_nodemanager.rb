@@ -1,9 +1,39 @@
 
 %w{hadoop-yarn-nodemanager
-  hadoop-mapreduce}.each do |pkg|
+  hadoop-mapreduce
+  sqoop
+  lzop
+  hadoop-lzo}.each do |pkg|
   package pkg do
     action :upgrade
   end
+end
+
+# Install Sqoop Bits
+template "/etc/sqoop/conf/sqoop-env.sh" do
+  source "sq_sqoop-env.sh.erb"
+  mode "0444"
+  action :create
+end
+
+# Install Hive Bits
+# workaround for hcatalog dpkg not creating the hcat user it requires
+user "hcat" do
+  username "hcat"
+  system true
+  shell "/bin/bash"
+  home "/usr/lib/hcatalog"
+  supports :manage_home => false
+end
+
+%w{hive hcatalog libmysql-java}.each do |pkg|
+  package pkg do
+    action :upgrade
+  end
+end
+
+link "/usr/lib/hive/lib/mysql.jar" do
+  to "/usr/share/java/mysql.jar"
 end
 
 # Install YARN Bits
