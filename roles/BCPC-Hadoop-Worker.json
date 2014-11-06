@@ -12,6 +12,7 @@
     "recipe[pam::default]",
     "recipe[bcpc-hadoop::datanode]",
     "recipe[bcpc-hadoop::yarn_nodemanager]",
+    "recipe[bcpc-hadoop::hive_client]",
     "recipe[bcpc-hadoop::httpfs]",
     "recipe[bcpc-hadoop::region_server]",
     "recipe[bcpc-hadoop::pig]",
