@@ -16,8 +16,8 @@ else
   node.override[:bcpc][:hadoop][:zookeeper][:servers] = zk_hosts
 end
 # Override Kafka related node attributes
-node.override[:kafka][:zookeeper][:connect] = zk_hosts.map{|x| float_host(x['hostname'])}
+node.override[:kafka][:broker][:zookeeper][:connect] = zk_hosts.map{|x| float_host(x['hostname'])}
 node.override[:kafka][:base_url] = get_binary_server_url + "kafka"
-node.override[:kafka][:host_name] = float_host(node[:fqdn])
-node.override[:kafka][:advertised_host_name] = float_host(node[:fqdn])
-node.override[:kafka][:jmx_port] = node[:bcpc][:hadoop][:kafka][:jmx][:port]
+node.override[:kafka][:broker][:host_name] = float_host(node[:fqdn])
+node.override[:kafka][:broker][:advertised_host_name] = float_host(node[:fqdn])
+node.override[:kafka][:broker][:jmx_port] = node[:bcpc][:hadoop][:kafka][:jmx][:port]
