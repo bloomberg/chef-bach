@@ -8,8 +8,8 @@ default[:use_hadoop_zookeeper_quorum] = false
 #
 # Overwriting community kafka cookbook attributes 
 #
-default[:kafka][:port] = 6667
-default[:kafka][:advertised_port] = 6667
+default[:kafka][:broker][:port] = 6667
+default[:kafka][:broker][:advertised_port] = 6667
 default[:kafka][:automatic_start] = true
 default[:kafka][:automatic_restart] = true
 
