@@ -12,6 +12,18 @@ include_recipe 'bcpc-hadoop::hadoop_config'
   end
 end
 
+link "/usr/lib/hadoop/lib/native/libgplcompression.la" do
+  to "/usr/lib/hadoop/lib/native/Linux-amd64-64/libgplcompression.la"
+end
+
+link "/usr/lib/hadoop/lib/native/libgplcompression.a" do
+  to "/usr/lib/hadoop/lib/native/Linux-amd64-64/libgplcompression.a"
+end
+
+link "/usr/lib/hadoop/lib/native/libgplcompression.so.0.0.0" do
+  to "/usr/lib/hadoop/lib/native/Linux-amd64-64/libgplcompression.so.0.0.0"
+end
+
 # Install YARN Bits
 template "/etc/hadoop/conf/container-executor.cfg" do
   source "hdp_container-executor.cfg.erb"
