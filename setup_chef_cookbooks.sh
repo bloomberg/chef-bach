@@ -68,7 +68,6 @@ done
 [[ -d dpkg_autostart ]] || git clone https://github.com/hw-cookbooks/dpkg_autostart.git
 if [[ ! -d kafka ]]; then
   git clone https://github.com/mthssdrbrg/kafka-cookbook.git kafka
-  cd kafka && git checkout v0.6.0 && cd ..
 fi
 [[ -d java ]] || git clone https://github.com/socrata-cookbooks/java.git java
 [[ -d jmxtrans ]] || git clone https://github.com/bijugs/chef-jmxtrans.git jmxtrans
