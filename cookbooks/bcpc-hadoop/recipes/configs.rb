@@ -1,3 +1,17 @@
+# disable IPv6 (e.g. for HADOOP-8568)
+case node["platform_family"]
+  when "debian"
+    %w{net.ipv6.conf.all.disable_ipv6
+       net.ipv6.conf.default.disable_ipv6
+       net.ipv6.conf.lo.disable_ipv6}.each do |param|
+      sysctl_param param do
+        value 1
+      end
+    end
+  else
+   Chef::Log.warn "============ Unable to disable IPv6 for non-Debian systems"
+end
+
 # ensure we use /etc/security/limits.d to allow ulimit overriding
 if not node.has_key?('pam_d') or not node['pam_d'].has_key?('services') or not node['pam_d']['services'].has_key?('common-session')
   node.default['pam_d']['services'] = {
