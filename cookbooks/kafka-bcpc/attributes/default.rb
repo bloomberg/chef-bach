@@ -13,3 +13,10 @@ default[:kafka][:broker][:advertised_port] = 6667
 default[:kafka][:automatic_start] = true
 default[:kafka][:automatic_restart] = true
 
+default[:kafka][:base_url] = get_binary_server_url + "kafka"
+default[:kafka][:broker][:host_name] = float_host(node[:fqdn])
+default[:kafka][:broker][:advertised_host_name] = float_host(node[:fqdn])
+default[:kafka][:broker][:jmx_port] = node[:bcpc][:hadoop][:kafka][:jmx][:port]
+default[:kafka][:broker][:controlled][:shutdown][:enable] = true
+default[:kafka][:broker][:controlled][:shutdown][:max][:retries] = 3
+default[:kafka][:broker][:controlled][:shutdown][:retry][:backoff][:ms] = 5000
