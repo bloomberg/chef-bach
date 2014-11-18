@@ -10,3 +10,4 @@ depends "bcpc", ">= 0.5.0"
 depends "dpkg_autostart"
 depends "sysctl"
 depends "pam"
+depends 'java', '>= 1.28.0'

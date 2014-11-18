@@ -55,7 +55,11 @@ template "hadoop-detect-javahome" do
   mode "0755"
 end
 
-%w{openjdk-7-jdk zookeeper}.each do |pkg|
+# Install Java
+include_recipe "bcpc-hadoop::java_config"
+include_recipe "java::default"
+
+%w{zookeeper}.each do |pkg|
   package pkg do
     action :upgrade
   end
