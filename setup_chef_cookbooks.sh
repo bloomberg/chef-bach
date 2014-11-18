@@ -70,5 +70,5 @@ if [[ ! -d kafka ]]; then
   git clone https://github.com/mthssdrbrg/kafka-cookbook.git kafka
 fi
 [[ -d java ]] || git clone https://github.com/socrata-cookbooks/java.git java
-[[ -d jmxtrans ]] || git clone https://github.com/bijugs/chef-jmxtrans.git jmxtrans
+[[ -d jmxtrans ]] || git clone https://github.com/bijugs/jmxtrans-cookbook.git jmxtrans
 [[ -d cobblerd ]] || git clone https://github.com/cbaenziger/cobbler-cookbook.git cobblerd -b cobbler_profile
