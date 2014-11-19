@@ -14,6 +14,7 @@ vservers = node['jmxtrans']['servers'].dup
 
 vservers.each do |vserver|
   vserver['name']=node['bcpc']['management']['ip']
+  vserver['alias']=vserver['type']+"."+node[:hostname]
   vserver['port']=node["bcpc"]["hadoop"][vserver['type']]["jmx"]["port"]
 end
 

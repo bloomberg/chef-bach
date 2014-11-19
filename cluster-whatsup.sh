@@ -8,7 +8,7 @@ fi
 if [[ -f cluster.txt ]]; then
 
     # select which hosts to scan
-    while read HOSTNAME MACADDR IPADDR ILOIPADDR DOMAIN ROLE; do
+    while read HOSTNAME MACADDR IPADDR ILOIPADDR PROFILE DOMAIN ROLE; do
 	if [[ "$HOSTNAME" = end ]]; then
 	    continue
 	fi
