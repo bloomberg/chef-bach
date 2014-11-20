@@ -9,8 +9,7 @@
       "recipe[bcpc::apache-mirror]",
       "recipe[bcpc::ufw]",
       "recipe[bcpc::cobbler]",
-      "recipe[bcpc::cobbler-centos]",
-      "recipe[bcpc::bootstrap]"
+      "recipe[bcpc::cobbler-centos]"
     ],
     "description": "A bootstrap node in a BCPC cluster",
     "chef_type": "role",
