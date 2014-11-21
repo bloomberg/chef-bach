@@ -7,6 +7,7 @@
     "recipe[bcpc::networking]",
     "recipe[bcpc-hadoop::disks]",
     "recipe[bcpc-hadoop::default]",
+    "recipe[kafka-wrapper::default]", 
     "recipe[kafka-bcpc::default]", 
     "recipe[kafka-bcpc::setattr]",
     "recipe[java::oracle]", 
