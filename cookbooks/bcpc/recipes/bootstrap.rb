@@ -60,7 +60,7 @@ end
 cron 'synchronize chef' do
   user  'vagrant'
   home '/home/vagrant'
-  command "cd ~/chef-bcpc; git pull local hadoop_hortonworks; knife role from file roles/*.json; knife cookbook upload -a; knife environment from file environments/#{node.chef_environment}.json"
+  command "cd ~/chef-bcpc; git pull local master; knife role from file roles/*.json; knife cookbook upload -a; knife environment from file environments/#{node.chef_environment}.json"
 end
 
 package 'sshpass'
