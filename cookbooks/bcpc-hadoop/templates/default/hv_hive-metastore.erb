@@ -23,25 +23,25 @@
 #    by Ian Murdock <imurdock@gnu.ai.mit.edu>.
 #               Further changes by Javier Fernandez-Sanguino <jfs@debian.org>
 #
-# Starts a Hive hiveserver2
+# Starts a Hive metastore
 #
 # chkconfig: 345 85 15
-# description: Starts a Hive hiveserver2
+# description: Starts a Hive metastore
 # processname: hive
 #
 ### BEGIN INIT INFO
-# Provides:          hive-server2
+# Provides:          hive-metastore
 # Required-Start:    $syslog $remote_fs
 # Should-Start:
 # Required-Stop:     $syslog $remote_fs
 # Should-Stop:
 # Default-Start:     3 4 5
 # Default-Stop:      0 1 2 6
-# Short-Description: Starts a Hive hiveserver2
+# Short-Description: Starts a Hive metastore
 ### END INIT INFO
 
 source /lib/lsb/init-functions
-source /etc/default/hive-server2
+source /etc/default/hive-metastore
 
 # Autodetect JAVA_HOME if not defined
 if [ -e /usr/libexec/bigtop-detect-javahome ]; then
@@ -62,8 +62,8 @@ ERROR_PROGRAM_NOT_INSTALLED=5
 ERROR_PROGRAM_NOT_CONFIGURED=6
 
 PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
-NAME="hive-hiveserver2"
-DESC="Hive hiveserver2 daemon"
+NAME="hive-metastore"
+DESC="Hive metastore daemon"
 SYS_FILE="/etc/default/${NAME}"
 EXE_FILE="/usr/lib/hive/bin/hive"
 PID_FILE="/var/run/hive/${NAME}.pid"
@@ -82,12 +82,12 @@ hive_start() {
     [ -x $EXE_FILE ] || exit $ERROR_PROGRAM_NOT_INSTALLED
 
     exec_env="HADOOP_OPTS=\"-Dhive.log.dir=`dirname $LOG_FILE` -Dhive.log.file=${NAME}.log -Dhive.log.threshold=INFO\""
-    service_name="hiveserver2"
+    service_name="metastore"
     log_success_msg "Starting $desc (${NAME}): "
     /sbin/start-stop-daemon --quiet --oknodo --start --user $HIVE_USER --name java --background \
        --chuid $HIVE_USER --nicelevel $NICENESS --chdir $HIVE_HOME \
        --make-pidfile --pidfile $PID_FILE --startas /bin/sh -- \
-       -c "$exec_env exec $EXE_FILE --service $service_name $HIVESERVER2_PORT >> $LOG_FILE 2>&1 < /dev/null"
+       -c "$exec_env exec $EXE_FILE --service $service_name $METASTORE_PORT >> $LOG_FILE 2>&1 < /dev/null"
 
     RETVAL=$?
     [ $RETVAL -eq $RETVAL_SUCCESS ] && touch $LOCKFILE
@@ -116,19 +116,19 @@ hive_status() {
 
     case "$RETVAL" in
       $STATUS_RUNNING)
-        log_success_msg "hiveserver2 is running"
+        log_success_msg "metastore is running"
         ;;
       $STATUS_DEAD)
-        log_failure_msg "hiveserver2 is dead and pid file exists"
+        log_failure_msg "metastore is dead and pid file exists"
         ;;
       $STATUS_DEAD_AND_LOCK)
-        log_failure_msg "hiveserver2 is dead and lock file exists"
+        log_failure_msg "metastore is dead and lock file exists"
         ;;
       $STATUS_NOT_RUNNING|$STATUS_DEBIAN_NOT_RUNNING)
-        log_failure_msg "hiveserver2 is not running"
+        log_failure_msg "metastore is not running"
         ;;
       *)
-        log_failure_msg "hiveserver2 status is unknown"
+        log_failure_msg "metastore status is unknown"
         ;;
     esac
     return $RETVAL

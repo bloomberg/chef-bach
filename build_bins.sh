@@ -61,6 +61,12 @@ if [ ! -f kibana3.tgz ]; then
 fi
 FILES="kibana3.tgz $FILES"
 
+# Fetch MySQL connector
+if ! [[ -f mysql-connector-java-5.1.34.tar.gz ]]; then
+  $CURL -O -L http://dev.mysql.com/get/Downloads/Connector-J/mysql-connector-java-5.1.34.tar.gz
+fi
+FILES="mysql-connector-java-5.1.34.tar.gz $FILES"
+
 # Fetch Kafka Tar
 for version in 0.8.1 0.8.1.1; do
   mkdir -p kafka/${version}/

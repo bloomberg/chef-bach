@@ -1,13 +1,54 @@
+# Cookbook Name : bcpc-hadoop
+# Recipe Name : hive_metastore
+# Description : To setup hive metastore service
+
+require 'digest'
+
 include_recipe "bcpc-hadoop::hive_config"
 
-%w{hive-metastore libmysql-java}.each do |pkg|
-  package pkg do
-    action :upgrade
-  end
+remote_file "#{Chef::Config[:file_cache_path]}/mysql-connector-java-5.1.34.tar.gz" do
+  source "#{get_binary_server_url}/mysql-connector-java-5.1.34.tar.gz"
+  owner "root"
+  group "root"
+  mode "755"
+  not_if { File.exists?('/usr/share/java/mysql-connector-java-5.1.34-bin.jar') && (Digest::SHA256.hexdigest File.read "/usr/share/java/mysql-connector-java-5.1.34-bin.jar") == "af1e5f28be112c85ec52a82d94e7a8dc02ede57a182dc2f1545f7cec5e808142" } 
+end
+
+bash "extract-mysql-connector" do
+  code "tar xvzf #{Chef::Config[:file_cache_path]}/mysql-connector-java-5.1.34.tar.gz -C /usr/share/java --no-anchored mysql-connector-java-5.1.34-bin.jar --strip-components=1"
+  action :run
+  group "root"
+  user "root"
+  not_if { File.exists?('/usr/share/java/mysql-connector-java-5.1.34-bin.jar') && (Digest::SHA256.hexdigest File.read "/usr/share/java/mysql-connector-java-5.1.34-bin.jar") == "af1e5f28be112c85ec52a82d94e7a8dc02ede57a182dc2f1545f7cec5e808142" }
+end
+
+link "/usr/share/java/mysql-connector-java.jar" do
+  to "/usr/share/java/mysql-connector-java-5.1.34-bin.jar"
+end
+
+link "/usr/share/java/mysql.jar" do
+  to "/usr/share/java/mysql-connector-java.jar"
 end
 
 link "/usr/lib/hive/lib/mysql.jar" do
   to "/usr/share/java/mysql.jar"
+end
+
+# create metastore defaults
+template "hive-metastore-defaults" do
+  path "/etc/default/hive-metastore"
+  source "hv_hive-default-metastore.erb"
+  owner "root"
+  group "root"
+  mode "0755"
+end
+
+template "hive-metastore-service" do
+  path "/etc/init.d/hive-metastore"
+  source "hv_hive-metastore.erb"
+  owner "root"
+  group "root"
+  mode "0755"
 end
 
 template "hive-config" do
@@ -17,7 +58,7 @@ template "hive-config" do
   group "root"
   mode "0755"
 end
-  
+
 ruby_block "hive-metastore-database-creation" do
   cmd = "mysql -uroot -p#{get_config('mysql-root-password')} -e"
   privs = "SELECT,INSERT,UPDATE,DELETE,LOCK TABLES,EXECUTE" # todo node[:bcpc][:hadoop][:hive_db_privs].join(",")
@@ -40,18 +81,9 @@ ruby_block "hive-metastore-database-creation" do
   end
 end
 
-bash "create-hive-warehouse" do
-  code "hadoop fs -mkdir -p /user/hive/warehouse && hadoop fs -chmod 1777 /user/hive/warehouse && hadoop fs -chown hive /user/hive"
-  user "hdfs"
-end
-
-bash "create-hive-scratch" do
-  code "hadoop fs -mkdir -p /tmp/scratch && hadoop fs -chmod -R 1777 /tmp/scratch && hadoop fs -chown -R hive /tmp/scratch"
-  user "hdfs"
-end
-
 service "hive-metastore" do
   action [:enable, :start]
   subscribes :restart, "template[/etc/hive/conf/hive-site.xml]", :delayed
   subscribes :restart, "template[/etc/hive/conf/hive-log4j.properties]", :delayed
+  subscribes :restart, "bash[extract-mysql-connector]", :delayed
 end

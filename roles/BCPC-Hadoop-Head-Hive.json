@@ -7,7 +7,8 @@
     "role[Basic]",
     "role[BCPC-Hadoop-Head]",
     "recipe[bcpc-hadoop::hive]",
-    "recipe[bcpc-hadoop::hive_metastore]"
+    "recipe[bcpc-hadoop::hive_metastore]",
+    "recipe[bcpc-hadoop::hive_server]"
   ],
   "description": "A highly-available head node in a BCPC Hadoop cluster",
   "chef_type": "role",
