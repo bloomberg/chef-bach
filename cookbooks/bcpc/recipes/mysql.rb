@@ -77,17 +77,8 @@ end
 template "/etc/mysql/conf.d/wsrep.cnf" do
   source "wsrep.cnf.erb"
   mode 00644
-  results = get_node_attributes(HOSTNAME_MGMT_IP_ATTR_SRCH_KEYS,"mysql","bcpc")
-  # If we are the first one, special case
-  seed = ""
-  if ((results.length == 1) && (results[0]['hostname'] == node[:hostname])) then
-    seed = "gcomm://"
-    # Commented out to prevent mysql from always restarting when 1 head-node
-    notifies :run, "bash[remove-bare-gcomm]", :delayed
-  end
-  variables( :seed => seed,
-             :max_connections => [results.length*50+get_all_nodes.length*5, 200].max,
-             :servers => results )
+  variables( :max_connections => [get_nodes_for('mysql','bcpc').length*50+get_all_nodes.length*5, 200].max,
+             :servers => get_nodes_for('mysql','bcpc') )
   notifies :restart, "service[mysql]", :immediate
 end
 
