@@ -1,7 +1,12 @@
+#
+# Cookbook Name : bcpc-hadoop
+# Recipe Name : hive
+# Description : To install hive/hcatalog core packages
+
 include_recipe "bcpc-hadoop::hive_config"
 
 # workaround for hcatalog dpkg not creating the hcat user it requires
-user "hcat" do 
+user "hcat" do
   username "hcat"
   system true
   shell "/bin/bash"
@@ -23,24 +28,12 @@ template "hive-config" do
   mode "0755"
 end
 
-template "hive-server2-service" do
-  path "/etc/init.d/hive-server2"
-  source "hv_hive-server2.erb"
-  owner "root"
-  group "root"
-  mode "0755"
+bash "create-hive-warehouse" do
+  code "hadoop fs -mkdir -p /user/hive/warehouse && hadoop fs -chmod 1777 /user/hive/warehouse && hadoop fs -chown hive /user/hive"
+  user "hdfs"
 end
 
-bash "hiveserver2" do
-  code "nohup /usr/lib/hive/bin/hiveserver2 -hiveconf hive.metastore.uris=\" \" > /var/log/hiveServer2.out 2>/var/log/hive/hiveServer2.log &"
-  user "hive"
-  action :run
-  not_if { true }
-end
-
-service "hive-server2" do
-  action :nothing
-  supports :status => true, :restart => true, :reload => false
-  subscribes :restart, "template[/etc/hive/conf/hive-site.xml]", :delayed
-  subscribes :restart, "template[/etc/hive/conf/hive-log4j.properties]", :delayed
+bash "create-beeline-scratchroot" do
+  code "hadoop fs -mkdir -p /tmp/hive-hive && hadoop fs -chmod 1777 /tmp/hive-hive && hadoop fs -chown hive /tmp/hive-hive"
+  user "hdfs"
 end

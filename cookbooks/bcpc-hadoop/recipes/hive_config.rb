@@ -4,17 +4,11 @@
 # Description : To setup hive configuration only. No hive package will be installed through this Recipe
 #
 
-#
+
 #Create hive password
-#
 make_config('mysql-hive-password', secure_password)
 
-%w{
-  hive
-  webhcat
-  hcat
-  hive-hcatalog
-  }.each do |w|
+%w{hive webhcat hcat hive-hcatalog}.each do |w|
   directory "/etc/#{w}/conf.#{node.chef_environment}" do
     owner "root"
     group "root"
@@ -25,15 +19,13 @@ make_config('mysql-hive-password', secure_password)
 
   bash "update-#{w}-conf-alternatives" do
     code %Q{
-     update-alternatives --install /etc/#{w}/conf #{w}-conf /etc/#{w}/conf.#{node.chef_environment} 50
-     update-alternatives --set #{w}-conf /etc/#{w}/conf.#{node.chef_environment}
+      update-alternatives --install /etc/#{w}/conf #{w}-conf /etc/#{w}/conf.#{node.chef_environment} 50
+      update-alternatives --set #{w}-conf /etc/#{w}/conf.#{node.chef_environment}
     }
   end
 end
 
-#
 # Set up hive configs
-#
 %w{hive-exec-log4j.properties
    hive-log4j.properties
    hive-env.sh

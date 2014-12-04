@@ -102,4 +102,9 @@
   <value><%= "hdfs://#{node.chef_environment}/user/hive/warehouse" %></value>
 </property>
 
+<property>
+  <name>hive.exec.scratchdir</name>
+  <value>/tmp/hive-${user.name}</value>
+</property>
+
 </configuration>
