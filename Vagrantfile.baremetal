@@ -1,0 +1,124 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+# This is a Vagrant to automatically provision a bootstrap node with a
+# Chef server.
+# See http://www.vagrantup.com/ for info on Vagrant.
+
+require 'json'
+
+base_dir = File.expand_path(File.dirname(File.realpath(__FILE__)))
+json_file = Dir[File.join(base_dir,'*.json')]
+
+if json_file.empty? 
+  puts "No environment file found to parse. Please make sure at least one environment file exists."
+  exit
+end
+
+if json_file.length > 1 
+  puts "More than one environment file found."
+  exit
+end
+
+file_name=File.basename(json_file.join(","))
+chef_env = JSON.parse(File.read(json_file.join(",")))
+bridge_if = chef_env["override_attributes"]["bcpc"]["bootstrap"]["pxe_interface"]
+ip_address = chef_env["override_attributes"]["bcpc"]["bootstrap"]["server"]
+env_name = chef_env["name"]
+host_name = "bcpc-cluster-#{env_name}-bootstrap"
+
+puts "Base dir   : #{base_dir}"
+puts "Json file  : #{json_file}"
+puts "Interface  : #{bridge_if}"
+puts "IP Address : #{ip_address}"
+puts "Chef Env   : #{env_name}"
+puts "hostname   : #{host_name}"
+puts "File name  : #{file_name}"
+
+Vagrant.configure("2") do |config|
+
+  config.vm.define :bootstrap do |bootstrap|
+
+    bootstrap.vm.hostname = host_name
+    bootstrap.vm.network "public_network", :ip => ip_address, :bridge => bridge_if, auto_config: false
+    bootstrap.vm.provision :file, source: json_file.join(","), destination: "/home/vagrant/chef-bcpc/environments/#{file_name}"
+
+    # Chef provisioning
+    bootstrap.vm.provision "chef_solo" do |chef|
+      chef.environments_path = [[:vm,""]]
+      chef.environment = env_name
+      chef.cookbooks_path = [[:vm,""]]
+      chef.roles_path = [[:vm,""]]
+      chef.add_recipe("bcpc::bootstrap_network")
+      chef.log_level="debug"
+      chef.verbose_logging=true
+      chef.provisioning_path="/home/vagrant/chef-bcpc/"
+    end
+
+    # Chef provisioning
+    bootstrap.vm.provision "chef_solo" do |chef|
+      chef.environments_path = [[:vm,""]]
+      chef.environment = env_name
+      chef.cookbooks_path = [[:vm,""]]
+      chef.roles_path = [[:vm,""]]
+      chef.add_recipe("bcpc::bootstrap_knife")
+      chef.log_level="debug"
+      chef.verbose_logging=true
+      chef.provisioning_path="/home/vagrant/chef-bcpc/"
+    end
+
+    # Reconfigure chef-server
+    bootstrap.vm.provision :shell, :inline => "sudo chef-server-ctl reconfigure"
+
+    # Chef provisioning
+    bootstrap.vm.provision "chef_solo" do |chef|
+      chef.environments_path = [[:vm,""]]
+      chef.environment = env_name
+      chef.cookbooks_path = [[:vm,""]]
+      chef.roles_path = [[:vm,""]]
+      chef.add_recipe("bcpc::bootstrap_cleanup")
+      chef.log_level="debug"
+      chef.verbose_logging=true
+      chef.provisioning_path="/home/vagrant/chef-bcpc/"
+    end
+
+    bootstrap.vm.provision :shell, :inline => "cd /home/vagrant/chef-bcpc; sudo knife environment from file environments/#{env_name}.json -u admin -k /etc/chef-server/admin.pem"
+    bootstrap.vm.provision :shell, :inline => "cd /home/vagrant/chef-bcpc; sudo chef-client -E #{env_name} -c .chef/knife.rb"
+
+    # Chef provisioning
+    bootstrap.vm.provision "chef_solo" do |chef|
+      chef.environments_path = [[:vm,""]]
+      chef.environment = env_name
+      chef.cookbooks_path = [[:vm,""]]
+      chef.roles_path = [[:vm,""]]
+      chef.add_recipe("bcpc::bootstrap_config")
+      chef.log_level="debug"
+      chef.verbose_logging=true
+      chef.provisioning_path="/home/vagrant/chef-bcpc/"
+    end
+
+    bootstrap.vm.provision :shell, :inline => "cd /home/vagrant/chef-bcpc; sudo chef-client -E #{env_name} -c .chef/knife.rb"
+
+  end
+
+  config.vm.box = "#{env_name}"
+  config.vm.box_url = "/home/aanand59/Downloads/GENERIC.box"
+
+  memory = ( ENV["BOOTSTRAP_VM_MEM"] or "4096" )
+  cpus = ( ENV["BOOTSTRAP_VM_CPUs"] or "2" )
+
+  config.vm.provider :virtualbox do |vb|
+     # Don't boot with headless mode
+     vb.gui = false
+     vb.name = host_name
+     vb.customize ["setproperty", "machinefolder", "#{base_dir}/#{env_name}"]
+     vb.customize ["modifyvm", :id, "--nictype2", "82543GC"]
+     vb.customize ["modifyvm", :id, "--memory", memory]
+     vb.customize ["modifyvm", :id, "--cpus", cpus]
+     vb.customize ["modifyvm", :id, "--largepages", "on"]
+     vb.customize ["modifyvm", :id, "--nestedpaging", "on"]
+     vb.customize ["modifyvm", :id, "--vtxvpid", "on"]
+     vb.customize ["modifyvm", :id, "--hwvirtex", "on"]
+     vb.customize ["modifyvm", :id, "--ioapic", "on"]
+   end
+end
