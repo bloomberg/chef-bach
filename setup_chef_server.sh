@@ -34,6 +34,8 @@ if dpkg -s chef 2>/dev/null | grep -q ^Status.*installed && \
   echo chef is installed
 else
   apt-get -y install chef
+  /opt/chef/embedded/bin/gem sources --add file://$(pwd)/bins/
+  /opt/chef/embedded/bin/gem sources --remove http://rubygems.org/
 fi
 
 # setup OpenStack hint
