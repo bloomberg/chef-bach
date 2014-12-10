@@ -3,11 +3,11 @@
 <% node[:bcpc][:hadoop][:graphite][:queries].each_with_index do |(host, value),hidx| -%>
   <% value.each_with_index do |q,aidx| -%>
     <% if hidx == node[:bcpc][:hadoop][:graphite][:queries].length-1 and aidx == value.length()-1 -%>
-      {"graphite_url": "https://<%=node[:bcpc][:management][:vip]%>:<%=node[:bcpc][:graphite][:web_port]%>/render/?from=-2min&target=<%=q['type']%>.*_<%=node[:bcpc][:hadoop][host][:jmx][:port]%>.<%=q['query']%>&format=json",
+      {"graphite_url": "https://<%=node[:bcpc][:management][:vip]%>:<%=node[:bcpc][:graphite][:web_port]%>/render/?from=-2min&target=<%=q['type']%>.<%= host %>.*.<%=q['query']%>&format=json",
        "zabbix_host" : "<%= host %>", 
        "zabbix_key"  : "<%=q['key']%>"}
     <% else -%>
-      {"graphite_url": "https://<%=node[:bcpc][:management][:vip]%>:<%=node[:bcpc][:graphite][:web_port]%>/render/?from=-2min&target=<%=q['type']%>.*_<%=node[:bcpc][:hadoop][host][:jmx][:port]%>.<%=q['query']%>&format=json",
+      {"graphite_url": "https://<%=node[:bcpc][:management][:vip]%>:<%=node[:bcpc][:graphite][:web_port]%>/render/?from=-2min&target=<%=q['type']%>.<%= host %>.*.<%=q['query']%>&format=json",
        "zabbix_host" : "<%= host %>", 
        "zabbix_key"  : "<%=q['key']%>"},
     <% end %>
