@@ -138,7 +138,7 @@ ruby_block "zabbix_monitor" do
             expr = "{"+"#{trigger_host}"+":"+"#{trigger_attr['key']}"+"."+"#{trigger_attr['trigger_val']}"+"}"+"#{trigger_attr['trigger_cond']}"
             zbx.triggers.create(:description => "#{trigger_attr['trigger_name']}", 
                                 :expression => expr, 
-                                :comments => "Service down", 
+                                :comments => "#{trigger_attr['trigger_desc']}", 
                                 :priority => 4, 
                                 :status => trigger_status, 
                                 :dependencies => dependencies)
@@ -151,7 +151,8 @@ ruby_block "zabbix_monitor" do
                       'conditions' => [{"conditiontype" => 3,"operator" => 2,"value" => "#{trigger_attr['trigger_name']}"}, 
                                        {"conditiontype" => 5,"operator" => 0,"value" => 1}, 
                                        {"conditiontype" => 16,"operator" => 7}], 
-                      'operations' => [{"operationtype" => 1,"opcommand" => {"command" => "#{node['bcpc']['zabbix']['scripts_dir']}/zbx_mail.sh {TRIGGER.NAME} #{node.chef_environment}","type" => "0","execute_on" => "1"}, 
+                      #'operations' => [{"operationtype" => 1,"opcommand" => {"command" => "#{node['bcpc']['zabbix']['scripts_dir']}/zbx_mail.sh {TRIGGER.NAME} #{node.chef_environment}","type" => "0","execute_on" => "1"},
+                      'operations' => [{"operationtype" => 1,"opcommand" => {"command" => "#{node[:almn][:client][:install_location]}/almn_proc_client.sh #{trigger_attr['drqs_type']} {TRIGGER.NAME} \"#{trigger_attr['trigger_desc']}\" #{node.chef_environment} #{trigger_host}","type" => "0","execute_on" => "1"}, 
                       "opcommand_hst" => [ "hostid" => 0]}]})
           else
             Chef::Log.debug "Trigger #{trigger_attr['trigger_name']} already defined"
