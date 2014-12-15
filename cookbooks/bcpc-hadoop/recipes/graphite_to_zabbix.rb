@@ -151,7 +151,7 @@ ruby_block "zabbix_monitor" do
                       'conditions' => [{"conditiontype" => 3,"operator" => 2,"value" => "#{trigger_attr['trigger_name']}"}, 
                                        {"conditiontype" => 5,"operator" => 0,"value" => 1}, 
                                        {"conditiontype" => 16,"operator" => 7}], 
-                      'operations' => [{"operationtype" => 1,"opcommand" => {"command" => "#{node['bcpc']['zabbix']['scripts_dir']}/zbx_mail.sh {TRIGGER.NAME} #{node.chef_environment}","type" => "0","execute_on" => "1"}, 
+                      'operations' => [{"operationtype" => 1,"opcommand" => {"command" => "#{node['bcpc']['zabbix']['scripts_dir']}/zbx_mail.sh {TRIGGER.NAME} #{node.chef_environment}","type" => "0","execute_on" => "1"},
                       "opcommand_hst" => [ "hostid" => 0]}]})
           else
             Chef::Log.debug "Trigger #{trigger_attr['trigger_name']} already defined"
