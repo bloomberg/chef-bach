@@ -1,14 +1,20 @@
-template "#{node['bcpc']['zabbix']['scripts_dir']}/run_zabbix_sender.sh" do
+template node['bcpc']['zabbix']['scripts']['sender'] do
   source "zabbix.run_zabbix_sender.sh.erb"
   mode 0755
 end
 
-template "#{node['bcpc']['zabbix']['scripts_dir']}/zbx_mail.sh" do
-  source "zabbix.zbx_mail.sh.erb"
+directory ::File.dirname(node['bcpc']['zabbix']['scripts']['mail']) do
+  recursive true
+  owner 'root' 
+end
+
+template node['bcpc']['zabbix']['scripts']['mail'] do
+  source node["bcpc"]["hadoop"]["zabbix"]["mail_source"]
+  cookbook node["bcpc"]["hadoop"]["zabbix"]["cookbook"] if node["bcpc"]["hadoop"]["zabbix"]["cookbook"]
   mode 0755
 end
 
-cookbook_file "#{node['bcpc']['zabbix']['scripts_dir']}/query_graphite.py" do
+cookbook_file node['bcpc']['zabbix']['scripts']['query_graphite'] do
   source "query_graphite.py"
   mode 0744
   owner "root"
@@ -138,7 +144,7 @@ ruby_block "zabbix_monitor" do
             expr = "{"+"#{trigger_host}"+":"+"#{trigger_attr['key']}"+"."+"#{trigger_attr['trigger_val']}"+"}"+"#{trigger_attr['trigger_cond']}"
             zbx.triggers.create(:description => "#{trigger_attr['trigger_name']}", 
                                 :expression => expr, 
-                                :comments => "Service down", 
+                                :comments => trigger_attr['trigger_desc'], 
                                 :priority => 4, 
                                 :status => trigger_status, 
                                 :dependencies => dependencies)
@@ -151,7 +157,7 @@ ruby_block "zabbix_monitor" do
                       'conditions' => [{"conditiontype" => 3,"operator" => 2,"value" => "#{trigger_attr['trigger_name']}"}, 
                                        {"conditiontype" => 5,"operator" => 0,"value" => 1}, 
                                        {"conditiontype" => 16,"operator" => 7}], 
-                      'operations' => [{"operationtype" => 1,"opcommand" => {"command" => "#{node['bcpc']['zabbix']['scripts_dir']}/zbx_mail.sh {TRIGGER.NAME} #{node.chef_environment}","type" => "0","execute_on" => "1"}, 
+                      'operations' => [{"operationtype" => 1,"opcommand" => {"command" => "#{node['bcpc']['zabbix']['scripts']['mail']} {TRIGGER.NAME} #{node.chef_environment} #{trigger_attr['severity']} '#{trigger_attr['trigger_desc']}' #{trigger_host}","type" => "0","execute_on" => "1"}, 
                       "opcommand_hst" => [ "hostid" => 0]}]})
           else
             Chef::Log.debug "Trigger #{trigger_attr['trigger_name']} already defined"

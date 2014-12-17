@@ -85,6 +85,8 @@ default["bcpc"]["revelytix"]["port"] = 8080
 default["bcpc"]["hadoop"]["zabbix"]["history_days"] = 1
 default["bcpc"]["hadoop"]["zabbix"]["trend_days"] = 15
 default["bcpc"]["hadoop"]["zabbix"]["cron_check_time"] = 240
+default["bcpc"]["hadoop"]["zabbix"]["mail_source"] = "zabbix.zbx_mail.sh.erb"
+default["bcpc"]["hadoop"]["zabbix"]["cookbook"] = nil 
 default["bcpc"]["hadoop"]["graphite"]["queries"] = {
    'namenode' => [
     {
@@ -94,7 +96,9 @@ default["bcpc"]["hadoop"]["graphite"]["queries"] = {
       'trigger_val' => "max(61,0)",
       'trigger_cond' => "=0",
       'trigger_name' => "NameNodeAvailability",
-      'trigger_enable' => true
+      'trigger_enable' => true,
+      'trigger_desc' => "Namenode service seems to be down",
+      'severity' => 2
     },
     {
       'type'  => "jmx",
@@ -110,7 +114,9 @@ default["bcpc"]["hadoop"]["graphite"]["queries"] = {
       'trigger_val' => "max(61,0)",
       'trigger_cond' => "=0",
       'trigger_name' => "HBaseMasterAvailability",
-      'trigger_dep' => ["NameNodeAvailability"]
+      'trigger_dep' => ["NameNodeAvailability"],
+      'trigger_desc' => "HBase master seems to be down",
+      'severity' => 1
     },
     {
       'type'  => "jmx",
@@ -127,7 +133,9 @@ default["bcpc"]["hadoop"]["graphite"]["queries"] = {
       'trigger_cond' => "=0",
       'trigger_name' => "HBaseRSAvailability",
       'trigger_enable' => true,
-      'trigger_dep' => ["HBaseMasterAvailability"]
+      'trigger_dep' => ["HBaseMasterAvailability"],
+      'trigger_desc' => "HBase region server seems to be down",
+      'severity' => 2
     }
   ]
 }
