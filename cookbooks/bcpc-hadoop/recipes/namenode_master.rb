@@ -72,6 +72,7 @@ service "generally run hadoop-hdfs-namenode" do
    subscribes :restart, "template[/etc/hadoop/conf/hdfs-site.xml]", :delayed
    subscribes :restart, "template[/etc/hadoop/conf/hdfs-policy.xml]", :delayed
    subscribes :restart, "template[/etc/hadoop/conf/hdfs-site_HA.xml]", :delayed
+   subscribes :restart, "template[/etc/hadoop/conf/topology]", :delayed
    subscribes :restart, "bash[initialize-shared-edits]", :immediately
 end
 

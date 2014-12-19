@@ -40,6 +40,7 @@ service "hadoop-hdfs-namenode" do
   action [:enable, :start]
   subscribes :restart, "template[/etc/hadoop/conf/hdfs-site.xml]", :delayed
   subscribes :restart, "template[/etc/hadoop/conf/hdfs-policy.xml]", :delayed
+  subscribes :restart, "template[/etc/hadoop/conf/topology]", :delayed
 end
 
 bash "reload hdfs nodes" do

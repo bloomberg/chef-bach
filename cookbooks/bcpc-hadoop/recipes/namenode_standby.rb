@@ -45,6 +45,7 @@ if @node['bcpc']['hadoop']['hdfs']['HA'] == true then
     action [:enable, :start]
     subscribes :restart, "template[/etc/hadoop/conf/hdfs-site.xml]", :delayed
     subscribes :restart, "template[/etc/hadoop/conf/hdfs-policy.xml]", :delayed
+    subscribes :restart, "template[/etc/hadoop/conf/topology]", :delayed
   end
 else
   Chef::Log.info "Not running standby namenode services yet -- HA disabled!"

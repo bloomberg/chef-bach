@@ -45,6 +45,12 @@ hadoop_conf_files.each do |t|
    end
 end
 
+template "/etc/hadoop/conf/topology" do
+  source "#{node["bcpc"]["hadoop"]["topology"]["script"]}.erb"
+  cookbook node["bcpc"]["hadoop"]["topology"]["cookbook"] if node["bcpc"]["hadoop"]["topology"]["cookbook"]
+  mode 0655
+end
+
 %w{yarn-env.sh
   hadoop-env.sh}.each do |t|
  template "/etc/hadoop/conf/#{t}" do
