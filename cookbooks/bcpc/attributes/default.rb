@@ -141,7 +141,9 @@ default['bcpc']['zabbix']['user'] = "zabbix"
 default['bcpc']['zabbix']['group'] = "adm"
 default['bcpc']['zabbix']['server_port'] = 10051
 default['bcpc']['zabbix']['web_port'] = 7777
-default['bcpc']['zabbix']['scripts_dir'] = "/usr/local/bin"
+default['bcpc']['zabbix']['scripts']['sender'] = "/usr/local/bin/run_zabbix_sender.sh"
+default['bcpc']['zabbix']['scripts']['mail'] = "/usr/local/bin/zbx_mail.sh"
+default['bcpc']['zabbix']['scripts']['query_graphite'] = "/usr/local/bin/query_graphite.py"
 
 default['bcpc']['keepalived']['config_template'] = "keepalived.conf_openstack"
 default['bcpc']['graphite']['relay_port'] = 2013
