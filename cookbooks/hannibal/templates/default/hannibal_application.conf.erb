@@ -4,13 +4,13 @@
 # HA mode
 # "active" : Collect regions info and region/compaction metrics
 # "passive" : Collects regions info but not metrics. Displays metric data populated in the DB.
-ha.role=<%= "#{node[:hannibal][:ha][:role]}" %>
+ha.role=<%= node[:hannibal][:ha][:role] %>
 
 # Secret key
 # ~~~~~
 # The secret key is used to secure cryptographics functions.
 # If you deploy your application to several instances be sure to use the same key!
-application.secret=<%= "#{get_config('hannibal-app-secret-key')}" %>
+application.secret=<%= node[:hannibal][:app_secret_key] %>
 
 # The application languages
 # ~~~~~
@@ -28,22 +28,22 @@ application.langs="en"
 # By convention, the default datasource is named `default`
 #
 
-<% if ("mysql" == "#{node[:hannibal][:db]}") then %>
-db.default.driver=<%= "#{node[:hannibal][:mysql][:driver]}" %>
-db.default.url=<%= "#{node[:hannibal][:mysql][:url]}" %>
+<% if ("mysql" == node[:hannibal][:db]) then %>
+db.default.driver=<%= node[:hannibal][:mysql][:driver] %>
+db.default.url=<%= node[:hannibal][:mysql][:url] %>
 <% else %>
-db.default.driver=<%= "#{node[:hannibal][:h2][:driver]}" %>
-db.default.url=<%= "#{node[:hannibal][:h2][:url]}" %>
+db.default.driver=<%= node[:hannibal][:h2][:driver] %>
+db.default.url=<%= node[:hannibal][:h2][:url] %>
 <% end %>
 
-db.default.user=<%= "#{get_config('hannibal-db-user')}" %>
-db.default.password=<%= "#{get_config('hannibal-db-password')}" %>
+db.default.user=<%= node[:hannibal][:db_user] %>
+db.default.password=<%= node[:hannibal][:db_password] %>
 
 # Evolutions
 # ~~~~~
 # You can disable evolutions if needed
 # evolutionplugin=disabled
-applyEvolutions.default=<%= "#{node[:hannibal][:apply_evolutions]}" %>
+applyEvolutions.default=<%= node[:hannibal][:apply_evolutions] %>
 
 # Logger
 # ~~~~~
@@ -65,33 +65,33 @@ akka.loggers = ["akka.event.slf4j.Slf4jLogger"]
 akka.loglevel=<%= node[:hannibal][:akka][:loglevel] %>
 
 # how long to keep the metrics in our database (in seconds)
-metrics.clean-threshold = <%= "#{node[:hannibal][:metrics][:clean_threshold]}" %>
+metrics.clean-threshold = <%= node[:hannibal][:metrics][:clean_threshold] %>
 
 # The frontend per default shows the range from `metrics.default-range` (in seconds) until now
-metrics.default-range = <%= "#{node[:hannibal][:metrics][:default_range]}" %>
+metrics.default-range = <%= node[:hannibal][:metrics][:default_range] %>
 
 # How often to clean old metrics (in seconds, set to 0 to disable)
-metrics.clean-interval = <%= "#{node[:hannibal][:metrics][:clean_interval] }" %>
+metrics.clean-interval = <%= node[:hannibal][:metrics][:clean_interval] %>
 
 # How often to fetch region-information from HBase (cannot be disabled!)
-metrics.regions-fetch-interval = <%= "#{node[:hannibal][:metrics][:regions_fetch_interval]}" %>
+metrics.regions-fetch-interval = <%= node[:hannibal][:metrics][:regions_fetch_interval] %>
 
 # How often to fetch logfiles from HBase, required for compaction metrics (in seconds, set to 0 to disable)
-metrics.logfile-fetch-interval = <%= "#{node[:hannibal][:metrics][:logfile_fetch_interval]}" %>
+metrics.logfile-fetch-interval = <%= node[:hannibal][:metrics][:logfile_fetch_interval] %>
 
 # Set this to a higher value if you want the first log fetching to look farther back to get more compaction data
 # (at the cost of higher memory usage and latency)
-logfile.initial-look-behind-size-in-kb=<%= "#{node[:hannibal][:logfile][:initial_lookbehind_size] }" %>
+logfile.initial-look-behind-size-in-kb=<%= node[:hannibal][:logfile][:initial_lookbehind_size] %>
 
 # Set HBase Regionserver LogLevel to INFO which is required for reading Compaction-Metrics from the logfile
-logfile.set-loglevels-on-startup = <%= "#{node[:hannibal][:logfile][:set_loglevel_on_start]}" %>
-logfile.loglevel-url-pattern = <%= "#{node[:hannibal][:logfile][:url_pattern]}" %>
+logfile.set-loglevels-on-startup = <%= node[:hannibal][:logfile][:set_loglevel_on_start] %>
+logfile.loglevel-url-pattern = <%= node[:hannibal][:logfile][:url_pattern] %>
 
 # This is the pattern to match a region server logfile as listed in the html body when hitting
 # http://%hostname%:%infoport%/logs/
-logfile.path-pattern = <%= "#{node[:hannibal][:logfile][:path_pattern]}" %>
-logfile.date-format = <%= "#{node[:hannibal][:logfile][:date_format]}" %>
-logfile.fetch-timeout-in-seconds=<%= "#{node[:hannibal][:logfile][:fetch_timeout]}" %>
+logfile.path-pattern = <%= node[:hannibal][:logfile][:path_pattern] %>
+logfile.date-format = <%= node[:hannibal][:logfile][:date_format] %>
+logfile.fetch-timeout-in-seconds=<%= node[:hannibal][:logfile][:fetch_timeout] %>
 
 # Set Values from environment variables (needed for Vagrant machines)
 logfile.loglevel-url-pattern = ${?HANNIBAL_LOGFILE_LOGLEVEL_URL_PATTERN}

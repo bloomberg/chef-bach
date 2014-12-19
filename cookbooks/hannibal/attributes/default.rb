@@ -23,7 +23,7 @@ default[:hannibal][:user] = 'nobody'
 default[:hannibal][:owner] = 'root'
 default[:hannibal][:group] = 'root'
 default[:hannibal][:file_mode] = '0644'
-default[:hannibal][:exec_mode] = '0645'
+default[:hannibal][:exec_mode] = '0655'
 
 default[:hannibal][:checksum]["0.90"] = '32183556dc5423b84655f7ef57b06ad910b2ec69f10809d359a5a813b7cb6ad2'
 default[:hannibal][:checksum]["0.92"] = '9255ff08605f917018848da437465df76a54a458cc109d1d9454352d40227974'
@@ -34,13 +34,18 @@ default[:hannibal][:checksum]["0.98"] = 'fd45dfc0ec3128331783aca862a21a310be7583
 default[:hannibal][:ha][:role] = 'active'
 default[:hannibal][:max_memory] = '256M'
 default[:hannibal][:apply_evolutions] = 'true'
+default[:hannibal][:app_secret_key] = 'tempappsecretkey'
 
-default[:hannibal][:db] = 'mysql'
+default[:hannibal][:db] = 'h2'
+default[:hannibal][:db_user] = "hannibal"
+default[:hannibal][:db_password] = "hannibal"
 default[:hannibal][:h2][:driver] = 'org.h2.Driver'
 default[:hannibal][:h2][:url] = '"jdbc:h2:data/metrics.h2;MODE=MYSQL"'
 default[:hannibal][:mysql][:db_name] = 'hannibal' 
 default[:hannibal][:mysql][:driver] = 'com.mysql.jdbc.Driver' 
-default[:hannibal][:mysql][:url] = "\"jdbc:mysql://#{node[:bcpc][:management][:vip]}/hannibal?characterEncoding=UTF-8\""
+default[:hannibal][:mysql][:url] = '"jdbc:mysql://localhost/hannibal?characterEncoding=UTF-8"'
+
+default[:hannibal][:zookeeper_quorum] = 'localhost'
 
 default[:hannibal][:metrics][:clean_threshold] = 86400
 default[:hannibal][:metrics][:default_range] = 86400

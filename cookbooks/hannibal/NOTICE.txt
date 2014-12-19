@@ -1,4 +1,4 @@
-Cookbook Name:: hannibal
+Cookbook Name: hannibal
 Copyright 2014, Bloomberg L.P.
 
 Licensed under the Apache License, Version 2.0 (the "License");

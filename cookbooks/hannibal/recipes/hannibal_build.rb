@@ -1,21 +1,16 @@
 # Pre-requisites
 # git is installed and proxies configured
 # http and https proxies are set
+# java and maven are installed
 
-hbase_version = "#{node[:hannibal][:hbase_version]}"
+require 'digest'
+
+hbase_version = node[:hannibal][:hbase_version]
 target_filename = "hannibal-hbase#{hbase_version}.tgz"
 target_filepath = "#{node[:hannibal][:bin_dir]}/#{target_filename}"
-owner = "#{node[:hannibal][:owner]}"
-group = "#{node[:hannibal][:group]}"
+owner = node[:hannibal][:owner]
+group = node[:hannibal][:group]
 source_code_location = "#{Chef::Config[:file_cache_path]}/hannibal"
-
-# Install java
-include_recipe "bcpc-hadoop::java_config"
-include_recipe "java::default"
-
-# Install maven
-node.default['maven']['install_java'] = false
-include_recipe "maven::default"
 
 git source_code_location do
   repository node[:hannibal][:repo][:url]
@@ -37,6 +32,9 @@ bash "compile_hannibal"  do
    }
    action :nothing
 end
+
+# Calculate checksum for tarball and set node attribute 
+#node.override[:hannibal][:checksum]["#{hbase_version}"] = Digest::SHA256.hexdigest(File.read(target_filepath))
 
 bash "cleanup" do
    cwd ::File.dirname(source_code_location)

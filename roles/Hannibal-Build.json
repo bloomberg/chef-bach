@@ -1,0 +1,17 @@
+{
+    "name": "Hannibal-Build",
+    "default_attributes": {
+    },
+    "json_class": "Chef::Role",
+    "run_list": [
+      "recipe[bcpc-hadoop::java_config]",
+      "recipe[java::default]",
+      "recipe[bcpc-hadoop::maven_config]",
+      "recipe[maven::default]",
+      "recipe[hannibal::hannibal_build]"
+    ],
+    "description": "A hannibal tarball node",
+    "chef_type": "role",
+    "override_attributes": {
+    }
+}
