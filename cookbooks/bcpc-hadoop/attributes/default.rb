@@ -145,3 +145,20 @@ default["bcpc"]["hadoop"]["graphite"]["queries"] = {
     }
   ]
 }
+#
+# Attributes to store details about (log) files from nodes to be copied
+# into a centralized location (currently HDFS).
+# E.g. value {'hbase_rs' =>  { 'logfile' => "/path/file_name_of_log_file",
+#                              'docopy' => true (or false)
+#                             },...
+#            }
+#
+default['bcpc']['hadoop']['copylog'] = {}
+#
+# Attribute to enable/disable the copylog feature
+#
+default['bcpc']['hadoop']['copylog_enable'] = true
+#
+# File rollup interval in secs for log data copied into HDFS through Flume
+#
+default['bcpc']['hadoop']['copylog_rollup_interval'] = 86400

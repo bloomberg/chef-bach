@@ -1,5 +1,15 @@
 include_recipe 'bcpc-hadoop::hbase_config'
 
+node.default['bcpc']['hadoop']['copylog']['region_server'] = {
+    'logfile' => "/var/log/hbase/hbase-hbase-regionserver-#{node.hostname}.log", 
+    'docopy' => true
+}
+
+node.default['bcpc']['hadoop']['copylog']['region_server_out'] = {
+    'logfile' => "/var/log/hbase/hbase-hbase-regionserver-#{node.hostname}.out", 
+    'docopy' => true
+}
+
 %w{hbase-regionserver libsnappy1}.each do |pkg|
   package pkg do
     action :install

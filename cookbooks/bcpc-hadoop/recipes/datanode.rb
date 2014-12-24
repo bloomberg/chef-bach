@@ -1,5 +1,10 @@
 include_recipe 'bcpc-hadoop::hadoop_config'
 
+node.default['bcpc']['hadoop']['copylog']['datanode'] = {
+    'logfile' => "/var/log/hadoop-hdfs/hadoop-hdfs-datanode-#{node.hostname}.log",
+    'docopy' => true
+}
+
 %w{hadoop-yarn-nodemanager
    hadoop-hdfs-datanode
    hadoop-mapreduce

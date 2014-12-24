@@ -3,6 +3,19 @@ require "base64"
 
 include_recipe 'bcpc-hadoop::hadoop_config'
 
+#
+# Updating node attribuetes to copy namenode log files to centralized location (HDFS)
+#
+node.default['bcpc']['hadoop']['copylog']['namenode'] = {
+    'logfile' => "/var/log/hadoop-hdfs/hadoop-hdfs-namenode-#{node.hostname}.log", 
+    'docopy' => true
+}
+
+node.default['bcpc']['hadoop']['copylog']['namenode_out'] = {
+    'logfile' => "/var/log/hadoop-hdfs/hadoop-hdfs-namenode-#{node.hostname}.out", 
+    'docopy' => true
+}
+
 %w{hadoop-hdfs-namenode hadoop-mapreduce}.each do |pkg|
   dpkg_autostart pkg do
     allow false
