@@ -15,7 +15,7 @@ activeScan.hdfs.enabled=<%= node.bcpc.revelytix.activescan_hdfs_enabled %>
 # path that will be resolved against the Loom working directory. The scan is
 # recursive, so all sub-directories of each configured directory will be scanned.
 # Defaults to the Loom working directory if not set.
-activeScan.hdfs.baseDir=hdfs://<%= node.chef_environment %>/user,hdfs://<%= node.chef_environment %>/projects
+activeScan.hdfs.baseDir=<%= node['bcpc']['hadoop']['hdfs_url'] %>/user,hdfs://<%= node.chef_environment %>/projects
 
 # The username to run the potential-source scanner service as. A Loom account is
 # created with this username when the Loom server is launched, and that account

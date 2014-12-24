@@ -10,7 +10,7 @@
 <configuration>
   <property>
     <name>hbase.rootdir</name>
-    <value>hdfs://<%= node.chef_environment %>/hbase</value>
+    <value><%= node['bcpc']['hadoop']['hdfs_url'] %>/hbase</value>
   </property>
   <property>
     <name>hbase.zookeeper.quorum</name>

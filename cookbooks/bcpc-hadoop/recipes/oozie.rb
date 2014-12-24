@@ -13,7 +13,7 @@ end
 
 OOZIE_LIB_PATH='/usr/lib/oozie'
 OOZIE_SERVER_PATH='/var/lib/oozie/oozie-server'
-HDFS_URL="hdfs://#{node.chef_environment}/"
+HDFS_URL="#{node['bcpc']['hadoop']['hdfs_url']}/"
 
 directory "#{OOZIE_LIB_PATH}/libext" do
   owner "oozie"
