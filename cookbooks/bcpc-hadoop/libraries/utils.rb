@@ -72,16 +72,6 @@ def get_config(key)
         return (node['bcpc']['encrypt_data_bag'] ? $edbi[key] : $dbi[key])
 end
 
-def get_all_nodes
-  results = search(:node, "role:BCPC* AND chef_environment:#{node.chef_environment}")
-  if results.any?{|x| x['hostname'] == node['hostname']}
-    results.map!{|x| x['hostname'] == node['hostname'] ? node : x}
-  else
-    results.push(node)
-  end
-  return results.sort
-end
-
 def get_head_nodes
   results = search(:node, "role:BCPC-Headnode AND chef_environment:#{node.chef_environment}")
   results.map!{ |x| x['hostname'] == node[:hostname] ? node : x }
