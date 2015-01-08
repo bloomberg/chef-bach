@@ -20,14 +20,6 @@ node[:bcpc][:hadoop][:mounts].each do |d|
     recursive true
   end
 
-  directory "/disk/#{d}/dfs/namedir" do
-    owner "hdfs"
-    group "hdfs"
-    mode 0700
-    action :create
-    recursive true
-  end
-
   execute "fixup nn owner" do
     command "chown -Rf hdfs:hdfs /disk/#{d}/dfs"
     only_if { Etc.getpwuid(File.stat("/disk/#{d}/dfs/").uid).name != "hdfs" }
