@@ -40,6 +40,11 @@ node[:bcpc][:hadoop][:mounts].each do |d|
   end
 end
 
+template "/etc/init.d/hadoop-hdfs-namenode" do
+  source "hdp_hadoop-hdfs-namenode-initd.erb"
+  mode 0655
+end
+
 bash "format namenode" do
   code "hdfs namenode -format -nonInteractive -force"
   user "hdfs"
@@ -73,6 +78,12 @@ bash "create-hdfs-temp" do
   not_if "sudo -u hdfs hadoop fs -test -d /tmp"
 end
 
+bash "create-hdfs-applogs" do
+  code "hadoop fs -mkdir /app-logs; hadoop fs -chmod -R 1777 /app-logs; hadoop fs -chown yarn /app-logs"
+  user "hdfs"
+  not_if "sudo -u hdfs hadoop fs -test -d /app-logs"
+end
+
 bash "create-hdfs-user" do
   code "hadoop fs -mkdir /user; hadoop fs -chmod -R 0755 /user"
   user "hdfs"
@@ -80,7 +91,7 @@ bash "create-hdfs-user" do
 end
 
 bash "create-hdfs-history" do
-  code "hadoop fs -mkdir /user/history; hadoop fs -chmod -R 1777 /user/history; hadoop fs -chown yarn /user/history"
+  code "hadoop fs -mkdir /user/history; hadoop fs -chmod -R 1777 /user/history; hadoop fs -chown mapred:hdfs /user/history"
   user "hdfs"
   not_if "sudo -u hdfs hadoop fs -test -d /user/history"
 end

@@ -43,6 +43,16 @@ link "/usr/lib/hbase/lib/native/Linux-amd64-64/libsnappy.so.1" do
   to "/usr/lib/libsnappy.so.1"
 end
 
+template "/etc/hbase/conf/hbase-env.sh" do
+  source "hb_hbase-env.sh.erb"
+  mode 0655
+end
+
+template "/etc/init.d/hbase-master" do
+  source "hdp_hbase-master-initd.erb"
+  mode 0655
+end
+
 service "hbase-master" do
   action [:enable, :start]
   subscribes :restart, "template[/etc/hbase/conf/hbase-site.xml]", :delayed

@@ -39,6 +39,11 @@ node[:bcpc][:hadoop][:mounts].each do |d|
   end
 end
 
+template "/etc/init.d/hadoop-hdfs-namenode" do
+  source "hdp_hadoop-hdfs-namenode-initd.erb"
+  mode 0655
+end
+
 if @node['bcpc']['hadoop']['hdfs']['HA'] == true then
   bash "hdfs namenode -bootstrapStandby -force -nonInteractive" do
     code "hdfs namenode -bootstrapStandby -force -nonInteractive"

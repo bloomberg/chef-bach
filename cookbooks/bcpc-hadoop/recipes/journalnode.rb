@@ -46,13 +46,13 @@ node[:bcpc][:hadoop][:mounts].each do |d|
   end
 end
 
-link "/usr/lib/hadoop-hdfs/libexec" do
-  to "/usr/lib/hadoop/libexec"
-end
+#link "/usr/lib/hadoop-hdfs/libexec" do
+#  to "/usr/lib/hadoop/libexec"
+#end
 
 template "hadoop-hdfs-journalnode" do
   path "/etc/init.d/hadoop-hdfs-journalnode"
-  source "hdp_hadoop-hdfs-journalnode.erb"
+  source "hdp_hadoop-hdfs-journalnode-initd.erb"
   owner "root"
   group "root"
   mode "0755"

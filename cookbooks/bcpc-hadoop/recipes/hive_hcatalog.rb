@@ -1,10 +1,19 @@
-# Cookbook Name : bcpc-hadoop
-# Recipe Name : hive_metastore
-# Description : To setup hive metastore service
-
-require 'digest'
-
+#
+#  Installing Hive & Hcatalog
+#
 include_recipe "bcpc-hadoop::hive_config"
+
+package "hive-hcatalog" do
+  action :upgrade
+end
+
+package "hadoop-lzo" do
+  action :upgrade
+end
+
+link "/usr/hdp/2.2.0.0-2041/hadoop/lib/hadoop-lzo-0.6.0.jar" do
+  to "/usr/lib/hadoop/lib/hadoop-lzo-0.6.0.jar"
+end
 
 remote_file "#{Chef::Config[:file_cache_path]}/mysql-connector-java-5.1.34.tar.gz" do
   source "#{get_binary_server_url}/mysql-connector-java-5.1.34.tar.gz"
@@ -30,38 +39,36 @@ link "/usr/share/java/mysql.jar" do
   to "/usr/share/java/mysql-connector-java.jar"
 end
 
-link "/usr/hdp/current/hive-metastore/lib/mysql-connector-java.jar" do
-  to "/usr/share/java/mysql-connector-java.jar"
+link "/usr/hdp/current/mysql-connector-java.jar" do
+  to "/usr/share/java/mysql.jar"
 end
 
-#link "/usr/lib/hive/lib/mysql.jar" do
-#  to "/usr/share/java/mysql.jar"
-#end
-
-# create metastore defaults
-template "hive-metastore-defaults" do
-  path "/etc/default/hive-metastore"
-  source "hv_hive-default-metastore.erb"
-  owner "root"
-  group "root"
-  mode "0755"
+bash "create-hive-user-home" do
+  code <<-EOH
+  hdfs dfs -mkdir -p /user/hive
+  hdfs dfs -chmod 1777 /user/hive
+  hdfs dfs -chown hive:hdfs /user/hive
+  EOH
+  user "hdfs"
 end
 
-template "hive-metastore-service" do
-  path "/etc/init.d/hive-metastore"
-  source "hv_hive-metastore.erb"
-  owner "root"
-  group "root"
-  mode "0755"
+bash "create-hive-warehouse" do
+  code <<-EOH
+  hdfs dfs -mkdir -p /apps/hive/warehousehadoop
+  hdfs dfs -chmod -R 775 /apps/hive
+  hdfs dfs -chown -R hive:hdfs /apps/hive
+  EOH
+  user "hdfs"
 end
 
-#template "hive-config" do
-#  path "/usr/lib/hive/bin/hive-config.sh"
-#  source "hv_hive-config.sh.erb"
-#  owner "root"
-#  group "root"
-#  mode "0755"
-#end
+bash "create-hive-scratch" do
+  code <<-EOH
+  hdfs dfs -mkdir -p /tmp/scratch
+  hdfs dfs -chmod -R 1777 /tmp/scratch
+  hdfs dfs -chown -R hive:hdfs /tmp/scratch
+  EOH
+  user "hdfs"
+end
 
 ruby_block "hive-metastore-database-creation" do
   cmd = "mysql -uroot -p#{get_config('mysql-root-password')} -e"
@@ -74,7 +81,7 @@ ruby_block "hive-metastore-database-creation" do
         GRANT #{privs} ON metastore.* TO 'hive'@'localhost' IDENTIFIED BY '#{get_config('mysql-hive-password')}';
         FLUSH PRIVILEGES;
         USE metastore;
-        SOURCE /usr/lib/hive/scripts/metastore/upgrade/mysql/hive-schema-0.12.0.mysql.sql;
+        SOURCE /usr/hdp/current/hive-metastore/scripts/metastore/upgrade/mysql/hive-schema-0.14.0.mysql.sql;
         EOF
       IO.popen("mysql -uroot -p#{get_config('mysql-root-password')}", "r+") do |db|
         db.write code
@@ -85,8 +92,32 @@ ruby_block "hive-metastore-database-creation" do
   end
 end
 
+#bash "create-hive-metastore-db" do
+#  code <<-EOH
+#  /usr/hdp/2.2.0.0-2041/hive/bin/schematool -initSchema -dbType mysql -verbose
+#  EOH
+#end
+
+template "/etc/init.d/hive-metastore" do
+  source "hdp_hive-metastore-initd.erb"
+  mode 0655
+end
+
+template "/etc/init.d/hive-server2" do
+  source "hdp_hive-server2-initd.erb"
+  mode 0655
+end
+
 service "hive-metastore" do
   action [:enable, :start]
+  subscribes :restart, "template[/etc/hive/conf/hive-site.xml]", :delayed
+  subscribes :restart, "template[/etc/hive/conf/hive-log4j.properties]", :delayed
+  subscribes :restart, "bash[extract-mysql-connector]", :delayed
+end
+
+service "hive-server2" do
+  action [:enable, :start]
+  supports :status => true, :restart => true, :reload => false
   subscribes :restart, "template[/etc/hive/conf/hive-site.xml]", :delayed
   subscribes :restart, "template[/etc/hive/conf/hive-log4j.properties]", :delayed
   subscribes :restart, "bash[extract-mysql-connector]", :delayed

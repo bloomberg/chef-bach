@@ -15,16 +15,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# Starts a Hadoop journalnode
+# Starts a Hadoop JournalNode
 #
-# chkconfig: 2345 85 15
-# description: Hadoop journalnode
+# chkconfig: 345 85 15
+# description: Hadoop zkfc
 #
 ### BEGIN INIT INFO
-# Provides:          hadoop-hdfs-journalnode
-# Short-Description: Hadoop journalnode
-# Default-Start:     2 3 4 5
-# Default-Stop:      0 1 6
+# Provides:          hadoop-hdfs-zkfc
+# Short-Description: Hadoop zkfc
+# Default-Start:     3 4 5
+# Default-Stop:      0 1 2 6
 # Required-Start:    $syslog $remote_fs
 # Required-Stop:     $syslog $remote_fs
 # Should-Start:
@@ -32,18 +32,6 @@
 ### END INIT INFO
 
 . /lib/lsb/init-functions
-. /etc/default/hadoop
-
-if [ -f /etc/default/hadoop-hdfs-namenode ] ; then
-  . /etc/default/hadoop-hdfs-namenode
-fi
-
-# Autodetect JAVA_HOME if not defined
-if [ -e /usr/libexec/bigtop-detect-javahome ]; then
-  . /usr/libexec/bigtop-detect-javahome
-elif [ -e /usr/lib/bigtop-utils/bigtop-detect-javahome ]; then
-  . /usr/lib/bigtop-utils/bigtop-detect-javahome
-fi
 
 RETVAL_SUCCESS=0
 
@@ -62,17 +50,22 @@ RETVAL=0
 SLEEP_TIME=5
 PROC_NAME="java"
 
-DAEMON="hadoop-hdfs-journalnode"
-DESC="Hadoop journalnode"
-EXEC_PATH="/usr/lib/hadoop/sbin/hadoop-daemon.sh"
-SVC_USER="root"
-DAEMON_FLAGS="journalnode"
+DAEMON="hadoop-hdfs-zkfc"
+DESC="Hadoop zkfc"
+EXEC_PATH="/usr/hdp/current/hadoop-hdfs-namenode/../hadoop/sbin/hadoop-daemon.sh"
+SVC_USER="hdfs"
+DAEMON_FLAGS="zkfc"
 CONF_DIR="/etc/hadoop/conf"
-PIDFILE="/var/run/hadoop-hdfs/hadoop-hdfs-journalnode.pid"
 LOCKDIR="/var/lock/subsys"
-LOCKFILE="$LOCKDIR/hadoop-journalnode"
+LOCKFILE="$LOCKDIR/hadoop-hdfs-zkfc"
+WORKING_DIR="/var/lib/hadoop-hdfs"
 
-install -d -m 0755 -o hdfs -g hdfs /var/run/hadoop-hdfs 1>/dev/null 2>&1 || :
+# set user since the pid/log dir often depends on it
+USER="$SVC_USER"
+. $CONF_DIR/hadoop-env.sh
+PIDFILE="$HADOOP_PID_DIR/hadoop-$HADOOP_IDENT_STRING-zkfc.pid"
+
+install -d -m 0755 -o hdfs -g hdfs $HADOOP_PID_DIR 1>/dev/null 2>&1 || :
 [ -d "$LOCKDIR" ] || install -d -m 0755 $LOCKDIR 1>/dev/null 2>&1 || :
 
 start() {
@@ -80,7 +73,7 @@ start() {
   [ -d $CONF_DIR ] || exit $ERROR_PROGRAM_NOT_CONFIGURED
   log_success_msg "Starting ${DESC}: "
 
-  su -s /bin/bash $SVC_USER -c "$EXEC_PATH --config '$CONF_DIR' start $DAEMON_FLAGS"
+  su -s /bin/bash $SVC_USER -c "cd $WORKING_DIR && $EXEC_PATH --config '$CONF_DIR' start $DAEMON_FLAGS"
 
   # Some processes are slow to start
   sleep $SLEEP_TIME
@@ -94,7 +87,7 @@ start() {
 
 stop() {
   log_success_msg "Stopping ${DESC}: "
-  start_daemon $EXEC_PATH --config "$CONF_DIR" stop $DAEMON_FLAGS
+  su -s /bin/bash $SVC_USER -c "$EXEC_PATH --config "$CONF_DIR" stop $DAEMON_FLAGS"
   RETVAL=$?
 
   [ $RETVAL -eq $RETVAL_SUCCESS ] && rm -f $LOCKFILE $PIDFILE
@@ -167,8 +160,22 @@ service() {
       check_for_root
       condrestart
       ;;
+    upgrade|rollback)
+      DAEMON_FLAGS="$DAEMON_FLAGS -${1}"
+      start
+      ;;
+    init)
+      check_for_root
+      checkstatusofproc
+      if [ "$?" = "$STATUS_RUNNING" ] ; then
+        echo "Error: $DESC is running. Stop it first."
+        exit 1
+      else
+        su -s /bin/bash $SVC_USER -c "hdfs namenode -format"
+      fi
+      ;;
     *)
-      echo $"Usage: $0 {start|stop|status|restart|condrestart}"
+      echo $"Usage: $0 {start|stop|status|restart|try-restart|condrestart|upgrade|rollback|init}"
       exit 1
   esac
 }

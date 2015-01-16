@@ -10,16 +10,17 @@
 export OOZIE_CONFIG=/etc/oozie/conf
 export OOZIE_DATA=/var/lib/oozie
 export OOZIE_LOG=/var/log/oozie
-export OOZIE_CATALINA_HOME=/usr/lib/oozie/oozie-server
-export CATALINA_TMPDIR=/var/tmp/oozie
+export OOZIE_LOG_DIR=/var/log/oozie
+export OOZIE_PID_DIR=/var/run/oozie
+export OOZIE_CATALINA_HOME=/usr/lib/bigtop-tomcat
+export CATALINA_TMPDIR=/tmp
 export CATALINA_PID=/var/run/oozie/oozie.pid
-export CATALINA_BASE=/var/lib/oozie/oozie-server
+export CATALINA_BASE=/usr/hdp/2.2.0.0-2041/oozie
 export CATALINA_OPTS=-Xmx1024m
 export OOZIE_HTTPS_PORT=11443
 export OOZIE_HTTPS_KEYSTORE_PASS=<%=get_config("oozie-keystore-password") %>
 export CATALINA_OPTS="$CATALINA_OPTS -Doozie.https.port=${OOZIE_HTTPS_PORT}"
 export CATALINA_OPTS="$CATALINA_OPTS -Doozie.https.keystore.pass=${OOZIE_HTTPS_KEYSTORE_PASS}"
-
-export JAVA_HOME=<%= node["bcpc"]["hadoop"]["java"] %>
+export JAVA_HOME=<% node["bcpc"]["hadoop"]["java"] %>
 export JAVA_LIBRARY_PATH=/usr/lib/hadoop/lib/native/Linux-amd64-64
 

@@ -55,6 +55,10 @@ template "hadoop-detect-javahome" do
   mode "0755"
 end
 
+package "hdp-select" do
+  action :upgrade
+end
+
 # Install Java
 include_recipe "bcpc-hadoop::java_config"
 include_recipe "java::default"

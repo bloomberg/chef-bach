@@ -20,13 +20,13 @@ end
   end
 end
 
-template "hive-config" do
-  path "/usr/lib/hive/bin/hive-config.sh"
-  source "hv_hive-config.sh.erb"
-  owner "root"
-  group "root"
-  mode "0755"
-end
+#template "hive-config" do
+#  path "/usr/lib/hive/bin/hive-config.sh"
+#  source "hv_hive-config.sh.erb"
+#  owner "root"
+#  group "root"
+#  mode "0755"
+#end
 
 bash "create-hive-warehouse" do
   code "hadoop fs -mkdir -p /user/hive/warehouse && hadoop fs -chmod 1777 /user/hive/warehouse && hadoop fs -chown hive /user/hive"

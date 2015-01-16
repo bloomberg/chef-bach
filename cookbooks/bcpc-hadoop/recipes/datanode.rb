@@ -18,6 +18,16 @@ node.default['bcpc']['hadoop']['copylog']['datanode'] = {
   end
 end
 
+template "/etc/init.d/hadoop-hdfs-datanode" do
+  source "hdp_hadoop-hdfs-datanode-initd.erb"
+  mode 0655
+end
+
+template "/etc/init.d/hadoop-yarn-nodemanager" do
+  source "hdp_hadoop-yarn-nodemanager-initd.erb"
+  mode 0655
+end
+
 link "/usr/lib/hadoop/lib/native/libgplcompression.la" do
   to "/usr/lib/hadoop/lib/native/Linux-amd64-64/libgplcompression.la"
 end
@@ -65,14 +75,26 @@ user "hcat" do
   supports :manage_home => false
 end
 
-%w{hive hcatalog libmysql-java}.each do |pkg|
-  package pkg do
-    action :upgrade
-  end
+#%w{hive hcatalog libmysql-java}.each do |pkg|
+#  package pkg do
+#    action :upgrade
+#  end
+#end
+
+package 'hive-hcatalog' do
+  action :upgrade
 end
 
-link "/usr/lib/hive/lib/mysql.jar" do
-  to "/usr/share/java/mysql.jar"
+#link "/usr/lib/hive/lib/mysql.jar" do
+#  to "/usr/share/java/mysql.jar"
+#end
+
+link "/usr/hdp/current/hive-metastore/lib/mysql-connector-java.jar" do
+  to "/usr/share/java/mysql-connector-java.jar"
+end
+
+link "/usr/hdp/current/hive-server2/lib/mysql-connector-java.jar" do
+  to "/usr/share/java/mysql-connector-java.jar"
 end
 
 # Setup datanode and nodemanager bits
