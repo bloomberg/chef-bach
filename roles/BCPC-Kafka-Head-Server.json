@@ -11,7 +11,6 @@
     "recipe[kafka-bcpc::setattr]",
     "recipe[java::oracle]", 
     "recipe[kafka::default]",
-    "recipe[bcpc_jmxtrans]",
     "recipe[kafka-bcpc::kafka]",
     "recipe[bcpc::diamond]",
     "recipe[bcpc_jmxtrans]"
