@@ -2,7 +2,7 @@ include_recipe 'dpkg_autostart'
 require "base64"
 include_recipe 'bcpc-hadoop::hadoop_config'
 
-%w{hadoop-hdfs-namenode hadoop-hdfs-zkfc}.each do |pkg|
+%w{hadoop-hdfs-namenode hadoop-hdfs-zkfc hadoop-mapreduce}.each do |pkg|
   dpkg_autostart pkg do
     allow false
   end
