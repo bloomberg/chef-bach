@@ -18,9 +18,12 @@ default["bcpc"]["hadoop"]["yarn"]["nodemanager"]["avail_memory"]["size"] = nil
 default["bcpc"]["hadoop"]["yarn"]["nodemanager"]["avail_vcpu"]["ratio"] = 0.8
 default["bcpc"]["hadoop"]["yarn"]["nodemanager"]["avail_vcpu"]["count"] = nil
 default["bcpc"]["hadoop"]["yarn"]["scheduler"] = "org.apache.hadoop.yarn.server.resourcemanager.scheduler.fair.FairScheduler"
+default['bcpc']['hadoop']['yarn']['historyserver']['heap']["size"] = 128
+default['bcpc']['hadoop']['yarn']['historyserver']['heap']["ratio"] = 0
 default["bcpc"]["hadoop"]["hdfs"]["HA"] = false
 default["bcpc"]["hadoop"]["hdfs"]["failed_volumes_tolerated"] = 1
 default["bcpc"]["hadoop"]["hdfs"]["dfs_replication_factor"] = 3
+default["bcpc"]["hadoop"]["hdfs"]["dfs_blocksize"] = "128m"
 default["bcpc"]["hadoop"]["jmx_enabled"] = true
 default["bcpc"]["hadoop"]["namenode"]["jmx"]["port"] = 10111
 default["bcpc"]["hadoop"]["namenode"]["rpc"]["port"] = 8020
@@ -31,6 +34,8 @@ default["bcpc"]["hadoop"]["hbase_master"]["jmx"]["port"] = 10101
 default["bcpc"]["hadoop"]["hbase_rs"]["jmx"]["port"] = 10102
 default["bcpc"]["hadoop"]["kafka"]["jmx"]["port"] = 9995
 default["bcpc"]["hadoop"]["java"] = "/usr/lib/jvm/java-1.7.0-openjdk-amd64"
+default["bcpc"]["hadoop"]["topology"]["script"] = "topology"
+default["bcpc"]["hadoop"]["topology"]["cookbook"] = "bcpc-hadoop"
 #
 # Attributes for service rolling restart process
 #

@@ -43,8 +43,8 @@ end
 
 service "hadoop-yarn-resourcemanager" do
   action [:enable, :start]
+  subscribes :restart, "template[/etc/hadoop/conf/hadoop-env.sh]", :delayed
   subscribes :restart, "template[/etc/hadoop/conf/yarn-site.xml]", :delayed
-  subscribes :restart, "template[/etc/hadoop/conf/yarn-policy.xml]", :delayed
 end
 
 bash "reload mapreduce nodes" do
