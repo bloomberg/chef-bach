@@ -3,7 +3,7 @@ require "base64"
 
 include_recipe 'bcpc-hadoop::hadoop_config'
 
-%w{hadoop-hdfs-namenode}.each do |pkg|
+%w{hadoop-hdfs-namenode hadoop-mapreduce}.each do |pkg|
   dpkg_autostart pkg do
     allow false
   end
