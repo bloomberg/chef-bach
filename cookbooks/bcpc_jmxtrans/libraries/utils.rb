@@ -31,7 +31,7 @@ def process_require_restart?(process_name, process_cmd, dep_process_cmds)
   #
   target_process_pid = `pgrep -f #{process_cmd}`
   if target_process_pid != ""
-    target_process_stime = `ps --no-header -o start_time #{target_process_pid}`
+    target_process_stime = `ps --no-header -o lstart #{target_process_pid}`
   else
     Chef::Log.info "#{process_name} is not currently running which was the expected state"
     return true
@@ -46,7 +46,7 @@ def process_require_restart?(process_name, process_cmd, dep_process_cmds)
     if dep_process_pids != ""
       dep_process_pids_arr = dep_process_pids.split("\n")
       dep_process_pids_arr.each do |dep_process_pid| 
-        dep_process_stime = `ps --no-header -o start_time #{dep_process_pid}`
+        dep_process_stime = `ps --no-header -o lstart #{dep_process_pid}`
         if DateTime.parse(target_process_stime) < DateTime.parse(dep_process_stime)
           restarted_processes.push(dep_process)
           ret = true
