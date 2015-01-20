@@ -55,7 +55,7 @@ def process_require_restart?(process_name, process_cmd, dep_process_cmds)
     end
   end
   if ret
-    Chef::Log.info "#{process_name} service needs restart since #{restarted_processes.join(",")} process(s) got manually restarted"
+    Chef::Log.info "#{process_name} service needs restart since #{restarted_processes.join(",")} process(s) got restarted"
   end
   return ret
 end
