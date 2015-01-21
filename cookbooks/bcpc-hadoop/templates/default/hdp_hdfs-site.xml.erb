@@ -15,11 +15,6 @@
   </property>
 
   <property>
-    <name>dfs.name.dir</name>
-    <value><%=@mounts.map{ |d| "file:///disk/#{d}/dfs/namedir" }.join(",")%></value>
-  </property>
-
-  <property>
     <name>dfs.namenode.name.dir</name>
     <value><%=@mounts.map{ |d| "file:///disk/#{d}/dfs/nn" }.join(",")%></value>
   </property>
