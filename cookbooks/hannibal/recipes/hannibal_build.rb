@@ -13,11 +13,12 @@ group = node[:hannibal][:group]
 source_code_location = "#{Chef::Config[:file_cache_path]}/hannibal"
 
 git source_code_location do
-  repository node[:hannibal][:repo][:url]
-  revision node[:hannibal][:repo][:branch]
-  action :sync
-  notifies :run, "bash[compile_hannibal]", :immediately
-  notifies :run, "bash[cleanup]", :immediately
+   repository node[:hannibal][:repo][:url]
+   revision node[:hannibal][:repo][:branch]
+   action :sync
+   notifies :run, "bash[compile_hannibal]", :immediately
+   notifies :run, "bash[cleanup]", :immediately
+   not_if "test -e #{target_filepath}"
 end
 
 bash "compile_hannibal"  do
@@ -32,9 +33,6 @@ bash "compile_hannibal"  do
    }
    action :nothing
 end
-
-# Calculate checksum for tarball and set node attribute 
-#node.override[:hannibal][:checksum]["#{hbase_version}"] = Digest::SHA256.hexdigest(File.read(target_filepath))
 
 bash "cleanup" do
    cwd ::File.dirname(source_code_location)

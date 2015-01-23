@@ -8,7 +8,6 @@ if(node[:hannibal][:local_tarball]) then
    node.override[:hannibal][:download_url] = get_binary_server_url
 end
 
-
 node.override[:hannibal][:db] = "mysql"
 node.override[:hannibal][:mysql][:db_name] = 'hannibal' 
 node.override[:hannibal][:mysql][:driver] = 'com.mysql.jdbc.Driver' 
@@ -21,19 +20,14 @@ if ("mysql" == node[:hannibal][:db]) then
 # Create DB, User and configure permissions for hannibal
    ruby_block "hannibal-database-creation" do
       block do
-         if not system "mysql -u#{get_config('mysql-root-user')} -p#{get_config('mysql-root-password')} -e 'SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = '#{node[:hannibal][:mysql][:db_name]}'' | grep #{node[:hannibal][:mysql][:db_name]}" then
             puts %x[ mysql -u#{get_config('mysql-root-user')} -p#{get_config('mysql-root-password')} -e "CREATE DATABASE #{node[:hannibal][:mysql][:db_name]} CHARACTER SET UTF8;"
                      mysql -u#{get_config('mysql-root-user')} -p#{get_config('mysql-root-password')} -e "GRANT ALL ON #{node[:hannibal][:mysql][:db_name]}.* TO '#{get_config('hannibal-db-user')}'@'%' IDENTIFIED BY '#{get_config('hannibal-db-password')}';"
                      mysql -u#{get_config('mysql-root-user')} -p#{get_config('mysql-root-password')} -e "GRANT ALL ON #{node[:hannibal][:mysql][:db_name]}.* TO '#{get_config('hannibal-db-user')}'@'localhost' IDENTIFIED BY '#{get_config('hannibal-db-password')}';"
                      mysql -u#{get_config('mysql-root-user')} -p#{get_config('mysql-root-password')} -e "FLUSH PRIVILEGES;"
                   ]
-            puts "Created DB '#{node[:hannibal][:mysql][:db_name]}'."
-         else
-            puts "DB '#{node[:hannibal][:mysql][:db_name]}' already exists."
-         end
       end
+      not_if "mysql -u#{get_config('mysql-root-user')} -p#{get_config('mysql-root-password')} -e \"SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = \'#{node[:hannibal][:mysql][:db_name]}\'\" | grep #{node[:hannibal][:mysql][:db_name]}" 
    end
 end
 
- 
 node.override[:hannibal][:zookeeper_quorum] = node[:bcpc][:hadoop][:zookeeper][:servers] 

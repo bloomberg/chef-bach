@@ -1,5 +1,7 @@
 # Download, configure and start hannibal
 
+require 'fileutils'
+
 hbase_version = node[:hannibal][:hbase_version]
 src_filename = "hannibal-hbase#{hbase_version}.tgz"
 src_filepath = "#{Chef::Config['file_cache_path']}/#{src_filename}"
@@ -15,24 +17,20 @@ exec_mode = node[:hannibal][:exec_mode]
 endpoint = node[:hannibal][:service_endpoint]
 timeout = node[:hannibal][:service_timeout]
 
-remote_file src_filepath do
-   source "#{node[:hannibal][:download_url]}/#{src_filename}"
-   checksum "#{node[:hannibal][:checksum]["#{hbase_version}"]}"
-end
-
-bash "unzip_hannibal" do
-   cwd ::File.dirname(src_filepath)
-   code %Q{
-      tar -xf #{src_filename} -C #{install_dir}/
-      chown -R #{owner}:#{group} #{install_dir}/hannibal
-   }
+ark "hannibal" do
+   url "#{node[:hannibal][:download_url]}/#{src_filename}"
+   checksum node[:hannibal][:checksum]["#{hbase_version}"]
+   path install_dir
+   owner owner
+   creates "start"
+   action :put
+   notifies :run, "ruby_block[set_hannibal_file_permissions]", :immediately
 end
 
 ["#{log_dir}", "#{data_dir}"].each do |d|
    directory d do
       recursive true   
       owner user
-      action :create
    end
 end
 
@@ -71,7 +69,6 @@ template "start_script" do
    source "hannibal_start.erb"
    owner owner
    group group
-   mode exec_mode
 end
 
 template "hannibal_service" do
@@ -82,17 +79,6 @@ template "hannibal_service" do
    mode file_mode
 end
 
-# TODO remove these commented lines after verifying db works
-#%w{ 1 2 3 4 5
-#}.each do |n|
-#   template "hannibal_#{n}.sql" do
-#      path "#{install_dir}/hannibal/conf/evolutions/default/#{n}.sql"
-#      source "hannibal_#{n}.sql.erb"
-#      owner owner
-#      group group
-#   end
-#end
-
 hannibal_dir = "#{install_dir}/hannibal"
 
 # Set directory permissions
@@ -102,18 +88,21 @@ hannibal_dir = "#{install_dir}/hannibal"
    end
 end
 
-bash "set_hannibal_file_permissions" do
-   cwd "#{hannibal_dir}"
-   code %Q{
-      chmod '0644' ./lib/*
-      chmod '0644' ./conf/*
-      chmod -R '0755' ./conf/evolutions
-   }
+ruby_block "set_hannibal_file_permissions" do
+   block do 
+      FileUtils.chmod 0644, Dir["#{hannibal_dir}/lib/*"]
+      FileUtils.chmod 0644, Dir["#{hannibal_dir}/conf/*"]
+      FileUtils.chmod_R 0755, Dir["#{hannibal_dir}/conf/evolutions"]
+   end
+   action :nothing
 end
 
 service "hannibal" do
    provider Chef::Provider::Service::Upstart
-   action [:start]
+   supports :status => true, :restart => true 
+   action [:enable, :start]
+   subscribes :restart, "template[application_conf]", :delayed
+   notifies :run, "ruby_block[wait_for_hannibal]", :delayed 
 end
 
 # Confirm service did start; try until timeout and fail 
@@ -121,4 +110,5 @@ ruby_block "wait_for_hannibal" do
    block do
       wait_until_ready(endpoint, timeout)
    end
+   action :nothing
 end
