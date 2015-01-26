@@ -15,6 +15,8 @@ cookbook_path            '/home/vagrant/chef-bcpc/cookbooks'
 
 # Disable the Ohai password module which explodes on a Single-Sign-On-joined system
 Ohai::Config[:disabled_plugins] = [ "passwd" ]
+
+<% if node[:bcpc][:bootstrap][:proxy] != nil -%>
 no_proxy_array = ["localhost", o[:ipaddress], o[:hostname], o[:fqdn], "<%= node[:bcpc][:bootstrap][:server] %>", "<%= node[:bcpc][:bootstrap][:server] %>"]
 no_proxy_array.insert("*#{o[:domain]}") unless o[:domain].nil?
 no_proxy_string = no_proxy_array.uniq * ","
@@ -25,4 +27,6 @@ ENV['no_proxy'] = no_proxy_string
 http_proxy ENV['http_proxy']
 https_proxy ENV['https_proxy']
 no_proxy no_proxy_string
+<% end -%>
+
 File.umask(0007)
