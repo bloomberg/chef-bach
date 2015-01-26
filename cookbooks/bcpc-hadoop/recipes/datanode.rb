@@ -165,6 +165,7 @@ ruby_block "acquire_lock_to_restart_datanode" do
   action :nothing
   subscribes :create, "template[/etc/hadoop/conf/hdfs-site.xml]", :immediate
   subscribes :create, "template[/etc/hadoop/conf/hadoop-env.sh]", :immediate
+  subscribes :create, "template[/etc/hadoop/conf/topology]", :immediate
   subscribes :create, "ruby_block[handle_prev_datanode_restart_failure]", :immediate
 end
 #
@@ -203,5 +204,6 @@ end
 service "hadoop-yarn-nodemanager" do
   supports :status => true, :restart => true, :reload => false
   action [:enable, :start]
+  subscribes :restart, "template[/etc/hadoop/conf/hadoop-env.sh]", :delayed
   subscribes :restart, "template[/etc/hadoop/conf/yarn-site.xml]", :delayed
 end

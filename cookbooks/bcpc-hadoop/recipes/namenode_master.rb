@@ -2,7 +2,7 @@ include_recipe 'dpkg_autostart'
 require "base64"
 include_recipe 'bcpc-hadoop::hadoop_config'
 
-%w{hadoop-hdfs-namenode hadoop-hdfs-zkfc}.each do |pkg|
+%w{hadoop-hdfs-namenode hadoop-hdfs-zkfc hadoop-mapreduce}.each do |pkg|
   dpkg_autostart pkg do
     allow false
   end
@@ -72,6 +72,7 @@ service "generally run hadoop-hdfs-namenode" do
    subscribes :restart, "template[/etc/hadoop/conf/hdfs-site.xml]", :delayed
    subscribes :restart, "template[/etc/hadoop/conf/hdfs-policy.xml]", :delayed
    subscribes :restart, "template[/etc/hadoop/conf/hdfs-site_HA.xml]", :delayed
+   subscribes :restart, "template[/etc/hadoop/conf/topology]", :delayed
    subscribes :restart, "bash[initialize-shared-edits]", :immediately
 end
 

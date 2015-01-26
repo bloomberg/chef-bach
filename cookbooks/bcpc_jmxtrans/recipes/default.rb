@@ -67,24 +67,20 @@ node['jmxtrans']['servers'].each do |server|
   jmx_services.push(server['service'])
   jmx_service_cmds[server['service']] = server['service_cmd']
 end
-#
-# Using the services array generate chef service resources to restart when the monitored services are restarted 
-#
-jmx_services.each do |jmx_dep_service| 
-  service "restart jmxtrans for #{jmx_dep_service}" do
-    service_name "jmxtrans"
-    supports :restart => true, :status => true, :reload => true
-    action   :nothing
-    subscribes :restart, "service[#{jmx_dep_service}]", :delayed
-  end
-end
 
 #
-# Ruby block to restart jmxtrans if any of the dependent process is restarted manually
+# Ruby block to restart jmxtrans if any of the dependent process is restarted
 #
-service "restart jmxtrans on dependent service manual restart" do
+service "restart jmxtrans on dependent service" do
   service_name "jmxtrans"
   supports :restart => true, :status => true, :reload => true
   action   :restart
+  #
+  # Using the services array generate chef service resources to restart when the monitored services are restarted 
+  #
+  jmx_services.each do |jmx_dep_service| 
+    subscribes :restart, "service[#{jmx_dep_service}]", :delayed
+  end
+  # Run if we see a service was restarted (either manually or from a service restart subscribed above)
   only_if { process_require_restart?("jmxtrans","jmxtrans-all.jar",jmx_service_cmds) }
 end

@@ -2,7 +2,7 @@ include_recipe 'dpkg_autostart'
 include_recipe 'bcpc-hadoop::hadoop_config'
 require "base64"
 
-%w{hadoop-hdfs-namenode hadoop-hdfs-zkfc}.each do |pkg|
+%w{hadoop-hdfs-namenode hadoop-hdfs-zkfc hadoop-mapreduce}.each do |pkg|
   dpkg_autostart pkg do
     allow false
   end
@@ -45,6 +45,7 @@ if @node['bcpc']['hadoop']['hdfs']['HA'] == true then
     action [:enable, :start]
     subscribes :restart, "template[/etc/hadoop/conf/hdfs-site.xml]", :delayed
     subscribes :restart, "template[/etc/hadoop/conf/hdfs-policy.xml]", :delayed
+    subscribes :restart, "template[/etc/hadoop/conf/topology]", :delayed
   end
 else
   Chef::Log.info "Not running standby namenode services yet -- HA disabled!"

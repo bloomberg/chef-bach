@@ -129,4 +129,9 @@
     <name>dfs.journalnode.edits.dir</name>
     <value><%="/disk/#{@mounts[0]}/dfs/jn"%></value>
   </property>
+
+  <property>
+    <name>dfs.blocksize</name>
+    <value><%= node["bcpc"]["hadoop"]["hdfs"]["dfs_blocksize"] %></value>
+  </property>
 </configuration>
