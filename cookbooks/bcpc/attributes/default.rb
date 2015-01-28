@@ -148,8 +148,14 @@ default['bcpc']['zabbix']['scripts']['query_graphite'] = "/usr/local/bin/query_g
 default['bcpc']['keepalived']['config_template'] = "keepalived.conf_openstack"
 default['bcpc']['graphite']['relay_port'] = 2013
 default['bcpc']['graphite']['web_port'] = 8888
+default['bcpc']['graphite']['log']['retention'] = 15
 
 default[:bcpc][:ports][:apache][:radosgw] = 8080
 default[:bcpc][:ports][:apache][:radosgw_https] = 8443
 default[:bcpc][:ports][:haproxy][:radosgw] = 80
 default[:bcpc][:ports][:haproxy][:radosgw_https] = 443
+default[:bcpc][:graphite][:carbon][:storage] = { 
+  "carbon"=>{ "pattern" => "^carbon\\.", "retentions"=>"60:90d" },
+  "default"=>{ "pattern" =>".*", "retentions" => "15s:7d,1m:30d,5m:90d" },
+  "hbase"=>{ "pattern" => "^jmx\\.hbase_rs\\.*\\.hb*\\.", "retentions" => "15s:15d" } 
+}

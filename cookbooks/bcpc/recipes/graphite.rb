@@ -170,3 +170,9 @@ bash "graphite-database-sync" do
     EOH
     notifies :restart, "service[apache2]", :immediately
 end
+
+bash "cleanup-old-logs" do
+  action :run
+  user "root"
+  code "find /opt/graphite/storage/ -name *.wsp -mtime +#{node['bcpc']['graphite']['log']['retention']} -type f -exec rm {} \\;"
+end
