@@ -5,4 +5,4 @@
 include_recipe "hannibal_build"
 
 # Deploy hannibal
-include_recipe "hannibal_hbase"
+include_recipe "hannibal_deploy"

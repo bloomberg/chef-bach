@@ -1,11 +1,11 @@
 # Test hannibal_hbase recipe.
 # Run from directory ~/chef-bcpc/cookbooks/hannibal/spec
-# Command: rspec tests/hannibal_hbase_spec.rb --color --format documentation
+# Command: rspec tests/hannibal_deploy.rb --color --format documentation
 
 require_relative '../spec_helper'
 
 # Test the local_tarball version (built from source locally)
-describe 'hannibal::hannibal_hbase' do
+describe 'hannibal::hannibal_deploy' do
    let(:chef_run) do
       ChefSpec::ServerRunner.new do |node|
          node.set['hannibal']['local_tarball'] = true

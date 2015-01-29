@@ -1,5 +1,8 @@
 # Setup hannibal config
 
+# Populate node attributes for all kind of hosts
+set_hosts
+
 make_config('hannibal-app-secret-key', secure_password(64))
 make_config('hannibal-db-user', "hannibal")
 make_config('hannibal-db-password', secure_password)
