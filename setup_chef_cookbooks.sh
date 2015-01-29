@@ -51,7 +51,7 @@ ENV['no_proxy'] = no_proxy_string
 http_proxy ENV['http_proxy']
 https_proxy ENV['https_proxy']
 no_proxy no_proxy_string
-
+ENV['GIT_SSL_NO_VERIFY'] = 'true'
 File.umask(0007)
 EOF
 cd cookbooks
