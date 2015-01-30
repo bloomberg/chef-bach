@@ -30,6 +30,12 @@ template "/etc/hbase/conf/hbase-env.sh" do
   mode 0655
 end
 
+template "/etc/default/hbase" do
+  source "hdp_hbase.default.erb"
+  mode 0655
+  variables(:hbrs_jmx_port => node[:bcpc][:hadoop][:hbase_rs][:jmx][:port])
+end
+
 template "/etc/init.d/hbase-regionserver" do
   source "hdp_hbase-regionserver-initd.erb"
   mode 0655
