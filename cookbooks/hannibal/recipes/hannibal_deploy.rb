@@ -1,4 +1,6 @@
-# Download, configure and start hannibal
+# Cookbook Name : hannibal
+# Recipe Name : hannibal_deploy
+# Description : Download, configure and start hannibal
 
 require 'fileutils'
 

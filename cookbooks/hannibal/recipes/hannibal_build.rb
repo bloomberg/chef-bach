@@ -1,3 +1,7 @@
+# Cookbook Name : hannibal
+# Recipe Name : hannibal_build
+# Description : To build hannibal tarball
+
 # Pre-requisites
 # git is installed and proxies configured
 # http and https proxies are set
