@@ -1,5 +1,6 @@
 require 'chefspec'
 require 'chef/config'
+require_relative 'support/matchers'
 
 RSpec.configure do | config |
    config.cookbook_path = "../../"

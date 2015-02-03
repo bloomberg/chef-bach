@@ -21,8 +21,7 @@ git source_code_location do
    revision node[:hannibal][:repo][:branch]
    action :sync
    notifies :run, "bash[compile_hannibal]", :immediately
-   notifies :run, "bash[cleanup]", :immediately
-   not_if "test -e #{target_filepath}"
+   not_if { ::File.exist?(target_filepath) }
 end
 
 bash "compile_hannibal"  do
@@ -36,6 +35,7 @@ bash "compile_hannibal"  do
       chmod 755 #{target_filepath}
    }
    action :nothing
+   notifies :run, "bash[cleanup]", :immediately
 end
 
 bash "cleanup" do
