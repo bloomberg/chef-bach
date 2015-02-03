@@ -9,7 +9,8 @@
       "recipe[bcpc::apache-mirror]",
       "recipe[bcpc::ufw]",
       "recipe[bcpc::cobbler]",
-      "recipe[bcpc::cobbler-centos]"
+      "recipe[bcpc::cobbler-centos]",
+      "role[Hannibal-Build]"
     ],
     "description": "A bootstrap node in a BCPC cluster",
     "chef_type": "role",

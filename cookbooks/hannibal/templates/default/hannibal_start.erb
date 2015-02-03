@@ -1,0 +1,14 @@
+#!/bin/sh
+export HANNIBAL_HBASE_VERSION=<%= "#{node[:hannibal][:hbase_version]}" %>
+if [ "" = "$HANNIBAL_HTTP_PORT" ]; then
+HANNIBAL_HTTP_PORT=<%= "#{node[:hannibal][:port]}" %>
+echo "starting Hannibal for HBase $HANNIBAL_HBASE_VERSION on Port $HANNIBAL_HTTP_PORT (may be altered by assigning another port-number to HANNIBAL_HTTP_PORT)"
+else
+echo "starting Hannibal for HBase $HANNIBAL_HBASE_VERSION on Port $HANNIBAL_HTTP_PORT (as defined by HANNIBAL_HTTP_PORT)"
+fi
+<% if(node[:hannibal][:local_tarball]) %> 
+java -Xmx<%= "#{node[:hannibal][:max_memory]}" %> -Dhttp.port=$HANNIBAL_HTTP_PORT -cp "`dirname $0`/conf:`dirname $0`/lib/*" play.core.server.NettyServer
+<% else %>
+java -Xmx<%= "#{node[:hannibal][:max_memory]}" %> -Dhttp.port=$HANNIBAL_HTTP_PORT -cp "`dirname $0`/conf:`dirname $0`/target/staged/*" play.core.server.NettyServer
+<% end if%>
+

@@ -1,0 +1,33 @@
+#!upstart
+description "Hannibal for HBASE"
+
+start on runlevel [2345]
+stop on runlevel [016]
+
+env HANNIBAL_HBASE_VERSION=<%= node[:hannibal][:hbase_version] %>
+
+pre-start script
+   if [ ! -d <%= "#{node[:hannibal][:install_dir]}/hannibal" %> ]
+   then
+      logger "ERROR: Hannibal install directory does not exist"
+      stop
+      exit 0
+   else
+      if [ ! -d <%= node[:hannibal][:working_dir] %> ]; then
+         mkdir -p <%= node[:hannibal][:working_dir] %>
+         chown nobody <%= node[:hannibal][:working_dir] %>
+         ln -s <%= "#{node[:hannibal][:data_dir]} #{node[:hannibal][:working_dir]}/data" %>
+         ln -s <%= "#{node[:hannibal][:log_dir]} #{node[:hannibal][:working_dir]}/logs" %>
+      fi
+   fi
+end script
+
+script
+   chdir <%= node[:hannibal][:working_dir] %>
+<% if node[:hannibal][:local_tarball] %>
+   exec sudo -u <%= node[:hannibal][:user] %> java -Xmx<%= node[:hannibal][:max_memory] %> -Dhttp.port=<%= node[:hannibal][:port] %> -cp <%= "#{node[:hannibal][:install_dir]}/hannibal/conf:#{node[:hannibal][:install_dir]}/hannibal/lib/*" %> play.core.server.NettyServer > <%= node[:hannibal][:log_dir] %>/service.log 2>&1
+<% else %>
+   exec sudo -u <%= node[:hannibal][:user] %> java -Xmx<%= node[:hannibal][:max_memory] %> -Dhttp.port=<%= node[:hannibal][:port] %> -cp <%= "#{node[:hannibal][:install_dir]}/hannibal/conf:#{node[:hannibal][:install_dir]}/hannibal/target/staged/*" %> play.core.server.NettyServer > <%= node[:hannibal][:log_dir] %>/service.log 2>&1
+<% end %>
+end script
+

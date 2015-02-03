@@ -1,0 +1,14 @@
+{
+    "name": "Hannibal-Deploy",
+    "default_attributes": {
+    },
+    "json_class": "Chef::Role",
+    "run_list": [
+      "recipe[bcpc-hadoop::hannibal]",
+      "recipe[hannibal::hannibal_deploy]"
+    ],
+    "description": "A hannibal node",
+    "chef_type": "role",
+    "override_attributes": {
+    }
+}
