@@ -20,6 +20,7 @@ default["bcpc"]["hadoop"]["yarn"]["nodemanager"]["avail_vcpu"]["count"] = nil
 default["bcpc"]["hadoop"]["yarn"]["scheduler"] = "org.apache.hadoop.yarn.server.resourcemanager.scheduler.fair.FairScheduler"
 default['bcpc']['hadoop']['yarn']['historyserver']['heap']["size"] = 128
 default['bcpc']['hadoop']['yarn']['historyserver']['heap']["ratio"] = 0
+default["bcpc"]["hadoop"]["yarn"]["rm_port"] = 8032
 default["bcpc"]["hadoop"]["hdfs"]["HA"] = false
 default["bcpc"]["hadoop"]["hdfs"]["failed_volumes_tolerated"] = 1
 default["bcpc"]["hadoop"]["hdfs"]["dfs_replication_factor"] = 3
