@@ -4,10 +4,11 @@
 
 require 'digest'
 
+Chef::Resource.send(:include, Bcpc::OSHelper)
 include_recipe "bcpc-hadoop::hive_config"
 
 remote_file "#{Chef::Config[:file_cache_path]}/mysql-connector-java-5.1.34.tar.gz" do
-  source "#{get_binary_server_url}/mysql-connector-java-5.1.34.tar.gz"
+  source "#{Bcpc::OSHelper.get_binary_server_url(node)}/mysql-connector-java-5.1.34.tar.gz"
   owner "root"
   group "root"
   mode "755"
@@ -60,19 +61,19 @@ template "hive-config" do
 end
 
 ruby_block "hive-metastore-database-creation" do
-  cmd = "mysql -uroot -p#{get_config('mysql-root-password')} -e"
+  cmd = "mysql -uroot -p#{Bcpc::OSHelper.get_config(node, 'mysql-root-password')} -e"
   privs = "SELECT,INSERT,UPDATE,DELETE,LOCK TABLES,EXECUTE" # todo node[:bcpc][:hadoop][:hive_db_privs].join(",")
   block do
     if not system " #{cmd} 'SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = \"metastore\"' | grep -q metastore" then
       code = <<-EOF
         CREATE DATABASE metastore;
-        GRANT #{privs} ON metastore.* TO 'hive'@'%' IDENTIFIED BY '#{get_config('mysql-hive-password')}';
-        GRANT #{privs} ON metastore.* TO 'hive'@'localhost' IDENTIFIED BY '#{get_config('mysql-hive-password')}';
+        GRANT #{privs} ON metastore.* TO 'hive'@'%' IDENTIFIED BY '#{Bcpc::OSHelper.get_config(node, 'mysql-hive-password')}';
+        GRANT #{privs} ON metastore.* TO 'hive'@'localhost' IDENTIFIED BY '#{Bcpc::OSHelper.get_config(node, 'mysql-hive-password')}';
         FLUSH PRIVILEGES;
         USE metastore;
         SOURCE /usr/lib/hive/scripts/metastore/upgrade/mysql/hive-schema-0.12.0.mysql.sql;
         EOF
-      IO.popen("mysql -uroot -p#{get_config('mysql-root-password')}", "r+") do |db|
+      IO.popen("mysql -uroot -p#{Bcpc::OSHelper.get_config(node, 'mysql-root-password')}", "r+") do |db|
         db.write code
       end
       self.notifies :enable, "service[hive-metastore]", :delayed

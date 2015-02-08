@@ -1,3 +1,4 @@
+
 # disable IPv6 (e.g. for HADOOP-8568)
 case node["platform_family"]
   when "debian"
@@ -43,7 +44,7 @@ sysctl_param 'vm.swappiness' do
 end
 
 # Populate node attributes for all kind of hosts
-set_hosts
+BcpcHadoop::HadoopHelper.set_hosts(node,cookbook_name)
 
 package "bigtop-jsvc"
 

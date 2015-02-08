@@ -1,3 +1,4 @@
+Chef::Resource.send(:include, Bcpc::OSHelper)
 #
 # Cookbook Name:: bcpc
 # Recipe:: horizon
@@ -22,8 +23,8 @@ include_recipe "bcpc::openstack"
 include_recipe "bcpc::apache2"
 include_recipe "bcpc::cobalt"
 
-make_config('mysql-horizon-user', "horizon")
-make_config('mysql-horizon-password', secure_password)
+Bcpc::OSHelper.set_config(node, 'mysql-horizon-user', "horizon")
+Bcpc::OSHelper.set_config(node, 'mysql-horizon-password', Bcpc::Helper.secure_password)
 
 package "openstack-dashboard" do
     action :upgrade
@@ -72,16 +73,17 @@ template "/etc/openstack-dashboard/local_settings.py" do
     owner "root"
     group "root"
     mode 00644
+    helpers(Bcpc::OSHelper)
     notifies :restart, "service[apache2]", :delayed
 end
 
 ruby_block "horizon-database-creation" do
     block do
-        if not system "mysql -uroot -p#{get_config('mysql-root-password')} -e 'SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = \"#{node['bcpc']['horizon_dbname']}\"'|grep \"#{node['bcpc']['horizon_dbname']}\"" then
-            %x[ mysql -uroot -p#{get_config('mysql-root-password')} -e "CREATE DATABASE #{node['bcpc']['horizon_dbname']};"
-                mysql -uroot -p#{get_config('mysql-root-password')} -e "GRANT ALL ON #{node['bcpc']['horizon_dbname']}.* TO '#{get_config('mysql-horizon-user')}'@'%' IDENTIFIED BY '#{get_config('mysql-horizon-password')}';"
-                mysql -uroot -p#{get_config('mysql-root-password')} -e "GRANT ALL ON #{node['bcpc']['horizon_dbname']}.* TO '#{get_config('mysql-horizon-user')}'@'localhost' IDENTIFIED BY '#{get_config('mysql-horizon-password')}';"
-                mysql -uroot -p#{get_config('mysql-root-password')} -e "FLUSH PRIVILEGES;"
+        if not system "mysql -uroot -p#{Bcpc::OSHelper.get_config(node, 'mysql-root-password')} -e 'SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = \"#{node['bcpc']['horizon_dbname']}\"'|grep \"#{node['bcpc']['horizon_dbname']}\"" then
+            %x[ mysql -uroot -p#{Bcpc::OSHelper.get_config(node, 'mysql-root-password')} -e "CREATE DATABASE #{node['bcpc']['horizon_dbname']};"
+                mysql -uroot -p#{Bcpc::OSHelper.get_config(node, 'mysql-root-password')} -e "GRANT ALL ON #{node['bcpc']['horizon_dbname']}.* TO '#{Bcpc::OSHelper.get_config(node, 'mysql-horizon-user')}'@'%' IDENTIFIED BY '#{Bcpc::OSHelper.get_config(node, 'mysql-horizon-password')}';"
+                mysql -uroot -p#{Bcpc::OSHelper.get_config(node, 'mysql-root-password')} -e "GRANT ALL ON #{node['bcpc']['horizon_dbname']}.* TO '#{Bcpc::OSHelper.get_config(node, 'mysql-horizon-user')}'@'localhost' IDENTIFIED BY '#{Bcpc::OSHelper.get_config(node, 'mysql-horizon-password')}';"
+                mysql -uroot -p#{Bcpc::OSHelper.get_config(node, 'mysql-root-password')} -e "FLUSH PRIVILEGES;"
             ]
             self.notifies :run, "bash[horizon-database-sync]", :immediately
             self.resolve_notification_references

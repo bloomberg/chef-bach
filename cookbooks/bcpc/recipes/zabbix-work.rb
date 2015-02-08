@@ -1,3 +1,4 @@
+Chef::Resource.send(:include, Bcpc::OSHelper)
 #
 # Cookbook Name:: bcpc
 # Recipe:: zabbix-work
@@ -20,7 +21,7 @@
 include_recipe "bcpc::default"
 
 remote_file "/tmp/zabbix-agent.tar.gz" do
-    source "#{get_binary_server_url}/zabbix-agent.tar.gz"
+    source "#{Bcpc::OSHelper.get_binary_server_url(node)}/zabbix-agent.tar.gz"
     owner "root"
     mode 00444
     not_if { File.exists?("/usr/local/sbin/zabbix_agentd") }
@@ -65,6 +66,7 @@ template "/usr/local/etc/zabbix_agentd.conf" do
     owner node[:bcpc][:zabbix][:user]
     group "root"
     mode 00600
+    helpers(Bcpc::OSHelper)
     notifies :restart, "service[zabbix-agent]", :delayed
 end
 
@@ -87,7 +89,7 @@ directory "/usr/local/etc/checks" do
   mode 00775
 end 
 
-if get_nodes_for("nova-head").length > 0
+if Bcpc::OSHelper.get_nodes_for("nova-head",node,cookbook_name).length > 0
   %w{ float_ips }.each do |cc| 
     template  "/usr/local/etc/checks/#{cc}.yml" do
       source "checks/#{cc}.yml.erb"

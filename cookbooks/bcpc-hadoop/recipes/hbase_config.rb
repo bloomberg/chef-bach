@@ -17,7 +17,7 @@ bash "update-hbase-conf-alternatives" do
   }
 end
 
-if get_nodes_for("powerdns", "bcpc").length > 0
+if Bcpc::OSHelper.get_nodes_for("powerdns", node, "bcpc").length > 0
  dns_server = node[:bcpc][:management][:vip]
 else
  dns_server = node[:bcpc][:dns_servers][0]
@@ -32,6 +32,7 @@ end
    template "/etc/hbase/conf/#{t}" do
      source "hb_#{t}.erb"
      mode 0644
+     helpers(Bcpc::OSHelper)
      variables(:nn_hosts => node[:bcpc][:hadoop][:nn_hosts],
                :zk_hosts => node[:bcpc][:hadoop][:zookeeper][:servers],
                :jn_hosts => node[:bcpc][:hadoop][:jn_hosts],

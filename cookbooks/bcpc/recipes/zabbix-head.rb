@@ -1,3 +1,4 @@
+Chef::Resource.send(:include, Bcpc::OSHelper)
 #
 # Cookbook Name:: bcpc
 # Recipe:: zabbix-head
@@ -20,15 +21,15 @@
 include_recipe "bcpc::mysql"
 include_recipe "bcpc::apache2"
 
-make_config('mysql-zabbix-user', "zabbix")
-make_config('mysql-zabbix-password', secure_password)
-make_config('zabbix-admin-user', "admin")
-make_config('zabbix-admin-password', secure_password)
-make_config('zabbix-guest-user', "guest")
-make_config('zabbix-guest-password', secure_password)
+Bcpc::OSHelper.set_config(node, 'mysql-zabbix-user', "zabbix")
+Bcpc::OSHelper.set_config(node, 'mysql-zabbix-password', Bcpc::Helper.secure_password)
+Bcpc::OSHelper.set_config(node, 'zabbix-admin-user', "admin")
+Bcpc::OSHelper.set_config(node, 'zabbix-admin-password', Bcpc::Helper.secure_password)
+Bcpc::OSHelper.set_config(node, 'zabbix-guest-user', "guest")
+Bcpc::OSHelper.set_config(node, 'zabbix-guest-password', Bcpc::Helper.secure_password)
 
 remote_file "/tmp/zabbix-server.tar.gz" do
-    source "#{get_binary_server_url}/zabbix-server.tar.gz"
+    source "#{Bcpc::OSHelper.get_binary_server_url(node)}/zabbix-server.tar.gz"
     owner "root"
     mode 00444
     not_if { File.exists?("/usr/local/sbin/zabbix_server") }
@@ -65,23 +66,24 @@ template "/usr/local/etc/zabbix_server.conf" do
     owner node[:bcpc][:zabbix][:user]
     group "root"
     mode 00600
+    helpers(Bcpc::OSHelper)
     notifies :restart, "service[zabbix-server]", :delayed
 end
 
 ruby_block "zabbix-database-creation" do
     block do
-        if not system "mysql -uroot -p#{get_config('mysql-root-password')} -e 'SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = \"#{node['bcpc']['zabbix_dbname']}\"'|grep \"#{node['bcpc']['zabbix_dbname']}\"" then
-            puts %x[ mysql -uroot -p#{get_config('mysql-root-password')} -e "CREATE DATABASE #{node['bcpc']['zabbix_dbname']} CHARACTER SET UTF8;"
-                mysql -uroot -p#{get_config('mysql-root-password')} -e "GRANT ALL ON #{node['bcpc']['zabbix_dbname']}.* TO '#{get_config('mysql-zabbix-user')}'@'%' IDENTIFIED BY '#{get_config('mysql-zabbix-password')}';"
-                mysql -uroot -p#{get_config('mysql-root-password')} -e "GRANT ALL ON #{node['bcpc']['zabbix_dbname']}.* TO '#{get_config('mysql-zabbix-user')}'@'localhost' IDENTIFIED BY '#{get_config('mysql-zabbix-password')}';"
-                mysql -uroot -p#{get_config('mysql-root-password')} -e "FLUSH PRIVILEGES;"
-                mysql -uroot -p#{get_config('mysql-root-password')} #{node['bcpc']['zabbix_dbname']} < /usr/local/share/zabbix/schema.sql
-                mysql -uroot -p#{get_config('mysql-root-password')} #{node['bcpc']['zabbix_dbname']} < /usr/local/share/zabbix/images.sql
-                mysql -uroot -p#{get_config('mysql-root-password')} #{node['bcpc']['zabbix_dbname']} < /usr/local/share/zabbix/data.sql
-                HASH=`echo -n "#{get_config('zabbix-admin-password')}" | md5sum | awk '{print $1}'`
-                mysql -uroot -p#{get_config('mysql-root-password')} #{node['bcpc']['zabbix_dbname']} -e "UPDATE users SET passwd=\\"$HASH\\" WHERE alias=\\"#{get_config('zabbix-admin-user')}\\";"
-                HASH=`echo -n "#{get_config('zabbix-guest-password')}" | md5sum | awk '{print $1}'`
-                mysql -uroot -p#{get_config('mysql-root-password')} #{node['bcpc']['zabbix_dbname']} -e "UPDATE users SET passwd=\\"$HASH\\" WHERE alias=\\"#{get_config('zabbix-guest-user')}\\";"
+        if not system "mysql -uroot -p#{Bcpc::OSHelper.get_config(node, 'mysql-root-password')} -e 'SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = \"#{node['bcpc']['zabbix_dbname']}\"'|grep \"#{node['bcpc']['zabbix_dbname']}\"" then
+            puts %x[ mysql -uroot -p#{Bcpc::OSHelper.get_config(node, 'mysql-root-password')} -e "CREATE DATABASE #{node['bcpc']['zabbix_dbname']} CHARACTER SET UTF8;"
+                mysql -uroot -p#{Bcpc::OSHelper.get_config(node, 'mysql-root-password')} -e "GRANT ALL ON #{node['bcpc']['zabbix_dbname']}.* TO '#{Bcpc::OSHelper.get_config(node, 'mysql-zabbix-user')}'@'%' IDENTIFIED BY '#{Bcpc::OSHelper.get_config(node, 'mysql-zabbix-password')}';"
+                mysql -uroot -p#{Bcpc::OSHelper.get_config(node, 'mysql-root-password')} -e "GRANT ALL ON #{node['bcpc']['zabbix_dbname']}.* TO '#{Bcpc::OSHelper.get_config(node, 'mysql-zabbix-user')}'@'localhost' IDENTIFIED BY '#{Bcpc::OSHelper.get_config(node, 'mysql-zabbix-password')}';"
+                mysql -uroot -p#{Bcpc::OSHelper.get_config(node, 'mysql-root-password')} -e "FLUSH PRIVILEGES;"
+                mysql -uroot -p#{Bcpc::OSHelper.get_config(node, 'mysql-root-password')} #{node['bcpc']['zabbix_dbname']} < /usr/local/share/zabbix/schema.sql
+                mysql -uroot -p#{Bcpc::OSHelper.get_config(node, 'mysql-root-password')} #{node['bcpc']['zabbix_dbname']} < /usr/local/share/zabbix/images.sql
+                mysql -uroot -p#{Bcpc::OSHelper.get_config(node, 'mysql-root-password')} #{node['bcpc']['zabbix_dbname']} < /usr/local/share/zabbix/data.sql
+                HASH=`echo -n "#{Bcpc::OSHelper.get_config(node, 'zabbix-admin-password')}" | md5sum | awk '{print $1}'`
+                mysql -uroot -p#{Bcpc::OSHelper.get_config(node, 'mysql-root-password')} #{node['bcpc']['zabbix_dbname']} -e "UPDATE users SET passwd=\\"$HASH\\" WHERE alias=\\"#{Bcpc::OSHelper.get_config(node, 'zabbix-admin-user')}\\";"
+                HASH=`echo -n "#{Bcpc::OSHelper.get_config(node, 'zabbix-guest-password')}" | md5sum | awk '{print $1}'`
+                mysql -uroot -p#{Bcpc::OSHelper.get_config(node, 'mysql-root-password')} #{node['bcpc']['zabbix_dbname']} -e "UPDATE users SET passwd=\\"$HASH\\" WHERE alias=\\"#{Bcpc::OSHelper.get_config(node, 'zabbix-guest-user')}\\";"
             ]
         end
     end
@@ -116,6 +118,7 @@ template "/usr/local/share/zabbix/php/conf/zabbix.conf.php" do
     user node[:bcpc][:zabbix][:user]
     group "www-data"
     mode 00640
+    helpers(Bcpc::OSHelper)
     notifies :restart, "service[apache2]", :delayed
 end
 
@@ -158,12 +161,13 @@ cookbook_file "/usr/local/bin/check" do
   mode "00755"
 end
 
-if get_nodes_for("nova-head").length > 0
+if Bcpc::OSHelper.get_nodes_for("nova-head",node,cookbook_name).length > 0
   template  "/usr/local/etc/checks/default.yml" do
     source "checks/default_openstack.yml.erb"
     owner node[:bcpc][:zabbix][:user]
-      group "root"
+    group "root"
     mode 00640
+    helpers(Bcpc::OSHelper)
   end
 
   template "/usr/local/etc/zabbix_agentd.conf.d/zabbix-openstack.conf" do
@@ -171,6 +175,7 @@ if get_nodes_for("nova-head").length > 0
       owner node[:bcpc][:zabbix][:user]
       group "root"
       mode 00600
+      helpers(Bcpc::OSHelper)
       notifies :restart, "service[zabbix-agent]", :immediately
   end
 
@@ -180,6 +185,7 @@ if get_nodes_for("nova-head").length > 0
       owner node[:bcpc][:zabbix][:user]
       group "root"
       mode 00640
+      helpers(Bcpc::OSHelper)
     end
     
     cookbook_file "/usr/local/bin/checks/#{cc}" do
@@ -205,6 +211,7 @@ if get_nodes_for("nova-head").length > 0
     owner "root"
     group "root"
     mode "00755"
+    helpers(Bcpc::OSHelper)
   end
 end
 

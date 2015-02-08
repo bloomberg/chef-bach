@@ -1,8 +1,9 @@
+Chef::Resource.send(:include, Bcpc::OSHelper)
 
 ruby_block "initialize-revelytix-config" do
     block do
-      make_config('revelytix_loom_ssl_password', secure_password)
-      make_config('revelitix_ssl_trust_password', secure_password)
+      Bcpc::OSHelper.set_config(node, 'revelytix_loom_ssl_password', Bcpc::Helper.secure_password)
+      Bcpc::OSHelper.set_config(node, 'revelitix_ssl_trust_password', Bcpc::Helper.secure_password)
     end
 end
 
@@ -45,6 +46,7 @@ template "loom-properties" do
   owner "root"
   group "root"
   mode "0755"
+  helpers(Bcpc::OSHelper)
 #  notifies :enable, "service[loom]"
 #  notifies :start, "service[loom]"
 end

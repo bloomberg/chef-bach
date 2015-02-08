@@ -1,3 +1,4 @@
+Chef::Resource.send(:include, Bcpc::OSHelper)
 #
 # Cookbook Name:: bcpc
 # Recipe:: elasticsearch
@@ -36,8 +37,8 @@ template "/etc/elasticsearch/elasticsearch.yml" do
     owner "root"
     group "root"
     mode 00644
-    variables( :servers => get_head_nodes,
-               :min_quorum => get_head_nodes.length/2 + 1 )
+    variables( :servers => Bcpc::OSHelper.get_head_nodes(node),
+               :min_quorum => Bcpc::OSHelper.get_head_nodes(node).length/2 + 1 )
     notifies :restart, "service[elasticsearch]", :immediately
 end
 
@@ -48,7 +49,7 @@ directory "/usr/share/elasticsearch/plugins" do
 end
 
 remote_file "/tmp/elasticsearch-plugins.tgz" do
-    source "#{get_binary_server_url}/elasticsearch-plugins.tgz"
+    source "#{Bcpc::OSHelper.get_binary_server_url(node)}/elasticsearch-plugins.tgz"
     owner "root"
     mode 00444
     not_if { Dir.exists?("/usr/share/elasticsearch/plugins/head") }
@@ -64,7 +65,7 @@ package "curl" do
 end
 
 bash "set-elasticsearch-replicas" do
-    min_quorum = get_head_nodes.length/2 + 1
+    min_quorum = Bcpc::OSHelper.get_head_nodes(node).length/2 + 1
     code <<-EOH
         curl -XPUT '#{node[:bcpc][:management][:vip]}:9200/_settings' -d '
         {

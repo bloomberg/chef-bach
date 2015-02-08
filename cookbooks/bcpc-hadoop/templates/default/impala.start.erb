@@ -1,4 +1,4 @@
-IMPALA_STATE_STORE_HOST=<%=float_host(@state_store.first[:hostname])%>
+IMPALA_STATE_STORE_HOST=<%=float_host(@node,@state_store.first[:hostname])%>
 IMPALA_STATE_STORE_PORT=24000
 IMPALA_BACKEND_PORT=22000
 IMPALA_LOG_DIR=/var/log/impala

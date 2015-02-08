@@ -1,3 +1,4 @@
+Chef::Resource.send(:include, Bcpc::OSHelper)
 #
 # Cookbook Name:: bcpc
 # Recipe:: ceph-rgw
@@ -56,7 +57,7 @@ bash "write-client-radosgw-key" do
     not_if "test -f /var/lib/ceph/radosgw/ceph-radosgw.gateway/keyring"
 end
 
-rgw_optimal_pg = power_of_2(get_ceph_osd_nodes.length*node[:bcpc][:ceph][:pgs_per_node]/node[:bcpc][:ceph][:rgw][:replicas]*node[:bcpc][:ceph][:rgw][:portion]/100)
+rgw_optimal_pg = Bcpc::Helper.power_of_2(Bcpc::OSHelper.get_ceph_osd_nodes(node).length*node[:bcpc][:ceph][:pgs_per_node]/node[:bcpc][:ceph][:rgw][:replicas]*node[:bcpc][:ceph][:rgw][:portion]/100)
 
 rgw_crush_ruleset = (node[:bcpc][:ceph][:rgw][:type] == "ssd") ? 3 : 4
 
@@ -105,21 +106,21 @@ execute "radosgw-all-starter" do
 end
 
 ruby_block "initialize-radosgw-admin-user" do
-  make_config('radosgw-admin-user', "radosgw")
-  make_config('radosgw-admin-access-key', secure_password_alphanum_upper(20))
-  make_config('radosgw-admin-secret-key', secure_password(40))
+  Bcpc::OSHelper.set_config(node, 'radosgw-admin-user', "radosgw")
+  Bcpc::OSHelper.set_config(node, 'radosgw-admin-access-key', Bcpc::Helper.secure_password_alphanum_upper(20))
+  Bcpc::OSHelper.set_config(node, 'radosgw-admin-secret-key', Bcpc::Helper.secure_password(40))
   block do
-    rgw_admin = JSON.parse(%x[radosgw-admin user create --display-name="Admin" --uid="radosgw" --access_key=#{get_config('radosgw-admin-access-key')} --secret=#{get_config('radosgw-admin-secret-key')}])
+    rgw_admin = JSON.parse(%x[radosgw-admin user create --display-name="Admin" --uid="radosgw" --access_key=#{Bcpc::OSHelper.get_config(node, 'radosgw-admin-access-key')} --secret=#{Bcpc::OSHelper.get_config(node, 'radosgw-admin-secret-key')}])
   end
   not_if "radosgw-admin user info --uid='radosgw'"
 end
 
 ruby_block "initialize-radosgw-test-user" do
   block do
-    make_config('radosgw-test-user', "tester")
-    make_config('radosgw-test-access-key', secure_password_alphanum_upper(20))
-    make_config('radosgw-test-secret-key', secure_password(40))
-    rgw_admin = JSON.parse(%x[radosgw-admin user create --display-name="Tester" --uid="tester" --max-buckets=3 --access_key=#{get_config('radosgw-test-access-key')} --secret=#{get_config('radosgw-test-secret-key')} --caps="usage=read; user=read; bucket=read;" ])
+    Bcpc::OSHelper.set_config(node, 'radosgw-test-user', "tester")
+    Bcpc::OSHelper.set_config(node, 'radosgw-test-access-key', Bcpc::Helper.secure_password_alphanum_upper(20))
+    Bcpc::OSHelper.set_config(node, 'radosgw-test-secret-key', Bcpc::Helper.secure_password(40))
+    rgw_admin = JSON.parse(%x[radosgw-admin user create --display-name="Tester" --uid="tester" --max-buckets=3 --access_key=#{Bcpc::OSHelper.get_config(node, 'radosgw-test-access-key')} --secret=#{Bcpc::OSHelper.get_config(node, 'radosgw-test-secret-key')} --caps="usage=read; user=read; bucket=read;" ])
   end
   not_if "radosgw-admin user info --uid='tester'"
 end
@@ -129,4 +130,5 @@ template "/usr/local/bin/radosgw_check.py" do
   mode 0700
   owner "root"
   group "root"
+  helpers(Bcpc::OSHelper)
 end

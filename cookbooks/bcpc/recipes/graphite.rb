@@ -1,3 +1,4 @@
+Chef::Resource.send(:include, Bcpc::OSHelper)
 #
 # Cookbook Name:: bcpc
 # Recipe:: graphite
@@ -20,8 +21,8 @@
 include_recipe "bcpc::default"
 include_recipe "bcpc::apache2"
 
-make_config('mysql-graphite-user', "graphite")
-make_config('mysql-graphite-password', secure_password)
+Bcpc::OSHelper.set_config(node, 'mysql-graphite-user', "graphite")
+Bcpc::OSHelper.set_config(node, 'mysql-graphite-password', Bcpc::Helper.secure_password)
 
 %w{python-whisper_0.9.10_all.deb python-carbon_0.9.10_all.deb python-graphite-web_0.9.10_all.deb}.each do |pkg|
     # split package name on the first underscore to get the package name for dpkg to look-up
@@ -72,7 +73,7 @@ ruby_block "graphite_ip" do
   end
 end
 
-mysql_servers = get_node_attributes(MGMT_IP_GRAPHITE_WEBPORT_ATTR_SRCH_KEYS,"mysql","bcpc")
+mysql_servers = Bcpc::OSHelper.get_node_attributes(MGMT_IP_GRAPHITE_WEBPORT_ATTR_SRCH_KEYS,"mysql",node,"bcpc")
 
 template "/opt/graphite/conf/carbon.conf" do
     source "carbon.conf.erb"
@@ -137,6 +138,7 @@ template "/opt/graphite/webapp/graphite/local_settings.py" do
     owner "root"
     group "root"
     mode 00644
+    helpers(Bcpc::OSHelper)
     variables( :servers => mysql_servers )
     notifies :restart, "service[apache2]", :delayed
 end
@@ -149,11 +151,11 @@ end
 
 ruby_block "graphite-database-creation" do
     block do
-        if not system "mysql -uroot -p#{get_config('mysql-root-password')} -e 'SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = \"#{node['bcpc']['graphite_dbname']}\"'|grep \"#{node['bcpc']['graphite_dbname']}\"" then
-            %x[ mysql -uroot -p#{get_config('mysql-root-password')} -e "CREATE DATABASE #{node['bcpc']['graphite_dbname']};"
-                mysql -uroot -p#{get_config('mysql-root-password')} -e "GRANT ALL ON #{node['bcpc']['graphite_dbname']}.* TO '#{get_config('mysql-graphite-user')}'@'%' IDENTIFIED BY '#{get_config('mysql-graphite-password')}';"
-                mysql -uroot -p#{get_config('mysql-root-password')} -e "GRANT ALL ON #{node['bcpc']['graphite_dbname']}.* TO '#{get_config('mysql-graphite-user')}'@'localhost' IDENTIFIED BY '#{get_config('mysql-graphite-password')}';"
-                mysql -uroot -p#{get_config('mysql-root-password')} -e "FLUSH PRIVILEGES;"
+        if not system "mysql -uroot -p#{Bcpc::OSHelper.get_config(node, 'mysql-root-password')} -e 'SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = \"#{node['bcpc']['graphite_dbname']}\"'|grep \"#{node['bcpc']['graphite_dbname']}\"" then
+            %x[ mysql -uroot -p#{Bcpc::OSHelper.get_config(node, 'mysql-root-password')} -e "CREATE DATABASE #{node['bcpc']['graphite_dbname']};"
+                mysql -uroot -p#{Bcpc::OSHelper.get_config(node, 'mysql-root-password')} -e "GRANT ALL ON #{node['bcpc']['graphite_dbname']}.* TO '#{Bcpc::OSHelper.get_config(node, 'mysql-graphite-user')}'@'%' IDENTIFIED BY '#{Bcpc::OSHelper.get_config(node, 'mysql-graphite-password')}';"
+                mysql -uroot -p#{Bcpc::OSHelper.get_config(node, 'mysql-root-password')} -e "GRANT ALL ON #{node['bcpc']['graphite_dbname']}.* TO '#{Bcpc::OSHelper.get_config(node, 'mysql-graphite-user')}'@'localhost' IDENTIFIED BY '#{Bcpc::OSHelper.get_config(node, 'mysql-graphite-password')}';"
+                mysql -uroot -p#{Bcpc::OSHelper.get_config(node, 'mysql-root-password')} -e "FLUSH PRIVILEGES;"
             ]
             self.notifies :run, "bash[graphite-database-sync]", :immediately
             self.resolve_notification_references

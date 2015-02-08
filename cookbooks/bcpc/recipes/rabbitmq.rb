@@ -1,3 +1,4 @@
+Chef::Resource.send(:include, Bcpc::OSHelper)
 #
 # Cookbook Name:: bcpc
 # Recipe:: rabbitmq
@@ -19,9 +20,9 @@
 
 include_recipe "bcpc::default"
 
-make_config('rabbitmq-user', "guest")
-make_config('rabbitmq-password', secure_password)
-make_config('rabbitmq-cookie', secure_password)
+Bcpc::OSHelper.set_config(node, 'rabbitmq-user', "guest")
+Bcpc::OSHelper.set_config(node, 'rabbitmq-password', Bcpc::Helper.secure_password)
+Bcpc::OSHelper.set_config(node, 'rabbitmq-cookie', Bcpc::Helper.secure_password)
 
 apt_repository "rabbitmq" do
     uri node['bcpc']['repos']['rabbitmq']
@@ -38,6 +39,7 @@ end
 template "/var/lib/rabbitmq/.erlang.cookie" do
     source "erlang.cookie.erb"
     mode 00400
+    helpers(Bcpc::OSHelper)
     notifies :restart, "service[rabbitmq-server]", :delayed
 end
 
@@ -66,6 +68,7 @@ end
 template "/etc/rabbitmq/rabbitmq.conf.d/bcpc.conf" do
     source "rabbitmq-bcpc.conf.erb"
     mode 00644
+    helpers(Bcpc::OSHelper)
     notifies :restart, "service[rabbitmq-server]", :delayed
 end
 
@@ -95,7 +98,7 @@ service "rabbitmq-server" do
     action [ :enable, :start ]
 end
 
-get_head_nodes.each do |server|
+Bcpc::OSHelper.get_head_nodes(node).each do |server|
     if server['hostname'] != node[:hostname]
         bash "rabbitmq-clustering-with-#{server['hostname']}" do
             code <<-EOH
@@ -111,12 +114,12 @@ end
 
 ruby_block "set-rabbitmq-guest-password" do
     block do
-        %x[ rabbitmqctl change_password "#{get_config('rabbitmq-user')}" "#{get_config('rabbitmq-password')}" ]
+        %x[ rabbitmqctl change_password "#{Bcpc::OSHelper.get_config(node, 'rabbitmq-user')}" "#{Bcpc::OSHelper.get_config(node, 'rabbitmq-password')}" ]
     end
 end
 
 bash "set-rabbitmq-ha-policy" do
-    min_quorum = get_head_nodes.length/2 + 1
+    min_quorum = Bcpc::OSHelper.get_head_nodes(node).length/2 + 1
     code <<-EOH
         rabbitmqctl set_policy HA '^(?!(amq\.|[a-f0-9]{32})).*' '{"ha-mode": "exactly", "ha-params": #{min_quorum}}'
     EOH
@@ -155,7 +158,7 @@ end
 
 ruby_block "reap-dead-rabbitmq-servers" do
     block do
-        head_names = get_head_nodes.collect{|x| x['hostname']}
+        head_names = Bcpc::OSHelper.get_head_nodes(node).collect{|x| x['hostname']}
         status = %x[ rabbitmqctl cluster_status | grep nodes | grep disc ].strip
         status.scan(/(?:'rabbit@([a-zA-Z0-9-]+)',?)+?/).each do |server|
             if not head_names.include?(server[0])

@@ -1,3 +1,4 @@
+Chef::Resource.send(:include, Bcpc::OSHelper)
 #
 # Cookbook Name:: bcpc
 # Recipe:: nova-head
@@ -24,8 +25,8 @@ require 'openssl'
 require 'net/ssh'
 key = OpenSSL::PKey::RSA.new 2048;
 pubkey = "#{key.ssh_type} #{[ key.to_blob ].pack('m0')}"
-make_config('ssh-nova-private-key', key.to_pem)
-make_config('ssh-nova-public-key', pubkey)
+Bcpc::OSHelper.set_config(node, 'ssh-nova-private-key', key.to_pem)
+Bcpc::OSHelper.set_config(node, 'ssh-nova-public-key', pubkey)
 
 package "nova-compute-#{node[:bcpc][:virt_type]}" do
     action :upgrade
@@ -55,6 +56,7 @@ template "/etc/nova/nova.conf" do
     owner "nova"
     group "nova"
     mode 00600
+    helpers(Bcpc::OSHelper)
     notifies :restart, "service[nova-api]", :delayed
     notifies :restart, "service[nova-compute]", :delayed
     notifies :restart, "service[nova-network]", :delayed
@@ -66,6 +68,7 @@ template "/etc/nova/api-paste.ini" do
     owner "nova"
     group "nova"
     mode 00600
+    helpers(Bcpc::OSHelper)
     notifies :restart, "service[nova-api]", :delayed
     notifies :restart, "service[nova-compute]", :delayed
     notifies :restart, "service[nova-network]", :delayed
@@ -94,6 +97,7 @@ template "/var/lib/nova/.ssh/authorized_keys" do
     owner "nova"
     group "nova"
     mode 00644
+    helpers(Bcpc::OSHelper)
 end
 
 template "/var/lib/nova/.ssh/id_rsa" do
@@ -101,6 +105,7 @@ template "/var/lib/nova/.ssh/id_rsa" do
     owner "nova"
     group "nova"
     mode 00600
+    helpers(Bcpc::OSHelper)
 end
 
 template "/var/lib/nova/.ssh/config" do
@@ -137,6 +142,7 @@ template "/etc/nova/virsh-secret.xml" do
     owner "nova"
     group "nova"
     mode 00600
+    helpers(Bcpc::OSHelper)
 end
 
 bash "set-nova-user-shell" do
@@ -149,10 +155,10 @@ end
 
 ruby_block 'load-virsh-keys' do
     block do
-        if not system "virsh secret-list | grep -i #{get_config('libvirt-secret-uuid')}" then
+        if not system "virsh secret-list | grep -i #{Bcpc::OSHelper.get_config(node, 'libvirt-secret-uuid')}" then
             %x[ ADMIN_KEY=`ceph --name mon. --keyring /etc/ceph/ceph.mon.keyring auth get-or-create-key client.admin`
                 virsh secret-define --file /etc/nova/virsh-secret.xml
-                virsh secret-set-value --secret #{get_config('libvirt-secret-uuid')} \
+                virsh secret-set-value --secret #{Bcpc::OSHelper.get_config(node, 'libvirt-secret-uuid')} \
                     --base64 "$ADMIN_KEY"
             ]
         end

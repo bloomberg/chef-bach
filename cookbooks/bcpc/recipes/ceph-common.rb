@@ -1,3 +1,4 @@
+Chef::Resource.send(:include, Bcpc::OSHelper)
 #
 # Cookbook Name:: bcpc
 # Recipe:: ceph-common
@@ -34,15 +35,15 @@ end
     end
 end
 
-make_config('ceph-fs-uuid', %x[uuidgen -r].strip)
-make_config('ceph-mon-key', ceph_keygen)
+Bcpc::OSHelper.set_config(node, 'ceph-fs-uuid', %x[uuidgen -r].strip)
+Bcpc::OSHelper.set_config(node, 'ceph-mon-key', Bcpc::OSHelper.ceph_keygen)
 
 ruby_block 'write-ceph-mon-key' do
     block do
         %x[ ceph-authtool "/etc/ceph/ceph.mon.keyring" \
                 --create-keyring \
                 --name=mon. \
-                --add-key="#{get_config('ceph-mon-key')}" \
+                --add-key="#{Bcpc::OSHelper.get_config(node, 'ceph-mon-key')}" \
                 --cap mon 'allow *'
         ]
     end
@@ -52,5 +53,6 @@ end
 template '/etc/ceph/ceph.conf' do
     source 'ceph.conf.erb'
     mode '0644'
-    variables( :servers => get_head_nodes )
+    helpers(Bcpc::OSHelper)
+    variables( :servers => Bcpc::OSHelper.get_head_nodes(node) )
 end

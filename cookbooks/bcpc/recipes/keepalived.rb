@@ -19,8 +19,8 @@
 
 include_recipe "bcpc::default"
 
-make_config('keepalived-router-id', "#{(rand * 1000).to_i%254/2*2+1}")
-make_config('keepalived-password', secure_password)
+Bcpc::OSHelper.set_config(node, 'keepalived-router-id', "#{(rand * 1000).to_i%254/2*2+1}")
+Bcpc::OSHelper.set_config(node, 'keepalived-password', Bcpc::Helper.secure_password)
 
 package "keepalived" do
     action :upgrade
@@ -29,6 +29,7 @@ end
 template "/etc/keepalived/keepalived.conf" do
     source "#{node[:bcpc][:keepalived][:config_template]}.erb"
     mode 00644
+    helpers(Bcpc::OSHelper)
     notifies :restart, "service[keepalived]", :delayed
     notifies :restart, "service[keepalived]", :immediately
 end

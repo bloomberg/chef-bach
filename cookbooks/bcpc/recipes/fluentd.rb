@@ -1,3 +1,4 @@
+Chef::Resource.send(:include, Bcpc::OSHelper)
 #
 # Cookbook Name:: bcpc
 # Recipe:: fluentd
@@ -48,7 +49,7 @@ end
     gem_package pkg.split('!',2)[0] do
         gem_binary "/usr/lib/fluent/ruby/bin/fluent-gem"
         version pkg.split('!',2)[1]
-        options "--no-ri --no-rdoc --no-http-proxy --clear-sources --source #{get_binary_server_url}"
+        options "--no-ri --no-rdoc --no-http-proxy --clear-sources --source #{Bcpc::OSHelper.get_binary_server_url(node)}"
         action :install
     end
 end

@@ -1,3 +1,4 @@
+Chef::Resource.send(:include, Bcpc::OSHelper)
 #
 # Cookbook Name:: bcpc
 # Recipe:: cinder
@@ -21,9 +22,9 @@ include_recipe "bcpc::mysql"
 include_recipe "bcpc::ceph-head"
 include_recipe "bcpc::openstack"
 
-make_config('mysql-cinder-user', "cinder")
-make_config('mysql-cinder-password', secure_password)
-make_config('libvirt-secret-uuid', %x[uuidgen -r].strip)
+Bcpc::OSHelper.set_config(node, 'mysql-cinder-user', "cinder")
+Bcpc::OSHelper.set_config(node, 'mysql-cinder-password', Bcpc::Helper.secure_password)
+Bcpc::OSHelper.set_config(node, 'libvirt-secret-uuid', %x[uuidgen -r].strip)
 
 %w{cinder-api cinder-volume cinder-scheduler}.each do |pkg|
     package pkg do
@@ -43,6 +44,7 @@ template "/etc/cinder/cinder.conf" do
     owner "cinder"
     group "cinder"
     mode 00600
+    helpers(Bcpc::OSHelper)
     notifies :restart, "service[cinder-api]", :delayed
     notifies :restart, "service[cinder-volume]", :delayed
     notifies :restart, "service[cinder-scheduler]", :delayed
@@ -53,6 +55,7 @@ template "/etc/cinder/api-paste.ini" do
     owner "cinder"
     group "cinder"
     mode 00600
+    helpers(Bcpc::OSHelper)
     notifies :restart, "service[cinder-api]", :delayed
     notifies :restart, "service[cinder-volume]", :delayed
     notifies :restart, "service[cinder-scheduler]", :delayed
@@ -60,11 +63,11 @@ end
 
 ruby_block "cinder-database-creation" do
     block do
-        if not system "mysql -uroot -p#{get_config('mysql-root-password')} -e 'SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = \"#{node['bcpc']['cinder_dbname']}\"'|grep \"#{node['bcpc']['cinder_dbname']}\"" then
-            %x[ mysql -uroot -p#{get_config('mysql-root-password')} -e "CREATE DATABASE #{node['bcpc']['cinder_dbname']};"
-                mysql -uroot -p#{get_config('mysql-root-password')} -e "GRANT ALL ON #{node['bcpc']['cinder_dbname']}.* TO '#{get_config('mysql-cinder-user')}'@'%' IDENTIFIED BY '#{get_config('mysql-cinder-password')}';"
-                mysql -uroot -p#{get_config('mysql-root-password')} -e "GRANT ALL ON #{node['bcpc']['cinder_dbname']}.* TO '#{get_config('mysql-cinder-user')}'@'localhost' IDENTIFIED BY '#{get_config('mysql-cinder-password')}';"
-                mysql -uroot -p#{get_config('mysql-root-password')} -e "FLUSH PRIVILEGES;"
+        if not system "mysql -uroot -p#{Bcpc::OSHelper.get_config(node, 'mysql-root-password')} -e 'SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = \"#{node['bcpc']['cinder_dbname']}\"'|grep \"#{node['bcpc']['cinder_dbname']}\"" then
+            %x[ mysql -uroot -p#{Bcpc::OSHelper.get_config(node, 'mysql-root-password')} -e "CREATE DATABASE #{node['bcpc']['cinder_dbname']};"
+                mysql -uroot -p#{Bcpc::OSHelper.get_config(node, 'mysql-root-password')} -e "GRANT ALL ON #{node['bcpc']['cinder_dbname']}.* TO '#{Bcpc::OSHelper.get_config(node, 'mysql-cinder-user')}'@'%' IDENTIFIED BY '#{Bcpc::OSHelper.get_config(node, 'mysql-cinder-password')}';"
+                mysql -uroot -p#{Bcpc::OSHelper.get_config(node, 'mysql-root-password')} -e "GRANT ALL ON #{node['bcpc']['cinder_dbname']}.* TO '#{Bcpc::OSHelper.get_config(node, 'mysql-cinder-user')}'@'localhost' IDENTIFIED BY '#{Bcpc::OSHelper.get_config(node, 'mysql-cinder-password')}';"
+                mysql -uroot -p#{Bcpc::OSHelper.get_config(node, 'mysql-root-password')} -e "FLUSH PRIVILEGES;"
             ]
             self.notifies :run, "bash[cinder-database-sync]", :immediately
             self.resolve_notification_references
@@ -84,7 +87,7 @@ end
 node[:bcpc][:ceph][:enabled_pools].each do |type|
     bash "create-cinder-rados-pool-#{type}" do
         user "root"
-        optimal = power_of_2(get_ceph_osd_nodes.length*node[:bcpc][:ceph][:pgs_per_node]/node[:bcpc][:ceph][:volumes][:replicas]*node[:bcpc][:ceph][:volumes][:portion]/100/node[:bcpc][:ceph][:enabled_pools].length)
+        optimal = Bcpc::Helper.power_of_2(Bcpc::OSHelper.get_ceph_osd_nodes(node).length*node[:bcpc][:ceph][:pgs_per_node]/node[:bcpc][:ceph][:volumes][:replicas]*node[:bcpc][:ceph][:volumes][:portion]/100/node[:bcpc][:ceph][:enabled_pools].length)
         code <<-EOH
             ceph osd pool create #{node[:bcpc][:ceph][:volumes][:name]}-#{type} #{optimal}
             ceph osd pool set #{node[:bcpc][:ceph][:volumes][:name]}-#{type} crush_ruleset #{(type=="ssd")?3:4}
@@ -100,7 +103,7 @@ node[:bcpc][:ceph][:enabled_pools].each do |type|
 
     bash "set-cinder-rados-pool-pgs-#{type}" do
         user "root"
-        optimal = power_of_2(get_ceph_osd_nodes.length*node[:bcpc][:ceph][:pgs_per_node]/node[:bcpc][:ceph][:volumes][:replicas]*node[:bcpc][:ceph][:volumes][:portion]/100/node[:bcpc][:ceph][:enabled_pools].length)
+        optimal = Bcpc::Helper.power_of_2(Bcpc::OSHelper.get_ceph_osd_nodes(node).length*node[:bcpc][:ceph][:pgs_per_node]/node[:bcpc][:ceph][:volumes][:replicas]*node[:bcpc][:ceph][:volumes][:portion]/100/node[:bcpc][:ceph][:enabled_pools].length)
         code "ceph osd pool set #{node[:bcpc][:ceph][:volumes][:name]}-#{type} pg_num #{optimal}"
         not_if "((`ceph osd pool get #{node[:bcpc][:ceph][:volumes][:name]}-#{type} pg_num | awk '{print $2}'` >= #{optimal}))"
     end

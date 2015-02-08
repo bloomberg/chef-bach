@@ -1,18 +1,20 @@
+Chef::Resource.send(:include, Bcpc::OSHelper)
+
 include_recipe 'dpkg_autostart'
 include_recipe 'bcpc-hadoop::hue_config'
 
-make_config('mysql-hue-password', secure_password)
-make_config('hue-session-key', secure_password)
+Bcpc::OSHelper.set_config(node, 'mysql-hue-password', Bcpc::Helper.secure_password)
+Bcpc::OSHelper.set_config(node, 'hue-session-key', Bcpc::Helper.secure_password)
 
 bash "hue-database-creation" do
   privs = "ALL" # todo node[:bcpc][:hadoop][:hue_db_privs].join(",")
   code <<-EOH
-    mysql -u root -p#{get_config('mysql-root-password')} -e "CREATE DATABASE desktop;
-                                                             GRANT #{privs} ON desktop.* TO 'hue'@'%' IDENTIFIED BY '#{get_config('mysql-hue-password')}';
-                                                             GRANT #{privs} ON desktop.* TO 'hue'@'localhost' IDENTIFIED BY '#{get_config('mysql-hue-password')}';
+    mysql -u root -p#{Bcpc::OSHelper.get_config(node, 'mysql-root-password')} -e "CREATE DATABASE desktop;
+                                                             GRANT #{privs} ON desktop.* TO 'hue'@'%' IDENTIFIED BY '#{Bcpc::OSHelper.get_config(node, 'mysql-hue-password')}';
+                                                             GRANT #{privs} ON desktop.* TO 'hue'@'localhost' IDENTIFIED BY '#{Bcpc::OSHelper.get_config(node, 'mysql-hue-password')}';
                                                              FLUSH PRIVILEGES;"
   EOH
-  not_if "mysql -u hue -p#{get_config('mysql-hue-password')} -e 'SHOW TABLES' desktop"
+  not_if "mysql -u hue -p#{Bcpc::OSHelper.get_config(node, 'mysql-hue-password')} -e 'SHOW TABLES' desktop"
   self.notifies :start, "service[hue]", :immediately
 end
 

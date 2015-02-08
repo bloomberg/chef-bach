@@ -34,14 +34,14 @@ end
 #
 # Logic to set the URL from where the jmxtrans software need to be downloaded
 #
-sw_download_url = get_binary_server_url
+sw_download_url = Bcpc::OSHelper.get_binary_server_url(node)
 node.default['jmxtrans']['url'] = "#{sw_download_url}"+"#{node['jmxtrans']['sw']}"
 
 include_recipe 'jmxtrans'
 #
 # Get an array of hosts which are garphite heads
 #
-graphite_hosts = get_nodes_for("graphite","bcpc").map{|x| x.bcpc.management.ip}
+graphite_hosts = Bcpc::OSHelper.get_nodes_for("graphite",node,"bcpc").map{|x| x.bcpc.management.ip}
 #
 # Array to store the list of services on which jxmtrans dependent on i.e. collects data from
 # If any of the services gets restarted jmxtrans process need to be restarted

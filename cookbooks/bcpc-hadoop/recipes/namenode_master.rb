@@ -1,4 +1,5 @@
 include_recipe 'dpkg_autostart'
+Chef::Resource.send(:include, BcpcHadoop::HadoopHelper)
 require "base64"
 include_recipe 'bcpc-hadoop::hadoop_config'
 
@@ -39,7 +40,7 @@ bash "format-zk-hdfs-ha" do
   action :run
   user "hdfs"
   notifies :restart, "service[generally run hadoop-hdfs-namenode]", :delayed
-  not_if { zk_formatted? }
+  not_if { BcpcHadoop::HadoopHelper.zk_formatted?(node) }
 end
 
 service "hadoop-hdfs-zkfc" do
@@ -88,7 +89,7 @@ ruby_block "grab the format UUID File" do
     Dir.chdir("/disk/#{node[:bcpc][:hadoop][:mounts][0]}/dfs/") do
       system("tar czvf #{Chef::Config[:file_cache_path]}/nn_fmt.tgz nn/current/VERSION jn/#{node.chef_environment}/current/VERSION")
     end
-    make_config("namenode_txn_fmt", Base64.encode64(IO.read("#{Chef::Config[:file_cache_path]}/nn_fmt.tgz")));
+    Bcpc::OSHelper.set_config(node, "namenode_txn_fmt", Base64.encode64(IO.read("#{Chef::Config[:file_cache_path]}/nn_fmt.tgz")));
   end
   action :nothing
   subscribes :run, "service[generally run hadoop-hdfs-namenode]", :immediately

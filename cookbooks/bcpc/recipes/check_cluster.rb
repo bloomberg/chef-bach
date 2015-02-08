@@ -1,3 +1,4 @@
+Chef::Resource.send(:include, Bcpc::OSHelper)
 #
 # Cookbook Name:: bcpc
 # Recipe:: check_cluster
@@ -17,9 +18,9 @@
 # limitations under the License.
 #
 
-raise Chef::Application.fatal!("Chef reports reduced number of headnodes, see /etc/headnodes") if  ( get_cached_head_node_names - get_head_nodes.map{ |x| x['hostname']} ).length > 0
+raise Chef::Application.fatal!("Chef reports reduced number of headnodes, see /etc/headnodes") if  ( Bcpc::OSHelper.get_cached_head_node_names - Bcpc::OSHelper.get_head_nodes(node).map{ |x| x['hostname']} ).length > 0
 
 template "/etc/headnodes" do
   source "headnodes.erb"
-  variables( :servers => get_head_nodes)
+  variables( :servers => Bcpc::OSHelper.get_head_nodes(node))
 end

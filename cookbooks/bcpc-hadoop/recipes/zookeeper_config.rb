@@ -24,6 +24,7 @@ end
   template "/etc/zookeeper/conf/#{t}" do
     source "zk_#{t}.erb"
     mode 0644
+    helpers(Bcpc::OSHelper)
     variables(:zk_hosts => node[:bcpc][:hadoop][:zookeeper][:servers])
   end
 end

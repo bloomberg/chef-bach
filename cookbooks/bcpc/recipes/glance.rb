@@ -1,3 +1,4 @@
+Chef::Resource.send(:include, Bcpc::OSHelper)
 #
 # Cookbook Name:: bcpc
 # Recipe:: glance
@@ -21,8 +22,8 @@ include_recipe "bcpc::mysql"
 include_recipe "bcpc::ceph-head"
 include_recipe "bcpc::openstack"
 
-make_config('mysql-glance-user', "glance")
-make_config('mysql-glance-password', secure_password)
+Bcpc::OSHelper.set_config(node, 'mysql-glance-user', "glance")
+Bcpc::OSHelper.set_config(node, 'mysql-glance-password', Bcpc::Helper.secure_password)
 
 package "glance" do
     action :upgrade
@@ -43,6 +44,7 @@ template "/etc/glance/glance-api.conf" do
     owner "glance"
     group "glance"
     mode 00600
+    helpers(Bcpc::OSHelper)
     notifies :restart, "service[glance-api]", :delayed
     notifies :restart, "service[glance-registry]", :delayed
 end
@@ -52,6 +54,7 @@ template "/etc/glance/glance-registry.conf" do
     owner "glance"
     group "glance"
     mode 00600
+    helpers(Bcpc::OSHelper)
     notifies :restart, "service[glance-api]", :delayed
     notifies :restart, "service[glance-registry]", :delayed
 end
@@ -70,17 +73,18 @@ template "/etc/glance/glance-cache.conf" do
     owner "glance"
     group "glance"
     mode 00600
+    helpers(Bcpc::OSHelper)
     notifies :restart, "service[glance-api]", :immediately
     notifies :restart, "service[glance-registry]", :immediately
 end
 
 ruby_block "glance-database-creation" do
     block do
-        if not system "mysql -uroot -p#{get_config('mysql-root-password')} -e 'SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = \"#{node['bcpc']['glance_dbname']}\"'|grep \"#{node['bcpc']['glance_dbname']}\"" then
-            %x[ mysql -uroot -p#{get_config('mysql-root-password')} -e "CREATE DATABASE #{node['bcpc']['glance_dbname']};"
-                mysql -uroot -p#{get_config('mysql-root-password')} -e "GRANT ALL ON #{node['bcpc']['glance_dbname']}.* TO '#{get_config('mysql-glance-user')}'@'%' IDENTIFIED BY '#{get_config('mysql-glance-password')}';"
-                mysql -uroot -p#{get_config('mysql-root-password')} -e "GRANT ALL ON #{node['bcpc']['glance_dbname']}.* TO '#{get_config('mysql-glance-user')}'@'localhost' IDENTIFIED BY '#{get_config('mysql-glance-password')}';"
-                mysql -uroot -p#{get_config('mysql-root-password')} -e "FLUSH PRIVILEGES;"
+        if not system "mysql -uroot -p#{Bcpc::OSHelper.get_config(node, 'mysql-root-password')} -e 'SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = \"#{node['bcpc']['glance_dbname']}\"'|grep \"#{node['bcpc']['glance_dbname']}\"" then
+            %x[ mysql -uroot -p#{Bcpc::OSHelper.get_config(node, 'mysql-root-password')} -e "CREATE DATABASE #{node['bcpc']['glance_dbname']};"
+                mysql -uroot -p#{Bcpc::OSHelper.get_config(node, 'mysql-root-password')} -e "GRANT ALL ON #{node['bcpc']['glance_dbname']}.* TO '#{Bcpc::OSHelper.get_config(node, 'mysql-glance-user')}'@'%' IDENTIFIED BY '#{Bcpc::OSHelper.get_config(node, 'mysql-glance-password')}';"
+                mysql -uroot -p#{Bcpc::OSHelper.get_config(node, 'mysql-root-password')} -e "GRANT ALL ON #{node['bcpc']['glance_dbname']}.* TO '#{Bcpc::OSHelper.get_config(node, 'mysql-glance-user')}'@'localhost' IDENTIFIED BY '#{Bcpc::OSHelper.get_config(node, 'mysql-glance-password')}';"
+                mysql -uroot -p#{Bcpc::OSHelper.get_config(node, 'mysql-root-password')} -e "FLUSH PRIVILEGES;"
             ]
             self.notifies :run, "bash[glance-database-sync]", :immediately
             self.resolve_notification_references
@@ -98,7 +102,7 @@ end
 
 bash "create-glance-rados-pool" do
     user "root"
-    optimal = power_of_2(get_ceph_osd_nodes.length*node[:bcpc][:ceph][:pgs_per_node]/node[:bcpc][:ceph][:images][:replicas]*node[:bcpc][:ceph][:images][:portion]/100)
+    optimal = Bcpc::Helper.power_of_2(Bcpc::OSHelper.get_ceph_osd_nodes(node).length*node[:bcpc][:ceph][:pgs_per_node]/node[:bcpc][:ceph][:images][:replicas]*node[:bcpc][:ceph][:images][:portion]/100)
     code <<-EOH
         ceph osd pool create #{node[:bcpc][:ceph][:images][:name]} #{optimal}
         ceph osd pool set #{node[:bcpc][:ceph][:images][:name]} crush_ruleset #{(node[:bcpc][:ceph][:images][:type]=="ssd")?3:4}
@@ -114,13 +118,13 @@ end
 
 bash "set-glance-rados-pool-pgs" do
     user "root"
-    optimal = power_of_2(get_ceph_osd_nodes.length*node[:bcpc][:ceph][:pgs_per_node]/node[:bcpc][:ceph][:images][:replicas]*node[:bcpc][:ceph][:images][:portion]/100)
+    optimal = Bcpc::Helper.power_of_2(Bcpc::OSHelper.get_ceph_osd_nodes(node).length*node[:bcpc][:ceph][:pgs_per_node]/node[:bcpc][:ceph][:images][:replicas]*node[:bcpc][:ceph][:images][:portion]/100)
     code "ceph osd pool set #{node[:bcpc][:ceph][:images][:name]} pg_num #{optimal}"
     not_if "((`ceph osd pool get #{node[:bcpc][:ceph][:images][:name]} pg_num | awk '{print $2}'` >= #{optimal}))"
 end
 
 remote_file "/tmp/cirros-0.3.0-x86_64-disk.img" do
-    source "#{get_binary_server_url}/cirros-0.3.0-x86_64-disk.img"
+    source "#{Bcpc::OSHelper.get_binary_server_url(node)}/cirros-0.3.0-x86_64-disk.img"
     owner "root"
     mode 00444
     only_if ". /root/adminrc; glance image-show 'Cirros 0.3.0 x86_64' 2>&1 | grep -e '^No image'"

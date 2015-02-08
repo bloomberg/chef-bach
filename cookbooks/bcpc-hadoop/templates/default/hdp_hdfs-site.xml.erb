@@ -42,21 +42,21 @@
   <% @nn_hosts.each do |h| %>	
     <property>
       <name>dfs.namenode.rpc-address.<%= "#{node.chef_environment}.namenode#{h[:node_number]}" %></name>
-      <value><%=float_host(h[:hostname]) %>:<%= node[:bcpc][:hadoop][:namenode][:rpc][:port] %></value>
+      <value><%=float_host(@node,h[:hostname]) %>:<%= node[:bcpc][:hadoop][:namenode][:rpc][:port] %></value>
     </property>
   <% end %>
 
   <% @nn_hosts.each do |h| %>	
     <property>
       <name>dfs.namenode.http-address.<%= "#{node.chef_environment}.namenode#{h[:node_number]}" %></name>
-      <value><%=float_host(h[:hostname]) %>:<%= node[:bcpc][:hadoop][:namenode][:http][:port] %></value>
+      <value><%=float_host(@node,h[:hostname]) %>:<%= node[:bcpc][:hadoop][:namenode][:http][:port] %></value>
     </property>
   <% end %>
 
   <% @nn_hosts.each do |h| %>	
     <property>
       <name>dfs.namenode.https-address.<%= "#{node.chef_environment}.namenode#{h[:node_number]}" %></name>
-      <value><%=float_host(h[:hostname]) %>:<%= node[:bcpc][:hadoop][:namenode][:https][:port] %></value>
+      <value><%=float_host(@node,h[:hostname]) %>:<%= node[:bcpc][:hadoop][:namenode][:https][:port] %></value>
     </property>
   <% end %>
 

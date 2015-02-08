@@ -1,3 +1,4 @@
+Chef::Resource.send(:include, Bcpc::OSHelper)
 #
 # Cookbook Name:: bcpc
 # Recipe:: powerdns
@@ -17,8 +18,8 @@
 # limitations under the License.
 #
 
-make_config('mysql-pdns-user', "pdns")
-make_config('mysql-pdns-password', secure_password)
+Bcpc::OSHelper.set_config(node, 'mysql-pdns-user', "pdns")
+Bcpc::OSHelper.set_config(node, 'mysql-pdns-password', Bcpc::Helper.secure_password)
 
 %w{pdns-server pdns-backend-mysql}.each do |pkg|
     package pkg do
@@ -36,12 +37,12 @@ end
 
 ruby_block "powerdns-database-creation" do
     block do
-        system "mysql -uroot -p#{get_config('mysql-root-password')} -e 'SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = \"#{node[:bcpc][:pdns_dbname]}\"' | grep -q \"#{node[:bcpc][:pdns_dbname]}\""
+        system "mysql -uroot -p#{Bcpc::OSHelper.get_config(node, 'mysql-root-password')} -e 'SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = \"#{node[:bcpc][:pdns_dbname]}\"' | grep -q \"#{node[:bcpc][:pdns_dbname]}\""
         if not $?.success? then
-            %x[ mysql -uroot -p#{get_config('mysql-root-password')} -e "CREATE DATABASE #{node[:bcpc][:pdns_dbname]} CHARACTER SET utf8 COLLATE utf8_general_ci;"
-                mysql -uroot -p#{get_config('mysql-root-password')} -e "GRANT ALL ON #{node[:bcpc][:pdns_dbname]}.* TO '#{get_config('mysql-pdns-user')}'@'%' IDENTIFIED BY '#{get_config('mysql-pdns-password')}';"
-                mysql -uroot -p#{get_config('mysql-root-password')} -e "GRANT ALL ON #{node[:bcpc][:pdns_dbname]}.* TO '#{get_config('mysql-pdns-user')}'@'localhost' IDENTIFIED BY '#{get_config('mysql-pdns-password')}';"
-                mysql -uroot -p#{get_config('mysql-root-password')} -e "FLUSH PRIVILEGES;"
+            %x[ mysql -uroot -p#{Bcpc::OSHelper.get_config(node, 'mysql-root-password')} -e "CREATE DATABASE #{node[:bcpc][:pdns_dbname]} CHARACTER SET utf8 COLLATE utf8_general_ci;"
+                mysql -uroot -p#{Bcpc::OSHelper.get_config(node, 'mysql-root-password')} -e "GRANT ALL ON #{node[:bcpc][:pdns_dbname]}.* TO '#{Bcpc::OSHelper.get_config(node, 'mysql-pdns-user')}'@'%' IDENTIFIED BY '#{Bcpc::OSHelper.get_config(node, 'mysql-pdns-password')}';"
+                mysql -uroot -p#{Bcpc::OSHelper.get_config(node, 'mysql-root-password')} -e "GRANT ALL ON #{node[:bcpc][:pdns_dbname]}.* TO '#{Bcpc::OSHelper.get_config(node, 'mysql-pdns-user')}'@'localhost' IDENTIFIED BY '#{Bcpc::OSHelper.get_config(node, 'mysql-pdns-password')}';"
+                mysql -uroot -p#{Bcpc::OSHelper.get_config(node, 'mysql-root-password')} -e "FLUSH PRIVILEGES;"
             ]
             self.notifies :restart, "service[pdns]", :delayed
             self.resolve_notification_references
@@ -51,24 +52,24 @@ end
 
 ruby_block "powerdns-database-creation-nova-grant" do
     block do
-        system "mysql -uroot -p#{get_config('mysql-root-password')} -e 'SHOW GRANTS for \"#{get_config('mysql-pdns-user')}\";' #{node[:bcpc][:nova_dbname]}'"
+        system "mysql -uroot -p#{Bcpc::OSHelper.get_config(node, 'mysql-root-password')} -e 'SHOW GRANTS for \"#{Bcpc::OSHelper.get_config(node, 'mysql-pdns-user')}\";' #{node[:bcpc][:nova_dbname]}'"
         if not $?.success? then
-            %x[ mysql -uroot -p#{get_config('mysql-root-password')} -e "GRANT ALL ON #{node[:bcpc][:nova_dbname]}.* TO '#{get_config('mysql-pdns-user')}'@'%' IDENTIFIED BY '#{get_config('mysql-pdns-password')}';"
-                mysql -uroot -p#{get_config('mysql-root-password')} -e "GRANT ALL ON #{node[:bcpc][:nova_dbname]}.* TO '#{get_config('mysql-pdns-user')}'@'localhost' IDENTIFIED BY '#{get_config('mysql-pdns-password')}';"
-                mysql -uroot -p#{get_config('mysql-root-password')} -e "FLUSH PRIVILEGES;"
+            %x[ mysql -uroot -p#{Bcpc::OSHelper.get_config(node, 'mysql-root-password')} -e "GRANT ALL ON #{node[:bcpc][:nova_dbname]}.* TO '#{Bcpc::OSHelper.get_config(node, 'mysql-pdns-user')}'@'%' IDENTIFIED BY '#{Bcpc::OSHelper.get_config(node, 'mysql-pdns-password')}';"
+                mysql -uroot -p#{Bcpc::OSHelper.get_config(node, 'mysql-root-password')} -e "GRANT ALL ON #{node[:bcpc][:nova_dbname]}.* TO '#{Bcpc::OSHelper.get_config(node, 'mysql-pdns-user')}'@'localhost' IDENTIFIED BY '#{Bcpc::OSHelper.get_config(node, 'mysql-pdns-password')}';"
+                mysql -uroot -p#{Bcpc::OSHelper.get_config(node, 'mysql-root-password')} -e "FLUSH PRIVILEGES;"
             ]
             self.notifies :restart, "service[pdns]", :delayed
             self.resolve_notification_references
         end
     end
-    only_if { get_nodes_for("openstack").length >= 1 }
+    only_if { Bcpc::OSHelper.get_nodes_for("openstack",node,cookbook_name).length >= 1 }
 end
 
 ruby_block "powerdns-function-dns-name" do
     block do
-        system "mysql -uroot -p#{get_config('mysql-root-password')} -e 'SELECT name FROM mysql.proc WHERE name = \"dns_name\" AND db = \"#{node[:bcpc][:pdns_dbname]}\";' \"#{node[:bcpc][:pdns_dbname]}\" | grep -q \"dns_name\""
+        system "mysql -uroot -p#{Bcpc::OSHelper.get_config(node, 'mysql-root-password')} -e 'SELECT name FROM mysql.proc WHERE name = \"dns_name\" AND db = \"#{node[:bcpc][:pdns_dbname]}\";' \"#{node[:bcpc][:pdns_dbname]}\" | grep -q \"dns_name\""
         if not $?.success? then
-            %x[ mysql -uroot -p#{get_config('mysql-root-password')} #{node[:bcpc][:pdns_dbname]} <<-EOH
+            %x[ mysql -uroot -p#{Bcpc::OSHelper.get_config(node, 'mysql-root-password')} #{node[:bcpc][:pdns_dbname]} <<-EOH
                 delimiter //
                 CREATE FUNCTION dns_name (tenant VARCHAR(64) CHARACTER SET latin1) RETURNS VARCHAR(64)
                 COMMENT 'Returns the project name in a DNS acceptable format. Roughly RFC 1035.'
@@ -85,17 +86,17 @@ ruby_block "powerdns-function-dns-name" do
             self.resolve_notification_references
         end
     end
-    only_if { get_nodes_for("openstack").length >= 1 }
+    only_if { Bcpc::OSHelper.get_nodes_for("openstack",node,cookbook_name).length >= 1 }
 end
 
 ruby_block "powerdns-table-domains" do
     block do
 
-        reverse_dns_zone = node['bcpc']['floating']['reverse_dns_zone'] || calc_reverse_dns_zone(node['bcpc']['floating']['cidr'])
+        reverse_dns_zone = node['bcpc']['floating']['reverse_dns_zone'] || Bcpc::OSHelper.calc_reverse_dns_zone(node['bcpc']['floating']['cidr'])
 
-        system "mysql -uroot -p#{get_config('mysql-root-password')} -e 'SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = \"#{node[:bcpc][:pdns_dbname]}\" AND TABLE_NAME=\"domains_static\"' | grep -q \"domains_static\""
+        system "mysql -uroot -p#{Bcpc::OSHelper.get_config(node, 'mysql-root-password')} -e 'SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = \"#{node[:bcpc][:pdns_dbname]}\" AND TABLE_NAME=\"domains_static\"' | grep -q \"domains_static\""
         if not $?.success? then
-            %x[ mysql -uroot -p#{get_config('mysql-root-password')} #{node[:bcpc][:pdns_dbname]} <<-EOH
+            %x[ mysql -uroot -p#{Bcpc::OSHelper.get_config(node, 'mysql-root-password')} #{node[:bcpc][:pdns_dbname]} <<-EOH
                 CREATE TABLE IF NOT EXISTS domains_static (
                     id INT auto_increment,
                     name VARCHAR(255) NOT NULL,
@@ -119,11 +120,11 @@ end
 ruby_block "powerdns-table-records" do
     block do
 
-        reverse_dns_zone = node['bcpc']['floating']['reverse_dns_zone'] || calc_reverse_dns_zone(node['bcpc']['floating']['cidr'])
+        reverse_dns_zone = node['bcpc']['floating']['reverse_dns_zone'] || Bcpc::OSHelper.calc_reverse_dns_zone(node['bcpc']['floating']['cidr'])
 
-        system "mysql -uroot -p#{get_config('mysql-root-password')} -e 'SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = \"#{node[:bcpc][:pdns_dbname]}\" AND TABLE_NAME=\"records_static\"' | grep -q \"records_static\""
+        system "mysql -uroot -p#{Bcpc::OSHelper.get_config(node, 'mysql-root-password')} -e 'SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = \"#{node[:bcpc][:pdns_dbname]}\" AND TABLE_NAME=\"records_static\"' | grep -q \"records_static\""
         if not $?.success? then
-            %x[ mysql -uroot -p#{get_config('mysql-root-password')} #{node[:bcpc][:pdns_dbname]} <<-EOH
+            %x[ mysql -uroot -p#{Bcpc::OSHelper.get_config(node, 'mysql-root-password')} #{node[:bcpc][:pdns_dbname]} <<-EOH
                     CREATE TABLE IF NOT EXISTS records_static (
                         id INT auto_increment,
                         domain_id INT DEFAULT NULL,
@@ -154,9 +155,9 @@ end
 
 ruby_block "powerdns-function-ip4_to_ptr_name" do
     block do
-        system "mysql -uroot -p#{get_config('mysql-root-password')} -e 'SELECT name FROM mysql.proc WHERE name = \"ip4_to_ptr_name\" AND db = \"#{node[:bcpc][:pdns_dbname]}\";' \"#{node[:bcpc][:pdns_dbname]}\" | grep -q \"ip4_to_ptr_name\""
+        system "mysql -uroot -p#{Bcpc::OSHelper.get_config(node, 'mysql-root-password')} -e 'SELECT name FROM mysql.proc WHERE name = \"ip4_to_ptr_name\" AND db = \"#{node[:bcpc][:pdns_dbname]}\";' \"#{node[:bcpc][:pdns_dbname]}\" | grep -q \"ip4_to_ptr_name\""
         if not $?.success? then
-            %x[ mysql -uroot -p#{get_config('mysql-root-password')} #{node[:bcpc][:pdns_dbname]} <<-EOH
+            %x[ mysql -uroot -p#{Bcpc::OSHelper.get_config(node, 'mysql-root-password')} #{node[:bcpc][:pdns_dbname]} <<-EOH
                 delimiter //
                 CREATE FUNCTION ip4_to_ptr_name(ip4 VARCHAR(64) CHARACTER SET latin1) RETURNS VARCHAR(64)
                 COMMENT 'Returns the reversed IP with .in-addr.arpa appended, suitable for use in the name column of PTR records.'
@@ -191,12 +192,12 @@ openstack_domain_view=<<-OS_DOMAIN_VIEW
 OS_DOMAIN_VIEW
 ruby_block "powerdns-table-domains-view" do
     block do
-        if get_nodes_for("openstack").length < 1 then
+        if Bcpc::OSHelper.get_nodes_for("openstack",node,cookbook_name).length < 1 then
             openstack_domain_view=""
         end 
-        system "mysql -uroot -p#{get_config('mysql-root-password')} -e 'SELECT TABLE_NAME FROM INFORMATION_SCHEMA.VIEWS WHERE TABLE_SCHEMA = \"#{node[:bcpc][:pdns_dbname]}\" AND TABLE_NAME=\"domains\"' | grep -q \"domains\""
+        system "mysql -uroot -p#{Bcpc::OSHelper.get_config(node, 'mysql-root-password')} -e 'SELECT TABLE_NAME FROM INFORMATION_SCHEMA.VIEWS WHERE TABLE_SCHEMA = \"#{node[:bcpc][:pdns_dbname]}\" AND TABLE_NAME=\"domains\"' | grep -q \"domains\""
         if not $?.success? then
-            %x[ mysql -uroot -p#{get_config('mysql-root-password')} #{node[:bcpc][:pdns_dbname]} <<-EOH
+            %x[ mysql -uroot -p#{Bcpc::OSHelper.get_config(node, 'mysql-root-password')} #{node[:bcpc][:pdns_dbname]} <<-EOH
                 CREATE OR REPLACE VIEW domains AS
                     SELECT id,name,master,last_check,type,notified_serial,account FROM domains_static #{openstack_domain_view};
             ]
@@ -232,12 +233,12 @@ openstack_records_view=<<-OS_RECORDS_VIEW
 OS_RECORDS_VIEW
 ruby_block "powerdns-table-records_forward-view" do
     block do
-        if get_nodes_for("openstack").length < 1 then
+        if Bcpc::OSHelper.get_nodes_for("openstack",node,cookbook_name).length < 1 then
             openstack_records_view=""
         end 
-        system "mysql -uroot -p#{get_config('mysql-root-password')} -e 'SELECT TABLE_NAME FROM INFORMATION_SCHEMA.VIEWS WHERE TABLE_SCHEMA = \"#{node[:bcpc][:pdns_dbname]}\" AND TABLE_NAME=\"records_forward\"' | grep -q \"records_forward\""
+        system "mysql -uroot -p#{Bcpc::OSHelper.get_config(node, 'mysql-root-password')} -e 'SELECT TABLE_NAME FROM INFORMATION_SCHEMA.VIEWS WHERE TABLE_SCHEMA = \"#{node[:bcpc][:pdns_dbname]}\" AND TABLE_NAME=\"records_forward\"' | grep -q \"records_forward\""
         if not $?.success? then
-            %x[ mysql -uroot -p#{get_config('mysql-root-password')} #{node[:bcpc][:pdns_dbname]} <<-EOH
+            %x[ mysql -uroot -p#{Bcpc::OSHelper.get_config(node, 'mysql-root-password')} #{node[:bcpc][:pdns_dbname]} <<-EOH
                 CREATE OR REPLACE VIEW records_forward AS
                     SELECT id,domain_id,name,type,content,ttl,prio,change_date FROM records_static #{openstack_records_view};
             ]
@@ -250,12 +251,12 @@ end
 ruby_block "powerdns-table-records_reverse-view" do
     block do
 
-        reverse_dns_zone = node['bcpc']['floating']['reverse_dns_zone'] || calc_reverse_dns_zone(node['bcpc']['floating']['cidr'])
+        reverse_dns_zone = node['bcpc']['floating']['reverse_dns_zone'] || Bcpc::OSHelper.calc_reverse_dns_zone(node['bcpc']['floating']['cidr'])
 
-        system "mysql -uroot -p#{get_config('mysql-root-password')} -e 'SELECT TABLE_NAME FROM INFORMATION_SCHEMA.VIEWS WHERE TABLE_SCHEMA = \"#{node[:bcpc][:pdns_dbname]}\" AND TABLE_NAME=\"records_reverse\"' | grep -q \"records_reverse\""
+        system "mysql -uroot -p#{Bcpc::OSHelper.get_config(node, 'mysql-root-password')} -e 'SELECT TABLE_NAME FROM INFORMATION_SCHEMA.VIEWS WHERE TABLE_SCHEMA = \"#{node[:bcpc][:pdns_dbname]}\" AND TABLE_NAME=\"records_reverse\"' | grep -q \"records_reverse\""
         if not $?.success? then
 
-            %x[ mysql -uroot -p#{get_config('mysql-root-password')} #{node[:bcpc][:pdns_dbname]} <<-EOH
+            %x[ mysql -uroot -p#{Bcpc::OSHelper.get_config(node, 'mysql-root-password')} #{node[:bcpc][:pdns_dbname]} <<-EOH
                 create or replace view records_reverse as
                 select r.id * -1 as id, d.id as domain_id,
                       ip4_to_ptr_name(r.content) as name,
@@ -277,10 +278,10 @@ end
 ruby_block "powerdns-table-records-view" do
 
     block do
-        system "mysql -uroot -p#{get_config('mysql-root-password')} -e 'SELECT TABLE_NAME FROM INFORMATION_SCHEMA.VIEWS WHERE TABLE_SCHEMA = \"#{node[:bcpc][:pdns_dbname]}\" AND TABLE_NAME=\"records\"' | grep -q \"records\""
+        system "mysql -uroot -p#{Bcpc::OSHelper.get_config(node, 'mysql-root-password')} -e 'SELECT TABLE_NAME FROM INFORMATION_SCHEMA.VIEWS WHERE TABLE_SCHEMA = \"#{node[:bcpc][:pdns_dbname]}\" AND TABLE_NAME=\"records\"' | grep -q \"records\""
         if not $?.success? then
 
-            %x[ mysql -uroot -p#{get_config('mysql-root-password')} #{node[:bcpc][:pdns_dbname]} <<-EOH
+            %x[ mysql -uroot -p#{Bcpc::OSHelper.get_config(node, 'mysql-root-password')} #{node[:bcpc][:pdns_dbname]} <<-EOH
               create or replace view records as
                 select id, domain_id, name, type, content, ttl, prio, change_date from records_forward
                 union all
@@ -295,24 +296,24 @@ ruby_block "powerdns-table-records-view" do
 
 end
 
-get_all_nodes.each do |server|
+Bcpc::OSHelper.get_all_nodes(node).each do |server|
     ruby_block "create-dns-entry-#{server['hostname']}" do
         block do
             # check if we have a float address
             float_host_A_record=""
             if server['bcpc']['management']['ip'] != server['bcpc']['floating']['ip'] then
-                float_host_A_record="INSERT INTO records_static (domain_id, name, content, type, ttl, prio) VALUES ((SELECT id FROM domains WHERE name='#{node[:bcpc][:domain_name]}'),'#{float_host(server['hostname'])}.#{node[:bcpc][:domain_name]}','#{server['bcpc']['floating']['ip']}','A',300,NULL);"
+                float_host_A_record="INSERT INTO records_static (domain_id, name, content, type, ttl, prio) VALUES ((SELECT id FROM domains WHERE name='#{node[:bcpc][:domain_name]}'),'#{Bcpc::OSHelper.float_host(node,server['hostname'])}.#{node[:bcpc][:domain_name]}','#{server['bcpc']['floating']['ip']}','A',300,NULL);"
             end
 
             # check if we have a storage address
             storage_host_A_record=""
             if server['bcpc']['management']['ip'] != server['bcpc']['storage']['ip'] then
-                storage_host_A_record="INSERT INTO records_static (domain_id, name, content, type, ttl, prio) VALUES ((SELECT id FROM domains WHERE name='#{node[:bcpc][:domain_name]}'),'#{storage_host(server['hostname'])}.#{node[:bcpc][:domain_name]}','#{server['bcpc']['storage']['ip']}','A',300,NULL);"
+                storage_host_A_record="INSERT INTO records_static (domain_id, name, content, type, ttl, prio) VALUES ((SELECT id FROM domains WHERE name='#{node[:bcpc][:domain_name]}'),'#{Bcpc::OSHelper.storage_host(node,server['hostname'])}.#{node[:bcpc][:domain_name]}','#{server['bcpc']['storage']['ip']}','A',300,NULL);"
             end
 
-            system "mysql -uroot -p#{get_config('mysql-root-password')} #{node[:bcpc][:pdns_dbname]} -e 'SELECT name FROM records_static' | grep -q \"#{server['hostname']}.#{node[:bcpc][:domain_name]}\""
+            system "mysql -uroot -p#{Bcpc::OSHelper.get_config(node, 'mysql-root-password')} #{node[:bcpc][:pdns_dbname]} -e 'SELECT name FROM records_static' | grep -q \"#{server['hostname']}.#{node[:bcpc][:domain_name]}\""
             if not $?.success? then
-                %x[ mysql -uroot -p#{get_config('mysql-root-password')} #{node[:bcpc][:pdns_dbname]} <<-EOH
+                %x[ mysql -uroot -p#{Bcpc::OSHelper.get_config(node, 'mysql-root-password')} #{node[:bcpc][:pdns_dbname]} <<-EOH
                         INSERT INTO records_static (domain_id, name, content, type, ttl, prio) VALUES ((SELECT id FROM domains WHERE name='#{node[:bcpc][:domain_name]}'),'#{server['hostname']}.#{node[:bcpc][:domain_name]}','#{server['bcpc']['management']['ip']}','A',300,NULL);
                         #{storage_host_A_record}
                         #{float_host_A_record}
@@ -325,10 +326,10 @@ end
 %w{openstack kibana graphite zabbix}.each do |static|
     ruby_block "create-management-dns-entry-#{static}" do
         block do
-            if get_nodes_for(static).length >= 1 then
-                system "mysql -uroot -p#{get_config('mysql-root-password')} #{node[:bcpc][:pdns_dbname]} -e 'SELECT name FROM records_static' | grep -q \"#{static}.#{node[:bcpc][:domain_name]}\""
+            if Bcpc::OSHelper.get_nodes_for(static,node,cookbook_name).length >= 1 then
+                system "mysql -uroot -p#{Bcpc::OSHelper.get_config(node, 'mysql-root-password')} #{node[:bcpc][:pdns_dbname]} -e 'SELECT name FROM records_static' | grep -q \"#{static}.#{node[:bcpc][:domain_name]}\""
                 if not $?.success? then
-                    %x[ mysql -uroot -p#{get_config('mysql-root-password')} #{node[:bcpc][:pdns_dbname]} <<-EOH
+                    %x[ mysql -uroot -p#{Bcpc::OSHelper.get_config(node, 'mysql-root-password')} #{node[:bcpc][:pdns_dbname]} <<-EOH
                             INSERT INTO records_static (domain_id, name, content, type, ttl, prio) VALUES ((SELECT id FROM domains WHERE name='#{node[:bcpc][:domain_name]}'),'#{static}.#{node[:bcpc][:domain_name]}','#{node[:bcpc][:management][:vip]}','A',300,NULL);
                     ]
                 end
@@ -340,10 +341,10 @@ end
 %w{s3}.each do |static|
     ruby_block "create-floating-dns-entry-#{static}" do
         block do
-            if get_nodes_for("ceph-rgw").length >= 1 then
-                system "mysql -uroot -p#{get_config('mysql-root-password')} #{node[:bcpc][:pdns_dbname]} -e 'SELECT name FROM records_static' | grep -q \"#{static}.#{node[:bcpc][:domain_name]}\""
+            if Bcpc::OSHelper.get_nodes_for("ceph-rgw",node,cookbook_name).length >= 1 then
+                system "mysql -uroot -p#{Bcpc::OSHelper.get_config(node, 'mysql-root-password')} #{node[:bcpc][:pdns_dbname]} -e 'SELECT name FROM records_static' | grep -q \"#{static}.#{node[:bcpc][:domain_name]}\""
                if not $?.success? then
-                   %x[ mysql -uroot -p#{get_config('mysql-root-password')} #{node[:bcpc][:pdns_dbname]} <<-EOH
+                   %x[ mysql -uroot -p#{Bcpc::OSHelper.get_config(node, 'mysql-root-password')} #{node[:bcpc][:pdns_dbname]} <<-EOH
                            INSERT INTO records_static (domain_id, name, content, type, ttl, prio) VALUES ((SELECT id FROM domains WHERE name='#{node[:bcpc][:domain_name]}'),'#{static}.#{node[:bcpc][:domain_name]}','#{node[:bcpc][:floating][:vip]}','A',300,NULL);
                    ]
                end
@@ -357,6 +358,7 @@ template "/etc/powerdns/pdns.d/pdns.local.gmysql" do
     owner "pdns"
     group "root"
     mode 00640
+    helpers(Bcpc::OSHelper)
     notifies :restart, "service[pdns]", :immediately
 end
 

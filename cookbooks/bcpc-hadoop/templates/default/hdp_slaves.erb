@@ -1,5 +1,5 @@
 localhost
 <% @dn_hosts.each do |h| %>	
-<%=float_host(h[:hostname]) %>
+<%=float_host(@node,h[:hostname]) %>
 <% end %>
 

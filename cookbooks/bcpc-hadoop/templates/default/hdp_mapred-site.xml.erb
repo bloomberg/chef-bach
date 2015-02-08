@@ -36,12 +36,12 @@
 
   <property>
     <name>mapreduce.jobhistory.address</name>
-    <value><%="#{float_host(@hs_hosts.sort.first[:hostname])}:10020" if not @hs_hosts.empty?%></value>
+    <value><%="#{float_host(@node,@hs_hosts.sort.first[:hostname])}:10020" if not @hs_hosts.empty?%></value>
   </property>
 
   <property>
     <name>mapreduce.jobhistory.webapp.address</name>
-    <value><%="#{float_host(@hs_hosts.sort.first[:hostname])}:19888" if not @hs_hosts.empty?%></value>
+    <value><%="#{float_host(@node,@hs_hosts.sort.first[:hostname])}:19888" if not @hs_hosts.empty?%></value>
   </property>
 
   <property>

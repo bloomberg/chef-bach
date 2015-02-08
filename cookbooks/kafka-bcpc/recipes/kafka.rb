@@ -2,6 +2,7 @@
 # Cookbook Name:: kafka-bcpc 
 # Recipe: Kafka
 
+Chef::Resource.send(:include,BcpcHadoop::HadoopHelper)
 user_ulimit "kafka" do
   filehandle_limit 32768
   notifies :restart, "service[kafka-broker]", :immediately
@@ -14,9 +15,9 @@ ruby_block "kafkaup" do
     zk_host = node[:kafka][:broker][:zookeeper][:connect].map{|zkh| "#{zkh}:2181"}.join(",")
     Chef::Log.info("Zookeeper hosts are #{zk_host}")
     sleep_time = 0.5
-    kafka_in_zk = znode_exists?(brokerpath, zk_host)
+    kafka_in_zk = BcpcHadoop::HadoopHelper.znode_exists?(brokerpath, zk_host)
     while !kafka_in_zk
-      kafka_in_zk = znode_exists?(brokerpath, zk_host)
+      kafka_in_zk = BcpcHadoop::HadoopHelper.znode_exists?(brokerpath, zk_host)
       if !kafka_in_zk and i < 20
         sleep(sleep_time)
         i += 1
@@ -24,7 +25,7 @@ ruby_block "kafkaup" do
       elsif !kafka_in_zk and i >= 19 
         Chef::Application.fatal! "Kafka is reported down for more than #{i * sleep_time} seconds"
       else
-        Chef::Log.info("Broker #{brokerpath} existance : #{znode_exists?(brokerpath, zk_host)}")
+        Chef::Log.info("Broker #{brokerpath} existance : #{BcpcHadoop::HadoopHelper.znode_exists?(brokerpath, zk_host)}")
       end
     end
     Chef::Log.info("Kafka with znode #{brokerpath} is up and running.")

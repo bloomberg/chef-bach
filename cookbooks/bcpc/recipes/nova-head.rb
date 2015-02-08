@@ -1,3 +1,4 @@
+Chef::Resource.send(:include, Bcpc::OSHelper)
 #
 # Cookbook Name:: bcpc
 # Recipe:: nova-head
@@ -20,9 +21,9 @@
 include_recipe "bcpc::mysql"
 include_recipe "bcpc::openstack"
 
-make_config('mysql-nova-user', "nova")
-make_config('mysql-nova-password', secure_password)
-make_config('glance-cloudpipe-uuid', %x[uuidgen -r].strip)
+Bcpc::OSHelper.set_config(node, 'mysql-nova-user', "nova")
+Bcpc::OSHelper.set_config(node, 'mysql-nova-password', Bcpc::Helper.secure_password)
+Bcpc::OSHelper.set_config(node, 'glance-cloudpipe-uuid', %x[uuidgen -r].strip)
 
 package "python-memcache"
 
@@ -40,6 +41,7 @@ template "/etc/nova/nova.conf" do
     owner "nova"
     group "nova"
     mode 00600
+    helpers(Bcpc::OSHelper)
     notifies :restart, "service[nova-scheduler]", :delayed
     notifies :restart, "service[nova-cert]", :delayed
     notifies :restart, "service[nova-consoleauth]", :delayed
@@ -51,6 +53,7 @@ template "/etc/nova/api-paste.ini" do
     owner "nova"
     group "nova"
     mode 00600
+    helpers(Bcpc::OSHelper)
     notifies :restart, "service[nova-scheduler]", :delayed
     notifies :restart, "service[nova-cert]", :delayed
     notifies :restart, "service[nova-consoleauth]", :delayed
@@ -59,11 +62,11 @@ end
 
 ruby_block "nova-database-creation" do
     block do
-        if not system "mysql -uroot -p#{get_config('mysql-root-password')} -e 'SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = \"#{node['bcpc']['nova_dbname']}\"'|grep \"#{node['bcpc']['nova_dbname']}\"" then
-            %x[ mysql -uroot -p#{get_config('mysql-root-password')} -e "CREATE DATABASE #{node['bcpc']['nova_dbname']};"
-                mysql -uroot -p#{get_config('mysql-root-password')} -e "GRANT ALL ON #{node['bcpc']['nova_dbname']}.* TO '#{get_config('mysql-nova-user')}'@'%' IDENTIFIED BY '#{get_config('mysql-nova-password')}';"
-                mysql -uroot -p#{get_config('mysql-root-password')} -e "GRANT ALL ON #{node['bcpc']['nova_dbname']}.* TO '#{get_config('mysql-nova-user')}'@'localhost' IDENTIFIED BY '#{get_config('mysql-nova-password')}';"
-                mysql -uroot -p#{get_config('mysql-root-password')} -e "FLUSH PRIVILEGES;"
+        if not system "mysql -uroot -p#{Bcpc::OSHelper.get_config(node, 'mysql-root-password')} -e 'SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = \"#{node['bcpc']['nova_dbname']}\"'|grep \"#{node['bcpc']['nova_dbname']}\"" then
+            %x[ mysql -uroot -p#{Bcpc::OSHelper.get_config(node, 'mysql-root-password')} -e "CREATE DATABASE #{node['bcpc']['nova_dbname']};"
+                mysql -uroot -p#{Bcpc::OSHelper.get_config(node, 'mysql-root-password')} -e "GRANT ALL ON #{node['bcpc']['nova_dbname']}.* TO '#{Bcpc::OSHelper.get_config(node, 'mysql-nova-user')}'@'%' IDENTIFIED BY '#{Bcpc::OSHelper.get_config(node, 'mysql-nova-password')}';"
+                mysql -uroot -p#{Bcpc::OSHelper.get_config(node, 'mysql-root-password')} -e "GRANT ALL ON #{node['bcpc']['nova_dbname']}.* TO '#{Bcpc::OSHelper.get_config(node, 'mysql-nova-user')}'@'localhost' IDENTIFIED BY '#{Bcpc::OSHelper.get_config(node, 'mysql-nova-password')}';"
+                mysql -uroot -p#{Bcpc::OSHelper.get_config(node, 'mysql-root-password')} -e "FLUSH PRIVILEGES;"
             ]
             self.notifies :run, "bash[nova-database-sync]", :immediately
             self.resolve_notification_references
@@ -83,12 +86,12 @@ end
 
 ruby_block "reap-dead-servers-from-nova" do
     block do
-        all_hosts = get_all_nodes.collect{|x| x['hostname']}
+        all_hosts = Bcpc::OSHelper.get_all_nodes(node).collect{|x| x['hostname']}
         nova_hosts = %x[nova-manage service list | awk '{print $2}' | grep -ve "^Host$" | uniq].split
         nova_hosts.each do |host|
             if not all_hosts.include?(host)
-                %x[ mysql -uroot -p#{get_config('mysql-root-password')} #{node['bcpc']['nova_dbname']} -e "DELETE FROM services WHERE host=\\"#{host}\\";"
-                    mysql -uroot -p#{get_config('mysql-root-password')} #{node['bcpc']['nova_dbname']} -e "DELETE FROM compute_nodes WHERE hypervisor_hostname=\\"#{host}\\";"
+                %x[ mysql -uroot -p#{Bcpc::OSHelper.get_config(node, 'mysql-root-password')} #{node['bcpc']['nova_dbname']} -e "DELETE FROM services WHERE host=\\"#{host}\\";"
+                    mysql -uroot -p#{Bcpc::OSHelper.get_config(node, 'mysql-root-password')} #{node['bcpc']['nova_dbname']} -e "DELETE FROM compute_nodes WHERE hypervisor_hostname=\\"#{host}\\";"
                 ]
             end
         end

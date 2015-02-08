@@ -1,3 +1,4 @@
+Chef::Resource.send(:include, Bcpc::OSHelper)
 #
 # Cookbook Name:: bcpc
 # Recipe:: kibana
@@ -21,7 +22,7 @@ include_recipe "bcpc::default"
 include_recipe "bcpc::apache2"
 
 remote_file "/tmp/kibana3.tgz" do
-    source "#{get_binary_server_url}/kibana3.tgz"
+    source "#{Bcpc::OSHelper.get_binary_server_url(node)}/kibana3.tgz"
     owner "root"
     mode 00444
     not_if { Dir.exists? "/opt/kibana3" }

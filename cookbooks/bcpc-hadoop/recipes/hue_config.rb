@@ -2,8 +2,8 @@
 # Recipe Name : hue_config
 # Description : To setup hue configuration only.
 
-make_config('mysql-hue-password', secure_password)
-make_config('hue-session-key', secure_password)
+Bcpc::OSHelper.set_config(node, 'mysql-hue-password', Bcpc::Helper.secure_password)
+Bcpc::OSHelper.set_config(node, 'hue-session-key', Bcpc::Helper.secure_password)
 
 directory "/etc/hue/conf.#{node.chef_environment}" do
   owner "root"
@@ -23,6 +23,7 @@ end
 template "/etc/hue/conf/hue.ini" do
   source "hue_hue.ini.erb"
   mode 0644
+  helpers(Bcpc::OSHelper)
   variables(
     :zk_hosts => node[:bcpc][:hadoop][:zookeeper][:servers],
     :rm_hosts  => node[:bcpc][:hadoop][:rm_hosts],

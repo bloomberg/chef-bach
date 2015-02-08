@@ -1,3 +1,5 @@
+Chef::Resource.send(:include, BcpcHadoop::HadoopHelper, Bcpc::OSHelper)
+
 template node['bcpc']['zabbix']['scripts']['sender'] do
   source "zabbix.run_zabbix_sender.sh.erb"
   mode 0755
@@ -34,14 +36,14 @@ ruby_block "zabbix_monitor" do
     #
     zbx=ZabbixApi.connect(:url => "https://#{node['bcpc']['management']['vip']}:#{node['bcpc']['zabbix']['web_port']}/api_jsonrpc.php", 
                           :user => 'admin', 
-                          :password => "#{get_config('zabbix-admin-password')}")
+                          :password => "#{Bcpc::OSHelper.get_config(node, 'zabbix-admin-password')}")
     if zbx.nil?
       Chef::Log.fatal!("Fatal error: could not connect to Zabbix server")
     end
     #
     # Looping through the graphite queries attribute to define the required zabbix hosts, items and triggers
     #
-    graphite_hosts = (get_node_attributes(MGMT_IP_ATTR_SRCH_KEYS,"graphite","bcpc").map {|v| v['mgmt_ip']}).join(",")
+    graphite_hosts = (Bcpc::OSHelper.get_node_attributes(MGMT_IP_ATTR_SRCH_KEYS,"graphite",node,"bcpc").map {|v| v['mgmt_ip']}).join(",")
     cron_check_cond = Array.new
     node['bcpc']['hadoop']['graphite']['queries'].each do |trigger_host, trigger|
       trigger.each do |trigger_attr|    

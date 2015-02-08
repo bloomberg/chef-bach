@@ -1,3 +1,4 @@
+Chef::Resource.send(:include, Bcpc::OSHelper)
 #
 # Cookbook Name:: bcpc
 # Recipe:: haproxy
@@ -19,8 +20,8 @@
 
 include_recipe "bcpc::default"
 
-make_config('haproxy-stats-user', "haproxy")
-make_config('haproxy-stats-password', secure_password)
+Bcpc::OSHelper.set_config(node, 'haproxy-stats-user', "haproxy")
+Bcpc::OSHelper.set_config(node, 'haproxy-stats-password', Bcpc::Helper.secure_password)
 
 package "haproxy" do
     action :upgrade
@@ -38,16 +39,17 @@ end
 template "/etc/haproxy/haproxy.cfg" do
     source "haproxy.cfg.erb"
     mode 00644
-	variables( :nova_servers => get_nodes_for("nova-work","bcpc"),
-                   :mysql_servers => get_nodes_for("mysql","bcpc"),
-                   :rabbitmq_servers => get_nodes_for("rabbitmq","bcpc"),
-                   :ldap_servers => get_nodes_for("389ds","bcpc"),
-                   :keystone_servers => get_nodes_for("keystone","bcpc"),
-                   :glance_servers => get_nodes_for("glance","bcpc"),
-                   :cinder_servers => get_nodes_for("cinder","bcpc"),
-                   :horizon_servers => get_nodes_for("horizon","bcpc"),
-                   :elasticsearch_servers => get_nodes_for("elasticsearch","bcpc"),
-                   :radosgw_servers => get_nodes_for("ceph-rgw","bcpc"))
+    helpers(Bcpc::OSHelper)
+	variables( :nova_servers => Bcpc::OSHelper.get_nodes_for("nova-work",node,"bcpc"),
+                   :mysql_servers => Bcpc::OSHelper.get_nodes_for("mysql",node,"bcpc"),
+                   :rabbitmq_servers => Bcpc::OSHelper.get_nodes_for("rabbitmq",node,"bcpc"),
+                   :ldap_servers => Bcpc::OSHelper.get_nodes_for("389ds",node,"bcpc"),
+                   :keystone_servers => Bcpc::OSHelper.get_nodes_for("keystone",node,"bcpc"),
+                   :glance_servers => Bcpc::OSHelper.get_nodes_for("glance",node,"bcpc"),
+                   :cinder_servers => Bcpc::OSHelper.get_nodes_for("cinder",node,"bcpc"),
+                   :horizon_servers => Bcpc::OSHelper.get_nodes_for("horizon",node,"bcpc"),
+                   :elasticsearch_servers => Bcpc::OSHelper.get_nodes_for("elasticsearch",node,"bcpc"),
+                   :radosgw_servers => Bcpc::OSHelper.get_nodes_for("ceph-rgw",node,"bcpc"))
 	notifies :restart, "service[haproxy]", :immediately
 end
 

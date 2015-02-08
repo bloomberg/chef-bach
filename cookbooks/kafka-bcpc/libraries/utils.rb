@@ -28,5 +28,5 @@ def get_zk_nodes
   ro_results = search(:node, "roles:BCPC-Kafka-Head-Zookeeper AND chef_environment:#{node.chef_environment}")
   ro_results.map!{|x| x[:hostname] == node[:hostname] ? node : x}
   results = rl_results.concat ro_results
-  return results.uniq{|x| float_host(x[:hostname])}.sort
+  return results.uniq{|x| Bcpc::OSHelper.float_host(node,x[:hostname])}.sort
 end

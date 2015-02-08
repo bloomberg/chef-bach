@@ -1,3 +1,4 @@
+Chef::Resource.send(:include, BcpcHadoop::HadoopHelper, Bcpc::OSHelper)
 include_recipe 'bcpc-hadoop::hadoop_config'
 
 %w{hadoop-yarn-nodemanager
@@ -125,7 +126,7 @@ end
 #
 # Since string with all the zookeeper nodes is used multiple times this variable is populated once and reused reducing calls to Chef server
 #
-zk_hosts = (get_node_attributes(MGMT_IP_ATTR_SRCH_KEYS,"zookeeper_server","bcpc-hadoop").map{|zkhost| "#{zkhost['mgmt_ip']}:#{node[:bcpc][:hadoop][:zookeeper][:port]}"}).join(",")
+zk_hosts = (Bcpc::OSHelper.get_node_attributes(MGMT_IP_ATTR_SRCH_KEYS,"zookeeper_server",node,"bcpc-hadoop").map{|zkhost| "#{zkhost['mgmt_ip']}:#{node[:bcpc][:hadoop][:zookeeper][:port]}"}).join(",")
 #
 # znode is used as the locking mechnism to control restart of services. The following code is to build the path
 # to create the znode before initiating the restart of HDFS datanode service 
@@ -146,14 +147,14 @@ ruby_block "acquire_lock_to_restart_datanode" do
     tries = 0
     Chef::Log.info("#{node[:hostname]}: Acquring lock at #{lock_znode_path}")
     while true 
-      lock = acquire_restart_lock(lock_znode_path, zk_hosts, node[:fqdn])
+      lock = BcpcHadoop::HadoopHelper.acquire_restart_lock(lock_znode_path, zk_hosts, node[:fqdn])
       if lock
         break
       else
         tries += 1
         if tries >= node[:bcpc][:hadoop][:restart_lock_acquire][:max_tries]
           Chef::Log.info("Couldn't acquire lock to restart datanode with in the #{node[:bcpc][:hadoop][:restart_lock_acquire][:max_tries] * node[:bcpc][:hadoop][:restart_lock_acquire][:sleep_time]} secs.")
-          Chef::Log.info("Node #{get_restart_lock_holder(lock_znode_path, zk_hosts)} may have died during datanode restart.")
+          Chef::Log.info("Node #{BcpcHadoop::HadoopHelper.get_restart_lock_holder(lock_znode_path, zk_hosts)} may have died during datanode restart.")
           node.set[:bcpc][:hadoop][:datanode][:restart_failed] = true
           node.save
           break
@@ -176,7 +177,7 @@ ruby_block "coordinate_datanode_restart" do
     Chef::Log.info("Data node will be restarted in node #{node[:fqdn]}")
   end
   action :create
-  only_if { my_restart_lock?(lock_znode_path, zk_hosts, node[:fqdn]) }
+  only_if { BcpcHadoop::HadoopHelper.my_restart_lock?(lock_znode_path, zk_hosts, node[:fqdn]) }
 end
 
 service "hadoop-hdfs-datanode" do
@@ -191,14 +192,14 @@ end
 ruby_block "release_datanode_restart_lock" do
   block do
     Chef::Log.info("#{node[:hostname]}: Releasing lock at #{lock_znode_path}")
-    lock_rel = rel_restart_lock(lock_znode_path, zk_hosts, node[:fqdn])
+    lock_rel = BcpcHadoop::HadoopHelper.rel_restart_lock(lock_znode_path, zk_hosts, node[:fqdn])
     if lock_rel
       node.set[:bcpc][:hadoop][:datanode][:restart_failed] = false
       node.save
     end
   end
   action :create
-  only_if { my_restart_lock?(lock_znode_path, zk_hosts, node[:fqdn]) }
+  only_if { BcpcHadoop::HadoopHelper.my_restart_lock?(lock_znode_path, zk_hosts, node[:fqdn]) }
 end
 
 service "hadoop-yarn-nodemanager" do

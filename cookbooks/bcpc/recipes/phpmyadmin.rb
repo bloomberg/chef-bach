@@ -1,3 +1,4 @@
+Chef::Resource.send(:include, Bcpc::OSHelper)
 #
 # Cookbook Name:: bcpc
 # Recipe:: phpmyadmin
@@ -20,12 +21,12 @@
 package "debconf-utils"
 
 bash "phpmyadmin-debconf-setup" do
-  make_config('mysql-phpmyadmin-password', secure_password)
+  Bcpc::OSHelper.set_config(node, 'mysql-phpmyadmin-password', Bcpc::Helper.secure_password)
   code <<-EOH
     set -e
     debconf-set-selections <<< 'phpmyadmin phpmyadmin/dbconfig-install boolean true'
-    debconf-set-selections <<< 'phpmyadmin phpmyadmin/mysql/admin-pass password #{get_config('mysql-root-password')}'
-    debconf-set-selections <<< 'phpmyadmin phpmyadmin/mysql/app-pass password #{get_config('mysql-phpmyadmin-password')}' 
+    debconf-set-selections <<< 'phpmyadmin phpmyadmin/mysql/admin-pass password #{Bcpc::OSHelper.get_config(node, 'mysql-root-password')}'
+    debconf-set-selections <<< 'phpmyadmin phpmyadmin/mysql/app-pass password #{Bcpc::OSHelper.get_config(node, 'mysql-phpmyadmin-password')}' 
     debconf-set-selections <<< 'phpmyadmin phpmyadmin/reconfigure-webserver multiselect apache2' 
   EOH
   not_if "debconf-get-selections | grep phpmyadmin >/dev/null 2>&1"

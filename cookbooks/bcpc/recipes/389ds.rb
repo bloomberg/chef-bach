@@ -16,15 +16,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-
+Chef::Resource.send(:include, Bcpc::OSHelper)
 include_recipe "bcpc::default"
 
-make_config('389ds-admin-user', "admin")
-make_config('389ds-admin-password', secure_password)
-make_config('389ds-rootdn-user', "cn=Directory Manager")
-make_config('389ds-rootdn-password', secure_password)
-make_config('389ds-replication-user', "cn=Replication Manager")
-make_config('389ds-replication-password', secure_password)
+Bcpc::OSHelper.set_config(node, '389ds-admin-user', "admin")
+Bcpc::OSHelper.set_config(node, '389ds-admin-password', Bcpc::Helper.secure_password)
+Bcpc::OSHelper.set_config(node, '389ds-rootdn-user', "cn=Directory Manager")
+Bcpc::OSHelper.set_config(node, '389ds-rootdn-password', Bcpc::Helper.secure_password)
+Bcpc::OSHelper.set_config(node, '389ds-replication-user', "cn=Replication Manager")
+Bcpc::OSHelper.set_config(node, '389ds-replication-password', Bcpc::Helper.secure_password)
 
 %w{389-ds ldap-utils}.each do |pkg|
     package pkg do
@@ -37,6 +37,7 @@ template "/tmp/389ds-install.inf" do
     owner "root"
     group "root"
     mode 00600
+    helpers(Bcpc::OSHelper)
 end
 
 bash "setup-389ds-server" do
@@ -56,7 +57,7 @@ bash "setup-389ds-server" do
         echo "objectClass: top" >> /etc/dirsrv/slapd-#{node[:hostname]}/dse.ldif
         echo "cn: Replication Manager" >> /etc/dirsrv/slapd-#{node[:hostname]}/dse.ldif
         echo "sn: RM" >> /etc/dirsrv/slapd-#{node[:hostname]}/dse.ldif
-        echo "userPassword: #{get_config('389ds-replication-password')}" >> /etc/dirsrv/slapd-#{node[:hostname]}/dse.ldif
+        echo "userPassword: #{Bcpc::OSHelper.get_config(node, '389ds-replication-password')}" >> /etc/dirsrv/slapd-#{node[:hostname]}/dse.ldif
         echo "passwordExpirationTime: 20380119031407Z" >> /etc/dirsrv/slapd-#{node[:hostname]}/dse.ldif
         echo "nsIdleTimeout: 0" >> /etc/dirsrv/slapd-#{node[:hostname]}/dse.ldif
         service dirsrv start
@@ -67,8 +68,8 @@ end
 
 ruby_block "create-ldap-changelog" do
     block do
-        if not system "ldapsearch -h #{node[:bcpc][:management][:ip]} -p 389  -D \"#{get_config('389ds-rootdn-user')}\" -w \"#{get_config('389ds-rootdn-password')}\" -b cn=config \"(cn=changelog5)\" | grep -v filter | grep changelog5 > /dev/null 2>&1" then
-            %x[ ldapmodify -h #{node[:bcpc][:management][:ip]} -p 389  -D \"#{get_config('389ds-rootdn-user')}\" -w \"#{get_config('389ds-rootdn-password')}\" << EOH
+        if not system "ldapsearch -h #{node[:bcpc][:management][:ip]} -p 389  -D \"#{Bcpc::OSHelper.get_config(node, '389ds-rootdn-user')}\" -w \"#{Bcpc::OSHelper.get_config(node, '389ds-rootdn-password')}\" -b cn=config \"(cn=changelog5)\" | grep -v filter | grep changelog5 > /dev/null 2>&1" then
+            %x[ ldapmodify -h #{node[:bcpc][:management][:ip]} -p 389  -D \"#{Bcpc::OSHelper.get_config(node, '389ds-rootdn-user')}\" -w \"#{Bcpc::OSHelper.get_config(node, '389ds-rootdn-password')}\" << EOH
 dn: cn=changelog5,cn=config
 changetype: add
 objectclass: top
@@ -83,9 +84,9 @@ end
 
 ruby_block "create-ldap-supplier-replica" do
     block do
-        if not system "ldapsearch -h #{node[:bcpc][:management][:ip]} -p 389  -D \"#{get_config('389ds-rootdn-user')}\" -w \"#{get_config('389ds-rootdn-password')}\" -b cn=config \"(cn=replica)\" | grep -v filter | grep replica > /dev/null 2>&1" then
+        if not system "ldapsearch -h #{node[:bcpc][:management][:ip]} -p 389  -D \"#{Bcpc::OSHelper.get_config(node, '389ds-rootdn-user')}\" -w \"#{Bcpc::OSHelper.get_config(node, '389ds-rootdn-password')}\" -b cn=config \"(cn=replica)\" | grep -v filter | grep replica > /dev/null 2>&1" then
             domain = node[:bcpc][:domain_name].split('.').collect{|x| 'dc='+x}.join(',')
-            %x[ ldapmodify -h #{node[:bcpc][:management][:ip]} -p 389  -D \"#{get_config('389ds-rootdn-user')}\" -w \"#{get_config('389ds-rootdn-password')}\" << EOH
+            %x[ ldapmodify -h #{node[:bcpc][:management][:ip]} -p 389  -D \"#{Bcpc::OSHelper.get_config(node, '389ds-rootdn-user')}\" -w \"#{Bcpc::OSHelper.get_config(node, '389ds-rootdn-password')}\" << EOH
 dn: cn=replica,cn="#{domain}",cn=mapping tree,cn=config
 changetype: add
 objectclass: top
@@ -97,20 +98,20 @@ nsds5replicaid: #{node[:bcpc][:node_number]}
 nsds5replicatype: 3
 nsds5flags: 1
 nsds5ReplicaPurgeDelay: 604800
-nsds5ReplicaBindDN: #{get_config('389ds-replication-user')},cn=config
+nsds5ReplicaBindDN: #{Bcpc::OSHelper.get_config(node, '389ds-replication-user')},cn=config
 
             ]
         end
     end
 end
 
-get_head_nodes.each do |server|
+Bcpc::OSHelper.get_head_nodes(node).each do |server|
     if server['hostname'] != node[:hostname]
         ruby_block "setup-ldap-consumption-from-#{server['hostname']}" do
             block do
-                if not system "ldapsearch -h #{server['bcpc']['management']['ip']} -p 389  -D \"#{get_config('389ds-rootdn-user')}\" -w \"#{get_config('389ds-rootdn-password')}\" -b cn=config \"(cn=To-#{node[:hostname]})\" | grep -v filter | grep #{node[:hostname]} > /dev/null 2>&1" then
+                if not system "ldapsearch -h #{server['bcpc']['management']['ip']} -p 389  -D \"#{Bcpc::OSHelper.get_config(node, '389ds-rootdn-user')}\" -w \"#{Bcpc::OSHelper.get_config(node, '389ds-rootdn-password')}\" -b cn=config \"(cn=To-#{node[:hostname]})\" | grep -v filter | grep #{node[:hostname]} > /dev/null 2>&1" then
                     domain = node[:bcpc][:domain_name].split('.').collect{|x| 'dc='+x}.join(',')
-                    %x[ ldapmodify -h #{server['bcpc']['management']['ip']} -p 389  -D \"#{get_config('389ds-rootdn-user')}\" -w \"#{get_config('389ds-rootdn-password')}\" << EOH
+                    %x[ ldapmodify -h #{server['bcpc']['management']['ip']} -p 389  -D \"#{Bcpc::OSHelper.get_config(node, '389ds-rootdn-user')}\" -w \"#{Bcpc::OSHelper.get_config(node, '389ds-rootdn-password')}\" << EOH
 dn: cn=To-#{node[:hostname]},cn=replica,cn="#{domain}",cn=mapping tree,cn=config
 changetype: add
 objectclass: top
@@ -118,12 +119,12 @@ objectclass: nsds5replicationagreement
 cn: To-#{node[:hostname]}
 nsds5replicahost: #{node[:bcpc][:management][:ip]}
 nsds5replicaport: 389
-nsds5ReplicaBindDN: #{get_config('389ds-replication-user')},cn=config
+nsds5ReplicaBindDN: #{Bcpc::OSHelper.get_config(node, '389ds-replication-user')},cn=config
 nsds5replicabindmethod: SIMPLE
 nsds5replicaroot: #{domain}
 description: Agreement to sync from #{server['hostname']} to #{node[:hostname]}
 nsds5replicatedattributelist: (objectclass=*) $ EXCLUDE authorityRevocationList
-nsds5replicacredentials: #{get_config('389ds-replication-password')}
+nsds5replicacredentials: #{Bcpc::OSHelper.get_config(node, '389ds-replication-password')}
 nsds5BeginReplicaRefresh: start
 
                     ]
@@ -142,6 +143,7 @@ template "/etc/phpldapadmin/config.php" do
     owner "root"
     group "root"
     mode 00644
+    helpers(Bcpc::OSHelper)
 end
 
 template "/etc/apache2/vhost-ssl-root.d/phpldapadmin.conf" do

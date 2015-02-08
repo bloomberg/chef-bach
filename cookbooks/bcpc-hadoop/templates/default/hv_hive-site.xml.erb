@@ -71,7 +71,7 @@
 
 <property>
   <name>hive.metastore.uris</name>
-  <value>thrift://<%=@hive_hosts.map{ |s| float_host(s[:hostname]) + ":9083" }.join(",") %></value>
+  <value>thrift://<%=@hive_hosts.map{ |s| float_host(@node,s[:hostname]) + ":9083" }.join(",") %></value>
   <description>IP address (or fully-qualified domain name) and port of the metastore hosts</description>
 </property>
 
@@ -84,7 +84,7 @@
 <property>
   <name>hive.zookeeper.quorum</name>
   <description>Zookeeper quorum used by Hive's Table Lock Manager</description>
-  <value><%= @zk_hosts.map{ |s| float_host(s[:hostname]) }.join(",")%></value>
+  <value><%= @zk_hosts.map{ |s| float_host(@node,s[:hostname]) }.join(",")%></value>
 </property>
 
 <property>

@@ -1,3 +1,4 @@
+Chef::Resource.send(:include, Bcpc::OSHelper)
 #
 # Cookbook Name:: bcpc
 # Recipe:: mysql
@@ -19,12 +20,12 @@
 
 include_recipe "bcpc::default"
 
-make_config('mysql-root-user', "root")
-make_config('mysql-root-password', secure_password)
-make_config('mysql-galera-user', "sst")
-make_config('mysql-galera-password', secure_password)
-make_config('mysql-check-user', "check")
-make_config('mysql-check-password', secure_password)
+Bcpc::OSHelper.set_config(node, 'mysql-root-user', "root")
+Bcpc::OSHelper.set_config(node, 'mysql-root-password', Bcpc::Helper.secure_password)
+Bcpc::OSHelper.set_config(node, 'mysql-galera-user', "sst")
+Bcpc::OSHelper.set_config(node, 'mysql-galera-password', Bcpc::Helper.secure_password)
+Bcpc::OSHelper.set_config(node, 'mysql-check-user', "check")
+Bcpc::OSHelper.set_config(node, 'mysql-check-password', Bcpc::Helper.secure_password)
 
 apt_repository "percona" do
   uri node['bcpc']['repos']['mysql']
@@ -40,10 +41,10 @@ end
 bash "initial-mysql-config" do
   code <<-EOH
         mysql -u root -e "DROP USER ''@'localhost';
-                          GRANT USAGE ON *.* to '#{get_config('mysql-galera-user')}'@'%' IDENTIFIED BY '#{get_config('mysql-galera-password')}';
-                          GRANT ALL PRIVILEGES on *.* TO '#{get_config('mysql-galera-user')}'@'%' IDENTIFIED BY '#{get_config('mysql-galera-password')}';
-                          GRANT PROCESS ON *.* to '#{get_config('mysql-check-user')}'@'localhost' IDENTIFIED BY '#{get_config('mysql-check-password')}';
-                          UPDATE mysql.user SET password=PASSWORD('#{get_config('mysql-root-password')}') WHERE user='root'; FLUSH PRIVILEGES;
+                          GRANT USAGE ON *.* to '#{Bcpc::OSHelper.get_config(node, 'mysql-galera-user')}'@'%' IDENTIFIED BY '#{Bcpc::OSHelper.get_config(node, 'mysql-galera-password')}';
+                          GRANT ALL PRIVILEGES on *.* TO '#{Bcpc::OSHelper.get_config(node, 'mysql-galera-user')}'@'%' IDENTIFIED BY '#{Bcpc::OSHelper.get_config(node, 'mysql-galera-password')}';
+                          GRANT PROCESS ON *.* to '#{Bcpc::OSHelper.get_config(node, 'mysql-check-user')}'@'localhost' IDENTIFIED BY '#{Bcpc::OSHelper.get_config(node, 'mysql-check-password')}';
+                          UPDATE mysql.user SET password=PASSWORD('#{Bcpc::OSHelper.get_config(node, 'mysql-root-password')}') WHERE user='root'; FLUSH PRIVILEGES;
                           UPDATE mysql.user SET host='%' WHERE user='root' and host='localhost';
                           FLUSH PRIVILEGES;"
         EOH
@@ -65,6 +66,7 @@ end
 template "/etc/mysql/debian.cnf" do
   source "my-debian.cnf.erb"
   mode 00644
+  helpers(Bcpc::OSHelper)
   notifies :reload, "service[mysql]", :delayed
 end
 
@@ -77,8 +79,9 @@ end
 template "/etc/mysql/conf.d/wsrep.cnf" do
   source "wsrep.cnf.erb"
   mode 00644
-  variables( :max_connections => [get_nodes_for('mysql','bcpc').length*50+get_all_nodes.length*5, 200].max,
-             :servers => get_nodes_for('mysql','bcpc') )
+  helpers(Bcpc::OSHelper)
+  variables( :max_connections => [Bcpc::OSHelper.get_nodes_for('mysql',node,'bcpc').length*50+Bcpc::OSHelper.get_all_nodes(node).length*5, 200].max,
+             :servers => Bcpc::OSHelper.get_nodes_for('mysql',node,'bcpc') )
   notifies :restart, "service[mysql]", :immediate
 end
 
@@ -96,7 +99,7 @@ service "mysql" do
 end
 
 ruby_block "Check MySQL Quorum Status" do
-  status_cmd="mysql -u root -p#{get_config('mysql-root-password')} -e \"SHOW STATUS LIKE 'wsrep_ready' \\G\" | grep -v 'Value: OFF'"
+  status_cmd="mysql -u root -p#{Bcpc::OSHelper.get_config(node, 'mysql-root-password')} -e \"SHOW STATUS LIKE 'wsrep_ready' \\G\" | grep -v 'Value: OFF'"
   iter = 0
   poll_time = 0.5
   block do
@@ -135,6 +138,7 @@ template "/etc/xinetd.d/mysqlchk" do
   owner "root"
   group "root"
   mode 00440
+  helpers(Bcpc::OSHelper)
   notifies :reload, "service[xinetd]", :immediately
 end
 

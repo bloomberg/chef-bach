@@ -1,3 +1,4 @@
+Chef::Resource.send(:include, Bcpc::OSHelper)
 #
 # Cookbook Name:: bcpc
 # Recipe:: diamond
@@ -39,7 +40,7 @@ if node[:bcpc][:virt_type] == "kvm"
 end
 
 python_pip "pyrabbit" do
-    options "--index #{get_binary_server_url}/python/simple"
+    options "--index #{Bcpc::OSHelper.get_binary_server_url(node)}/python/simple"
     action :install
 end
 
@@ -58,7 +59,8 @@ template "/etc/diamond/diamond.conf" do
     owner "diamond"
     group "root"
     mode 00600
-    variables( :servers => get_head_nodes )
+    helpers(Bcpc::OSHelper)
+    variables( :servers => Bcpc::OSHelper.get_head_nodes(node) )
     notifies :restart, "service[diamond]", :delayed
 end
 

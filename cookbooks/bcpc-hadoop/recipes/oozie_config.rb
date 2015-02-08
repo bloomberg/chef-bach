@@ -3,8 +3,8 @@
 # Description : To setup oozie configuration only.
 
 # Create oozie realted passwords
-make_config('oozie-keystore-password', secure_password)
-make_config('mysql-oozie-password', secure_password)
+Bcpc::OSHelper.set_config(node, 'oozie-keystore-password', Bcpc::Helper.secure_password)
+Bcpc::OSHelper.set_config(node, 'mysql-oozie-password', Bcpc::Helper.secure_password)
 
 directory "/etc/oozie/conf.#{node.chef_environment}" do
   owner "root"
@@ -34,6 +34,7 @@ end
   template "/etc/oozie/conf/#{t}" do
     source "ooz_#{t}.erb"
     mode 0644
+    helpers(Bcpc::OSHelper)
     variables(:mysql_hosts => node[:bcpc][:hadoop][:mysql_hosts].map{ |m| m[:hostname] },
               :zk_hosts => node[:bcpc][:hadoop][:zookeeper][:servers],
               :hive_hosts => node[:bcpc][:hadoop][:hive_hosts])

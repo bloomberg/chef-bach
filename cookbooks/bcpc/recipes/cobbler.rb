@@ -18,13 +18,14 @@
 #
 
 require 'digest/sha2'
+Chef::Resource.send(:include, Bcpc::OSHelper)
 
-make_config('cobbler-web-user', "cobbler")
-make_config('cobbler-web-password', secure_password)
-make_config('cobbler-root-password', secure_password)
-make_config('cobbler-root-password-salted', "#{get_config('cobbler-root-password')}".crypt("$6$" + rand(36**8).to_s(36)) )
-node.default[:cobbler][:web_username] = get_config('cobbler-web-user')
-node.default[:cobbler][:web_password] = get_config('cobbler-web-password')
+Bcpc::OSHelper.set_config(node, 'cobbler-web-user', "cobbler")
+Bcpc::OSHelper.set_config(node, 'cobbler-web-password', Bcpc::Helper.secure_password)
+Bcpc::OSHelper.set_config(node, 'cobbler-root-password', Bcpc::Helper.secure_password)
+Bcpc::OSHelper.set_config(node, 'cobbler-root-password-salted', "#{Bcpc::OSHelper.get_config(node, 'cobbler-root-password')}".crypt("$6$" + rand(36**8).to_s(36)) )
+node.default[:cobbler][:web_username] = Bcpc::OSHelper.get_config(node, 'cobbler-web-user')
+node.default[:cobbler][:web_password] = Bcpc::OSHelper.get_config(node, 'cobbler-web-password')
 
 package "isc-dhcp-server"
 
@@ -45,7 +46,7 @@ template "/etc/cobbler/dhcp.template" do
 end
 
 cobbler_image 'ubuntu-12.04-mini' do
-  source "#{get_binary_server_url}/ubuntu-12.04-mini.iso"
+  source "#{Bcpc::OSHelper.get_binary_server_url(node)}/ubuntu-12.04-mini.iso"
   os_version 'precise'
   os_breed 'ubuntu'
 end

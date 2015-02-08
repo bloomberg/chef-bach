@@ -39,7 +39,7 @@
 
     <property>
         <name>oozie.base.url</name>
-        <value><%= "http://#{float_host(node[:hostname])}:8080/oozie" %></value>
+        <value><%= "http://#{float_host(@node,node[:hostname])}:8080/oozie" %></value>
         <description>
              Base Oozie URL.
         </description>

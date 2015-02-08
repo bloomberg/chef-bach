@@ -1,3 +1,4 @@
+Chef::Resource.send(:include, Bcpc::OSHelper)
 #
 # Cookbook Name:: bcpc
 # Recipe:: keystone
@@ -22,16 +23,16 @@ include_recipe "bcpc::openstack"
 include_recipe "bcpc::apache2"
 
 ruby_block "initialize-keystone-config" do
-    make_config('mysql-keystone-user', "keystone")
-    make_config('mysql-keystone-password', secure_password)
-    make_config('keystone-admin-token', secure_password)
-    make_config('keystone-admin-user', "admin")
-    make_config('keystone-admin-password', secure_password)
+    Bcpc::OSHelper.set_config(node, 'mysql-keystone-user', "keystone")
+    Bcpc::OSHelper.set_config(node, 'mysql-keystone-password', Bcpc::Helper.secure_password)
+    Bcpc::OSHelper.set_config(node, 'keystone-admin-token', Bcpc::Helper.secure_password)
+    Bcpc::OSHelper.set_config(node, 'keystone-admin-user', "admin")
+    Bcpc::OSHelper.set_config(node, 'keystone-admin-password', Bcpc::Helper.secure_password)
     block do
-        if get_config('keystone-pki-certificate').nil? then
+        if Bcpc::OSHelper.get_config(node, 'keystone-pki-certificate').nil? then
             temp = %x[openssl req -new -x509 -passout pass:temp_passwd -newkey rsa:2048 -out /dev/stdout -keyout /dev/stdout -days 1095 -subj "/C=#{node['bcpc']['country']}/ST=#{node['bcpc']['state']}/L=#{node['bcpc']['location']}/O=#{node['bcpc']['organization']}/OU=#{node['bcpc']['region_name']}/CN=keystone.#{node['bcpc']['domain_name']}/emailAddress=#{node['bcpc']['admin_email']}"]
-            make_config('keystone-pki-private-key', %x[echo "#{temp}" | openssl rsa -passin pass:temp_passwd -out /dev/stdout])
-            make_config('keystone-pki-certificate', %x[echo "#{temp}" | openssl x509])
+            Bcpc::OSHelper.set_config(node, 'keystone-pki-private-key', %x[echo "#{temp}" | openssl rsa -passin pass:temp_passwd -out /dev/stdout])
+            Bcpc::OSHelper.set_config(node, 'keystone-pki-certificate', %x[echo "#{temp}" | openssl x509])
         end
 
     end
@@ -46,6 +47,7 @@ template "/etc/keystone/keystone.conf" do
     owner "keystone"
     group "keystone"
     mode 00600
+    helpers(Bcpc::OSHelper)
     notifies :restart, "service[apache2]", :delayed
 end
 
@@ -54,6 +56,7 @@ template "/etc/keystone/cert.pem" do
     owner "keystone"
     group "keystone"
     mode 00644
+    helpers(Bcpc::OSHelper)
     notifies :restart, "service[apache2]", :delayed
 end
 
@@ -62,6 +65,7 @@ template "/etc/keystone/key.pem" do
     owner "keystone"
     group "keystone"
     mode 00600
+    helpers(Bcpc::OSHelper)
     notifies :restart, "service[apache2]", :delayed
 end
 
@@ -70,6 +74,7 @@ template "/root/adminrc" do
     owner "root"
     group "root"
     mode 00600
+    helpers(Bcpc::OSHelper)
 end
 
 template "/root/keystonerc" do
@@ -77,6 +82,7 @@ template "/root/keystonerc" do
     owner "root"
     group "root"
     mode 00600
+    helpers(Bcpc::OSHelper)
 end
 
 %w{main admin}.each do |api|
@@ -114,11 +120,11 @@ end
 
 ruby_block "keystone-database-creation" do
     block do
-        if not system "mysql -uroot -p#{get_config('mysql-root-password')} -e 'SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = \"#{node['bcpc']['keystone_dbname']}\"'|grep \"#{node['bcpc']['keystone_dbname']}\"" then
-            %x[ mysql -uroot -p#{get_config('mysql-root-password')} -e "CREATE DATABASE #{node['bcpc']['keystone_dbname']};"
-                mysql -uroot -p#{get_config('mysql-root-password')} -e "GRANT ALL ON #{node['bcpc']['keystone_dbname']}.* TO '#{get_config('mysql-keystone-user')}'@'%' IDENTIFIED BY '#{get_config('mysql-keystone-password')}';"
-                mysql -uroot -p#{get_config('mysql-root-password')} -e "GRANT ALL ON #{node['bcpc']['keystone_dbname']}.* TO '#{get_config('mysql-keystone-user')}'@'localhost' IDENTIFIED BY '#{get_config('mysql-keystone-password')}';"
-                mysql -uroot -p#{get_config('mysql-root-password')} -e "FLUSH PRIVILEGES;"
+        if not system "mysql -uroot -p#{Bcpc::OSHelper.get_config(node, 'mysql-root-password')} -e 'SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = \"#{node['bcpc']['keystone_dbname']}\"'|grep \"#{node['bcpc']['keystone_dbname']}\"" then
+            %x[ mysql -uroot -p#{Bcpc::OSHelper.get_config(node, 'mysql-root-password')} -e "CREATE DATABASE #{node['bcpc']['keystone_dbname']};"
+                mysql -uroot -p#{Bcpc::OSHelper.get_config(node, 'mysql-root-password')} -e "GRANT ALL ON #{node['bcpc']['keystone_dbname']}.* TO '#{Bcpc::OSHelper.get_config(node, 'mysql-keystone-user')}'@'%' IDENTIFIED BY '#{Bcpc::OSHelper.get_config(node, 'mysql-keystone-password')}';"
+                mysql -uroot -p#{Bcpc::OSHelper.get_config(node, 'mysql-root-password')} -e "GRANT ALL ON #{node['bcpc']['keystone_dbname']}.* TO '#{Bcpc::OSHelper.get_config(node, 'mysql-keystone-user')}'@'localhost' IDENTIFIED BY '#{Bcpc::OSHelper.get_config(node, 'mysql-keystone-password')}';"
+                mysql -uroot -p#{Bcpc::OSHelper.get_config(node, 'mysql-root-password')} -e "FLUSH PRIVILEGES;"
             ]
             self.notifies :run, "bash[keystone-database-sync]", :immediately
             self.resolve_notification_references
@@ -272,12 +278,12 @@ end
 
 
 bash "keystone-create-test-tenants" do
-  make_config('keystone-test-user', "tester")
-  make_config('keystone-test-password', secure_password)
+  Bcpc::OSHelper.set_config(node, 'keystone-test-user', "tester")
+  Bcpc::OSHelper.set_config(node, 'keystone-test-password', Bcpc::Helper.secure_password)
   code <<-EOH
         . /root/adminrc
         export KEYSTONE_ADMIN_TENANT_ID=`keystone tenant-get "#{node['bcpc']['admin_tenant']}" | grep " id " | awk '{print $4}'`
-        keystone user-create --name #{get_config('keystone-test-user')} --tenant-id $KEYSTONE_ADMIN_TENANT_ID --pass  #{get_config('keystone-test-password')} --enabled true
+        keystone user-create --name #{Bcpc::OSHelper.get_config(node, 'keystone-test-user')} --tenant-id $KEYSTONE_ADMIN_TENANT_ID --pass  #{Bcpc::OSHelper.get_config(node, 'keystone-test-password')} --enabled true
   EOH
-  only_if ". /root/keystonerc; . /root/adminrc; keystone user-get #{get_config('keystone-test-user')} 2>&1 | grep -e '^No user'"
+  only_if ". /root/keystonerc; . /root/adminrc; keystone user-get #{Bcpc::OSHelper.get_config(node, 'keystone-test-user')} 2>&1 | grep -e '^No user'"
 end
