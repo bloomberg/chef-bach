@@ -1,4 +1,5 @@
 include_recipe 'bcpc-hadoop::hadoop_config'
+include_recipe 'bcpc-hadoop::hive_config'
 
 %w{hadoop-yarn-nodemanager
    hadoop-hdfs-datanode
