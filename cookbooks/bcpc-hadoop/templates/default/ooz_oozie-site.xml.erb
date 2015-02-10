@@ -121,6 +121,14 @@
     </property>
 
     <property>
+      <name>oozie.base.url</name>
+      <value>http://<%=node[:bcpc][:management][:vip]%>:11000/oozie</value>
+      <description>
+        http url to access Oozie
+      </description>
+    </property>
+
+    <property>
       <name>oozie.service.JPAService.jdbc.driver</name>
       <value>com.mysql.jdbc.Driver</value>
       <description>
@@ -132,8 +140,9 @@
       <name>oozie.service.JPAService.jdbc.url</name>
       <!-- XXX for some reason, this works for hive metastore, but breaks oozie with an error 
           "No Database Selected"  just connecting to localhost instead 
-       <value>jdbc:mysql:loadbalance://<%=@mysql_hosts.join(',')%>/oozie?loadBalanceBlacklistTimeout=5000</value>  -->
-      <value>jdbc:mysql://<%=node[:hostname]%>/oozie</value>
+       <value>jdbc:mysql:loadbalance://<%=@mysql_hosts.join(',')%>/oozie?loadBalanceBlacklistTimeout=5000</value>  
+      <value>jdbc:mysql://<%=node[:hostname]%>/oozie</value> -->
+      <value>jdbc:mysql://<%=node[:bcpc][:management][:vip]%>:3306/oozie</value>
       <description>
         JDBC URL.
       </description>
