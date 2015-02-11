@@ -120,6 +120,7 @@
       </description>
     </property>
 
+    <% if @ooz_hosts.length >= 2 %>
     <property>
       <name>oozie.base.url</name>
       <value>http://<%=node[:bcpc][:management][:vip]%>:11000/oozie</value>
@@ -127,6 +128,7 @@
         http url to access Oozie
       </description>
     </property>
+    <% end %>
 
     <property>
       <name>oozie.service.JPAService.jdbc.driver</name>

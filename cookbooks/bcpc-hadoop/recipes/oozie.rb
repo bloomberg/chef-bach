@@ -92,14 +92,21 @@ end
 #
 bash "oozie_update_shared_libs" do
   share_dir_url="#{HDFS_URL}/user/oozie/share/"
-  #code "#{OOZIE_LIB_PATH}/bin/oozie-setup.sh sharelib update -fs #{HDFS_URL}"
-  code "#{OOZIE_CLIENT_PATH}/bin/oozie-setup.sh sharelib update -fs #{HDFS_URL}"
+  code "#{OOZIE_CLIENT_PATH}/bin/oozie-setup.sh sharelib create -fs #{HDFS_URL} -locallib /usr/hdp/current/oozie-client/share"
   user "oozie"
-  not_if { require 'time'
-           hdfs_mtime=`hdfs dfs -stat #{share_dir_url}`.strip
-           Time.parse("#{hdfs_mtime} UTC") >
-           File.mtime("#{OOZIE_CLIENT_PATH}/oozie-sharelib.tar.gz") }
+  not_if "hdfs dfs -test -d #{HDFS_URL}/user/oozie/share/lib", :user => "hdfs"
 end
+
+#bash "oozie_update_shared_libs" do
+#  share_dir_url="#{HDFS_URL}/user/oozie/share/"
+  #code "#{OOZIE_LIB_PATH}/bin/oozie-setup.sh sharelib update -fs #{HDFS_URL}"
+#  code "#{OOZIE_CLIENT_PATH}/bin/oozie-setup.sh sharelib update -fs #{HDFS_URL}"
+#  user "oozie"
+#  not_if { require 'time'
+#           hdfs_mtime=`hdfs dfs -stat #{share_dir_url}`.strip
+#           Time.parse("#{hdfs_mtime} UTC") >
+#           File.mtime("#{OOZIE_CLIENT_PATH}/oozie-sharelib.tar.gz") }
+#end
 
 directory "/etc/oozie/conf.#{node.chef_environment}/action-conf" do
   owner "root"

@@ -36,6 +36,7 @@ end
     mode 0644
     variables(:mysql_hosts => node[:bcpc][:hadoop][:mysql_hosts].map{ |m| m[:hostname] },
               :zk_hosts => node[:bcpc][:hadoop][:zookeeper][:servers],
+              :ooz_hosts => node[:bcpc][:hadoop][:oozie_hosts],
               :hive_hosts => node[:bcpc][:hadoop][:hive_hosts])
   end
 end
