@@ -18,6 +18,7 @@ hbase
 hbase-master
 hbase-thrift
 libsnappy1
+phoenix
 }.each do |p|
   package p do
     action :install

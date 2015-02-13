@@ -56,4 +56,17 @@
     <name>hbase.master.dns.nameserver</name>
     <value><%= @dns_server %></value> 
   </property>
+  <property>
+    <name>hbase.defaults.for.version.skip</name>
+    <value>true</value>
+  </property>
+  <property>
+    <name>hbase.regionserver.wal.codec</name>
+    <value>org.apache.hadoop.hbase.regionserver.wal.IndexedWALEditCodec</value>
+  </property>
+  <property>
+    <name>hbase.region.server.rpc.scheduler.factory.class</name>
+    <value>org.apache.phoenix.hbase.index.ipc.PhoenixIndexRpcSchedulerFactory</value>
+    <description>Factory to create the Phoenix RPC Scheduler that knows to put index updates into index queues</description>
+  </property>
 </configuration>

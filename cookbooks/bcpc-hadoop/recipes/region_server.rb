@@ -10,7 +10,7 @@ node.default['bcpc']['hadoop']['copylog']['region_server_out'] = {
     'docopy' => true
 }
 
-%w{hbase-regionserver libsnappy1}.each do |pkg|
+%w{hbase-regionserver libsnappy1 phoenix}.each do |pkg|
   package pkg do
     action :install
   end
