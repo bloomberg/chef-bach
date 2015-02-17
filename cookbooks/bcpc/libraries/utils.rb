@@ -155,7 +155,12 @@ def get_req_node_attributes(node_objects,srch_keys)
   node_objects.each do |obj|
     temp = Hash.new
     srch_keys.each do |name, key|
-      val = key.split('.').reduce(obj) {|memo, key| memo[key]}
+      begin
+        val = key.split('.').reduce(obj) {|memo, key| memo[key]}
+      rescue NoMethodError
+        Chef::Log.fatal "Node #{obj} does not have key #{key}!"
+        raise
+      end
       temp[name] = val
     end
     result.push(temp)
