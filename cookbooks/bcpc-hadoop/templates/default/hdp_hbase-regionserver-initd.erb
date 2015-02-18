@@ -204,7 +204,7 @@ multi_hbase_daemon() {
         HBASE_MULTI_ARGS="-D hbase.regionserver.port=`expr ${FIRST_PORT} + $OFFSET` \
                           -D hbase.regionserver.info.port=`expr ${FIRST_INFO_PORT} + ${OFFSET}`"
         if [ "x$JMXPORT" != "x" ] ; then
-            HBASE_MULTI_ARGS="${HBASE_MULTI_ARGS} -Dcom.sun.management.jmxremote.port=`expr ${JMXPORT} + ${OFFSET}`"
+            export HBASE_${UPPERCASE_HBASE_DAEMON}_OPTS="`eval '$'HBASE_${UPPERCASE_HBASE_DAEMON}_OPTS` -Dcom.sun.management.jmxremote.port=`expr ${JMXPORT} + ${OFFSET}`"
         fi
         hbase_check_pidfile $PID_FILE
         STATUS=$?
