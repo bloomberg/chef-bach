@@ -28,6 +28,10 @@ template "/etc/init.d/hadoop-yarn-nodemanager" do
   mode 0655
 end
 
+link "/usr/hdp/2.2.0.0-2041/hadoop/lib/hadoop-lzo-0.6.0.jar" do
+  to "/usr/lib/hadoop/lib/hadoop-lzo-0.6.0.jar"
+end
+
 link "/usr/lib/hadoop/lib/native/libgplcompression.la" do
   to "/usr/lib/hadoop/lib/native/Linux-amd64-64/libgplcompression.la"
 end
