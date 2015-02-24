@@ -69,3 +69,8 @@ end
 package "openjdk-7-jdk" do
     action :upgrade
 end
+
+dpkg_autostart "hadoop-mapreduce" do
+  allow false
+end
+package "hadoop-mapreduce"

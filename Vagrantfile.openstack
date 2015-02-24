@@ -1,0 +1,177 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+require 'fog'
+require 'json'
+require 'resolv'
+require 'uri'
+require 'vagrant-openstack-plugin'
+
+OS_TENANTNAME=ENV["OS_TENANT_NAME"]
+OS_ENDPOINT=URI.parse(ENV["OS_AUTH_URL"]).host
+
+# load Chef environment
+base_dir = File.expand_path(File.dirname(File.realpath(__FILE__)))
+json_file = Dir[File.join(File.join(base_dir, 'environments'), '*.json')]
+if json_file.empty?
+  puts "No environment file found to parse. Please make sure at least one environment file exists."
+  exit
+end
+if json_file.length > 1
+  puts "More than one environment file found."
+  exit
+end
+
+file_name=File.basename(json_file.join(","))
+chef_env = JSON.parse(File.read(json_file.join(",")))
+
+# get proxy from Chef environment
+proxy_url = chef_env["override_attributes"]["bcpc"]["bootstrap"]["proxy"]
+
+# verify we have a domain name for the OS_AUTH_URL
+raise ArgumentError, "Need OS_AUTH_URL (#{OS_ENDPOINT}) to be the hostname and DNS domain of the OpenStack cluster VMs -- not an IP" if Resolv.getaddress(OS_ENDPOINT) == OS_ENDPOINT
+
+# ensure we have a ssh private key and authorized_keys in the vagrant_ssh directory
+raise ArgumentError, "Need a vagrant_ssh/id_rsa file to run" unless File.exists?("vagrant_ssh/id_rsa")
+`ssh-keygen -y -f vagrant_ssh/id_rsa > vagrant_ssh/authorized_keys` unless File.exists?("vagrant_ssh/authorized_keys")
+
+# instead of doing :auto for floats which would require DNS lookups to build a cluster.txt
+# simply require the user to provide them here
+FLOATING_IPS=["1.2.3.4", "1.2.3.5", "1.2.3.6", "1.2.3.7"]
+
+# optional cluster name if running multiple clusters in a tenancy
+# needs to be a valid ruby symbol name (e.g. no hypens, underscores)
+CLUSTER_NAME=""
+
+# cluster disk size
+DISK_SIZE=10
+
+# these rules come from bcpc::powerdns SQL function dns_name
+def munge_domainname(domainname)
+  return domainname.downcase.
+         gsub('&', 'and').
+         gsub('_','-').
+         gsub(' ','-').
+         gsub('.','-')
+end
+
+# Vagrantfile API/syntax version. Don't touch unless you know what you're doing!
+VAGRANTFILE_API_VERSION = "2"
+
+Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+  # All Vagrant configuration is done here. The most common configuration
+  # options are documented and commented below. For a complete reference,
+  # please see the online documentation at vagrantup.com.
+  config.vm.synced_folder "vagrant_ssh", "/home/ubuntu/.ssh/", type: "rsync"
+
+  vm_settings = Proc.new { |os|
+     os.username     = ENV["OS_USERNAME"]          # e.g. "#{ENV['OS_USERNAME']}"
+     os.api_key      = ENV["OS_PASSWORD"]           # e.g. "#{ENV['OS_PASSWORD']}"
+     os.flavor       = /r1.large/                # Regex or String
+     os.image        = /Ubuntu 12.04.2 LTS/                 # Regex or String
+     os.endpoint     = "https://#{OS_ENDPOINT}:5000/v2.0/tokens"      # e.g. "#{ENV['OS_AUTH_URL']}/tokens"
+     os.keypair_name = "Vagrant-Test"      # as stored in Nova
+     os.ssh_username = "ubuntu"           # login for the VM
+
+     os.security_groups    = ['Hadoop-Security-Group']    # optional
+     os.tenant             = OS_TENANTNAME
+  }
+
+  (1...FLOATING_IPS.length()).each do |num|
+    config.vm.define "#{CLUSTER_NAME}bcpc#{num}".to_sym do |vm|
+      hostname="#{CLUSTER_NAME}bcpc-#{num}"
+      vm.ssh.private_key_path = "vagrant_ssh/id_rsa"
+
+      # Every Vagrant virtual environment requires a box to build off of
+      vm.vm.box = "dummy"
+      vm.vm.hostname = "#{hostname}.#{munge_domainname(OS_TENANTNAME)}.#{OS_ENDPOINT}"
+      vm.vm.provider :openstack do |os|
+       vm_settings.call(os)
+       os.server_name = hostname
+       os.floating_ip = FLOATING_IPS[num]
+       os.disks = [{"name" => "#{hostname} disk 1", "description" => "Chef-BCPC Disk", "size" => DISK_SIZE},
+                   {"name" => "#{hostname} disk 2", "description" => "Chef-BCPC Disk", "size" => DISK_SIZE}]
+      end
+      vm.vm.provision :shell, :inline => "echo 'Acquire::http::Proxy \"#{proxy_url}\";' >> /etc/apt/apt.conf" if proxy_url
+
+      # Volume attachment is inconsistent on first boot, so reboot before Chefing is tried
+      vm.vm.provision :shell, :inline => "reboot"
+    end
+  end
+
+  config.vm.define "#{CLUSTER_NAME}bcpcchef".to_sym, primary: true, autostart: false  do |bcpcchef|
+    hostname="#{CLUSTER_NAME}bcpc-chef"
+    bcpcchef.ssh.private_key_path = "vagrant_ssh/id_rsa"
+
+    openstack_compute = Fog::Compute.new({:provider           => :openstack,
+                                          :connection_options => { :ssl_verify_peer => false },
+                                          :openstack_username => ENV["OS_USERNAME"],
+                                          :openstack_api_key  => ENV["OS_PASSWORD"],
+                                          :openstack_auth_url => "https://#{OS_ENDPOINT}:5000/v2.0/tokens",
+                                          :openstack_tenant   => OS_TENANTNAME
+                                          })
+
+    machines = openstack_compute.servers.all( :name => "#{CLUSTER_NAME}bcpc-1" )
+    id = machines.first.id if machines.length() == 1
+    # Set a bogus address incase we do not have a bcpc-1 VM at this time
+    vm1_fixed_ip = "## DID NOT FIND #{CLUSTER_NAME}bcpc-1 VM ##"
+    if not id
+      nil
+      puts "Unable to find host #{CLUSTER_NAME}bcpc-1 found #{machines.length()} matches"
+    else
+      ips = openstack_compute.servers.get(id).private_ip_addresses
+      if not ips.length() == 1
+        nil
+        puts "Unable to find IP for #{CLUSTER_NAME}bcpc-#{idx} found #{ips.length()} IPs"
+      end
+      vm1_fixed_ip = ips.first
+    end
+
+    # Every Vagrant virtual environment requires a box to build off of.
+    bcpcchef.vm.box = "dummy"
+    fqdn = "#{hostname}.#{munge_domainname(OS_TENANTNAME)}.#{OS_ENDPOINT}"
+    raise ArgumentError, "hostnames longer than 64 characters not permitted per https://docs.getchef.com/server_security.html\nTrying: #{fqdn}" if fqdn.length > 64
+    bcpcchef.vm.hostname = fqdn
+    bcpcchef.vm.provider :openstack do |os|
+     vm_settings.call(os)
+     os.server_name = hostname
+     os.floating_ip = FLOATING_IPS[0]
+     os.flavor = /m1.medium/
+    end
+
+    # spoof having a vagrant homedir
+    bcpcchef.vm.provision :shell, :inline => "ln -s /home/ubuntu /home/vagrant ; ln -s /vagrant /home/ubuntu/chef-bcpc ; chown -R ubuntu /home/ubuntu/" 
+    # clean up /etc/hosts to have correct IP address
+    bcpcchef.vm.provision :shell, :inline => "sed -i \"s/127.0.1.1/\$(ip addr show dev eth0 scope global |grep 'inet '|sed -e 's/.* inet //' -e 's#/.*##'|tail -1)/\" /etc/hosts"
+    # clean up Chef environment to have correct IP address for bootstrap server, float and mgmt VIPs
+    bcpcchef.vm.provision :shell, :privileged => false, :inline => "sed -i \"s/10.0.100.3/\$(ip addr show dev eth0 scope global |grep 'inet '|sed -e 's/.* inet //' -e 's#/.*##'|tail -1)/\" chef-bcpc/environments/Test-Laptop.json"
+    bcpcchef.vm.provision :shell, :privileged => false, :inline => "sed -i -e \"s/\\(10.0.100.5\\|192.168.100.5\\)/#{vm1_fixed_ip}/\" chef-bcpc/environments/Test-Laptop.json"
+    # set correct domain name in environment
+    bcpcchef.vm.provision :shell, :privileged => false, :inline => "sed -i -e 's/\"bcpc\"[ ]*:[ ]*{/\"bcpc\": {\\n\"domain_name\": \"#{munge_domainname(OS_TENANTNAME)}.#{OS_ENDPOINT}\",/' chef-bcpc/environments/Test-Laptop.json"
+    # build required binaries
+    bcpcchef.vm.provision :shell, :inline => "cd chef-bcpc && source proxy_setup.sh && sudo -E ./build_bins.sh"
+    # bootstrap the chef server
+    bcpcchef.vm.provision :shell, :privileged => false, :inline => "cd chef-bcpc && source proxy_setup.sh && ln -s /bin/true rsync; export PATH=.:${PATH} ; ./bootstrap_chef.sh --vagrant-local \$(ip addr show dev eth0 scope global | grep 'inet '|sed -e 's/.* inet //' -e 's#/.*##'|tail -1)" 
+
+    roles = ["role[BCPC-OpenStack-Client],role[BCPC-Hadoop-Head-Namenode-NoHA],role[BCPC-Hadoop-Head-HBase]",
+             "role[BCPC-OpenStack-Client],role[BCPC-Hadoop-Head-Namenode-Standby],role[BCPC-Hadoop-Head-MapReduce],role[BCPC-Hadoop-Head-Hive]",
+             "role[BCPC-OpenStack-Client],role[BCPC-Hadoop-Worker]"]
+    cluster_txt = ""
+    cluster_txt_contents = (1...FLOATING_IPS.length()).map do |idx|
+      # Create each line of cluster.txt. Pick each role taking the last role as the "generic" role
+      ["#{CLUSTER_NAME}bcpc-#{idx}", "-", FLOATING_IPS[idx], "-", "-", "#{munge_domainname(OS_TENANTNAME)}.#{OS_ENDPOINT}", roles[[idx-1, roles.length()].min()]].join("\t")
+    end
+
+    build_cluster_txt = <<-EOH
+    cd chef-bcpc
+    rm cluster.txt
+    echo "#{cluster_txt_contents.join("\n")}" > cluster.txt
+    ./cluster-assign-roles.sh Test-Laptop hadoop
+    EOH
+
+    bcpcchef.vm.provision :shell, :keep_color => false, :privileged => false, :inline => "#{build_cluster_txt}"
+  end
+
+  config.ca_certificates.enabled = false
+  config.ca_certificates.certs = [ ]
+
+end

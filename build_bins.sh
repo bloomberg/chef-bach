@@ -280,8 +280,9 @@ chmod -R 755 .
 # "/usr/bin/pip install: error: no such option: --no-use-wheel"
 if ! hash dir2pi; then
   /usr/bin/pip install pip2pi || /bin/true
-  /usr/local/bin/pip install setuptools --no-use-wheel --upgrade
-  /usr/local/bin/pip install pip2pi
+  /usr/local/bin/pip --cert /etc/ssl/certs/ca-certificates.crt install setuptools --no-use-wheel --upgrade
+  /usr/local/bin/pip --cert /etc/ssl/certs/ca-certificates.crt install pip2pi
+  hash -p /usr/local/bin/dir2pi dir2pi
 fi
 
 dir2pi python

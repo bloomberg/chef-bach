@@ -118,110 +118,93 @@ end
 bash "setup-interfaces-source" do
   user "root"
   code <<-EOH
-    echo "source /etc/network/interfaces.d/iface-*" >> /etc/network/interfaces
+    echo "source /etc/network/interfaces.d/*.cfg" >> /etc/network/interfaces
   EOH
-  not_if "grep '^source /etc/network/interfaces.d/' /etc/network/interfaces"
+  not_if "grep '^source /etc/network/interfaces.d/\*.cfg' /etc/network/interfaces"
 end
 
-template "/etc/network/interfaces.d/iface-#{node[:bcpc][:management][:interface]}" do
-  source "network.iface.erb"
-  owner "root"
-  group "root"
-  mode 00644
-  variables(
-    :interface => node[:bcpc][:management][:interface],
-    :ip => node[:bcpc][:management][:ip],
-    :netmask => node[:bcpc][:management][:netmask],
-    :gateway => node[:bcpc][:management][:gateway],
-    :metric => 100
-  )
+# set up the DNS resolvers
+# we want the VIP which will be running powerdns to be first on the list
+# but the first entry in our master list is also the only one in pdns,
+# so make that the last entry to minimize double failures when upstream dies.
+resolvers=node[:bcpc][:dns_servers].dup
+if node[:bcpc][:management][:vip] and get_nodes_for("powerdns").length() > 0
+  resolvers.push resolvers.shift
+  resolvers.unshift node[:bcpc][:management][:vip]
 end
 
+bash "update resolvers" do
+  code <<-EOH
+  echo "#{(resolvers.map{|r| 'nameserver #{r}'} + ['search #{node[:bcpc][:domain_name]}']).join('\n')}" | resolvconf -a #{node[:bcpc][:management][:interface]}.inet
+  EOH
+end
+
+ifaces = %w{ management storage floating }
+ifaces.each_index do |i|
+  iface = ifaces[i]
+  next if iface != "management" and \
+      node[:bcpc][:management][:interface] == node[:bcpc][iface][:interface]
+  template "/etc/network/interfaces.d/#{node[:bcpc][iface][:interface]}.cfg" do
+    source "network.iface.erb"
+    owner "root"
+    group "root"
+    mode 00644
+    variables(
+      :interface => node[:bcpc][iface][:interface],
+      :ip => node[:bcpc][iface][:ip],
+      :netmask => node[:bcpc][iface][:netmask],
+      :gateway => node[:bcpc][iface][:gateway],
+      :dns => resolvers,
+      :metric => i*100
+    )
+  end
+    
+  bash "#{iface} up" do
+    code <<-EOH
+      ifup #{node[:bcpc][iface][:interface]}
+    EOH
+    not_if "ip link show up | grep #{node[:bcpc][iface][:interface]}"
+  end
+end
+
+bash "interface-mgmt-make-static-if-dhcp" do
+  user "root"
+  code <<-EOH
+  sed --in-place '/\\(.*#{node[:bcpc][:management][:interface]}.*\\)/d' /etc/network/interfaces
+  resolvconf -d #{node[:bcpc][:management][:interface]}.dhclient
+  pkill -u root dhclient
+  EOH
+  only_if "cat /etc/network/interfaces | grep #{node[:bcpc][:management][:interface]} | grep dhcp"
+end
+
+# only run routing scripts if we have more than one interface
 if node[:bcpc][:floating][:interface] != node[:bcpc][:management][:interface]
-    template "/etc/network/interfaces.d/iface-#{node[:bcpc][:storage][:interface]}" do
-      source "network.iface.erb"
-      owner "root"
-      group "root"
-      mode 00644
-      variables(
-        :interface => node[:bcpc][:storage][:interface],
-        :ip => node[:bcpc][:storage][:ip],
-        :netmask => node[:bcpc][:storage][:netmask],
-        :gateway => node[:bcpc][:storage][:gateway],
-        :metric => 300
-      )
-    end
-    
-    # set up the DNS resolvers
-    # we want the VIP which will be running powerdns to be first on the list
-    # but the first entry in our master list is also the only one in pdns,
-    # so make that the last entry to minimize double failures when upstream dies.
-    resolvers=node[:bcpc][:dns_servers].dup
-    if node[:bcpc][:management][:vip] and get_nodes_for("powerdns").length() > 0
-      resolvers.push resolvers.shift
-      resolvers.unshift node[:bcpc][:management][:vip]
-    end
-    
-    template "/etc/network/interfaces.d/iface-#{node[:bcpc][:floating][:interface]}" do
-      source "network.iface.erb"
-      owner "root"
-      group "root"
-      mode 00644
-      variables(
-        :interface => node[:bcpc][:floating][:interface],
-        :ip => node[:bcpc][:floating][:ip],
-        :netmask => node[:bcpc][:floating][:netmask],
-        :gateway => node[:bcpc][:floating][:gateway],
-        :dns => resolvers,
-        :metric => 200
-      )
-    end
-    
-    bash "interface-mgmt-make-static-if-dhcp" do
-        user "root"
-        code <<-EOH
-        sed --in-place '/\\(.*#{node[:bcpc][:management][:interface]}.*\\)/d' /etc/network/interfaces
-        resolvconf -d #{node[:bcpc][:management][:interface]}.dhclient
-        EOH
-        only_if "cat /etc/network/interfaces | grep #{node[:bcpc][:management][:interface]} | grep dhcp"
-    end
-    
-    %w{ management storage floating }.each do |iface|
-      bash "#{iface} up" do
-        user "root"
-        code <<-EOH
-          ifup #{node[:bcpc][iface][:interface]}
-        EOH
-        not_if "ip link show up | grep #{node[:bcpc][iface][:interface]}"
-      end
-    end
-    
-    bash "routing-management" do
-        user "root"
-        code "echo '1 mgmt' >> /etc/iproute2/rt_tables"
-        not_if "grep -e '^1 mgmt' /etc/iproute2/rt_tables"
-    end
-    
-    bash "routing-storage" do
-        user "root"
-        code "echo '2 storage' >> /etc/iproute2/rt_tables"
-        not_if "grep -e '^2 storage' /etc/iproute2/rt_tables"
-    end
-    
-    template "/etc/network/if-up.d/bcpc-routing" do
-        mode 00775
-        source "bcpc-routing.erb"
-        notifies :run, "execute[run-routing-script-once]", :immediately
-    end
-    
-    execute "run-routing-script-once" do
-        action :nothing
-        command "/etc/network/if-up.d/bcpc-routing"
-    end
-    
-    bash "disable-noninteractive-pam-logging" do
-        user "root"
-        code "sed --in-place 's/^\\(session\\s*required\\s*pam_unix.so\\)/#\\1/' /etc/pam.d/common-session-noninteractive"
-        only_if "grep -e '^session\\s*required\\s*pam_unix.so' /etc/pam.d/common-session-noninteractive"
-    end
+  bash "routing-management" do
+    user "root"
+    code "echo '1 mgmt' >> /etc/iproute2/rt_tables"
+    not_if "grep -e '^1 mgmt' /etc/iproute2/rt_tables"
+  end
+  
+  bash "routing-storage" do
+    user "root"
+    code "echo '2 storage' >> /etc/iproute2/rt_tables"
+    not_if "grep -e '^2 storage' /etc/iproute2/rt_tables"
+  end
+  
+  template "/etc/network/if-up.d/bcpc-routing" do
+    mode 00775
+    source "bcpc-routing.erb"
+    notifies :run, "execute[run-routing-script-once]", :immediately
+  end
+  
+  execute "run-routing-script-once" do
+    action :nothing
+    command "/etc/network/if-up.d/bcpc-routing"
+  end
+end
+
+bash "disable-noninteractive-pam-logging" do
+  user "root"
+  code "sed --in-place 's/^\\(session\\s*required\\s*pam_unix.so\\)/#\\1/' /etc/pam.d/common-session-noninteractive"
+  only_if "grep -e '^session\\s*required\\s*pam_unix.so' /etc/pam.d/common-session-noninteractive"
 end

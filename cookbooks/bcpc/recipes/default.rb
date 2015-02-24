@@ -25,10 +25,14 @@ ifs=node[:network][:interfaces].keys
 # create a hash of ipaddresses
 ips= ifs.map{|a|node[:network][:interfaces][a][:addresses]}.reduce({}, :merge)
 
-# select the first IP address which is on the management network
+# select the fixed IP if we are on OpenStack
+node.set['bcpc']['management']['ip'] = node['openstack']['local_ipv4'] if node['openstack']['local_ipv4']
+
+# select the first IP address which is on the management network skip the VIP if we have more
+# than one address
 node.set['bcpc']['management']['ip'] = ips.select {|ip,v| v['family'] == "inet" and
                                                    ip != node['bcpc']['management']['vip'] and
-                                                   mgmt_cidr===ip}.first[0]
+                                                   mgmt_cidr===ip}.first[0] if not node['bcpc']['management']['ip']
 
 mgmt_bitlen = (node['bcpc']['management']['cidr'].match /\d+\.\d+\.\d+\.\d+\/(\d+)/)[1].to_i
 mgmt_hostaddr = IPAddr.new(node['bcpc']['management']['ip'])<<mgmt_bitlen>>mgmt_bitlen

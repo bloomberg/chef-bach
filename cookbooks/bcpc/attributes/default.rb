@@ -25,6 +25,8 @@ default['bcpc']['encrypt_data_bag'] = false
 default['bcpc']['bootstrap']['preseed']['late_command'] = "true"
 
 default['bcpc']['bootstrap']['admin_users'] = []
+default['bcpc']['bootstrap']['admin']['user'] = "vagrant"
+default['bcpc']['bootstrap']['admin']['group'] = "vagrant"
 
 ###########################################
 #

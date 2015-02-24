@@ -19,11 +19,14 @@
 
 include_recipe "bcpc::default"
 
+admin_user = node[:bcpc][:bootstrap][:admin][:user]
+admin_group = node[:bcpc][:bootstrap][:admin][:group]
+
 node[:bcpc][:bootstrap][:admin_users].each do |user_name|
   user user_name do
     action :create
     home "/home/#{user_name}"
-    group 'vagrant'
+    group admin_group
     supports :manage_home => true
   end
   bash 'set group permission on homedir' do
@@ -33,33 +36,33 @@ end
 
 sudo 'cluster-interaction' do
   user      node[:bcpc][:bootstrap][:admin_users] * ','
-  runas     'vagrant'
-  commands  ['/home/vagrant/chef-bcpc/cluster-assign-roles.sh','/home/vagrant/chef-bcpc/nodessh.sh','/usr/bin/knife']
+  runas     admin_user
+  commands  ["/home/#{admin_user}/chef-bcpc/cluster-assign-roles.sh","/home/#{admin_user}/chef-bcpc/nodessh.sh","/usr/bin/knife"]
   only_if { node[:bcpc][:bootstrap][:admin_users].length >= 1 }
 end
 
 bash 'create repo' do
-  user 'vagrant'
-  code 'git clone --bare /home/vagrant/chef-bcpc /home/vagrant/chef-bcpc-repo && cd /home/vagrant/chef-bcpc-repo && git config core.sharedRepository true'
-  not_if { File.exists?('/home/vagrant/chef-bcpc-repo') }
+  user admin_user
+  code "git clone --bare /home/#{admin_user}/chef-bcpc /home/#{admin_user}/chef-bcpc-repo && cd /home/#{admin_user}/chef-bcpc-repo && git config core.sharedRepository true"
+  not_if { File.exists?("/home/#{admin_user}/chef-bcpc-repo") }
 end
 
 bash 'set repo as origin' do
-  user 'vagrant'
-  cwd '/home/vagrant/chef-bcpc/'
-  code 'git remote add local /home/vagrant/chef-bcpc-repo'
-  not_if 'git remote -v |grep -q "^local	"', :cwd => '/home/vagrant/chef-bcpc/'
+  user admin_user
+  cwd "/home/#{admin_user}/chef-bcpc/"
+  code "git remote add local /home/#{admin_user}/chef-bcpc-repo"
+  not_if 'git remote -v |grep -q "^local	"', :cwd => "/home/#{admin_user}/chef-bcpc/"
 end
 
 package 'acl'
 
 bash 'Update chef-bcpc-repo rights' do
-  code 'setfacl -R -m g:vagrant:rwX /home/vagrant/chef-bcpc-repo; find /home/vagrant/chef-bcpc-repo -type d | xargs setfacl -R -m d:g:vagrant:rwX'
+  code "setfacl -R -m g:#{admin_group}:rwX /home/#{admin_user}/chef-bcpc-repo; find /home/#{admin_user}/chef-bcpc-repo -type d | xargs setfacl -R -m d:g:#{admin_group}:rwX"
 end
 
 cron 'synchronize chef' do
-  user  'vagrant'
-  home '/home/vagrant'
+  user admin_user
+  home "/home/#{admin_user}"
   command "cd ~/chef-bcpc; git pull local master; knife role from file roles/*.json; knife cookbook upload -a; knife environment from file environments/#{node.chef_environment}.json"
 end
 
