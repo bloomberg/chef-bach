@@ -99,7 +99,7 @@
 
 <property>
   <name>hive.metastore.warehouse.dir</name>
-  <value><%= "hdfs://#{node.chef_environment}/user/hive/warehouse" %></value>
+  <value><%= "#{node['bcpc']['hadoop']['hdfs_url']}/user/hive/warehouse" %></value>
 </property>
 
 <property>

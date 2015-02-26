@@ -1,5 +1,18 @@
 include_recipe 'bcpc-hadoop::hbase_config'
 
+#
+# Updating node attributes to copy HBase master log file to centralized location (HDFS)
+#
+node.default['bcpc']['hadoop']['copylog']['hbase_master'] = {
+    'logfile' => "/var/log/hbase/hbase-hbase-master-#{node.hostname}.log",
+    'docopy' => true
+}
+
+node.default['bcpc']['hadoop']['copylog']['hbase_master_out'] = {
+    'logfile' => "/var/log/hbase/hbase-hbase-master-#{node.hostname}.out",
+    'docopy' => true
+}
+
 %w{
 hbase
 hbase-master
