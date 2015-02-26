@@ -36,7 +36,7 @@ $SEDINPLACE 's/vb.gui = true/vb.gui = false/' Vagrantfile
 
 # setup environment file
 $SEDINPLACE "s/\"dns_servers\" : \[ \"8.8.8.8\", \"8.8.4.4\" \]/\"dns_servers\" : \[ $DNS_SERVERS \]/" environments/${ENVIRONMENT}.json
-[[ -n "$PROXY" ]] && $SEDINPLACE "s#\(\"bootstrap\": {\)#\1\n\"proxy\" : \"http://$PROXY\",\n#" environments/${ENVIRONMENT}.json
+[[ -n "$PROXY" ]] && $SEDINPLACE -e "s#\(\"bootstrap\": {\)#\1\\\n\"proxy\" : \"http://$PROXY\",#" -e $'s/\\\\n/\\\n/' environments/${ENVIRONMENT}.json
 
 printf "#### Setup VB's and Bootstrap\n"
 source ./vbox_create.sh
