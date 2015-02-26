@@ -15,6 +15,7 @@
     "recipe[bcpc-hadoop::region_server]",
     "recipe[bcpc-hadoop::pig]",
     "recipe[bcpc-hadoop::mahout]",
+    "recipe[bcpc-hadoop::oozie_client]",
     "recipe[bcpc::zabbix-work]",
     "recipe[bcpc::diamond]",
     "recipe[bcpc_jmxtrans]"
