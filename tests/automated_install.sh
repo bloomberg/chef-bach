@@ -76,10 +76,8 @@ printf "Snapshotting post-Cobbler\n"
 printf "#### Chef all the nodes\n"
 vagrant ssh -c "sudo apt-get install -y sshpass"
 
-for i in 1 2 3; do
-  printf "#### Chef machine bcpc-vm${i}\n"
-  vagrant ssh -c "cd chef-bcpc; ./cluster-assign-roles.sh $ENVIRONMENT Hadoop bcpc-vm$i"
-done
+printf "#### Chef machine bcpc-vms\n"
+vagrant ssh -c "cd chef-bcpc; ./cluster-assign-roles.sh $ENVIRONMENT Hadoop"
 
 printf "Snapshotting post-Cobbler\n"
 VBoxManage snapshot bcpc-vm1 take Full-Shoes
