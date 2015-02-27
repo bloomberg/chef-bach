@@ -1,4 +1,5 @@
 include_recipe 'bcpc-hadoop::hadoop_config'
+include_recipe 'bcpc-hadoop::hive_config'
 
 node.default['bcpc']['hadoop']['copylog']['datanode'] = {
     'logfile' => "/var/log/hadoop-hdfs/hadoop-hdfs-datanode-#{node.hostname}.log",
