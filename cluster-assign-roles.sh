@@ -221,17 +221,19 @@ function kafka_install {
     local fqdn="${BASH_REMATCH[3]}"
     sudo knife node run_list set $fqdn "$role" $KNIFE_ADMIN &
   done
-  
-  # Making sure that the run_list is updated in solr index and is available for search during chef-client run 
-  num_hosts=$(printf ${hosts// /\\n} | grep -i "BCPC-Kafka-Head-Zookeeper" | wc -l)
-  while true; do
-    printf "Waiting for Chef Solr to update\n"
-    sleep 0.5
-    [[ $num_hosts -eq $(sudo knife search node "role:BCPC-Kafka-Head-Zookeeper" $KNIFE_ADMIN | grep '^Node Name:' | wc -l) ]] && break
-  done
+ 
+  if printf ${hosts// /\\n} | grep -q "BCPC-Kafka-Head-Zookeeper"; then
+    # Making sure that the run_list is updated in solr index and is available for search during chef-client run 
+    num_hosts=$(printf ${hosts// /\\n} | grep -i "BCPC-Kafka-Head-Zookeeper" | wc -l)
+    while true; do
+      printf "Waiting for Chef Solr to update\n"
+      sleep 0.5
+      [[ $num_hosts -eq $(sudo knife search node "role:BCPC-Kafka-Head-Zookeeper" $KNIFE_ADMIN | grep '^Node Name:' | wc -l) ]] && break
+    done
 
-  printf "Installing kafka zookeeper heads...\n"
-  install_machines $(printf ${hosts// /\\n} | grep -i "BCPC-Kafka-Head-Zookeeper" | sort)
+    printf "Installing kafka zookeeper heads...\n"
+    install_machines $(printf ${hosts// /\\n} | grep -i "BCPC-Kafka-Head-Zookeeper" | sort)
+  fi
 
   printf "Installing kafka server heads...\n"
   install_machines $(printf ${hosts// /\\n} | grep -i "BCPC-Kafka-Head-Server" | sort)
