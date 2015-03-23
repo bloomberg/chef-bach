@@ -160,3 +160,13 @@ default[:bcpc][:graphite][:carbon][:storage] = {
   "default"=>{ "pattern" =>".*", "retentions" => "15s:7d,1m:30d,5m:90d" },
   "hbase"=>{ "pattern" => "^jmx\\.hbase_rs\\.*\\.hb*\\.", "retentions" => "15s:15d" } 
 }
+
+#################################################
+#  attributes for chef vault download and install
+#################################################
+default['bcpc']['chefvault']['filename'] = "chef-vault-2.2.4.gem"
+default['bcpc']['chefvault']['checksum'] = "8d89c96554f614ec2a80ef20e98b0574c355a6ea119a30bd49aa9cfdcde15b4a"
+# gems package pathname
+default['bcpc']['bin_dir']['gems'] = '/home/vagrant/chef-bcpc/bins/gems'
+# rubygems download website URL
+default['bcpc']['gem_source'] = 'https://rubygems.org/downloads'
