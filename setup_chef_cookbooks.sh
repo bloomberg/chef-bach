@@ -54,20 +54,3 @@ no_proxy no_proxy_string
 ENV['GIT_SSL_NO_VERIFY'] = 'true'
 File.umask(0007)
 EOF
-cd cookbooks
-
-# allow versions on cookbooks via "cookbook version"
-for cookbook in "apt 2.4.0" python build-essential ubuntu cron "chef-client 3.0.6" ntp yum logrotate yum-epel sysctl chef_handler 7-zip windows ark sudo ulimit pam ohai poise graphite_handler java maven; do
-  if [[ ! -d ${cookbook% *} ]]; then
-     # unless the proxy was defined this knife config will be the same as the one generated above
-    knife cookbook site download $cookbook --config ../.chef/knife.rb
-    tar zxf ${cookbook% *}*.tar.gz
-    rm ${cookbook% *}*.tar.gz
-  fi
-done
-[[ -d dpkg_autostart ]] || git clone https://github.com/hw-cookbooks/dpkg_autostart.git
-if [[ ! -d kafka ]]; then
-  git clone https://github.com/mthssdrbrg/kafka-cookbook.git kafka
-fi
-[[ -d jmxtrans ]] || git clone https://github.com/jmxtrans/jmxtrans-cookbook.git jmxtrans
-[[ -d cobblerd ]] || git clone https://github.com/cbaenziger/cobbler-cookbook.git cobblerd -b cobbler_profile
