@@ -13,9 +13,10 @@ end
 end
 
 %w{hive-hcatalog-server}.each do |s|
-    service s do
-      action [:enable, :start]
-      subscribes :restart, "template[/etc/webhcat/conf/webhcat-site.xml]", :delayed
-      subscribes :restart, "template[/etc/hive/conf/hive-site.xml]", :delayed
-    end
+  service s do
+    action [:enable, :start]
+    supports :status => true, :restart => true, :reload => false
+    subscribes :restart, "template[/etc/webhcat/conf/webhcat-site.xml]", :delayed
+    subscribes :restart, "template[/etc/hive/conf/hive-site.xml]", :delayed
   end
+end

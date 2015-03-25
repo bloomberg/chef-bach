@@ -43,6 +43,7 @@ end
 
 service "hadoop-yarn-resourcemanager" do
   action [:enable, :start]
+  supports :status => true, :restart => true, :reload => false
   subscribes :restart, "template[/etc/hadoop/conf/hadoop-env.sh]", :delayed
   subscribes :restart, "template[/etc/hadoop/conf/yarn-site.xml]", :delayed
 end
