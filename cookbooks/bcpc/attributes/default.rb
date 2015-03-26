@@ -149,6 +149,7 @@ default['bcpc']['keepalived']['config_template'] = "keepalived.conf_openstack"
 default['bcpc']['graphite']['relay_port'] = 2013
 default['bcpc']['graphite']['web_port'] = 8888
 default['bcpc']['graphite']['log']['retention'] = 15
+default['bcpc']['graphite']['timezone'] = "'America/New_York'"
 
 default[:bcpc][:ports][:apache][:radosgw] = 8080
 default[:bcpc][:ports][:apache][:radosgw_https] = 8443
