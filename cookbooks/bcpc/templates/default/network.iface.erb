@@ -4,13 +4,28 @@
 #
 ################################################
 
+<% @slaves.each do |slave| %>
+auto <%= slave %>
+iface <%= slave %> inet manual
+bond-master <%= @interface %>
+<% end %>
+
 auto <%= @interface %>
 iface <%= @interface %> inet static
- address <%= @ip %>
+ address  <%= @ip %>
  netmask <%= @netmask %>
  gateway <%= @gateway %>
  metric <%= @metric %>
-<% if @dns %>
+ <% if @dns %>
  dns-nameservers <%= @dns.join(' ') %>
  dns-search <%="#{node[:bcpc][:domain_name]}"%>
-<% end %>
+ <% end %>
+ <% if @slaves %>
+ bond-mode 4
+ bond-miimon 100
+ bond-lacp-rate 1
+ bond-slaves <%= @slaves.join(" ") %>
+ <% end %>
+ <% if @mtu %>
+ mtu <%= @mtu %>
+ <% end %>
