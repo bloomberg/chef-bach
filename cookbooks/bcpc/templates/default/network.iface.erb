@@ -4,7 +4,7 @@
 #
 ################################################
 
-<% @slaves.each do |slave| %>
+<% (@slaves or []).each do |slave| %>
 auto <%= slave %>
 iface <%= slave %> inet manual
 bond-master <%= @interface %>
@@ -12,7 +12,7 @@ bond-master <%= @interface %>
 
 auto <%= @interface %>
 iface <%= @interface %> inet static
- address  <%= @ip %>
+ address <%= @ip %>
  netmask <%= @netmask %>
  gateway <%= @gateway %>
  metric <%= @metric %>

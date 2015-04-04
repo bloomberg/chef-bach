@@ -98,13 +98,15 @@ bash "enable-mellanox" do
     only_if "lspci | grep Mellanox"
 end
 
-bash "enable-bonding" do
+if ["floating", "storage", "management"].select{|i| node[:bcpc][i].attribute?("slaves")}.any?
+  bash "enable-bonding" do
     user "root"
     code <<-EOH
-        modprobe bonding
-        echo 'bonding' >> /etc/modules
+      modprobe bonding
+      echo 'bonding' >> /etc/modules
     EOH
     not_if "grep -e '^bonding' /etc/modules"
+  end
 end
 
 bash "enable-8021q" do
@@ -126,9 +128,9 @@ end
 bash "setup-interfaces-source" do
   user "root"
   code <<-EOH
-    echo "source /etc/network/interfaces.d/iface-*" >> /etc/network/interfaces
+    echo "source /etc/network/interfaces.d/*.cfg" >> /etc/network/interfaces
   EOH
-  not_if "grep '^source /etc/network/interfaces.d/' /etc/network/interfaces"
+  not_if "grep '^source /etc/network/interfaces.d/\*.cfg' /etc/network/interfaces"
 end
 
 # set up the DNS resolvers
@@ -163,7 +165,7 @@ ifaces.each_index do |i|
       :ip => node[:bcpc][iface][:ip],
       :netmask => node[:bcpc][iface][:netmask],
       :gateway => node[:bcpc][iface][:gateway],
-      :slaves => node[:bcpc][iface].has_key("slaves") ? node[:bcpc][iface][:slaves] : False,
+      :slaves => node[:bcpc][iface].attribute?("slaves") ? node[:bcpc][iface][:slaves] : false,
       :dns => resolvers,
       :mtu => node[:bcpc][iface][:mtu],
       :metric => i*100
@@ -172,7 +174,7 @@ ifaces.each_index do |i|
   
   bash "#{iface} up" do
     code <<-EOH
-      ifup #{device_name} #{node[:bcpc][iface].has_key("slaves") and node[:bcpc][iface][:slaves].join(" ")}
+      ifup #{device_name} #{node[:bcpc][iface].attribute?("slaves") and node[:bcpc][iface][:slaves].join(" ")}
     EOH
     not_if "ip link show up | grep #{device_name}"
   end
