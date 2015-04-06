@@ -9,29 +9,32 @@ directory "/disk" do
   action :create
 end
 
-if node[:bcpc][:hadoop][:disks].length > 0 then
-  node[:bcpc][:hadoop][:disks].each_index do |i|
-    directory "/disk/#{i}" do
-      owner "root"
-      group "root"
-      mode 00755
-      action :create
-      recursive true
-    end
+ruby_block "hadoop disks" do
+  block do
+    if node[:bcpc][:hadoop][:disks].length > 0 then
+      node[:bcpc][:hadoop][:disks].each_index do |i|
+        dir = Chef::Resource::Directory.new("/disk/#{i}", run_context)
+        dir.owner "root"
+        dir.group "root"
+        dir.mode 00755
+        dir.recursive true
+        dir.run_action :create
    
-    d = node[:bcpc][:hadoop][:disks][i]
-    execute "mkfs -t xfs -f /dev/#{d}" do
-      not_if "file -s /dev/#{d} | grep -q 'SGI XFS filesystem'"
-    end
- 
-    mount "/disk/#{i}" do
-      device "/dev/#{d}"
-      fstype "xfs"
-      options "noatime,nodiratime,inode64"
-      action [:enable, :mount]
+        d = node[:bcpc][:hadoop][:disks][i]
+        fs = Chef::Resource::Execute.new("mkfs -t xfs -f /dev/#{d}", run_context)
+        fs.not_if(command="file -s /dev/#{d} | grep -q 'SGI XFS filesystem'")
+        fs.run_action :run
+
+        mount = Chef::Resource::Mount.new("/disk/#{i}", run_context)
+        mount.device "/dev/#{d}"
+        mount.fstype "xfs"
+        mount.options "noatime,nodiratime,inode64"
+        mount.run_action :enable
+        mount.run_action :mount
+      end
+      node.set[:bcpc][:hadoop][:mounts] = (0..node[:bcpc][:hadoop][:disks].length-1).to_a
+    else
+      Chef::Application.fatal!('Please specify some node[:bcpc][:hadoop][:disks]!')
     end
   end
-  node.set[:bcpc][:hadoop][:mounts] = (0..node[:bcpc][:hadoop][:disks].length-1).to_a
-else
-  Chef::Application.fatal!('Please specify some node[:bcpc][:hadoop][:disks]!')
 end

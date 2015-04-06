@@ -1,5 +1,20 @@
 include_recipe 'dpkg_autostart'
 include_recipe 'bcpc-hadoop::hadoop_config'
+ruby_block "Create YARN Local Directories" do
+  block do
+    node[:bcpc][:hadoop][:mounts].each_index do |i|
+      ["local", "logs"].each do |d|
+        dir = Chef::Resource::Directory.new("/disk/#{i}/yarn/#{d}", run_context)
+        dir.owner "yarn"
+        dir.group "yarn"
+        dir.mode 00755
+        dir.recursive true
+        dir.run_action :create
+      end
+    end
+  end
+end
+
 node[:bcpc][:hadoop][:mounts].each do |i|
   directory "/disk/#{i}/yarn/local" do
     owner "yarn"

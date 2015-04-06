@@ -32,16 +32,20 @@ hadoop_conf_files = %w{capacity-scheduler.xml
 node[:bcpc][:hadoop][:hdfs][:HA] == true and hadoop_conf_files.insert(-1,"hdfs-site_HA.xml")
 
 hadoop_conf_files.each do |t|
-   template "/etc/hadoop/conf/#{t}" do
-     source "hdp_#{t}.erb"
-     mode 0644
-     variables(:nn_hosts => node[:bcpc][:hadoop][:nn_hosts],
-               :zk_hosts => node[:bcpc][:hadoop][:zookeeper][:servers],
-               :jn_hosts => node[:bcpc][:hadoop][:jn_hosts],
-               :rm_hosts => node[:bcpc][:hadoop][:rm_hosts],
-               :dn_hosts => node[:bcpc][:hadoop][:dn_hosts],
-               :hs_hosts => node[:bcpc][:hadoop][:hs_hosts],
-               :mounts => node[:bcpc][:hadoop][:mounts])
+    template "/etc/hadoop/conf/#{t}" do
+      source "hdp_#{t}.erb"
+      mode 0644
+      variables lazy {
+        {
+          :nn_hosts => node[:bcpc][:hadoop][:nn_hosts],
+          :zk_hosts => node[:bcpc][:hadoop][:zookeeper][:servers],
+          :jn_hosts => node[:bcpc][:hadoop][:jn_hosts],
+          :rm_hosts => node[:bcpc][:hadoop][:rm_hosts],
+          :dn_hosts => node[:bcpc][:hadoop][:dn_hosts],
+          :hs_hosts => node[:bcpc][:hadoop][:hs_hosts],
+          :mounts => node[:bcpc][:hadoop][:mounts]
+        }
+      }
    end
 end
 
@@ -56,13 +60,16 @@ end
  template "/etc/hadoop/conf/#{t}" do
    source "hdp_#{t}.erb"
    mode 0644
-   variables(:nn_hosts => node[:bcpc][:hadoop][:nn_hosts],
-             :zk_hosts => node[:bcpc][:hadoop][:zookeeper][:servers],
-             :jn_hosts => node[:bcpc][:hadoop][:jn_hosts],
-             :mounts => node[:bcpc][:hadoop][:mounts],
-             :nn_jmx_port => node[:bcpc][:hadoop][:namenode][:jmx][:port],
-             :dn_jmx_port => node[:bcpc][:hadoop][:datanode][:jmx][:port]
-   )
+   variables lazy {
+     {
+        :nn_hosts => node[:bcpc][:hadoop][:nn_hosts],
+        :zk_hosts => node[:bcpc][:hadoop][:zookeeper][:servers],
+        :jn_hosts => node[:bcpc][:hadoop][:jn_hosts],
+        :mounts => node[:bcpc][:hadoop][:mounts],
+        :nn_jmx_port => node[:bcpc][:hadoop][:namenode][:jmx][:port],
+        :dn_jmx_port => node[:bcpc][:hadoop][:datanode][:jmx][:port]
+     }
+   }
  end
 end
 

@@ -17,32 +17,35 @@ if get_config("namenode_txn_fmt") then
     group "hdfs"
     user 0644
     content Base64.decode64(get_config("namenode_txn_fmt"))
-    not_if { node[:bcpc][:hadoop][:mounts].all? { |d| File.exists?("/disk/#{d}/dfs/jn/#{node.chef_environment}/current/VERSION") } }
+    not_if { lazy { node[:bcpc][:hadoop][:mounts].all? { |d| File.exists?("/disk/#{d}/dfs/jn/#{node.chef_environment}/current/VERSION") } }.call }
   end
 end
 
-node[:bcpc][:hadoop][:mounts].each do |d|
-  directory "/disk/#{d}/dfs/jn/" do
-    owner "hdfs"
-    group "hdfs"
-    mode 0755
-    action :create
-    recursive true
-  end
-  directory "/disk/#{d}/dfs/jn/#{node.chef_environment}" do
-    owner "hdfs"
-    group "hdfs"
-    mode 0755
-    action :create
-    recursive true
-  end
-  bash "unpack nn fmt image" do
-    user "hdfs"
-    code ["pushd /disk/#{d}/dfs/",
-          "tar xzvf #{Chef::Config[:file_cache_path]}/nn_fmt.tgz",
-          "popd"].join("\n")
-    notifies :restart, "service[hadoop-hdfs-journalnode]"
-    only_if { not get_config("namenode_txn_fmt").nil? and not File.exists?("/disk/#{d}/dfs/jn/#{node.chef_environment}/current/VERSION") }
+ruby_block "hadoop disks" do
+  block do
+    node[:bcpc][:hadoop][:mounts].each do |d|
+      dir = Chef::Resource::Directory.new("/disk/#{d}/dfs/jn/", run_context)
+      dir.owner "hdfs"
+      dir.group "hdfs"
+      dir.mode 0755
+      dir.run_action :create
+      dir.recursive true
+
+      dir = Chef::Resource::Directory.new("/disk/#{d}/dfs/jn/#{node.chef_environment}", run_context)
+      dir.owner "hdfs"
+      dir.group "hdfs"
+      dir.mode 0755
+      dir.run_action :create
+      dir.recursive true
+
+      bash = Chef::Resource::Bash.new("unpack nn fmt image", run_context)
+      bash.user "hdfs"
+      bash.code ["pushd /disk/#{d}/dfs/",
+                 "tar xzvf #{Chef::Config[:file_cache_path]}/nn_fmt.tgz",
+                 "popd"].join("\n")
+      bash.notifies :restart, "service[hadoop-hdfs-journalnode]", :delayed
+      bash.only_if { not get_config("namenode_txn_fmt").nil? and not File.exists?("/disk/#{d}/dfs/jn/#{node.chef_environment}/current/VERSION") }
+    end
   end
 end
 

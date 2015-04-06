@@ -37,7 +37,7 @@ end
                :jn_hosts => node[:bcpc][:hadoop][:jn_hosts],
                :rs_hosts => node[:bcpc][:hadoop][:rs_hosts],
                :master_hosts => node[:bcpc][:hadoop][:hb_hosts],
-               :mounts => node[:bcpc][:hadoop][:mounts],
+               :mounts => lazy { node[:bcpc][:hadoop][:mounts] },
                :hbm_jmx_port => node[:bcpc][:hadoop][:hbase_master][:jmx][:port],
                :hbrs_jmx_port => node[:bcpc][:hadoop][:hbase_rs][:jmx][:port],
                :dns_server => dns_server
