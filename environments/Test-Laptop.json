@@ -65,6 +65,9 @@
     "chef_client": {
       "server_url": "http://10.0.100.3:4000",
       "cache_path": "/var/chef/cache",
+      "config": {
+         "verify_api_cert": false
+      },
       "backup_path": "/var/chef/backup",
       "validation_client_name": "chef-validator",
       "run_path": "/var/chef"
