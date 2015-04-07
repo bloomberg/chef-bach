@@ -7,5 +7,6 @@ end
 
 service "hadoop-httpfs" do
   action [:enable, :start]
+  supports :status => true, :restart => true, :reload => false
   subscribes :restart, "template[/etc/hadoop-httpfs/conf/httpfs-site.xml]"
 end

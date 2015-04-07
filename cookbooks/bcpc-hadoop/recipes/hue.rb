@@ -55,5 +55,6 @@ end
 
 service "hue" do
   action [:enable, :start]
+  supports :status => true, :restart => true, :reload => false
   subscribes :restart, "template[/etc/hue/conf/hue.ini]", :delayed
 end

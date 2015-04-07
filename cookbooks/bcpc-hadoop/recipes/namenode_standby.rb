@@ -50,12 +50,14 @@ if @node['bcpc']['hadoop']['hdfs']['HA'] == true then
 
   service "hadoop-hdfs-zkfc" do
     action [:enable, :start]
+    supports :status => true, :restart => true, :reload => false
     subscribes :restart, "template[/etc/hadoop/conf/hdfs-site.xml]", :delayed
     subscribes :restart, "template[/etc/hadoop/conf/hdfs-policy.xml]", :delayed
   end
 
   service "hadoop-hdfs-namenode" do
     action [:enable, :start]
+    supports :status => true, :restart => true, :reload => false
     subscribes :restart, "template[/etc/hadoop/conf/hdfs-site.xml]", :delayed
     subscribes :restart, "template[/etc/hadoop/conf/hdfs-policy.xml]", :delayed
     subscribes :restart, "template[/etc/hadoop/conf/topology]", :delayed
