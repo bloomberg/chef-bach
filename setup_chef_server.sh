@@ -48,9 +48,11 @@ if dpkg -s chef-server 2>/dev/null | grep -q ^Status.*installed && \
 else
   apt-get -y install chef-server
   mkdir /etc/chef-server
+  printf "chef_server_webui['enable'] = false\n" >> /etc/chef-server/chef-server.rb
   printf "nginx['enable_non_ssl'] = false\n" >> /etc/chef-server/chef-server.rb
   printf "nginx['non_ssl_port'] = 4000\n" >> /etc/chef-server/chef-server.rb
-  # we take about 45 minutes to Chef the first machine so follow tuning from CHEF-4253
+  # we can take about 45 minutes to Chef the first machine when running on VMs
+  # so follow tuning from CHEF-4253
   printf "erchef['s3_url_ttl'] = 3600\n" >> /etc/chef-server/chef-server.rb
   chef-server-ctl reconfigure
 fi
