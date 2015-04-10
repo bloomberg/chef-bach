@@ -1,5 +1,6 @@
 <%= @agent_name %>.channels = memoryChannel
 <%= @agent_name %>.channels.memoryChannel.type = memory
+<%= @agent_name %>.channels.memoryChannel.capacity = 10000
 <%= @agent_name %>.sources = pstream
 <%= @agent_name %>.sources.pstream.channels = memoryChannel
 <%= @agent_name %>.sources.pstream.type = exec
