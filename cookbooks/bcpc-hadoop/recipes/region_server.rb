@@ -1,12 +1,12 @@
 include_recipe 'bcpc-hadoop::hbase_config'
 
 node.default['bcpc']['hadoop']['copylog']['region_server'] = {
-    'logfile' => "/var/log/hbase/hbase-hbase-regionserver-#{node.hostname}.log", 
+    'logfile' => "/var/log/hbase/hbase-hbase-0-regionserver-#{node.hostname}.log", 
     'docopy' => true
 }
 
 node.default['bcpc']['hadoop']['copylog']['region_server_out'] = {
-    'logfile' => "/var/log/hbase/hbase-hbase-regionserver-#{node.hostname}.out", 
+    'logfile' => "/var/log/hbase/hbase-hbase-0-regionserver-#{node.hostname}.out", 
     'docopy' => true
 }
 
