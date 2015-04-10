@@ -39,6 +39,18 @@ default['bcpc']['bootstrap']['dhcp_subnet'] = "10.0.100.0"
 
 ###########################################
 #
+#  Storage settings for the cluster
+#
+###########################################
+default['bcpc']['storage']['disks']['mount_root'] = "/disk"
+default['bcpc']['storage']['fs']['type'] = "xfs"
+default['bcpc']['storage']['fs']['fstyp_string']["xfs"] = "SGI XFS filesystem"
+default['bcpc']['storage']['fs']['fstyp_string']["ext4"] = "ext4 filesystem data"
+default['bcpc']['storage']['fs']['mount_options'] = "noatime,nodiratime,inode64"
+default['bcpc']['storage']['fs']['mkfs_options'] = "-f"
+
+###########################################
+#
 #  Ceph settings for the cluster
 #
 ###########################################

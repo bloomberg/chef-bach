@@ -36,7 +36,11 @@ template "/etc/hadoop/conf/container-executor.cfg" do
   owner "root"
   group "yarn"
   mode "0400"
-  variables(:mounts => node[:bcpc][:hadoop][:mounts])
+  variables lazy {
+    {
+      :mounts => node[:bcpc][:storage][:mounts]
+    }
+  }
   action :create
   notifies :run, "bash[verify-container-executor]", :immediate
 end
@@ -76,40 +80,46 @@ link "/usr/lib/hive/lib/mysql.jar" do
 end
 
 # Setup datanode and nodemanager bits
-if node[:bcpc][:hadoop][:mounts].length <= node[:bcpc][:hadoop][:hdfs][:failed_volumes_tolerated]
-  Chef::Application.fatal!("You have fewer #{node[:bcpc][:hadoop][:disks]} than #{node[:bcpc][:hadoop][:hdfs][:failed_volumes_tolerated]}! See comments of HDFS-4442.")
-end
-
-# Build nodes for HDFS storage
-node[:bcpc][:hadoop][:mounts].each do |i|
-  directory "/disk/#{i}/dfs" do
-    owner "hdfs"
-    group "hdfs"
-    mode 0700
-    action :create
-  end
-  directory "/disk/#{i}/dfs/dn" do
-    owner "hdfs"
-    group "hdfs"
-    mode 0700
-    action :create
+ruby_block "verify Hadoop mounts" do
+  block do
+    if node[:bcpc][:storage][:mounts].length <= node[:bcpc][:hadoop][:hdfs][:failed_volumes_tolerated]
+      raise "You have fewer node[:bcpc][:storage][:disks][:devices] (#{node[:bcpc][:storage][:mounts]}) than node[:bcpc][:hadoop][:hdfs][:failed_volumes_tolerated] (#{node[:bcpc][:hadoop][:hdfs][:failed_volumes_tolerated]})! See comments of HDFS-4442."
+    end
   end
 end
 
-# Build nodes for YARN log storage
-node[:bcpc][:hadoop][:mounts].each do |i|
-  directory "/disk/#{i}/yarn/" do
-    owner "yarn"
-    group "yarn"
-    mode 0755
-    action :create
+mount_root = node["bcpc"]["storage"]["disks"]["mount_root"]
+
+ruby_block "Create Datanode Directories" do
+  block do
+    node[:bcpc][:storage][:mounts].each_index do |i|
+      ["#{mount_root}/#{i}/dfs", "#{mount_root}/#{i}/dfs/dn"].each do |d|
+        dir = Chef::Resource::Directory.new(d, run_context)
+        dir.owner "hdfs"
+        dir.group "hdfs"
+        dir.mode 00700
+        dir.run_action :create
+      end
+    end
   end
-  %w{mapred-local local logs}.each do |d|
-    directory "/disk/#{i}/yarn/#{d}" do
-      owner "yarn"
-      group "hadoop"
-      mode 0755
-      action :create
+end
+
+ruby_block "Create Nodemanager Directories" do
+  block do
+    node[:bcpc][:storage][:mounts].each_index do |i|
+      dir = Chef::Resource::Directory.new("#{mount_root}/#{i}/yarn/", run_context)
+      dir.owner "yarn"
+      dir.group "yarn"
+      dir.mode 0755
+      dir.run_action :create
+
+      %w{mapred-local local logs}.each do |d|
+        dir = Chef::Resource::Directory.new("#{mount_root}/#{i}/yarn/#{d}", run_context)
+        dir.owner "yarn"
+        dir.group "hadoop"
+        dir.mode 0755
+        dir.run_action :create
+      end
     end
   end
 end

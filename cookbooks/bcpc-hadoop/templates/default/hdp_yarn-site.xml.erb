@@ -109,12 +109,12 @@
 
   <property>
     <name>yarn.nodemanager.local-dirs</name>
-    <value><%=@mounts.map{ |d| "file:///disk/#{d}/yarn/local" }.join(",")%></value>
+    <value><%=@mounts.map{ |d| "file://#{node["bcpc"]["storage"]["disks"]["mount_root"]}/#{d}/yarn/local" }.join(",")%></value>
   </property>
 
   <property>
     <name>yarn.nodemanager.log-dirs</name>
-    <value><%=@mounts.map{ |d| "/disk/#{d}/yarn/logs" }.join(",")%></value>
+    <value><%=@mounts.map{ |d| "#{node["bcpc"]["storage"]["disks"]["mount_root"]}/#{d}/yarn/logs" }.join(",")%></value>
   </property>
 
   <property>

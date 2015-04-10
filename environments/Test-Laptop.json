@@ -36,12 +36,16 @@
         "dhcp_subnet" : "10.0.100.0",
         "dhcp_range" : "10.0.100.14 10.0.100.250"
       },
+      "storage": {
+        "disks" : {
+          "devices" : ["sdb" , "sdc"]
+         }
+       },
       "dns_servers" : [ "8.8.8.8", "8.8.4.4" ],
       "hadoop" : {
         "hdfs" : {
           "dfs_replication_factor" : 1
         },
-        "disks" : ["sdb" , "sdc" ],
         "distribution" : {
           "version" : "HDP",
           "key" : "hortonworks.key"

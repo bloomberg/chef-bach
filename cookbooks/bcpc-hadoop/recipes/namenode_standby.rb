@@ -15,6 +15,8 @@ node.default['bcpc']['hadoop']['copylog']['namenode_standby_out'] = {
     'docopy' => true
 }
 
+mount_root = node["bcpc"]["storage"]["disks"]["mount_root"]
+
 %w{hadoop-hdfs-namenode hadoop-hdfs-zkfc hadoop-mapreduce}.each do |pkg|
   dpkg_autostart pkg do
     allow false
@@ -24,18 +26,20 @@ node.default['bcpc']['hadoop']['copylog']['namenode_standby_out'] = {
   end
 end
 
-node[:bcpc][:hadoop][:mounts].each do |d|
-  directory "/disk/#{d}/dfs/nn" do
-    owner "hdfs"
-    group "hdfs"
-    mode 0755
-    action :create
-    recursive true
-  end
+ruby_block "create namenode directories" do
+  block do
+    node[:bcpc][:storage][:mounts].each do |d|
+      dir = Chef::Resource::Directory.new("#{mount_root}/#{d}/dfs/nn", run_context)
+      dir.owner "hdfs"
+      dir.group "hdfs"
+      dir.mode 0755
+      dir.recursive true
+      dir.run_action :create
 
-  execute "fixup nn owner" do
-    command "chown -Rf hdfs:hdfs /disk/#{d}/dfs/"
-    only_if { Etc.getpwuid(File.stat("/disk/#{d}/dfs/").uid).name != "hdfs" }
+      exe = Chef::Resource::Execute.new("fixup nn owner", run_context)
+      exe.command "chown -Rf hdfs:hdfs #{mount_root}/#{d}/dfs"
+      exe.only_if { Etc.getpwuid(File.stat("#{mount_root}/#{d}/dfs/").uid).name != "hdfs" }
+    end
   end
 end
 
@@ -45,7 +49,7 @@ if @node['bcpc']['hadoop']['hdfs']['HA'] == true then
     user "hdfs"
     cwd  "/var/lib/hadoop-hdfs"
     action :run
-    not_if { node[:bcpc][:hadoop][:mounts].all? { |d| Dir.entries("/disk/#{d}/dfs/nn/").include?("current") } }
+    not_if { lazy {node[:bcpc][:storage][:mounts]}.call.all? { |d| Dir.entries("#{mount_root}/#{d}/dfs/nn/").include?("current") } }
   end  
 
   service "hadoop-hdfs-zkfc" do

@@ -11,7 +11,6 @@ default["bcpc"]["hadoop"]["distribution"]["version"] = 'HDP'
 default["bcpc"]["hadoop"]["distribution"]["key"] = 'hortonworks.key'
 default["bcpc"]["repos"]["hortonworks"] = 'http://public-repo-1.hortonworks.com/HDP/ubuntu12/2.0.11.0'
 default["bcpc"]["repos"]["hdp_utils"] = 'http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.16/repos/ubuntu12'
-default["bcpc"]["hadoop"]["disks"] = []
 default["bcpc"]["hadoop"]["oozie"]["admins"] = []
 default["bcpc"]["hadoop"]["yarn"]["nodemanager"]["avail_memory"]["ratio"] = 0.8
 default["bcpc"]["hadoop"]["yarn"]["nodemanager"]["avail_memory"]["size"] = nil

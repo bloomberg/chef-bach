@@ -16,7 +16,7 @@
 
   <property>
     <name>dfs.journalnode.edits.dir</name>
-    <value><%="/disk/#{@mounts[0]}/dfs/jn"%></value>
+    <value><%="#{node["bcpc"]["storage"]["disks"]["mount_root"]}/#{@mounts[0]}/dfs/jn"%></value>
   </property>
 
   <property>

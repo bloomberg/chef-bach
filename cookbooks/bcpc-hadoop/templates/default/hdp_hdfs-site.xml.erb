@@ -16,7 +16,7 @@
 
   <property>
     <name>dfs.namenode.name.dir</name>
-    <value><%=@mounts.map{ |d| "file:///disk/#{d}/dfs/nn" }.join(",")%></value>
+    <value><%=@mounts.map{ |d| "file://#{node["bcpc"]["storage"]["disks"]["mount_root"]}/#{d}/dfs/nn" }.join(",")%></value>
   </property>
 
   <property>
@@ -31,7 +31,7 @@
 
   <property>
     <name>dfs.datanode.data.dir</name>
-    <value><%=@mounts.map{ |d| "file:///disk/#{d}/dfs/dn" }.join(",")%></value>
+    <value><%=@mounts.map{ |d| "file://#{node["bcpc"]["storage"]["disks"]["mount_root"]}/#{d}/dfs/dn" }.join(",")%></value>
   </property>
 
   <property>
@@ -127,7 +127,7 @@
 
   <property>
     <name>dfs.journalnode.edits.dir</name>
-    <value><%="/disk/#{@mounts[0]}/dfs/jn"%></value>
+    <value><%="#{node["bcpc"]["storage"]["disks"]["mount_root"]}/#{@mounts[0]}/dfs/jn"%></value>
   </property>
 
   <property>
