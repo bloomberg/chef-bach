@@ -111,7 +111,7 @@ than place server vhost definitions in conf.d.  To update an existing cluster,
 please run the following on each head node before running ``chef-client``:
 
 ```
-# rm /etc/apache2/conf.d/openstack-dashboard.conf /etc/apache2/conf.d/zabbix-web.conf /etc/apache2/conf.d/graphite-web.conf /etc/apache2/conf.d/kibana-web.conf
+# rm /etc/apache2/conf.d/openstack-dashboard.conf /etc/apache2/conf.d/zabbix-web.conf /etc/apache2/conf.d/graphite-web.conf 
 ```
 
 #### 20130817
@@ -161,8 +161,3 @@ to (at the outer level - akin to ``bcpc``, ``chef_client``, and ``ubuntu``):
    "servers" : [ "0.pool.ntp.org", "1.pool.ntp.org", "2.pool.ntp.org", "3.pool.ntp.org" ]
 },
 ```
-
-#### 20130720
-Kibana has been upgraded from version 2 to version 3.
-First run `service stop kibana` on each headnode before running
-chef-client with the updated recipe.

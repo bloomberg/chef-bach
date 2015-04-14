@@ -195,17 +195,6 @@ http-check expect status 200
 <% end -%>
 <% end -%>
 
-<% if @elasticsearch_servers.length > 0 -%>
-listen elasticsearch <%="#{node[:bcpc][:management][:vip]}"%>:9200
-  balance  source
-  option  tcplog
-  option httpchk GET /
-  http-check expect status 200
-<% @elasticsearch_servers.each do |server| -%>
-  <%= "server #{server['hostname']} #{server['bcpc']['management']['ip']}:9200 check inter 1s rise 1 fall 1" %>
-<% end -%>
-<% end -%>
-
 <% if @radosgw_servers.length > 0 -%>
 listen radosgw-passthru-http  <%="#{node[:bcpc][:floating][:vip]}:#{node[:bcpc][:ports][:haproxy][:radosgw]}"%>
   balance leastconn

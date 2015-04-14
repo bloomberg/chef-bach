@@ -322,7 +322,7 @@ get_all_nodes.each do |server|
     end
 end
 
-%w{openstack kibana graphite zabbix}.each do |static|
+%w{openstack graphite zabbix}.each do |static|
     ruby_block "create-management-dns-entry-#{static}" do
         block do
             if get_nodes_for(static).length >= 1 then
