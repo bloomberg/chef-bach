@@ -33,6 +33,7 @@ default["bcpc"]["hadoop"]["namenode"]["https"]["port"] = 50080
 default["bcpc"]["hadoop"]["datanode"]["jmx"]["port"] = 10112
 default["bcpc"]["hadoop"]["hbase_master"]["jmx"]["port"] = 10101
 default["bcpc"]["hadoop"]["hbase_rs"]["jmx"]["port"] = 10102
+default["bcpc"]["hadoop"]["hbase_rs"]["info_port"] = 60030
 default["bcpc"]["hadoop"]["kafka"]["jmx"]["port"] = 9995
 default["bcpc"]["hadoop"]["java"] = "/usr/lib/jvm/java-1.7.0-openjdk-amd64"
 default["bcpc"]["hadoop"]["topology"]["script"] = "topology"
