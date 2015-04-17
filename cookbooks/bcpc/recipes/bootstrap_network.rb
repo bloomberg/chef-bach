@@ -47,6 +47,12 @@ template "/etc/network/interfaces.d/iface-#{node[:bcpc][:bootstrap][:pxe_interfa
   )
 end
 
+bash 'disable DHCP router overwriting' do
+  router = node['bcpc']['management']['gateway']
+  code "echo 'supersede routers #{router};' >> /etc/dhcp/dhclient.conf"
+  not_if "grep -q 'supersede routers #{router};' /etc/dhcp/dhclient.conf"
+end
+
 service "networking" do
   action :restart
 end
