@@ -66,10 +66,19 @@ def make_config(key, value)
   end
 end
 
+def make_config!(key, value)
+  init_config if $dbi.nil?
+  $dbi[key] = (node['bcpc']['encrypt_data_bag'] ? Chef::EncryptedDataBagItem.encrypt_value(value, Chef::EncryptedDataBagItem.load_secret) : value)
+  $dbi.save
+  $edbi = Chef::EncryptedDataBagItem.load('configs', node.chef_environment) if node['bcpc']['encrypt_data_bag']
+  puts "++++++++++++ Updating existing item with key \"#{key}\""
+  return value
+end
+
 def get_config(key)
-        init_config if $dbi.nil?
-        puts "------------ Fetching value for key \"#{key}\""
-        return (node['bcpc']['encrypt_data_bag'] ? $edbi[key] : $dbi[key])
+  init_config if $dbi.nil?
+  puts "------------ Fetching value for key \"#{key}\""
+  return (node['bcpc']['encrypt_data_bag'] ? $edbi[key] : $dbi[key])
 end
 
 def get_head_nodes
