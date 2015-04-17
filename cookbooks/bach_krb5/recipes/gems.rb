@@ -18,8 +18,6 @@ gem_package "rkerberos" do
   gem_binary gem_path
   version ">=0.0.0"
   action :nothing
-end.run_action(:install)
-
 execute "correct-permissions-for-rkerberos" do
   command "chmod 644 /opt/chef/embedded/lib/ruby/gems/1.9.1/specifications/rkerberos-0.1.3.gemspec"
   action :nothing
@@ -30,3 +28,4 @@ execute "correct-permissions-for-rake-compiler" do
   action :nothing
 end.run_action(:run)
 
+Gem.clear_paths

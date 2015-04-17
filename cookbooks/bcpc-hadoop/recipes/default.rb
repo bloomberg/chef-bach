@@ -58,6 +58,12 @@ gem_package "webhdfs" do
     action :nothing
 end.run_action(:install)
 
+gem_package "chef-vault" do
+  gem_binary gem_path
+  version ">=0.0.0"
+  action :nothing
+end.run_action(:install)
+
 gem_package "zabbixapi" do
     gem_binary gem_path
     version ">=0.0.0"

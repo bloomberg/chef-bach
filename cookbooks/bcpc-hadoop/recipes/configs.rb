@@ -1,4 +1,5 @@
 require 'base64'
+require 'chef-vault'
 
 # disable IPv6 (e.g. for HADOOP-8568)
 case node["platform_family"]
@@ -86,11 +87,12 @@ if node[:bcpc][:hadoop][:enable_kerberos] == true then
       only_if {File.exists?("#{node[:bcpc][:hadoop][:kerberos][:keytab][:dir]}/#{srvdat['keytab']}") && node[:bcpc][:hadoop][:kerberos][:keytab][:recreate] == true}
     end 
 
+    keytab = ChefVault::Item.load("keytabs","#{config_host}-#{srvc}")  
     file "#{node[:bcpc][:hadoop][:kerberos][:keytab][:dir]}/#{srvdat['keytab']}" do
       owner "#{srvdat['owner']}"
       group "#{srvdat['owner']}"
       mode "#{srvdat['perms']}"
-      content Base64.decode64(get_config("#{config_host}-#{srvc}"))
+      content Base64.decode64(keytab['krb5_key'])
       only_if { !File.exists?("#{node[:bcpc][:hadoop][:kerberos][:keytab][:dir]}/#{srvdat['keytab']}") && node[:etc][:passwd].key?("#{srvdat['owner']}")}
     end
   end

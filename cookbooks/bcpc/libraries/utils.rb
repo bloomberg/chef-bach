@@ -22,6 +22,14 @@ require 'base64'
 require 'thread'
 require 'ipaddr'
 
+def create_databag(name)
+  if !Chef::DataBag.list.key?(name)
+    bag = Chef::DataBag.new
+    bag.name(name)
+    bag.create
+  end
+end
+
 #
 # Constant string which defines the default attributes which need to be retrieved from node objects
 # The format is hash { key => value , key => value }
