@@ -51,16 +51,6 @@ if ! [[ -f jmxtrans-20120525-210643-4e956b1144.zip ]]; then
 fi
 FILES="jmxtrans-20120525-210643-4e956b1144.zip $FILES"
 
-# Build kibana3 installable bundle
-if [ ! -f kibana3.tgz ]; then
-  git clone https://github.com/elasticsearch/kibana.git kibana3
-  cd kibana3
-  git archive --output ../kibana3.tgz --prefix kibana3/ $VER_KIBANA
-  cd ..
-  rm -rf kibana3
-fi
-FILES="kibana3.tgz $FILES"
-
 # Fetch MySQL connector
 if ! [[ -f mysql-connector-java-5.1.34.tar.gz ]]; then
   $CURL -O -L http://dev.mysql.com/get/Downloads/Connector-J/mysql-connector-java-5.1.34.tar.gz
@@ -86,7 +76,7 @@ FILES="jdk-7u51-linux-x64.tar.gz $FILES"
 
 
 # Pull all the gems required for the cluster 
-for i in elasticsearch elasticsearch-api elasticsearch-transport patron fluent-plugin-elasticsearch fluent-plugin-tail-multiline fluent-plugin-tail-ex fluent-plugin-record-reformer fluent-plugin-rewrite wmi-lite simple-graphite; do
+for i in patron wmi-lite simple-graphite; do
   if ! [[ -f gems/${i}.gem ]]; then
     gem fetch ${i}
     ln -s ${i}-*.gem ${i}.gem || true
@@ -141,21 +131,6 @@ if ! [[ -f diamond.deb ]]; then
   rm -rf Diamond
 fi
 FILES="diamond.deb $FILES"
-
-# Snag elasticsearch
-if ! [[ -f elasticsearch-0.90.3.deb ]]; then
-  $CURL -O -L https://download.elasticsearch.org/elasticsearch/elasticsearch/elasticsearch-0.90.3.deb
-fi
-FILES="elasticsearch-0.90.3.deb $FILES"
-
-if ! [[ -f elasticsearch-plugins.tgz ]]; then
-  git clone https://github.com/mobz/elasticsearch-head.git
-  cd elasticsearch-head
-  git archive --output ../elasticsearch-plugins.tgz --prefix head/_site/ $VER_ESPLUGIN
-  cd ..
-  rm -rf elasticsearch-head
-fi
-FILES="elasticsearch-plugins.tgz $FILES"
 
 # Fetch pyrabbit
 if ! [[ -f python/pyrabbit-1.0.1.tar.gz ]]; then

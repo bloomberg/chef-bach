@@ -46,7 +46,6 @@ template "/etc/haproxy/haproxy.cfg" do
                    :glance_servers => get_nodes_for("glance","bcpc"),
                    :cinder_servers => get_nodes_for("cinder","bcpc"),
                    :horizon_servers => get_nodes_for("horizon","bcpc"),
-                   :elasticsearch_servers => get_nodes_for("elasticsearch","bcpc"),
                    :radosgw_servers => get_nodes_for("ceph-rgw","bcpc"))
 	notifies :restart, "service[haproxy]", :immediately
 end

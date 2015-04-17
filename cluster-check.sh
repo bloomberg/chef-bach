@@ -147,24 +147,6 @@ if [[ -f cluster.txt ]]; then
         else
             printf "$HOST %20s %s\n" ceph "$STAT"
         fi
-        # fluentd has a ridiculous status output from the normal
-        # service reporting (something like "* ruby running"), try to
-        # do better, according to this:
-        # http://docs.treasure-data.com/articles/td-agent-monitoring
-        # Roughly speaking if we have two lines of output from the
-        # following ps command it's in good shape, if not dump the
-        # entire output of that command to the status. This needs more
-        # work
-        FLUENTD=`./nodessh.sh $ENVIRONMENT $HOST "ps w -C ruby -C td-agent --no-heading | grep -v chef-client" sudo`
-        STAT=`./nodessh.sh $ENVIRONMENT $HOST "ps w -C ruby -C td-agent --no-heading | grep -v chef-client | wc -l" sudo`
-        STAT=`echo $STAT | cut -f2 -d:`  
-        if [[ "$STAT" =~ 2 ]]; then
-            if [[ ! -z "$VERBOSE" ]]; then 
-		printf "$HOST %20s %s\n" "fluentd" "normal"
-	    fi
-        else
-            printf "$HOST %20s %s\n" fluentd "$FLUENTD"
-        fi
         for SERVICE in keystone glance-api glance-registry cinder-scheduler cinder-volume cinder-api nova-api nova-novncproxy nova-scheduler nova-consoleauth nova-cert nova-conductor nova-compute nova-network haproxy; do
             STAT=`./nodessh.sh $ENVIRONMENT $HOST "service $SERVICE status | grep running" sudo`
             if [[ ! "$STAT" =~ "unrecognized" ]]; then
