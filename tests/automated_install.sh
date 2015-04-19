@@ -6,6 +6,11 @@
 # simple few environment variables to tune booting for fast testing of Chef-BCPC
 # Run this script in the root of the git repository
 #
+# Pre-requisite software:
+# 1. curl
+# 2. virtualbox
+# 3. vagrant
+# 4. chefdk (w/ berkshelf)
 
 set -e
 
@@ -37,6 +42,18 @@ $SEDINPLACE 's/vb.gui = true/vb.gui = false/' Vagrantfile
 # setup environment file
 $SEDINPLACE "s/\"dns_servers\" : \[ \"8.8.8.8\", \"8.8.4.4\" \]/\"dns_servers\" : \[ $DNS_SERVERS \]/" environments/${ENVIRONMENT}.json
 [[ -n "$PROXY" ]] && $SEDINPLACE -e "s#\(\"bootstrap\": {\)#\1\\\n\"proxy\" : \"http://$PROXY\",#" -e $'s/\\\\n/\\\n/' environments/${ENVIRONMENT}.json
+
+# download dependent/third-party cookbooks: begin
+[[ -n "$PROXY" ]] && export http_proxy=http://$PROXY; export https_proxy=http://$PROXY;
+export SSL_CERT_FILE="$PWD/bins/cacert.pem"
+rm -rf /tmp/cookbooks
+pushd cookbooks
+find . -maxdepth 1 -type d '!' -name "*bcpc*" -a '!' -name "hannibal" -a '!' -name "hdfsdu" -a '!' -name '\.'| xargs rm -rf
+popd
+find ./cookbooks -name "Berksfile" -exec berks -b {} \; -exec berks vendor /tmp/cookbooks -b {} \; -exec rsync -ar /tmp/cookbooks . \;
+rm -rf /tmp/cookbooks
+[[ -n "$PROXY" ]] && unset http_proxy; unset https_proxy; unset SSL_CERT_FILE;
+# download dependent/third-party cookbooks: end
 
 printf "#### Setup VB's and Bootstrap\n"
 source ./vbox_create.sh

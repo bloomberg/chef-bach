@@ -1,0 +1,9 @@
+source "https://supermarket.chef.io"
+
+metadata
+
+cookbook "bcpc", path: "../bcpc"
+cookbook "bcpc-hadoop", path: "../bcpc-hadoop"
+cookbook "jmxtrans" , git: "https://github.com/jmxtrans/jmxtrans-cookbook.git"
+cookbook "cobblerd", ">= 0.3.0", git: "https://github.com/cbaenziger/cobbler-cookbook.git", branch: "cobbler_profile"
+cookbook "dpkg_autostart", git: "https://github.com/hw-cookbooks/dpkg_autostart.git"

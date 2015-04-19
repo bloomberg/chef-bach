@@ -1,0 +1,7 @@
+source "https://supermarket.chef.io"
+
+metadata
+
+cookbook "bcpc", ">= 0.5.0", path: "../bcpc"
+cookbook "cobblerd", ">= 0.3.0", git: "https://github.com/cbaenziger/cobbler-cookbook.git", branch: "cobbler_profile"
+cookbook "dpkg_autostart", git: "https://github.com/hw-cookbooks/dpkg_autostart.git"

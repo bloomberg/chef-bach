@@ -1,0 +1,5 @@
+source "https://supermarket.chef.io"
+
+metadata
+
+cookbook "cobblerd", ">= 0.3.0", git: "https://github.com/cbaenziger/cobbler-cookbook.git", branch: "cobbler_profile"
