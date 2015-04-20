@@ -20,4 +20,8 @@
     <name>hbase.cluster.distributed</name>
     <value>true</value>
   </property>
+  <property>
+    <name>hbase.regionserver.info.port</name>
+    <value><%= node[:hannibal][:hbase_rs][:info_port] %></value>
+  </property>
 </configuration>
