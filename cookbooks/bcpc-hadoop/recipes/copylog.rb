@@ -33,12 +33,11 @@ EOH
   not_if "hdfs dfs -test #{node['bcpc']['hadoop']['hdfs_url']}/user/flume/logs/", :user => "hdfs"
 end
 
-#
-# Dummy template resource for future use
-# Currently we use the default flume-env values
-#
 template "/etc/flume/conf/flume-env.sh" do
-  action :nothing
+  source "flume_flume-env.sh.erb"
+  owner "root"
+  group "root"
+  mode "0755"
 end
 
 template "/etc/init.d/flume-agent-multi" do

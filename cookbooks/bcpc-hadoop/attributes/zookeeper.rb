@@ -2,6 +2,9 @@
 #    Zookeeper specific attributes    # 
 #######################################
 
+# Conf directory for Zookeeper
+default[:bcpc][:hadoop][:zookeeper][:conf_dir] = '/etc/zookeeper/conf'
+
 # Data directory for Zookeeper state
 default[:bcpc][:hadoop][:zookeeper][:data_dir] = '/var/lib/zookeeper'
 

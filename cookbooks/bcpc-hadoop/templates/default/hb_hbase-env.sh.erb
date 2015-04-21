@@ -106,4 +106,4 @@ export HBASE_MANAGES_ZK=false
 # The reason for changing default to RFA is to avoid the boundary case of filling out disk space as 
 # DRFA doesn't put any cap on the log size. Please refer to HBase-5655 for more context.
 
-export JAVA_HOME=/usr/lib/jvm/java-1.7.0-openjdk-amd64
+export JAVA_HOME=<%= node["bcpc"]["hadoop"]["java"] %>

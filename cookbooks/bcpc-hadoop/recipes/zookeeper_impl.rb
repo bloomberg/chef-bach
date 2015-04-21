@@ -87,7 +87,8 @@ end
 service "zookeeper-server" do
   supports :status => true, :restart => true, :reload => false
   action [:enable, :start]
-  subscribes :restart, "template[/etc/zookeeper/conf/zoo.cfg]", :delayed
+  subscribes :restart, "template[#{node[:bcpc][:hadoop][:zookeeper][:conf_dir]}/zoo.cfg]", :delayed
+  subscribes :restart, "template[#{node[:bcpc][:hadoop][:zookeeper][:conf_dir]}/zookeeper-env.sh]", :delayed
   subscribes :restart, "template[/usr/lib/zookeeper/bin/zkServer.sh]", :delayed
   subscribes :restart, "template[/etc/default/zookeeper-server]", :delayed
   subscribes :restart, "file[#{node[:bcpc][:hadoop][:zookeeper][:data_dir]}/myid]", :delayed

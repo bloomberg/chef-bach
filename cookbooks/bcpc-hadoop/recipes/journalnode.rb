@@ -66,4 +66,5 @@ service "hadoop-hdfs-journalnode" do
   supports :status => true, :restart => true, :reload => false
   subscribes :restart, "template[/etc/hadoop/conf/hdfs-site.xml]", :delayed
   subscribes :restart, "template[/etc/hadoop/conf/hdfs-site_HA.xml]", :delayed
+  subscribes :restart, "template[/etc/hadoop/conf/hadoop-env.sh]", :delayed
 end
