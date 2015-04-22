@@ -46,6 +46,7 @@ default[:hannibal][:mysql][:driver] = 'com.mysql.jdbc.Driver'
 default[:hannibal][:mysql][:url] = '"jdbc:mysql://localhost/hannibal?characterEncoding=UTF-8"'
 
 default[:hannibal][:zookeeper_quorum] = 'localhost'
+default[:hannibal][:hbase_rs][:info_port] = 60030
 
 default[:hannibal][:metrics][:clean_threshold] = 86400
 default[:hannibal][:metrics][:default_range] = 86400
