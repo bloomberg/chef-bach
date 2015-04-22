@@ -3,8 +3,12 @@
 #######################################
 
 # Attribute to indidate whether an existing Hadoop Zookeeper
-# can be used. If not Kafka Zookeeper quorum need to be created 
+# can be used. If not Kafka Zookeeper quorum need to be created
 default[:use_hadoop_zookeeper_quorum] = false
+default[:bcpc][:kafka][:skip_restart_coordination] = true
+default[:bcpc][:kafka][:restart_failed] = false
+default[:bcpc][:kafka][:restart_failed_time] = ""
+
 #
 # Overwriting community kafka cookbook attributes 
 #
@@ -20,3 +24,7 @@ default[:kafka][:jmx_port] = node[:bcpc][:hadoop][:kafka][:jmx][:port]
 default[:kafka][:broker][:controlled][:shutdown][:enable] = true
 default[:kafka][:broker][:controlled][:shutdown][:max][:retries] = 3
 default[:kafka][:broker][:controlled][:shutdown][:retry][:backoff][:ms] = 5000
+#
+# Overwrite the community cookbook to restart Kafka servers with custom recipe for BCPC
+#
+default[:kafka][:start_coordination][:recipe] = 'kafka-bcpc::coordinate'
