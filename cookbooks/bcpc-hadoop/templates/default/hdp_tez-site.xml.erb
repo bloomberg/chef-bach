@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<configuration>
+  <property>
+    <name>tez.lib.uris</name>
+    <value>/hdp/apps/2.2.0.0-2041/tez/tez.tar.gz</value>
+  </property>
+  <property>
+    <name>tez.runtime.compress.codec</name>
+    <value>org.apache.hadoop.io.compress.SnappyCodec</value>
+  </property>
+  <property>
+    <name>tez.cluster.additional.classpath.prefix</name>
+    <value>/usr/hdp/2.2.0.0-2041/hadoop/lib/hadoop-lzo-0.6.0.jar</value>
+  </property>
+  <property>
+    <name>tez.am.launch.cluster-default.cmd-opts</name>
+    <value>-server -Djava.net.preferIPv4Stack=true -Dhdp.version=2.2.0.0-2041</value>
+  </property>
+  <property>
+    <name>tez.task.launch.cluster-default.cmd-opts</name>
+    <value>-server -Djava.net.preferIPv4Stack=true -Dhdp.version=2.2.0.0-2041</value>
+  </property>
+</configuration>

@@ -1,5 +1,8 @@
-include_recipe 'dpkg_autostart'
 require "base64"
+require "digest"
+require 'mixlib/shellout'
+
+include_recipe 'dpkg_autostart'
 include_recipe 'bcpc-hadoop::hadoop_config'
 
 #
@@ -37,6 +40,16 @@ node[:bcpc][:hadoop][:mounts].each do |d|
     command "chown -Rf hdfs:hdfs /disk/#{d}/dfs"
     only_if { Etc.getpwuid(File.stat("/disk/#{d}/dfs/").uid).name != "hdfs" }
   end
+end
+
+template "/etc/init.d/hadoop-hdfs-namenode" do
+  source "hdp_hadoop-hdfs-namenode-initd.erb"
+  mode 0655
+end
+
+template "/etc/init.d/hadoop-hdfs-zkfc" do
+  source "hdp_hadoop-hdfs-zkfc-initd.erb"
+  mode 0655
 end
 
 bash "format namenode" do
@@ -96,16 +109,61 @@ end
 # So we fake the formatting of the txn directories by copying over current/VERSION
 # this tricks the journalnodes and namenodes into thinking they've been formatted.
 
-ruby_block "grab the format UUID File" do
+ruby_block "create-format-UUID-File" do
   block do
     Dir.chdir("/disk/#{node[:bcpc][:hadoop][:mounts][0]}/dfs/") do
       system("tar czvf #{Chef::Config[:file_cache_path]}/nn_fmt.tgz nn/current/VERSION jn/#{node.chef_environment}/current/VERSION")
     end
-    make_config("namenode_txn_fmt", Base64.encode64(IO.read("#{Chef::Config[:file_cache_path]}/nn_fmt.tgz")));
   end
-  action :nothing
-  subscribes :run, "service[generally run hadoop-hdfs-namenode]", :immediately
-  only_if { File.exists?("/disk/#{node[:bcpc][:hadoop][:mounts][0]}/dfs/nn/current/VERSION") }
+  action :run
+  only_if { File.exists?("/disk/#{node[:bcpc][:hadoop][:mounts][0]}/dfs/nn/current/VERSION") and  File.exists?("/disk/#{node[:bcpc][:hadoop][:mounts][0]}/dfs/jn/#{node.chef_environment}/current/VERSION") }
+end
+
+ruby_block "upload-format-UUID-File" do
+  block do
+    cmdStrCount = "zgrep -a -i layoutVersion #{Chef::Config[:file_cache_path]}/nn_fmt.tgz|wc -l"
+    cmdStrUnqCount = "zgrep -a -i layoutVersion #{Chef::Config[:file_cache_path]}/nn_fmt.tgz|uniq|wc -l"
+    cmdStrLayVersn = "zgrep -a -i layoutVersion #{Chef::Config[:file_cache_path]}/nn_fmt.tgz|uniq|cut -d'=' -f2"
+
+    cmd = Mixlib::ShellOut.new(cmdStrCount, :timeout => 10).run_command
+    cmd.error!
+    Chef::Log.debug("Total number of version lines : #{cmd.stdout}") 
+    if cmd.stdout.to_i != 2
+      Chef::Log.fatal("Couldn't find required number of layoutVersion records");
+      raise
+    end
+
+    cmd = Mixlib::ShellOut.new(cmdStrUnqCount, :timeout => 10).run_command
+    cmd.error!
+    Chef::Log.debug("Total number of unique version lines : #{cmd.stdout}")
+    if cmd.stdout.to_i != 1
+      Chef::Log.fatal("Mismatched layoutVersion records between JN and NN in local file");
+      raise
+    end
+    
+    node_layout_version = 0
+    if node[:bcpc][:hadoop][:hdfs].key?('layoutVersion')
+      node_layout_version = node[:bcpc][:hadoop][:hdfs][:layoutVersion]
+    end
+
+    cmd = Mixlib::ShellOut.new(cmdStrLayVersn, :timeout => 10).run_command
+    cmd.error!
+    Chef::Log.debug("layoutVersion stored in node is : #{node_layout_version}")
+    Chef::Log.debug("layoutVersion stored in the file is #{cmd.stdout.to_i}")
+
+    if ( get_config("namenode_txn_fmt").nil? ) || ( cmd.stdout.to_i < node_layout_version )
+      make_config!("namenode_txn_fmt", Base64.encode64(IO.read("#{Chef::Config[:file_cache_path]}/nn_fmt.tgz")));
+      node.set[:bcpc][:hadoop][:hdfs][:layoutVersion] = cmd.stdout.to_i
+      node.save
+    elsif cmd.stdout.to_i > node_layout_version
+      Chef::Log.fatal("New HDFS layoutVersion is higher than old HDFS layoutVersion")
+      raise
+    end
+
+  end
+  action :run
+  ignore_failure true
+  only_if { File.exists?("#{Chef::Config[:file_cache_path]}/nn_fmt.tgz") }
 end
 
 bash "reload hdfs nodes" do
@@ -125,6 +183,12 @@ bash "create-hdfs-temp" do
   not_if "sudo -u hdfs hadoop fs -test -d /tmp"
 end
 
+bash "create-hdfs-applogs" do
+  code "hadoop fs -mkdir /app-logs; hadoop fs -chmod -R 1777 /app-logs; hadoop fs -chown yarn /app-logs"
+  user "hdfs"
+  not_if "sudo -u hdfs hadoop fs -test -d /app-logs"
+end
+
 bash "create-hdfs-user" do
   code "hadoop fs -mkdir /user; hadoop fs -chmod -R 0755 /user"
   user "hdfs"
@@ -132,7 +196,7 @@ bash "create-hdfs-user" do
 end
 
 bash "create-hdfs-history" do
-  code "hadoop fs -mkdir /user/history; hadoop fs -chmod -R 1777 /user/history; hadoop fs -chown yarn /user/history"
+  code "hadoop fs -mkdir /user/history; hadoop fs -chmod -R 1777 /user/history; hadoop fs -chown mapred:hdfs /user/history"
   user "hdfs"
   not_if "sudo -u hdfs hadoop fs -test -d /user/history"
 end

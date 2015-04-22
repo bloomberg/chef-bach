@@ -1,6 +1,13 @@
+export TEZ_CONF_DIR=/etc/tez/conf
+export TEZ_JARS=/usr/hdp/current/tez-client/*:/usr/hdp/current/tez-client/lib/*
+
 export JAVA_HOME=<%= node["bcpc"]["hadoop"]["java"] %>
 export MAPREDUCE_LIBS=/usr/lib/hadoop-mapreduce/*
-export HADOOP_CLASSPATH=$HADOOP_CLASSPATH:${MAPREDUCE_LIBS}
+export HADOOP_CLASSPATH=$HADOOP_CLASSPATH:${MAPREDUCE_LIBS}:${TEZ_CONF_DIR}:${TEZ_JARS}
+
+export HADOOP_LOG_DIR=/var/log/hadoop-hdfs
+export HADOOP_PID_DIR=/var/run/hadoop-hdfs
+export HADOOP_IDENT_STRING=hdfs
 
 # Hive Configuration Directory can be controlled by:
 export HIVE_CONF_DIR=/etc/hive/conf.<%= node.chef_environment %> 

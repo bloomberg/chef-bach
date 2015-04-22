@@ -9,7 +9,12 @@
 <?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
 
 <configuration>
-  <% if @rm_hosts.length > 2 %>
+  <% if @rm_hosts.length >= 2 %>
+    <property>
+      <name>yarn.resourcemanager.cluster-id</name>
+      <value><%="#{node.chef_environment}"%></value>
+    </property>
+
     <property> 
       <name>yarn.resourcemanager.ha.enabled</name> 
       <value>true</value>
@@ -23,7 +28,14 @@
     <% @rm_hosts.each do |h| %>   
       <property>
         <name>yarn.resourcemanager.hostname.rm<%= "#{node.chef_environment}#{h[:node_number]}" %></name>
-        <value><%=float_host(h[:hostname]) %>:8032</value>
+        <value><%=float_host(h[:hostname]) %></value>
+      </property>
+    <% end %>
+
+    <% @rm_hosts.each do |h| %>   
+      <property>
+        <name>yarn.resourcemanager.address.rm<%= "#{node.chef_environment}#{h[:node_number]}" %></name>
+        <value><%=float_host(h[:hostname])%>:<%=node["bcpc"]["hadoop"]["yarn"]["rm_port"]%></value>
       </property>
     <% end %>
 
@@ -55,7 +67,7 @@
 
     <property>
       <name>yarn.resourcemanager.address</name>
-      <value><%="#{float_host(@rm_hosts.first[:hostname])}:8032" if not @rm_hosts.empty?%></value>
+      <value><%="#{float_host(@rm_hosts.first[:hostname])}:#{node["bcpc"]["hadoop"]["yarn"]["rm_port"]}" if not @rm_hosts.empty?%></value>
     </property>
 
     <property>
@@ -93,7 +105,7 @@
     <description>Classpath for typical applications.</description>
     <name>yarn.application.classpath</name>
     <value>
-      /etc/hadoop/conf,/usr/lib/hadoop/*,/usr/lib/hadoop/lib/*,/usr/lib/hadoop-hdfs/*,/usr/lib/hadoop-hdfs/lib/*,/usr/lib/hadoop-yarn/*,/usr/lib/hadoop-yarn/lib/*,/usr/lib/hadoop-mapreduce/*,/usr/lib/hadoop-mapreduce/lib/*,/usr/lib/pig/*,/usr/lib/pig/lib/*
+      /etc/hadoop/conf,/usr/lib/hadoop/*,/usr/lib/hadoop/lib/*,/usr/lib/hadoop-hdfs/*,/usr/lib/hadoop-hdfs/lib/*,/usr/lib/hadoop-yarn/*,/usr/lib/hadoop-yarn/lib/*,/usr/lib/hadoop-mapreduce/*,/usr/lib/hadoop-mapreduce/lib/*,/usr/lib/pig/*,/usr/lib/pig/lib/*,$HADOOP_CONF_DIR,/usr/hdp/2.2.0.0-2041/hadoop-client/*,/usr/hdp/2.2.0.0-2041/hadoop-client/lib/*,/usr/hdp/2.2.0.0-2041/hadoop-hdfs-client/*,/usr/hdp/2.2.0.0-2041/hadoop-hdfs-client/lib/*,/usr/hdp/2.2.0.0-2041/hadoop-yarn-client/*,/usr/hdp/2.2.0.0-2041/hadoop-yarn-client/lib/*
     </value>
   </property>
 

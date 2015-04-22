@@ -15,13 +15,18 @@
 
 [mysqld_safe]
 
+[client]
+max_allowed_packet=32M
+
+[mysql]
+max_allowed_packet=32M
 ##
 ## mysqld options _MANDATORY_ for correct opration of the cluster
 ##
 [mysqld]
 
 datadir=/var/lib/mysql
-
+max_allowed_packet=32M
 # (This must be substituted by wsrep_format)
 binlog_format=ROW
 

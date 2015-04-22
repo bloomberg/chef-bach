@@ -22,6 +22,10 @@ template "hive-server2-service" do
   mode "0755"
 end
 
+link "/usr/hdp/current/hive-server2/lib/mysql-connector-java.jar" do
+  to "/usr/share/java/mysql-connector-java.jar"
+end
+
 # Start hive-server2 daemon
 service "hive-server2" do
   action [:enable, :start]

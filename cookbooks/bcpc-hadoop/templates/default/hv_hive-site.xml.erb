@@ -28,11 +28,6 @@
 <!-- Hive Execution Parameters -->
 
 <property>
-  <name>hive.metastore.local</name>
-  <value>false</value>
-</property>
-
-<property>
   <name>hive.metastore.client.socket.timeout</name>
   <value>3600</value>
   <description>MetaStore Client socket timeout in seconds</description>
@@ -40,7 +35,7 @@
 
 <property>
   <name>javax.jdo.option.ConnectionURL</name>
-  <value>jdbc:mysql:loadbalance://<%=@mysql_hosts.join(',')%>/metastore?loadBalanceBlacklistTimeout=5000</value>
+  <value>jdbc:mysql:loadbalance://<%=@mysql_hosts.join(',')%>:3306/metastore?loadBalanceBlacklistTimeout=5000</value>
   <description>the URL of the MySQL database</description>
 </property>
 

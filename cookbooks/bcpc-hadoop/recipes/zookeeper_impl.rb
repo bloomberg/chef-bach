@@ -20,7 +20,7 @@ ruby_block "Compare_zookeeper_server_start_shell_script" do
   block do
     require "digest"
     orig_checksum=Digest::MD5.hexdigest(File.read("/tmp/zkServer.sh"))
-    new_checksum=Digest::MD5.hexdigest(File.read("/usr/lib/zookeeper/bin/zkServer.sh"))
+    new_checksum=Digest::MD5.hexdigest(File.read("/usr/hdp/2.2.0.0-2041/zookeeper/bin/zkServer.sh"))
     if orig_checksum != new_checksum
       Chef::Application.fatal!("zookeeper-server:New version of zkServer.sh need to be created and used")
     end
@@ -29,8 +29,30 @@ ruby_block "Compare_zookeeper_server_start_shell_script" do
 end
 
 template "/etc/init.d/zookeeper-server" do
-  source "hdp_zookeeper-server.start.erb"
+  source "hdp_zookeeper-server-initd.erb"
   mode 0655
+end
+
+directory "/var/run/zookeeper" do 
+  owner "zookeeper"
+  group "zookeeper"
+  mode "0755"
+  action :create
+end
+
+link "/usr/bin/zookeeper-server-initialize" do
+  to "/usr/hdp/current/zookeeper-client/bin/zookeeper-server-initialize"
+end
+
+template "/etc/init.d/zookeeper-server" do
+  source "hdp_zookeeper-server-initd.erb"
+  mode 0655
+end
+
+template "/etc/zookeeper/conf/zookeeper-env.sh" do
+  source "hdp_zookeeper-env.sh.erb"
+  mode 0644
+  variables(:zk_jmx_port => node[:bcpc][:hadoop][:zookeeper][:jmx][:port])
 end
 
 directory node[:bcpc][:hadoop][:zookeeper][:data_dir] do
@@ -40,13 +62,13 @@ directory node[:bcpc][:hadoop][:zookeeper][:data_dir] do
   mode 0755
 end
 
-template "/etc/default/zookeeper-server" do
-  source "hdp_zookeeper-server.default.erb"
-  mode 0644
-  variables(:zk_jmx_port => node[:bcpc][:hadoop][:zookeeper][:jmx][:port])
-end
+#template "/etc/default/zookeeper-server" do
+#  source "hdp_zookeeper-server.default.erb"
+#  mode 0644
+#  variables(:zk_jmx_port => node[:bcpc][:hadoop][:zookeeper][:jmx][:port])
+#end
 
-template "/usr/lib/zookeeper/bin/zkServer.sh" do
+template "/usr/hdp/2.2.0.0-2041/zookeeper/bin/zkServer.sh" do
   source "hdp_zkServer.sh.erb"
 end
 

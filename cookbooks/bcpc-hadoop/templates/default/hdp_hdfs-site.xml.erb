@@ -95,8 +95,23 @@
   </property>
 
   <property>
-    <name>dfs.datanode.dns.interface</name>
-    <value><%= node['bcpc']['floating']['interface'] %></value>
+    <name>dfs.namenode.datanode.registration.ip-hostname-check</name>
+    <value>false</value>
+  </property>
+
+  <property>
+    <name>dfs.datanode.address</name>
+    <value><%=node[:bcpc][:floating][:ip]%>:50010</value>
+  </property>
+
+  <property>
+    <name>dfs.datanode.ipc.address</name>
+    <value><%=node[:bcpc][:floating][:ip]%>:50020</value>
+  </property>
+
+  <property>
+    <name>dfs.datanode.http.address</name>
+    <value><%=node[:bcpc][:floating][:ip]%>:50075</value>
   </property>
 
   <property>
