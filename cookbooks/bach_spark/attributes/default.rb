@@ -1,0 +1,8 @@
+default[:spark][:download][:url] = "http://d3kbcqa49mib13.cloudfront.net"
+default[:spark][:download][:file][:name] = "spark-1.4.0-bin-hadoop2.6"
+default[:spark][:download][:file][:type] = "tgz"
+default[:spark][:download][:dir] = "/home/vagrant/chef-bcpc/bins"
+default[:spark][:package][:base] = "/usr/spark"
+default[:spark][:package][:prefix] = "spark"
+default[:spark][:package][:version] = "1.4.0"
+default[:spark][:bin][:dir] = "#{node[:spark][:package][:base]}/#{node[:spark][:package][:version]}"
