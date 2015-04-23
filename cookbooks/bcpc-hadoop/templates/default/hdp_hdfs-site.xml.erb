@@ -15,6 +15,11 @@
   </property>
 
   <property>
+    <name>dfs.datanode.balance.bandwidthPerSec</name>
+    <value><%=node[:bcpc][:hadoop][:balancer][:bandwidth]%></value>
+  </property>
+
+  <property>
     <name>dfs.namenode.name.dir</name>
     <value><%=@mounts.map{ |d| "file:///disk/#{d}/dfs/nn" }.join(",")%></value>
   </property>
