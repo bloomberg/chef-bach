@@ -20,7 +20,6 @@ end
 %w{zoo.cfg
   log4j.properties
   configuration.xsl
-  zookeeper-env.sh
 }.each do |t|
   template "#{node[:bcpc][:hadoop][:zookeeper][:conf_dir]}/#{t}" do
     source "zk_#{t}.erb"

@@ -1,8 +1,0 @@
-export ZOO_LOG_DIR=/var/log/zookeeper
-export ZOO_PID_DIR=/var/run/zookeeper
-export ZOOPIDFILE=$ZOO_PID_DIR/zookeeper-server
-export ZOOCFGDIR=/etc/zookeeper/conf
-export ZOO_DATADIR_AUTOCREATE_DISABLE=1
-<% if node[:bcpc][:hadoop].attribute?(:jmx_enabled) and node[:bcpc][:hadoop][:jmx_enabled] %>
-export JMXPORT=<%= @zk_jmx_port %>
-<% end %>
