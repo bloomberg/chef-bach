@@ -82,6 +82,9 @@ Vagrant.configure("2") do |config|
       chef.provisioning_path="/home/vagrant/chef-bcpc/"
     end
 
+    # Rekey the admin user
+    bootstrap.vm.provision :shell, :inline => "cd /home/vagrant/chef-bcpc; sudo mv /etc/chef-server/admin.pem /tmp/old_admin.pem; sudo knife user reregister admin -u admin -k /tmp/old_admin.pem | sudo tee /etc/chef-server/admin.pem > /dev/null"
+
     bootstrap.vm.provision :shell, :inline => "cd /home/vagrant/chef-bcpc; sudo knife environment from file environments/#{env_name}.json -u admin -k /etc/chef-server/admin.pem"
     bootstrap.vm.provision :shell, :inline => "cd /home/vagrant/chef-bcpc; sudo chef-client -E #{env_name} -c .chef/knife.rb"
 

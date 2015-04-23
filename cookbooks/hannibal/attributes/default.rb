@@ -6,7 +6,7 @@ default[:hannibal][:local_tarball] = true
 default[:hannibal][:download_url] = 'https://github.com/sentric/hannibal/releases/download/v.0.10.1'
 default[:hannibal][:repo][:url] = 'https://github.com/kiiranh/hannibal.git'
 default[:hannibal][:repo][:branch] = 'next'
-default[:hannibal][:hbase_version] = 0.96
+default[:hannibal][:hbase_version] = 0.98
 
 default[:hannibal][:install_dir] = '/usr/lib'
 default[:hannibal][:service_dir] = '/etc/init'
