@@ -50,7 +50,7 @@ bash "setup-allow-rules-ufw" do
       ufw allow in on #{node[:bcpc][:bootstrap][:pxe_interface]} from any to #{node[:bcpc][:bootstrap][:server]} port tftp
       ufw --force enable
     EOH
-    not_if "ufw status numbered | grep 22/tcp"
+    not_if "ufw status numbered | grep #{node[:bcpc][:bootstrap][:server]}"
 end
 
 service "ufw" do
