@@ -116,7 +116,7 @@
 
   <property>
     <name>dfs.client.local.interfaces</name>
-    <value><%=node['bcpc']['floating']['ip']%>/32</value>
+    <value><%= node['bcpc']['networks'][node['bcpc']['management']['subnet']]['floating']['interface'] %></value>
   </property>
 
   <property>

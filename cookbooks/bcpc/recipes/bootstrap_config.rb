@@ -14,7 +14,7 @@ end
 
 ruby_block "convert-bootstrap-to-admin" do
   block do
-    rest = Chef::REST.new(node[:chef_client][:server_url], "admin", "/etc/chef-server/admin.pem")
+    rest = Chef::REST.new(node[:bcpc][:bootstrap][:server], "admin", "/etc/chef-server/admin.pem")
     rest.put_rest("/clients/#{node[:hostname]}",{:admin => true})
     rest.put_rest("/nodes/#{node[:hostname]}", {:name => node[:hostname], :run_list => ['role[BCPC-Bootstrap]']})
   end

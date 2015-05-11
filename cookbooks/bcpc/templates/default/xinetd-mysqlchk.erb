@@ -12,14 +12,17 @@ service mysqlchk
         disable = no
         flags           = REUSE
         socket_type     = stream
-        bind            = <%="#{node[:bcpc][:management][:ip]}"%>
+        bind            = <%="#{node[:bcpc][:networks][node[:bcpc][:management][:subnet]][:management][:ip]}"%>
         port            = 3307
         wait            = no
         user            = nobody
         server          = /usr/bin/clustercheck
         server_args     = <%="#{get_config('mysql-check-user')}"%> <%="#{get_config!('password','mysql-check','os')}"%> 1
         log_on_failure  += USERID
-        only_from       = <%="#{node[:bcpc][:management][:cidr]}"%>
+        only_from       = <%=(node[:bcpc][:networks].keys.map do |n|
+                               node[:bcpc][:networks][n][:management][:cidr]
+                             end + [node[:bcpc][:management][:vip]]).join(' ')
+                           %>
         # recommended to put the IPs that need
         # to connect exclusively (security purposes)
         per_source      = UNLIMITED
