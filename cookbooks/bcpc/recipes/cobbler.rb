@@ -58,9 +58,8 @@ end
 template "/etc/cobbler/dhcp.template" do
     source "cobbler.dhcp.template.erb"
     mode 00644
-    variables( :range => node[:bcpc][:bootstrap][:dhcp_range],
-               :subnet => node[:bcpc][:bootstrap][:dhcp_subnet] )
-    notifies :restart, "service[cobbler]", :delayed
+    variables( :subnets => node[:bcpc][:networks] )
+    notifies :run, "bash[cobbler-sync]", :delayed
 end
 
 cobbler_image 'ubuntu-12.04-mini' do

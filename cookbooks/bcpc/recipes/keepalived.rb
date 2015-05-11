@@ -45,3 +45,19 @@ end
 service "keepalived" do
     action [ :enable, :start ]
 end
+
+if node[:bcpc][:networks].length > 1
+  include_recipe "bfd::default"
+  bfd_session "Global Cluster Service VIP Connect" do
+    subnet = node[:bcpc][:management][:subnet]
+    action :connect
+    remote_ip node[:bcpc][:networks][subnet][:management][:gateway]
+    local_ip node[:bcpc][:networks][subnet][:management][:vip]
+  end
+  bfd_session "Global Cluster Service VIP Up" do
+    subnet = node[:bcpc][:management][:subnet]
+    action :up
+    remote_ip node[:bcpc][:networks][subnet][:management][:gateway]
+    local_ip node[:bcpc][:networks][subnet][:management][:vip]
+  end
+end

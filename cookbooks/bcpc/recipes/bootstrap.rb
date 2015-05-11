@@ -19,6 +19,21 @@
 
 include_recipe "bcpc::default"
 
+if node[:bcpc][:networks].length > 1
+  include_recipe "bfd::default"
+  bfd_session "Global Bootstrap VIP Connect" do
+    action :connect
+    remote_ip node[:bcpc][:networks][node[:bcpc][:management][:subnet]][:management][:gateway]
+    local_ip node[:bcpc][:management][:ip]
+  end
+#  XXX disabled as router is not currently speaking BFD
+#  bfd_session "Global Bootstrap VIP Up" do
+#    action :up
+#    remote_ip node[:bcpc][:networks][node[:bcpc][:management][:subnet]][:management][:gateway]
+#    local_ip node[:bcpc][:management][:ip]
+#  end
+end
+
 node[:bcpc][:bootstrap][:admin_users].each do |user_name|
   user user_name do
     action :create
