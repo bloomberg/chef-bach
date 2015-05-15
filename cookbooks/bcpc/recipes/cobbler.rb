@@ -18,13 +18,32 @@
 #
 
 require 'digest/sha2'
+require 'chef-vault'
 
 make_config('cobbler-web-user', "cobbler")
-make_config('cobbler-web-password', secure_password)
-make_config('cobbler-root-password', secure_password)
-make_config('cobbler-root-password-salted', "#{get_config('cobbler-root-password')}".crypt("$6$" + rand(36**8).to_s(36)) )
+
+create_databag("os")
+
+# backward compatibility
+web_passwd = get_config('cobbler-web-password')
+if web_passwd.nil?
+  web_passwd = secure_password
+end
+root_passwd = get_config('cobbler-root-password')
+if root_passwd.nil?
+  root_passwd = secure_password
+end
+
+chef_vault_secret "cobbler" do
+  data_bag 'os'
+  raw_data({ 'web-password' => web_passwd, 'root-password' => root_passwd, 'root-password-salted' => root_passwd.crypt("$6$" + rand(36**8).to_s(36)) })
+  admins node[:hostname]
+  search '*:*'
+  action :nothing
+end.run_action(:create_if_missing)
+
 node.default[:cobbler][:web_username] = get_config('cobbler-web-user')
-node.default[:cobbler][:web_password] = get_config('cobbler-web-password')
+node.default[:cobbler][:web_password] = get_config( 'web-password', 'cobbler', 'os')
 
 package "isc-dhcp-server"
 

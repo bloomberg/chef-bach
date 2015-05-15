@@ -38,7 +38,7 @@ if [[ ! -z "$KNIFESTAT" ]]; then
 fi
 
 # get the cobbler root passwd from the data bag
-PASSWD=`knife data bag show configs $ENVIRONMENT | grep "cobbler-root-password:" | awk ' {print $2}'`
+PASSWD=`sudo knife vault show os cobbler "root-password" --mode client | grep "root-password:" | awk ' {print $2}'`
 if [[ -z "$PASSWD" ]]; then
     echo "Failed to retrieve 'cobbler-root-password'"
     exit

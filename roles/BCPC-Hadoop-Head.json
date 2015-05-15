@@ -3,6 +3,7 @@
   "json_class": "Chef::Role",
   "run_list": [
     "role[Basic]",
+    "recipe[bcpc::chef_vault_install]",
     "recipe[bcpc::default]",
     "recipe[bcpc-hadoop::default]",
     "recipe[bcpc::networking]",

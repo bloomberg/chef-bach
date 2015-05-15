@@ -34,7 +34,7 @@ KNIFE_ADMIN="-u admin -k /etc/chef-server/admin.pem"
 # Argument: $1 - a string of role!IP!FQDN pairs separated by white space
 # Will install the machine with role $role in the order passed (left to right)
 function install_machines {
-  passwd=`sudo knife data bag show configs $ENVIRONMENT $KNIFE_ADMIN | grep "cobbler-root-password:" | awk ' {print $2}'`
+  passwd=`sudo knife vault show os cobbler "root-password" --mode client | grep "root-password:" | awk ' {print $2}'`
   for h in $(sort <<< ${*// /\\n}); do
     [[ "$h" =~ $REGEX ]]
     local run_list="${BASH_REMATCH[1]}"

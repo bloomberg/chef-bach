@@ -75,12 +75,6 @@ def make_config!(key, value)
   return value
 end
 
-def get_config(key)
-  init_config if $dbi.nil?
-  puts "------------ Fetching value for key \"#{key}\""
-  return (node['bcpc']['encrypt_data_bag'] ? $edbi[key] : $dbi[key])
-end
-
 def get_head_nodes
   results = search(:node, "role:BCPC-Headnode AND chef_environment:#{node.chef_environment}")
   results.map!{ |x| x['hostname'] == node[:hostname] ? node : x }
