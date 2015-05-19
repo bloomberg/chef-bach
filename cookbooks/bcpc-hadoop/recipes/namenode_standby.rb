@@ -63,6 +63,7 @@ if @node['bcpc']['hadoop']['hdfs']['HA'] == true then
     supports :status => true, :restart => true, :reload => false
     subscribes :restart, "template[/etc/hadoop/conf/hdfs-site.xml]", :delayed
     subscribes :restart, "template[/etc/hadoop/conf/hdfs-policy.xml]", :delayed
+    subscribes :restart, "template[/etc/hadoop/conf/hadoop-env.sh]", :delayed
   end
 
   service "hadoop-hdfs-namenode" do
@@ -70,6 +71,7 @@ if @node['bcpc']['hadoop']['hdfs']['HA'] == true then
     supports :status => true, :restart => true, :reload => false
     subscribes :restart, "template[/etc/hadoop/conf/hdfs-site.xml]", :delayed
     subscribes :restart, "template[/etc/hadoop/conf/hdfs-policy.xml]", :delayed
+    subscribes :restart, "template[/etc/hadoop/conf/hadoop-env.sh]", :delayed
     subscribes :restart, "template[/etc/hadoop/conf/topology]", :delayed
   end
 else

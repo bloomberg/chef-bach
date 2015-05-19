@@ -32,5 +32,6 @@ service "hive-server2" do
   supports :status => true, :restart => true, :reload => false
   subscribes :restart, "template[/etc/hive/conf/hive-site.xml]", :delayed
   subscribes :restart, "template[/etc/hive/conf/hive-log4j.properties]", :delayed
+  subscribes :restart, "template[/etc/hive/conf/hive-env.sh]", :delayed
   subscribes :restart, "bash[extract-mysql-connector]", :delayed
 end
