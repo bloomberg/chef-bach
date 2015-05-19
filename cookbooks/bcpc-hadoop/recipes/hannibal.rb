@@ -34,3 +34,4 @@ if ("mysql" == node[:hannibal][:db]) then
 end
 
 node.override[:hannibal][:zookeeper_quorum] = node[:bcpc][:hadoop][:zookeeper][:servers] 
+node.override[:hannibal][:hbase_rs][:info_port] = 60300
