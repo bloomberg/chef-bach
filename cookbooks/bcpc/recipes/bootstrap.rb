@@ -58,11 +58,6 @@ if node[:bcpc][:networks].length > 1
     remote_ip node[:bcpc][:networks][node[:bcpc][:management][:subnet]][:management][:gateway]
     local_ip node[:bcpc][:management][:ip]
   end
-  bfd_session "Global Bootstrap VIP Up" do
-    action :up
-    remote_ip node[:bcpc][:networks][node[:bcpc][:management][:subnet]][:management][:gateway]
-    local_ip node[:bcpc][:management][:ip]
-  end
   Augeas::open do |aug|
     aug.set("/augeas/load/Interfaces/incl", "/etc/network/interfaces.d/*")
     aug.load
@@ -85,6 +80,11 @@ if node[:bcpc][:networks].length > 1
       mask "255.255.255.255"
       action [:enable]
     end
+  end
+  bfd_session "Global Bootstrap VIP Up" do
+    action :up
+    remote_ip node[:bcpc][:networks][node[:bcpc][:management][:subnet]][:management][:gateway]
+    local_ip node[:bcpc][:management][:ip]
   end
 end
 
