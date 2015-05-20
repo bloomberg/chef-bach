@@ -86,7 +86,7 @@ fi
 FILES="jce_policy-8.zip $FILES"
 
 # Pull all the gems required for the cluster 
-for i in patron wmi-lite simple-graphite; do
+for i in patron wmi-lite simple-graphite ruby-augeas; do
   if ! [[ -f gems/${i}.gem ]]; then
     gem fetch ${i}
     ln -s ${i}-*.gem ${i}.gem || true
