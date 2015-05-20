@@ -98,7 +98,9 @@ bash "enable-mellanox" do
     only_if "lspci | grep Mellanox"
 end
 
-if ["floating", "storage", "management"].select{|i| node[:bcpc][i].attribute?("slaves")}.any?
+subnet = node[:bcpc][:management][:subnet]
+# XXX change subnet to pod or cell!!!
+if ["floating", "storage", "management"].select{|i| node[:bcpc][:networks][subnet][i].attribute?("slaves")}.any?
   bash "enable-bonding" do
     user "root"
     code <<-EOH
