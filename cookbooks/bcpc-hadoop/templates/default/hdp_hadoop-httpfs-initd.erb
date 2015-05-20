@@ -32,11 +32,6 @@
 ### END INIT INFO
 
 . /lib/lsb/init-functions
-. /etc/default/hadoop
-
-if [ -f /etc/default/hadoop-httpfs ] ; then
-  . /etc/default/hadoop-httpfs
-fi
 
 # Autodetect JAVA_HOME if not defined
 if [ -e /usr/libexec/bigtop-detect-javahome ]; then
@@ -53,10 +48,8 @@ STATUS_DEAD_AND_LOCK=2
 STATUS_NOT_RUNNING=3
 STATUS_OTHER_ERROR=102
 
-
 ERROR_PROGRAM_NOT_INSTALLED=5
 ERROR_PROGRAM_NOT_CONFIGURED=6
-
 
 RETVAL=0
 SLEEP_TIME=5
@@ -81,14 +74,7 @@ start() {
   [ -d $CONF_DIR ] || exit $ERROR_PROGRAM_NOT_CONFIGURED
   log_success_msg "Starting ${DESC}: "
 
-  export HTTPFS_USER="$SVC_USER"
-  export HTTPFS_CONFIG="$CONF_DIR"
-  export HTTPFS_LOG=${HTTPFS_LOG:-"/var/log/hadoop-httpfs/"}
-  export HTTPFS_TEMP="$(dirname $PIDFILE)"
   export HTTPFS_SLEEP_TIME="$SLEEP_TIME"
-  export CATALINA_BASE=${CATALINA_BASE:-"/usr/lib/hadoop-httpfs"}
-  export CATALINA_PID="$PIDFILE"
-  export CATALINA_TMPDIR="$HTTPFS_TEMP"
 
   su -s /bin/bash -c "${EXEC_PATH} start $DAEMON_FLAGS" $HTTPFS_USER
 
