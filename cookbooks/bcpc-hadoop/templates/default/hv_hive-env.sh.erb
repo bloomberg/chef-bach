@@ -4,7 +4,7 @@ export HIVE_CONF_DIR=/etc/hive/conf.<%= node.chef_environment %>
 
 # Folder containing extra ibraries required for hive compilation/execution can be controlled by:
 # export HIVE_AUX_JARS_PATH=
-export HIVE_AUX_JARS_PATH=/usr/lib/hcatalog/share/hcatalog/hcatalog-core.jar
+export HIVE_AUX_JARS_PATH=/usr/hdp/current/hive-webhcat/share/hcatalog/hive-hcatalog-core.jar
 
 export JAVA_HOME=<%= node["bcpc"]["hadoop"]["java"] %>
 export HADOOP_HEAPSIZE=<%=node[:bcpc][:hive][:heap][:size] %>
