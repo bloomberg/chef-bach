@@ -39,6 +39,8 @@ subnet = node[:bcpc][:networks].keys do |env_net|
 end.select{|n| n}.first
 node.set['bcpc']['management']['subnet'] = subnet
 
+raise "Could not find subnet!" if subnet.nil?
+
 mgmt_cidr = IPAddr.new(node['bcpc']['networks'][subnet]['management']['cidr'])
 mgmt_vip = IPAddr.new(node['bcpc']['networks'][subnet]['management']['vip'])
 
