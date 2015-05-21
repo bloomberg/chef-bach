@@ -39,6 +39,9 @@ default["bcpc"]["hadoop"]["kafka"]["jmx"]["port"] = 9995
 default["bcpc"]["hadoop"]["java"] = "/usr/lib/jvm/java-1.7.0-openjdk-amd64"
 default["bcpc"]["hadoop"]["topology"]["script"] = "topology"
 default["bcpc"]["hadoop"]["topology"]["cookbook"] = "bcpc-hadoop"
+
+# Setting balancer bandwidth to default value as per hdfs-default.xml
+default["bcpc"]["hadoop"]["balancer"]["bandwidth]" = 1048576
 #
 # Attributes for service rolling restart process
 #

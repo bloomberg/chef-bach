@@ -2,19 +2,10 @@ export TEZ_CONF_DIR=/etc/tez/conf
 export TEZ_JARS=/usr/hdp/current/tez-client/*:/usr/hdp/current/tez-client/lib/*
 
 export JAVA_HOME=<%= node["bcpc"]["hadoop"]["java"] %>
+export JSVC_HOME=/usr/lib/bigtop-utils
+
 export MAPREDUCE_LIBS=/usr/lib/hadoop-mapreduce/*
 export HADOOP_CLASSPATH=$HADOOP_CLASSPATH:${MAPREDUCE_LIBS}:${TEZ_CONF_DIR}:${TEZ_JARS}
-
-export HADOOP_LOG_DIR=/var/log/hadoop-hdfs
-export HADOOP_PID_DIR=/var/run/hadoop-hdfs
-export HADOOP_IDENT_STRING=hdfs
-
-# Hive Configuration Directory can be controlled by:
-export HIVE_CONF_DIR=/etc/hive/conf.<%= node.chef_environment %> 
-
-# Folder containing extra ibraries required for hive compilation/execution can be controlled by:
-# export HIVE_AUX_JARS_PATH=
-export HIVE_AUX_JARS_PATH=/usr/lib/hcatalog/share/hcatalog/hcatalog-core.jar
 
 # avoid IPv6 (for HADOOP-8568)
 export HADOOP_NAMENODE_OPTS="-Djava.net.preferIPv4Stack=true"
@@ -29,3 +20,12 @@ JMX_OPTS="-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.ssl=fals
 export HADOOP_NAMENODE_OPTS="$HADOOP_NAMENODE_OPTS $JMX_OPTS -Dcom.sun.management.jmxremote.port=<%= @nn_jmx_port %>"
 export HADOOP_DATANODE_OPTS="$HADOOP_DATANODE_OPTS $JMX_OPTS -Dcom.sun.management.jmxremote.port=<%= @dn_jmx_port %>"
 <% end %>
+
+export HADOOP_LOG_DIR=/var/log/hadoop-hdfs
+export HADOOP_PID_DIR=/var/run/pid/$USER
+export HADOOP_IDENT_STRING="$USER"
+export HADOOP_SECURE_DN_USER=hdfs
+export HADOOP_SECURE_DN_PID_DIR=/var/run/pid/$HADOOP_SECURE_DN_USER
+export HADOOP_SECURE_DN_LOG_DIR=$HADOOP_LOG_DIR/$HADOOP_SECURE_DN_USER
+
+#HADOOP_OPTS="-Djavax.net.debug=ssl -Dsun.security.krb5.debug=true $HADOOP_OPTS"

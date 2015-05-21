@@ -11,6 +11,7 @@
     "recipe[bcpc::haproxy]",
     "recipe[bcpc::zabbix-head]",
     "recipe[bcpc::zabbix-work]",
+    "recipe[bcpc::diamond]",
     "recipe[bcpc::graphite]",
     "recipe[bcpc::powerdns]",
     "recipe[bcpc-hadoop::disks]",
