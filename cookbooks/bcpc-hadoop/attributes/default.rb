@@ -41,7 +41,7 @@ default["bcpc"]["hadoop"]["topology"]["script"] = "topology"
 default["bcpc"]["hadoop"]["topology"]["cookbook"] = "bcpc-hadoop"
 
 # Setting balancer bandwidth to default value as per hdfs-default.xml
-default["bcpc"]["hadoop"]["balancer"]["bandwidth]" = 1048576
+default["bcpc"]["hadoop"]["balancer"]["bandwidth"] = 1048576
 #
 # Attributes for service rolling restart process
 #
