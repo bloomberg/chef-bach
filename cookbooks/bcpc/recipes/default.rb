@@ -29,22 +29,28 @@ ips = ifs.map{ |a| node[:network][:interfaces][a].attribute?(:addresses) and
 nets = ips.keys.select{ |ip| ips[ip]['family'] == "inet" }.map{ |ip| IPAddr.new("#{ip}/#{ips[ip]['prefixlen']}") }
 
 # find which subnet contains this machine's management network
-subnet = node[:bcpc][:networks].keys do |env_net|
+subnet = node[:bcpc][:networks].keys.map do |env_net|
   matches = nets.select{|n| n == IPAddr.new(node[:bcpc][:networks][env_net][:management][:cidr])}
-  if matches == 0
-    false
-  else
+  if matches.length >= 1
     env_net
+  else
+    false
   end
 end.select{|n| n}.first
-node.set['bcpc']['management']['subnet'] = subnet
 
 raise "Could not find subnet!" if subnet.nil?
+node.set['bcpc']['management']['subnet'] = subnet
 
 mgmt_cidr = IPAddr.new(node['bcpc']['networks'][subnet]['management']['cidr'])
 mgmt_vip = IPAddr.new(node['bcpc']['networks'][subnet]['management']['vip'])
 
 # select the first IP address which is on the management network
+plausible_ips = ips.select {|ip,v| v['family'] == "inet" and
+                            ip != mgmt_vip and mgmt_cidr===ip}.first
+if not plausible_ips or plausible_ips.length < 1
+  raise "Unable to find any plausible IPs for node['bcpc']['management']['ip']\nPossible IPs: #{ips}\nCan not match #{mgmt_vip} and must be in network #{subnet} -- #{mgmt_cidr.to_range}"
+end
+
 node.set['bcpc']['management']['ip'] = ips.select {|ip,v| v['family'] == "inet" and
                                                    ip != mgmt_vip and mgmt_cidr===ip}.first[0]
 
