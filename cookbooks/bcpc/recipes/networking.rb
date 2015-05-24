@@ -147,7 +147,7 @@ end
 
 bash "update resolvers" do
   code <<-EOH
-  echo "#{(resolvers.map{|r| "nameserver #{r}"} + ["search #{node[:bcpc][:domain_name]}"]).join('\n')}" | resolvconf -a #{node[:bcpc][:management][:interface]}.inet
+  echo "#{(resolvers.map{|r| "nameserver #{r}"} + ["search #{node[:bcpc][:domain_name]}"]).join('\n')}" | resolvconf -a #{node[:bcpc][:networks][subnet][:management][:interface]}.inet
   EOH
 end
 
@@ -156,7 +156,7 @@ ifaces.each_index do |i|
   iface = ifaces[i]
   device_name = node[:bcpc][iface][:interface]
   next if iface != "management" and \
-      node[:bcpc][:management][:interface] == device_name
+      node[:bcpc][:networks][subnet][:management][:interface] == device_name
   template "/etc/network/interfaces.d/#{device_name}.cfg" do
     source "network.iface.erb"
     owner "root"
@@ -185,14 +185,14 @@ end
 bash "interface-mgmt-make-static-if-dhcp" do
   user "root"
   code <<-EOH
-  sed --in-place '/\\(.*#{node[:bcpc][:management][:interface]}.*\\)/d' /etc/network/interfaces
-  resolvconf -d #{node[:bcpc][:management][:interface]}.dhclient
+  sed --in-place '/\\(.*#{node[:bcpc][:networks][subnet][:management][:interface]}.*\\)/d' /etc/network/interfaces
+  resolvconf -d #{node[:bcpc][:networks][subnet][:management][:interface]}.dhclient
   pkill -u root dhclient
   EOH
-  only_if "cat /etc/network/interfaces | grep #{node[:bcpc][:management][:interface]} | grep dhcp"
+  only_if "cat /etc/network/interfaces | grep #{node[:bcpc][:networks][subnet][:management][:interface]} | grep dhcp"
 end
 
-if node[:bcpc][:management][:interface] != node[:bcpc][:storage][:interface]
+if node[:bcpc][:networks][subnet][:management][:interface] != node[:bcpc][:networks][subnet][:storage][:interface]
   bash "routing-storage" do
       user "root"
       code "echo '2 storage' >> /etc/iproute2/rt_tables"
@@ -200,8 +200,8 @@ if node[:bcpc][:management][:interface] != node[:bcpc][:storage][:interface]
   end
 end
   
-if node[:bcpc][:management][:interface] != node[:bcpc][:storage][:interface] or \
-   node[:bcpc][:management][:interface] != node[:bcpc][:floating][:interface]
+if node[:bcpc][:networks][subnet][:management][:interface] != node[:bcpc][:networks][subnet][:storage][:interface] or \
+   node[:bcpc][:networks][subnet][:management][:interface] != node[:bcpc][:networks][subnet][:floating][:interface]
   bash "routing-management" do
       user "root"
       code "echo '1 mgmt' >> /etc/iproute2/rt_tables"
