@@ -28,14 +28,37 @@
     <% @rm_hosts.each do |h| %>   
       <property>
         <name>yarn.resourcemanager.hostname.rm<%= "#{node.chef_environment}#{h[:node_number]}" %></name>
-        <value><%=float_host(h[:hostname]) %></value>
+        <value><%= float_host(h[:hostname]) %></value>
       </property>
-    <% end %>
 
-    <% @rm_hosts.each do |h| %>   
+      <property>
+        <name>yarn.resourcemanager.resource-tracker.address.rm<%= "#{node.chef_environment}#{h[:node_number]}" %></name>
+        <value><%="#{float_host(h[:hostname])}:8031"%></value>
+      </property>
+
       <property>
         <name>yarn.resourcemanager.address.rm<%= "#{node.chef_environment}#{h[:node_number]}" %></name>
-        <value><%=float_host(h[:hostname])%>:<%=node["bcpc"]["hadoop"]["yarn"]["rm_port"]%></value>
+        <value><%="#{float_host(h[:hostname])}:8032"%></value>
+      </property>
+
+      <property>
+        <name>yarn.resourcemanager.scheduler.address.rm<%= "#{node.chef_environment}#{h[:node_number]}" %></name>
+        <value><%="#{float_host(h[:hostname])}:8030"%></value>
+      </property>
+
+      <property>
+        <name>yarn.resourcemanager.admin.address.rm<%= "#{node.chef_environment}#{h[:node_number]}" %></name>
+        <value><%="#{float_host(h[:hostname])}:8033"%></value>
+      </property>
+
+      <property>
+        <name>yarn.resourcemanager.webapp.address.rm<%= "#{node.chef_environment}#{h[:node_number]}" %></name>
+        <value><%="#{float_host(h[:hostname])}:8088"%></value>
+      </property>
+
+      <property>
+        <name>yarn.resourcemanager.webapp.https.address.rm<%= "#{node.chef_environment}#{h[:node_number]}" %></name>
+        <value><%="#{float_host(h[:hostname])}:8090"%></value>
       </property>
     <% end %>
 
@@ -59,7 +82,6 @@
       <value>org.apache.hadoop.yarn.client.ConfiguredRMFailoverProxyProvider</value> 
     </property>
   <% else %>
-
     <property>
       <name>yarn.resourcemanager.resource-tracker.address</name>
       <value><%="#{float_host(@rm_hosts.first[:hostname])}:8031" if not @rm_hosts.empty?%></value>
@@ -83,6 +105,11 @@
     <property>
       <name>yarn.resourcemanager.webapp.address</name>
       <value><%="#{float_host(@rm_hosts.first[:hostname])}:8088" if not @rm_hosts.empty?%></value>
+    </property>
+
+    <property>
+      <name>yarn.resourcemanager.webapp.https.address</name>
+      <value><%="#{float_host(@rm_hosts.first[:hostname])}:8090" if not @rm_hosts.empty?%></value>
     </property>
   <% end %>
 
