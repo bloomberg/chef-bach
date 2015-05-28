@@ -16,12 +16,12 @@ node.default['bcpc']['hadoop']['copylog']['region_server_out'] = {
   end
 end
 
-directory "/usr/lib/hbase/lib/native/Linux-amd64-64/" do
+directory "/usr/hdp/current/hbase-regionserver/lib/native/Linux-amd64-64" do
   recursive true
   action :create
 end
 
-link "/usr/lib/hbase/lib/native/Linux-amd64-64/libsnappy.so.1" do
+link "/usr/hdp/current/hbase-regionserver/lib/native/Linux-amd64-64/libsnappy.so" do
   to "/usr/lib/libsnappy.so.1"
 end
 
