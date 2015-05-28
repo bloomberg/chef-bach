@@ -1,31 +1,55 @@
-export TEZ_CONF_DIR=/etc/tez/conf
-export TEZ_JARS=/usr/hdp/current/tez-client/*:/usr/hdp/current/tez-client/lib/*
-
+# Set Hadoop-specific environment variables here.
+ 
+# The java implementation to use.  Required.
 export JAVA_HOME=<%= node["bcpc"]["hadoop"]["java"] %>
+export HADOOP_HOME_WARN_SUPPRESS=1
+ 
+# Extra Java runtime options.  Empty by default.
+export HADOOP_OPTS="-Djava.net.preferIPv4Stack=true ${HADOOP_OPTS}"
+ 
+# Where log files are stored.  $HADOOP_HOME/logs by default.
+export HADOOP_LOG_DIR=/var/log/hadoop-hdfs
+ 
+# History server logs
+export HADOOP_MAPRED_LOG_DIR=/var/log/hadoop-hdfs
+ 
+# Where log files are stored in the secure data environment.
+export HADOOP_SECURE_DN_LOG_DIR=/var/log/hadoop-hdfs
+ 
+# The directory where pid files are stored.
+export HADOOP_PID_DIR=/var/run/hadoop-hdfs
+export HADOOP_SECURE_DN_PID_DIR=/var/run/hadoop-hdfs
+ 
+# History server pid
+export HADOOP_MAPRED_PID_DIR=/var/run/hadoop-hdfs
+ 
+# A string representing this instance of hadoop.
+export HADOOP_IDENT_STRING="$USER"
+ 
+# Use libraries from standard classpath
+JAVA_JDBC_LIBS=""
+#Add libraries required by mysql connector
+for jarFile in `ls /usr/share/java/*mysql* 2>/dev/null`
+do
+  JAVA_JDBC_LIBS=${JAVA_JDBC_LIBS}:$jarFile
+done
+#Add libraries required by oracle connector
+for jarFile in `ls /usr/share/java/*ojdbc* 2>/dev/null`
+do
+  JAVA_JDBC_LIBS=${JAVA_JDBC_LIBS}:$jarFile
+done
+#Add libraries required by nodemanager
+TEZ_LIBS=/etc/tez/conf:/usr/hdp/${HDP_VERSION}/tez/*:/usr/hdp/${HDP_VERSION}/tez/lib/*
+export HADOOP_CLASSPATH=${HADOOP_CLASSPATH}${JAVA_JDBC_LIBS}:${TEZ_LIBS}
+ 
+# Path to jsvc required by secure datanode
 export JSVC_HOME=/usr/lib/bigtop-utils
-
-export MAPREDUCE_LIBS=/usr/lib/hadoop-mapreduce/*
-export HADOOP_CLASSPATH=$HADOOP_CLASSPATH:${MAPREDUCE_LIBS}:${TEZ_CONF_DIR}:${TEZ_JARS}
-
-# avoid IPv6 (for HADOOP-8568)
-export HADOOP_NAMENODE_OPTS="-Djava.net.preferIPv4Stack=true"
-export HADOOP_DATANODE_OPTS="-Djava.net.preferIPv4Stack=true"
-export YARN_RESOURCEMANAGER_OPTS="-Djava.net.preferIPv4Stack=true"
-export YARN_NODEMANAGER_OPTS="-Djava.net.preferIPv4Stack=true"
-export YARN_PROXYSERVER_OPTS="-Djava.net.preferIPv4Stack=true"
-export HADOOP_JOB_HISTORYSERVER_OPTS="-Djava.net.preferIPv4Stack=true -Xmx<%= [node['bcpc']['hadoop']['yarn']['historyserver']['heap']['size'], (node['memory']['total'].to_i * node['bcpc']['hadoop']['yarn']['historyserver']['heap']['ratio']/1024).floor].max %>m"
+ 
+# On secure datanodes, user to run the datanode as after dropping privileges
+export HADOOP_SECURE_DN_USER=hdfs
 
 <% if node[:bcpc][:hadoop].attribute?(:jmx_enabled) and node[:bcpc][:hadoop][:jmx_enabled] %>
 JMX_OPTS="-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false"
 export HADOOP_NAMENODE_OPTS="$HADOOP_NAMENODE_OPTS $JMX_OPTS -Dcom.sun.management.jmxremote.port=<%= @nn_jmx_port %>"
 export HADOOP_DATANODE_OPTS="$HADOOP_DATANODE_OPTS $JMX_OPTS -Dcom.sun.management.jmxremote.port=<%= @dn_jmx_port %>"
 <% end %>
-
-export HADOOP_LOG_DIR=/var/log/hadoop-hdfs
-export HADOOP_PID_DIR=/var/run/pid/$USER
-export HADOOP_IDENT_STRING="$USER"
-export HADOOP_SECURE_DN_USER=hdfs
-export HADOOP_SECURE_DN_PID_DIR=/var/run/pid/$HADOOP_SECURE_DN_USER
-export HADOOP_SECURE_DN_LOG_DIR=$HADOOP_LOG_DIR/$HADOOP_SECURE_DN_USER
-
-#HADOOP_OPTS="-Djavax.net.debug=ssl -Dsun.security.krb5.debug=true $HADOOP_OPTS"
