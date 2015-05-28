@@ -8,4 +8,4 @@ node.override['java']['jdk']['7']['i586']['url'] = get_binary_server_url + "jdk-
 node.override['bcpc']['hadoop']['java'] = "/usr/lib/jvm/java-7-oracle-amd64"
 node.override['java']['oracle']['jce']['7']['url'] = get_binary_server_url + "UnlimitedJCEPolicyJDK7.zip"
 node.override['java']['oracle']['jce']['8']['url'] = get_binary_server_url + "jce_policy-8.zip"
-nove.override['java']['oracle']['jce']['enabled'] = true
+node.override['java']['oracle']['jce']['enabled'] = true
