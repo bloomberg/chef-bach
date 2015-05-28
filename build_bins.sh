@@ -74,6 +74,15 @@ if ! [[ -f jdk-7u51-linux-x64.tar.gz ]]; then
 fi
 FILES="jdk-7u51-linux-x64.tar.gz $FILES"
 
+if ! [[ -f UnlimitedJCEPolicyJDK7.zip ]]; then
+  $CURL -O -L -C - -b "oraclelicense=accept-securebackup-cookie" http://download.oracle.com/otn-pub/java/jce/7/UnlimitedJCEPolicyJDK7.zip
+fi
+FILES="UnlimitedJCEPolicyJDK7.zip $FILES"
+
+if ! [[ -f jce_policy-8.zip ]]; then
+  $CURL -O -L -C - -b "oraclelicense=accept-securebackup-cookie" http://download.oracle.com/otn-pub/java/jce/8/jce_policy-8.zip
+fi
+FILES="jce_policy-8.zip $FILES"
 
 # Pull all the gems required for the cluster 
 for i in patron wmi-lite simple-graphite; do

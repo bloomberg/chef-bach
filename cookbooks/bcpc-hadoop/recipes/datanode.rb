@@ -28,20 +28,30 @@ template "/etc/init.d/hadoop-yarn-nodemanager" do
   mode 0655
 end
 
-link "/usr/hdp/2.2.0.0-2041/hadoop/lib/hadoop-lzo-0.6.0.jar" do
-  to "/usr/lib/hadoop/lib/hadoop-lzo-0.6.0.jar"
+directory "/usr/hdp/current/hadoop-client/lib/native/Linux-amd64-64" do
+  action :create
+  mode 0755
+  recursive true
 end
 
-link "/usr/lib/hadoop/lib/native/libgplcompression.la" do
-  to "/usr/lib/hadoop/lib/native/Linux-amd64-64/libgplcompression.la"
+link "/usr/hdp/current/hadoop-client/lib/hadoop-lzo-0.6.0.jar" do
+   to "/usr/lib/hadoop/lib/hadoop-lzo-0.6.0.jar"
 end
-
-link "/usr/lib/hadoop/lib/native/libgplcompression.a" do
-  to "/usr/lib/hadoop/lib/native/Linux-amd64-64/libgplcompression.a"
+ 
+link "/usr/hdp/current/hadoop-client/lib/native/Linux-amd64-64/libgplcompression.la" do
+   to "/usr/lib/hadoop/lib/native/Linux-amd64-64/libgplcompression.la"
+ end
+ 
+link "/usr/hdp/current/hadoop-client/lib/native/Linux-amd64-64/libgplcompression.a" do
+   to "/usr/lib/hadoop/lib/native/Linux-amd64-64/libgplcompression.a"
+ end
+ 
+link "/usr/hdp/current/hadoop-client/lib/native/Linux-amd64-64/libgplcompression.so" do
+   to "/usr/lib/hadoop/lib/native/Linux-amd64-64/libgplcompression.so.0.0.0"
 end
-
-link "/usr/lib/hadoop/lib/native/libgplcompression.so.0.0.0" do
-  to "/usr/lib/hadoop/lib/native/Linux-amd64-64/libgplcompression.so.0.0.0"
+ 
+link "/usr/hdp/current/hadoop-client/lib/native/liblzo2.so" do
+  to "/usr/lib/x86_64-linux-gnu/liblzo2.so.2.0.0"
 end
 
 # Install YARN Bits
@@ -88,10 +98,6 @@ end
 package 'hive-hcatalog' do
   action :upgrade
 end
-
-#link "/usr/lib/hive/lib/mysql.jar" do
-#  to "/usr/share/java/mysql.jar"
-#end
 
 link "/usr/hdp/current/hive-metastore/lib/mysql-connector-java.jar" do
   to "/usr/share/java/mysql-connector-java.jar"
