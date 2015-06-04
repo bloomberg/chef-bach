@@ -30,7 +30,6 @@ o = Ohai::System.new
 o.all_plugins
  
 log_level                :info
-log_location             STDOUT
 node_name                o[:fqdn]
 client_key               "$(pwd)/.chef/#{o[:fqdn]}.pem"
 validation_client_name   'chef-validator'
