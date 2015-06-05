@@ -98,6 +98,9 @@ default["bcpc"]["hadoop"]["zabbix"]["trend_days"] = 15
 default["bcpc"]["hadoop"]["zabbix"]["cron_check_time"] = 240
 default["bcpc"]["hadoop"]["zabbix"]["mail_source"] = "zabbix.zbx_mail.sh.erb"
 default["bcpc"]["hadoop"]["zabbix"]["cookbook"] = nil 
+
+# Graphite queries which specify property to query and alarming trigger, severity
+# and owner who the trigger is routed to for resolution
 default["bcpc"]["hadoop"]["graphite"]["queries"] = {
    'namenode' => [
     {
@@ -109,7 +112,8 @@ default["bcpc"]["hadoop"]["graphite"]["queries"] = {
       'trigger_name' => "NameNodeAvailability",
       'trigger_enable' => true,
       'trigger_desc' => "Namenode service seems to be down",
-      'severity' => 2
+      'severity' => 2,
+      'route_to' => "admin"
     },
     {
       'type'  => "jmx",
@@ -127,7 +131,8 @@ default["bcpc"]["hadoop"]["graphite"]["queries"] = {
       'trigger_name' => "HBaseMasterAvailability",
       'trigger_dep' => ["NameNodeAvailability"],
       'trigger_desc' => "HBase master seems to be down",
-      'severity' => 1
+      'severity' => 1,
+      'route_to' => "admin"
     },
     {
       'type'  => "jmx",
@@ -146,7 +151,8 @@ default["bcpc"]["hadoop"]["graphite"]["queries"] = {
       'trigger_enable' => true,
       'trigger_dep' => ["HBaseMasterAvailability"],
       'trigger_desc' => "HBase region server seems to be down",
-      'severity' => 2
+      'severity' => 2,
+      'route_to' => "admin"
     }
   ]
 }

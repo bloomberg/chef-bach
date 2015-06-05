@@ -4,5 +4,6 @@ cluster_name=$2
 severity=$3
 description=$4
 host=$5
+owner=$6
 
-logger -t "Zabbix-Trigger-Action" <<< "Please attend to severity $severity issue with $trigger_name on $cluster_name:$host; problem description=$description"
+logger -t "Zabbix-Trigger-Action" <<< "@$owner: Please attend to severity $severity issue with $trigger_name on $cluster_name:$host; problem description=$description"
