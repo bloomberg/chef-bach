@@ -30,7 +30,6 @@ o = Ohai::System.new
 o.all_plugins
  
 log_level                :info
-log_location             STDOUT
 node_name                o[:fqdn]
 client_key               "$(pwd)/.chef/#{o[:fqdn]}.pem"
 validation_client_name   'chef-validator'
@@ -57,7 +56,7 @@ EOF
 cd cookbooks
 
 # allow versions on cookbooks via "cookbook version"
-for cookbook in "apt 2.4.0" python build-essential ubuntu cron "chef-client 3.0.6" chef-vault ntp yum logrotate yum-epel sysctl chef_handler 7-zip windows ark sudo ulimit pam ohai "poise 1.0.12" graphite_handler java maven; do
+for cookbook in "apt 2.4.0" python build-essential ubuntu cron "chef-client 4.2.4" chef-vault ntp yum logrotate yum-epel sysctl chef_handler 7-zip windows ark sudo ulimit pam ohai "poise 1.0.12" graphite_handler java maven; do
   if [[ ! -d ${cookbook% *} ]]; then
      # unless the proxy was defined this knife config will be the same as the one generated above
     knife cookbook site download $cookbook --config ../.chef/knife.rb
