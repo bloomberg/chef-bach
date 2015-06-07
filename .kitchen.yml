@@ -1,0 +1,54 @@
+---
+driver:
+  name: vagrant
+
+provisioner:
+  name: chef_zero
+
+platforms:
+  - name: ubuntu-14.04
+    run_list:
+      - 'recipe[apt::default]'
+      - 'recipe[java::oracle]'
+      - 'recipe[bcpc-hadoop::hdp_repo]'
+    attributes: {
+      java: {
+        oracle: {
+          accept_oracle_download_terms: true
+        }
+      },
+      bcpc: {
+        hadoop: {
+          repos: {
+            hortonworks: 'http://public-repo-1.hortonworks.com/HDP/ubuntu14/2.x/updates/2.3.2.0/',
+            hdp_utils: 'http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.20/repos/ubuntu14'
+          }
+        }
+      }
+    }
+suites:
+  - name: mysql_connector
+    run_list:
+      - 'recipe[bcpc::mysql_connector]' 
+      - 'recipe[bcpc::test_mysql_connector]' 
+    attributes:
+      bcpc:
+        bin_dir:
+          path: "/tmp/"
+  - name: zookeeper
+    run_list:
+      - 'recipe[kafka-bcpc::zookeeper_server]'
+  - name: kafka
+    attributes: {
+      kafka: {
+        version: '0.8.2.1',
+        scala_version: '2.9.2',
+        checksum: '',
+        md5_checksum: ''
+      }
+    }
+    run_list:
+      - 'recipe[kafka-bcpc::default]' 
+      - 'recipe[kafka-bcpc::setattr]'
+      - 'recipe[kafka::default]'
+      - 'recipe[kafka-bcpc::kafka]'

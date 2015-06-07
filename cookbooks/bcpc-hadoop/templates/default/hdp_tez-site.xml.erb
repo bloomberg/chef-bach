@@ -2,7 +2,7 @@
 <configuration>
   <property>
     <name>tez.lib.uris</name>
-    <value>/hdp/apps/2.2.0.0-2041/tez/tez.tar.gz</value>
+    <value>/hdp/apps/<%= node[:bcpc][:hadoop][:distribution][:active_release] %>/tez/tez.tar.gz</value>
   </property>
   <property>
     <name>tez.runtime.compress.codec</name>
@@ -10,14 +10,14 @@
   </property>
   <property>
     <name>tez.cluster.additional.classpath.prefix</name>
-    <value>/usr/hdp/2.2.0.0-2041/hadoop/lib/hadoop-lzo-0.6.0.jar</value>
+    <value>/usr/hdp/<%= node[:bcpc][:hadoop][:distribution][:active_release] %>/hadoop/lib/hadoop-lzo-0.6.0.<%= node[:bcpc][:hadoop][:distribution][:active_release] %>.jar</value>
   </property>
   <property>
     <name>tez.am.launch.cluster-default.cmd-opts</name>
-    <value>-server -Djava.net.preferIPv4Stack=true -Dhdp.version=2.2.0.0-2041</value>
+    <value>-server -Djava.net.preferIPv4Stack=true -Dhdp.version=<%= node[:bcpc][:hadoop][:distribution][:active_release] %></value>
   </property>
   <property>
     <name>tez.task.launch.cluster-default.cmd-opts</name>
-    <value>-server -Djava.net.preferIPv4Stack=true -Dhdp.version=2.2.0.0-2041</value>
+    <value>-server -Djava.net.preferIPv4Stack=true -Dhdp.version=<%= node[:bcpc][:hadoop][:distribution][:active_release] %></value>
   </property>
 </configuration>

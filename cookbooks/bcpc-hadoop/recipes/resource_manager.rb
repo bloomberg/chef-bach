@@ -1,7 +1,7 @@
-# vim: tabstop=2:shiftwidth=2:softtabstop=2 
-#
-include_recipe 'dpkg_autostart'
 include_recipe 'bcpc-hadoop::hadoop_config'
+::Chef::Recipe.send(:include, Bcpc_Hadoop::Helper)
+::Chef::Resource::Bash.send(:include, Bcpc_Hadoop::Helper)
+
 node[:bcpc][:hadoop][:mounts].each do |i|
   directory "/disk/#{i}/yarn/local" do
     owner "yarn"
@@ -22,49 +22,54 @@ end
 
 ["", "done", "done_intermediate"].each do |dir|
   bash "create-hdfs-history-dir #{dir}" do
-    code "hadoop fs -mkdir /user/history/#{dir} && hadoop fs -chmod 1777 /user/history/#{dir} && hadoop fs -chown yarn:mapred /user/history/#{dir}"
+    code "hdfs dfs -mkdir /user/history/#{dir} && hdfs dfs -chmod 1777 /user/history/#{dir} && hdfs dfs -chown yarn:mapred /user/history/#{dir}"
     user "hdfs"
-    not_if "sudo -u hdfs hadoop fs -test -d /user/history/#{dir}"
+    not_if "hdfs dfs -test -d /user/history/#{dir}", :user => "hdfs"
   end
 end
 
 bash "create-hdfs-yarn-log" do
-  code "hadoop fs -mkdir -p /var/log/hadoop-yarn && hadoop fs -chmod 1777 /var/log/hadoop-yarn && hadoop fs -chown yarn:mapred /var/log/hadoosp-yarn"
+  code "hdfs dfs -mkdir -p /var/log/hadoop-yarn && hdfs dfs -chmod 1777 /var/log/hadoop-yarn && hdfs dfs -chown yarn:mapred /var/log/hadoosp-yarn"
   user "hdfs"
-  not_if "sudo -u hdfs hadoop fs -test -d /var/log/hadoop-yarn"
+  not_if "hdfs dfs -test -d /var/log/hadoop-yarn", :user => "hdfs"
 end
 
-%w{hadoop-yarn-resourcemanager hadoop-client hadoop-mapreduce}.each do |pkg|
-  dpkg_autostart pkg do
-    allow false
+# list hdp packages to install
+%w{hadoop-yarn-resourcemanager hadoop-client hadoop-mapreduce-historyserver}.each do |pkg|
+  package hwx_pkg_str(pkg, node[:bcpc][:hadoop][:distribution][:release]) do
+    action :install
   end
-  package pkg do
-    action :upgrade
-  end
+
+  hdp_select(pkg, node[:bcpc][:hadoop][:distribution][:active_release])
 end
 
-template "/etc/init.d/hadoop-yarn-resourcemanager" do
-  source "hdp_hadoop-yarn-resourcemanager-initd.erb"
-  mode 0655
+link "/etc/init.d/hadoop-yarn-resourcemanager" do
+  to "/usr/hdp/#{node[:bcpc][:hadoop][:distribution][:active_release]}/hadoop-yarn/etc/init.d/hadoop-yarn-resourcemanager"
+  notifies :run, 'bash[kill yarn-resourcemanager]', :immediate
+end
+
+bash "kill yarn-resourcemanager" do
+  code "pkill -u yarn -f resourcemanager"
+  action :nothing
+  returns [0, 1]
 end
 
 bash "setup-mapreduce-app" do
   code <<-EOH
-  hdfs dfs -mkdir -p /hdp/apps/2.2.0.0-2041/mapreduce/
-  hdfs dfs -put /usr/hdp/2.2.0.0-2041/hadoop/mapreduce.tar.gz /hdp/apps/2.2.0.0-2041/mapreduce/
+  hdfs dfs -mkdir -p /hdp/apps/#{node[:bcpc][:hadoop][:distribution][:release]}/mapreduce/
+  hdfs dfs -put /usr/hdp/#{node[:bcpc][:hadoop][:distribution][:release]}/hadoop/mapreduce.tar.gz /hdp/apps/#{node[:bcpc][:hadoop][:distribution][:release]}/mapreduce/
   hdfs dfs -chown -R hdfs:hadoop /hdp
-  hdfs dfs -chmod -R 555 /hdp/apps/2.2.0.0-2041/mapreduce
-  hdfs dfs -chmod -R 444 /hdp/apps/2.2.0.0-2041/mapreduce/mapreduce.tar.gz
+  hdfs dfs -chmod -R 555 /hdp/apps/#{node[:bcpc][:hadoop][:distribution][:release]}/mapreduce
+  hdfs dfs -chmod -R 444 /hdp/apps/#{node[:bcpc][:hadoop][:distribution][:release]}/mapreduce/mapreduce.tar.gz
   EOH
   user "hdfs"
-  not_if "sudo -u hdfs hdfs dfs -test -f /hdp/apps/2.2.0.0-2041/mapreduce/mapreduce.tar.gz" 
-  only_if "echo 'test'|sudo -u hdfs hdfs dfs -copyFromLocal - /tmp/mapred-test"
-  notifies :run,"bash[delete-temp-file]",:immediately
+  not_if "hdfs dfs -test -f /hdp/apps/#{node[:bcpc][:hadoop][:distribution][:release]}/mapreduce/mapreduce.tar.gz", :user => "hdfs" 
+  only_if "echo 'test' | hdfs dfs -copyFromLocal - /user/hdfs/chef-mapred-test", :user => "hdfs"
 end
 
 bash "delete-temp-file" do
   code <<-EOH
-  hdfs dfs -rm /tmp/mapred-test
+  hdfs dfs -rm /user/hdfs/chef-mapred-test
   EOH
   user "hdfs"
   action :nothing
@@ -77,6 +82,7 @@ service "hadoop-yarn-resourcemanager" do
   subscribes :restart, "template[/etc/hadoop/conf/yarn-env.sh]", :delayed
   subscribes :restart, "template[/etc/hadoop/conf/yarn-site.xml]", :delayed
   subscribes :restart, "template[/etc/hadoop/conf/mapred-site.xml]", :delayed
+  subscribes :restart, "bash[hdp-select hadoop-yarn-resourcemanager]", :delayed
 end
 
 bash "reload mapreduce nodes" do

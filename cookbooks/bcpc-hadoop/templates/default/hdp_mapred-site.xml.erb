@@ -11,13 +11,13 @@
 <configuration>
   <property>
     <name>mapreduce.admin.map.child.java.opts</name>
-    <value>-server -Djava.net.preferIPv4Stack=true -Dhdp.version=2.2.0.0-2041</value>
+    <value>-server -Djava.net.preferIPv4Stack=true -Dhdp.version=<%= node[:bcpc][:hadoop][:distribution][:release] %></value>
     <final>true</final>
   </property>
 
   <property>
     <name>mapreduce.admin.user.env</name> 
-    <value>LD_LIBRARY_PATH=/usr/hdp/current/hadoop-client/lib/native:/usr/hdp/current/hadoop-client/lib/native/Linux-amd64-64</value>
+    <value>LD_LIBRARY_PATH=/usr/hdp/<%= node[:bcpc][:hadoop][:distribution][:active_release] %>/hadoop/lib/native:/usr/hdp/<%= node[:bcpc][:hadoop][:distribution][:active_release] %>/hadoop/lib/native/Linux-amd64-64</value>
   </property>
 
   <property>
@@ -27,12 +27,12 @@
 
   <property>
     <name>mapreduce.application.classpath</name>
-    <value>$PWD/mr-framework/hadoop/share/hadoop/mapreduce/*,$PWD/mr-framework/hadoop/share/hadoop/mapreduce/lib/*,$PWD/mr-framework/hadoop/share/hadoop/common/*,$PWD/mr-framework/hadoop/share/hadoop/common/lib/*,$PWD/mr-framework/hadoop/share/hadoop/yarn/*,$PWD/mr-framework/hadoop/share/hadoop/yarn/lib/*,$PWD/mr-framework/hadoop/share/hadoop/hdfs/*,$PWD/mr-framework/hadoop/share/hadoop/hdfs/lib/*,/usr/hdp/2.2.0.0-2041/hadoop/lib/hadoop-lzo-0.6.0.jar,$HADOOP_CONF_DIR</value>
+    <value>$PWD/mr-framework/hadoop/share/hadoop/mapreduce/*,$PWD/mr-framework/hadoop/share/hadoop/mapreduce/lib/*,$PWD/mr-framework/hadoop/share/hadoop/common/*,$PWD/mr-framework/hadoop/share/hadoop/common/lib/*,$PWD/mr-framework/hadoop/share/hadoop/yarn/*,$PWD/mr-framework/hadoop/share/hadoop/yarn/lib/*,$PWD/mr-framework/hadoop/share/hadoop/hdfs/*,$PWD/mr-framework/hadoop/share/hadoop/hdfs/lib/*,/usr/hdp/<%= node[:bcpc][:hadoop][:distribution][:active_release] %>/hadoop/lib/hadoop-lzo-0.6.0.<%= node[:bcpc][:hadoop][:distribution][:active_release] %>.jar,/usr/hdp/<%= node[:bcpc][:hadoop][:distribution][:active_release] %>/phoenix/phoenix-server.jar,$HADOOP_CONF_DIR</value>
   </property>
 
   <property>
     <name>mapreduce.application.framework.path</name>
-    <value>/hdp/apps/2.2.0.0-2041/mapreduce/mapreduce.tar.gz#mr-framework</value>
+    <value>/hdp/apps/<%= node[:bcpc][:hadoop][:distribution][:active_release] %>/mapreduce/mapreduce.tar.gz#mr-framework</value>
   </property>
 
   <property>

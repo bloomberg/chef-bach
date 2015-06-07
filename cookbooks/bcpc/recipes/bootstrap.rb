@@ -68,3 +68,15 @@ package 'sshpass'
 link '/etc/chef/client.d/knife.rb' do
   to '/home/vagrant/chef-bcpc/.chef/knife.rb'
 end
+
+# run build_bins if any debs or gems updated
+bash 'build_bins' do
+  user 'root'
+  cwd '/home/vagrant/chef-bcpc'
+  code './build_bins.sh'
+  umask 0002
+  action :run
+  only_if { File.mtime('/home/vagrant/chef-bcpc/bins/dists/0.5.0/main/binary-amd64/Packages') < Dir.glob('/home/vagrant/chef-bcpc/bins/*.deb').map{|f| File.mtime("#{f}")}.max ||
+            File.mtime('/home/vagrant/chef-bcpc/bins/latest_specs.4.8') < Dir.glob('/home/vagrant/chef-bcpc/bins/gems/*.gem').map{|f| File.mtime("#{f}")}.max ||
+            Dir.glob('/home/vagrant/chef-bcpc/bins/*.gem').any? }
+end

@@ -65,3 +65,5 @@ log4j.logger.org.apache.hadoop=WARN, oozie
 log4j.logger.org.mortbay=WARN, oozie
 log4j.logger.org.hsqldb=WARN, oozie
 log4j.logger.org.apache.hadoop.security.authentication.server=WARN, oozie
+# Per https://docs.hortonworks.com/HDPDocuments/HDP2/HDP-2.3.4/bk_upgrading_hdp_manually/content/start-oozie-22.html
+log4j.appender.oozie.layout.ConversionPattern=%d{ISO8601} %5p %c{1}:%L - SERVER[${oozie.instance.id}] %m%n

@@ -2,6 +2,5 @@ ENV['BERKSHELF_PATH'] = "#{File.expand_path('../../',__FILE__)}:#{File.expand_pa
 source 'https://supermarket.chef.io'
 
 cookbook 'bcpc', path: File.expand_path('../../bcpc', __FILE__)
-cookbook 'dpkg_autostart', git: 'https://github.com/hw-cookbooks/dpkg_autostart.git'
 cookbook 'cobblerd', git: 'https://github.com/bloomberg/cobbler-cookbook.git'
 metadata

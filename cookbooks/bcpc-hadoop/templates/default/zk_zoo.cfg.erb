@@ -34,6 +34,7 @@ dataLogDir=<%= node[:bcpc][:hadoop][:zookeeper][:data_log_dir] %>
 
 # the port at which the clients will connect
 clientPort=<%= node[:bcpc][:hadoop][:zookeeper][:port] %>
+clientPortAddress=<%= float_host(node[:hostname]) %>
 
 <% @zk_hosts.each do |s| %> 
 <%="server.#{s[:node_number]}=#{float_host(s[:hostname])}:#{node[:bcpc][:hadoop][:zookeeper][:leader_connect][:port]}:#{node[:bcpc][:hadoop][:zookeeper][:leader_elect][:port]}" %>
@@ -51,4 +52,3 @@ autopurge.snapRetainCount=<%= node[:bcpc][:hadoop][:zookeeper][:snap][:retain_co
 
 #ZooKeeper snapshot purge interval in hours
 autopurge.purgeInterval=<%= node[:bcpc][:hadoop][:zookeeper][:snap][:purge_interval] %>
-

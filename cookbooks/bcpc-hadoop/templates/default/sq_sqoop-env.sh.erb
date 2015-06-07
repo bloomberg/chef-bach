@@ -20,19 +20,19 @@
 # Set Hadoop-specific environment variables here.
 
 #Set path to where bin/hadoop is available
-export HADOOP_COMMON_HOME=/usr/lib/hadoop
+export HADOOP_COMMON_HOME=${HADOOP_COMMON_HOME:-/usr/hdp/<%= node["bcpc"]["hadoop"]["distribution"]["active_release"] %>/hadoop}
 
 #Set path to where hadoop-*-core.jar is available
-export HADOOP_MAPRED_HOME=/usr/lib/hadoop-mapreduce
+export HADOOP_MAPRED_HOME=${HADOOP_MAPRED_HOME:-/usr/hdp/<%= node["bcpc"]["hadoop"]["distribution"]["active_release"] %>/hadoop/client}
 
 #set the path to where bin/hbase is available
-export HBASE_HOME=/usr/lib/hbase
+export HBASE_HOME=${HBASE_HOME:-/usr/hdp/<%= node["bcpc"]["hadoop"]["distribution"]["active_release"] %>/hbase}
 
 #Set the path to where bin/hive is available
-export HIVE_HOME=/usr/lib/hive
+export HIVE_HOME=${HIVE_HOME:-/usr/hdp/<%= node["bcpc"]["hadoop"]["distribution"]["active_release"] %>/hive}
 
 #Set the path for where zookeper config dir is
-export ZOOCFGDIR=<%= node[:bcpc][:hadoop][:zookeeper][:conf_dir] %>
+export ZOOCFGDIR=${ZOOCFGDIR:-<%= node[:bcpc][:hadoop][:zookeeper][:conf_dir] %>}
 
 # add libthrift in hive to sqoop class path first so hive imports work
 export SQOOP_USER_CLASSPATH="`ls ${HIVE_HOME}/lib/libthrift-*.jar 2> /dev/null`:${SQOOP_USER_CLASSPATH}"

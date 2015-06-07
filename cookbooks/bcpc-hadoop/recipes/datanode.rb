@@ -1,22 +1,31 @@
 include_recipe 'bcpc-hadoop::hadoop_config'
 include_recipe 'bcpc-hadoop::hive_config'
+::Chef::Recipe.send(:include, Bcpc_Hadoop::Helper)
+::Chef::Resource::Bash.send(:include, Bcpc_Hadoop::Helper)
 
 node.default['bcpc']['hadoop']['copylog']['datanode'] = {
     'logfile' => "/var/log/hadoop-hdfs/hadoop-hdfs-datanode-#{node.hostname}.log",
     'docopy' => true
 }
 
-%w{hadoop-yarn-nodemanager
-   hadoop-hdfs-datanode
-   hadoop-mapreduce
-   hadoop-client
-   sqoop
-   lzop
-   cgroup-bin
-   hadoop-lzo}.each do |pkg|
+hdp_select_pkgs = %w{hadoop-yarn-nodemanager
+                     hadoop-hdfs-datanode
+                     hadoop-client}
+
+(hdp_select_pkgs.map{|p| hwx_pkg_str(p, node[:bcpc][:hadoop][:distribution][:release])} +
+                  %W{hadoop-mapreduce
+                     sqoop
+                     hadooplzo
+                     hadooplzo-native
+                     #{node['bcpc']['mysql']['connector']['package']['short_name']}
+                     cgroup-bin}).each do |pkg|
   package pkg do
-    action :upgrade
+    action :install
   end
+end
+
+(hdp_select_pkgs + ['sqoop-client', 'sqoop-server']).each do |pkg|
+  hdp_select(pkg, node[:bcpc][:hadoop][:distribution][:active_release])
 end
 
 user_ulimit "root" do
@@ -93,40 +102,15 @@ execute "chown hadoop-yarn cgroup tree to yarn" do
   action :run
 end
 
-template "/etc/init.d/hadoop-hdfs-datanode" do
-  source "hdp_hadoop-hdfs-datanode-initd.erb"
-  mode 0655
+link "/etc/init.d/hadoop-hdfs-datanode" do
+  to "/usr/hdp/#{node[:bcpc][:hadoop][:distribution][:active_release]}/hadoop-hdfs/etc/init.d/hadoop-hdfs-datanode"
+  notifies :run, "bash[kill hdfs-hdfs-datanode]", :immediate
 end
 
-template "/etc/init.d/hadoop-yarn-nodemanager" do
-  source "hdp_hadoop-yarn-nodemanager-initd.erb"
-  mode 0655
-end
-
-directory "/usr/hdp/current/hadoop-client/lib/native/Linux-amd64-64" do
-  action :create
-  mode 0755
-  recursive true
-end
-
-link "/usr/hdp/current/hadoop-client/lib/hadoop-lzo-0.6.0.jar" do
-   to "/usr/lib/hadoop/lib/hadoop-lzo-0.6.0.jar"
-end
- 
-link "/usr/hdp/current/hadoop-client/lib/native/Linux-amd64-64/libgplcompression.la" do
-   to "/usr/lib/hadoop/lib/native/Linux-amd64-64/libgplcompression.la"
- end
- 
-link "/usr/hdp/current/hadoop-client/lib/native/Linux-amd64-64/libgplcompression.a" do
-   to "/usr/lib/hadoop/lib/native/Linux-amd64-64/libgplcompression.a"
- end
- 
-link "/usr/hdp/current/hadoop-client/lib/native/Linux-amd64-64/libgplcompression.so" do
-   to "/usr/lib/hadoop/lib/native/Linux-amd64-64/libgplcompression.so.0.0.0"
-end
- 
-link "/usr/hdp/current/hadoop-client/lib/native/liblzo2.so" do
-  to "/usr/lib/x86_64-linux-gnu/liblzo2.so.2.0.0"
+bash "kill hdfs-hdfs-datanode" do
+  code "pkill -u hdfs -f hdfs-datanode"
+  action :nothing
+  returns [0, 1]
 end
 
 # Install YARN Bits
@@ -141,10 +125,11 @@ template "/etc/hadoop/conf/container-executor.cfg" do
 end
 
 bash "verify-container-executor" do
-  code "/usr/lib/hadoop-yarn/bin/container-executor --checksetup"
+  code "/usr/hdp/#{node[:bcpc][:hadoop][:distribution][:active_release]}/hadoop-yarn/bin/container-executor --checksetup"
+  user "yarn"
   group "yarn"
   action :nothing
-  only_if { File.exists?("/usr/lib/hadoop-yarn/bin/container-executor") }
+  only_if { File.exists?("/usr/hdp/#{node[:bcpc][:hadoop][:distribution][:active_release]}/hadoop-yarn/bin/container-executor") }
 end
 
 # Install Sqoop Bits
@@ -165,9 +150,11 @@ user "hcat" do
   not_if { user_exists? "hcat" }
 end
 
-package 'hive-hcatalog' do
-  action :upgrade
+package hwx_pkg_str('hive-hcatalog', node[:bcpc][:hadoop][:distribution][:release]) do
+  action :install
 end
+
+hdp_select('hive-webhcat', node[:bcpc][:hadoop][:distribution][:active_release])
 
 link "/usr/hdp/current/hive-metastore/lib/mysql-connector-java.jar" do
   to "/usr/share/java/mysql-connector-java.jar"
@@ -180,6 +167,17 @@ end
 # Setup datanode and nodemanager bits
 if node[:bcpc][:hadoop][:mounts].length <= node[:bcpc][:hadoop][:hdfs][:failed_volumes_tolerated]
   Chef::Application.fatal!("You have fewer #{node[:bcpc][:hadoop][:disks]} than #{node[:bcpc][:hadoop][:hdfs][:failed_volumes_tolerated]}! See comments of HDFS-4442.")
+end
+
+link "/etc/init.d/hadoop-yarn-nodemanager" do
+  to "/usr/hdp/#{node[:bcpc][:hadoop][:distribution][:active_release]}/hadoop-yarn/etc/init.d/hadoop-yarn-nodemanager"
+  notifies :run, "bash[kill yarn-yarn-nodemanager]", :immediate
+end
+
+bash "kill yarn-yarn-nodemanager" do
+  code "pkill -u yarn -f yarn-nodemanager"
+  action :nothing
+  returns [0, 1]
 end
 
 # Build nodes for HDFS storage
@@ -271,11 +269,13 @@ ruby_block "acquire_lock_to_restart_datanode" do
     end
   end
   action :nothing
+  subscribes :create, "link[/etc/init.d/hadoop-hdfs-datanode]", :delayed
   subscribes :create, "template[/etc/hadoop/conf/hdfs-site.xml]", :immediate
   subscribes :create, "template[/etc/hadoop/conf/hadoop-env.sh]", :immediate
   subscribes :create, "template[/etc/hadoop/conf/topology]", :immediate
   subscribes :create, "user_ulimit[hdfs]", :immediate
   subscribes :create, "user_ulimit[root]", :immediate
+  subscribes :create, "bash[hdp-select hadoop-hdfs-datanode]", :immediate
   subscribes :create, "ruby_block[handle_prev_datanode_restart_failure]", :immediate
 end
 #
@@ -314,8 +314,10 @@ end
 service "hadoop-yarn-nodemanager" do
   supports :status => true, :restart => true, :reload => false
   action [:enable, :start]
+  subscribes :restart, "link[/etc/init.d/hadoop-yarn-nodemanager]", :delayed
   subscribes :restart, "template[/etc/hadoop/conf/hadoop-env.sh]", :delayed
   subscribes :restart, "template[/etc/hadoop/conf/yarn-env.sh]", :delayed
   subscribes :restart, "template[/etc/hadoop/conf/yarn-site.xml]", :delayed
+  subscribes :restart, "bash[hdp-select hadoop-yarn-nodemanager]", :delayed
   subscribes :restart, "user_ulimit[yarn]", :delayed
 end

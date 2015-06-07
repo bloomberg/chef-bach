@@ -1,14 +1,13 @@
 require 'base64'
-include_recipe 'dpkg_autostart'
 include_recipe 'bcpc-hadoop::hadoop_config'
+::Chef::Recipe.send(:include, Bcpc_Hadoop::Helper)
+::Chef::Resource::Bash.send(:include, Bcpc_Hadoop::Helper)
 
-%w{hadoop-hdfs-namenode }.each do |pkg|
-  dpkg_autostart pkg do
-    allow false
+%w{hadoop-hdfs-namenode hadoop-hdfs-journalnode}.each do |pkg|
+  package hwx_pkg_str(pkg, node[:bcpc][:hadoop][:distribution][:release]) do
+    action :install
   end
-  package pkg do
-    action :upgrade
-  end
+  hdp_select(pkg, node[:bcpc][:hadoop][:distribution][:active_release])
 end
 
 if get_config("namenode_txn_fmt") then
@@ -21,7 +20,7 @@ if get_config("namenode_txn_fmt") then
   end
 end
 
-node[:bcpc][:hadoop][:mounts].each do |d|
+[node[:bcpc][:hadoop][:mounts].first].each do |d|
 
   # Per chef-documentation for directory resource's recursive attribute:
   # For the owner, group, and mode attributes, the value of this attribute applies only to the leaf directory
@@ -88,19 +87,23 @@ ruby_block 'create_or_manage_groups' do
   end
 end
 
-template "hadoop-hdfs-journalnode" do
-  path "/etc/init.d/hadoop-hdfs-journalnode"
-  source "hdp_hadoop-hdfs-journalnode-initd.erb"
-  owner "root"
-  group "root"
-  mode "0755"
-  notifies :restart, "service[hadoop-hdfs-journalnode]"
+link "/etc/init.d/hadoop-hdfs-journalnode" do
+  to "/usr/hdp/#{node[:bcpc][:hadoop][:distribution][:active_release]}/hadoop-hdfs/etc/init.d/hadoop-hdfs-journalnode"
+  notifies :run, 'bash[kill hdfs-journalnode]', :immediate
+end
+
+bash "kill hdfs-journalnode" do
+  code "pkill -u hdfs -f journalnode"
+  action :nothing
+  returns [0, 1]
 end
 
 service "hadoop-hdfs-journalnode" do
   action [:start, :enable]
   supports :status => true, :restart => true, :reload => false
+  subscribes :restart, "link[/etc/init.d/hadoop-hdfs-journalnode]", :delayed
   subscribes :restart, "template[/etc/hadoop/conf/hdfs-site.xml]", :delayed
   subscribes :restart, "template[/etc/hadoop/conf/hdfs-site_HA.xml]", :delayed
   subscribes :restart, "template[/etc/hadoop/conf/hadoop-env.sh]", :delayed
 end
+
