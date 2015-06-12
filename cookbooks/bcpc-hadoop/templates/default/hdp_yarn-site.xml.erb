@@ -15,48 +15,48 @@
       <value><%="#{node.chef_environment}"%></value>
     </property>
 
-    <property> 
-      <name>yarn.resourcemanager.ha.enabled</name> 
+    <property>
+      <name>yarn.resourcemanager.ha.enabled</name>
       <value>true</value>
-    </property> 
+    </property>
 
     <property>
       <name>yarn.resourcemanager.ha.rm-ids</name>
       <value><%=@rm_hosts.map{ |s| "rm#{node.chef_environment}#{s[:node_number]}" }.join(",") %></value>
     </property>
 
-    <% @rm_hosts.each do |h| %>   
+    <% @rm_hosts.each do |h| %>
       <property>
         <name>yarn.resourcemanager.hostname.rm<%= "#{node.chef_environment}#{h[:node_number]}" %></name>
         <value><%=float_host(h[:hostname]) %></value>
       </property>
     <% end %>
 
-    <% @rm_hosts.each do |h| %>   
+    <% @rm_hosts.each do |h| %>
       <property>
         <name>yarn.resourcemanager.address.rm<%= "#{node.chef_environment}#{h[:node_number]}" %></name>
         <value><%=float_host(h[:hostname])%>:<%=node["bcpc"]["hadoop"]["yarn"]["rm_port"]%></value>
       </property>
     <% end %>
 
-    <property> 
-      <name>yarn.resourcemanager.recovery.enabled</name> 
-      <value>true</value> 
-    </property> 
- 
-    <property> 
-       <name>yarn.resourcemanager.store.class</name> 
-       <value>org.apache.hadoop.yarn.server.resourcemanager.recovery.ZKRMStateStore</value> 
-    </property> 
- 
-    <property> 
+    <property>
+      <name>yarn.resourcemanager.recovery.enabled</name>
+      <value>true</value>
+    </property>
+
+    <property>
+       <name>yarn.resourcemanager.store.class</name>
+       <value>org.apache.hadoop.yarn.server.resourcemanager.recovery.ZKRMStateStore</value>
+    </property>
+
+    <property>
       <name>yarn.resourcemanager.zk-address</name>
       <value><%= @zk_hosts.map{ |s| float_host(s[:hostname]) + ":#{node[:bcpc][:hadoop][:zookeeper][:port]}" }.join(",") %></value>
     </property>
- 
-    <property> 
-      <name>yarn.client.failover-proxy-provider</name> 
-      <value>org.apache.hadoop.yarn.client.ConfiguredRMFailoverProxyProvider</value> 
+
+    <property>
+      <name>yarn.client.failover-proxy-provider</name>
+      <value>org.apache.hadoop.yarn.client.ConfiguredRMFailoverProxyProvider</value>
     </property>
   <% else %>
 
@@ -146,9 +146,9 @@
   </property>
 
   <property>
-    <name>yarn.nodemanager.container-executor.class</name>      
+    <name>yarn.nodemanager.container-executor.class</name>
     <value>org.apache.hadoop.yarn.server.nodemanager.LinuxContainerExecutor</value>
-  </property>  
+  </property>
 
   <property>
     <name>yarn.nodemanager.linux-container-executor.group</name>
@@ -171,4 +171,85 @@
     <name>yarn.resourcemanager.scheduler.class</name>
     <value><%= node['bcpc']['hadoop']['yarn']['scheduler'] %></value>
   </property>
+
+<property>
+     <description>The hostname of the timeline server web application.</description>
+     <name>yarn.timeline-service.hostname</name>
+     <value>0.0.0.0</value>
+</property>
+
+
+<property>
+     <description>This is default address for the timeline server to start the RPC server.</description>
+     <name>yarn.timeline-service.address</name>
+     <value>f-bcpc-vm3:10200</value>
+</property>
+
+<property>
+     <description>The http address of the timeline server web application.</description>
+     <name>yarn.timeline-service.webapp.address</name>
+     <value>f-bcpc-vm3:8188</value>
+</property>
+
+<property>
+     <description>Handler thread count to serve the client RPC requests.</description>
+     <name>yarn.timeline-service.handler-thread-count</name>
+     <value>10</value>
+</property>
+
+
+<property>
+     <description>Enable or disable the GHS</description>
+     <name>yarn.timeline-service.generic-application-history.enabled</name>
+     <value>true</value>
+</property>
+
+<property>
+     <description>Store class name for history store, defaulting to file system store</description>
+     <name>yarn.timeline-service.generic-application-history.store-class</name>
+     <value>org.apache.hadoop.yarn.server.applicationhistoryservice.FileSystemApplicationHistoryStore</value>
+</property>
+
+<property>
+     <description>URI pointing to the location of the FileSystem path where the history will be persisted.</description>
+     <name>yarn.timeline-service.generic-application-history.fs-history-store.uri</name>
+      <value>/var/log/hadoop-yarn</value>
+</property>
+
+<property>
+     <description>T-file compression types used to compress history data.</description>
+     <name>yarn.timeline-service.generic-application-history.fs-history-store.compression-type</name>
+     <value>none</value>
+</property>
+
+<property>
+     <description>Enable or disable the Timeline Server.</description>
+     <name>yarn.timeline-service.enabled</name>
+     <value>true</value>
+</property>
+
+<property>
+     <description>Store class name for timeline store</description>
+     <name>yarn.timeline-service.store-class</name>
+     <value>org.apache.hadoop.yarn.server.timeline.LeveldbTimelineStore</value>
+</property>
+
+<property>
+     <description>Store file name for leveldb timeline store</description>
+     <name>yarn.timeline-service.leveldb-timeline-store.path</name>
+     <value>/var/log/hadoop-yarn/timeline</value>
+</property>
+
+<property>
+  <description>Enable age off of timeline store data.</description>
+  <name>yarn.timeline-service.ttl-enable</name>
+  <value>true</value>
+</property>
+
+<property>
+  <description>Time to live for timeline store data in milliseconds.</description>
+  <name>yarn.timeline-service.ttl-ms</name>
+  <value>604800000</value>
+</property>
+
 </configuration>

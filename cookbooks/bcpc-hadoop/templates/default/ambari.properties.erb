@@ -1,0 +1,86 @@
+#
+# Copyright 2011 The Apache Software Foundation
+#
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+#
+#Thu May 14 18:50:49 EDT 2015
+agent.package.install.task.timeout=1800
+agent.task.timeout=900
+agent.threadpool.size.max=25
+ambari-server.user=root
+ambari.python.wrap=ambari-python-wrap
+api.authenticate=true
+bootstrap.dir=/var/run/ambari-server/bootstrap
+bootstrap.script=/usr/lib/python2.6/site-packages/ambari_server/bootstrap.py
+bootstrap.setup_agent.script=/usr/lib/python2.6/site-packages/ambari_server/setupAgent.py
+client.threadpool.size.max=25
+common.services.path=/var/lib/ambari-server/resources/common-services
+custom.action.definitions=/var/lib/ambari-server/resources/custom_action_definitions
+java.home=/usr/lib/jvm/java-7-oracle-amd64
+java.releases=jdk1.7,jdk1.6
+jdk1.6.desc=Oracle JDK 1.6
+jdk1.6.dest-file=jdk-6u31-linux-x64.bin
+jdk1.6.home=/usr/jdk64/
+jdk1.6.jcpol-file=jce_policy-6.zip
+jdk1.6.jcpol-url=http://public-repo-1.hortonworks.com/ARTIFACTS/jce_policy-6.zip
+jdk1.6.re=Creating (jdk.*)/jre
+jdk1.6.url=http://public-repo-1.hortonworks.com/ARTIFACTS/jdk-6u31-linux-x64.bin
+jdk1.7.desc=Oracle JDK 1.7
+jdk1.7.dest-file=jdk-7u67-linux-x64.tar.gz
+jdk1.7.home=/usr/jdk64/
+jdk1.7.jcpol-file=UnlimitedJCEPolicyJDK7.zip
+jdk1.7.jcpol-url=http://public-repo-1.hortonworks.com/ARTIFACTS/UnlimitedJCEPolicyJDK7.zip
+jdk1.7.re=(jdk.*)/jre
+jdk1.7.url=http://public-repo-1.hortonworks.com/ARTIFACTS/jdk-7u67-linux-x64.tar.gz
+kerberos.keytab.cache.dir=/var/lib/ambari-server/data/cache
+metadata.path=/var/lib/ambari-server/resources/stacks
+recommendations.dir=/var/run/ambari-server/stack-recommendations
+resources.dir=/var/lib/ambari-server/resources
+security.server.keys_dir=/var/lib/ambari-server/keys
+server.connection.max.idle.millis=900000
+server.execution.scheduler.isClustered=false
+server.execution.scheduler.maxDbConnections=5
+server.execution.scheduler.maxThreads=5
+server.execution.scheduler.misfire.toleration.minutes=480
+server.fqdn.service.url=http://169.254.169.254/latest/meta-data/public-hostname
+server.http.session.inactive_timeout=1800
+server.jdbc.database=mysql
+server.jdbc.database_name=ambari
+server.jdbc.driver=com.mysql.jdbc.Driver
+server.jdbc.hostname=fbcpc-vm2
+server.jdbc.port=3306
+server.jdbc.postgres.schema=ambari
+server.jdbc.rca.driver=com.mysql.jdbc.Driver
+server.jdbc.rca.url=jdbc:mysql://fbcpc-vm2:3306/ambari
+server.jdbc.rca.user.name=ambari
+server.jdbc.rca.user.passwd=/etc/ambari-server/conf/password.dat
+server.jdbc.url=jdbc:mysql://fbcpc-vm2:3306/ambari
+server.jdbc.user.name=ambari
+server.jdbc.user.passwd=/etc/ambari-server/conf/password.dat
+server.os_family=ubuntu12
+server.os_type=ubuntu12
+server.persistence.type=remote
+server.stages.parallel=true
+server.tmp.dir=/var/lib/ambari-server/tmp
+server.version.file=/var/lib/ambari-server/resources/version
+shared.resources.dir=/usr/lib/ambari-server/lib/ambari_commons/resources
+stackadvisor.script=/var/lib/ambari-server/resources/scripts/stack_advisor.py
+ulimit.open.files=10000
+views.request.connect.timeout.millis=5000
+views.request.read.timeout.millis=10000
+webapp.dir=/usr/lib/ambari-server/web
