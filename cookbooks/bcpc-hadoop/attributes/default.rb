@@ -105,70 +105,7 @@ default["bcpc"]["revelytix"]["ssl_trust_password"] = ""
 default["bcpc"]["revelytix"]["loom_dist_cache"] = "loom-dist-cache"
 default["bcpc"]["revelytix"]["hive_classloader_blacklist_jars"] = "slf4j,log4j,commons-logging"
 default["bcpc"]["revelytix"]["port"] = 8080
-default["bcpc"]["hadoop"]["zabbix"]["history_days"] = 1
-default["bcpc"]["hadoop"]["zabbix"]["trend_days"] = 15
-default["bcpc"]["hadoop"]["zabbix"]["cron_check_time"] = 240
-default["bcpc"]["hadoop"]["zabbix"]["mail_source"] = "zabbix.zbx_mail.sh.erb"
-default["bcpc"]["hadoop"]["zabbix"]["cookbook"] = nil 
 
-# Graphite queries which specify property to query and alarming trigger, severity
-# and owner who the trigger is routed to for resolution
-default["bcpc"]["hadoop"]["graphite"]["queries"] = {
-   'namenode' => [
-    {
-      'type'  => "jmx",
-      'query' => "memory.HeapMemoryUsage_committed",
-      'key'   => "nnheapmem",
-      'trigger_val' => "max(61,0)",
-      'trigger_cond' => "=0",
-      'trigger_name' => "NameNodeAvailability",
-      'trigger_enable' => true,
-      'trigger_desc' => "Namenode service seems to be down",
-      'severity' => 2,
-      'route_to' => "admin"
-    },
-    {
-      'type'  => "jmx",
-      'query' => "nn_fs_name_system_state.FSNamesystemState.NumStaleDataNodes",
-      'key'   => "numstaledn"
-    }
-  ],
-  'hbase_master' => [
-    {
-      'type'  => "jmx",
-      'query' => "memory.NonHeapMemoryUsage_committed",
-      'key'   => "hbasenonheapmem",
-      'trigger_val' => "max(61,0)",
-      'trigger_cond' => "=0",
-      'trigger_name' => "HBaseMasterAvailability",
-      'trigger_dep' => ["NameNodeAvailability"],
-      'trigger_desc' => "HBase master seems to be down",
-      'severity' => 1,
-      'route_to' => "admin"
-    },
-    {
-      'type'  => "jmx",
-      'query' => "memory.HeapMemoryUsage_committed",
-      'key'   => "hbaseheapmem",
-      'history_days' => 2,
-      'trend_days' => 30
-    },
-    {
-      'type'  => "jmx",
-      'query' => "hbm_server.Master.numRegionServers",
-      'key'   => "numrsservers",
-      'trigger_val' => "max(61,0)",
-      'trigger_cond' => "=0",
-      'trigger_name' => "HBaseRSAvailability",
-      'trigger_enable' => true,
-      'trigger_dep' => ["HBaseMasterAvailability"],
-      'trigger_desc' => "HBase region server seems to be down",
-      'severity' => 2,
-      'route_to' => "admin"
-    }
-  ]
-}
-#
 # Attributes to store details about (log) files from nodes to be copied
 # into a centralized location (currently HDFS).
 # E.g. value {'hbase_rs' =>  { 'logfile' => "/path/file_name_of_log_file",
