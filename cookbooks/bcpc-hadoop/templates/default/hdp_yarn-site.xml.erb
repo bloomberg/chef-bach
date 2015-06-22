@@ -156,6 +156,11 @@
   </property>
 
   <property>
+    <name>yarn.nodemanager.linux-container-executor.nonsecure-mode.limit-users</name>
+    <value>false</value>
+  </property>
+
+  <property>
     <name>yarn.nodemanager.resource.memory-mb</name>
     <value><%= node['bcpc']['hadoop']['yarn']['nodemanager']['avail_memory']['size'] or
                [1024, (node['memory']['total'].to_i * node['bcpc']['hadoop']['yarn']['nodemanager']['avail_memory']['ratio']/1024).floor].max %></value>
