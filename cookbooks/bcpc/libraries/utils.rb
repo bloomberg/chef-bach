@@ -22,6 +22,17 @@ require 'base64'
 require 'thread'
 require 'ipaddr'
 
+# create databag if missing
+def create_databag(name)
+  if !Chef::DataBag.list.key?(name)
+    bag = Chef::DataBag.new
+    bag.name(name)
+    bag.create
+  end
+end
+
+# retrieve secret by key in chef vault item from chef vault data bag
+
 #
 # Constant string which defines the default attributes which need to be retrieved from node objects
 # The format is hash { key => value , key => value }
@@ -67,11 +78,26 @@ def make_config(key, value)
 	end
 end
 
-def get_config(key)
-	init_config if $dbi.nil?
-	Chef::Log.info  "------------ Fetching value for key \"#{key}\""
-	value = node['bcpc']['encrypt_data_bag'] ? $edbi[key] : $dbi[key]
-	return value
+# get value for data bag/chef-vault item with key
+# bag: databag name of chef vault item; 
+# item: chef vault item; 
+# key: the key to retrieve password in the item
+def get_config(key, item=node.chef_environment, bag="configs")
+  require 'chef-vault'
+  begin
+    entry = ChefVault::Item.load(bag, item)
+    return entry[key]
+  rescue ChefVault::Exceptions::KeysNotFound
+    if bag != "configs"
+      entry = Chef::DataBagItem.load(bag,item)
+      return entry[key]
+    else
+      init_config if $dbi.nil?
+      Chef::Log.info  "------------ Fetching value for key \"#{key}\""
+      value = node['bcpc']['encrypt_data_bag'] ? $edbi[key] : $dbi[key]
+      return value
+    end
+  end
 end
 
 def get_config!(key)

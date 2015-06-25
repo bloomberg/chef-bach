@@ -6,6 +6,7 @@ description      "Installs/Configures Bloomberg Clustered Private Cloud (BCPC)"
 long_description IO.read(File.join(File.dirname(__FILE__), 'README.md'))
 version          "0.5.0"
 
+depends "chef-vault"
 depends "apt", ">= 1.9.2"
 depends "ubuntu", ">= 1.1.2"
 depends "chef-client", ">= 2.2.2"
