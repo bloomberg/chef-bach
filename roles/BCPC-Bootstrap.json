@@ -10,8 +10,8 @@
       "recipe[bcpc::ufw]",
       "recipe[bcpc::chef_vault_download]",
       "recipe[bcpc::chef_vault_install]",
-      "recipe[bcpc::cobbler]",
-      "role[Hannibal-Build]"
+      "role[Hannibal-Build]",
+      "role[Ambari-Server-Build]"
     ],
     "description": "A bootstrap node in a BCPC cluster",
     "chef_type": "role",
