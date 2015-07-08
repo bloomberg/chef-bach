@@ -24,6 +24,11 @@ node.default['bcpc']['hadoop']['copylog']['namenode_standby_out'] = {
   end
 end
 
+user_ulimit "hdfs" do
+  filehandle_limit 32769
+  process_limit 65536
+end
+
 node[:bcpc][:hadoop][:mounts].each do |d|
   directory "/disk/#{d}/dfs/nn" do
     owner "hdfs"
@@ -73,6 +78,7 @@ if @node['bcpc']['hadoop']['hdfs']['HA'] == true then
     subscribes :restart, "template[/etc/hadoop/conf/hdfs-policy.xml]", :delayed
     subscribes :restart, "template[/etc/hadoop/conf/hadoop-env.sh]", :delayed
     subscribes :restart, "template[/etc/hadoop/conf/topology]", :delayed
+    subscribes :restart, "user_ulimit[hdfs]", :delayed
   end
 else
   Chef::Log.info "Not running standby namenode services yet -- HA disabled!"

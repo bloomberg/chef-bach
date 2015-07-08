@@ -27,6 +27,11 @@ node.default['bcpc']['hadoop']['copylog']['namenode_master_out'] = {
   end
 end
 
+user_ulimit "hdfs" do
+  filehandle_limit 32769
+  process_limit 65536
+end
+
 node[:bcpc][:hadoop][:mounts].each do |d|
   directory "/disk/#{d}/dfs/nn" do
     owner "hdfs"
@@ -93,15 +98,16 @@ bash "initialize-shared-edits" do
 end
 
 service "generally run hadoop-hdfs-namenode" do
-   action [:enable, :start]
-   supports :status => true, :restart => true, :reload => false
-   service_name "hadoop-hdfs-namenode"
-   subscribes :restart, "template[/etc/hadoop/conf/hdfs-site.xml]", :delayed
-   subscribes :restart, "template[/etc/hadoop/conf/hdfs-policy.xml]", :delayed
-   subscribes :restart, "template[/etc/hadoop/conf/hdfs-site_HA.xml]", :delayed
-   subscribes :restart, "template[/etc/hadoop/conf/hadoop-env.sh]", :delayed
-   subscribes :restart, "template[/etc/hadoop/conf/topology]", :delayed
-   subscribes :restart, "bash[initialize-shared-edits]", :immediately
+  action [:enable, :start]
+  supports :status => true, :restart => true, :reload => false
+  service_name "hadoop-hdfs-namenode"
+  subscribes :restart, "template[/etc/hadoop/conf/hdfs-site.xml]", :delayed
+  subscribes :restart, "template[/etc/hadoop/conf/hdfs-policy.xml]", :delayed
+  subscribes :restart, "template[/etc/hadoop/conf/hdfs-site_HA.xml]", :delayed
+  subscribes :restart, "template[/etc/hadoop/conf/hadoop-env.sh]", :delayed
+  subscribes :restart, "template[/etc/hadoop/conf/topology]", :delayed
+  subscribes :restart, "user_ulimit[hdfs]", :delayed
+  subscribes :restart, "bash[initialize-shared-edits]", :immediately
 end
 
 ## We need to bootstrap the standby and journal node transaction logs

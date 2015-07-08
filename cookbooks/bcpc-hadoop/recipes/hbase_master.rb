@@ -25,6 +25,10 @@ phoenix
   end
 end
 
+user_ulimit "hbase" do
+  filehandle_limit 32769
+end
+
 service "hbase-thrift" do
   action :disable
 end 
@@ -60,4 +64,5 @@ service "hbase-master" do
   subscribes :restart, "template[/etc/hbase/conf/hbase-site.xml]", :delayed
   subscribes :restart, "template[/etc/hbase/conf/hbase-policy.xml]", :delayed
   subscribes :restart, "template[/etc/hbase/conf/hbase-env.sh]", :delayed
+  subscribes :restart, "user_ulimit[hbase]", :delayed
 end

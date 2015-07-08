@@ -16,6 +16,10 @@ node.default['bcpc']['hadoop']['copylog']['region_server_out'] = {
   end
 end
 
+user_ulimit "hbase" do
+  filehandle_limit 32769
+end
+
 directory "/usr/hdp/current/hbase-regionserver/lib/native/Linux-amd64-64" do
   recursive true
   action :create
@@ -47,4 +51,5 @@ service "hbase-regionserver" do
   subscribes :restart, "template[/etc/hbase/conf/hbase-site.xml]", :delayed
   subscribes :restart, "template[/etc/hbase/conf/hbase-policy.xml]", :delayed
   subscribes :restart, "template[/etc/hbase/conf/hbase-env.sh]", :delayed
+  subscribes :restart, "user_ulimit[hbase]", :delayed
 end
