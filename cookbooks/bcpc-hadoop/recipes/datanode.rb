@@ -18,6 +18,21 @@ node.default['bcpc']['hadoop']['copylog']['datanode'] = {
   end
 end
 
+user_ulimit "hdfs" do
+  filehandle_limit 32769
+  process_limit 65536
+end
+
+user_ulimit "mapred" do
+  filehandle_limit 32769
+  process_limit 65536
+end
+
+user_ulimit "yarn" do
+  filehandle_limit 32769
+  process_limit 65536
+end
+
 template "/etc/init.d/hadoop-hdfs-datanode" do
   source "hdp_hadoop-hdfs-datanode-initd.erb"
   mode 0655
@@ -204,6 +219,7 @@ ruby_block "acquire_lock_to_restart_datanode" do
   subscribes :create, "template[/etc/hadoop/conf/hdfs-site.xml]", :immediate
   subscribes :create, "template[/etc/hadoop/conf/hadoop-env.sh]", :immediate
   subscribes :create, "template[/etc/hadoop/conf/topology]", :immediate
+  subscribes :create, "user_ulimit[hdfs]", :immediate
   subscribes :create, "ruby_block[handle_prev_datanode_restart_failure]", :immediate
 end
 #
@@ -244,4 +260,5 @@ service "hadoop-yarn-nodemanager" do
   action [:enable, :start]
   subscribes :restart, "template[/etc/hadoop/conf/hadoop-env.sh]", :delayed
   subscribes :restart, "template[/etc/hadoop/conf/yarn-site.xml]", :delayed
+  subscribes :restart, "user_ulimit[yarn]", :delayed
 end

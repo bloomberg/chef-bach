@@ -25,6 +25,11 @@ node.default['bcpc']['hadoop']['copylog']['namenode_out'] = {
   end
 end
 
+user_ulimit "hdfs" do
+  filehandle_limit 32769
+  process_limit 65536
+end
+
 node[:bcpc][:hadoop][:mounts].each do |d|
   directory "/disk/#{d}/dfs/nn" do
     owner "hdfs"
@@ -60,6 +65,7 @@ service "hadoop-hdfs-namenode" do
   subscribes :restart, "template[/etc/hadoop/conf/hdfs-policy.xml]", :delayed
   subscribes :restart, "template[/etc/hadoop/conf/hadoop-env.sh]", :delayed
   subscribes :restart, "template[/etc/hadoop/conf/topology]", :delayed
+  subscribes :restart, "user_ulimit[hdfs]", :delayed
 end
 
 bash "reload hdfs nodes" do
