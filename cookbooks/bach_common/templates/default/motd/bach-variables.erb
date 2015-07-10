@@ -9,7 +9,9 @@
 <% mfg = node['dmi']['system']['manufacturer']
    product = node['dmi']['system']['product_name']
    gb = (node['memory']['total'].to_f / 1024 / 1024).round
-   cores = node[:cpu]['0'][:cores].to_i * node[:cpu][:real] %>
+   cores = (node[:cpu]['0'][:cores].to_i * node[:cpu][:real]) rescue 0
+   # Compensate for strange ohai data in vbox.
+   cores = `nproc`.chomp if(cores == 0) %>
 
 cat << EOF
 

@@ -1,10 +1,24 @@
+<% # -*- mode: json -*- %>
 {
-  "name": "Test-Laptop",
+  "name": "<%= node.chef_environment %>",
   "override_attributes": {
-    "spark": {
-      "package": {
-        "install_meta": false
-      }
+    "bach": { 
+	<% if ENV['http_proxy'] %>
+	"http_proxy": "<%= ENV['http_proxy'] %>",
+	<% end %>
+	<% if ENV['https_proxy'] %>
+	"https_proxy": "<%= ENV['https_proxy'] %>",
+	<% end %>
+	"cluster": {
+	    "certificates_path": "/usr/local/share/ca-certificates/bloomberg",
+	    "organization": { "name": "bach", 
+			      "longname": "BACH" },
+	    "user" : { "name": "bach",
+		       "longname": "BACH Administrator",
+		       "email" : "bach@bcpc.example.com",
+		       "password" : "thisishighlysecure" },
+	    "node_count": "<%= ENV['BACH_CLUSTER_NODE_COUNT'] %>"
+	}
     },
     "bcpc": {
       "graphite": {
@@ -12,33 +26,33 @@
       },
       "domain_name" : "bcpc.example.com",
       "management": {
-        "vip" : "10.0.100.5",
-        "interface" : "eth0",
-        "netmask" : "255.255.255.0",
-        "cidr" : "10.0.100.0/24",
-        "gateway" : "10.0.100.3"
+        "vip" : "10.0.101.3",
+        "interface" : "eth1",
+        "netmask" : "255.255.255.240",
+        "cidr" : "10.0.101.0/28",
+        "gateway" : "10.0.101.2"
       },
       "storage": {
+        "vip" : "10.0.101.3",
         "interface" : "eth1",
-        "netmask" : "255.255.255.0",
-        "cidr" : "172.16.100.0/24",
-        "gateway" : "172.16.100.3"
+        "netmask" : "255.255.255.240",
+        "cidr" : "10.0.101.0/28",
+        "gateway" : "10.0.101.2"
       },
       "floating": {
-        "vip" : "192.168.100.5",
-        "interface" : "eth2",
-        "netmask" : "255.255.255.0",
-        "cidr" : "192.168.100.0/24",
-        "gateway" : "192.168.100.3",
-        "available_subnet" : "192.168.100.128/25"
+        "vip" : "10.0.101.3",
+        "interface" : "eth1",
+        "netmask" : "255.255.255.240",
+        "cidr" : "10.0.101.0/28",
+        "gateway" : "10.0.101.2",
+        "available_subnet" : "10.0.101.0/25"
       },
       "bootstrap": {
-        "interface" : "eth0",
+        "interface" : "eth1",
         "pxe_interface" : "eth1",
-        "hostname" : "bcpc-bootstrap",
-        "server" : "10.0.100.3",
-        "dhcp_subnet" : "10.0.100.0",
-        "dhcp_range" : "10.0.100.14 10.0.100.250"
+        "server" : "10.0.101.2",
+        "dhcp_subnet" : "10.0.101.0",
+        "dhcp_range" : "10.0.101.4 10.0.101.14"
       },
       "dns_servers" : [ "8.8.8.8", "8.8.4.4" ],
       "hadoop" : {
@@ -117,7 +131,7 @@
        "servers" : [ "0.pool.ntp.org", "1.pool.ntp.org", "2.pool.ntp.org", "3.pool.ntp.org" ]
     },
     "chef_client": {
-      "server_url": "http://10.0.100.3:4000",
+      "server_url": "http://<%= bootstrap_fqdn %>:4000",
       "cache_path": "/var/chef/cache",
       "config": {
          "verify_api_cert": false

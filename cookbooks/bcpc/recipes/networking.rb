@@ -125,12 +125,13 @@ directory "/etc/network/interfaces.d" do
   action :create
 end
 
-bash "setup-interfaces-source" do
-  user "root"
-  code <<-EOH
-    echo "source /etc/network/interfaces.d/*.cfg" >> /etc/network/interfaces
-  EOH
-  not_if "grep '^source /etc/network/interfaces.d/\*.cfg' /etc/network/interfaces"
+#
+# If we don't overwrite the interfaces file, networking fails because
+# the /etc/network/interfaces.d/* files contain duplicate entries.
+#
+template '/etc/network/interfaces' do
+  mode 0444
+  source 'network.interfaces.erb'
 end
 
 # set up the DNS resolvers
@@ -198,7 +199,7 @@ if node[:bcpc][:management][:interface] != node[:bcpc][:storage][:interface]
   end
 end
   
-if node[:bcpc][:management][:interface] != node[:bcpc][:storage][:interface] or \
+if node[:bcpc][:management][:interface] != node[:bcpc][:storage][:interface] or
    node[:bcpc][:management][:interface] != node[:bcpc][:floating][:interface]
   bash "routing-management" do
       user "root"

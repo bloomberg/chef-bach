@@ -19,52 +19,56 @@
 
 include_recipe "bcpc::default"
 
-node[:bcpc][:bootstrap][:admin_users].each do |user_name|
-  user user_name do
-    action :create
-    home "/home/#{user_name}"
-    group 'vagrant'
-    supports :manage_home => true
-  end
-  bash 'set group permission on homedir' do
-    code "chmod 775 /home/#{user_name}"
-  end
-end
+log "bcpc::bootstrap has been commented out, but not removed from roles"
 
-sudo 'cluster-interaction' do
-  user      node[:bcpc][:bootstrap][:admin_users] * ','
-  runas     'vagrant'
-  commands  ['/home/vagrant/chef-bcpc/cluster-assign-roles.sh','/home/vagrant/chef-bcpc/nodessh.sh','/usr/bin/knife']
-  only_if { node[:bcpc][:bootstrap][:admin_users].length >= 1 }
-end
+# node[:bcpc][:bootstrap][:admin_users].each do |user_name|
+#   user user_name do
+#     action :create
+#     home "/home/#{user_name}"
+#     group 'vagrant'
+#     supports :manage_home => true
+#   end
+#   bash 'set group permission on homedir' do
+#     code "chmod 775 /home/#{user_name}"
+#   end
+# end
 
-bash 'create repo' do
-  user 'vagrant'
-  code 'git clone --bare /home/vagrant/chef-bcpc /home/vagrant/chef-bcpc-repo && cd /home/vagrant/chef-bcpc-repo && git config core.sharedRepository true'
-  not_if { File.exists?('/home/vagrant/chef-bcpc-repo') }
-end
+# sudo 'cluster-interaction' do
+#   user      node[:bcpc][:bootstrap][:admin_users] * ','
+#   runas     'vagrant'
+#   commands  ['/home/vagrant/chef-bcpc/cluster-assign-roles.sh','/home/vagrant/chef-bcpc/nodessh.sh','/usr/bin/knife']
+#   only_if { node[:bcpc][:bootstrap][:admin_users].length >= 1 }
+# end
 
-bash 'set repo as origin' do
-  user 'vagrant'
-  cwd '/home/vagrant/chef-bcpc/'
-  code 'git remote add local /home/vagrant/chef-bcpc-repo'
-  not_if 'git remote -v |grep -q "^local	"', :cwd => '/home/vagrant/chef-bcpc/'
-end
+# bash 'create repo' do
+#   user 'vagrant'
+#   code 'git clone --bare /home/vagrant/chef-bcpc /home/vagrant/chef-bcpc-repo && cd /home/vagrant/chef-bcpc-repo && git config core.sharedRepository true'
+#   not_if { File.exists?('/home/vagrant/chef-bcpc-repo') }
+# end
 
-package 'acl'
+# bash 'set repo as origin' do
+#   user 'vagrant'
+#   cwd '/home/vagrant/chef-bcpc/'
+#   code 'git remote add local /home/vagrant/chef-bcpc-repo'
+#   not_if 'git remote -v |grep -q "^local	"', :cwd => '/home/vagrant/chef-bcpc/'
+# end
 
-bash 'Update chef-bcpc-repo rights' do
-  code 'setfacl -R -m g:vagrant:rwX /home/vagrant/chef-bcpc-repo; find /home/vagrant/chef-bcpc-repo -type d | xargs setfacl -R -m d:g:vagrant:rwX'
-end
+# package 'acl'
 
-cron 'synchronize chef' do
-  user  'vagrant'
-  home '/home/vagrant'
-  command "cd ~/chef-bcpc; git pull local master; knife role from file roles/*.json; knife cookbook upload -a; knife environment from file environments/#{node.chef_environment}.json"
-end
+# bash 'Update chef-bcpc-repo rights' do
+#   code 'setfacl -R -m g:vagrant:rwX /home/vagrant/chef-bcpc-repo; find /home/vagrant/chef-bcpc-repo -type d | xargs setfacl -R -m d:g:vagrant:rwX'
+# end
 
-package 'sshpass'
+# cron 'synchronize chef' do
+#   user  'vagrant'
+#   home '/home/vagrant'
+#   command "cd ~/chef-bcpc; git pull local master; knife role from file roles/*.json; knife cookbook upload -a; knife environment from file environments/#{node.chef_environment}.json"
+# end
 
+<<<<<<< variant A
 link '/etc/chef/client.d/knife.rb' do
   to '/home/vagrant/chef-bcpc/.chef/knife.rb'
 end
+>>>>>>> variant B
+# package 'sshpass'
+======= end

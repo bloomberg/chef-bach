@@ -1,0 +1,10 @@
+DEPENDENCIES
+  bach_common
+    path: ../bach_common
+  bach_repository
+    path: .
+    metadata: true
+
+GRAPH
+  bach_common (0.1.0)
+  bach_repository (0.1.0)

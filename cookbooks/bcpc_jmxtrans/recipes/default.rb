@@ -41,7 +41,7 @@ include_recipe 'jmxtrans'
 #
 # Get an array of hosts which are garphite heads
 #
-graphite_hosts = get_nodes_for("graphite","bcpc").map{|x| x.bcpc.management.ip}
+graphite_hosts = get_nodes_for("graphite","bcpc").map{|x| x.bcpc.management.ip rescue nil}.compact
 #
 # Array to store the list of services on which jxmtrans dependent on i.e. collects data from
 # If any of the services gets restarted jmxtrans process need to be restarted

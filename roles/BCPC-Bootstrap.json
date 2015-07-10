@@ -5,14 +5,13 @@
     "json_class": "Chef::Role",
     "run_list": [
       "role[Basic]",
+      "recipe[bach_repository]",
       "recipe[bcpc::bootstrap]",
       "recipe[bcpc::apache-mirror]",
       "recipe[bcpc::ufw]",
-      "recipe[bcpc::chef_vault_download]",
       "recipe[bcpc::chef_vault_install]",
       "recipe[bcpc::cobbler]",
       "role[Hannibal-Build]",
-      "recipe[bach_spark::spark_package]",
       "recipe[bcpc::rotate_chef_nginx_access_log]"
     ],
     "description": "A bootstrap node in a BCPC cluster",

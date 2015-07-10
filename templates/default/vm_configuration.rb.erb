@@ -1,0 +1,49 @@
+# -*- mode: ruby -*-
+
+config.vm.hostname = '<%= @fqdn %>'
+
+config.vm.network :private_network, 
+  ip: '<%= @management_ip %>',
+  netmask: '<%= @management_netmask %>',
+  adapter_ip: '<%= @management_ip %>'
+
+# config.vm.network :private_network, 
+#   ip: '<%= @storage_ip %>',
+#   netmask: '<%= @storage_netmask %>',
+#   adapter_ip: '<%= @storage_ip %>'
+
+# config.vm.network :private_network, 
+#   ip: '<%= @floating_ip %>',
+#   netmask: '<%= @floating_netmask %>',
+#   adapter_ip: '<%= @floating_ip %>'
+
+config.vm.provider :virtualbox do |vb|
+  vb.gui = true
+  vb.name = "<%= @name %>"
+  vb.customize ["modifyvm", :id, "--memory", "<%= @memory %>"]
+  vb.customize ["modifyvm", :id, "--largepages", "on"]
+  vb.customize ["modifyvm", :id, "--nestedpaging", "on"]
+  vb.customize ["modifyvm", :id, "--vtxvpid", "on"]
+  vb.customize ["modifyvm", :id, "--hwvirtex", "on"]
+  vb.customize ["modifyvm", :id, "--ioapic", "on"]
+
+  # Get disk path
+  line = `VBoxManage list systemproperties | grep "Default machine folder"`
+  vb_machine_folder = line.split(':')[1].strip()
+
+  ['sdb','sdc','sdd','sde'].each_with_index do |dev,i|
+    disk_path = File.join(vb_machine_folder, vb.name, "#{vb.name}-#{dev}.vdi")
+    unless File.exists?(disk_path)
+      vb.customize ['createhd', 
+                    '--filename', disk_path, 
+                    '--format', 'VDI', 
+                    '--size', 20 * 1024]
+    end
+    vb.customize ['storageattach', :id, 
+                  '--storagectl', "SATAController",
+                  '--port', i + 1, 
+                  '--device', 0, 
+                  '--type', 'hdd', 
+                  '--medium', disk_path]
+  end
+end

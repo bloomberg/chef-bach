@@ -1,23 +1,15 @@
-.rake_test_cache
-id_rsa
-secret_file
-bootstrap_chef.id_rsa*
-.*.sw*
-*~
-.chef_found*/
-python_server.log
-.chef/
-vbox/
-bins/
-cookbooks/*/
-!cookbooks/bach_common
-!cookbooks/bach_spark
-!cookbooks/bcpc
-!cookbooks/bcpc-hadoop
-!cookbooks/bcpc_jmxtrans
-!cookbooks/hannibal
-!cookbooks/kafka-bcpc
-!cookbooks/bach_krb5
-cookbooks/*/coverage
-cookbooks/*/vendor
-*.lock
+# bona-fide development items
+.bundle/
+.kitchen/
+vendor/
+
+# chef-zero stuff
+.chef
+clients/
+environments/
+local-mode-cache/
+nodes/
+trusted_certs/
+
+# chef-provisioning VMs
+vms/
