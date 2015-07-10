@@ -6,4 +6,6 @@ description      'bach_common contains common recipes for the BACH cookbooks'
 long_description 'bach_common contains common recipes for the BACH cookbooks'
 version          '0.1.0'
 
+depends 'apt'
+
 supports 'ubuntu', '12.04'

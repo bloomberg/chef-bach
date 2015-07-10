@@ -19,6 +19,14 @@
 
 require 'ipaddr'
 
+#
+# We should be providing this information to the entire cluster
+# with DNS SD or the chef environment or SOMETHING.
+#
+# As it is, on first converge, every cluster will write a garbage
+# hosts file.
+#
+
 mgmt_cidr = IPAddr.new(node['bcpc']['management']['cidr'])
 
 ifs=node[:network][:interfaces].keys

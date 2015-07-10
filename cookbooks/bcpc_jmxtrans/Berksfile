@@ -1,0 +1,10 @@
+# -*- mode: enh-ruby -*-
+source "https://supermarket.chef.io"
+
+metadata
+
+# jmxtrans 1.0+ isn't on the supermarket.
+cookbook 'jmxtrans', 
+  git: 'https://github.com/jmxtrans/jmxtrans-cookbook',
+  revision: 'd8ee2396eca91ef8e0e558490bde075869b787de'
+

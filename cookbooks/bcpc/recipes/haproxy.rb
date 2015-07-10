@@ -19,6 +19,8 @@
 
 include_recipe "bcpc::default"
 
+require 'uri'
+
 make_config('haproxy-stats-user', "haproxy")
 
 # backward compatibility
@@ -27,15 +29,14 @@ if haproxy_stats_password.nil?
   haproxy_stats_password = secure_password
 end
 
-bootstrap = get_all_nodes.select{|s| s.hostname.include? 'bootstrap'}[0].fqdn
-
+bootstrap = 'bach-vm-bootstrap-b0.bcpc.example.com' # XXX non-parameterized!
 nodes = get_nodes_for("haproxy").map!{ |x| x['fqdn'] }.join(",")
 
 chef_vault_secret "haproxy-stats" do
   data_bag 'os'
   raw_data({ 'password' => haproxy_stats_password })
-  admins "#{ nodes },#{ bootstrap }"
   search '*:*'
+  admins "#{bootstrap},#{Chef::Config[:node_name]}"
   action :nothing
 end.run_action(:create_if_missing)
 

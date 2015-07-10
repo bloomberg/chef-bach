@@ -94,7 +94,7 @@ template "/etc/init.d/hadoop-hdfs-zkfc" do
   mode 0655
 end
 
-if @node['bcpc']['hadoop']['hdfs']['HA'] == true then
+if node['bcpc']['hadoop']['hdfs']['HA'] == true then
   bash "hdfs namenode -bootstrapStandby -force -nonInteractive" do
     code "hdfs namenode -bootstrapStandby -force -nonInteractive"
     user "hdfs"

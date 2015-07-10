@@ -17,23 +17,7 @@
 # limitations under the License.
 #
 
-require 'pathname'
-require 'rubygems'
-
-gem_path = Pathname.new(Gem.ruby).dirname.join("gem").to_s
-chef_gemspec = "/opt/chef/embedded/lib/ruby/gems/1.9.1/specifications/chef-vault-2.2.4.gemspec"
-
-gem_package "chef-vault" do
-  gem_binary gem_path
-  version ">=0.0.0"
-  action :nothing
-end.run_action(:install)
-
-# set the gemspec permission
-file chef_gemspec do
-  owner 'root'
-  mode "644"
-  action :nothing
-end.run_action(:create)
-
-Gem.clear_paths
+# See bach_repository::gems for correct version
+chef_gem 'chef-vault' do
+  version '2.2.4'
+end

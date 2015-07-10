@@ -8,6 +8,11 @@ node.default['chef_client']['handler']['graphite']['host'] = node['bcpc']['manag
 node.default['chef_client']['handler']['graphite']['port'] = node['bcpc']['graphite']['relay_port']
 node.default['chef_client']['handler']['graphite']['prefix'] = "chef.#{node['hostname']}"
 
+# See bach_repository::gems for correct version.
+node.set['chef_client']['handler']['gem']['version'] = '2.1.0'
+
+log "Gem configuration: #{Gem.configuration.inspect}"
+
 include_recipe 'graphite_handler::default'
 
 #
