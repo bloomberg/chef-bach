@@ -27,6 +27,13 @@ node.default['bcpc']['hadoop']['copylog']['namenode_master_out'] = {
   end
 end
 
+directory "/var/log/hadoop-hdfs/gc/" do
+  user "hdfs"
+  group "hdfs"
+  action :create
+  notifies :restart, "service[generally run hadoop-hdfs-namenode]", :delayed
+end
+
 user_ulimit "hdfs" do
   filehandle_limit 32769
   process_limit 65536

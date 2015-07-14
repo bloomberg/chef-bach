@@ -31,12 +31,15 @@ default["bcpc"]["hadoop"]["jmx_enabled"] = true
 default["bcpc"]["hadoop"]["datanode"]["xmx"]["max_size"] = 4096
 default["bcpc"]["hadoop"]["datanode"]["xmx"]["max_ratio"] = 0.25
 default["bcpc"]["hadoop"]["datanode"]["max"]["xferthreads"] = 16384
+default["bcpc"]["hadoop"]["datanode"]["jmx"]["port"] = 10112
 default["bcpc"]["hadoop"]["namenode"]["handler"]["count"] = 100
+default["bcpc"]["hadoop"]["namenode"]["gc_opts"] = "-XX:ParallelGCThreads=14 -XX:+UseParNewGC -XX:+UseConcMarkSweepGC -XX:CMSInitiatingOccupancyFraction=70 -XX:+UseCMSInitiatingOccupancyOnly -verbose:gc -XX:+PrintHeapAtGC -XX:+PrintGCDetails -XX:+PrintGCTimeStamps -XX:+PrintGCDateStamps -Xloggc:/var/log/hadoop-hdfs/gc/gc.log-$$-$(hostname)-$(date +'%Y%m%d%H%M').log -XX:+PrintTenuringDistribution -XX:+UseNUMA -XX:+PrintGCApplicationStoppedTime -XX:+UseCompressedOops -XX:+PrintClassHistogram -XX:+PrintGCApplicationConcurrentTime"
+default["bcpc"]["hadoop"]["namenode"]["xmx"]["max_size"] = 16384
+default["bcpc"]["hadoop"]["namenode"]["xmx"]["max_ratio"] = 0.25
 default["bcpc"]["hadoop"]["namenode"]["jmx"]["port"] = 10111
 default["bcpc"]["hadoop"]["namenode"]["rpc"]["port"] = 8020
 default["bcpc"]["hadoop"]["namenode"]["http"]["port"] = 50070 
 default["bcpc"]["hadoop"]["namenode"]["https"]["port"] = 50080 
-default["bcpc"]["hadoop"]["datanode"]["jmx"]["port"] = 10112
 default["bcpc"]["hadoop"]["hbase_master"]["jmx"]["port"] = 10101
 default["bcpc"]["hadoop"]["hbase_rs"]["jmx"]["port"] = 10102
 default["bcpc"]["hadoop"]["kafka"]["jmx"]["port"] = 9995
