@@ -48,11 +48,6 @@ link "/usr/hdp/current/hbase-master/lib/native/Linux-amd64-64/libsnappy.so" do
   to "/usr/lib/libsnappy.so.1"
 end
 
-template "/etc/hbase/conf/hbase-env.sh" do
-  source "hb_hbase-env.sh.erb"
-  mode 0655
-end
-
 template "/etc/init.d/hbase-master" do
   source "hdp_hbase-master-initd.erb"
   mode 0655

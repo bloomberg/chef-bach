@@ -29,11 +29,6 @@ link "/usr/hdp/current/hbase-regionserver/lib/native/Linux-amd64-64/libsnappy.so
   to "/usr/lib/libsnappy.so.1"
 end
 
-template "/etc/hbase/conf/hbase-env.sh" do
-  source "hb_hbase-env.sh.erb"
-  mode 0655
-end
-
 template "/etc/default/hbase" do
   source "hdp_hbase.default.erb"
   mode 0655
