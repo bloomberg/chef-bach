@@ -5,7 +5,8 @@ set -x
 
 # Define the version of Zabbix server and zabbixapi gem to be downloaded
 # Refer https://github.com/bloomberg/chef-bcpc/issues/343
-ZABBIX_VERSION=2.2.2   
+ZABBIXAPI_VERSION=2.2.2
+ZABBIX_VERSION=2.2.9
 
 # Define the appropriate version of each binary to grab/build
 VER_KIBANA=d1495fbf6e9c20c707ecd4a77444e1d486a1e7d6
@@ -40,7 +41,7 @@ mkdir -p $APT_REPO_BINS
 apt-get -y update
 
 # Install tools needed for packaging
-apt-get -y install git rubygems make pbuilder python-mock python-configobj python-support cdbs python-all-dev python-stdeb libmysqlclient-dev libldap2-dev ruby-dev gcc patch rake ruby1.9.3 ruby1.9.1-dev python-pip python-setuptools dpkg-dev apt-utils haveged libtool autoconf unzip rsync autogen
+apt-get -y install git rubygems make pbuilder python-mock python-configobj python-support cdbs python-all-dev python-stdeb libmysqlclient-dev libldap2-dev ruby-dev gcc patch rake ruby1.9.3 ruby1.9.1-dev python-pip python-setuptools dpkg-dev apt-utils haveged libtool autoconf automake autotools-dev unzip rsync autogen
 if [[ -z `gem list --local fpm | grep fpm | cut -f1 -d" "` ]]; then
   gem install fpm --no-ri --no-rdoc
 fi
@@ -116,7 +117,7 @@ FILES="rkerberos*.gem $FILES"
 
 # Get Rubygem for zabbixapi
 if ! [[ -f gems/zabbixapi.gem ]]; then
-  gem fetch zabbixapi -v ${ZABBIX_VERSION}
+  gem fetch zabbixapi -v ${ZABBIXAPI_VERSION}
   ln -s zabbix*.gem zabbixapi.gem || true
 fi
 FILES="zabbix*.gem $FILES"
@@ -193,7 +194,18 @@ FILES="python-requests-aws_0.1.5_all.deb $FILES"
 
 # Build the zabbix packages
 if [ ! -f zabbix-agent.tar.gz ] || [ ! -f zabbix-server.tar.gz ]; then
-    $CURL -L -O http://sourceforge.net/projects/zabbix/files/ZABBIX%20Latest%20Stable/${ZABBIX_VERSION}/zabbix-${ZABBIX_VERSION}.tar.gz
+    # Create a zabbix source distribution from the official git mirror.
+    rm -rf /tmp/zabbix-${ZABBIX_VERSION}
+    git clone https://github.com/zabbix/zabbix /tmp/zabbix-${ZABBIX_VERSION}
+    cd /tmp/zabbix-${ZABBIX_VERSION}
+    git checkout tags/${ZABBIX_VERSION}
+    ./bootstrap.sh
+    ./configure
+    make dbschema
+    cd -
+    tar -czf zabbix-${ZABBIX_VERSION}.tar.gz -C /tmp zabbix-${ZABBIX_VERSION}
+
+    # Actually build zabbix.
     tar zxf zabbix-${ZABBIX_VERSION}.tar.gz
     rm -rf /tmp/zabbix-install && mkdir -p /tmp/zabbix-install
     cd zabbix-${ZABBIX_VERSION}
