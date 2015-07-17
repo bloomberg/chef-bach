@@ -123,7 +123,6 @@ default['bcpc']['cinder_dbname'] = "cinder"
 default['bcpc']['glance_dbname'] = "glance"
 default['bcpc']['horizon_dbname'] = "horizon"
 default['bcpc']['keystone_dbname'] = "keystone"
-default['bcpc']['graphite_dbname'] = "graphite"
 default['bcpc']['pdns_dbname'] = "pdns"
 default['bcpc']['zabbix_dbname'] = "zabbix"
 
@@ -141,21 +140,11 @@ default['bcpc']['zabbix']['scripts']['mail'] = "/usr/local/bin/zbx_mail.sh"
 default['bcpc']['zabbix']['scripts']['query_graphite'] = "/usr/local/bin/query_graphite.py"
 
 default['bcpc']['keepalived']['config_template'] = "keepalived.conf_openstack"
-default['bcpc']['graphite']['relay_port'] = 2013
-default['bcpc']['graphite']['web_port'] = 8888
-default['bcpc']['graphite']['log']['retention'] = 15
-default['bcpc']['graphite']['timezone'] = "'America/New_York'"
-default['bcpc']['graphite']['local_data_dir'] = "/opt/graphite/storage/whisper"
 
 default[:bcpc][:ports][:apache][:radosgw] = 8080
 default[:bcpc][:ports][:apache][:radosgw_https] = 8443
 default[:bcpc][:ports][:haproxy][:radosgw] = 80
 default[:bcpc][:ports][:haproxy][:radosgw_https] = 443
-default[:bcpc][:graphite][:carbon][:storage] = { 
-  "carbon"=>{ "pattern" => "^carbon\\.", "retentions"=>"60:90d" },
-  "default"=>{ "pattern" =>".*", "retentions" => "15s:7d,1m:30d,5m:90d" },
-  "hbase"=>{ "pattern" => "^jmx\\.hbase_rs\\.*\\.hb*\\.", "retentions" => "15s:15d" } 
-}
 
 #################################################
 #  attributes for chef vault download and install
