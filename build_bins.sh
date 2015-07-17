@@ -197,12 +197,12 @@ if [ ! -f zabbix-agent.tar.gz ] || [ ! -f zabbix-server.tar.gz ]; then
     # Create a zabbix source distribution from the official git mirror.
     rm -rf /tmp/zabbix-${ZABBIX_VERSION}
     git clone https://github.com/zabbix/zabbix /tmp/zabbix-${ZABBIX_VERSION}
-    cd /tmp/zabbix-${ZABBIX_VERSION}
+    pushd /tmp/zabbix-${ZABBIX_VERSION}
     git checkout tags/${ZABBIX_VERSION}
     ./bootstrap.sh
     ./configure
     make dbschema
-    cd -
+    popd
     tar -czf zabbix-${ZABBIX_VERSION}.tar.gz -C /tmp zabbix-${ZABBIX_VERSION}
 
     # Actually build zabbix.
