@@ -74,6 +74,14 @@ end
 
 mysql_servers = get_node_attributes(MGMT_IP_GRAPHITE_WEBPORT_ATTR_SRCH_KEYS,"mysql","bcpc")
 
+# Directory resource sets owner and group only to the leaf directory.
+# All other directories will be owned by root
+directory "#{node['bcpc']['graphite']['local_data_dir']}" do
+    owner "www-data"
+    group "www-data"
+    recursive true
+end
+
 template "/opt/graphite/conf/carbon.conf" do
     source "carbon.conf.erb"
     owner "root"
@@ -174,5 +182,5 @@ end
 bash "cleanup-old-logs" do
   action :run
   user "root"
-  code "find /opt/graphite/storage/ -name *.wsp -mtime +#{node['bcpc']['graphite']['log']['retention']} -type f -exec rm {} \\;"
+  code "find #{node['bcpc']['graphite']['local_data_dir']} -name *.wsp -mtime +#{node['bcpc']['graphite']['log']['retention']} -type f -exec rm {} \\;"
 end
