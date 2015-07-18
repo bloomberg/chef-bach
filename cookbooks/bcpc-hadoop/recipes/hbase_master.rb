@@ -59,5 +59,6 @@ service "hbase-master" do
   subscribes :restart, "template[/etc/hbase/conf/hbase-site.xml]", :delayed
   subscribes :restart, "template[/etc/hbase/conf/hbase-policy.xml]", :delayed
   subscribes :restart, "template[/etc/hbase/conf/hbase-env.sh]", :delayed
+  subscribes :restart, "template[/etc/hadoop/conf/hdfs-site.xml]", :delayed
   subscribes :restart, "user_ulimit[hbase]", :delayed
 end
