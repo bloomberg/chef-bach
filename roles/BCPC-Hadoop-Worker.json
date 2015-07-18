@@ -5,6 +5,7 @@
     "role[Basic]",
     "recipe[bcpc::chef_vault_install]",
     "recipe[bcpc::default]",
+    "recipe[bcpc::ubuntu_tools_repo]",
     "recipe[bcpc-hadoop::default]",
     "recipe[bcpc::networking]",
     "recipe[bcpc-hadoop::disks]",
