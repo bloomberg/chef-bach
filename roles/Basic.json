@@ -7,7 +7,6 @@
       "recipe[bcpc::graphite_handler]",
       "recipe[apt]",
       "recipe[ubuntu]",
-      "recipe[bcpc::ubuntu_tools_repo]",
       "recipe[ntp]",
       "recipe[chef-client::delete_validation]",
       "recipe[chef-client::config]"

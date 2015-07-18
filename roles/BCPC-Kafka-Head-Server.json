@@ -6,6 +6,7 @@
     "recipe[bcpc::default]",
     "recipe[bcpc::networking]",
     "recipe[bcpc-hadoop::disks]",
+    "recipe[bcpc::ubuntu_tools_repo]",
     "recipe[bcpc-hadoop::default]",
     "recipe[kafka-bcpc::default]", 
     "recipe[kafka-bcpc::setattr]",
