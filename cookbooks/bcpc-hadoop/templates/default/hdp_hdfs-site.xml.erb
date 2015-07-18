@@ -162,4 +162,8 @@
     <name>dfs.namenode.handler.count</name>
     <value><%= node["bcpc"]["hadoop"]["namenode"]["handler"]["count"] %></value>
   </property>
+  <property>
+    <name>dfs.client.local.interfaces</name>
+    <value><%= node['bcpc']['floating']['ip'] %></value>
+  </property>
 </configuration>
