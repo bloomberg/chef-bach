@@ -1,3 +1,10 @@
+export SPARK_LOCAL_IP=<%= node['bcpc']['floating']['ip'] %>
+export SPARK_PUBLIC_DNS=<%= float_host(node['fqdn']) %>
+
+export LD_LIBRARY_PATH=/usr/hdp/current/hadoop-client/lib/native:/usr/hdp/current/hadoop-client/lib/native/Linux-amd64-64
+
 export HADOOP_CONF_DIR="/etc/hadoop/conf"
-export SPARK_DIST_CLASSPATH=$(hadoop classpath)
+
+export SPARK_DIST_CLASSPATH=${SPARK_LIBRARY_PATH}:$(for i in $(export IFS=":"; for i in $(hadoop classpath); do find $i -maxdepth 1 -name "*.jar"; done | egrep -v "jackson-databind-.*.jar|jackson-core.jar|jackson-core-.*.jar|jackson-annotations-.*.jar"); do echo -n "${i}:"; done | sed 's/:$//')
+
 export SPARK_CLASSPATH="$SPARK_DIST_CLASSPATH:$SPARK_CLASSPATH"
