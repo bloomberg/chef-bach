@@ -100,6 +100,20 @@ if ! [[ -f gems/zookeeper.gem ]]; then
 fi
 FILES="zookeeper*.gem $FILES"
 
+# Get the Rubygem for kerberos
+if ! [[ -f gems/rake-compiler.gem ]]; then
+  gem fetch rake-compiler
+  ln -s rake-compiler*.gem rake-compiler.gem || true
+fi
+FILES="rake-compiler*.gem $FILES"
+
+# Get the Rubygem for kerberos
+if ! [[ -f gems/rkerberos.gem ]]; then
+  gem fetch rkerberos
+  ln -s rkerberos*.gem rkerberos.gem || true
+fi
+FILES="rkerberos*.gem $FILES"
+
 # Get Rubygem for zabbixapi
 if ! [[ -f gems/zabbixapi.gem ]]; then
   gem fetch zabbixapi -v ${ZABBIX_VERSION}

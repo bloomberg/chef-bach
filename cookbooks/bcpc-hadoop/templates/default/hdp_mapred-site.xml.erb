@@ -51,11 +51,6 @@
   </property>
 
   <property>
-    <name>mapreduce.jobtracker.hosts.exclude.filename</name>
-    <value>/etc/hadoop/conf/mapred.exclude</value>
-  </property>
-
-  <property>
     <name>mapreduce.jobhistory.address</name>
     <value><%="#{float_host(@hs_hosts.map{|i| i[:hostname] }.sort.first)}:10020" if not @hs_hosts.empty?%></value>
   </property>

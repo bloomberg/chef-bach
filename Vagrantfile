@@ -5,14 +5,44 @@
 # Chef server.
 # See http://www.vagrantup.com/ for info on Vagrant.
 
-$local_environment = "Test-Laptop"
+require 'json'
+
+# Since we run vagrant commands from ~/chef-bcpc and from ~/chef-bcpc/vbox directory, finding
+# correct location for environment file is important. To set the base_dir correct we check
+# if we are inside "vbox" directory or not and act accordingly
+
+if File.basename(File.expand_path(".")) == "vbox"
+  base_dir = File.expand_path("../environments")
+else
+  base_dir = File.expand_path("./environments")
+end
+
+puts "Base directory is : #{base_dir}"
+
+json_file = Dir[File.join("#{base_dir}/../environments/",'*.json')]
+
+if json_file.empty?
+  puts "No environment file found to parse. Please make sure at least one environment file exists."
+  exit
+end
+
+if json_file.length > 1
+  puts "More than one environment file found."
+  exit
+end
+
+chef_env = JSON.parse(File.read(json_file.join(",")))
+cluster_environment = chef_env["name"]
+bootstrap_hostname = chef_env["override_attributes"]["bcpc"]["bootstrap"]["hostname"]
+bootstrap_domain = chef_env["override_attributes"]["bcpc"]["domain_name"]
+
+$local_environment = cluster_environment
 $local_mirror = nil
-#$local_mirror = "10.0.100.4"
 
 Vagrant.configure("2") do |config|
 
   config.vm.define :bootstrap do |bootstrap|
-    bootstrap.vm.hostname = "bcpc-bootstrap"
+    bootstrap.vm.hostname = "#{bootstrap_hostname}.#{bootstrap_domain}"
 
     bootstrap.vm.network :private_network, ip: "10.0.100.3", netmask: "255.255.255.0", adapter_ip: "10.0.100.2"
     bootstrap.vm.network :private_network, ip: "172.16.100.3", netmask: "255.255.255.0", adapter_ip: "172.16.100.2"
@@ -28,25 +58,9 @@ Vagrant.configure("2") do |config|
         sed -i s/^deb-src/\#deb-src/g /etc/apt/sources.list
       EOH
     end
-
-    # since we are creating the server and the validation keys on this new
-    # machine itself, we can't use Vagrant's built-in chef provisioning.
-    # We actually prefer to do this in vbox_create.sh as we do some fixups
-    # and register our VMs in cobbler after we're done.
-    #bootstrap.vm.provision :shell, :inline => "/chef-bcpc-host/bootstrap_chef.sh --vagrant-local 10.0.100.3 #{$local_environment}"
   end
 
-  #config.vm.define :mirror do |mirror|
-  #  mirror.vm.hostname = "bcpc-mirror-vagrant"
-  #
-  #  mirror.vm.network :private_network, ip: "10.0.100.4", netmask: "255.255.255.0", adapter_ip: "10.0.100.2"
-  #  mirror.vm.network :private_network, ip: "172.16.100.4", netmask: "255.255.255.0", adapter_ip: "172.16.100.2"
-  #  mirror.vm.network :private_network, ip: "192.168.100.4", netmask: "255.255.255.0", adapter_ip: "192.168.100.2"
-  #
-  #end
-
   config.vm.box = "precise64"
-  #config.vm.box_url = "http://cloud-images.ubuntu.com/precise/current/precise-server-cloudimg-amd64-vagrant-disk1.box"
   config.vm.box_url = "precise-server-cloudimg-amd64-vagrant-disk1.box"
 
   memory = ( ENV["BOOTSTRAP_VM_MEM"] or "1024" )
@@ -55,7 +69,7 @@ Vagrant.configure("2") do |config|
   config.vm.provider :virtualbox do |vb|
      # Don't boot with headless mode
      vb.gui = true
-     vb.name = "bcpc-bootstrap"
+     vb.name = "#{bootstrap_hostname}"
      vb.customize ["modifyvm", :id, "--nictype2", "82543GC"]
      vb.customize ["modifyvm", :id, "--memory", memory]
      vb.customize ["modifyvm", :id, "--cpus", cpus]
@@ -64,7 +78,5 @@ Vagrant.configure("2") do |config|
      vb.customize ["modifyvm", :id, "--vtxvpid", "on"]
      vb.customize ["modifyvm", :id, "--hwvirtex", "on"]
      vb.customize ["modifyvm", :id, "--ioapic", "on"]
-     #vb.customize ["modifyvm", :id, "--chipset", "ich9"]
    end
-
 end

@@ -26,7 +26,7 @@ hadoop_conf_files = %w{capacity-scheduler.xml
    ssl-client.xml
    ssl-server.xml
    yarn-site.xml
-   mapred.exclude
+   yarn.exclude
    dfs.exclude
 }
 node[:bcpc][:hadoop][:hdfs][:HA] == true and hadoop_conf_files.insert(-1,"hdfs-site_HA.xml")
