@@ -98,13 +98,16 @@
 
   <property>
     <name>yarn.nodemanager.aux-services</name>
-    <value>mapreduce_shuffle</value>
+    <value><%= node[:bcpc][:hadoop][:yarn][:aux_services].keys.join(',') %></value>
   </property>
 
+  <% node[:bcpc][:hadoop][:yarn][:aux_services].each_pair do |k,cls_v| %>
   <property>
-    <name>yarn.nodemanager.aux-services.mapreduce_shuffle.class</name>
-    <value>org.apache.hadoop.mapred.ShuffleHandler</value>
+    <name>yarn.nodemanager.aux-services.<%= k %>.class</name>
+    <value><%= cls_v['class'] %></value>
   </property>
+
+  <% end # end loop over node[:bcpc][:hadoop][:yarn][:aux_services] %>
 
   <property>
     <name>yarn.nodemanager.local-dirs</name>

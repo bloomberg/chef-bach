@@ -5,4 +5,5 @@ default[:spark][:download][:dir] = "/home/vagrant/chef-bcpc/bins"
 default[:spark][:package][:base] = "/usr/spark"
 default[:spark][:package][:prefix] = "spark"
 default[:spark][:package][:version] = "1.4.0"
+default[:spark][:hdfs_url] = node['bcpc']['hadoop']['hdfs_url']
 default[:spark][:bin][:dir] = "#{node[:spark][:package][:base]}/#{node[:spark][:package][:version]}"
