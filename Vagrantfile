@@ -17,17 +17,17 @@ else
   base_dir = File.expand_path("./environments")
 end
 
-puts "Base directory is : #{base_dir}"
+$stderr.puts "Base directory is : #{base_dir}"
 
 json_file = Dir[File.join("#{base_dir}/../environments/",'*.json')]
 
 if json_file.empty?
-  puts "No environment file found to parse. Please make sure at least one environment file exists."
+  $stderr.puts "No environment file found to parse. Please make sure at least one environment file exists."
   exit
 end
 
 if json_file.length > 1
-  puts "More than one environment file found."
+  $stderr.puts "More than one environment file found."
   exit
 end
 
