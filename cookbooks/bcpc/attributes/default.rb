@@ -22,6 +22,8 @@ default['bcpc']['vms_key'] = nil
 
 default['bcpc']['encrypt_data_bag'] = false
 
+default['bcpc']['bootstrap']['preseed']['add_kernel_opts'] = "console=ttyS0"
+
 default['bcpc']['bootstrap']['preseed']['late_command'] = "true"
 
 default['bcpc']['bootstrap']['admin_users'] = []
