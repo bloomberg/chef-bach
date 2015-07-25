@@ -29,7 +29,7 @@ gem_path = Pathname.new(Gem.ruby).dirname.join('gem').to_s
 
 gem_package 'ruby-augeas' do
     gem_binary gem_path
-    #XXX uncoment if serving locally options "--no-http-proxy --clear-sources --source #{get_binary_server_url}"
+    version ">=0.0.0"
     action :nothing
 end.run_action(:install)
 
