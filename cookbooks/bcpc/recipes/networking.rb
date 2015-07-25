@@ -132,7 +132,7 @@ bash "setup-interfaces-source" do
   code <<-EOH
     echo "source /etc/network/interfaces.d/*.cfg" >> /etc/network/interfaces
   EOH
-  not_if "grep '^source /etc/network/interfaces.d/\*.cfg' /etc/network/interfaces"
+  not_if 'grep "^source /etc/network/interfaces.d/\*.cfg" /etc/network/interfaces'
 end
 
 # set up the DNS resolvers
