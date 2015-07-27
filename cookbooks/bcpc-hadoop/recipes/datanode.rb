@@ -38,6 +38,40 @@ user_ulimit "yarn" do
   process_limit 65536
 end
 
+# need to ensure hdfs user is in hadoop and hdfs
+# groups. Packages will not add hdfs if it
+# is already created at install time (e.g. if
+# machine is using LDAP for users).
+# Similarly, yarn needs to be in the hadoop
+# group to run the LCE and in the mapred group
+# for log aggregation
+group 'hadoop' do
+  # use manage as if the group does not exist
+  # we do not want an exception
+  action :manage
+  members ['hdfs', 'yarn']
+  append true
+end
+group 'hdfs' do
+  # use manage as if the group does not exist
+  # we do not want an exception
+  action :manage
+  members 'hdfs'
+  append true
+end
+group 'mapred' do
+  # use manage as if the group does not exist
+  # we do not want an exception
+  action :manage
+  members 'yarn'
+  append true
+end
+
+directory "/var/run/hadoop-hdfs" do
+  owner "hdfs"
+  group "root"
+end
+
 template "/etc/init.d/hadoop-hdfs-datanode" do
   source "hdp_hadoop-hdfs-datanode-initd.erb"
   mode 0655
