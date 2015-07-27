@@ -107,3 +107,10 @@ export HBASE_MANAGES_ZK=false
 # DRFA doesn't put any cap on the log size. Please refer to HBase-5655 for more context.
 
 export JAVA_HOME=<%= node["bcpc"]["hadoop"]["java"] %>
+
+export HBASE_MASTER_OPTS="$HBASE_MASTER_OPTS -Xms<%=[node["bcpc"]["hadoop"]["hbase_master"]["xmx"]["max_size"], ( node["memory"]["total"].to_i * node["bcpc"]["hadoop"]["hbase_master"]["xmx"]["max_ratio"]/1024).floor].min %>m -Xmx<%=[node["bcpc"]["hadoop"]["hbase_master"]["xmx"]["max_size"], (node["memory"]["total"].to_i * node["bcpc"]["hadoop"]["hbase_master"]["xmx"]["max_ratio"]/1024).floor].min %>m"
+export HBASE_REGIONSERVER_OPTS="$HBASE_MASTER_OPTS -Xms<%=[node["bcpc"]["hadoop"]["hbase_rs"]["xmx"]["max_size"], (node["memory"]["total"].to_i * node["bcpc"]["hadoop"]["hbase_rs"]["xmx"]["max_ratio"]/1024).floor].min 
+ %>m -Xmx<%=[node["bcpc"]["hadoop"]["hbase_rs"]["xmx"]["max_size"], (node["memory"]["total"].to_i * node["bcpc"]["hadoop"]["hbase_rs"]["xmx"]["max_ratio"]/1024).floor].min 
+ %>m"
+
+
