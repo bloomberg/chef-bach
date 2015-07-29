@@ -19,7 +19,7 @@ end
 
 OOZIE_LIB_PATH='/usr/hdp/current/oozie'
 OOZIE_CLIENT_PATH='/usr/hdp/current/oozie-client'
-OOZIE_SERVER_PATH='/usr/hdp/2.2.0.0-2041/oozie-server'
+OOZIE_SERVER_PATH='/usr/hdp/current/oozie-server/oozie-server'
 HDFS_URL="hdfs://#{node.chef_environment}/"
 
 directory "#{OOZIE_LIB_PATH}/libext" do
