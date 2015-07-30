@@ -45,24 +45,24 @@
   </property>
 
   <% @nn_hosts.each do |h| %>	
-    <property>
-      <name>dfs.namenode.rpc-address.<%= "#{node.chef_environment}.namenode#{h[:node_number]}" %></name>
-      <value><%=float_host(h[:hostname]) %>:<%= node[:bcpc][:hadoop][:namenode][:rpc][:port] %></value>
-    </property>
+  <property>
+    <name>dfs.namenode.rpc-address.<%= "#{node.chef_environment}.namenode#{h[:node_number]}" %></name>
+    <value><%=float_host(h[:hostname]) %>:<%= node[:bcpc][:hadoop][:namenode][:rpc][:port] %></value>
+  </property>
   <% end %>
 
   <% @nn_hosts.each do |h| %>	
-    <property>
-      <name>dfs.namenode.http-address.<%= "#{node.chef_environment}.namenode#{h[:node_number]}" %></name>
-      <value><%=float_host(h[:hostname]) %>:<%= node[:bcpc][:hadoop][:namenode][:http][:port] %></value>
-    </property>
+  <property>
+    <name>dfs.namenode.http-address.<%= "#{node.chef_environment}.namenode#{h[:node_number]}" %></name>
+    <value><%=float_host(h[:hostname]) %>:<%= node[:bcpc][:hadoop][:namenode][:http][:port] %></value>
+  </property>
   <% end %>
 
   <% @nn_hosts.each do |h| %>	
-    <property>
-      <name>dfs.namenode.https-address.<%= "#{node.chef_environment}.namenode#{h[:node_number]}" %></name>
-      <value><%=float_host(h[:hostname]) %>:<%= node[:bcpc][:hadoop][:namenode][:https][:port] %></value>
-    </property>
+  <property>
+    <name>dfs.namenode.https-address.<%= "#{node.chef_environment}.namenode#{h[:node_number]}" %></name>
+    <value><%=float_host(h[:hostname]) %>:<%= node[:bcpc][:hadoop][:namenode][:https][:port] %></value>
+  </property>
   <% end %>
 
   <property>
@@ -121,7 +121,7 @@
 
   <property>
     <name>dfs.client.local.interfaces</name>
-    <value><%= node['bcpc']['floating']['interface'] %></value>
+    <value><%=node['bcpc']['floating']['ip']%>/32</value>
   </property>
 
   <property>
@@ -154,16 +154,15 @@
     <name>dfs.blocksize</name>
     <value><%= node["bcpc"]["hadoop"]["hdfs"]["dfs_blocksize"] %></value>
   </property>
+
   <property>
     <name>dfs.datanode.max.transfer.threads</name>
     <value><%= node["bcpc"]["hadoop"]["datanode"]["max"]["xferthreads"] %></value>
   </property>
+
   <property>
     <name>dfs.namenode.handler.count</name>
     <value><%= node["bcpc"]["hadoop"]["namenode"]["handler"]["count"] %></value>
   </property>
-  <property>
-    <name>dfs.client.local.interfaces</name>
-    <value><%= node['bcpc']['floating']['ip'] %></value>
-  </property>
+
 </configuration>
