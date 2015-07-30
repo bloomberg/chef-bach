@@ -9,25 +9,35 @@
       },
       "domain_name" : "bcpc.example.com",
       "management": {
-        "vip" : "10.0.100.5",
-        "interface" : "eth0",
-        "netmask" : "255.255.255.0",
-        "cidr" : "10.0.100.0/24",
-        "gateway" : "10.0.100.3"
-      },
-      "storage": {
-        "interface" : "eth1",
-        "netmask" : "255.255.255.0",
-        "cidr" : "172.16.100.0/24",
-        "gateway" : "172.16.100.3"
+        "vip" : "10.0.100.5"
       },
       "floating": {
-        "vip" : "192.168.100.5",
-        "interface" : "eth2",
-        "netmask" : "255.255.255.0",
-        "cidr" : "192.168.100.0/24",
-        "gateway" : "192.168.100.3",
-        "available_subnet" : "192.168.100.128/25"
+        "vip" : "192.168.100.5"
+      },
+      "networks": {
+        "subnet1": {
+          "management": {
+            "vip" : "10.0.100.5",
+            "interface" : "eth0",
+            "netmask" : "255.255.255.0",
+            "cidr" : "10.0.100.0/24",
+            "gateway" : "10.0.100.3"
+          },
+          "storage": {
+            "interface" : "eth1",
+            "netmask" : "255.255.255.0",
+            "cidr" : "172.16.100.0/24",
+            "gateway" : "172.16.100.3"
+          },
+          "floating": {
+            "vip" : "192.168.100.5",
+            "interface" : "eth2",
+            "netmask" : "255.255.255.0",
+            "cidr" : "192.168.100.0/24",
+            "gateway" : "192.168.100.3",
+            "available_subnet" : "192.168.100.128/25"
+          }
+        }
       },
       "bootstrap": {
         "interface" : "eth0",
