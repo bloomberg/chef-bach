@@ -173,6 +173,9 @@ function create_bootstrap_VM {
           # Add the bootable mini ISO for installing Ubuntu 12.04
           $VBM storageattach $vm --storagectl "IDE Controller" --device 0 --port 0 --type dvddrive --medium ubuntu-12.04-mini.iso
           $VBM modifyvm $vm --boot1 disk
+          # Add serial ports
+          $VBM modifyvm $vm --uart1 0x3F8 4
+          $VBM modifyvm $vm --uartmode1 server /tmp/serial-${vm}-ttyS0
       fi
     done
   fi
@@ -221,6 +224,9 @@ function create_cluster_VMs {
 
           # Set hardware acceleration options
           $VBM modifyvm $vm --largepages on --vtxvpid on --hwvirtex on --nestedpaging on --ioapic on
+          # Add serial ports
+          $VBM modifyvm $vm --uart1 0x3F8 4
+          $VBM modifyvm $vm --uartmode1 server /tmp/serial-${vm}-ttyS0
       fi
   done
 }
