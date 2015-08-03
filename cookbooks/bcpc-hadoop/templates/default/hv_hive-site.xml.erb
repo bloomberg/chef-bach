@@ -152,4 +152,32 @@
 </property>
 <% end %>
 <% end %>
+
+<property>
+  <name>hive.stats.dbclass</name>
+  <value>jdbc:mysql</value>
+</property>
+
+<property>
+  <name>hive.stats.jdbcdriver</name>
+  <value>com.mysql.jdbc.Driver</value>
+</property>
+
+<property>
+  <name>hive.stats.dbconnectionstring</name>
+  <value>jdbc:mysql:loadbalance://<%=@mysql_hosts.join(',')%>:3306/hive_table_stats?useUnicode=true&amp;
+characterEncoding=UTF-8&amp;user=<%=get_config("mysql-hive-table-stats-user")%>&amp;password=<%=get_config("mysql-hive-table-stats-password")%></value>
+</property>
+
+<property> 
+  <name>hive.aux.jars.path</name> 
+  <value>file:///usr/share/java/mysql-connector-java.jar</value>
+</property>
+
+<property>
+  <name>hive.stats.autogather</name>
+  <value>true</value>
+  <description>A flag to gather statistics automatically during the INSERT OVERWRITE command.</description>
+</property>
+
 </configuration>

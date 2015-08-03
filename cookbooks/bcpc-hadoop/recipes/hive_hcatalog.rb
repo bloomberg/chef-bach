@@ -2,6 +2,7 @@
 #  Installing Hive & Hcatalog
 #
 include_recipe "bcpc-hadoop::hive_config"
+include_recipe "bcpc-hadoop::hive_table_stat"
 
 package "hive-hcatalog" do
   action :upgrade
