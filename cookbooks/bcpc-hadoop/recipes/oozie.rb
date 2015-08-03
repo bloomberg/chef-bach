@@ -164,7 +164,7 @@ ruby_block "oozie-database-creation" do
         db.write code
       end
       #system "sudo -u oozie #{OOZIE_CLIENT_PATH}/bin/ooziedb.sh create -sqlfile #{OOZIE_CLIENT_PATH}/oozie.sql -run Validate DB Connection"
-      system "sudo -u oozie /usr/hdp/2.2.0.0-2041/oozie/bin/ooziedb.sh create -sqlfile /usr/hdp/2.2.0.0-2041/oozie/oozie.sql -run Validate DB Connection"
+      system "sudo -u oozie /usr/hdp/current/oozie-server/bin/ooziedb.sh create -sqlfile /usr/hdp/current/oozie-server/oozie.sql -run Validate DB Connection"
       self.resolve_notification_references
     end
   end
