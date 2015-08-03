@@ -172,6 +172,11 @@
   </property>
 
   <property>
+    <name>yarn.scheduler.minimum-allocation-mb</name>
+    <value><%= node['bcpc']['hadoop']['yarn']['scheduler']['minimum-allocation-mb'] %></value>
+  </property>
+
+  <property>
     <name>yarn.nodemanager.resource.cpu-vcores</name>
     <value><%= node['bcpc']['hadoop']['yarn']['nodemanager']['avail_vcpu']['count'] or
                [1, (node['cpu']['total'] * node['bcpc']['hadoop']['yarn']['nodemanager']['avail_vcpu']['ratio']).floor].max %></value>
@@ -179,7 +184,7 @@
 
   <property>
     <name>yarn.resourcemanager.scheduler.class</name>
-    <value><%= node['bcpc']['hadoop']['yarn']['scheduler'] %></value>
+    <value><%= node['bcpc']['hadoop']['yarn']['scheduler']["class"] %></value>
   </property>
 
   <% if node.run_list.expand(node.chef_environment).recipes.include?("bcpc-hadoop::datanode")  %>
