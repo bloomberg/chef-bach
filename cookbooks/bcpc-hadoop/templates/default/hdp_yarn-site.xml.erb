@@ -181,4 +181,18 @@
     <name>yarn.resourcemanager.scheduler.class</name>
     <value><%= node['bcpc']['hadoop']['yarn']['scheduler'] %></value>
   </property>
+
+  <% if node.run_list.expand(node.chef_environment).recipes.include?("bcpc-hadoop::datanode")  %>
+  <property>
+    <name>yarn.nodemanager.bind-host</name>
+    <value><%=node[:bcpc][:floating][:ip] %></value>
+  </property>
+  <%end %>
+  <% if node.run_list.expand(node.chef_environment).recipes.include?("bcpc-hadoop::resource_manager")  %>
+  <property>
+    <name>yarn.resourcemanager.bind-host</name>
+    <value><%=node[:bcpc][:floating][:ip] %></value>
+  </property>
+  <% end %>
+
 </configuration>
