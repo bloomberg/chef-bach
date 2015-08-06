@@ -6,8 +6,9 @@ export HIVE_CONF_DIR=/etc/hive/conf.<%= node.chef_environment %>
 # export HIVE_AUX_JARS_PATH=
 export HIVE_AUX_JARS_PATH=/usr/hdp/current/hive-webhcat/share/hcatalog/hive-hcatalog-core.jar
 
-export JAVA_HOME=<%= node["bcpc"]["hadoop"]["java"] %>
+export JAVA_HOME=<%= node[:bcpc][:hadoop][:java] %>
 export HADOOP_HEAPSIZE=<%=node[:bcpc][:hive][:heap][:size] %>
+export HADOOP_OPTS="<%= node[:bcpc][:hive][:gc_opts]%>"
 export HIVE_LOG_DIR=/var/log/hive
 export HIVE_PID_DIR=/var/run/hive
 export HIVE_IDENT_STRING=hive
