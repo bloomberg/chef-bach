@@ -41,11 +41,6 @@ end
   end
 end
 
-template "/etc/hadoop/conf/yarn-env.sh" do
-  source "hdp_yarn-env.sh.erb"
-  mode 0655
-end
-
 template "/etc/init.d/hadoop-yarn-resourcemanager" do
   source "hdp_hadoop-yarn-resourcemanager-initd.erb"
   mode 0655
@@ -77,6 +72,7 @@ service "hadoop-yarn-resourcemanager" do
   action [:enable, :start]
   supports :status => true, :restart => true, :reload => false
   subscribes :restart, "template[/etc/hadoop/conf/hadoop-env.sh]", :delayed
+  subscribes :restart, "template[/etc/hadoop/conf/yarn-env.sh]", :delayed
   subscribes :restart, "template[/etc/hadoop/conf/yarn-site.xml]", :delayed
 end
 
