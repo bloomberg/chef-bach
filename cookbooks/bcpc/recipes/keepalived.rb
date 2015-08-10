@@ -20,7 +20,23 @@
 include_recipe "bcpc::default"
 
 make_config('keepalived-router-id', "#{(rand * 1000).to_i%254/2*2+1}")
-make_config('keepalived-password', secure_password)
+
+keepalived_password = get_config('keepalived-password')
+if keepalived_password.nil?
+  keepalived_password = secure_password
+end
+
+bootstrap = get_bootstrap
+results = get_nodes_for("keepalived").map!{ |x| x['fqdn'] }.join(",")
+nodes = results == "" ? node['fqdn'] : results
+
+chef_vault_secret "keepalived" do
+  data_bag 'os'
+  raw_data({ 'password' => keepalived_password })
+  admins "#{ nodes },#{ bootstrap }"
+  search '*:*'
+  action :nothing
+end.run_action(:create_if_missing)
 
 package "keepalived" do
     action :upgrade
@@ -28,7 +44,8 @@ end
 
 template "/etc/keepalived/keepalived.conf" do
     source "#{node[:bcpc][:keepalived][:config_template]}.erb"
-    mode 00644
+    mode 00640
+    sensitive true
     notifies :restart, "service[keepalived]", :delayed
     notifies :restart, "service[keepalived]", :immediately
 end
