@@ -351,4 +351,35 @@
     <name>oozie.service.ProxyUserService.proxyuser.hue.groups</name>
     <value>*</value>
   </property>
+
+  <property>
+      <name>oozie.launcher.mapreduce.map.memory.mb</name>
+      <value><%= node['bcpc']['hadoop']['yarn']['scheduler']['minimum-allocation-mb'].round %></value>
+  </property>
+
+  <property>
+      <name>oozie.launcher.mapreduce.map.java.opts</name>
+      <value><%="-Xmx#{(0.8 * node['bcpc']['hadoop']['yarn']['scheduler']['minimum-allocation-mb']).round}m" %></value>
+  </property>
+
+  <property>
+      <name>oozie.launcher.mapreduce.reduce.memory.mb</name>
+      <value><%= 2 * node['bcpc']['hadoop']['yarn']['scheduler']['minimum-allocation-mb'].round %></value>
+  </property>
+
+  <property>
+      <name>oozie.launcher.mapreduce.reduce.java.opts</name>
+      <value><%="-Xmx#{(0.8 * 2 * node['bcpc']['hadoop']['yarn']['scheduler']['minimum-allocation-mb']).round}m" %></value>
+  </property>
+
+  <property>
+      <name>oozie.launcher.yarn.app.mapreduce.am.resource.mb</name>
+      <value><%= 2 * node['bcpc']['hadoop']['yarn']['scheduler']['minimum-allocation-mb'].round %></value>
+  </property>
+
+  <property>
+    <name>oozie.launcher.yarn.app.mapreduce.am.command-opts</name>
+    <value><%="-Xmx#{ (0.8 * 2 * node['bcpc']['hadoop']['yarn']['scheduler']['minimum-allocation-mb']).round}m" %></value>
+  </property>
+
 </configuration>
