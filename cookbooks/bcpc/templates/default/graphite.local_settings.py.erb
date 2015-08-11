@@ -130,7 +130,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': '<%="#{node['bcpc']['graphite_dbname']}"%>',
         'USER': '<%="#{get_config('mysql-graphite-user')}"%>',
-        'PASSWORD': '<%="#{get_config('mysql-graphite-password')}"%>',
+        'PASSWORD': '<%="#{get_config('password', 'mysql-graphite','os')}"%>',
         'HOST': '<%="#{node[:bcpc][:graphite][:ip]}"%>',
         'default-character-set': 'utf8'
     },
