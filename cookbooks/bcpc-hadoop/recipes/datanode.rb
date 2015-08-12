@@ -104,12 +104,6 @@ user "hcat" do
   supports :manage_home => false
 end
 
-#%w{hive hcatalog libmysql-java}.each do |pkg|
-#  package pkg do
-#    action :upgrade
-#  end
-#end
-
 package 'hive-hcatalog' do
   action :upgrade
 end
@@ -259,6 +253,7 @@ service "hadoop-yarn-nodemanager" do
   supports :status => true, :restart => true, :reload => false
   action [:enable, :start]
   subscribes :restart, "template[/etc/hadoop/conf/hadoop-env.sh]", :delayed
+  subscribes :restart, "template[/etc/hadoop/conf/yarn-env.sh]", :delayed
   subscribes :restart, "template[/etc/hadoop/conf/yarn-site.xml]", :delayed
   subscribes :restart, "user_ulimit[yarn]", :delayed
 end
