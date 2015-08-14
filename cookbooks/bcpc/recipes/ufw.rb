@@ -44,6 +44,17 @@ bash "setup-allow-rules-ufw" do
     code <<-EOH
       ufw allow 22/tcp
       ufw allow 80/tcp
+      ufw allow 88/tcp
+      ufw allow 88/udp
+      ufw allow 543/tcp
+      ufw allow 544/tcp
+      ufw allow 749/tcp
+      ufw allow 749/udp
+      ufw allow 754/tcp
+      ufw allow 750/tcp
+      ufw allow 750/udp
+      ufw allow 2105/tcp
+      ufw allow 4444/tcp
       ufw allow 443/tcp
       ufw allow 8080/tcp
       ufw allow in on #{node[:bcpc][:bootstrap][:pxe_interface]} from any port 68 to any port 67 proto udp

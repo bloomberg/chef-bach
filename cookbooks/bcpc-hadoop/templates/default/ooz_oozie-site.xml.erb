@@ -7,7 +7,6 @@
 ################################################
 -->
 <configuration>
-
   <!--
         Refer to the oozie-default.xml file for the complete list of
         Oozie configuration properties and their default values.
@@ -174,38 +173,6 @@
     </property>
 
     <property>
-      <name>oozie.service.HadoopAccessorService.kerberos.enabled</name>
-      <value>false</value>
-      <description>
-        Indicates if Oozie is configured to use Kerberos.
-      </description>
-    </property>
-
-    <property>
-      <name>local.realm</name>
-      <value>LOCALHOST</value>
-      <description>
-        Kerberos Realm used by Oozie and Hadoop. Using 'local.realm' to be aligned with Hadoop configuration
-      </description>
-    </property>
-
-    <property>
-      <name>oozie.service.HadoopAccessorService.keytab.file</name>
-      <value>${user.home}/oozie.keytab</value>
-      <description>
-        Location of the Oozie user keytab file.
-      </description>
-    </property>
-
-    <property>
-      <name>oozie.service.HadoopAccessorService.kerberos.principal</name>
-      <value>${user.name}/localhost@${local.realm}</value>
-      <description>
-        Kerberos principal for Oozie service.
-      </description>
-    </property>
-
-    <property>
       <name>oozie.service.HadoopAccessorService.jobTracker.whitelist</name>
       <value/>
       <description>
@@ -256,15 +223,6 @@
     </property>
 
     <property>
-      <name>oozie.authentication.type</name>
-      <value>simple</value>
-      <description>
-        Defines authentication used for Oozie HTTP endpoint.
-        Supported values are: simple | kerberos | #AUTHENTICATION_HANDLER_CLASSNAME#
-      </description>
-    </property>
-
-    <property>
       <name>oozie.authentication.token.validity</name>
       <value>36000</value>
       <description>
@@ -303,82 +261,71 @@
       </description>
     </property>
 
-    <property>
-      <name>oozie.authentication.kerberos.principal</name>
-      <value>HTTP/localhost@${local.realm}</value>
-      <description>
-        Indicates the Kerberos principal to be used for HTTP endpoint.
-        The principal MUST start with 'HTTP/' as per Kerberos HTTP SPNEGO specification.
-      </description>
-    </property>
-
-    <property>
-      <name>oozie.authentication.kerberos.keytab</name>
-      <value>${oozie.service.HadoopAccessorService.keytab.file}</value>
-      <description>
-        Location of the keytab file with the credentials for the principal.
-        Referring to the same keytab file Oozie uses for its Kerberos credentials for Hadoop.
-      </description>
-    </property>
-
-    <property>
-      <name>oozie.authentication.kerberos.name.rules</name>
-      <value>DEFAULT</value>
-      <description>
-        The kerberos names rules is to resolve kerberos principal names, refer to Hadoop's
-        KerberosName for more details.
-      </description>
-    </property>
-
-    <!-- Proxyuser Configuration -->
-
-    <!--
-
-    <property>
-        <name>oozie.service.ProxyUserService.proxyuser.#USER#.hosts</name>
-        <value>*</value>
-        <description>
-            List of hosts the '#USER#' user is allowed to perform 'doAs'
-            operations.
-
-            The '#USER#' must be replaced with the username o the user who is
-            allowed to perform 'doAs' operations.
-
-            The value can be the '*' wildcard or a list of hostnames.
-
-            For multiple users copy this property and replace the user name
-            in the property name.
-        </description>
-    </property>
-
-    <property>
-        <name>oozie.service.ProxyUserService.proxyuser.#USER#.groups</name>
-        <value>*</value>
-        <description>
-            List of groups the '#USER#' user is allowed to impersonate users
-            from to perform 'doAs' operations.
-
-            The '#USER#' must be replaced with the username o the user who is
-            allowed to perform 'doAs' operations.
-
-            The value can be the '*' wildcard or a list of groups.
-
-            For multiple users copy this property and replace the user name
-            in the property name.
-        </description>
-    </property>
-
-    -->
-
     <!-- Default proxyuser configuration for Hue -->
 
-    <property>
-      <name>oozie.service.ProxyUserService.proxyuser.hue.hosts</name>
-      <value>*</value>
-    </property>
+  <% if node[:bcpc][:hadoop][:kerberos][:enable] == true then %> 
+  <property>
+    <name>oozie.authentication.kerberos.principal</name>
+    <value><%=node[:bcpc][:hadoop][:kerberos][:data][:spnego][:principal]%>/<%=node[:bcpc][:hadoop][:kerberos][:data][:spnego][:princhost]=="_HOST" ? float_host(node[:fqdn]) : node[:bcpc][:hadoop][:kerberos][:data][:spnego][:princhost]%>@<%=node[:bcpc][:hadoop][:kerberos][:realm]%></value>
+    <description>Indicates the Kerberos principal to be used for HTTP endpoint. The principal MUST start with 'HTTP/' as per Kerberos HTTP SPNEGO specification.</description>
+  </property>
 
-    <property>
-      <name>oozie.service.ProxyUserService.proxyuser.hue.groups</name>
-      <value>*</value>
-    </property>
-  </configuration>
+  <property>
+    <name>oozie.authentication.kerberos.keytab</name>
+    <value><%=node[:bcpc][:hadoop][:kerberos][:keytab][:dir] %>/<%= node[:bcpc][:hadoop][:kerberos][:data][:oozie][:spnego_keytab]%></value>
+    <description>Location of the keytab file with the credentials for the principal. Referring to the same keytab file Oozie uses for its Kerberos credentials for Hadoop.</description>
+  </property>
+
+  <property>
+    <name>oozie.authentication.type</name>
+    <value>kerberos</value>
+    <description>Defines authentication used for Oozie HTTP endpoint. Supported values are: simple | kerberos | #AUTHENTICATION_HANDLER_CLASSNAME#</description>
+  </property>
+
+  <property>
+    <name>oozie.service.HadoopAccessorService.kerberos.enabled</name>
+    <value>true</value>
+    <description>Indicates if Oozie is configured to use Kerberos.</description>
+  </property>
+
+  <property>
+    <name>local.realm</name>
+    <value><%= node[:bcpc][:hadoop][:kerberos][:realm] %></value>
+    <description>Kerberos Realm used by Oozie and Hadoop. Using 'local.realm' to be aligned with Hadoop configuration</description>
+  </property>
+
+  <property>
+    <name>oozie.service.HadoopAccessorService.keytab.file</name>
+    <value><%= node[:bcpc][:hadoop][:kerberos][:keytab][:dir] %>/<%= node[:bcpc][:hadoop][:kerberos][:data][:oozie][:keytab] %></value>
+    <description> Location of the Oozie user keytab file.</description>
+  </property>
+
+  <property>
+    <name>oozie.service.HadoopAccessorService.kerberos.principal</name>
+    <value><%=node[:bcpc][:hadoop][:kerberos][:data][:oozie][:principal]%>/<%=node[:bcpc][:hadoop][:kerberos][:data][:oozie][:princhost]=="_HOST" ? float_host(node[:fqdn]) : node[:bcpc][:hadoop][:kerberos][:data][:oozie][:princhost]%>@<%= node[:bcpc][:hadoop][:kerberos][:realm] %></value>
+    <description>Kerberos principal for Oozie service.</description>
+  </property>
+
+  <property>
+    <name>oozie.authentication.kerberos.name.rules</name>
+    <value>
+    <% node[:bcpc][:hadoop][:kerberos][:data].each do|ke,va| %>
+      RULE:[2:$1@$0](<%= va['principal']%>@.*<%= node[:bcpc][:hadoop][:kerberos][:realm] %>)s/.*/<%=va['owner'] %>/
+    <% end %>
+      DEFAULT
+    </value>
+    <description>The kerberos names rules is to resolve kerberos principal names, refer to Hadoop's KerberosName for more details.</description>
+  </property>
+  <% end %>
+
+  <!-- Default proxyuser configuration for Hue -->
+  <property>
+    <name>oozie.service.ProxyUserService.proxyuser.hue.hosts</name>
+    <value>*</value>
+  </property>
+
+  <property>
+    <name>oozie.service.ProxyUserService.proxyuser.hue.groups</name>
+    <value>*</value>
+  </property>
+</configuration>

@@ -177,7 +177,7 @@ end
 #
 # Since string with all the zookeeper nodes is used multiple times this variable is populated once and reused reducing calls to Chef server
 #
-zk_hosts = (get_node_attributes(MGMT_IP_ATTR_SRCH_KEYS,"zookeeper_server","bcpc-hadoop").map{|zkhost| "#{zkhost['mgmt_ip']}:#{node[:bcpc][:hadoop][:zookeeper][:port]}"}).join(",")
+zk_hosts = (get_node_attributes(HOSTNAME_ATTR_SRCH_KEYS,"zookeeper_server","bcpc-hadoop").map{|zkhost| "#{float_host(zkhost['hostname'])}:#{node[:bcpc][:hadoop][:zookeeper][:port]}"}).join(",")
 #
 # znode is used as the locking mechnism to control restart of services. The following code is to build the path
 # to create the znode before initiating the restart of HDFS datanode service 

@@ -19,6 +19,7 @@
     <name>httpfs.proxyuser.hue.hosts</name>
     <value>*</value>
   </property>
+
   <property>
     <name>httpfs.proxyuser.hue.groups</name>
     <value>*</value>
@@ -33,8 +34,50 @@
     <name>httpfs.proxyuser.hue.hosts</name>
     <value>*</value>
   </property>
+
   <property>
     <name>httpfs.proxyuser.hue.groups</name>
     <value>*</value>
   </property>
+  <% if node[:bcpc][:hadoop][:kerberos][:enable] == true then %>
+  <property>
+    <name>httpfs.authentication.type</name>
+    <value>kerberos</value>
+  </property>
+
+  <property>
+    <name>httpfs.hadoop.authentication.type</name>
+    <value>kerberos</value>
+  </property>
+
+  <property>
+    <name>httpfs.authentication.kerberos.principal</name>
+    <value><%=node[:bcpc][:hadoop][:kerberos][:data][:spnego][:principal]%>/<%=node[:bcpc][:hadoop][:kerberos][:data][:spnego][:princhost] == "_HOST" ? float_host(node[:fqdn]) : node[:bcpc][:hadoop][:kerberos][:data][:spnego][:princhost]%>@<%= node[:bcpc][:hadoop][:kerberos][:realm]%></value>
+  </property>
+
+  <property>
+    <name>httpfs.authentication.kerberos.keytab</name>
+    <value><%=node[:bcpc][:hadoop][:kerberos][:keytab][:dir]%>/<%=node[:bcpc][:hadoop][:kerberos][:data][:httpfs][:spnego_keytab]%></value>
+  </property>
+
+  <property>
+    <name>httpfs.hadoop.authentication.kerberos.principal</name>
+    <value><%=node[:bcpc][:hadoop][:kerberos][:data][:httpfs][:principal]%>/<%=node[:bcpc][:hadoop][:kerberos][:data][:httpfs][:princhost] == "_HOST" ? float_host(node[:fqdn]) : node[:bcpc][:hadoop][:kerberos][:data][:httpfs][:princhost]%>@<%= node[:bcpc][:hadoop][:kerberos][:realm]%></value>
+  </property>
+
+  <property>
+    <name>httpfs.hadoop.authentication.kerberos.keytab</name>
+    <value><%=node[:bcpc][:hadoop][:kerberos][:keytab][:dir]%>/<%=node[:bcpc][:hadoop][:kerberos][:data][:httpfs][:keytab]%></value>
+  </property>
+
+  <property>
+    <name>httpfs.authentication.kerberos.name.rules</name>
+    <value>
+    <% node[:bcpc][:hadoop][:kerberos][:data].each do|ke,va| %>
+    RULE:[2:$1@$0](<%= va['principal']%>@.*<%= node[:bcpc][:hadoop][:kerberos][:realm] %>)s/.*/<%=va['owner'] %>/
+    <% end %>
+    DEFAULT
+    </value>
+  </property>
+  <% end %>
 </configuration>

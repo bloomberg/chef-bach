@@ -27,3 +27,12 @@ end
     variables(:zk_hosts => node[:bcpc][:hadoop][:zookeeper][:servers])
   end
 end
+
+if node[:bcpc][:hadoop][:kerberos][:enable] == true then
+  %w{zookeeper-client.jaas zookeeper-server.jaas}.each do |t|
+    template "/etc/zookeeper/conf/#{t}" do
+      source "zk_#{t}.erb"
+      mode 0644
+    end
+  end
+end

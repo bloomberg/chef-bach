@@ -44,3 +44,15 @@ end
      )
   end
 end
+
+if node[:bcpc][:hadoop][:kerberos][:enable] == true then 
+  %w{
+    hbase-client.jaas
+    hbase-server.jaas
+    regionserver.jaas}.each do |t|
+    template "/etc/hbase/conf/#{t}" do
+      source "hb_#{t}.erb"
+      mode 0644
+    end
+  end
+end 
