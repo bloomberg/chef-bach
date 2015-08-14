@@ -46,6 +46,9 @@
         "distribution" : {
           "version" : "HDP",
           "key" : "hortonworks.key"
+        },
+        "oozie": {
+          "memory_opts": "-Xmx512m -XX:MaxPermSize=64m"
         }
       },
       "repos" : {
