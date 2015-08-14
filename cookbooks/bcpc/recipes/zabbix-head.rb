@@ -21,7 +21,25 @@ include_recipe "bcpc::mysql"
 include_recipe "bcpc::apache2"
 
 make_config('mysql-zabbix-user', "zabbix")
-make_config('mysql-zabbix-password', secure_password)
+
+# backward compatibility
+mysql_zabbix_password = get_config("mysql-zabbix-password")
+if mysql_zabbix_password.nil?
+  mysql_zabbix_password = secure_password
+end
+
+bootstrap = get_bootstrap
+results = get_nodes_for("zabbix-head").map!{ |x| x['fqdn'] }.join(",")
+nodes = results == "" ? node['fqdn'] : results
+
+chef_vault_secret "mysql-zabbix" do
+  data_bag 'os'
+  raw_data({ 'password' => mysql_zabbix_password })
+  admins "#{ nodes },#{ bootstrap }"
+  search '*:*'
+  action :nothing
+end.run_action(:create_if_missing)
+
 make_config('zabbix-admin-user', "admin")
 make_config('zabbix-admin-password', secure_password)
 make_config('zabbix-guest-user', "guest")
@@ -72,8 +90,8 @@ ruby_block "zabbix-database-creation" do
     block do
         if not system "mysql -uroot -p#{get_config('mysql-root-password')} -e 'SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = \"#{node['bcpc']['zabbix_dbname']}\"'|grep \"#{node['bcpc']['zabbix_dbname']}\"" then
             puts %x[ mysql -uroot -p#{get_config('mysql-root-password')} -e "CREATE DATABASE #{node['bcpc']['zabbix_dbname']} CHARACTER SET UTF8;"
-                mysql -uroot -p#{get_config('mysql-root-password')} -e "GRANT ALL ON #{node['bcpc']['zabbix_dbname']}.* TO '#{get_config('mysql-zabbix-user')}'@'%' IDENTIFIED BY '#{get_config('mysql-zabbix-password')}';"
-                mysql -uroot -p#{get_config('mysql-root-password')} -e "GRANT ALL ON #{node['bcpc']['zabbix_dbname']}.* TO '#{get_config('mysql-zabbix-user')}'@'localhost' IDENTIFIED BY '#{get_config('mysql-zabbix-password')}';"
+                mysql -uroot -p#{get_config('mysql-root-password')} -e "GRANT ALL ON #{node['bcpc']['zabbix_dbname']}.* TO '#{get_config('mysql-zabbix-user')}'@'%' IDENTIFIED BY '#{get_config('password','mysql-zabbix','os')}';"
+                mysql -uroot -p#{get_config('mysql-root-password')} -e "GRANT ALL ON #{node['bcpc']['zabbix_dbname']}.* TO '#{get_config('mysql-zabbix-user')}'@'localhost' IDENTIFIED BY '#{get_config('password','mysql-zabbix','os')}';"
                 mysql -uroot -p#{get_config('mysql-root-password')} -e "FLUSH PRIVILEGES;"
                 mysql -uroot -p#{get_config('mysql-root-password')} #{node['bcpc']['zabbix_dbname']} < /usr/local/share/zabbix/schema.sql
                 mysql -uroot -p#{get_config('mysql-root-password')} #{node['bcpc']['zabbix_dbname']} < /usr/local/share/zabbix/images.sql

@@ -110,7 +110,7 @@ DBUser=<%="#{get_config('mysql-zabbix-user')}"%>
 #
 # Mandatory: no
 # Default:
-DBPassword=<%="#{get_config('mysql-zabbix-password')}"%>
+DBPassword=<%="#{get_config('password','mysql-zabbix','os')}"%>
 
 ### Option: DBSocket
 #   Path to MySQL socket.
