@@ -172,7 +172,14 @@ function hadoop_install {
   done
 
   printf "Installing heads...\n"
-  install_machines $(printf ${hosts// /\\n} | grep -i "BCPC-Hadoop-Head" | sort)
+  for m in $(printf ${hosts// /\\n} | grep -i "BCPC-Hadoop-Head"| sort); do
+    [[ "$m" =~ $REGEX ]]
+    local fqdn="${BASH_REMATCH[3]}"
+    # authenticate the node one by one
+    vaults=$(sudo ./find_resources.rb $fqdn | tail -1)
+    sudo ./node_auth.rb $vaults $fqdn
+    install_machines $m
+  done
 
   # remove admin from the headnodes
   for h in $(printf ${hosts// /\\n} | grep -i "BCPC-Hadoop-Head" | sort); do
@@ -232,7 +239,14 @@ function kafka_install {
     done
 
     printf "Installing kafka zookeeper heads...\n"
-    install_machines $(printf ${hosts// /\\n} | grep -i "BCPC-Kafka-Head-Zookeeper" | sort)
+    for m in $(printf ${hosts// /\\n} | grep -i "BCPC-Kafka-Head-Zookeeper" | sort); do
+      [[ "$m" =~ $REGEX ]]
+      local fqdn="${BASH_REMATCH[3]}"
+      # authenticate the node one by one
+      vaults=$(sudo ./find_resources.rb $fqdn | tail -1)
+      sudo ./node_auth.rb $vaults $fqdn
+      install_machines $m
+    done
   fi
 
   printf "Installing kafka server heads...\n"
