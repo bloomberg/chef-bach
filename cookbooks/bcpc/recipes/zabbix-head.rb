@@ -23,9 +23,38 @@ include_recipe "bcpc::apache2"
 make_config('mysql-zabbix-user', "zabbix")
 make_config('mysql-zabbix-password', secure_password)
 make_config('zabbix-admin-user', "admin")
-make_config('zabbix-admin-password', secure_password)
+
+zabbix_admin_password = get_config("zabbix-admin-password")
+if zabbix_admin_password.nil?
+  zabbix_admin_password = secure_password
+end
+
+zabbix_guest_password = get_config("zabbix-guest-password")
+if zabbix_guest_password.nil?
+  zabbix_guest_password = secure_password
+end
+
+bootstrap = get_bootstrap
+results = get_nodes_for("zabbix-head").map!{ |x| x['fqdn'] }.join(",")
+nodes = results == "" ? node['fqdn'] : results
+
+chef_vault_secret "zabbix-admin" do
+  data_bag 'os'
+  raw_data({ 'password' => zabbix_admin_password })
+  admins "#{ nodes },#{ bootstrap }"
+  search '*:*'
+  action :nothing
+end.run_action(:create_if_missing)
+
 make_config('zabbix-guest-user', "guest")
-make_config('zabbix-guest-password', secure_password)
+
+chef_vault_secret "zabbix-guest" do
+  data_bag 'os'
+  raw_data({ 'password' => zabbix_guest_password })
+  admins "#{ nodes },#{ bootstrap }"
+  search '*:*'
+  action :nothing
+end.run_action(:create_if_missing)
 
 remote_file "/tmp/zabbix-server.tar.gz" do
     source "#{get_binary_server_url}/zabbix-server.tar.gz"
@@ -78,9 +107,9 @@ ruby_block "zabbix-database-creation" do
                 mysql -uroot -p#{get_config('mysql-root-password')} #{node['bcpc']['zabbix_dbname']} < /usr/local/share/zabbix/schema.sql
                 mysql -uroot -p#{get_config('mysql-root-password')} #{node['bcpc']['zabbix_dbname']} < /usr/local/share/zabbix/images.sql
                 mysql -uroot -p#{get_config('mysql-root-password')} #{node['bcpc']['zabbix_dbname']} < /usr/local/share/zabbix/data.sql
-                HASH=`echo -n "#{get_config('zabbix-admin-password')}" | md5sum | awk '{print $1}'`
+                HASH=`echo -n "#{get_config('password','zabbix-admin','os')}" | md5sum | awk '{print $1}'`
                 mysql -uroot -p#{get_config('mysql-root-password')} #{node['bcpc']['zabbix_dbname']} -e "UPDATE users SET passwd=\\"$HASH\\" WHERE alias=\\"#{get_config('zabbix-admin-user')}\\";"
-                HASH=`echo -n "#{get_config('zabbix-guest-password')}" | md5sum | awk '{print $1}'`
+                HASH=`echo -n "#{get_config('password','zabbix-guest','os')}" | md5sum | awk '{print $1}'`
                 mysql -uroot -p#{get_config('mysql-root-password')} #{node['bcpc']['zabbix_dbname']} -e "UPDATE users SET passwd=\\"$HASH\\" WHERE alias=\\"#{get_config('zabbix-guest-user')}\\";"
             ]
         end
