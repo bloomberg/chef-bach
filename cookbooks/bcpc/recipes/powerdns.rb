@@ -18,7 +18,23 @@
 #
 
 make_config('mysql-pdns-user', "pdns")
-make_config('mysql-pdns-password', secure_password)
+
+mysql_pdns_password = get_config("mysql-pdns-password")
+if mysql_pdns_password.nil?
+  mysql_pdns_passowrd = secure_password
+end
+
+bootstrap = get_bootstrap
+results = get_nodes_for("powerdns").map!{ |x| x['fqdn'] }.join(",")
+nodes = results == "" ? node['fqdn'] : results
+
+chef_vault_secret "mysql-pdns" do
+  data_bag 'os'
+  raw_data({ 'password' => mysql_pdns_password })
+  admins "#{ nodes },#{ bootstrap }"
+  search '*:*'
+  action :nothing
+end.run_action(:create_if_missing)
 
 %w{pdns-server pdns-backend-mysql}.each do |pkg|
     package pkg do
@@ -39,8 +55,8 @@ ruby_block "powerdns-database-creation" do
         system "mysql -uroot -p#{get_config('mysql-root-password')} -e 'SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = \"#{node[:bcpc][:pdns_dbname]}\"' | grep -q \"#{node[:bcpc][:pdns_dbname]}\""
         if not $?.success? then
             %x[ mysql -uroot -p#{get_config('mysql-root-password')} -e "CREATE DATABASE #{node[:bcpc][:pdns_dbname]} CHARACTER SET utf8 COLLATE utf8_general_ci;"
-                mysql -uroot -p#{get_config('mysql-root-password')} -e "GRANT ALL ON #{node[:bcpc][:pdns_dbname]}.* TO '#{get_config('mysql-pdns-user')}'@'%' IDENTIFIED BY '#{get_config('mysql-pdns-password')}';"
-                mysql -uroot -p#{get_config('mysql-root-password')} -e "GRANT ALL ON #{node[:bcpc][:pdns_dbname]}.* TO '#{get_config('mysql-pdns-user')}'@'localhost' IDENTIFIED BY '#{get_config('mysql-pdns-password')}';"
+                mysql -uroot -p#{get_config('mysql-root-password')} -e "GRANT ALL ON #{node[:bcpc][:pdns_dbname]}.* TO '#{get_config('mysql-pdns-user')}'@'%' IDENTIFIED BY '#{get_config('password','mysql-pdns','os')}';"
+                mysql -uroot -p#{get_config('mysql-root-password')} -e "GRANT ALL ON #{node[:bcpc][:pdns_dbname]}.* TO '#{get_config('mysql-pdns-user')}'@'localhost' IDENTIFIED BY '#{get_config('password','mysql-pdns','os')}';"
                 mysql -uroot -p#{get_config('mysql-root-password')} -e "FLUSH PRIVILEGES;"
             ]
             self.notifies :restart, "service[pdns]", :delayed
@@ -53,8 +69,8 @@ ruby_block "powerdns-database-creation-nova-grant" do
     block do
         system "mysql -uroot -p#{get_config('mysql-root-password')} -e 'SHOW GRANTS for \"#{get_config('mysql-pdns-user')}\";' #{node[:bcpc][:nova_dbname]}'"
         if not $?.success? then
-            %x[ mysql -uroot -p#{get_config('mysql-root-password')} -e "GRANT ALL ON #{node[:bcpc][:nova_dbname]}.* TO '#{get_config('mysql-pdns-user')}'@'%' IDENTIFIED BY '#{get_config('mysql-pdns-password')}';"
-                mysql -uroot -p#{get_config('mysql-root-password')} -e "GRANT ALL ON #{node[:bcpc][:nova_dbname]}.* TO '#{get_config('mysql-pdns-user')}'@'localhost' IDENTIFIED BY '#{get_config('mysql-pdns-password')}';"
+            %x[ mysql -uroot -p#{get_config('mysql-root-password')} -e "GRANT ALL ON #{node[:bcpc][:nova_dbname]}.* TO '#{get_config('mysql-pdns-user')}'@'%' IDENTIFIED BY '#{get_config('password','mysql-pdns','os')}';"
+                mysql -uroot -p#{get_config('mysql-root-password')} -e "GRANT ALL ON #{node[:bcpc][:nova_dbname]}.* TO '#{get_config('mysql-pdns-user')}'@'localhost' IDENTIFIED BY '#{get_config('password','mysql-pdns','os')}';"
                 mysql -uroot -p#{get_config('mysql-root-password')} -e "FLUSH PRIVILEGES;"
             ]
             self.notifies :restart, "service[pdns]", :delayed

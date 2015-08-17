@@ -12,6 +12,6 @@ launch=gmysql
 gmysql-host=<%="#{node[:bcpc][:management][:vip]}"%>
 gmysql-port=3306
 gmysql-user=<%="#{get_config('mysql-pdns-user')}"%>
-gmysql-password=<%="#{get_config('mysql-pdns-password')}"%>
+gmysql-password=<%="#{get_config('password','mysql-pdns','os')}"%>
 gmysql-dbname=<%="#{node['bcpc']['pdns_dbname']}"%>
 #gmysql-dnssec=yes
