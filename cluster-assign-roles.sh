@@ -194,7 +194,12 @@ function hadoop_install {
   }
   trap clean_up_status_file EXIT
   for m in $(printf ${hosts// /\\n} | grep -i "BCPC-Hadoop-Worker" | sort); do
-    install_machines $m || echo "$m" >> $status_file &
+    [[ "$m" =~ $REGEX ]]
+    local fqdn="${BASH_REMATCH[3]}"
+    # authenticate the node one by one
+    vaults=$(sudo ./find_resources.rb $fqdn | tail -1)
+    sudo ./node_auth.rb $vaults $fqdn
+    install_machines $m &
   done
   wait
   failures=$(wc -l $status_file | sed 's/ .*//')
@@ -263,7 +268,15 @@ function kafka_install {
   fi
 
   printf "Installing kafka server heads...\n"
-  install_machines $(printf ${hosts// /\\n} | grep -i "BCPC-Kafka-Head-Server" | sort)
+  for m in $(printf ${hosts// /\\n} | grep -i "BCPC-Kafka-Head-Server" | sort); do
+    [[ "$m" =~ $REGEX ]]
+    local fqdn="${BASH_REMATCH[3]}"
+    # authenticate the node one by one
+    vaults=$(sudo ./find_resources.rb $fqdn | tail -1)
+    sudo ./node_auth.rb $vaults $fqdn
+    install_machines $m
+  done
+
 
   # remove admin from the headnodes
   for h in $(printf ${hosts// /\\n} | grep -i "BCPC-Kafka-Head" | sort); do

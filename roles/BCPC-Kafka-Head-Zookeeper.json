@@ -16,6 +16,7 @@
     "role[Basic]",
     "recipe[bcpc::default]",
     "recipe[bcpc::networking]",
+    "recipe[bcpc::certs]",
     "recipe[bcpc-hadoop::disks]",
     "recipe[bcpc::ubuntu_tools_repo]",
     "recipe[kafka-bcpc::default]", 

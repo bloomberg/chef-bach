@@ -26,6 +26,12 @@ template "/tmp/openssl.cnf" do
     mode 00644
 end
 
+node.default[:temp][:value] = ""
+bootstrap = get_all_nodes.select{|s| s.hostname.include? 'bootstrap'}[0].fqdn
+
+results = get_nodes_for("certs").map!{ |x| x['fqdn'] }.join(",")
+nodes = results == "" ? node['fqdn'] : results
+
 ruby_block "initialize-ssh-keys" do
     block do
         require 'openssl'
@@ -34,12 +40,41 @@ ruby_block "initialize-ssh-keys" do
         pubkey = "#{key.ssh_type} #{[ key.to_blob ].pack('m0')}"
         make_config('ssh-private-key', key.to_pem)
         make_config('ssh-public-key', pubkey)
-        if get_config('ssl-certificate').nil? then
-            temp = %x[openssl req -config /tmp/openssl.cnf -extensions v3_req -new -x509 -passout pass:temp_passwd -newkey rsa:4096 -out /dev/stdout -keyout /dev/stdout -days 1095 -subj "/C=#{node['bcpc']['country']}/ST=#{node['bcpc']['state']}/L=#{node['bcpc']['location']}/O=#{node['bcpc']['organization']}/OU=#{node['bcpc']['region_name']}/CN=#{node['bcpc']['domain_name']}/emailAddress=#{node['bcpc']['admin_email']}"]
-            make_config('ssl-private-key', %x[echo "#{temp}" | openssl rsa -passin pass:temp_passwd -out /dev/stdout])
-            make_config('ssl-certificate', %x[echo "#{temp}" | openssl x509])
+        if get_config('ssl-certificate').nil? && get_config('certificate','ssl','os').nil? then
+            node.set[:temp][:value] = %x[openssl req -config /tmp/openssl.cnf -extensions v3_req -new -x509 -passout pass:temp_passwd -newkey rsa:4096 -out /dev/stdout -keyout /dev/stdout -days 1095 -subj "/C=#{node['bcpc']['country']}/ST=#{node['bcpc']['state']}/L=#{node['bcpc']['location']}/O=#{node['bcpc']['organization']}/OU=#{node['bcpc']['region_name']}/CN=#{node['bcpc']['domain_name']}/emailAddress=#{node['bcpc']['admin_email']}"]
         end
     end
+    notifies :create, 'ruby_block[chef_vault_secret]', :immediately
+end
+
+ruby_block "chef_vault_secret" do
+  block do
+    if node[:temp][:value] != ""
+      ssl_certificate = %x[echo "#{node[:temp][:value]}" | openssl x509]
+      ssl_private_key = %x[echo "#{node[:temp][:value]}" | openssl rsa -passin pass:temp_passwd -out /dev/stdout]
+    else
+      ssl_certificate = get_config("ssl-certificate")
+      ssl_private_key = get_config("ssl-private-key")
+    end
+    vault_resource = resources("chef_vault_secret[ssl]")
+    vault_resource.raw_data({ 'private-key' => ssl_private_key, "certificate" => ssl_certificate })
+  end
+  action :nothing
+end
+
+chef_vault_secret "ssl" do
+  if node[:temp][:value] != ""
+    ssl_certificate = %x[echo "#{node[:temp][:value]}" | openssl x509]
+    ssl_private_key = %x[echo "#{node[:temp][:value]}" | openssl rsa -passin pass:temp_passwd -out /dev/stdout]
+  else
+    ssl_certificate = get_config("ssl-certificate")
+    ssl_private_key = get_config("ssl-private-key")
+  end
+  data_bag 'os'
+  raw_data ({ 'private-key' => ssl_private_key, 'certificate' => ssl_certificate })
+  admins "#{ nodes },#{ bootstrap }"
+  search '*:*'
+  action :create_if_missing
 end
 
 directory "/root/.ssh" do

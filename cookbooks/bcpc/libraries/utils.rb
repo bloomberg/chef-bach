@@ -94,8 +94,12 @@ def get_config(key, item=node.chef_environment, bag="configs")
     return entry[key]
   rescue ChefVault::Exceptions::KeysNotFound
     if bag != "configs"
+    begin
       entry = Chef::DataBagItem.load(bag,item)
       return entry[key]
+    rescue Net::HTTPServerException
+      return nil
+    end
     else
       init_config if $dbi.nil?
       Chef::Log.info  "------------ Fetching value for key \"#{key}\""
