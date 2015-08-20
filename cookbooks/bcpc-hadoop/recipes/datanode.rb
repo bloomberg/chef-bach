@@ -18,6 +18,11 @@ node.default['bcpc']['hadoop']['copylog']['datanode'] = {
   end
 end
 
+user_ulimit "root" do
+  filehandle_limit 32769
+  process_limit 65536
+end
+
 user_ulimit "hdfs" do
   filehandle_limit 32769
   process_limit 65536
@@ -214,6 +219,7 @@ ruby_block "acquire_lock_to_restart_datanode" do
   subscribes :create, "template[/etc/hadoop/conf/hadoop-env.sh]", :immediate
   subscribes :create, "template[/etc/hadoop/conf/topology]", :immediate
   subscribes :create, "user_ulimit[hdfs]", :immediate
+  subscribes :create, "user_ulimit[root]", :immediate
   subscribes :create, "ruby_block[handle_prev_datanode_restart_failure]", :immediate
 end
 #
