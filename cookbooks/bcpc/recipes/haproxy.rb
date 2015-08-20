@@ -29,10 +29,12 @@ end
 
 bootstrap = get_all_nodes.select{|s| s.hostname.include? 'bootstrap'}[0].fqdn
 
+nodes = get_nodes_for("haproxy").map!{ |x| x['fqdn'] }.join(",")
+
 chef_vault_secret "haproxy-stats" do
   data_bag 'os'
   raw_data({ 'password' => haproxy_stats_password })
-  admins "#{ node['fqdn'] },#{ bootstrap }"
+  admins "#{ nodes },#{ bootstrap }"
   search '*:*'
   action :nothing
 end.run_action(:create_if_missing)
