@@ -12,61 +12,86 @@
     <name>hbase.rootdir</name>
     <value><%= node['bcpc']['hadoop']['hdfs_url'] %>/hbase</value>
   </property>
+
   <property>
     <name>hbase.zookeeper.quorum</name>
     <value><%= @zk_hosts.map{ |s| float_host(s[:hostname])}.join(",") %></value> 
   </property>
+
   <property>
     <name>hbase.zookeeper.property.clientPort</name>
     <value><%= node[:bcpc][:hadoop][:zookeeper][:port] %></value> 
   </property>
+
   <property>
     <name>hbase.cluster.distributed</name>
     <value>true</value>
   </property>
+
   <property>
     <name>fail.fast.expired.active.master</name>
     <value><%= @master_hosts.length > 1 ? "true" : "false" %></value>
   </property>
+
   <property>
     <name>hbase.master.wait.on.regionservers.mintostart</name>
     <value><%= @rs_hosts.length/2+1 %></value>
   </property>
+
   <property>
     <name>hbase.regionserver.dns.interface</name>
     <value><%= node["bcpc"]["floating"]["interface"] %></value> 
   </property>
+
   <property>
     <name>hbase.master.dns.interface</name>
     <value><%= node["bcpc"]["floating"]["interface"] %></value> 
   </property>
+
   <property>
     <name>hbase.regionserver.ipc.address</name>
     <value><%= node["bcpc"]["floating"]["ip"] %></value> 
   </property>
+
   <property>
     <name>hbase.master.ipc.address</name>
     <value><%= node["bcpc"]["floating"]["ip"] %></value> 
   </property>
+
   <property>
     <name>hbase.regionserver.dns.nameserver</name>
     <value><%= @dns_server %></value> 
   </property>
+
   <property>
     <name>hbase.master.dns.nameserver</name>
     <value><%= @dns_server %></value> 
   </property>
+
   <property>
     <name>hbase.defaults.for.version.skip</name>
     <value>true</value>
   </property>
+
   <property>
     <name>hbase.regionserver.wal.codec</name>
     <value>org.apache.hadoop.hbase.regionserver.wal.IndexedWALEditCodec</value>
   </property>
+
   <property>
     <name>hbase.region.server.rpc.scheduler.factory.class</name>
     <value>org.apache.phoenix.hbase.index.ipc.PhoenixIndexRpcSchedulerFactory</value>
     <description>Factory to create the Phoenix RPC Scheduler that knows to put index updates into index queues</description>
   </property>
+
+  <property>
+    <name>dfs.client.read.shortcircuit</name>
+    <value>true</value>
+  </property>
+
+  <property>
+    <name>dfs.domain.socket.path</name>
+    <value>/var/run/hadoop-hdfs/dn._PORT</value>
+  </property>
+
 </configuration>
