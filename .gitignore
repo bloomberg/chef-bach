@@ -10,6 +10,7 @@ python_server.log
 vbox/
 bins/
 cookbooks/*/
+!cookbooks/bach_common
 !cookbooks/bcpc
 !cookbooks/bcpc-hadoop
 !cookbooks/bcpc_jmxtrans
