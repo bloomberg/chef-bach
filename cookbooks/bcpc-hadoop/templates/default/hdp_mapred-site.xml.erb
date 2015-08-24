@@ -36,7 +36,7 @@
   </property>
 
   <property>
-    <name>mapreduce.map.output.compress</name>  
+    <name>mapreduce.map.output.compress</name>
     <value>true</value>
   </property>
 
@@ -64,4 +64,22 @@
     <name>yarn.app.mapreduce.am.staging-dir</name>
     <value>/user</value>
   </property>
+  <% if node[:bcpc][:hadoop][:kerberos][:enable] == true then %>
+  <property>
+    <name>mapreduce.jobhistory.keytab</name>
+    <value><%= node[:bcpc][:hadoop][:kerberos][:keytab][:dir] %>/<%= node[:bcpc][:hadoop][:kerberos][:data][:historyserver][:keytab] %></value>
+  </property>
+  <% if node.run_list.expand(node.chef_environment).recipes.include?("bcpc-hadoop::historyserver") %>
+  <property>
+    <name>mapreduce.jobhistory.principal</name>
+    <value><%= node[:bcpc][:hadoop][:kerberos][:data][:historyserver][:principal] %>/<%= node[:bcpc][:hadoop][:kerberos][:data][:historyserver][:princhost] == "_HOST" ? float_host(node[:fqdn]) : node[:bcpc][:hadoop][:kerberos][:data][:historyserver][:princhost] %>@<%= node[:bcpc][:hadoop][:kerberos][:realm] %></value>
+  </property>
+  <% else %>
+  <property>
+    <name>mapreduce.jobhistory.principal</name>
+    <value><%= node[:bcpc][:hadoop][:kerberos][:data][:historyserver][:principal] %>/<%=node[:bcpc][:hadoop][:kerberos][:data][:historyserver][:princhost] == "_HOST" ? "_HOST" : node[:bcpc][:hadoop][:kerberos][:data][:historyserver][:princhost]%>@<%= node[:bcpc][:hadoop][:kerberos][:realm] %></value>
+  </property>
+  <% end %>
+  <% end %>
+
 </configuration>

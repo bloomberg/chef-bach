@@ -22,12 +22,14 @@ if get_config("namenode_txn_fmt") then
 end
 
 node[:bcpc][:hadoop][:mounts].each do |d|
-# Per chef-documentation for directory resource's recursive attribute:
-# For the owner, group, and mode attributes, the value of this attribute applies only to the leaf directory
-# Hence, we create "/disk/#{d}/dfs/jn/" to have "jn" dir owned by hdfs and then
-# create "/disk/#{d}/dfs/jn/#{node.chef_environment}" owned by hdfs. 
-# This way the jn/{environment} dir tree is owned by hdfs
-  directory "/disk/#{d}/dfs/jn/" do
+
+  # Per chef-documentation for directory resource's recursive attribute:
+  # For the owner, group, and mode attributes, the value of this attribute applies only to the leaf directory
+  # Hence, we create "/disk/#{d}/dfs/jn/" to have "jn" dir owned by hdfs and then
+  # create "/disk/#{d}/dfs/jn/#{node.chef_environment}" owned by hdfs. 
+  # This way the jn/{environment} dir tree is owned by hdfs
+  
+  directory "/disk/#{d}/dfs/jn" do
     owner "hdfs"
     group "hdfs"
     mode 0755

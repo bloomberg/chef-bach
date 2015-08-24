@@ -36,3 +36,9 @@ clientPort=<%= node[:bcpc][:hadoop][:zookeeper][:port] %>
 <%="server.#{s[:node_number]}=#{float_host(s[:hostname])}:#{node[:bcpc][:hadoop][:zookeeper][:leader_connect][:port]}:#{node[:bcpc][:hadoop][:zookeeper][:leader_elect][:port]}" %>
 <% end %>
 
+<% if node[:bcpc][:hadoop][:kerberos][:enable] == true then %>
+authProvider.1=org.apache.zookeeper.server.auth.SASLAuthenticationProvider
+jaasLoginRenew=3600000
+kerberos.removeHostFromPrincipal=true
+kerberos.removeRealmFromPrincipal=true
+<% end %>

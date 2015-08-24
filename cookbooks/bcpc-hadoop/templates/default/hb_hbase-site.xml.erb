@@ -94,4 +94,71 @@
     <value>/var/run/hadoop-hdfs/dn._PORT</value>
   </property>
 
+  <% if node[:bcpc][:hadoop][:kerberos][:enable] == true then %>
+  <!-- HBase Authorization Configuration -->
+  <property> 
+    <name>hbase.security.authorization</name> 
+    <value>true</value> 
+  </property> 
+
+  <property>    
+    <name>hbase.superuser</name>    
+    <value><%= node[:bcpc][:hadoop][:hbase][:superusers].join(",") %></value>    
+    <description>List of users or groups (comma-separated), who are allowed full privileges, regardless of stored ACLs, across the cluster. Only used when HBase security is enabled.</description>
+  </property>
+
+  <property>    
+    <name>hbase.coprocessor.region.classes</name>    
+    <value>org.apache.hadoop.hbase.security.token.TokenProvider,org.apache.hadoop.hbase.security.access.SecureBulkLoadEndpoint,org.apache.hadoop.hbase.security.access.AccessController</value>
+    <description>A comma-separated list of Coprocessors that are loaded by default on all tables.</description>  
+  </property>
+
+  <property>
+    <name>hbase.security.exec.permission.checks</name>
+    <value>true</value>
+  </property>
+
+  <property>    
+    <name>hbase.coprocessor.regionserver.classes</name>    
+    <value>org.apache.hadoop.hbase.security.access.AccessController</value>    
+  </property> 
+
+  <property>    
+    <name>hbase.coprocessor.master.classes</name>    
+    <value>org.apache.hadoop.hbase.security.access.AccessController</value>    
+  </property> 
+
+  <!-- HBase Security Configuration -->
+  <property> 
+    <name>hbase.security.authentication</name> 
+    <value>kerberos</value> 
+  </property> 
+
+  <property>
+    <name>hbase.master.kerberos.principal</name>
+    <value><%= node[:bcpc][:hadoop][:kerberos][:data][:hbase][:principal] %>/<%=node[:bcpc][:hadoop][:kerberos][:data][:hbase][:princhost] == "_HOST" ? "_HOST" : node[:bcpc][:hadoop][:kerberos][:data][:hbase][:princhost]%>@<%= node[:bcpc][:hadoop][:kerberos][:realm] %></value>
+  </property>
+
+  <property> 
+    <name>hbase.master.keytab.file</name> 
+    <value><%= node[:bcpc][:hadoop][:kerberos][:keytab][:dir] %>/<%= node[:bcpc][:hadoop][:kerberos][:data][:hbase][:keytab] %></value> 
+    <description>Full path to the kerberos keytab file to use for logging in the configured HMaster server principal.</description> 
+  </property> 
+
+  <property>
+    <name>hbase.regionserver.kerberos.principal</name>
+    <value><%= node[:bcpc][:hadoop][:kerberos][:data][:hbase][:principal] %>/<%=node[:bcpc][:hadoop][:kerberos][:data][:hbase][:princhost] == "_HOST" ? "_HOST" : node[:bcpc][:hadoop][:kerberos][:data][:hbase][:princhost]%>@<%= node[:bcpc][:hadoop][:kerberos][:realm] %></value>
+  </property>
+
+  <property> 
+    <name>hbase.regionserver.keytab.file</name> 
+    <value><%= node[:bcpc][:hadoop][:kerberos][:keytab][:dir] %>/<%= node[:bcpc][:hadoop][:kerberos][:data][:hbase][:keytab] %></value> 
+    <description>Full path to the kerberos keytab file to use for logging in the configured HRegionServer server principal.</description> 
+  </property> 
+
+  <property>    
+    <name>hbase.rpc.engine</name>    
+    <value>org.apache.hadoop.hbase.ipc.SecureRpcEngine</value>    
+  </property>   
+  <% end %>
 </configuration>

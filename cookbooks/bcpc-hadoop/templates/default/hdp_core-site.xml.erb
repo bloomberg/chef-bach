@@ -18,6 +18,7 @@
     <name>hadoop.proxyuser.httpfs.hosts</name>
     <value>*</value>
   </property>
+
   <property>
     <name>hadoop.proxyuser.httpfs.groups</name>
     <value>*</value>
@@ -27,6 +28,7 @@
     <name>hadoop.proxyuser.hue.hosts</name>
     <value>*</value>
   </property>
+
   <property>
     <name>hadoop.proxyuser.hue.groups</name>
     <value>*</value>
@@ -36,6 +38,7 @@
     <name>hadoop.proxyuser.oozie.hosts</name>
     <value>*</value>
   </property>
+
   <property>
     <name>hadoop.proxyuser.oozie.groups</name>
     <value>*</value>
@@ -74,6 +77,43 @@
   <property>
     <name>io.compression.codec.lzo.class</name>
     <value>com.hadoop.compression.lzo.LzoCodec</value>
+  </property>
+
+  <% if node[:bcpc][:hadoop][:kerberos][:enable] == true then %>
+  <property>
+    <name>hadoop.security.authentication</name>
+    <value>kerberos</value>
+    <description>Set theauthentication for the cluster. Valid values are: simple or kerberos.</description>
+  </property>
+
+  <property>
+    <name>hadoop.security.authorization</name>
+    <value>true</value>
+    <description>Enable authorization for different protocols.</description>
+  </property>
+
+  <property>
+    <name>hadoop.security.auth_to_local</name>
+    <value>
+      <% node[:bcpc][:hadoop][:kerberos][:data].each do|ke,va| %>
+      RULE:[2:$1@$0](<%= va['principal']%>@.*<%= node[:bcpc][:hadoop][:kerberos][:realm] %>)s/.*/<%=va['owner'] %>/
+      <% end %>
+      DEFAULT
+    </value>
+    <description>
+      The mapping from kerberos principal names to local OS user names.
+    </description>
+  </property>
+  <% end %>
+
+  <property>
+    <name>hadoop.proxyuser.hive.hosts</name>
+    <value>*</value>
+  </property>
+  
+  <property>
+    <name>hadoop.proxyuser.hive.groups</name>
+    <value>*</value>
   </property>
 
 </configuration>

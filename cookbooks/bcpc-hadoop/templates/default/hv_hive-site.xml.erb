@@ -102,4 +102,54 @@
   <value>/tmp/hive-${user.name}</value>
 </property>
 
+<% if node[:bcpc][:hadoop][:kerberos][:enable] == true then %>
+
+<property>
+  <name>hive.metastore.sasl.enabled</name>
+  <value>true</value>
+  <description>If true, the metastore thrift interface will be secured with SASL. Clients must authenticate with Kerberos.</description>
+</property>
+
+<property>
+  <name>hive.metastore.kerberos.keytab.file</name>
+  <value><%= node[:bcpc][:hadoop][:kerberos][:keytab][:dir] %>/<%= node[:bcpc][:hadoop][:kerberos][:data][:hive][:keytab] %></value>
+  <description>The path to the Kerberos Keytab file containing the metastore thrift server's service principal.</description>
+</property>
+
+<% if node.run_list.expand(node.chef_environment).recipes.include?("bcpc-hadoop::hive_metastore")  %>
+<property>
+  <name>hive.metastore.kerberos.principal</name>
+  <value><%= node[:bcpc][:hadoop][:kerberos][:data][:hive][:principal] %>/<%=node[:bcpc][:hadoop][:kerberos][:data][:hive][:princhost] == "_HOST" ? float_host(node[:fqdn]) : node[:bcpc][:hadoop][:kerberos][:data][:hive][:princhost]%>@<%= node[:bcpc][:hadoop][:kerberos][:realm] %></value>
+</property>
+<% else %>
+<property>
+  <name>hive.metastore.kerberos.principal</name>
+  <value><%= node[:bcpc][:hadoop][:kerberos][:data][:hive][:principal] %>/<%=node[:bcpc][:hadoop][:kerberos][:data][:hive][:princhost] == "_HOST" ? "_HOST" : node[:bcpc][:hadoop][:kerberos][:data][:hive][:princhost]%>@<%= node[:bcpc][:hadoop][:kerberos][:realm] %></value>
+</property>
+<% end %>
+
+<!-- HiveServer2 Security Configuration -->
+<property>
+  <name>hive.server2.authentication</name>
+  <value>KERBEROS</value>
+</property>
+
+<property>
+  <name>hive.server2.authentication.kerberos.keytab</name>
+  <value><%= node[:bcpc][:hadoop][:kerberos][:keytab][:dir] %>/<%= node[:bcpc][:hadoop][:kerberos][:data][:hive][:keytab] %></value>
+  <description>The path to the Kerberos Keytab file containing the metastore thrift server's service principal.</description>
+</property>
+
+<% if node.run_list.expand(node.chef_environment).recipes.include?("bcpc-hadoop::hive_server")  %>
+<property>
+  <name>hive.server2.authentication.kerberos.principal</name>
+  <value><%=node[:bcpc][:hadoop][:kerberos][:data][:hive][:principal]%>/<%=node[:bcpc][:hadoop][:kerberos][:data][:hive][:princhost] == "_HOST" ? float_host(node[:fqdn]) : node[:bcpc][:hadoop][:kerberos][:data][:hive][:princhost]%>@<%= node[:bcpc][:hadoop][:kerberos][:realm] %></value>
+</property>
+<% else %>
+<property>
+  <name>hive.server2.authentication.kerberos.principal</name>
+  <value><%= node[:bcpc][:hadoop][:kerberos][:data][:hive][:principal] %>/<%=node[:bcpc][:hadoop][:kerberos][:data][:hive][:princhost] == "_HOST" ? "_HOST" : node[:bcpc][:hadoop][:kerberos][:data][:hive][:princhost]%>@<%= node[:bcpc][:hadoop][:kerberos][:realm] %></value>
+</property>
+<% end %>
+<% end %>
 </configuration>

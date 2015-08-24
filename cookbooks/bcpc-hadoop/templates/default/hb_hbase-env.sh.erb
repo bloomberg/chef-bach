@@ -107,3 +107,9 @@ export HBASE_MANAGES_ZK=false
 # DRFA doesn't put any cap on the log size. Please refer to HBase-5655 for more context.
 
 export JAVA_HOME=<%= node["bcpc"]["hadoop"]["java"] %>
+<% if node[:bcpc][:hadoop][:kerberos][:enable] == true then %>
+export HBASE_OPTS="$HBASE_OPTS -Djava.security.auth.login.config=/etc/hbase/conf/hbase-client.jaas"
+export HBASE_MASTER_OPTS="$HBASE_MASTER_OPTS -Djava.security.auth.login.config=/etc/hbase/conf/hbase-server.jaas"
+export HBASE_REGIONSERVER_OPTS="$HBASE_REGIONSERVER_OPTS -Djava.security.auth.login.config=/etc/hbase/conf/regionserver.jaas"
+#export HBASE_OPTS="$HBASE_OPTS -Djavax.net.debug=ssl -Dsun.security.krb5.debug=true"
+<% end %>

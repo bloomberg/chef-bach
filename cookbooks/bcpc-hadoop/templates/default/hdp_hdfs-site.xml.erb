@@ -105,18 +105,8 @@
   </property>
 
   <property>
-    <name>dfs.datanode.address</name>
-    <value><%=node[:bcpc][:floating][:ip]%>:50010</value>
-  </property>
-
-  <property>
     <name>dfs.datanode.ipc.address</name>
     <value><%=node[:bcpc][:floating][:ip]%>:50020</value>
-  </property>
-
-  <property>
-    <name>dfs.datanode.http.address</name>
-    <value><%=node[:bcpc][:floating][:ip]%>:50075</value>
   </property>
 
   <property>
@@ -165,4 +155,129 @@
     <value><%= node["bcpc"]["hadoop"]["namenode"]["handler"]["count"] %></value>
   </property>
 
+  <% if node[:bcpc][:hadoop][:kerberos][:enable] == true then %>
+  <property> 
+    <name>dfs.permissions.enabled</name> 
+    <value>true</value> 
+    <description> 
+      If "true", enables permission checking in HDFS. If "false", permission checking is turned
+      off, but all other behavior is unchanged. Switching from one parameter value to the other does
+      not change the mode, owner or group of files or directories.
+    </description> 
+  </property> 
+
+  <property> 
+    <name>dfs.block.access.token.enable</name> 
+    <value>true</value> 
+    <description> 
+      If "true", access tokens are used to access datanodes. If "false", no access tokens are checked on
+      accessing datanodes. 
+    </description> 
+  </property> 
+
+  <property>
+    <name>dfs.permissions.superusergroup</name>
+    <value>hdfs</value>
+  </property>
+
+  <property>
+    <name>dfs.namenode.kerberos.principal</name>
+    <value><%= node[:bcpc][:hadoop][:kerberos][:data][:namenode][:principal] %>/<%=node[:bcpc][:hadoop][:kerberos][:data][:namenode][:princhost] == "_HOST" ? "_HOST" : node[:bcpc][:hadoop][:kerberos][:data][:namenode][:princhost]%>@<%= node[:bcpc][:hadoop][:kerberos][:realm] %></value>
+    <description> Kerberos principal name for the NameNode</description>
+  </property>
+
+  <property>
+    <name>dfs.web.authentication.kerberos.principal</name>
+    <value><%= node[:bcpc][:hadoop][:kerberos][:data][:spnego][:principal] %>/<%=node[:bcpc][:hadoop][:kerberos][:data][:spnego][:princhost] == "_HOST" ? "_HOST" : node[:bcpc][:hadoop][:kerberos][:data][:spnego][:princhost]%>@<%= node[:bcpc][:hadoop][:kerberos][:realm] %></value>
+  </property>
+
+  <property> 
+    <name>dfs.web.authentication.kerberos.keytab</name> 
+    <value><%= node[:bcpc][:hadoop][:kerberos][:keytab][:dir] %>/<%= node[:bcpc][:hadoop][:kerberos][:data][:namenode][:spnego_keytab] %></value> 
+    <description>The Kerberos keytab file with the credentials for the HTTP Kerberos principal used by Hadoop-Auth in the HTTP endpoint. 
+    </description> 
+  </property> 
+
+  <property> 
+    <name>dfs.namenode.keytab.file</name> 
+    <value><%= node[:bcpc][:hadoop][:kerberos][:keytab][:dir] %>/<%= node[:bcpc][:hadoop][:kerberos][:data][:namenode][:keytab] %></value> 
+    <description>Combined keytab file containing the namenode service and host principals.</description> 
+  </property> 
+
+  <property> 
+    <name>dfs.datanode.keytab.file</name> 
+    <value><%= node[:bcpc][:hadoop][:kerberos][:keytab][:dir] %>/<%= node[:bcpc][:hadoop][:kerberos][:data][:datanode][:keytab] %></value> 
+    <description>The filename of the keytab file for the DataNode.</description> 
+  </property> 
+
+  <property> 
+    <name>dfs.cluster.administrators</name> 
+    <value>hdfs</value> 
+    <description>ACL for who all can view the default servlets in the HDFS</description> 
+  </property> 
+
+  <property> 
+    <name>dfs.namenode.kerberos.internal.spnego.principal</name> 
+    <value>${dfs.web.authentication.kerberos.principal}</value> 
+  </property> 
+
+  <property> 
+    <name>dfs.secondary.namenode.kerberos.internal.spnego.principal</name> 
+    <value>${dfs.web.authentication.kerberos.principal}</value> 
+  </property>
+
+  <% if node.run_list.expand(node.chef_environment).recipes.include?("bcpc-hadoop::journalnode")  %>
+  <property>
+    <name>dfs.journalnode.rpc-address</name>
+    <value><%=node[:bcpc][:floating][:ip]%>:8485</value>
+  </property>
+
+  <property>
+    <name>dfs.journalnode.http-address</name>
+    <value><%=node[:bcpc][:floating][:ip]%>:8480</value>
+  </property>
+
+  <property>
+    <name>dfs.journalnode.https-address</name>
+    <value><%=node[:bcpc][:floating][:ip]%>:8481</value>
+  </property>
+
+  <property>
+    <name>dfs.journalnode.keytab.file</name>
+    <value><%= node[:bcpc][:hadoop][:kerberos][:keytab][:dir] %>/<%= node[:bcpc][:hadoop][:kerberos][:data][:journalnode][:keytab] %></value> 
+  </property>
+
+  <property>
+    <name>dfs.journalnode.kerberos.principal</name>
+    <value><%= node[:bcpc][:hadoop][:kerberos][:data][:journalnode][:principal] %>/<%=node[:bcpc][:hadoop][:kerberos][:data][:journalnode][:princhost] == "_HOST" ? "_HOST" : node[:bcpc][:hadoop][:kerberos][:data][:journalnode][:princhost]%>@<%= node[:bcpc][:hadoop][:kerberos][:realm] %></value>
+  </property>
+
+  <property>
+    <name>dfs.journalnode.kerberos.internal.spnego.principal</name>
+    <value><%= node[:bcpc][:hadoop][:kerberos][:data][:spnego][:principal] %>/<%= node[:bcpc][:hadoop][:kerberos][:data][:spnego][:princhost] == "_HOST" ? float_host(node[:fqdn]) : node[:bcpc][:hadoop][:kerberos][:data][:spnego][:princhost] %>@<%= node[:bcpc][:hadoop][:kerberos][:realm] %></value>
+  </property>
+  <% end %>
+
+  <% if node.run_list.expand(node.chef_environment).recipes.include?("bcpc-hadoop::datanode")  %>
+  <property>
+    <name>dfs.datanode.kerberos.principal</name>
+    <value><%= node[:bcpc][:hadoop][:kerberos][:data][:datanode][:principal] %>/<%= node[:bcpc][:hadoop][:kerberos][:data][:datanode][:princhost] == "_HOST" ? float_host(node[:fqdn]) : node[:bcpc][:hadoop][:kerberos][:data][:datanode][:princhost] %>@<%= node[:bcpc][:hadoop][:kerberos][:realm] %></value>
+  </property>
+
+  <property>
+    <name>dfs.datanode.address</name>
+    <value><%= node[:bcpc][:floating][:ip] %>:1004</value>
+  </property>
+
+  <property>
+    <name>dfs.datanode.http.address</name>
+    <value><%= node[:bcpc][:floating][:ip] %>:1006</value>
+  </property>
+  <% else %>
+  <property>
+    <name>dfs.datanode.kerberos.principal</name>
+    <value><%= node[:bcpc][:hadoop][:kerberos][:data][:datanode][:principal] %>/<%=node[:bcpc][:hadoop][:kerberos][:data][:datanode][:princhost] == "_HOST" ? "_HOST" : node[:bcpc][:hadoop][:kerberos][:data][:datanode][:princhost]%>@<%= node[:bcpc][:hadoop][:kerberos][:realm] %></value>
+  </property>
+  <%end%>
+  <%end%>
 </configuration>

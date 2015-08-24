@@ -15,3 +15,8 @@ export ZOO_DATADIR_AUTOCREATE_DISABLE=1
 <% if node[:bcpc][:hadoop].attribute?(:jmx_enabled) and node[:bcpc][:hadoop][:jmx_enabled] %>
 export JMXPORT=<%= @zk_jmx_port %>
 <% end %>
+
+<% if node[:bcpc][:hadoop][:kerberos][:enable] == true %>
+export SERVER_JVMFLAGS="-Djava.security.auth.login.config=/etc/zookeeper/conf/zookeeper-server.jaas"
+export CLIENT_JVMFLAGS="-Djava.security.auth.login.config=/etc/zookeeper/conf/zookeeper-client.jaas"
+<% end %>

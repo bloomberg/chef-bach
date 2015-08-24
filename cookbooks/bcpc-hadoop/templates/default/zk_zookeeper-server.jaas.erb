@@ -1,0 +1,9 @@
+Server {
+  com.sun.security.auth.module.Krb5LoginModule required
+  useKeyTab=true
+  storeKey=true
+  useTicketCache=false
+  keyTab="<%= node[:bcpc][:hadoop][:kerberos][:keytab][:dir] %>/<%= node[:bcpc][:hadoop][:kerberos][:data][:zookeeper][:keytab] %>"
+  principal="<%=node[:bcpc][:hadoop][:kerberos][:data][:zookeeper][:principal]%>/<%=node[:bcpc][:hadoop][:kerberos][:data][:zookeeper][:princhost]=="_HOST" ? float_host(node[:fqdn]) : node[:bcpc][:hadoop][:kerberos][:data][:zookeeper][:princhost]%>";
+};
+
