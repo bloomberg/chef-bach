@@ -19,8 +19,25 @@
 
 include_recipe "bcpc::default"
 
+bootstrap = get_all_nodes.select{|s| s.hostname.include? 'bootstrap'}[0].fqdn
+
+nodes = get_nodes_for("mysql").map!{ |x| x['fqdn'] }.join(",")
+
 make_config('mysql-root-user', "root")
-make_config('mysql-root-password', secure_password)
+
+mysql_root_password = get_config("mysql-root-password")
+if mysql_root_password.nil?
+  mysql_root_password = secure_password
+end
+
+chef_vault_secret "mysql-root" do
+  data_bag 'os'
+  raw_data({ 'password' => mysql_root_password })
+  admins "#{ nodes },#{ bootstrap }"
+  search '*:*'
+  action :nothing
+end.run_action(:create_if_missing)
+
 make_config('mysql-galera-user', "sst")
 
 # backward compatibility
@@ -33,10 +50,6 @@ mysql_check_password = get_config("mysql-check-password")
 if mysql_check_password.nil?
   mysql_check_password = secure_password
 end
-
-bootstrap = get_all_nodes.select{|s| s.hostname.include? 'bootstrap'}[0].fqdn
-
-nodes = get_nodes_for("mysql").map!{ |x| x['fqdn'] }.join(",")
 
 chef_vault_secret "mysql-galera" do
   data_bag 'os'
@@ -76,7 +89,7 @@ bash "initial-mysql-config" do
                           GRANT USAGE ON *.* to '#{get_config('mysql-galera-user')}'@'%' IDENTIFIED BY '#{get_config('password','mysql-galera','os')}';
                           GRANT ALL PRIVILEGES on *.* TO '#{get_config('mysql-galera-user')}'@'%' IDENTIFIED BY '#{get_config('password','mysql-galera','os')}';
                           GRANT PROCESS ON *.* to '#{get_config('mysql-check-user')}'@'localhost' IDENTIFIED BY '#{get_config('password','mysql-check','os')}';
-                          UPDATE mysql.user SET password=PASSWORD('#{get_config('mysql-root-password')}') WHERE user='root'; FLUSH PRIVILEGES;
+                          UPDATE mysql.user SET password=PASSWORD('#{get_config('password','mysql-root','os')}') WHERE user='root'; FLUSH PRIVILEGES;
                           UPDATE mysql.user SET host='%' WHERE user='root' and host='localhost';
                           FLUSH PRIVILEGES;"
         EOH
@@ -129,7 +142,7 @@ service "mysql" do
 end
 
 ruby_block "Check MySQL Quorum Status" do
-  status_cmd="mysql -u root -p#{get_config('mysql-root-password')} -e \"SHOW STATUS LIKE 'wsrep_ready' \\G\" | grep -v 'Value: OFF'"
+  status_cmd="mysql -u root -p#{get_config('password','mysql-root','os')} -e \"SHOW STATUS LIKE 'wsrep_ready' \\G\" | grep -v 'Value: OFF'"
   iter = 0
   poll_time = 0.5
   block do

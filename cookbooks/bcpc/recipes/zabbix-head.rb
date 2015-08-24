@@ -52,10 +52,6 @@ if zabbix_guest_password.nil?
   zabbix_guest_password = secure_password
 end
 
-bootstrap = get_bootstrap
-results = get_nodes_for("zabbix-head").map!{ |x| x['fqdn'] }.join(",")
-nodes = results == "" ? node['fqdn'] : results
-
 chef_vault_secret "zabbix-admin" do
   data_bag 'os'
   raw_data({ 'password' => zabbix_admin_password })
@@ -117,18 +113,19 @@ end
 
 ruby_block "zabbix-database-creation" do
     block do
-        if not system "mysql -uroot -p#{get_config('mysql-root-password')} -e 'SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = \"#{node['bcpc']['zabbix_dbname']}\"'|grep \"#{node['bcpc']['zabbix_dbname']}\"" then
-            puts %x[ mysql -uroot -p#{get_config('mysql-root-password')} -e "CREATE DATABASE #{node['bcpc']['zabbix_dbname']} CHARACTER SET UTF8;"
-                mysql -uroot -p#{get_config('mysql-root-password')} -e "GRANT ALL ON #{node['bcpc']['zabbix_dbname']}.* TO '#{get_config('mysql-zabbix-user')}'@'%' IDENTIFIED BY '#{get_config!('password','mysql-zabbix','os')}';"
-                mysql -uroot -p#{get_config('mysql-root-password')} -e "GRANT ALL ON #{node['bcpc']['zabbix_dbname']}.* TO '#{get_config('mysql-zabbix-user')}'@'localhost' IDENTIFIED BY '#{get_config!('password','mysql-zabbix','os')}';"
-                mysql -uroot -p#{get_config('mysql-root-password')} -e "FLUSH PRIVILEGES;"
-                mysql -uroot -p#{get_config('mysql-root-password')} #{node['bcpc']['zabbix_dbname']} < /usr/local/share/zabbix/schema.sql
-                mysql -uroot -p#{get_config('mysql-root-password')} #{node['bcpc']['zabbix_dbname']} < /usr/local/share/zabbix/images.sql
-                mysql -uroot -p#{get_config('mysql-root-password')} #{node['bcpc']['zabbix_dbname']} < /usr/local/share/zabbix/data.sql
+        mysql_root_password = get_config!('password','mysql-root','os')
+        if not system "mysql -uroot -p#{ mysql_root_password } -e 'SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = \"#{node['bcpc']['zabbix_dbname']}\"'|grep \"#{node['bcpc']['zabbix_dbname']}\"" then
+            puts %x[ mysql -uroot -p#{ mysql_root_password } -e "CREATE DATABASE #{node['bcpc']['zabbix_dbname']} CHARACTER SET UTF8;"
+                mysql -uroot -p#{ mysql_root_password } -e "GRANT ALL ON #{node['bcpc']['zabbix_dbname']}.* TO '#{get_config('mysql-zabbix-user')}'@'%' IDENTIFIED BY '#{get_config!('password','mysql-zabbix','os')}';"
+                mysql -uroot -p#{ mysql_root_password } -e "GRANT ALL ON #{node['bcpc']['zabbix_dbname']}.* TO '#{get_config('mysql-zabbix-user')}'@'localhost' IDENTIFIED BY '#{get_config!('password','mysql-zabbix','os')}';"
+                mysql -uroot -p#{ mysql_root_password } -e "FLUSH PRIVILEGES;"
+                mysql -uroot -p#{ mysql_root_password } #{node['bcpc']['zabbix_dbname']} < /usr/local/share/zabbix/schema.sql
+                mysql -uroot -p#{ mysql_root_password } #{node['bcpc']['zabbix_dbname']} < /usr/local/share/zabbix/images.sql
+                mysql -uroot -p#{ mysql_root_password } #{node['bcpc']['zabbix_dbname']} < /usr/local/share/zabbix/data.sql
                 HASH=`echo -n "#{get_config!('password','zabbix-admin','os')}" | md5sum | awk '{print $1}'`
-                mysql -uroot -p#{get_config('mysql-root-password')} #{node['bcpc']['zabbix_dbname']} -e "UPDATE users SET passwd=\\"$HASH\\" WHERE alias=\\"#{get_config('zabbix-admin-user')}\\";"
+                mysql -uroot -p#{ mysql_root_password } #{node['bcpc']['zabbix_dbname']} -e "UPDATE users SET passwd=\\"$HASH\\" WHERE alias=\\"#{get_config('zabbix-admin-user')}\\";"
                 HASH=`echo -n "#{get_config!('password','zabbix-guest','os')}" | md5sum | awk '{print $1}'`
-                mysql -uroot -p#{get_config('mysql-root-password')} #{node['bcpc']['zabbix_dbname']} -e "UPDATE users SET passwd=\\"$HASH\\" WHERE alias=\\"#{get_config('zabbix-guest-user')}\\";"
+                mysql -uroot -p#{ mysql_root_password } #{node['bcpc']['zabbix_dbname']} -e "UPDATE users SET passwd=\\"$HASH\\" WHERE alias=\\"#{get_config('zabbix-guest-user')}\\";"
             ]
         end
     end

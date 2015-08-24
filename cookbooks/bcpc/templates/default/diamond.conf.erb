@@ -207,10 +207,12 @@ host=<%="#{node[:bcpc][:management][:ip]}"%>
 [[PowerDNSCollector]]
 enabled = True
 
+<% if @has_mysql -%>
 [[MySQLCollector]]
 enabled = True
-hosts=<%="#{get_config('mysql-root-user')}"%>:<%="#{get_config('mysql-root-password')}"%>@<%="#{node[:bcpc][:management][:ip]}"%>:3306/<%="#{node['bcpc']['nova_dbname']}"%>
+hosts=<%="#{get_config('mysql-root-user')}"%>:<%="#{get_config('password','mysql-root','os')}"%>@<%="#{node[:bcpc][:management][:ip]}"%>:3306/<%="#{node['bcpc']['nova_dbname']}"%>
 innodb = True
+<% end -%>
 
 [[RabbitMQCollector]]
 enabled = True

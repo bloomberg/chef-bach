@@ -7,7 +7,7 @@ make_config('hue-session-key', secure_password)
 bash "hue-database-creation" do
   privs = "ALL" # todo node[:bcpc][:hadoop][:hue_db_privs].join(",")
   code <<-EOH
-    mysql -u root -p#{get_config('mysql-root-password')} -e "CREATE DATABASE desktop;
+    mysql -u root -p#{get_config('password','mysql-root','os')} -e "CREATE DATABASE desktop;
                                                              GRANT #{privs} ON desktop.* TO 'hue'@'%' IDENTIFIED BY '#{get_config('mysql-hue-password')}';
                                                              GRANT #{privs} ON desktop.* TO 'hue'@'localhost' IDENTIFIED BY '#{get_config('mysql-hue-password')}';
                                                              FLUSH PRIVILEGES;"

@@ -53,12 +53,14 @@ bash "diamond-set-user" do
     notifies :restart, "service[diamond]", :delayed
 end
 
+has_mysql = get_nodes_for("mysql","bcpc").include?(node)
+
 template "/etc/diamond/diamond.conf" do
     source "diamond.conf.erb"
     owner "diamond"
     group "root"
     mode 00600
-    variables( :servers => get_head_nodes )
+    variables( :servers => get_head_nodes, :has_mysql => has_mysql )
     notifies :restart, "service[diamond]", :delayed
 end
 

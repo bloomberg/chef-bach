@@ -150,7 +150,7 @@ file "#{OOZIE_CLIENT_PATH}/oozie.sql" do
 end
 
 ruby_block "oozie-database-creation" do
-  cmd = "mysql -uroot -p#{get_config('mysql-root-password')} -e"
+  cmd = "mysql -uroot -p#{get_config('password','mysql-root','os')} -e"
   privs = "CREATE,INDEX,SELECT,INSERT,UPDATE,DELETE,LOCK TABLES,EXECUTE"
   block do
     if not system " #{cmd} 'SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = \"oozie\"' | grep oozie" then
@@ -160,7 +160,7 @@ ruby_block "oozie-database-creation" do
                 GRANT #{privs} ON oozie.* TO 'oozie'@'localhost' IDENTIFIED BY '#{get_config('mysql-oozie-password')}';
                 FLUSH PRIVILEGES;
       EOF
-      IO.popen("mysql -uroot -p#{get_config('mysql-root-password')}", "r+") do |db|
+      IO.popen("mysql -uroot -p#{get_config('password','mysql-root','os')}", "r+") do |db|
         db.write code
       end
       #system "sudo -u oozie #{OOZIE_CLIENT_PATH}/bin/ooziedb.sh create -sqlfile #{OOZIE_CLIENT_PATH}/oozie.sql -run Validate DB Connection"
