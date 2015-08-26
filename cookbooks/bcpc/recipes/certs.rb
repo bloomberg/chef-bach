@@ -17,6 +17,7 @@
 # limitations under the License.
 #
 
+require 'openssl'
 include_recipe "bcpc::default"
 
 template "/tmp/openssl.cnf" do
@@ -28,23 +29,34 @@ end
 
 node.default[:temp][:value] = ""
 bootstrap = get_all_nodes.select{|s| s.hostname.include? 'bootstrap'}[0].fqdn
+key = OpenSSL::PKey::RSA.new 2048;
 
 results = get_nodes_for("certs").map!{ |x| x['fqdn'] }.join(",")
 nodes = results == "" ? node['fqdn'] : results
 
 ruby_block "initialize-ssh-keys" do
     block do
-        require 'openssl'
         require 'net/ssh'
-        key = OpenSSL::PKey::RSA.new 2048;
         pubkey = "#{key.ssh_type} #{[ key.to_blob ].pack('m0')}"
-        make_config('ssh-private-key', key.to_pem)
         make_config('ssh-public-key', pubkey)
         if get_config('ssl-certificate').nil? && get_config('certificate','ssl','os').nil? then
             node.set[:temp][:value] = %x[openssl req -config /tmp/openssl.cnf -extensions v3_req -new -x509 -passout pass:temp_passwd -newkey rsa:4096 -out /dev/stdout -keyout /dev/stdout -days 1095 -subj "/C=#{node['bcpc']['country']}/ST=#{node['bcpc']['state']}/L=#{node['bcpc']['location']}/O=#{node['bcpc']['organization']}/OU=#{node['bcpc']['region_name']}/CN=#{node['bcpc']['domain_name']}/emailAddress=#{node['bcpc']['admin_email']}"]
         end
     end
     notifies :create, 'ruby_block[chef_vault_secret]', :immediately
+end
+
+ssh_private_key = get_config("ssh-private-key")
+if ssh_private_key.nil?
+  ssh_private_key = key.to_pem
+end
+
+chef_vault_secret "ssh" do
+  data_bag 'os'
+  raw_data({ "private-key" => key.to_pem })
+  admins "#{ nodes },#{ bootstrap }"
+  search '*:*'
+  action :create_if_missing
 end
 
 ruby_block "chef_vault_secret" do

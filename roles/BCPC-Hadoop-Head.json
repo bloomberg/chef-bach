@@ -8,7 +8,6 @@
     "recipe[bcpc::ubuntu_tools_repo]",
     "recipe[bcpc-hadoop::default]",
     "recipe[bcpc::networking]",
-    "recipe[bcpc::certs]",
     "recipe[bcpc::mysql]",
     "recipe[bcpc::keepalived]",
     "recipe[bcpc::haproxy]",
