@@ -48,8 +48,20 @@ export JSVC_HOME=/usr/lib/bigtop-utils
 # On secure datanodes, user to run the datanode as after dropping privileges
 export HADOOP_SECURE_DN_USER=hdfs
 
+<%
+   datanode_heap = [node["bcpc"]["hadoop"]["datanode"]["xmx"]["max_size"], (node["memory"]["total"].to_i * node["bcpc"]["hadoop"]["datanode"]["xmx"]["max_ratio"]/1024).floor].min
+   datanode_newsize = [(0.125*datanode_heap).ceil, 3072].min
+
+   namenode_heap = [node["bcpc"]["hadoop"]["namenode"]["xmx"]["max_size"], (node["memory"]["total"].to_i * node["bcpc"]["hadoop"]["namenode"]["xmx"]["max_ratio"]/1024).floor].min
+   namenode_newsize = [(0.125*namenode_heap).ceil, 3072].min 
+
+   maxpermsize = [(node["memory"]["total"].to_i * 0.021).floor, 256].min
+-%>
+export HADOOP_DATANODE_OPTS="$HADOOP_DATANODE_OPTS -Xms<%= datanode_heap %>m -Xmx<%= datanode_heap %>m -Xmn<%= datanode_newsize %>m -XX:PermSize=<%= (0.5*maxpermsize).floor %>m -XX:MaxPermSize=<%= maxpermsize %>m <%= node["bcpc"]["hadoop"]["datanode"]["gc_opts"] %>"
+export HADOOP_NAMENODE_OPTS="$HADOOP_NAMENODE_OPTS -Xms<%= namenode_heap %>m -Xmx<%= namenode_heap %>m -Xmn<%= namenode_newsize %>m -XX:PermSize=<%= (0.5*maxpermsize).floor %>m -XX:MaxPermSize=<%= maxpermsize %>m <%= node["bcpc"]["hadoop"]["namenode"]["gc_opts"] %>"
+
 <% if node[:bcpc][:hadoop].attribute?(:jmx_enabled) and node[:bcpc][:hadoop][:jmx_enabled] %>
 JMX_OPTS="-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false"
-export HADOOP_NAMENODE_OPTS="$HADOOP_NAMENODE_OPTS -Xms<%= [node["bcpc"]["hadoop"]["namenode"]["xmx"]["max_size"], (node["memory"]["total"].to_i * node["bcpc"]["hadoop"]["namenode"]["xmx"]["max_ratio"]/1024).floor].min %>m -Xmx<%= [node["bcpc"]["hadoop"]["namenode"]["xmx"]["max_size"], (node["memory"]["total"].to_i * node["bcpc"]["hadoop"]["namenode"]["xmx"]["max_ratio"]/1024).floor].min %>m <%= node["bcpc"]["hadoop"]["namenode"]["gc_opts"] %> $JMX_OPTS -Dcom.sun.management.jmxremote.port=<%= @nn_jmx_port %>"
-export HADOOP_DATANODE_OPTS="$HADOOP_DATANODE_OPTS -Xms<%= [node["bcpc"]["hadoop"]["datanode"]["xmx"]["max_size"], (node["memory"]["total"].to_i * node["bcpc"]["hadoop"]["datanode"]["xmx"]["max_ratio"]/1024).floor].min %>m -Xmx<%= [node["bcpc"]["hadoop"]["datanode"]["xmx"]["max_size"], (node["memory"]["total"].to_i * node["bcpc"]["hadoop"]["datanode"]["xmx"]["max_ratio"]/1024).floor].min %>m $JMX_OPTS -Dcom.sun.management.jmxremote.port=<%= @dn_jmx_port %>"
+export HADOOP_NAMENODE_OPTS="$HADOOP_NAMENODE_OPTS $JMX_OPTS -Dcom.sun.management.jmxremote.port=<%= @nn_jmx_port %>"
+export HADOOP_DATANODE_OPTS="$HADOOP_DATANODE_OPTS $JMX_OPTS -Dcom.sun.management.jmxremote.port=<%= @dn_jmx_port %>"
 <% end %>

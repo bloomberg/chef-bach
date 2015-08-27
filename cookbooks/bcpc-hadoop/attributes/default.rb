@@ -33,8 +33,9 @@ default["bcpc"]["hadoop"]["datanode"]["xmx"]["max_size"] = 4096
 default["bcpc"]["hadoop"]["datanode"]["xmx"]["max_ratio"] = 0.25
 default["bcpc"]["hadoop"]["datanode"]["max"]["xferthreads"] = 16384
 default["bcpc"]["hadoop"]["datanode"]["jmx"]["port"] = 10112
+default["bcpc"]["hadoop"]["datanode"]["gc_opts"] = "-server -XX:ParallelGCThreads=4 -XX:+UseParNewGC -XX:+UseConcMarkSweepGC -verbose:gc -XX:+PrintHeapAtGC -XX:+PrintGCDetails -XX:+PrintGCTimeStamps -XX:+PrintGCDateStamps -Xloggc:/var/log/hadoop-hdfs/gc/gc.log-datanode-$$-$(hostname)-$(date +'%Y%m%d%H%M').log -XX:+PrintTenuringDistribution -XX:+UseNUMA -XX:+PrintGCApplicationStoppedTime -XX:+UseCompressedOops -XX:+PrintClassHistogram -XX:+PrintGCApplicationConcurrentTime"
 default["bcpc"]["hadoop"]["namenode"]["handler"]["count"] = 100
-default["bcpc"]["hadoop"]["namenode"]["gc_opts"] = "-XX:ParallelGCThreads=14 -XX:+UseParNewGC -XX:+UseConcMarkSweepGC -XX:CMSInitiatingOccupancyFraction=70 -XX:+UseCMSInitiatingOccupancyOnly -verbose:gc -XX:+PrintHeapAtGC -XX:+PrintGCDetails -XX:+PrintGCTimeStamps -XX:+PrintGCDateStamps -Xloggc:/var/log/hadoop-hdfs/gc/gc.log-$$-$(hostname)-$(date +'%Y%m%d%H%M').log -XX:+PrintTenuringDistribution -XX:+UseNUMA -XX:+PrintGCApplicationStoppedTime -XX:+UseCompressedOops -XX:+PrintClassHistogram -XX:+PrintGCApplicationConcurrentTime"
+default["bcpc"]["hadoop"]["namenode"]["gc_opts"] = "-server -XX:ParallelGCThreads=14 -XX:+UseParNewGC -XX:+UseConcMarkSweepGC -verbose:gc -XX:+PrintHeapAtGC -XX:+PrintGCDetails -XX:+PrintGCTimeStamps -XX:+PrintGCDateStamps -Xloggc:/var/log/hadoop-hdfs/gc/gc.log-namenode-$$-$(hostname)-$(date +'%Y%m%d%H%M').log -XX:+PrintTenuringDistribution -XX:+UseNUMA -XX:+PrintGCApplicationStoppedTime -XX:+UseCompressedOops -XX:+PrintClassHistogram -XX:+PrintGCApplicationConcurrentTime"
 default["bcpc"]["hadoop"]["namenode"]["xmx"]["max_size"] = 16384
 default["bcpc"]["hadoop"]["namenode"]["xmx"]["max_ratio"] = 0.25
 default["bcpc"]["hadoop"]["namenode"]["jmx"]["port"] = 10111
