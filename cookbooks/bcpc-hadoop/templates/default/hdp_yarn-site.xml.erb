@@ -179,6 +179,21 @@
   </property>
 
   <property>
+    <name>yarn.nodemanager.linux-container-executor.resources-handler.class</name>
+    <value>org.apache.hadoop.yarn.server.nodemanager.util.CgroupsLCEResourcesHandler</value>
+  </property>
+
+  <property>
+    <name>yarn.nodemanager.linux-container-executor.group</name>
+    <value>yarn</value>
+  </property>
+
+  <property>
+    <name>yarn.nodemanager.linux-container-executor.cgroups.mount-path</name>
+    <value>/sys/fs/cgroup/</value>
+  </property>
+
+  <property>
     <name>yarn.nodemanager.resource.memory-mb</name>
     <value><%= node['bcpc']['hadoop']['yarn']['nodemanager']['avail_memory']['size'] or
                [1024, (node['memory']['total'].to_i * node['bcpc']['hadoop']['yarn']['nodemanager']['avail_memory']['ratio']/1024).floor].max %></value>
@@ -193,6 +208,13 @@
     <name>yarn.nodemanager.resource.cpu-vcores</name>
     <value><%= node['bcpc']['hadoop']['yarn']['nodemanager']['avail_vcpu']['count'] or
                [1, (node['cpu']['total'] * node['bcpc']['hadoop']['yarn']['nodemanager']['avail_vcpu']['ratio']).floor].max %></value>
+  </property>
+
+  <property>
+    <name>resource.percentage-physical-cpu-limit</name>
+    <value><%= (node['bcpc']['hadoop']['yarn']['nodemanager']['avail_vcpu']['count'] ? \
+                 node['bcpc']['hadoop']['yarn']['nodemanager']['avail_vcpu']['count']/node['cpu']['total'] :
+                 node['bcpc']['hadoop']['yarn']['nodemanager']['avail_vcpu']['ratio'] * 100).floor %></value>
   </property>
 
   <property>
