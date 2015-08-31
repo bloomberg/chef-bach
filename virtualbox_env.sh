@@ -13,19 +13,13 @@ if [[ -z "$VBM" ]]; then
     fi
 
     function check_version {
-        local MIN_MAJOR=4
-        local MIN_MINOR=3
+        local MIN_VERSION="4.3"
+        local version=`VBoxManage --version | perl -ne 'm/(\d\.\d)\./; print "$1"'`
 
-        local IFS='.'
-        local version="$(VBoxManage --version)"
-        local version_array
-        read -a version_array <<< "$version"
-
-        if ! [[ "${version_array[0]}" -ge "$MIN_MAJOR" && \
-                "${version_array[1]}" -ge "$MIN_MINOR" ]]
+        if ! echo "$version >= $MIN_VERSION" | bc | grep 1 > /dev/null
         then
-            echo "ERROR: VirtualBox $version is less than $MIN_MAJOR.$MIN_MINOR.x!" >&2
-            echo "  Only VirtualBox >= $MIN_MAJOR.$MIN_MINOR.x is officially supported." >&2
+            echo "ERROR: VirtualBox $version is less than $MIN_VERSION.x!" >&2
+            echo "  Only VirtualBox >= $MIN_VERSION.x is officially supported." >&2
             exit 1
         fi
     }
