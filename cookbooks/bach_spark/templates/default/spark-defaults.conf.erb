@@ -10,3 +10,5 @@ spark.logConf true
 spark.dynamicAllocation.enabled true
 spark.shuffle.service.enabled true
 spark.yarn.jar <%= "#{node['spark']['hdfs_url']}/apps/spark/#{node[:spark][:package][:version]}/spark-assembly.jar" %>
+spark.yarn.queue spark
+spark.master yarn-client

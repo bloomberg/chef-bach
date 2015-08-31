@@ -6,3 +6,4 @@ export HADOOP_CONF_DIR="/etc/hadoop/conf"
 export SPARK_DIST_CLASSPATH=${SPARK_LIBRARY_PATH}:$(for i in $(export IFS=":"; for i in $(hadoop classpath); do find $i -maxdepth 1 -name "*.jar"; done | egrep -v "jackson-databind-.*.jar|jackson-core.jar|jackson-core-.*.jar|jackson-annotations-.*.jar"); do echo -n "${i}:"; done | sed 's/:$//')
 
 export SPARK_CLASSPATH="$SPARK_DIST_CLASSPATH:$SPARK_CLASSPATH"
+export SPARK_LOCAL_DIRS=/home/$(whoami)/.spark_logs
