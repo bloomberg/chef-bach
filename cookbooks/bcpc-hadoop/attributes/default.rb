@@ -14,10 +14,12 @@ default["bcpc"]["repos"]["hdp_utils"] = 'http://public-repo-1.hortonworks.com/HD
 default["bcpc"]["hadoop"]["disks"] = []
 default["bcpc"]["hadoop"]["oozie"]["admins"] = []
 default["bcpc"]["hadoop"]["oozie"]["memory_opts"] = "-Xmx2048m -XX:MaxPermSize=256m"
+default["bcpc"]["hadoop"]["yarn"]["log-aggregation_retain-seconds"] = 60*60*24*31
 default["bcpc"]["hadoop"]["yarn"]["nodemanager"]["avail_memory"]["ratio"] = 0.5
 default["bcpc"]["hadoop"]["yarn"]["nodemanager"]["avail_memory"]["size"] = nil
 default["bcpc"]["hadoop"]["yarn"]["nodemanager"]["avail_vcpu"]["ratio"] = 0.5
 default["bcpc"]["hadoop"]["yarn"]["nodemanager"]["avail_vcpu"]["count"] = nil
+default["bcpc"]["hadoop"]["yarn"]["nodemanager"]["port"] = 45454
 default["bcpc"]["hadoop"]["yarn"]["scheduler"]["class"] = "org.apache.hadoop.yarn.server.resourcemanager.scheduler.fair.FairScheduler"
 default["bcpc"]["hadoop"]["yarn"]["scheduler"]["minimum-allocation-mb"] = 256
 default['bcpc']['hadoop']['yarn']['historyserver']['heap']["size"] = 128
