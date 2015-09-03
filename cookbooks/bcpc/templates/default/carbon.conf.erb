@@ -35,7 +35,7 @@
 #   PID_DIR        = /var/run/
 #
 LOCAL_DATA_DIR = <%= node['bcpc']['graphite']['local_data_dir'] %> 
-
+LOG_DIR =  <%= node['bcpc']['graphite']['local_log_dir'] %>
 # Specify the user to drop privileges to
 # If this is blank carbon runs as the user that invokes it
 # This user must have write access to the local data directory

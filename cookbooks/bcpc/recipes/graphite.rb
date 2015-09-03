@@ -179,8 +179,14 @@ bash "graphite-database-sync" do
     notifies :restart, "service[apache2]", :immediately
 end
 
+bash "cleanup-old-whisper-files" do
+  action :run
+  user "root"
+  code "find #{node['bcpc']['graphite']['local_data_dir']} -name *.wsp -mtime +#{node['bcpc']['graphite']['']['retention']} -type f -exec rm {} \\;"
+end
+
 bash "cleanup-old-logs" do
   action :run
   user "root"
-  code "find #{node['bcpc']['graphite']['local_data_dir']} -name *.wsp -mtime +#{node['bcpc']['graphite']['log']['retention']} -type f -exec rm {} \\;"
+  code "find #{node['bcpc']['graphite']['local_log_dir']} -name *.wsp -mtime +#{node['bcpc']['graphite']['log']['retention']} -type f -exec rm {} \\;"
 end
