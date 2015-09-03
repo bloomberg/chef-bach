@@ -29,14 +29,16 @@ if haproxy_stats_password.nil?
   haproxy_stats_password = secure_password
 end
 
-bootstrap = 'bach-vm-bootstrap-b0.bcpc.example.com' # XXX non-parameterized!
-nodes = get_nodes_for("haproxy").map!{ |x| x['fqdn'] }.join(",")
+# The 'search' parameter appears to be broken at the moment, so we'll
+# grant explicit admin permission to all nodes in the search index.
+admin_nodes = get_all_nodes.map{|n| n.fqdn}
 
 chef_vault_secret "haproxy-stats" do
   data_bag 'os'
   raw_data({ 'password' => haproxy_stats_password })
   search '*:*'
-  admins "#{bootstrap},#{Chef::Config[:node_name]}"
+  #admins node[:fqdn]
+  admins admin_nodes.join(",")
   action :nothing
 end.run_action(:create_if_missing)
 

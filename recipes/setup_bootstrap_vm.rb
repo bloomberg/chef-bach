@@ -56,7 +56,6 @@ machine bootstrap_fqdn do
   chef_environment node.chef_environment
   attributes chef_server_attributes
   complete true # overwrite run_list and pre-existing attributes.
-  converge true
   files cert_files_hash
   recipe 'bach_bootstrap::chef-server'
   action :converge
@@ -94,9 +93,7 @@ end
 
 # Generate a valid knife configuration
 render_knife_config
-knife_dir = "#{File.dirname(__FILE__)}/.chef"
-log knife_dir
-link knife_dir do
+link "#{Chef::Config[:chef_repo_path]}/.chef" do
   to cluster_data_dir
 end
 
