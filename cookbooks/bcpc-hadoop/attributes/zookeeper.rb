@@ -43,3 +43,9 @@ default[:bcpc][:hadoop][:zookeeper][:leader_connect][:port] = 2888
 
 #Port for leader election in the Quorum
 default[:bcpc][:hadoop][:zookeeper][:leader_elect][:port] = 3888
+
+#Number of ZooKeeper snapshots to be retained
+default[:bcpc][:hadoop][:zookeeper][:snap][:retain_count] = 5
+
+#ZooKeeper snapshot purge interval in hours
+default[:bcpc][:hadoop][:zookeeper][:snap][:purge_interval] = 24

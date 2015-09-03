@@ -42,3 +42,10 @@ jaasLoginRenew=3600000
 kerberos.removeHostFromPrincipal=true
 kerberos.removeRealmFromPrincipal=true
 <% end %>
+
+#Number of ZooKeeper snapshots to be retained
+autopurge.snapRetainCount=<%= node[:bcpc][:hadoop][:zookeeper][:snap][:retain_count] %>
+
+#ZooKeeper snapshot purge interval in hours
+autopurge.purgeInterval=<%= node[:bcpc][:hadoop][:zookeeper][:snap][:purge_interval] %>
+
