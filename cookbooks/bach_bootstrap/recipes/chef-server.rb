@@ -2,16 +2,30 @@
 # Cookbook Name:: bach_bootstrap
 # Recipe:: chef-server
 #
-require 'yaml'
-
 include_recipe 'bach_common::proxy'
 
-#
-# This should really be replaced with our own cookbook.  The upstream
-# cookbook provided by Chef, inc. requires your chef servers to have
-# internet access.
-#
-include_recipe 'chef-server'
+cache_path = Chef::Config[:file_cache_path]
+chef_path = "#{cache_path}/chef-server-core_12.1.2-1_amd64.deb"
+
+remote_file chef_path do
+  source "https://web-dl.packagecloud.io/chef/stable/packages/ubuntu/precise/chef-server-core_12.1.2-1_amd64.deb"
+  mode 0444
+  checksum '436c08c5b38705e19924a32f0885dd7f0f24a52c69a0259e93263dabf4b22ecb'
+end
+
+chef_ingredient 'chef-server' do
+  version '12.1.2'
+  package_source chef_path
+  config <<-EOS.gsub(/^ {4}/,'')
+    topology "standalone"
+    api_fqdn "#{node[:bcpc][:bootstrap][:server]}"
+  EOS
+  action :install
+end
+
+ingredient_config 'chef-server' do
+  notifies :reconfigure, 'chef_ingredient[chef-server]', :immediately
+end
 
 bach_user_path = '/home/vagrant/bach_user.pem'
 bach_validator_path = '/home/vagrant/bach_validator.pem'

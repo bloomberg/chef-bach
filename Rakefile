@@ -9,7 +9,7 @@ def chef_zero(recipe)
   puts "Chef environment: #{ENV['CHEF_ENV']}"
   config_path = File.dirname(__FILE__) + '/client.rb'
   command_line = 
-    'bundle exec chef-client -z -l info' +
+    'bundle exec chef-client -z -l error' +
     " -c #{config_path}" +
     " -o bach_cluster::#{recipe}" +
     " -E #{ENV['CHEF_ENV']}"
