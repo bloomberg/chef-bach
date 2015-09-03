@@ -82,6 +82,14 @@ module BachCluster
       "/tmp/bach_cluster_b#{build_id}"
     end
 
+    def fqdn_for(name)
+      if name.end_with?(node[:bcpc][:domain_name])
+        name
+      else
+        name + '.' + node[:bcpc][:domain_name]
+      end
+    end
+
     def render_knife_config
       template File.join(cluster_data_dir, 'knife.rb') do
         variables({
