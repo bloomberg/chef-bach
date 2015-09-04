@@ -29,6 +29,11 @@
   </property>
 
   <property>
+    <name>hbase.hregion.majorcompaction</name>
+    <value><%= node["bcpc"]["hadoop"]["hbase"]["major_compact"]["time"] %></value>
+  </property>
+
+  <property>
     <name>fail.fast.expired.active.master</name>
     <value><%= @master_hosts.length > 1 ? "true" : "false" %></value>
   </property>
