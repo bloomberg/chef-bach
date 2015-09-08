@@ -156,8 +156,8 @@ ruby_block "oozie-database-creation" do
     if not system " #{cmd} 'SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = \"oozie\"' | grep oozie" then
       code = <<-EOF
                 CREATE DATABASE oozie;
-                GRANT #{privs} ON oozie.* TO 'oozie'@'%' IDENTIFIED BY '#{get_config('mysql-oozie-password')}';
-                GRANT #{privs} ON oozie.* TO 'oozie'@'localhost' IDENTIFIED BY '#{get_config('mysql-oozie-password')}';
+                GRANT #{privs} ON oozie.* TO 'oozie'@'%' IDENTIFIED BY '#{get_config('password','mysql-oozie','hadoop')}';
+                GRANT #{privs} ON oozie.* TO 'oozie'@'localhost' IDENTIFIED BY '#{get_config('password','mysql-oozie','hadoop')}';
                 FLUSH PRIVILEGES;
       EOF
       IO.popen("mysql -uroot -p#{get_config('mysql-root-password')}", "r+") do |db|

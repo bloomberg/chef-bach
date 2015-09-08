@@ -4,7 +4,24 @@
 
 # Create oozie realted passwords
 make_config('oozie-keystore-password', secure_password)
-make_config('mysql-oozie-password', secure_password)
+
+mysql_oozie_password = get_config("mysql-oozie-password")
+if mysql_oozie_password.nil?
+  mysql_oozie_password = secure_password
+end
+
+bootstrap = get_all_nodes.select{|s| s.hostname.include? 'bootstrap'}[0].fqdn
+
+results = get_nodes_for("oozie_config").map!{ |x| x['fqdn'] }.join(",")
+nodes = results == "" ? node['fqdn'] : results
+
+chef_vault_secret "mysql-oozie" do
+  data_bag 'hadoop'
+  raw_data({ 'password' => mysql_oozie_password })
+  admins "#{ nodes },#{ bootstrap }"
+  search '*:*'
+  action :nothing
+end.run_action(:create_if_missing)
 
 directory "/etc/oozie/conf.#{node.chef_environment}" do
   owner "root"
