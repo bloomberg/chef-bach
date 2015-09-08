@@ -38,6 +38,7 @@ start(){
         if [ "${INSTANCE}" == "${CARBON_DAEMON}" ]; then
             INSTANCE="a";
         fi;
+        ulimit -Sn  <%= node['bcpc']['graphite']['carbon_fileno_limit'] %>
         echo "Starting carbon-${CARBON_DAEMON}:${INSTANCE}..."
         bin/carbon-${CARBON_DAEMON}.py --instance=${INSTANCE} start;
 
