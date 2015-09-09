@@ -131,9 +131,20 @@
 <!-- HiveServer2 Security Configuration -->
 <property>
   <name>hive.server2.authentication</name>
-  <value>KERBEROS</value>
+  <value><%= node[:bcpc][:hadoop][:hive][:hiveserver2][:authentication][:method] %></value>
 </property>
 
+<% if node[:bcpc][:hadoop][:hive][:hiveserver2][:authentication][:method].upcase == "LDAP" %>
+<property>
+  <name>hive.server2.authentication.ldap.url</name>
+  <value><%= node[:bcpc][:hadoop][:hive][:hiveserver2][:authentication][:ldap_url] %></value>
+</property>
+
+<property>
+  <name>hive.server2.authentication.ldap.Domain</name>
+  <value><%= node[:bcpc][:hadoop][:hive][:hiveserver2][:authentication][:ldap_domain] %></value>
+</property>
+<% end %>
 <property>
   <name>hive.server2.authentication.kerberos.keytab</name>
   <value><%= node[:bcpc][:hadoop][:kerberos][:keytab][:dir] %>/<%= node[:bcpc][:hadoop][:kerberos][:data][:hive][:keytab] %></value>
