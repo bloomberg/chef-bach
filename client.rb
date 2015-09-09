@@ -17,7 +17,7 @@ end
 
 http_proxy ENV['http_proxy']
 https_proxy ENV['https_proxy']
-no_proxy "localhost" if (http_proxy ENV['http_proxy'] || ENV['https_proxy'])
+no_proxy "localhost" if (ENV['http_proxy'] || ENV['https_proxy'])
 
 # Dev/test environments don't have DNS, so we can't validate the server cert.
 ssl_verify_mode        :verify_none
