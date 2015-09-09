@@ -13,6 +13,10 @@ cookbook 'bcpc_jmxtrans', path: "./cookbooks/bcpc_jmxtrans"
 cookbook 'hannibal', path: "./cookbooks/hannibal"
 cookbook 'kafka-bcpc', path: "./cookbooks/kafka-bcpc"
 
+# chef-vault forked, pending acceptance of a PR.
+cookbook 'chef-vault',
+  git: 'https://github.com/http-418/chef-vault'
+
 # cobblerd 0.3.0 isn't on the supermarket.
 cookbook 'cobblerd', 
   git: 'https://github.com/bloomberg/cobbler-cookbook',

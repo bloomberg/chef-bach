@@ -18,7 +18,7 @@ config.vm.network :private_network,
 #   adapter_ip: '<%= @floating_ip %>'
 
 config.vm.provider :virtualbox do |vb|
-  vb.gui = true
+  vb.gui = false
   vb.name = "<%= @name %>"
   vb.cpus = "<%= @cpus %>"
   vb.customize ["modifyvm", :id, "--memory", "<%= @memory %>"]

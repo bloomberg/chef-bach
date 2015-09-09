@@ -18,7 +18,8 @@ chef_ingredient 'chef-server' do
   package_source chef_path
   config <<-EOS.gsub(/^ {4}/,'')
     topology "standalone"
-    api_fqdn "#{node[:bcpc][:bootstrap][:server]}"
+    api_fqdn "#{node['chef-server']['api_fqdn']}"
+    #{node['chef-server']['configuration']}
   EOS
   action :install
 end
