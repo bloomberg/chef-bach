@@ -1,4 +1,4 @@
-node.default['bcpc']['hadoop']['graphite']['queries']['namenode'] = {
+node.normal['bcpc']['hadoop']['graphite']['service_queries']['namenode'] = {
   'nnheapmem' => {
      'type' => "jmx",
      'query' => "memory.HeapMemoryUsage_committed",
@@ -7,6 +7,7 @@ node.default['bcpc']['hadoop']['graphite']['queries']['namenode'] = {
      'trigger_cond' => "=0",
      'trigger_name' => "NameNodeAvailability",
      'enable' => true,
+     'trigger_dep' => [],
      'trigger_desc' => "Namenode service seems to be down",
      'severity' => 5,
      'route_to' => "admin"

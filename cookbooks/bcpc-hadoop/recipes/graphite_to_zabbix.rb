@@ -1,4 +1,4 @@
-include_recipe "bcpc-hadoop::os_basic_queries"
+include_recipe "bcpc-hadoop::graphite_queries"
 
 template node['bcpc']['zabbix']['scripts']['sender'] do
   source "zabbix.run_zabbix_sender.sh.erb"
@@ -26,6 +26,8 @@ end
 template "/usr/local/etc/query_graphite.config" do
   source "graphite.query_graphite.config.erb"
   mode 0544
+  zabbix_triggers = node.run_state["zabbix_triggers"] or {}
+  variables(:triggers => zabbix_triggers )
 end
 
 ruby_block "zabbix_monitor" do
@@ -55,7 +57,8 @@ ruby_block "zabbix_monitor" do
       zbx.hostgroups.create(:name => "#{node.chef_environment}")
     end
 
-    node["bcpc"]["hadoop"]["graphite"]["queries"].each do |trigger_host, queries|
+    zabbix_triggers = node.run_state["zabbix_triggers"] or {}
+    zabbix_triggers.each do |trigger_host, queries|
       # Create host entries in Zabbix. 
       # Note: these are dummy entries to define the required items and triggers
       if zbx.hosts.get_id(:host => "#{trigger_host}").nil?
@@ -99,7 +102,7 @@ ruby_block "zabbix_monitor" do
         # By default an item and its trigger & actions are disabled, which can be overwritten through attributes file
         # Per Zabbix API: status=1 => disable and status=0 => enable
         status = 1
-        if attrs.attribute?(:enable) and attrs[:enable]
+        if attrs.key?('enable') and attrs['enable']
           status = 0
         end
         
@@ -122,7 +125,7 @@ ruby_block "zabbix_monitor" do
 
         # Create zabbix triggers on the items so that actions can be taken if a trigger even occurs
         # For all triggers a companion trigger is created to check whether the zabbix sender cron job is active and sends data to zabbix
-        if attrs.attribute?(:trigger_dep)
+        if attrs.key?('trigger_dep')
           dependencies = Array.new
           attrs['trigger_dep'].each do |dep|
             dependency = Hash.new

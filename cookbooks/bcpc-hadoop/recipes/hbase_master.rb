@@ -13,7 +13,8 @@ node.default['bcpc']['hadoop']['copylog']['hbase_master_out'] = {
     'docopy' => true
 }
 
-node.default['bcpc']['hadoop']['graphite']['queries']['hbase_master'] = {
+# Set hbase related zabbix triggers
+node.normal['bcpc']['hadoop']['graphite']['service_queries']['hbase_master'] = {
   'hbasenonheapmem' => {
      'type' => "jmx",
      'query' => "memory.NonHeapMemoryUsage_committed",
