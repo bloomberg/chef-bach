@@ -18,7 +18,7 @@ total_node_count = worker_node_count + 2
               'recipe[bach_common::binary_server]',
               'role[Basic]', 
              ]
-    complete true # Completely overwrite the runlist.
+    #complete true # Completely overwrite the runlist.
   end
 end
 
@@ -71,46 +71,47 @@ ruby_block "wait-for-reindex" do
   end
 end
 
-# Re-converge the first head node with added runlist items.
-bach_cluster_node "bach-vm1-b#{build_id}" do
-  cpus 1
-  memory 3072
-  management_ip "10.0.101." + (3 + 1).to_s
-  management_netmask '255.255.255.240'
-  run_list [
-            'role[BCPC-Hadoop-Head-Namenode-NoHA]',
-            'role[BCPC-Hadoop-Head-HBase]',
-            #'role[Copylog]',
-           ]
-end
-
-# Re-converge the second head node with added runlist items.
-bach_cluster_node "bach-vm2-b#{build_id}" do
-  cpus 1
-  memory 3072
-  management_ip "10.0.101." + (3 + 2).to_s
-  management_netmask '255.255.255.240'
-  run_list [
-            'role[BCPC-Hadoop-Head-Namenode-Standby]',
-            'role[BCPC-Hadoop-Head-MapReduce]',
-            'role[BCPC-Hadoop-Head-Hive]',
-            #'role[Copylog]',
-           ]
-end
-
-# Skip 1 and 2, they are our head nodes.
-# Reconverge workers with the complete runlist.
-3.upto(total_node_count).each do |n|
-  vm_name = "bach-vm#{n}-b#{build_id}" # XXX: replace with helper!
-  bach_cluster_node vm_name do
+3.times do
+  # Re-converge the first head node with added runlist items.
+  bach_cluster_node "bach-vm1-b#{build_id}" do
     cpus 1
     memory 3072
-    management_ip "10.0.101." + (3 + n).to_s
+    management_ip "10.0.101." + (3 + 1).to_s
     management_netmask '255.255.255.240'
     run_list [
-              'role[BCPC-Hadoop-Worker]' # XXX: replace with helper!
+              'role[BCPC-Hadoop-Head-Namenode-NoHA]',
+              'role[BCPC-Hadoop-Head-HBase]',
               #'role[Copylog]',
              ]
   end
-end
 
+  # Re-converge the second head node with added runlist items.
+  bach_cluster_node "bach-vm2-b#{build_id}" do
+    cpus 1
+    memory 3072
+    management_ip "10.0.101." + (3 + 2).to_s
+    management_netmask '255.255.255.240'
+    run_list [
+              'role[BCPC-Hadoop-Head-Namenode-Standby]',
+              'role[BCPC-Hadoop-Head-MapReduce]',
+              'role[BCPC-Hadoop-Head-Hive]',
+              #'role[Copylog]',
+             ]
+  end
+
+  # Skip 1 and 2, they are our head nodes.
+  # Reconverge workers with the complete runlist.
+  3.upto(total_node_count).each do |n|
+    vm_name = "bach-vm#{n}-b#{build_id}" # XXX: replace with helper!
+    bach_cluster_node vm_name do
+      cpus 1
+      memory 3072
+      management_ip "10.0.101." + (3 + n).to_s
+      management_netmask '255.255.255.240'
+      run_list [
+                'role[BCPC-Hadoop-Worker]' # XXX: replace with helper!
+                #'role[Copylog]',
+               ]
+    end
+  end
+end
