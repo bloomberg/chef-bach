@@ -150,6 +150,15 @@ bash "update resolvers" do
   EOH
 end
 
+#
+# If we're running in a Vagrant/Virtualbox VM, delete the DNS server
+# associated with the virtual NAT interface.
+#
+execute 'delete-nat-resolver' do
+  command 'resolvconf -d eth0.dhclient'
+  only_if { node[:ipaddress] == '10.0.2.15' }
+end
+
 ifaces = %w(management storage floating)
 ifaces.each_index do |i|
   iface = ifaces[i]
