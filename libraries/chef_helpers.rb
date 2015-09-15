@@ -27,7 +27,7 @@ module BachCluster
       local_files = Dir.glob("#{local_cert_dir}/*.crt")
       ca_certs = local_files.map{ |f| 
         { "/usr/local/share/ca-certificates/#{File.basename(f)}" => f } 
-      }.reduce{ |accumulator,hash| accumulator.merge(hash) }
+      }.reduce{ |accumulator,hash| accumulator.merge(hash) } || {}
 
       chef_cert_hash = 
         if(File.exists?(Chef::Config['trusted_certs_dir'] +
