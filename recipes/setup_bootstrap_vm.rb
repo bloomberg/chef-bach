@@ -157,12 +157,20 @@ end
 # This is different from other nodes because it has proxy config.
 bootstrap_chef_client_config =
   <<-EOM.gsub(/^ {4}/,'')
-    http_proxy "#{node['bach']['http_proxy']}"
-    https_proxy "#{node['bach']['https_proxy']}"
     no_proxy "#{bootstrap_fqdn},#{bootstrap_ip},127.0.0.1"
     verify_api_cert false
     ssl_verify_mode :verify_none
   EOM
+
+if(node['bach']['http_proxy'])
+   bootstrap_chef_client_config +=
+     "http_proxy \"#{node['bach']['http_proxy']}\"\n"
+end
+
+if(node['bach']['https_proxy'])
+   bootstrap_chef_client_config +=
+     "https_proxy \"#{node['bach']['https_proxy']}\"\n"
+end   
 
 # Re-provision the bootstrap VM as its own client
 machine bootstrap_fqdn do

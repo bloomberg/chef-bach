@@ -14,14 +14,25 @@ link '/opt/chef/embedded/ssl/cert.pem' do
   to '/etc/ssl/certs/ca-certificates.crt'
 end
 
-gemrc = "gem: --http-proxy #{node['bach']['http_proxy']}\n"
 
-file '/opt/chef/embedded/etc/gemrc' do
-  mode 0444
-  content gemrc
+if(node['bach']['http_proxy'])
+  gemrc = "gem: --http-proxy #{node['bach']['http_proxy']}\n"
+  file '/opt/chef/embedded/etc/gemrc' do
+    mode 0444
+    content gemrc
+  end
+
+  file '/etc/gemrc' do
+    mode 0444
+    content gemrc
+  end
+else
+  file '/opt/chef/embedded/etc/gemrc' do
+    action :delete
+  end
+
+  file '/etc/gemrc' do
+    action :delete
+  end
 end
 
-file '/etc/gemrc' do
-  mode 0444
-  content gemrc
-end
