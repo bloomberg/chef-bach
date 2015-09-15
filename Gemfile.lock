@@ -31,7 +31,7 @@ GEM
     buff-shell_out (0.2.0)
       buff-ruby_engine (~> 0.1.0)
     builder (3.2.2)
-    celluloid (0.16.1)
+    celluloid (0.16.0)
       timers (~> 4.0.0)
     celluloid-io (0.16.2)
       celluloid (>= 0.16.0)
@@ -101,7 +101,7 @@ GEM
       builder (>= 2.1.2)
     hashie (2.1.2)
     highline (1.7.3)
-    hitimes (1.2.2)
+    hitimes (1.2.3)
     httpclient (2.6.0.1)
     inifile (2.0.2)
     ipaddress (0.8.0)
@@ -216,7 +216,7 @@ GEM
       sfl
     systemu (2.6.5)
     thor (0.19.1)
-    timers (4.0.1)
+    timers (4.0.4)
       hitimes
     uuidtools (2.1.5)
     varia_model (0.4.0)
