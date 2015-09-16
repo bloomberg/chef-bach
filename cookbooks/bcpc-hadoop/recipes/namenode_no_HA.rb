@@ -2,6 +2,7 @@ include_recipe 'dpkg_autostart'
 require "base64"
 
 include_recipe 'bcpc-hadoop::hadoop_config'
+include_recipe 'bcpc-hadoop::namenode_queries'
 
 #
 # Updating node attribuetes to copy namenode log files to centralized location (HDFS)

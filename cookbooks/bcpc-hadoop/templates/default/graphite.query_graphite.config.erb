@@ -1,17 +1,21 @@
+<%
+graphite_queries = Array.new
+@triggers.each do |host, queries|
+  queries.each do |key, attrs|
+     qhash = Hash.new
+     if attrs['type'] == 'jmx'
+        qhash["graphite_url"] = "https://#{node[:bcpc][:management][:vip]}:#{node[:bcpc][:graphite][:web_port]}/render/?from=-2min&target=#{attrs['type']}.#{host}.*.#{attrs['query']}&format=json"
+     elsif attrs['type'] == 'function' # graphtie functions eg: asPercent(series1, series2)
+        qhash["graphite_url"] = "https://#{node[:bcpc][:management][:vip]}:#{node[:bcpc][:graphite][:web_port]}/render/?from=-2min&target=#{attrs['query']}&format=json"
+     else
+        qhash["graphite_url"] = "https://#{node[:bcpc][:management][:vip]}:#{node[:bcpc][:graphite][:web_port]}/render/?from=-2min&target=#{attrs['type']}.#{host}.#{attrs['query']}&format=json"
+     end
+     qhash["zabbix_host"] = host
+     qhash["zabbix_key"] = key
+     graphite_queries.push(qhash)
+  end
+end
+%>
 {
- "queries":[
-<% node[:bcpc][:hadoop][:graphite][:queries].each_with_index do |(host, value),hidx| -%>
-  <% value.each_with_index do |q,aidx| -%>
-    <% if hidx == node[:bcpc][:hadoop][:graphite][:queries].length-1 and aidx == value.length()-1 -%>
-      {"graphite_url": "https://<%=node[:bcpc][:management][:vip]%>:<%=node[:bcpc][:graphite][:web_port]%>/render/?from=-2min&target=<%=q['type']%>.<%= host %>.*.<%=q['query']%>&format=json",
-       "zabbix_host" : "<%= host %>", 
-       "zabbix_key"  : "<%=q['key']%>"}
-    <% else -%>
-      {"graphite_url": "https://<%=node[:bcpc][:management][:vip]%>:<%=node[:bcpc][:graphite][:web_port]%>/render/?from=-2min&target=<%=q['type']%>.<%= host %>.*.<%=q['query']%>&format=json",
-       "zabbix_host" : "<%= host %>", 
-       "zabbix_key"  : "<%=q['key']%>"},
-    <% end %>
-  <% end %>
-<% end %>
- ]
+  "queries": <%= JSON.pretty_generate(graphite_queries) %>
 }

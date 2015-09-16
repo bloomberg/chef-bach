@@ -13,6 +13,43 @@ node.default['bcpc']['hadoop']['copylog']['hbase_master_out'] = {
     'docopy' => true
 }
 
+# Set hbase related zabbix triggers
+node.normal['bcpc']['hadoop']['graphite']['service_queries']['hbase_master'] = {
+  'hbasenonheapmem' => {
+     'type' => "jmx",
+     'query' => "memory.NonHeapMemoryUsage_committed",
+     'trigger_val' => "max(61,0)",
+     'value_type' => 3,
+     'trigger_cond' => "=0",
+     'trigger_name' => "HBaseMasterAvailability",
+     'enable' => true,
+     'trigger_dep' => ["NameNodeAvailability"],
+     'trigger_desc' => "HBase master seems to be down",
+     'severity' => 5,
+     'route_to' => "admin"
+  },
+  'hbaseheapmem' => {
+     'type' => "jmx",
+     'query' => "memory.HeapMemoryUsage_committed",
+     'history_days' => 2,
+     'trend_days' => 30,
+     'enable' => true
+  },
+  'numrsservers' => {
+     'type' => "jmx",
+     'query' => "hbm_server.Master.numRegionServers",
+     'trigger_val' => "max(61,0)",
+     'value_type' => 3,
+     'trigger_cond' => "=0",
+     'trigger_name' => "HBaseRSAvailability",
+     'enable' => true,
+     'trigger_dep' => ["HBaseMasterAvailability"],
+     'trigger_desc' => "HBase region server seems to be down",
+     'severity' => 5,
+     'route_to' => "admin"
+  }
+}
+
 %w{
 hbase
 hbase-master
