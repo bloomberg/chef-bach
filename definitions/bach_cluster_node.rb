@@ -23,9 +23,9 @@ define :bach_cluster_node do
   management_ip = params[:management_ip]
   management_netmask = params[:management_netmask]
   storage_ip = params[:storage_ip] || management_ip
-  storage_ip = params[:storage_netmask] || management_netmask
+  storage_netmask = params[:storage_netmask] || management_netmask
   floating_ip = params[:floating_ip] || management_ip
-  floating_ip = params[:floating_netmask] || management_netmask
+  floating_netmask = params[:floating_netmask] || management_netmask
   runlist = params[:run_list]
   fqdn = fqdn_for(name)
   cfg_path =  "#{Chef::Config[:file_cache_path]}/#{fqdn}.cfg"
@@ -40,10 +40,10 @@ define :bach_cluster_node do
                memory: memory,
                management_ip: management_ip,
                management_netmask: management_netmask,
-               # storage_ip: '10.0.101.4',
-               # storage_netmask: '255.255.255.240',
-               # floating_ip: '10.0.101.4',
-               # floating_netmask: '255.255.255.240',
+               storage_ip: storage_ip,
+               storage_netmask: storage_netmask,
+               floating_ip: floating_ip,
+               floating_netmask: floating_netmask,
               })
   end.run_action(:create)
 
@@ -59,7 +59,7 @@ define :bach_cluster_node do
     files cert_files_hash
 
     # We pass a list of items into the definition.
-    # Total apply those items to the resource, we have to generate method calls.
+    # To apply those items to the resource, we have to generate method calls.
     params[:run_list].each do |item|
       raise "\"#{item}\" is not marked as a role or recipe." unless
         match_data = item.match(/^(?<type>role|recipe)\[(?<name>.+)\]$/)

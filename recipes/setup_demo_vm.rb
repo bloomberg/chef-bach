@@ -7,12 +7,23 @@ total_node_count = worker_node_count + 2
 1.upto(total_node_count).each do |n|
   vm_name = "bach-vm#{n}-b#{build_id}"
   vm_mgmt_ip = "10.0.101." + (3 + n).to_s
+  vm_storage_ip = "10.0.101." + (19 + n).to_s
+  vm_floating_ip = "10.0.101." + (35 + n).to_s
+  my_netmask = '255.255.255.240'
 
   bach_cluster_node vm_name do
     cpus 1
     memory 3072
+
     management_ip vm_mgmt_ip
-    management_netmask '255.255.255.240'
+    management_netmask my_netmask
+
+    storage_ip vm_storage_ip
+    storage_netmask my_netmask
+
+    floating_ip vm_floating_ip
+    floating_netmask my_netmask
+
     run_list [
               'recipe[bach_common::apt_proxy]',
               'recipe[bach_common::binary_server]',
@@ -76,8 +87,21 @@ end
   bach_cluster_node "bach-vm1-b#{build_id}" do
     cpus 1
     memory 3072
-    management_ip "10.0.101." + (3 + 1).to_s
-    management_netmask '255.255.255.240'
+
+    vm_mgmt_ip = "10.0.101." + (3 + 1).to_s
+    vm_storage_ip = "10.0.101." + (19 + 1).to_s
+    vm_floating_ip = "10.0.101." + (35 + 1).to_s
+    my_netmask = '255.255.255.240'
+
+    management_ip vm_mgmt_ip
+    management_netmask my_netmask
+
+    storage_ip vm_storage_ip
+    storage_netmask my_netmask
+
+    floating_ip vm_floating_ip
+    floating_netmask my_netmask
+
     run_list [
               'role[BCPC-Hadoop-Head-Namenode-NoHA]',
               'role[BCPC-Hadoop-Head-HBase]',
@@ -89,8 +113,21 @@ end
   bach_cluster_node "bach-vm2-b#{build_id}" do
     cpus 1
     memory 3072
-    management_ip "10.0.101." + (3 + 2).to_s
-    management_netmask '255.255.255.240'
+
+    vm_mgmt_ip = "10.0.101." + (3 + 2).to_s
+    vm_storage_ip = "10.0.101." + (19 + 2).to_s
+    vm_floating_ip = "10.0.101." + (35 + 2).to_s
+    my_netmask = '255.255.255.240'
+
+    management_ip vm_mgmt_ip
+    management_netmask my_netmask
+
+    storage_ip vm_storage_ip
+    storage_netmask my_netmask
+
+    floating_ip vm_floating_ip
+    floating_netmask my_netmask
+
     run_list [
               'role[BCPC-Hadoop-Head-Namenode-Standby]',
               'role[BCPC-Hadoop-Head-MapReduce]',
@@ -106,8 +143,21 @@ end
     bach_cluster_node vm_name do
       cpus 1
       memory 3072
-      management_ip "10.0.101." + (3 + n).to_s
-      management_netmask '255.255.255.240'
+
+      vm_mgmt_ip = "10.0.101." + (3 + n).to_s
+      vm_storage_ip = "10.0.101." + (19 + n).to_s
+      vm_floating_ip = "10.0.101." + (35 + n).to_s
+      my_netmask = '255.255.255.240'
+
+      management_ip vm_mgmt_ip
+      management_netmask my_netmask
+
+      storage_ip vm_storage_ip
+      storage_netmask my_netmask
+
+      floating_ip vm_floating_ip
+      floating_netmask my_netmask
+
       run_list [
                 'role[BCPC-Hadoop-Worker]' # XXX: replace with helper!
                 #'role[Copylog]',

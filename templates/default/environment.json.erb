@@ -33,19 +33,19 @@
         "gateway" : "10.0.101.2"
       },
       "storage": {
-        "vip" : "10.0.101.3",
-        "interface" : "eth1",
+        "vip" : "10.0.101.19",
+        "interface" : "eth2",
         "netmask" : "255.255.255.240",
-        "cidr" : "10.0.101.0/28",
-        "gateway" : "10.0.101.2"
+        "cidr" : "10.0.101.16/28",
+        "gateway" : "10.0.101.18"
       },
       "floating": {
-        "vip" : "10.0.101.3",
-        "interface" : "eth1",
+        "vip" : "10.0.101.35",
+        "interface" : "eth3",
         "netmask" : "255.255.255.240",
-        "cidr" : "10.0.101.0/28",
-        "gateway" : "10.0.101.2",
-        "available_subnet" : "10.0.101.0/25"
+        "cidr" : "10.0.101.32/28",
+        "gateway" : "10.0.101.34",
+        "available_subnet" : "10.0.101.32/28"
       },
       "bootstrap": {
         "interface" : "eth1",
@@ -54,7 +54,7 @@
         "dhcp_subnet" : "10.0.101.0",
         "dhcp_range" : "10.0.101.4 10.0.101.14"
       },
-      "dns_servers" : [ "8.8.8.8", "8.8.4.4" ],
+      "dns_servers" : [ "10.16.23.33", "10.16.23.17" ],
       "hadoop" : {
         "yarn" : {
           "resourcemanager" : {

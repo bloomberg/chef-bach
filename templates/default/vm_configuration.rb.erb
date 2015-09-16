@@ -7,15 +7,15 @@ config.vm.network :private_network,
   netmask: '<%= @management_netmask %>',
   adapter_ip: '<%= @management_ip %>'
 
-# config.vm.network :private_network, 
-#   ip: '<%= @storage_ip %>',
-#   netmask: '<%= @storage_netmask %>',
-#   adapter_ip: '<%= @storage_ip %>'
+config.vm.network :private_network, 
+  ip: '<%= @storage_ip %>',
+  netmask: '<%= @storage_netmask %>',
+  adapter_ip: '<%= @storage_ip %>'
 
-# config.vm.network :private_network, 
-#   ip: '<%= @floating_ip %>',
-#   netmask: '<%= @floating_netmask %>',
-#   adapter_ip: '<%= @floating_ip %>'
+config.vm.network :private_network, 
+  ip: '<%= @floating_ip %>',
+  netmask: '<%= @floating_netmask %>',
+  adapter_ip: '<%= @floating_ip %>'
 
 config.vm.provider :virtualbox do |vb|
   vb.gui = false
