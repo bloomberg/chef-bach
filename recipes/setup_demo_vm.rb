@@ -82,90 +82,32 @@ ruby_block "wait-for-reindex" do
   end
 end
 
-
 # Re-converge the first head node with added runlist items.
-bach_cluster_node "bach-vm1-b#{build_id}" do
-  cpus 1
-  memory 3072
-
-  vm_mgmt_ip = "10.0.101." + (3 + 1).to_s
-  vm_storage_ip = "10.0.101." + (19 + 1).to_s
-  vm_floating_ip = "10.0.101." + (35 + 1).to_s
-  my_netmask = '255.255.255.240'
-
-  management_ip vm_mgmt_ip
-  management_netmask my_netmask
-
-  storage_ip vm_storage_ip
-  storage_netmask my_netmask
-
-  floating_ip vm_floating_ip
-  floating_netmask my_netmask
-
-  run_list [
-            'role[BCPC-Hadoop-Head-Namenode-NoHA]',
-            'role[BCPC-Hadoop-Head-HBase]',
-            #'role[Copylog]',
-           ]
+machine fqdn_for("bach-vm1-b#{build_id}") do
+  role 'BCPC-Hadoop-Head-Namenode-NoHA'
+  role 'BCPC-Hadoop-Head-HBase'
+  #role 'Copylog''
 end
 
 # Re-converge the second head node with added runlist items.
-bach_cluster_node "bach-vm2-b#{build_id}" do
-  cpus 1
-  memory 3072
-
-  vm_mgmt_ip = "10.0.101." + (3 + 2).to_s
-  vm_storage_ip = "10.0.101." + (19 + 2).to_s
-  vm_floating_ip = "10.0.101." + (35 + 2).to_s
-  my_netmask = '255.255.255.240'
-
-  management_ip vm_mgmt_ip
-  management_netmask my_netmask
-
-  storage_ip vm_storage_ip
-  storage_netmask my_netmask
-
-  floating_ip vm_floating_ip
-  floating_netmask my_netmask
-
-  run_list [
-            'role[BCPC-Hadoop-Head-Namenode-Standby]',
-            'role[BCPC-Hadoop-Head-MapReduce]',
-            'role[BCPC-Hadoop-Head-Hive]',
-            #'role[Copylog]',
-           ]
+machine fqdn_for("bach-vm2-b#{build_id}") do
+  role 'BCPC-Hadoop-Head-Namenode-Standby'
+  role 'BCPC-Hadoop-Head-MapReduce'
+  role 'BCPC-Hadoop-Head-Hive'
+  #role 'Copylog''
 end
 
 # Skip 1 and 2, they are our head nodes.
 # Reconverge workers with the complete runlist.
 3.upto(total_node_count).each do |n|
-  vm_name = "bach-vm#{n}-b#{build_id}" # XXX: replace with helper!
-  bach_cluster_node vm_name do
-    cpus 1
-    memory 3072
-
-    vm_mgmt_ip = "10.0.101." + (3 + n).to_s
-    vm_storage_ip = "10.0.101." + (19 + n).to_s
-    vm_floating_ip = "10.0.101." + (35 + n).to_s
-    my_netmask = '255.255.255.240'
-
-    management_ip vm_mgmt_ip
-    management_netmask my_netmask
-
-    storage_ip vm_storage_ip
-    storage_netmask my_netmask
-
-    floating_ip vm_floating_ip
-    floating_netmask my_netmask
-
-    run_list [
-              'role[BCPC-Hadoop-Worker]' # XXX: replace with helper!
-              #'role[Copylog]',
-             ]
+  vm_name = fqdn_for("bach-vm#{n}-b#{build_id}") # XXX: replace with helper!
+  machine vm_name do
+    role 'BCPC-Hadoop-Worker'
+    #role 'Copylog''
   end
 end
 
-# Re-run chef on everything.
+# Re-run chef on every node by notifying machine resources.
 1.upto(total_node_count).each do |n|
   vm_name = fqdn_for("bach-vm#{n}-b#{build_id}") # XXX: replace with helper!
   log "Re-converging #{vm_name}" do
