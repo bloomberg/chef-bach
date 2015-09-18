@@ -286,8 +286,8 @@ INSTALL_TYPE=$2
 MATCHKEY=${3-}
 
 shopt -s nocasematch
-if [[ ! "$INSTALL_TYPE" =~ (openstack|hadoop|kafka) ]]; then
-  printf "Error: Need install type of OpenStack, Hadoop or Kafka\n" > /dev/stderr
+if [[ ! "$INSTALL_TYPE" =~ (openstack|hadoop|kafka|basic) ]]; then
+  printf "Error: Need install type of OpenStack, Hadoop, Kafka or Basic\n" > /dev/stderr
   exit 1
 fi
 shopt -u nocasematch
@@ -315,11 +315,12 @@ fi
 shopt -s nocasematch
 if [[ "$INSTALL_TYPE" = "OpenStack" ]]; then
   openstack_install $hosts
-### Hadoop Install Method
 elif [[ "$INSTALL_TYPE" = "Hadoop" ]]; then
   hadoop_install $hosts
 elif [[ "$INSTALL_TYPE" = "Kafka" ]]; then
   kafka_install $hosts
+elif [[ "$INSTALL_TYPE" = "Basic" ]]; then
+  install_stub $(printf ${hosts// /\\n} | sort)
 fi
 
 printf "#### Install finished\n"
