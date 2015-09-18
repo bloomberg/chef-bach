@@ -11,6 +11,11 @@ package "hadoop-lzo" do
   action :upgrade
 end
 
+user_ulimit "hive" do
+  filehandle_limit 32769
+  process_limit 65536
+end
+
 link "/usr/hdp/2.2.0.0-2041/hadoop/lib/hadoop-lzo-0.6.0.jar" do
   to "/usr/lib/hadoop/lib/hadoop-lzo-0.6.0.jar"
 end

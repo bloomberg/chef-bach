@@ -54,6 +54,25 @@ node[:bcpc][:hadoop][:mounts].each do |d|
   end
 end
 
+# need to ensure hdfs user is in hadoop and hdfs
+# groups. Packages will not add hdfs if it
+# is already created at install time (e.g. if
+# machine is using LDAP for users).
+group 'hadoop' do
+  # use manage as if the group does not exist
+  # we do not want an exception
+  action :manage
+  members ['hdfs']
+  append true
+end
+group 'hdfs' do
+  # use manage as if the group does not exist
+  # we do not want an exception
+  action :manage
+  members 'hdfs'
+  append true
+end
+
 template "hadoop-hdfs-journalnode" do
   path "/etc/init.d/hadoop-hdfs-journalnode"
   source "hdp_hadoop-hdfs-journalnode-initd.erb"

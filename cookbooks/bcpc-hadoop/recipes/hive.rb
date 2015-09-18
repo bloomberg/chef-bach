@@ -12,6 +12,7 @@ user "hcat" do
   shell "/bin/bash"
   home "/usr/lib/hcatalog"
   supports :manage_home => false
+  not_if { user_exists? "hcat" }
 end
 
 %w{hive hcatalog}.each do |pkg|

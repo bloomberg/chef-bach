@@ -28,6 +28,25 @@ node.default['bcpc']['hadoop']['copylog']['namenode_master_out'] = {
   end
 end
 
+# need to ensure hdfs user is in hadoop and hdfs
+# groups. Packages will not add hdfs if it
+# is already created at install time (e.g. if
+# machine is using LDAP for users).
+group 'hadoop' do
+  # use manage as if the group does not exist
+  # we do not want an exception
+  action :manage
+  members ['hdfs']
+  append true
+end
+group 'hdfs' do
+  # use manage as if the group does not exist
+  # we do not want an exception
+  action :manage
+  members 'hdfs'
+  append true
+end
+
 directory "/var/log/hadoop-hdfs/gc/" do
   user "hdfs"
   group "hdfs"
