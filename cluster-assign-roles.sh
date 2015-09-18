@@ -188,10 +188,23 @@ function hadoop_install {
   done
 
   printf "Installing workers...\n"
+  status_file=$(mktemp)
+  function clean_up_status_file { 
+    rm -f $status_file
+  }
+  trap clean_up_status_file EXIT
   for m in $(printf ${hosts// /\\n} | grep -i "BCPC-Hadoop-Worker" | sort); do
-    install_machines $m &
+    install_machines $m || echo "$m" >> $status_file &
   done
   wait
+  failures=$(wc -l $status_file | sed 's/ .*//')
+  if [[ $failures -ne 0 ]]; then
+    printf "Install failed for machines:\n" > /dev/stderr
+    cat $status_file > /dev/stderr
+    exit 1
+  fi
+  clean_up_status_file
+  trap - EXIT
 }
 
 ########################################################################
@@ -273,8 +286,8 @@ INSTALL_TYPE=$2
 MATCHKEY=${3-}
 
 shopt -s nocasematch
-if [[ ! "$INSTALL_TYPE" =~ (openstack|hadoop|kafka) ]]; then
-  printf "Error: Need install type of OpenStack, Hadoop or Kafka\n" > /dev/stderr
+if [[ ! "$INSTALL_TYPE" =~ (openstack|hadoop|kafka|basic) ]]; then
+  printf "Error: Need install type of OpenStack, Hadoop, Kafka or Basic\n" > /dev/stderr
   exit 1
 fi
 shopt -u nocasematch
@@ -302,11 +315,12 @@ fi
 shopt -s nocasematch
 if [[ "$INSTALL_TYPE" = "OpenStack" ]]; then
   openstack_install $hosts
-### Hadoop Install Method
 elif [[ "$INSTALL_TYPE" = "Hadoop" ]]; then
   hadoop_install $hosts
 elif [[ "$INSTALL_TYPE" = "Kafka" ]]; then
   kafka_install $hosts
+elif [[ "$INSTALL_TYPE" = "Basic" ]]; then
+  install_stub $(printf ${hosts// /\\n} | sort)
 fi
 
 printf "#### Install finished\n"
