@@ -378,3 +378,12 @@ def user_exists?(user_name)
   return user_found
 end
 
+def group_exists?(group_name)
+  chk_grp_cmd = "getent group #{group_name}"
+  Chef::Log.debug("Executing command: #{chk_grp_cmd}")
+  cmd = Mixlib::ShellOut.new(chk_grp_cmd, :timeout => 10).run_command
+  return  cmd.exitstatus == 0 ? true : false 
+end
+
+def get_group_action(group_name)
+  return  group_exists?(group_name) ? :manage : :create 

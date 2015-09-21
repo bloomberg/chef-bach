@@ -30,19 +30,24 @@ end
 # groups. Packages will not add hdfs if it
 # is already created at install time (e.g. if
 # machine is using LDAP for users).
-group 'hadoop' do
-  # use manage as if the group does not exist
-  # we do not want an exception
-  action :manage
-  members ['hdfs']
-  append true
+
+# Create all the resources to add them in resource collection
+node[:bcpc][:hadoop][:os][:group].keys.each do |group_name|
+  group group_name do
+    append true
+    members node[:bcpc][:hadoop][:os][:group][group_name][:members]
+    action :nothing
+  end
 end
-group 'hdfs' do
-  # use manage as if the group does not exist
-  # we do not want an exception
-  action :manage
-  members 'hdfs'
-  append true
+  
+# Take action on each group resource based on its existence 
+ruby_block 'create_or_manage_groups' do
+  block do
+    node[:bcpc][:hadoop][:os][:group].keys.each do |group_name|
+      res = run_context.resource_collection.find("group[#{group_name}]")
+      res.run_action(get_group_action(group_name))
+    end
+  end
 end
 
 directory "/var/log/hadoop-hdfs/gc/" do
