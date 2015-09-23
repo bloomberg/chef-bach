@@ -126,3 +126,7 @@ default['bcpc']['hadoop']['copylog_rollup_interval'] = 86400
 # Some jmxtrans defaults
 #
 default['jmxtrans']['run_interval'] = "15"
+
+default[:bcpc][:hadoop][:os][:group][:hadoop][:members]=["hdfs","yarn"]
+default[:bcpc][:hadoop][:os][:group][:hdfs][:members]=["hdfs"]
+default[:bcpc][:hadoop][:os][:group][:mapred][:members]=["yarn"]
