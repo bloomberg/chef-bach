@@ -31,6 +31,16 @@ end
 
 # Create all the resources to add them in resource collection
 node[:bcpc][:hadoop][:os][:group].keys.each do |group_name|
+  node[:bcpc][:hadoop][:os][:group][group_name][:members].each do|user_name|
+    user user_name do
+      home "/var/lib/hadoop-#{user_name}"
+      shell '/bin/bash'
+      system true
+      action :create
+      not_if { user_exists?(user_name) }
+    end
+  end
+
   group group_name do
     append true
     members node[:bcpc][:hadoop][:os][:group][group_name][:members]
