@@ -113,11 +113,18 @@ template "/etc/init.d/hive-server2" do
   mode 0655
 end
 
+directory "/var/log/hive/gc" do
+  action :create
+  mode 0755
+  user "hive"
+end
+
 service "hive-metastore" do
   action [:enable, :start]
   subscribes :restart, "template[/etc/hive/conf/hive-site.xml]", :delayed
   subscribes :restart, "template[/etc/hive/conf/hive-log4j.properties]", :delayed
   subscribes :restart, "bash[extract-mysql-connector]", :delayed
+  subscribes :restart, "directory[/var/log/hive/gc]", :delayed
 end
 
 service "hive-server2" do
@@ -126,4 +133,5 @@ service "hive-server2" do
   subscribes :restart, "template[/etc/hive/conf/hive-site.xml]", :delayed
   subscribes :restart, "template[/etc/hive/conf/hive-log4j.properties]", :delayed
   subscribes :restart, "bash[extract-mysql-connector]", :delayed
+  subscribes :restart, "directory[/var/log/hive/gc]", :delayed
 end
