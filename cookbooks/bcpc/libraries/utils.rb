@@ -31,7 +31,12 @@ def create_databag(name)
   end
 end
 
-# retrieve secret by key in chef vault item from chef vault data bag
+# memrize function to bootstrap info
+def get_bootstrap
+  return $bootstrap if defined? $bootstrap
+  $bootstrap = get_all_nodes.select{|s| s.hostname.include? 'bootstrap'}[0].fqdn
+  return $bootstrap
+end
 
 #
 # Constant string which defines the default attributes which need to be retrieved from node objects
