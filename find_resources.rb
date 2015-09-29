@@ -15,7 +15,8 @@ this_host = Chef::Config[:node_name]
 # load the ohai data of the node 
 include Chef::DSL::DataQuery
 ohai = Ohai::System.new
-data = search(:node,"name:#{ARGV[0]}")[0].node.automatic_attrs
+node_obj = LoadNodeContext.search_node(ARGV[0])
+data = node_obj[0].node.automatic_attrs
 ohai.data = data
 
 # build the node

@@ -19,8 +19,6 @@ module LoadNodeContext
    class << self
      attr_accessor :client_type
      attr_accessor :options
-     attr_accessor :env
-     attr_writer   :editor
    end
 
    def self.start
@@ -33,7 +31,7 @@ module LoadNodeContext
    def self.setup_logger
      Chef::Config[:log_level] ||= :warn
      Chef::Config[:log_level] = :warn if Chef::Config[:log_level] == :auto
-     Chef::Log.init(STDERR)
+     Chef::Log.init(STDOUT)
      Mixlib::Authentication::Log.logger = Ohai::Log.logger = Chef::Log.logger
      Chef::Log.level = Chef::Config[:log_level] || :warn
    end
@@ -45,6 +43,15 @@ module LoadNodeContext
    def self.parse_opts
      @options = Options.new
      @options.parse_opts
+   end
+
+   def self.search_node(node_name)
+     node = nil
+     while node.nil?
+       puts "searching #{ node_name } on chef server..."
+       node = search(:node,"name:#{ node_name }")
+     end
+     return node
    end
 
    class Options
