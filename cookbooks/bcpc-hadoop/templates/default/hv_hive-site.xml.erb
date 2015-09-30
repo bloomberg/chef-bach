@@ -50,8 +50,8 @@
 </property>
 
 <property>
-  <name>javax.jdo.option.ConnectionPassword</name>
-  <value><%=get_config("mysql-hive-password") %></value>
+  <name>hadoop.security.credential.provider.path</name>
+  <value>jceks://file/etc/hive/conf.<%=node.chef_environment%>/hive.jceks</value>
 </property>
 
 <property>

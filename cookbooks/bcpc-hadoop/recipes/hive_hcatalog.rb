@@ -82,8 +82,8 @@ ruby_block "hive-metastore-database-creation" do
     if not system " #{cmd} 'SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = \"metastore\"' | grep -q metastore" then
       code = <<-EOF
         CREATE DATABASE metastore;
-        GRANT #{privs} ON metastore.* TO 'hive'@'%' IDENTIFIED BY '#{get_config('mysql-hive-password')}';
-        GRANT #{privs} ON metastore.* TO 'hive'@'localhost' IDENTIFIED BY '#{get_config('mysql-hive-password')}';
+        GRANT #{privs} ON metastore.* TO 'hive'@'%' IDENTIFIED BY '#{get_config('password','mysql-hive','hadoop')}';
+        GRANT #{privs} ON metastore.* TO 'hive'@'localhost' IDENTIFIED BY '#{get_config('password','mysql-hive','hadoop')}';
         FLUSH PRIVILEGES;
         USE metastore;
         SOURCE /usr/hdp/current/hive-metastore/scripts/metastore/upgrade/mysql/hive-schema-0.14.0.mysql.sql;
