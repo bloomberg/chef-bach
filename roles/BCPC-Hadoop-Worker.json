@@ -20,7 +20,6 @@
     "recipe[bcpc-hadoop::tez]",
     "recipe[bcpc-hadoop::mahout]",
     "recipe[bcpc-hadoop::oozie_client]",
-    "recipe[bcpc::zabbix-work]",
     "recipe[bcpc::diamond]",
     "recipe[bcpc_jmxtrans]"
   ],
