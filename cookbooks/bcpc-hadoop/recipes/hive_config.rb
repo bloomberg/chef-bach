@@ -8,6 +8,10 @@
 #Create hive password
 make_config('mysql-hive-password', secure_password)
 
+# Hive table stats user
+make_config('mysql-hive-table-stats-user', node["bcpc"]["hadoop"]["hive"]["hive_table_stats_db_user"])
+make_config('mysql-hive-table-stats-password', secure_password)
+
 %w{hive webhcat hcat hive-hcatalog}.each do |w|
   directory "/etc/#{w}/conf.#{node.chef_environment}" do
     owner "root"
