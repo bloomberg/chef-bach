@@ -115,8 +115,8 @@ def delete_config(key)
   end
 end
 
-def get_config!(key)
-  value = get_config(key)
+def get_config!(key,item=node.chef_environment,bag="configs")
+  value = get_config(key,item,bag)
   raise "Failed to find value for #{key}!" if value.nil?
   return value
 end
