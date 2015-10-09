@@ -1,0 +1,14 @@
+spark.driver.extraLibraryPath=/usr/hdp/current/hadoop-client/lib/native:/usr/hdp/current/hadoop-client/lib/native/Linux-amd64-64
+spark.executor.extraLibraryPath=/usr/hdp/current/hadoop-client/lib/native:/usr/hdp/current/hadoop-client/lib/native/Linux-amd64-64
+spark.executor.extraJavaOptions -verbose:gc -XX:+PrintHeapAtGC -XX:+PrintGCDetails -XX:+PrintGCTimeStamps -XX:+PrintGCDateStamps -XX:+PrintTenuringDistribution -XX:+UseNUMA -XX:+PrintGCApplicationStoppedTime -XX:+UseCompressedOops -XX:+PrintClassHistogram -XX:+PrintGCApplicationConcurrentTime
+spark.shuffle.consolidateFiles true
+spark.shuffle.io.numConnectionsPerPeer 2
+spark.history.fs.logDirectory <%= node['spark']['hdfs_url'] %>/spark-history
+spark.eventLog.dir <%= node['spark']['hdfs_url'] %>/spark-history
+spark.eventLog.enabled true
+spark.logConf true
+spark.dynamicAllocation.enabled true
+spark.shuffle.service.enabled true
+spark.yarn.jar <%= "#{node['spark']['hdfs_url']}/apps/spark/#{node[:spark][:package][:version]}/spark-assembly.jar" %>
+spark.yarn.queue spark
+spark.master yarn-client

@@ -11,6 +11,7 @@ vbox/
 bins/
 cookbooks/*/
 !cookbooks/bach_common
+!cookbooks/bach_spark
 !cookbooks/bcpc
 !cookbooks/bcpc-hadoop
 !cookbooks/bcpc_jmxtrans

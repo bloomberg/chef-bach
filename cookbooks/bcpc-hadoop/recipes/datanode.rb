@@ -12,6 +12,7 @@ node.default['bcpc']['hadoop']['copylog']['datanode'] = {
    hadoop-client
    sqoop
    lzop
+   cgroup-bin
    hadoop-lzo}.each do |pkg|
   package pkg do
     action :upgrade
@@ -78,6 +79,18 @@ end
 directory "/var/run/hadoop-hdfs" do
   owner "hdfs"
   group "root"
+end
+
+directory "/sys/fs/cgroup/cpu/hadoop-yarn" do
+  owner "yarn"
+  group "yarn"
+  mode 0755
+  action :create
+end
+
+execute "chown hadoop-yarn cgroup tree to yarn" do
+  command "chown -Rf yarn:yarn /sys/fs/cgroup/cpu/hadoop-yarn"
+  action :run
 end
 
 template "/etc/init.d/hadoop-hdfs-datanode" do

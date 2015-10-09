@@ -30,14 +30,14 @@
     <name>yarn.resourcemanager.hostname.rm<%= "#{node.chef_environment}#{h[:node_number]}" %></name>
     <value><%=float_host(h[:hostname]) %></value>
   </property>
-  <% end %>
+  <% end # @rm_hosts.each do |h| %>
 
   <% @rm_hosts.each do |h| %>   
   <property>
     <name>yarn.resourcemanager.address.rm<%= "#{node.chef_environment}#{h[:node_number]}" %></name>
-    <value><%=float_host(h[:hostname])%>:<%=node["bcpc"]["hadoop"]["yarn"]["rm_port"]%></value>
+    <value><%=float_host(h[:hostname])%>:<%=node["bcpc"]["hadoop"]["yarn"]["resourcemanager"]["port"]%></value>
   </property>
-  <% end %>
+  <% end # @rm_hosts.each do |h| %>
 
   <property> 
     <name>yarn.resourcemanager.recovery.enabled</name> 
@@ -48,17 +48,17 @@
     <name>yarn.resourcemanager.store.class</name> 
     <value>org.apache.hadoop.yarn.server.resourcemanager.recovery.ZKRMStateStore</value> 
   </property> 
- 
+  
   <property> 
     <name>yarn.resourcemanager.zk-address</name>
     <value><%= @zk_hosts.map{ |s| float_host(s[:hostname]) + ":#{node[:bcpc][:hadoop][:zookeeper][:port]}" }.join(",") %></value>
   </property>
- 
+  
   <property> 
     <name>yarn.client.failover-proxy-provider</name> 
     <value>org.apache.hadoop.yarn.client.ConfiguredRMFailoverProxyProvider</value> 
   </property>
-  <% else %>
+  <% else # if @rm_hosts.length >= 2 %>
 
   <property>
     <name>yarn.resourcemanager.resource-tracker.address</name>
@@ -67,7 +67,7 @@
 
   <property>
     <name>yarn.resourcemanager.address</name>
-    <value><%="#{float_host(@rm_hosts.first[:hostname])}:#{node["bcpc"]["hadoop"]["yarn"]["rm_port"]}" if not @rm_hosts.empty?%></value>
+    <value><%="#{float_host(@rm_hosts.first[:hostname])}:#{node["bcpc"]["hadoop"]["yarn"]["resourcemanager"]["port"]}" if not @rm_hosts.empty?%></value>
   </property>
 
   <property>
@@ -84,27 +84,43 @@
     <name>yarn.resourcemanager.webapp.address</name>
     <value><%="#{float_host(@rm_hosts.first[:hostname])}:8088" if not @rm_hosts.empty?%></value>
   </property>
-  <% end %>
+  <% end # if @rm_hosts.length >= 2 %>
+
+  <% if node.run_list.expand(node.chef_environment).recipes.include?("bcpc-hadoop::datanode") %>
+  <!-- Group nodemanager restart option with nodemanager port specification
+       since a stable port is needed for a successful restart -->
+  <property>
+    <name>yarn.nodemanager.recovery.enabled</name>
+    <value>true</value>
+  </property>
+
+  <property>
+    <name>yarn.nodemanager.address</name>
+    <value><%=float_host(node[:hostname])%>:<%=node["bcpc"]["hadoop"]["yarn"]["nodemanager"]["port"]%></value>
+  </property>
 
   <property>
     <name>yarn.nodemanager.hostname</name>
     <value><%= float_host(node[:hostname]) %></value>
   </property>
-
-<property>
+  <% end # if node.run_list.expand(node.chef_environment).recipes.include?("bcpc-hadoop::datanode") %>
+  <property>
     <name>yarn.application.classpath</name>
     <value>/etc/hadoop/conf,/usr/hdp/current/hadoop-client/*,/usr/hdp/current/hadoop-client/lib/*,/usr/hdp/current/hadoop-hdfs-client/*,/usr/hdp/current/hadoop-hdfs-client/lib/*,/usr/hdp/current/hadoop-yarn-client/*,/usr/hdp/current/hadoop-yarn-client/lib/*</value>
   </property>
 
   <property>
     <name>yarn.nodemanager.aux-services</name>
-    <value>mapreduce_shuffle</value>
+    <value><%= node[:bcpc][:hadoop][:yarn][:aux_services].keys.join(',') %></value>
   </property>
 
+  <% node[:bcpc][:hadoop][:yarn][:aux_services].each_pair do |k,cls_v| %>
   <property>
-    <name>yarn.nodemanager.aux-services.mapreduce_shuffle.class</name>
-    <value>org.apache.hadoop.mapred.ShuffleHandler</value>
+    <name>yarn.nodemanager.aux-services.<%= k %>.class</name>
+    <value><%= cls_v['class'] %></value>
   </property>
+
+  <% end # end loop over node[:bcpc][:hadoop][:yarn][:aux_services] %>
 
   <property>
     <name>yarn.nodemanager.local-dirs</name>
@@ -125,6 +141,16 @@
   <property>
     <name>yarn.log-aggregation-enable</name>
     <value>true</value>
+  </property>
+
+  <property>
+    <name>yarn.log-aggregation.retain-seconds</name>
+    <value><%= node["bcpc"]["hadoop"]["yarn"]["log-aggregation_retain-seconds"] %></value>
+  </property>
+
+  <property>
+    <name>yarn.nodemanager.log-aggregation.roll-monitoring-interval-seconds</name>
+    <value>1800</value>
   </property>
 
   <property>
@@ -153,6 +179,21 @@
   </property>
 
   <property>
+    <name>yarn.nodemanager.linux-container-executor.resources-handler.class</name>
+    <value>org.apache.hadoop.yarn.server.nodemanager.util.CgroupsLCEResourcesHandler</value>
+  </property>
+
+  <property>
+    <name>yarn.nodemanager.linux-container-executor.group</name>
+    <value>yarn</value>
+  </property>
+
+  <property>
+    <name>yarn.nodemanager.linux-container-executor.cgroups.mount-path</name>
+    <value>/sys/fs/cgroup/</value>
+  </property>
+
+  <property>
     <name>yarn.nodemanager.resource.memory-mb</name>
     <value><%= node['bcpc']['hadoop']['yarn']['nodemanager']['avail_memory']['size'] or
                [1024, (node['memory']['total'].to_i * node['bcpc']['hadoop']['yarn']['nodemanager']['avail_memory']['ratio']/1024).floor].max %></value>
@@ -170,6 +211,13 @@
   </property>
 
   <property>
+    <name>resource.percentage-physical-cpu-limit</name>
+    <value><%= (node['bcpc']['hadoop']['yarn']['nodemanager']['avail_vcpu']['count'] ? \
+                 node['bcpc']['hadoop']['yarn']['nodemanager']['avail_vcpu']['count']/node['cpu']['total'] :
+                 node['bcpc']['hadoop']['yarn']['nodemanager']['avail_vcpu']['ratio'] * 100).floor %></value>
+  </property>
+
+  <property>
     <name>yarn.resourcemanager.scheduler.class</name>
     <value><%= node['bcpc']['hadoop']['yarn']['scheduler']["class"] %></value>
   </property>
@@ -179,13 +227,13 @@
     <name>yarn.nodemanager.bind-host</name>
     <value><%=node[:bcpc][:floating][:ip] %></value>
   </property>
-  <%end %>
+  <% end # if node.run_list.expand(node.chef_environment).recipes.include?("bcpc-hadoop::datanode") %>
   <% if node.run_list.expand(node.chef_environment).recipes.include?("bcpc-hadoop::resource_manager")  %>
   <property>
     <name>yarn.resourcemanager.bind-host</name>
     <value><%=node[:bcpc][:floating][:ip] %></value>
   </property>
-  <% end %>
+  <% end # if node.run_list.expand(node.chef_environment).recipes.include?("bcpc-hadoop::resource_manager") %>
   <% if node[:bcpc][:hadoop][:kerberos][:enable] == true then %>
   <property>
     <name>yarn.resourcemanager.principal</name>
@@ -197,17 +245,17 @@
     <value><%= node[:bcpc][:hadoop][:kerberos][:keytab][:dir] %>/<%= node[:bcpc][:hadoop][:kerberos][:data][:resourcemanager][:keytab] %></value>
   </property>
 
-  <% if node.run_list.expand(node.chef_environment).recipes.include?("bcpc-hadoop::datanode")  %>
+  <% if node.run_list.expand(node.chef_environment).recipes.include?("bcpc-hadoop::datanode") %>
   <property>
     <name>yarn.nodemanager.principal</name>
     <value><%= node[:bcpc][:hadoop][:kerberos][:data][:nodemanager][:principal] %>/<%= node[:bcpc][:hadoop][:kerberos][:data][:nodemanager][:princhost] == "_HOST" ? float_host(node[:fqdn]) : node[:bcpc][:hadoop][:kerberos][:data][:nodemanager][:princhost] %>@<%= node[:bcpc][:hadoop][:kerberos][:realm] %></value>
   </property>
-  <% else %>
+  <% else # if node.run_list.expand(node.chef_environment).recipes.include?("bcpc-hadoop::datanode") %>
   <property>
     <name>yarn.nodemanager.principal</name>
     <value><%= node[:bcpc][:hadoop][:kerberos][:data][:nodemanager][:principal] %>/<%=node[:bcpc][:hadoop][:kerberos][:data][:nodemanager][:princhost] == "_HOST" ? "_HOST" : node[:bcpc][:hadoop][:kerberos][:data][:nodemanager][:princhost]%>@<%= node[:bcpc][:hadoop][:kerberos][:realm] %></value>
   </property>
-  <% end %>
+  <% end # if node.run_list.expand(node.chef_environment).recipes.include?("bcpc-hadoop::datanode") %>
   <property>
     <name>yarn.nodemanager.keytab</name>
     <value><%= node[:bcpc][:hadoop][:kerberos][:keytab][:dir] %>/<%= node[:bcpc][:hadoop][:kerberos][:data][:nodemanager][:keytab] %></value>
@@ -217,5 +265,5 @@
     <name>yarn.resourcemanager.webapp.delegation-token-auth-filter.enabled</name>
     <value>true</value>
   </property>
-  <% end %>
+  <% end # if node[:bcpc][:hadoop][:kerberos][:enable] == true then %>
 </configuration>

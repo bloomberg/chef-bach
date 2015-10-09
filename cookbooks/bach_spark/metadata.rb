@@ -9,3 +9,5 @@ version          '0.1.0'
 %w(ubuntu).each do |os|
   supports os
 end
+
+depends "bcpc"
