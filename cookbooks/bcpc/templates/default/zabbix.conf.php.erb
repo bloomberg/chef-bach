@@ -13,7 +13,7 @@ $DB['SERVER']   = '<%="#{node[:bcpc][:management][:vip]}"%>';
 $DB['PORT']     = '0';
 $DB['DATABASE'] = '<%="#{node[:bcpc][:zabbix_dbname]}"%>';
 $DB['USER']     = '<%="#{get_config('mysql-zabbix-user')}"%>';
-$DB['PASSWORD'] = '<%="#{get_config('password','mysql-zabbix','os')}"%>';
+$DB['PASSWORD'] = '<%="#{get_config!('password','mysql-zabbix','os')}"%>';
 
 // SCHEMA is relevant only for IBM_DB2 database
 $DB['SCHEMA'] = '';

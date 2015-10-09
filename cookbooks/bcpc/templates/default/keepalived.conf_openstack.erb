@@ -46,7 +46,7 @@ vrrp_instance VI1_<%="#{node[:bcpc][:region_name]}"%> {
   }
   authentication {
     auth_type PASS
-    auth_pass <%="#{get_config('password','keepalived','os')}"%>
+    auth_pass <%="#{get_config!('password','keepalived','os')}"%>
   }
   notify_backup "/usr/local/bin/vip_change"
   notify_fault "/usr/local/bin/vip_change"
@@ -67,6 +67,6 @@ vrrp_instance VI2_<%="#{node[:bcpc][:region_name]}"%> {
   }
   authentication {
     auth_type PASS
-    auth_pass <%="#{get_config('password','keepalived','os')}"%>
+    auth_pass <%="#{get_config!('password','keepalived','os')}"%>
   }
 }
