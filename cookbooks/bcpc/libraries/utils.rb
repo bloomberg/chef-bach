@@ -175,6 +175,12 @@ def get_nodes_for(recipe, cookbook=cookbook_name)
   return results.sort
 end
 
+def get_nodes_for_role(role)
+  results = search(:node, "role:#{role} AND chef_environment:#{node.chef_environment}")
+  results.map!{ |x| x['hostname'] == node[:hostname] ? node : x }
+  return results.sort
+end
+
 #
 # Library function to get attributes for nodes that executes a particular recipe
 #
