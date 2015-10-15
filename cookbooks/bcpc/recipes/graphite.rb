@@ -158,9 +158,9 @@ end
 
 template "/opt/graphite/webapp/graphite/local_settings.py" do
     source "graphite.local_settings.py.erb"
-    owner "root"
+    owner "www-data"
     group "root"
-    mode 00640
+    mode 00440
     variables( :servers => mysql_servers )
     notifies :restart, "service[apache2]", :delayed
 end
