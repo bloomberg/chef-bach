@@ -5,9 +5,10 @@
 ################################################
 
 Listen <%="#{node[:bcpc][:graphite][:ip]}"%>:<%="#{node[:bcpc][:graphite][:web_port]}"%>
+Listen <%="#{node[:bcpc][:management][:ip]}"%>:<%="#{node[:bcpc][:graphite][:web_port]}"%>
 NameVirtualHost <%="#{node[:bcpc][:management][:ip]}"%>:443
 
-<VirtualHost <%="#{node[:bcpc][:graphite][:ip]}"%>:<%="#{node[:bcpc][:graphite][:web_port]}"%> <%="#{node[:bcpc][:management][:ip]}"%>:443>
+<VirtualHost <%="#{node[:bcpc][:graphite][:ip]}"%>:<%="#{node[:bcpc][:graphite][:web_port]}"%> <%="#{node[:bcpc][:management][:ip]}"%>:443 <%="#{node[:bcpc][:management][:ip]}"%>:<%="#{node[:bcpc][:graphite][:web_port]}"%>>
     ServerName "graphite.<%="#{node[:bcpc][:domain_name]}"%>"
 
     DocumentRoot "/opt/graphite/webapp"
@@ -27,7 +28,7 @@ NameVirtualHost <%="#{node[:bcpc][:management][:ip]}"%>:443
         Allow from all
     </Directory>
 
-    Alias /content/ /opt/graphite/webapp/content/
+    Alias /static/ /opt/graphite/webapp/content/
     <Location "/content/">
         SetHandler None
     </Location>

@@ -12,6 +12,7 @@ ZABBIX_VERSION=2.2.9
 VER_KIBANA=d1495fbf6e9c20c707ecd4a77444e1d486a1e7d6
 VER_DIAMOND=d64cc5cbae8bee93ef444e6fa41b4456f89c6e12
 VER_ESPLUGIN=c3635657f4bb5eca0d50afa8545ceb5da8ca223a
+EPOCH=`date +"%s"`; export EPOCH 
 
 # The proxy and $CURL will be needed later
 if [[ -f ./proxy_setup.sh ]]; then
@@ -164,31 +165,50 @@ if ! [[ -f python/pyrabbit-1.0.1.tar.gz ]]; then
 fi
 FILES="pyrabbit-1.0.1.tar.gz $FILES"
 
-# Build graphite packages
-if ! [[ -f python-carbon_0.9.10_all.deb && \
-        -f python-whisper_0.9.10_all.deb && \
-        -f python-graphite-web_0.9.10_all.deb ]]; then
-  while ! $(file carbon-0.9.10.tar.gz | grep -q 'gzip compressed data'); do
-    $CURL -L -O http://pypi.python.org/packages/source/c/carbon/carbon-0.9.10.tar.gz
-  done
-  while ! $(file whisper-0.9.10.tar.gz | grep -q 'gzip compressed data'); do
-    $CURL -L -O http://pypi.python.org/packages/source/w/whisper/whisper-0.9.10.tar.gz
-  done
-  while ! $(file graphite-web-0.9.10.tar.gz | grep -q 'gzip compressed data'); do
-    $CURL -L -O http://pypi.python.org/packages/source/g/graphite-web/graphite-web-0.9.10.tar.gz
-  done
-  tar zxf carbon-0.9.10.tar.gz
-  tar zxf whisper-0.9.10.tar.gz
-  tar zxf graphite-web-0.9.10.tar.gz
-  fpm --python-install-bin /opt/graphite/bin -s python -t deb carbon-0.9.10/setup.py
-  fpm --python-install-bin /opt/graphite/bin  -s python -t deb whisper-0.9.10/setup.py
-  fpm --python-install-lib /opt/graphite/webapp -s python -t deb graphite-web-0.9.10/setup.py
+if ! [[ -f python-pytz*.dev ]]; then 
+  $CURL -O -L https://pypi.python.org/packages/source/p/pytz/pytz-2015.6.zip
+  unzip -o pytz-2015.6.zip; rm pytz-2015.6.zip
+  fpm --epoch $EPOCH --log info --python-install-bin /opt/graphite/bin -f -s python -t deb pytz-2015.6/setup.py
 fi
-FILES="python-carbon_0.9.10_all.deb python-whisper_0.9.10_all.deb python-graphite-web_0.9.10_all.deb $FILES"
+FILES="python-pytz_2015.6_all.deb $FILES"
+
+# build Django 
+if ! [[ -f python-django ]]; then
+  $CURL -O -L https://pypi.python.org/packages/source/D/Django/Django-1.5.4.tar.gz
+  tar -xzvf Django-1.5.4.tar.gz; rm Django-1.5.4.tar.gz
+  fpm --epoch $EPOCH --log info --python-install-bin /opt/graphite/bin -f -s python -t deb Django-1.5.4/setup.py
+fi
+FILES="python-django_1.5.4_all.deb $FILES"
+
+
+# Build graphite packages
+if ! [[ -f python-carbon_*.deb && \
+        -f python-whisper_*.deb && \
+        -f python-graphite-web_*.deb ]]; then
+  # pull from github
+  # until PR https://github.com/graphite-project/graphite-web/pull/1320 is merged 
+  #$CURL -O -L https://github.com/graphite-project/graphite-web/archive/master.zip
+  #unzip -o master.zip; rm master.zip
+  $CURL -O -L https://github.com/pu239ppy/graphite-web/archive/https_intracluster.zip 
+  unzip -o https_intracluster.zip; rm https_intracluster.zip 
+  $CURL -O -L https://github.com/graphite-project/carbon/archive/master.zip
+  unzip -o master.zip; rm master.zip
+  $CURL -O -L https://github.com/graphite-project/whisper/archive/master.zip
+  unzip -o master.zip; rm master.zip
+  # build with FPM
+  fpm --epoch $EPOCH --log info --python-install-bin /opt/graphite/bin -f -s python -t deb carbon-master/setup.py
+  fpm --epoch $EPOCH --log info --python-install-bin /opt/graphite/bin  -f -s python -t deb whisper-master/setup.py
+  # until PR https://github.com/graphite-project/graphite-web/pull/1320 is merged 
+  #fpm --epoch $EPOCH --log info --python-install-lib /opt/graphite/webapp -f -s python -t deb graphite-web-master/setup.py
+  fpm --epoch $EPOCH --log info --python-install-lib /opt/graphite/webapp -f -s python -t deb graphite-web-https_intracluster/setup.py
+
+fi
+FILES="python-carbon_0.9.10_all.deb python-whisper_0.9.10_all.deb python-graphite-web_0.10.0-alpha_all.deb $FILES"
+
 
 # Download Python requests-aws for Zabbix monitoring
 if ! [[ -f python-requests-aws_0.1.5_all.deb ]]; then
-  fpm -s python -t deb -v 0.1.5 requests-aws
+  fpm --log info -s python -t deb -v 0.1.5 requests-aws
 fi
 FILES="python-requests-aws_0.1.5_all.deb $FILES"
 

@@ -1,3 +1,4 @@
+# vim: tabstop=2:shiftwidth=2:softtabstop=2 
 #
 # Cookbook Name:: bcpc
 # Recipe:: graphite
@@ -39,32 +40,35 @@ chef_vault_secret "mysql-graphite" do
   action :nothing
 end.run_action(:create_if_missing)
 
-%w{python-whisper_0.9.10_all.deb python-carbon_0.9.10_all.deb python-graphite-web_0.9.10_all.deb}.each do |pkg|
-    # split package name on the first underscore to get the package name for dpkg to look-up
-    package "#{pkg.split('_',2)[0]}" do
-        action :install
-        version "0.9.10"
-    end
+%w{python-pytz python-pyparsing python-mysqldb python-pip python-cairo python-django-tagging python-ldap python-twisted python-memcache}.each do |pkg|
+  package pkg do
+    action :upgrade
+  end
 end
 
-%w{python-mysqldb python-pip python-cairo python-django python-django-tagging python-ldap python-twisted python-memcache}.each do |pkg|
-    package pkg do
-        action :upgrade
-    end
+package "python-django" do
+  action :upgrade
+  version node[:bcpc][:graphite][:django][:version] 
+end
+
+%w{python-whisper python-carbon python-graphite-web}.each do |pkg|
+  package pkg do
+    action :upgrade
+  end
 end
 
 %w{cache relay}.each do |pkg|
-    template "/etc/init.d/carbon-#{pkg}" do
-        source "init.d-carbon.erb"
-        owner "root"
-        group "root"
-        mode 00755
-        notifies :restart, "service[carbon-#{pkg}]", :delayed
-        variables( :daemon => "#{pkg}" )
-    end
-    service "carbon-#{pkg}" do
-        action [ :enable, :start ]
-    end
+  template "/etc/init.d/carbon-#{pkg}" do
+    source "init.d-carbon.erb"
+    owner "root"
+    group "root"
+    mode 00755
+    notifies :restart, "service[carbon-#{pkg}]", :delayed
+    variables( :daemon => "#{pkg}" )
+  end
+  service "carbon-#{pkg}" do
+    action [ :enable, :start ]
+  end
 end
 
 # #### #
@@ -73,9 +77,8 @@ end
 ruby_block "graphite_ip" do
   block do
     if (node[:bcpc].attribute?(:graphite) \
-        and node[:bcpc][:graphite].attribute?(:ip) \
-        and node[:bcpc][:graphite][:ip]) \
-    then
+      and node[:bcpc][:graphite].attribute?(:ip) \
+      and node[:bcpc][:graphite][:ip]) then
       Chef::Log.info("graphite ip = '#{node[:bcpc][:graphite][:ip]}'")
     else
       Chef::Log.info("node[:bcpc][:graphite][:ip] is not set")
@@ -92,83 +95,99 @@ mysql_servers = get_node_attributes(MGMT_IP_GRAPHITE_WEBPORT_ATTR_SRCH_KEYS,"mys
 
 # Directory resource sets owner and group only to the leaf directory.
 # All other directories will be owned by root
-directory "#{node['bcpc']['graphite']['local_data_dir']}" do
-    owner "www-data"
-    group "www-data"
-    recursive true
+directory "#{node['bcpc']['graphite']['local_storage_dir']}" do
+  owner "www-data"
+  group "www-data"
+  recursive true
 end
 
+directory "#{node['bcpc']['graphite']['local_log_dir']}" do
+  owner "www-data"
+  group "www-data"
+  recursive true
+end
+
+directory "#{node['bcpc']['graphite']['local_data_dir']}" do
+  owner "www-data"
+  group "www-data"
+  recursive true
+end
+
+
 template "/opt/graphite/conf/carbon.conf" do
-    source "carbon.conf.erb"
-    owner "root"
-    group "root"
-    mode 00644
-    variables( :servers => mysql_servers,
-               :min_quorum => mysql_servers.length/2 + 1 )
-    notifies :restart, "service[carbon-cache]", :delayed
-    notifies :restart, "service[carbon-relay]", :delayed
+  source "carbon.conf.erb"
+  owner "root"
+  group "root"
+  mode 00644
+  variables(
+    :servers => mysql_servers,
+    :min_quorum => mysql_servers.length/2 + 1 )
+  notifies :restart, "service[carbon-cache]", :delayed
+  notifies :restart, "service[carbon-relay]", :delayed
 end
 
 template "/opt/graphite/conf/storage-schemas.conf" do
-    source "carbon-storage-schemas.conf.erb"
-    owner "root"
-    group "root"
-    mode 00644
-    notifies :restart, "service[carbon-cache]", :delayed
+  source "carbon-storage-schemas.conf.erb"
+  owner "root"
+  group "root"
+  mode 00644
+  notifies :restart, "service[carbon-cache]", :delayed
 end
 
 template "/opt/graphite/conf/storage-aggregation.conf" do
-    source "carbon-storage-aggregation.conf.erb"
-    owner "root"
-    group "root"
-    mode 00644
-    notifies :restart, "service[carbon-cache]", :delayed
+  source "carbon-storage-aggregation.conf.erb"
+  owner "root"
+  group "root"
+  mode 00644
+  notifies :restart, "service[carbon-cache]", :delayed
 end
 
 template "/opt/graphite/conf/relay-rules.conf" do
-    source "carbon-relay-rules.conf.erb"
-    owner "root"
-    group "root"
-    mode 00644
-    variables( :servers => mysql_servers )
-    notifies :restart, "service[carbon-relay]", :delayed
+  source "carbon-relay-rules.conf.erb"
+  owner "root"
+  group "root"
+  mode 00644
+  variables( :servers => mysql_servers )
+  notifies :restart, "service[carbon-relay]", :delayed
 end
 
 template "/etc/apache2/sites-available/graphite-web" do
-    source "apache-graphite-web.conf.erb"
-    owner "root"
-    group "root"
-    mode 00644
-    notifies :restart, "service[apache2]", :delayed
+  source "apache-graphite-web.conf.erb"
+  owner "root"
+  group "root"
+  mode 00644
+  notifies :restart, "service[apache2]", :delayed
 end
 
 bash "apache-enable-graphite-web" do
-    user "root"
-    code "a2ensite graphite-web"
-    not_if "test -r /etc/apache2/sites-enabled/graphite-web"
-    notifies :restart, "service[apache2]", :delayed
+  user "root"
+  code "a2ensite graphite-web"
+  not_if "test -r /etc/apache2/sites-enabled/graphite-web"
+  notifies :restart, "service[apache2]", :delayed
 end
 
 template "/opt/graphite/conf/graphite.wsgi" do
-    source "graphite.wsgi.erb"
-    owner "root"
-    group "root"
-    mode 00755
+  source "graphite.wsgi.erb"
+  owner "root"
+  group "root"
+  mode 00755
 end
 
 template "/opt/graphite/webapp/graphite/local_settings.py" do
-    source "graphite.local_settings.py.erb"
-    owner "www-data"
-    group "root"
-    mode 00440
-    variables( :servers => mysql_servers )
-    notifies :restart, "service[apache2]", :delayed
+  source "graphite.local_settings.py.erb"
+  owner "root"
+  group "www-data"
+  mode 00440
+  variables(
+    :servers => mysql_servers,
+    :min_quorum => mysql_servers.length/2 + 1 )
+  notifies :restart, "service[apache2]", :delayed
 end
 
 execute "graphite-storage-ownership" do
-    user "root"
-    command "chown -R www-data:www-data /opt/graphite/storage"
-    not_if "ls -ald /opt/graphite/storage | awk '{print $3}' | grep www-data"
+  user "root"
+  command "chown -R www-data:www-data /opt/graphite/storage"
+  not_if "ls -ald /opt/graphite/storage | awk '{print $3}' | grep www-data"
 end
 
 ruby_block "graphite-database-creation" do
@@ -186,13 +205,16 @@ ruby_block "graphite-database-creation" do
 end
 
 bash "graphite-database-sync" do
-    action :nothing
-    user "root"
-    code <<-EOH
-        python /opt/graphite/webapp/graphite/manage.py syncdb --noinput
-        python /opt/graphite/webapp/graphite/manage.py createsuperuser --username=admin --email=#{node[:bcpc][:admin_email]} --noinput
-    EOH
-    notifies :restart, "service[apache2]", :immediately
+  action :nothing
+  user "root"
+  code <<-EOH
+    export PYTHONPATH='/opt/graphite/webapp'
+    export DJANGO_SETTINGS_MODULE='graphite.settings'
+    python /opt/graphite/bin/django-admin.py syncdb --noinput
+    python /opt/graphite/bin/django-admin.py createsuperuser --username=admin --email=#{node[:bcpc][:admin_email]} --noinput
+    python /opt/graphite/bin/django-admin.py collectstatic --noinput
+  EOH
+  notifies :restart, "service[apache2]", :immediately
 end
 
 bash "cleanup-old-whisper-files" do
