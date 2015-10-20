@@ -1,4 +1,5 @@
 #!/bin/bash 
+# vim: tabstop=2:shiftwidth=2:softtabstop=2
 
 set -e
 set -x
@@ -49,13 +50,17 @@ fi
 
 # Download jmxtrans zip file
 if ! [[ -f jmxtrans-20120525-210643-4e956b1144.zip ]]; then
-  $CURL -O -L -k https://github.com/downloads/jmxtrans/jmxtrans/jmxtrans-20120525-210643-4e956b1144.zip
+  while ! $(file jmxtrans-20120525-210643-4e956b1144.zip | grep -q 'Zip archive data'); do
+    $CURL -O -L -k https://github.com/downloads/jmxtrans/jmxtrans/jmxtrans-20120525-210643-4e956b1144.zip
+  done
 fi
 FILES="jmxtrans-20120525-210643-4e956b1144.zip $FILES"
 
 # Fetch MySQL connector
 if ! [[ -f mysql-connector-java-5.1.34.tar.gz ]]; then
-  $CURL -O -L http://dev.mysql.com/get/Downloads/Connector-J/mysql-connector-java-5.1.34.tar.gz
+  while ! $(file mysql-connector-java-5.1.34.tar.gz | grep -q 'gzip compressed data'); do
+    $CURL -O -L http://dev.mysql.com/get/Downloads/Connector-J/mysql-connector-java-5.1.34.tar.gz
+  done
 fi
 FILES="mysql-connector-java-5.1.34.tar.gz $FILES"
 
@@ -64,7 +69,9 @@ for version in 0.8.1 0.8.1.1; do
   mkdir -p kafka/${version}/
   if ! [[ -f kafka/${version}/kafka_2.9.2-${version}.tgz ]]; then
     pushd kafka/${version}/
-    $CURL -O -L https://archive.apache.org/dist/kafka/${version}/kafka_2.9.2-${version}.tgz
+    while ! $(file kafka_2.9.2-${version}.tgz | grep -q 'gzip compressed data'); do
+      $CURL -O -L https://archive.apache.org/dist/kafka/${version}/kafka_2.9.2-${version}.tgz
+    done
     popd
   fi
   FILES="kafka_2.9.2-${version}.tgz $FILES"
@@ -72,17 +79,23 @@ done
 
 # Fetch Java Tar
 if ! [[ -f jdk-7u51-linux-x64.tar.gz ]]; then
-  $CURL -O -L -C - -b "oraclelicense=accept-securebackup-cookie" http://download.oracle.com/otn-pub/java/jdk/7u51-b13/jdk-7u51-linux-x64.tar.gz   
+  while ! $(file jdk-7u51-linux-x64.tar.gz | grep -q 'gzip compressed data'); do
+    $CURL -O -L -C - -b "oraclelicense=accept-securebackup-cookie" http://download.oracle.com/otn-pub/java/jdk/7u51-b13/jdk-7u51-linux-x64.tar.gz   
+  done
 fi
 FILES="jdk-7u51-linux-x64.tar.gz $FILES"
 
 if ! [[ -f UnlimitedJCEPolicyJDK7.zip ]]; then
-  $CURL -O -L -C - -b "oraclelicense=accept-securebackup-cookie" http://download.oracle.com/otn-pub/java/jce/7/UnlimitedJCEPolicyJDK7.zip
+  while ! $(file UnlimitedJCEPolicyJDK7.zip | grep -q 'Zip archive data'); do
+    $CURL -O -L -C - -b "oraclelicense=accept-securebackup-cookie" http://download.oracle.com/otn-pub/java/jce/7/UnlimitedJCEPolicyJDK7.zip
+  done
 fi
 FILES="UnlimitedJCEPolicyJDK7.zip $FILES"
 
 if ! [[ -f jce_policy-8.zip ]]; then
-  $CURL -O -L -C - -b "oraclelicense=accept-securebackup-cookie" http://download.oracle.com/otn-pub/java/jce/8/jce_policy-8.zip
+  while ! $(file jce_policy-8.zip | grep -q 'Zip archive data'); do
+    $CURL -O -L -C - -b "oraclelicense=accept-securebackup-cookie" http://download.oracle.com/otn-pub/java/jce/8/jce_policy-8.zip
+  done
 fi
 FILES="jce_policy-8.zip $FILES"
 
@@ -132,7 +145,9 @@ FILES="webhdfs*.gem $FILES"
 
 # Fetch the cirros image for testing
 if ! [[ -f cirros-0.3.0-x86_64-disk.img ]]; then
-  $CURL -O -L https://launchpad.net/cirros/trunk/0.3.0/+download/cirros-0.3.0-x86_64-disk.img
+  while ! $(file cirros-0.3.0-x86_64-disk.img | grep -q 'QEMU QCOW Image'); do
+    $CURL -O -L https://launchpad.net/cirros/trunk/0.3.0/+download/cirros-0.3.0-x86_64-disk.img
+  done
 fi
 FILES="cirros-0.3.0-x86_64-disk.img $FILES"
 
@@ -140,7 +155,9 @@ FILES="cirros-0.3.0-x86_64-disk.img $FILES"
 if ! [[ -f ubuntu-12.04-mini.iso ]]; then
   # Download this ISO to get the latest kernel/X LTS stack installer
   #$CURL -o ubuntu-12.04-mini.iso http://archive.ubuntu.com/ubuntu/dists/precise-updates/main/installer-amd64/current/images/raring-netboot/mini.iso
-  $CURL -o ubuntu-12.04-mini.iso http://archive.ubuntu.com/ubuntu/dists/precise/main/installer-amd64/current/images/netboot/mini.iso
+  while ! $(file mini.iso | grep -q 'x86 boot sector'); do
+    $CURL -o ubuntu-12.04-mini.iso http://archive.ubuntu.com/ubuntu/dists/precise/main/installer-amd64/current/images/netboot/mini.iso
+  done
 fi
 FILES="ubuntu-12.04-mini.iso $FILES"
 
@@ -165,16 +182,20 @@ if ! [[ -f python/pyrabbit-1.0.1.tar.gz ]]; then
 fi
 FILES="pyrabbit-1.0.1.tar.gz $FILES"
 
-if ! [[ -f python-pytz*.dev ]]; then 
-  $CURL -O -L https://pypi.python.org/packages/source/p/pytz/pytz-2015.6.zip
+if ! [[ -f python-pytz*.deb ]]; then 
+  while ! $(file pytz-2015.6.zip | grep -q 'Zip archive data'); do
+    $CURL -O -L https://pypi.python.org/packages/source/p/pytz/pytz-2015.6.zip
+  done
   unzip -o pytz-2015.6.zip; rm pytz-2015.6.zip
   fpm --epoch $EPOCH --log info --python-install-bin /opt/graphite/bin -f -s python -t deb pytz-2015.6/setup.py
 fi
 FILES="python-pytz_2015.6_all.deb $FILES"
 
 # build Django 
-if ! [[ -f python-django ]]; then
-  $CURL -O -L https://pypi.python.org/packages/source/D/Django/Django-1.5.4.tar.gz
+if ! [[ -f python-django*.deb ]]; then
+  while ! $(file Django-1.5.4.tar.gz | grep -q 'gzip compressed data'); do
+    $CURL -O -L https://pypi.python.org/packages/source/D/Django/Django-1.5.4.tar.gz
+  done
   tar -xzvf Django-1.5.4.tar.gz; rm Django-1.5.4.tar.gz
   fpm --epoch $EPOCH --log info --python-install-bin /opt/graphite/bin -f -s python -t deb Django-1.5.4/setup.py
 fi
@@ -189,11 +210,17 @@ if ! [[ -f python-carbon_*.deb && \
   # until PR https://github.com/graphite-project/graphite-web/pull/1320 is merged 
   #$CURL -O -L https://github.com/graphite-project/graphite-web/archive/master.zip
   #unzip -o master.zip; rm master.zip
-  $CURL -O -L https://github.com/pu239ppy/graphite-web/archive/https_intracluster.zip 
+  while ! $(file https_intracluster.zip | grep -q 'Zip archive data'); do
+    $CURL -O -L https://github.com/pu239ppy/graphite-web/archive/https_intracluster.zip 
+  done
   unzip -o https_intracluster.zip; rm https_intracluster.zip 
-  $CURL -O -L https://github.com/graphite-project/carbon/archive/master.zip
+  while ! $(file master.zip | grep -q 'Zip archive data'); do
+    $CURL -O -L https://github.com/graphite-project/carbon/archive/master.zip
+  done
   unzip -o master.zip; rm master.zip
-  $CURL -O -L https://github.com/graphite-project/whisper/archive/master.zip
+  while ! $(file master.zip | grep -q 'Zip archive data'); do
+    $CURL -O -L https://github.com/graphite-project/whisper/archive/master.zip
+  done
   unzip -o master.zip; rm master.zip
   # build with FPM
   fpm --epoch $EPOCH --log info --python-install-bin /opt/graphite/bin -f -s python -t deb carbon-master/setup.py
