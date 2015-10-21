@@ -15,48 +15,71 @@
     <value><%="#{node.chef_environment}"%></value>
   </property>
 
-  <property> 
-    <name>yarn.resourcemanager.ha.enabled</name> 
+  <property>
+    <name>yarn.resourcemanager.ha.enabled</name>
     <value>true</value>
-  </property> 
+  </property>
 
   <property>
     <name>yarn.resourcemanager.ha.rm-ids</name>
     <value><%=@rm_hosts.map{ |s| "rm#{node.chef_environment}#{s[:node_number]}" }.join(",") %></value>
   </property>
 
-  <% @rm_hosts.each do |h| %>   
+  <% @rm_hosts.each do |h| %>
   <property>
     <name>yarn.resourcemanager.hostname.rm<%= "#{node.chef_environment}#{h[:node_number]}" %></name>
     <value><%=float_host(h[:hostname]) %></value>
   </property>
-  <% end # @rm_hosts.each do |h| %>
 
-  <% @rm_hosts.each do |h| %>   
+  <property>
+    <name>yarn.resourcemanager.resource-tracker.address.rm<%= "#{node.chef_environment}#{h[:node_number]}" %></name>
+    <value><%="#{float_host(h[:hostname])}:8031"%></value>
+  </property>
+
   <property>
     <name>yarn.resourcemanager.address.rm<%= "#{node.chef_environment}#{h[:node_number]}" %></name>
     <value><%=float_host(h[:hostname])%>:<%=node["bcpc"]["hadoop"]["yarn"]["resourcemanager"]["port"]%></value>
   </property>
-  <% end # @rm_hosts.each do |h| %>
 
-  <property> 
-    <name>yarn.resourcemanager.recovery.enabled</name> 
-    <value>true</value> 
-  </property> 
- 
-  <property> 
-    <name>yarn.resourcemanager.store.class</name> 
-    <value>org.apache.hadoop.yarn.server.resourcemanager.recovery.ZKRMStateStore</value> 
-  </property> 
-  
-  <property> 
+  <property>
+    <name>yarn.resourcemanager.scheduler.address.rm<%= "#{node.chef_environment}#{h[:node_number]}" %></name>
+    <value><%="#{float_host(h[:hostname])}:8030"%></value>
+  </property>
+
+  <property>
+    <name>yarn.resourcemanager.admin.address.rm<%= "#{node.chef_environment}#{h[:node_number]}" %></name>
+    <value><%="#{float_host(h[:hostname])}:8033"%></value>
+  </property>
+
+  <property>
+    <name>yarn.resourcemanager.webapp.address.rm<%= "#{node.chef_environment}#{h[:node_number]}" %></name>
+    <value><%="#{float_host(h[:hostname])}:8088"%></value>
+  </property>
+
+  <property>
+    <name>yarn.resourcemanager.webapp.https.address.rm<%= "#{node.chef_environment}#{h[:node_number]}" %></name>
+    <value><%="#{float_host(h[:hostname])}:8090"%></value>
+  </property>
+  <% end # @rm_hosts.each do |h|%>
+
+  <property>
+    <name>yarn.resourcemanager.recovery.enabled</name>
+    <value>true</value>
+  </property>
+
+  <property>
+    <name>yarn.resourcemanager.store.class</name>
+    <value>org.apache.hadoop.yarn.server.resourcemanager.recovery.ZKRMStateStore</value>
+  </property>
+
+  <property>
     <name>yarn.resourcemanager.zk-address</name>
     <value><%= @zk_hosts.map{ |s| float_host(s[:hostname]) + ":#{node[:bcpc][:hadoop][:zookeeper][:port]}" }.join(",") %></value>
   </property>
-  
-  <property> 
-    <name>yarn.client.failover-proxy-provider</name> 
-    <value>org.apache.hadoop.yarn.client.ConfiguredRMFailoverProxyProvider</value> 
+
+  <property>
+    <name>yarn.client.failover-proxy-provider</name>
+    <value>org.apache.hadoop.yarn.client.ConfiguredRMFailoverProxyProvider</value>
   </property>
   <% else # if @rm_hosts.length >= 2 %>
 
@@ -84,11 +107,15 @@
     <name>yarn.resourcemanager.webapp.address</name>
     <value><%="#{float_host(@rm_hosts.first[:hostname])}:8088" if not @rm_hosts.empty?%></value>
   </property>
+
+  <property>
+    <name>yarn.resourcemanager.webapp.https.address</name>
+    <value><%="#{float_host(@rm_hosts.first[:hostname])}:8090" if not @rm_hosts.empty?%></value>
+  </property>
   <% end # if @rm_hosts.length >= 2 %>
 
   <% if node.run_list.expand(node.chef_environment).recipes.include?("bcpc-hadoop::datanode") %>
-  <!-- Group nodemanager restart option with nodemanager port specification
-       since a stable port is needed for a successful restart -->
+  <!-- Group nodemanager restart option with nodemanager port specification since a stable port is needed for a successful restart -->
   <property>
     <name>yarn.nodemanager.recovery.enabled</name>
     <value>true</value>
@@ -104,6 +131,7 @@
     <value><%= float_host(node[:hostname]) %></value>
   </property>
   <% end # if node.run_list.expand(node.chef_environment).recipes.include?("bcpc-hadoop::datanode") %>
+
   <property>
     <name>yarn.application.classpath</name>
     <value>/etc/hadoop/conf,/usr/hdp/current/hadoop-client/*,/usr/hdp/current/hadoop-client/lib/*,/usr/hdp/current/hadoop-hdfs-client/*,/usr/hdp/current/hadoop-hdfs-client/lib/*,/usr/hdp/current/hadoop-yarn-client/*,/usr/hdp/current/hadoop-yarn-client/lib/*</value>
@@ -119,7 +147,6 @@
     <name>yarn.nodemanager.aux-services.<%= k %>.class</name>
     <value><%= cls_v['class'] %></value>
   </property>
-
   <% end # end loop over node[:bcpc][:hadoop][:yarn][:aux_services] %>
 
   <property>
@@ -159,14 +186,14 @@
   </property>
 
   <property>
-    <name>yarn.nodemanager.container-executor.class</name>      
+    <name>yarn.nodemanager.container-executor.class</name>
     <value>org.apache.hadoop.yarn.server.nodemanager.LinuxContainerExecutor</value>
-  </property>  
+  </property>
 
   <property>
-    <name>yarn.resourcemanager.nodes.exclude-path</name>      
+    <name>yarn.resourcemanager.nodes.exclude-path</name>
     <value>/etc/hadoop/conf/yarn.exclude</value>
-  </property>  
+  </property>
 
   <property>
     <name>yarn.nodemanager.linux-container-executor.group</name>
