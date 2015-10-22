@@ -4,11 +4,11 @@ graphite_queries = Array.new
   queries.each do |key, attrs|
      qhash = Hash.new
      if attrs['type'] == 'jmx'
-        qhash["graphite_url"] = "https://#{node[:bcpc][:management][:vip]}:#{node[:bcpc][:graphite][:web_port]}/render/?from=-2min&target=#{attrs['type']}.#{host}.*.#{attrs['query']}&format=json"
+        qhash["graphite_url"] = "https://#{node[:bcpc][:management][:vip]}:#{node[:bcpc][:graphite][:web_port]}/render/?from=-#{node[:bcpc][:hadoop][:graphite][:metric_fetch_period]}min&target=#{attrs['type']}.#{host}.*.#{attrs['query']}&format=json"
      elsif attrs['type'] == 'function' # graphtie functions eg: asPercent(series1, series2)
-        qhash["graphite_url"] = "https://#{node[:bcpc][:management][:vip]}:#{node[:bcpc][:graphite][:web_port]}/render/?from=-2min&target=#{attrs['query']}&format=json"
+        qhash["graphite_url"] = "https://#{node[:bcpc][:management][:vip]}:#{node[:bcpc][:graphite][:web_port]}/render/?from=-#{node[:bcpc][:hadoop][:graphite][:metric_fetch_period]}min&target=#{attrs['query']}&format=json"
      else
-        qhash["graphite_url"] = "https://#{node[:bcpc][:management][:vip]}:#{node[:bcpc][:graphite][:web_port]}/render/?from=-2min&target=#{attrs['type']}.#{host}.#{attrs['query']}&format=json"
+        qhash["graphite_url"] = "https://#{node[:bcpc][:management][:vip]}:#{node[:bcpc][:graphite][:web_port]}/render/?from=-#{node[:bcpc][:hadoop][:graphite][:metric_fetch_period]}min&target=#{attrs['type']}.#{host}.#{attrs['query']}&format=json"
      end
      qhash["zabbix_host"] = host
      qhash["zabbix_key"] = key

@@ -47,7 +47,7 @@ monitored_nodes_objs.each do |node_obj|
       'trigger_name' => "#{host}_NodeAvailability",
       'enable' => true,
       'trigger_desc' => "Node seems to be down",
-      'severity' => 5,
+      'severity' => 3,
       'route_to' => "admin"
     }
   end
@@ -102,7 +102,7 @@ monitored_nodes_objs.each do |node_obj|
         'trigger_dep' => ["#{host}_NodeAvailability"],
         'enable' => true,
         'trigger_desc' => "Disk seems to be full or down",
-        'severity' => 4,
+        'severity' => 3,
         'route_to' => "admin"
       }
     end

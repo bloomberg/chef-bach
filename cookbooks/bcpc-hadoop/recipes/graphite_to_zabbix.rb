@@ -229,17 +229,20 @@ ruby_block "zabbix_monitor" do
         end # End of "if (trigger_id = existing_triggers[trigger_name]).nil?"
 
         # Create/Update Actions
+        action_status = node[:bcpc][:hadoop][:zabbix][:enable_alarming] ? status : 1
+        esc_period = attrs['esc_period'].nil? ? node[:bcpc][:hadoop][:zabbix][:escalation_period] : attrs['esc_period']
+
         if (action_id = existing_actions["#{trigger_name}_action"]).nil?
           createActionsArr.push({
             "name" => "#{trigger_name}_action", "eventsource" => 0,
-            "evaltype" => 1, "status" => status, "esc_period" => 120,
+            "evaltype" => 1, "status" => action_status, "esc_period" => esc_period,
             'conditions' => [
               {"conditiontype" => 3,"operator" => 2,"value" => trigger_name},
               {"conditiontype" => 5,"operator" => 0,"value" => 1},
               {"conditiontype" => 16,"operator" => 7}
             ],
             'operations' => [{
-              "operationtype" => 1,
+              "operationtype" => 1, "esc_step_from" => 2, "esc_step_to" => 2,
               "opcommand" => {
                 "command" => "#{node['bcpc']['zabbix']['scripts']['mail']}" +
                   " {TRIGGER.NAME} #{node.chef_environment}" +
@@ -252,15 +255,15 @@ ruby_block "zabbix_monitor" do
           })
         else
           updateActionsArr.push({
-            "actionid" => action_id, "evaltype" => 1, "status" => status,
-            "esc_period" => 120,
+            "actionid" => action_id, "evaltype" => 1, "status" => action_status,
+            "esc_period" => esc_period,
             'conditions' => [
               {"conditiontype" => 3, "operator" => 2, "value" => trigger_name},
               {"conditiontype" => 5, "operator" => 0, "value" => 1},
               {"conditiontype" => 16, "operator" => 7}
             ],
             'operations' => [{
-              "operationtype" => 1,
+              "operationtype" => 1, "esc_step_from" => 2, "esc_step_to" => 2,
               "opcommand" => {
                 "command" => "#{node['bcpc']['zabbix']['scripts']['mail']}" +
                   " {TRIGGER.NAME} #{node.chef_environment}" +
@@ -306,5 +309,5 @@ cron "Run script to query graphite and send data to zabbix" do
   minute "*"
   hour   "*"
   user   "nobody"
-  command  "/usr/local/bin/run_zabbix_sender.sh"
+  command  "pgrep -u nobody 'zabbix_sender' > /dev/null || /usr/local/bin/run_zabbix_sender.sh"
 end
