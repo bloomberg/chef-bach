@@ -11,6 +11,10 @@ gem_package "fpm" do
    action :install
 end
 
+package "equivs" do
+    action :install
+end
+
 remote_file "#{spark_download_dir}/#{spark_tar_file}" do
   source "#{spark_tar_url}/#{spark_tar_file}"
   not_if { File.exists?("#{spark_download_dir}/#{spark_tar_file}") || File.exists?("#{spark_download_dir}/#{spark_pkg_prefix}_#{spark_pkg_version}_amd64.deb") }
@@ -26,11 +30,29 @@ bash "build_spark_package" do
   user 'root'
   group 'root'
   code %Q{
-    fpm -s dir -t deb --prefix #{spark_install_dir}/#{spark_pkg_version} -n #{spark_pkg_prefix} -v #{spark_pkg_version} --description "Spark Package with Hadoop" -p #{spark_download_dir} *
+    fpm -s dir -t deb --prefix #{spark_install_dir}/#{spark_pkg_version} -n "#{spark_pkg_prefix}-#{spark_pkg_version}" -v #{spark_pkg_version} --description "Spark Package with Hadoop" -p #{spark_download_dir} *
   }
   umask 0002
-  not_if { File.exists?("#{spark_download_dir}/#{spark_pkg_prefix}_#{spark_pkg_version}_amd64.deb") }
+  not_if { File.exists?("#{spark_download_dir}/#{spark_pkg_prefix}-#{spark_pkg_version}_#{spark_pkg_version}_amd64.deb") } 
   notifies :run, "bash[build_bins]", :delayed
+end
+
+if node[:spark][:package][:install_meta] == true then
+  template "/home/vagrant/chef-bcpc/bins/spark-metapkg" do
+  source "spark-metapackage.erb"
+  variables(
+    :meta_version => spark_pkg_version,
+    :package_name => "#{spark_pkg_prefix}-#{spark_pkg_version}",
+    :package_version => spark_pkg_version
+  )
+  end
+
+  bash "equivs-build" do
+    cwd "/home/vagrant/chef-bcpc/bins"
+    code "equivs-build /home/vagrant/chef-bcpc/bins/spark-metapkg"
+    not_if { File.exists?("#{spark_download_dir}/#{spark_pkg_prefix}_#{spark_pkg_version}_amd64.deb") } 
+    notifies :run, "bash[build_bins]", :delayed
+  end
 end
 
 # Call build_bins.sh so the package is added to the apt-repo

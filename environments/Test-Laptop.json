@@ -1,6 +1,11 @@
 {
   "name": "Test-Laptop",
   "override_attributes": {
+    "spark": {
+      "package": {
+        "install_meta": false
+      }
+    },
     "bcpc": {
       "graphite": {
         "graphite_disk": "sde"
