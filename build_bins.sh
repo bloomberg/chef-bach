@@ -156,7 +156,7 @@ UBUNTU_IMAGE="ubuntu-12.04-mini.iso"
 if ! [[ -f $UBUNTU_IMAGE ]]; then
   # Download this ISO to get the latest kernel/X LTS stack installer
   #$CURL -o $UBUNTU_IMAGE http://archive.ubuntu.com/ubuntu/dists/precise-updates/main/installer-amd64/current/images/raring-netboot/mini.iso
-  while ! $(file $UBUNTU_IMAGE | grep -q 'x86 boot sector'); do
+  while ! $(file $UBUNTU_IMAGE | grep -qE '(x86 boot sector)|(ISO 9660 CD-ROM)'); do
     $CURL -o $UBUNTU_IMAGE http://archive.ubuntu.com/ubuntu/dists/precise/main/installer-amd64/current/images/netboot/mini.iso
   done
 fi
