@@ -152,14 +152,15 @@ fi
 FILES="cirros-0.3.0-x86_64-disk.img $FILES"
 
 # Grab the Ubuntu 12.04 installer image
-if ! [[ -f ubuntu-12.04-mini.iso ]]; then
+UBUNTU_IMAGE="ubuntu-12.04-mini.iso"
+if ! [[ -f $UBUNTU_IMAGE ]]; then
   # Download this ISO to get the latest kernel/X LTS stack installer
-  #$CURL -o ubuntu-12.04-mini.iso http://archive.ubuntu.com/ubuntu/dists/precise-updates/main/installer-amd64/current/images/raring-netboot/mini.iso
-  while ! $(file mini.iso | grep -q 'x86 boot sector'); do
-    $CURL -o ubuntu-12.04-mini.iso http://archive.ubuntu.com/ubuntu/dists/precise/main/installer-amd64/current/images/netboot/mini.iso
+  #$CURL -o $UBUNTU_IMAGE http://archive.ubuntu.com/ubuntu/dists/precise-updates/main/installer-amd64/current/images/raring-netboot/mini.iso
+  while ! $(file $UBUNTU_IMAGE | grep -qE '(x86 boot sector)|(ISO 9660 CD-ROM)'); do
+    $CURL -o $UBUNTU_IMAGE http://archive.ubuntu.com/ubuntu/dists/precise/main/installer-amd64/current/images/netboot/mini.iso
   done
 fi
-FILES="ubuntu-12.04-mini.iso $FILES"
+FILES="$UBUNTU_IMAGE $FILES"
 
 # Make the diamond package
 if ! [[ -f diamond.deb ]]; then
