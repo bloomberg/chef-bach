@@ -10,7 +10,6 @@ node.default['bcpc']['hadoop']['copylog']['datanode'] = {
    hadoop-hdfs-datanode
    hadoop-mapreduce
    hadoop-client
-   sqoop
    lzop
    cgroup-bin
    hadoop-lzo}.each do |pkg|
@@ -147,13 +146,6 @@ bash "verify-container-executor" do
   only_if { File.exists?("/usr/lib/hadoop-yarn/bin/container-executor") }
 end
 
-# Install Sqoop Bits
-template "/etc/sqoop/conf/sqoop-env.sh" do
-  source "sq_sqoop-env.sh.erb"
-  mode "0444"
-  action :create
-end
-
 # Install Hive Bits
 # workaround for hcatalog dpkg not creating the hcat user it requires
 user "hcat" do 
@@ -181,6 +173,11 @@ end
 if node[:bcpc][:hadoop][:mounts].length <= node[:bcpc][:hadoop][:hdfs][:failed_volumes_tolerated]
   Chef::Application.fatal!("You have fewer #{node[:bcpc][:hadoop][:disks]} than #{node[:bcpc][:hadoop][:hdfs][:failed_volumes_tolerated]}! See comments of HDFS-4442.")
 end
+
+# Add Sqoop.
+node.default[:bach][:sqoop][:zookeeper_conf_dir] = 
+  node[:bcpc][:hadoop][:zookeeper][:conf_dir]
+include_recipe 'bach_sqoop'
 
 # Build nodes for HDFS storage
 node[:bcpc][:hadoop][:mounts].each do |i|
