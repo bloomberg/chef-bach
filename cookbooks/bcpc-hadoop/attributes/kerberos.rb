@@ -16,3 +16,4 @@ default[:bcpc][:hadoop][:kerberos][:data] = {
         :oozie => {"principal" => "oozie", "keytab" => "oozie.service.keytab", "owner" => "oozie", "princhost" => "_HOST", "perms" => "0600", "spnego_keytab" => "oozie.service.keytab"}}
 default[:bcpc][:hadoop][:kerberos][:keytab][:dir] = "/etc/security/keytabs"
 default[:bcpc][:hadoop][:kerberos][:keytab][:recreate] = false
+default[:bcpc][:hadoop][:kerberos][:additional][:hosts] = []
