@@ -12,7 +12,9 @@ end
 
 {
  'chef-vault' => '2.2.4',
+ 'mysql2' => '0.4.1',
  'patron' => '0.4.20',
+ 'sequel' => '4.27.0',
  'simple-graphite' => '2.1.0',
  'webhdfs' => '0.5.5',
  'wmi-lite' => '1.0.0',
