@@ -148,6 +148,7 @@ service "generally run hadoop-hdfs-namenode" do
   subscribes :restart, "template[/etc/hadoop/conf/core-site.xml]", :delayed
   subscribes :restart, "template[/etc/hadoop/conf/hdfs-policy.xml]", :delayed
   subscribes :restart, "template[/etc/hadoop/conf/hdfs-site_HA.xml]", :delayed
+  subscribes :restart, "file[/etc/hadoop/conf/ldap-conn-pass.txt]", :delayed
   subscribes :restart, "template[/etc/hadoop/conf/hadoop-env.sh]", :delayed
   subscribes :restart, "template[/etc/hadoop/conf/topology]", :delayed
   subscribes :restart, "user_ulimit[hdfs]", :delayed
