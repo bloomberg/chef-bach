@@ -26,3 +26,7 @@ cookbook 'cobblerd',
 cookbook 'jmxtrans', 
   git: 'https://github.com/jmxtrans/jmxtrans-cookbook',
   revision: 'd8ee2396eca91ef8e0e558490bde075869b787de'
+
+# pdns forked, pending acceptance of a PR.
+cookbook 'pdns',
+  path: '/home/ajones/src.dev/pdns'

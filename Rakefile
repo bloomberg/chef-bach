@@ -1,6 +1,8 @@
 # -*- mode: ruby -*-
 require 'highline'
 
+#ENV['http_proxy'] = 'http://10.0.2.2:3128'
+#ENV['https_proxy'] = 'http://10.0.2.2:3128'
 ENV['BUILD_ID'] ||= '0'
 ENV['CHEF_ENV'] ||= "Test-Laptop-b#{ENV['BUILD_ID']}"
 ENV['CHEF_ENV_FILE'] = "environments/#{ENV['CHEF_ENV']}.json"
