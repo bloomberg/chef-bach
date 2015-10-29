@@ -64,3 +64,7 @@ cron 'synchronize chef' do
 end
 
 package 'sshpass'
+
+link '/etc/chef/client.d/knife.rb' do
+  to '/home/vagrant/chef-bcpc/.chef/knife.rb'
+end

@@ -30,8 +30,3 @@ fi
 
 knife node run_list add $(hostname -f) 'role[BCPC-Bootstrap]' -c .chef/knife.rb
 sudo chef-client -c .chef/knife.rb
-
-# Create a symlink in /etc/chef/client.d/ to knife.rb so that one can run chef-client
-# on the bootstrap node without having to specify -c .chef/knife.rb later. This will
-# make sure that the chef-client service runs without issues.
-sudo ln -s $(pwd)/.chef/knife.rb /etc/chef/client.d/knife.rb
