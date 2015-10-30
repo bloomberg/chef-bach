@@ -1,7 +1,7 @@
 # -*- mode: enh-ruby -*-
 source 'https://rubygems.org'
 
-gem 'berkshelf', '~> 3'
-gem 'kitchen-docker', '2.1.0'
+gem 'berkshelf', '~> 4'
+gem 'kitchen-vagrant'
 gem 'serverspec', '~> 2'
-gem 'test-kitchen', '1.4.0'
+gem 'test-kitchen'

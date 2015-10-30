@@ -41,6 +41,7 @@ git "#{src_dir}/zabbix-#{zabbix_version}" do
     File.exists?("#{bins_dir}/zabbix-agent.tar.gz") &&
     File.exists?("#{bins_dir}/zabbix-server.tar.gz") 
   }
+  retries 5
 end
 
 package 'pkg-config'
