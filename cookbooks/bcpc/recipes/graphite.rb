@@ -113,6 +113,17 @@ directory "#{node['bcpc']['graphite']['local_data_dir']}" do
   recursive true
 end
 
+directory "#{node['bcpc']['graphite']['local_log_dir']}/webapp" do
+  owner "www-data"
+  group "www-data"
+end
+
+["info.log", "exception.log" ].each do |f|
+  file "#{node['bcpc']['graphite']['local_log_dir']}/webapp/#{f}" do
+    owner "www-data"
+    group "www-data"
+  end
+end
 
 template "/opt/graphite/conf/carbon.conf" do
   source "carbon.conf.erb"
@@ -182,12 +193,6 @@ template "/opt/graphite/webapp/graphite/local_settings.py" do
     :servers => mysql_servers,
     :min_quorum => mysql_servers.length/2 + 1 )
   notifies :restart, "service[apache2]", :delayed
-end
-
-execute "graphite-storage-ownership" do
-  user "root"
-  command "chown -R www-data:www-data /opt/graphite/storage"
-  not_if "ls -ald /opt/graphite/storage | awk '{print $3}' | grep www-data"
 end
 
 ruby_block "graphite-database-creation" do
