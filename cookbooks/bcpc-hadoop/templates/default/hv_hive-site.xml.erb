@@ -180,4 +180,18 @@ characterEncoding=UTF-8&amp;user=<%=get_config("mysql-hive-table-stats-user")%>&
   <description>A flag to gather statistics automatically during the INSERT OVERWRITE command.</description>
 </property>
 
+<property>
+  <name>hive.server2.logging.operation.enabled</name>
+  <value>true</value>
+</property>
+
+<property>
+  <name>hive.server2.logging.operation.log.location</name>
+  <value>/tmp/${user.name}/operation_logs</value>
+</property>
+
+<property>
+  <name>hive.server2.logging.operation.verbose</name>
+  <value>true</value>
+</property>
 </configuration>
