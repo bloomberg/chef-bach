@@ -1,5 +1,4 @@
 require 'spec_helper'
-
 bins_dir = '/home/vagrant/chef-bcpc/bins'
 
 chef_path = File.join(bins_dir,'chef_12.4.1-1_amd64.deb')

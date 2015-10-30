@@ -8,46 +8,65 @@
 #
 include_recipe 'bach_repository::directory'
 bins_dir = node['bach']['repository']['bins_directory']
+src_dir = node['bach']['repository']['src_directory']
 
-{
-  'carbon' => 
-    'f1a1d61a0bf9e2ff3c42c01310a59572e527139c7ce73bdbeb25d8813b78d2b9',
-  'whisper' =>
-    '5476285366f1af92e3a95c738b10d8d944b58b4931f301a19a7f849453a44fd3',
-  'graphite-web' =>
-    '6439598fbc03b3d1bf29b01295e2386e750c9e94e032596da857557fd07825b8'
-}.each do |package_name, package_checksum|
-  package_version = '0.9.10'
-  package_file = "#{package_name}-#{package_version}.tar.gz"
-  package_url =
-    "http://pypi.python.org/packages/source/#{package_name.chars.first}" +
-    "/#{package_name}/#{package_file}"
+[
+ {
+  name: 'pytz',
+  version: '2015.6',
+  url: 'https://pypi.python.org/packages/source/p/pytz/pytz-2015.6.zip',
+  checksum: '2b3b20919afcf06f90a4e58aa2a2c82a601b71dd5a352af36478e5337d4a16cd'
+ },
+ {
+  name: 'django',
+  version: '1.5.4', 
+  url: 'https://pypi.python.org/packages/source/D/Django/Django-1.5.4.tar.gz',
+  checksum: '428defe3fd515dfc8613039bb0a80622a13fb4b988c5be48db07ec098ea1704e'
+ },
+ {
+  name: 'carbon',
+  version: '0.9.10+git20151021',
+  url: 'https://github.com/graphite-project/carbon/archive/e1ec8e3a1fac12e19be450520947ef324647b8ae.tar.gz',
+  checksum: '5d088a9fcfd304cb509abec7be49c7bb81055cb71aabe2091dda3b009740c280'
+ },
+ {
+  name: 'whisper',
+  version: '0.9.10+git20151021',
+  url: 'https://github.com/graphite-project/whisper/archive/13f15a4aa5fcac2ed147854a732f9508f1f1dd8c.tar.gz',
+  checksum: '9db97e5b724a380f0702cbe112f9c156faec60e8640cbeefd77364fc7555e5a1'
+ },
+ {
+  name: 'graphite-web',
+  version: '0.10.0-alpha+git20151027',
+  url: 'https://github.com/graphite-project/graphite-web/archive/977b15467f03daffbe326166fd6e094b1d093e89.tar.gz',
+  checksum: '47319a481e4147f916e9c727db861f62243cdce9fea32754a2e6539342cdeb00'
+ },
+].each do |package|
 
-  remote_file "#{bins_dir}/#{package_file}" do
-    source package_url
-    mode 0444
-    checksum package_checksum
+  ark "#{package[:name]}-#{package[:version]}" do
+    url package[:url]
+    path src_dir
+    checksum package[:checksum]
+    action :put
   end
 
-  execute "extract-#{package_name}" do
-    command "tar -xzf #{bins_dir}/#{package_file}"
-    cwd bins_dir
-    not_if{ Dir.exists?( "#{bins_dir}/#{package_name}-#{package_version}" ) }
-  end
+  deb_name = "python-#{package[:name]}_#{package[:version]}_all.deb"
 
   fpm_command = 
-    if(package_name == 'graphite-web')
-      "fpm --python-install-bin /opt/graphite/webapp " +
-        "-s python -t deb #{package_name}-#{package_version}/setup.py"
+    if(package[:name] == 'graphite-web')
+      "fpm --python-install-lib /opt/graphite/webapp " +
+        "-p #{bins_dir}/#{deb_name} " +
+        "-s python -t deb #{package[:name]}-#{package[:version]}/setup.py"
     else
       "fpm --python-install-bin /opt/graphite/bin " +
-        "-s python -t deb #{package_name}-#{package_version}/setup.py"
+        "-p #{bins_dir}/#{deb_name} " +
+        "-s python -t deb #{package[:name]}-#{package[:version]}/setup.py"
     end
 
-  deb_name = "python-#{package_name}_#{package_version}_all.deb"
-  execute "fpm-#{package_name}" do
+  execute "fpm-#{package[:name]}" do
     command fpm_command
-    cwd bins_dir
-    not_if { File.exists?( "#{bins_dir}/#{deb_name}" ) }
+    cwd src_dir
+    not_if{ File.exists?("#{bins_dir}/#{deb_name}") }
   end
+
 end

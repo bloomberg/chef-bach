@@ -1,12 +1,13 @@
 # -*- mode: yaml-mode -*-
 ---
-driver:
-  dockerfile: test/Dockerfile
-  name: docker
-  proxy: <%= ENV['http_proxy'] %>
+driver_plugin: vagrant
+driver_config:
+  require_chef_omnibus: 12.3
 
 provisioner:
   name: chef_zero
+  http_proxy: <%= ENV['http_proxy'] %>
+  https_proxy: <%= ENV['https_proxy'] %>
   client_rb:
     no_proxy: localhost
     http_proxy: <%= ENV['http_proxy'] %>
@@ -16,8 +17,9 @@ platforms:
   - name: ubuntu-12.04
 
 suites:
-  - name: default
+  - name: bach_repository
     run_list:
       - recipe[bach_common::kitchen-fixes]
+      - recipe[apt]
       - recipe[bach_repository]
     attributes:

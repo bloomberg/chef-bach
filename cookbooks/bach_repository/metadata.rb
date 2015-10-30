@@ -7,3 +7,5 @@ long_description 'bach_repository builds a repo for use by BACH nodes. This cook
 version          '0.1.0'
 
 supports 'ubuntu', '= 12.04'
+
+depends 'ark'

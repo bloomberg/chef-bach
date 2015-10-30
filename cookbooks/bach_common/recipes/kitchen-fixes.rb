@@ -1,28 +1,39 @@
-
+#
 # Test kitchen has no method of automatically including a certificate.
 # This is a very nasty workaround for that problem.  Any certificates
 # dumped into the "data" dir in this repository will be trusted during
 # a test-kitchen run.
-
-directory '/usr/local/share/ca-certificates' do
+#
+directory '/usr/local/share/ca-certificates/bloomberg' do
   user 'root'
   group 'root'
   recursive true
   mode 0555
 end
 
-Dir.glob('/tmp/kitchen/data/*.crt') do |f|
-  FileUtils.cp(f, '/usr/local/share/ca-certificates')
+ruby_block 'kitchen-fixes-copy-certificates' do
+  block do
+    FileUtils.cp(Dir.glob('/tmp/kitchen/data/*.crt'),
+                 '/usr/local/share/ca-certificates/bloomberg')
+
+    system('/usr/sbin/update-ca-certificates')
+
+    Chef::Config.trusted_certs_dir =
+      '/usr/local/share/ca-certificates/bloomberg'
+  end
 end
 
-execute 'update-ca-certificates'
+log 'kitchen-fixes-log-trusted-certs' do
+  message lazy { "New trusted certs directory: " +
+                 Chef::Config.trusted_certs_dir }
+  level :warn
+end
 
-Chef::Config[:trusted_certs_dir] = '/usr/local/share/ca-certificates'
-
+#
 # Test-kitchen also attempts to install busser with
 # '/opt/chef/embedded/bin/gem install', which requires us to fix
 # up proxies and SSL for Chef's ruby.
-
+#
 [ '/opt/chef/embedded/ssl', '/opt/chef/embedded/etc' ].each do |path|
   directory path do
     recursive true

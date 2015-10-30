@@ -21,6 +21,7 @@ package [
          'libtool',
          'make',
          'patch',
+         'pkg-config',
          'pbuilder',
          'python-all-dev',
          'python-configobj',
@@ -38,6 +39,7 @@ package [
          'unzip',
         ] do 
   action :install
+  timeout 3600
 end
 
 # The classic package mangler
