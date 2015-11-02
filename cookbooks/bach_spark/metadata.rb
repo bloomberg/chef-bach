@@ -11,3 +11,4 @@ version          '0.1.0'
 end
 
 depends "bcpc"
+depends "bcpc-hadoop"
