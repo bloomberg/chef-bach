@@ -35,6 +35,8 @@ bash "compile_hannibal"  do
       chmod 755 #{target_filepath}
    }
    action :nothing
+   # Sometimes the compiler runs out of memory in VM cluster builds.
+   retries 5
    notifies :run, "bash[cleanup]", :immediately
 end
 
