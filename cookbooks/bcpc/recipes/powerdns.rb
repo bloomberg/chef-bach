@@ -18,11 +18,7 @@
 #
 
 make_config('mysql-pdns-user', "pdns")
-
-mysql_pdns_password = get_config("mysql-pdns-password")
-if mysql_pdns_password.nil?
-  mysql_pdns_password = secure_password
-end
+make_config('mysql-pdns-password', secure_password)
 
 bootstrap = get_bootstrap
 results = get_nodes_for("powerdns").map!{ |x| x['fqdn'] }.join(",")
@@ -30,7 +26,7 @@ nodes = results == "" ? node['fqdn'] : results
 
 chef_vault_secret "mysql-pdns" do
   data_bag 'os'
-  raw_data({ 'password' => mysql_pdns_password })
+  raw_data({ 'password' => get_config!('mysql-pdns-password') })
   admins "#{ nodes },#{ bootstrap }"
   search '*:*'
   action :nothing
@@ -41,37 +37,64 @@ node.set['pdns']['authoritative']['config']['disable_axfr'] = false
 
 node.set['pdns']['authoritative']['config'].tap do |config|
   config['launch'] = 'gmysql'
+  config['recursor'] = node[:bcpc][:dns_servers][0]
+end
+
+node.set['pdns']['authoritative']['gmysql'].tap do |config|
   config['gmysql-host'] = node[:bcpc][:management][:vip]
   config['gmysql-port'] = 3306
   config['gmysql-user'] = get_config!('mysql-pdns-user')
   config['gmysql-password'] = get_config!('mysql-pdns-password')
   config['gmysql-dbname'] = node['bcpc']['pdns_dbname']
   config['gmysql-dnssec'] = 'yes'
-  config['recursor'] = node[:bcpc][:dns_servers][0]
 end
 
 package 'libmysqlclient-dev'
+
 chef_gem 'mysql2' do
   compile_time false
 end
+
 package 'pdns-backend-mysql'
 
-mysql_connection_info = {:username => 'root',
-                         :password => get_config!('mysql-root-password')}
+mysql_connection_info = 
+{
+ :host => node['pdns']['authoritative']['config']['gmysql-host'],
+ :username => 'root',
+ :password => get_config!('mysql-root-password')
+}
 
 mysql_database node['bcpc']['pdns_dbname'] do
   connection mysql_connection_info
-  notifies :query, 'mysql_database[install-pdns-schema]', :immediately
+  # notifies :query, 'mysql_database[install-pdns-schema]', :immediately
+  notifies :run, 'execute[install-pdns-schema]', :immediately
 end
 
-mysql_database 'install-pdns-schema' do
-  connection mysql_connection_info
-  database_name node['bcpc']['pdns_dbname']
-  sql lazy { 
-    File.read('/usr/share/dbconfig-common/data/pdns-backend-mysql/install/mysql')
-        .lines
-        .map{|line| line.gsub(/type=Inno/, 'engine=Inno') }.join 
-  }
+# #
+# # This schema file works great when installed via the mysql CLI, but
+# # it fails when Ruby reads it and feeds it.  This smells like an
+# # escaping problem.  Unfortunately, 'gsub' can break things that
+# # contain backspaces.  For now, it has been replaced with an
+# # 'execute' resource that invokes the mysql CLI.
+# #
+# mysql_database 'install-pdns-schema' do
+#   connection mysql_connection_info
+#   database_name node['bcpc']['pdns_dbname']
+#   sql lazy { 
+#     File.open('/usr/share/dbconfig-common/data/pdns-backend-mysql/install/mysql', 'rb')
+#         .read
+#         .gsub(/type=InnoDB/, 'engine=InnoDB')
+#   }
+#   action :nothing
+#   notifies :reload, 'service[pdns]'
+# end
+
+schema_path = '/usr/share/dbconfig-common/data/pdns-backend-mysql/install/mysql'
+execute 'install-pdns-schema' do
+  command "cat #{schema_path} | " +
+    "perl -nle 's/type=Inno/engine=Inno/g; print' | " +
+    "/usr/bin/mysql -u root " + 
+    "--password=#{get_config!('mysql-root-password')} pdns"
   action :nothing
   notifies :reload, 'service[pdns]'
 end
