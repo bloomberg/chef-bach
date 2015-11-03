@@ -183,7 +183,7 @@ if ! [[ -f python/pyrabbit-1.0.1.tar.gz ]]; then
 fi
 FILES="pyrabbit-1.0.1.tar.gz $FILES"
 
-if ! [[ -f python-pytz*.deb ]]; then 
+if ! [[ -f python-pytz_2015.6_all.deb ]]; then 
   while ! $(file pytz-2015.6.zip | grep -q 'Zip archive data'); do
     $CURL -O -L https://pypi.python.org/packages/source/p/pytz/pytz-2015.6.zip
   done
@@ -193,7 +193,7 @@ fi
 FILES="python-pytz_2015.6_all.deb $FILES"
 
 # build Django 
-if ! [[ -f python-django*.deb ]]; then
+if ! [[ -f python-django_1.5.4_all.deb ]]; then
   while ! $(file Django-1.5.4.tar.gz | grep -q 'gzip compressed data'); do
     $CURL -O -L https://pypi.python.org/packages/source/D/Django/Django-1.5.4.tar.gz
   done
@@ -204,9 +204,9 @@ FILES="python-django_1.5.4_all.deb $FILES"
 
 
 # Build graphite packages
-if ! [[ -f python-carbon_*.deb && \
-        -f python-whisper_*.deb && \
-        -f python-graphite-web_*.deb ]]; then
+if ! [[ -f python-carbon_0.9.10_all.deb  && \
+        -f python-whisper_0.9.10_all.deb  && \
+        -f python-graphite-web_0.10.0-alpha_all.deb ]]; then
   # pull from github
   # until PR https://github.com/graphite-project/graphite-web/pull/1320 is merged 
   #$CURL -O -L https://github.com/graphite-project/graphite-web/archive/master.zip
