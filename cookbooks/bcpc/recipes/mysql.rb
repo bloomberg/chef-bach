@@ -86,10 +86,10 @@ end
 bash "initial-mysql-config" do
   code <<-EOH
         mysql -u root -e "DROP USER ''@'localhost';
-                          GRANT USAGE ON *.* to '#{get_config('mysql-galera-user')}'@'%' IDENTIFIED BY '#{get_config('password','mysql-galera','os')}';
-                          GRANT ALL PRIVILEGES on *.* TO '#{get_config('mysql-galera-user')}'@'%' IDENTIFIED BY '#{get_config('password','mysql-galera','os')}';
-                          GRANT PROCESS ON *.* to '#{get_config('mysql-check-user')}'@'localhost' IDENTIFIED BY '#{get_config('password','mysql-check','os')}';
-                          UPDATE mysql.user SET password=PASSWORD('#{get_config('password','mysql-root','os')}') WHERE user='root'; FLUSH PRIVILEGES;
+                          GRANT USAGE ON *.* to '#{get_config('mysql-galera-user')}'@'%' IDENTIFIED BY '#{get_config!('password','mysql-galera','os')}';
+                          GRANT ALL PRIVILEGES on *.* TO '#{get_config('mysql-galera-user')}'@'%' IDENTIFIED BY '#{get_config!('password','mysql-galera','os')}';
+                          GRANT PROCESS ON *.* to '#{get_config('mysql-check-user')}'@'localhost' IDENTIFIED BY '#{get_config!('password','mysql-check','os')}';
+                          UPDATE mysql.user SET password=PASSWORD('#{get_config!('password','mysql-root','os')}') WHERE user='root'; FLUSH PRIVILEGES;
                           UPDATE mysql.user SET host='%' WHERE user='root' and host='localhost';
                           FLUSH PRIVILEGES;"
         EOH
@@ -142,7 +142,7 @@ service "mysql" do
 end
 
 ruby_block "Check MySQL Quorum Status" do
-  status_cmd="mysql -u root -p#{get_config('password','mysql-root','os')} -e \"SHOW STATUS LIKE 'wsrep_ready' \\G\" | grep -v 'Value: OFF'"
+  status_cmd="mysql -u root -p#{get_config!('password','mysql-root','os')} -e \"SHOW STATUS LIKE 'wsrep_ready' \\G\" | grep -v 'Value: OFF'"
   iter = 0
   poll_time = 0.5
   block do

@@ -59,7 +59,7 @@ end
 
 ruby_block "nova-database-creation" do
     block do
-        mysql_root_password = get_config('password','mysql-root','os')
+        mysql_root_password = get_config!('password','mysql-root','os')
         if not system "mysql -uroot -p#{ mysql_root_password } -e 'SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = \"#{node['bcpc']['nova_dbname']}\"'|grep \"#{node['bcpc']['nova_dbname']}\"" then
             %x[ mysql -uroot -p#{ mysql_root_password } -e "CREATE DATABASE #{node['bcpc']['nova_dbname']};"
                 mysql -uroot -p#{ mysql_root_password } -e "GRANT ALL ON #{node['bcpc']['nova_dbname']}.* TO '#{get_config('mysql-nova-user')}'@'%' IDENTIFIED BY '#{get_config('mysql-nova-password')}';"
@@ -84,7 +84,7 @@ end
 
 ruby_block "reap-dead-servers-from-nova" do
     block do
-        mysql_root_password = get_config('password','mysql-root','os')
+        mysql_root_password = get_config!('password','mysql-root','os')
         all_hosts = get_all_nodes.collect{|x| x['hostname']}
         nova_hosts = %x[nova-manage service list | awk '{print $2}' | grep -ve "^Host$" | uniq].split
         nova_hosts.each do |host|

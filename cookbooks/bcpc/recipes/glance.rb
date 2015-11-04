@@ -76,7 +76,7 @@ end
 
 ruby_block "glance-database-creation" do
     block do
-        mysql_root_password = get_config('password','mysql-root','os')
+        mysql_root_password = get_config!('password','mysql-root','os')
         if not system "mysql -uroot -p#{ mysql_root_password } -e 'SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = \"#{node['bcpc']['glance_dbname']}\"'|grep \"#{node['bcpc']['glance_dbname']}\"" then
             %x[ mysql -uroot -p#{ mysql_root_password } -e "CREATE DATABASE #{node['bcpc']['glance_dbname']};"
                 mysql -uroot -p#{ mysql_root_password } -e "GRANT ALL ON #{node['bcpc']['glance_dbname']}.* TO '#{get_config('mysql-glance-user')}'@'%' IDENTIFIED BY '#{get_config('mysql-glance-password')}';"
