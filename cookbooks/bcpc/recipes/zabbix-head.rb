@@ -29,7 +29,7 @@ if mysql_zabbix_password.nil?
 end
 
 bootstrap = get_bootstrap
-results = get_nodes_for("zabbix-head").map!{ |x| x['fqdn'] }.join(",")
+results = get_all_nodes.map!{ |x| x['fqdn'] }.join(",")
 nodes = results == "" ? node['fqdn'] : results
 
 chef_vault_secret "mysql-zabbix" do
@@ -53,7 +53,7 @@ if zabbix_guest_password.nil?
 end
 
 bootstrap = get_bootstrap
-results = get_nodes_for("zabbix-head").map!{ |x| x['fqdn'] }.join(",")
+results = get_all_nodes.map!{ |x| x['fqdn'] }.join(",")
 nodes = results == "" ? node['fqdn'] : results
 
 chef_vault_secret "zabbix-admin" do
