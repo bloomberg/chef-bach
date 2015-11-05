@@ -214,21 +214,24 @@ if ! [[ -f python-carbon_0.9.10_all.deb  && \
   while ! $(file https_intracluster.zip | grep -q 'Zip archive data'); do
     $CURL -O -L https://github.com/pu239ppy/graphite-web/archive/https_intracluster.zip 
   done
-  unzip -o https_intracluster.zip; rm https_intracluster.zip 
-  while ! $(file master.zip | grep -q 'Zip archive data'); do
-    $CURL -O -L https://github.com/graphite-project/carbon/archive/master.zip
+  unzip -o https_intracluster.zip
+  while ! $(file carbon_master.zip | grep -q 'Zip archive data'); do
+    $CURL -L https://github.com/graphite-project/carbon/archive/master.zip -o carbon_master.zip
   done
-  unzip -o master.zip; rm master.zip
-  while ! $(file master.zip | grep -q 'Zip archive data'); do
-    $CURL -O -L https://github.com/graphite-project/whisper/archive/master.zip
+  unzip -o carbon_master.zip
+  while ! $(file whisper_master.zip | grep -q 'Zip archive data'); do
+    $CURL -L https://github.com/graphite-project/whisper/archive/master.zip -o whisper_master.zip
   done
-  unzip -o master.zip; rm master.zip
+  unzip -o whisper_master.zip
   # build with FPM
   fpm --epoch $EPOCH --log info --python-install-bin /opt/graphite/bin -f -s python -t deb carbon-master/setup.py
   fpm --epoch $EPOCH --log info --python-install-bin /opt/graphite/bin  -f -s python -t deb whisper-master/setup.py
   # until PR https://github.com/graphite-project/graphite-web/pull/1320 is merged 
   #fpm --epoch $EPOCH --log info --python-install-lib /opt/graphite/webapp -f -s python -t deb graphite-web-master/setup.py
   fpm --epoch $EPOCH --log info --python-install-lib /opt/graphite/webapp -f -s python -t deb graphite-web-https_intracluster/setup.py
+  rm -rf carbon-master
+  rm -rf whisper-master
+  rm -rf graphite-web-https_intracluster
 
 fi
 FILES="python-carbon_0.9.10_all.deb python-whisper_0.9.10_all.deb python-graphite-web_0.10.0-alpha_all.deb $FILES"
