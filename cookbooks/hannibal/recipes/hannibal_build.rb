@@ -22,6 +22,7 @@ git source_code_location do
    action :sync
    notifies :run, "bash[compile_hannibal]", :immediately
    not_if { ::File.exist?(target_filepath) }
+   retries 5
 end
 
 bash "compile_hannibal"  do

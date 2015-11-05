@@ -29,7 +29,7 @@ if mysql_graphite_password.nil?
 end
 
 bootstrap = get_bootstrap
-results = get_nodes_for("graphite").map!{ |x| x['fqdn'] }.join(",")
+results = get_all_nodes.map!{ |x| x['fqdn'] }.join(",")
 nodes = results == "" ? node['fqdn'] : results
 
 chef_vault_secret "mysql-graphite" do

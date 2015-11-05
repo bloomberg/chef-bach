@@ -21,7 +21,7 @@ make_config('mysql-pdns-user', "pdns")
 make_config('mysql-pdns-password', secure_password)
 
 bootstrap = get_bootstrap
-results = get_nodes_for("powerdns").map!{ |x| x['fqdn'] }.join(",")
+results = get_all_nodes.map!{ |x| x['fqdn'] }.join(",")
 nodes = results == "" ? node['fqdn'] : results
 
 chef_vault_secret "mysql-pdns" do

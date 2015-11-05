@@ -27,7 +27,7 @@ if keepalived_password.nil?
 end
 
 bootstrap = get_bootstrap
-results = get_nodes_for("keepalived").map!{ |x| x['fqdn'] }.join(",")
+results = get_all_nodes.map!{ |x| x['fqdn'] }.join(",")
 nodes = results == "" ? node['fqdn'] : results
 
 chef_vault_secret "keepalived" do
