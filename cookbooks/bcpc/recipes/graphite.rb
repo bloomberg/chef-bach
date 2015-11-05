@@ -40,7 +40,7 @@ chef_vault_secret "mysql-graphite" do
   action :nothing
 end.run_action(:create_if_missing)
 
-%w{python-pytz python-pyparsing python-mysqldb python-pip python-cairo python-django-tagging python-ldap python-twisted python-memcache}.each do |pkg|
+%w{python-pytz python-pyparsing python-mysqldb python-pip python-cairo python-django-tagging python-ldap python-twisted python-memcache python-pyparsing}.each do |pkg|
   package pkg do
     action :upgrade
   end
