@@ -2,25 +2,10 @@ Overview
 ========
 
 This is a set of [Chef](https://github.com/opscode/chef) cookbooks to bring up
-an [OpenStack](http://www.openstack.org) or [Hadoop](http://hadoop.apache.org/)
-cluster. In addition to hosting virtual machines, there are a number of
-additional services provided with these cookbooks - such as distributed
-storage, DNS, log aggregation/search, and monitoring - see below for a partial
+[Hadoop](http://hadoop.apache.org/) and [Kafka](http://kafka.apache.org)
+clusters. In addition, there are a number of additional services provided with
+these cookbooks - such as DNS, metrics, and monitoring - see below for a partial
 list of services provided by these cookbooks.
-
-OpenStack
----------
-
-Each OpenStack head node runs all of the core services in a highly-available
-manner with no restriction upon how many head nodes there are.  The cluster
-is deemed operational as long as 50%+1 of the head nodes are online. 
-Otherwise, a network partition may occur with a split-brain scenario. 
-In practice, we currently recommend roughly one head node per rack.
-
-Each worker node runs the relevant services (nova-compute, Ceph OSDs, etc.).
-There is no limitation on the number of worker nodes.  In practice, we
-currently recommend that the cluster should not grow to more than 200 worker
-nodes.
 
 Hadoop
 ------
@@ -50,14 +35,14 @@ To setup HDFS HA, please follow the following model from your Bootstrap VM:
 Setup
 =====
 
-These recipes are currently intended for building a BCPC cloud on top of
+These recipes are currently intended for building a BACH cluster on top of
 Ubuntu 12.04 servers using Chef 11. When setting this up in VMs, be sure to
-add a few dedicated disks (for ceph OSDs) aside from boot volume. In
+add a few dedicated disks (for HDFS data nodes) aside from boot volume. In
 addition, it's expected that you have three separate NICs per machine, with
 the following as defaults (and recommendations for VM settings):
  - ``eth0`` - management traffic (host-only NIC in VM)
- - ``eth1`` - storage traffic (host-only NIC in VM)
- - ``eth2`` - VM traffic (host-only NIC in VM)
+ - ``eth1`` - reserved traffic (host-only NIC in VM)
+ - ``eth2`` - compute traffic (host-only NIC in VM)
 
 You should look at the various settings in ``cookbooks/bcpc/attributes/default.rb``
 and tweak accordingly for your setup (by adding them to an environment file).
@@ -75,7 +60,7 @@ section for enrolling the nodes.
 Make a cluster
 --------------
 
-To build a new BCPC cluster, you have to start with building a head nodes
+To build a new BACH cluster, you have to start with building head nodes
 first. (This assumes that you have already completed the bootstrap process and
 have a Chef server available.)  Since the recipes will automatically generate
 all passwords and keys for this new cluster, the nodes must temporarily become
@@ -95,54 +80,76 @@ one can run through what is the expected "happy-path" install. This simple
 install supports only changing DNS, proxy and VM resource settings. (This is
 the basis of our automated build tests.)
 
-Using an OpenStack cluster
---------------------------
+Using a BACH cluster
+--------------------
 
-Once the nodes are configured and bootstrapped, BCPC services will be
+Once the nodes are configured and bootstrapped, BACH services will be
 accessible via the floating IP.  (For the Test-Laptop environment, it is
 10.0.100.5.)
 
-For example, you can go to ``https://10.0.100.5/horizon/`` for the OpenStack
-web interface.  To find the automatically-generated OpenStack credentials, look
-in the data bag for your environment under ``keystone-admin-user`` and
-``keystone-admin-password``:
+For example, you can go to ``https://10.0.100.5:8888`` for the Graphite
+web interface.  To find the automatically-generated service credentials, look
+in the data bag for your environment.
 
 ```
-ubuntu@bcpc-bootstrap:~$ knife data bag show configs Test-Laptop | grep keystone-admin
-keystone-admin-password:       abcdefgh
-keystone-admin-token:          this-is-my-token
-keystone-admin-user:           admin
-
+ubuntu@bcpc-bootstrap:~$ knife data bag show configs Test-Laptop | grep mysql-root-password
+mysql-root-password:       abcdefgh
 ```
 
-For example, to check on ``Ceph``:
+For example, to check on ``HDFS``:
 
 ```
-ubuntu@bcpc-vm1:~$ ceph -s
-   health HEALTH_OK
-   monmap e1: 1 mons at {bcpc-vm1=172.16.100.11:6789/0}, election epoch 2, quorum 0 bcpc-vm1
-   osdmap e94: 12 osds: 12 up, 12 in
-    pgmap v705: 2192 pgs: 2192 active+clean; 80333 KB data, 729 MB used, 227 GB / 227 GB avail
-   mdsmap e4: 1/1/1 up {0=bcpc-vm1=up:active}
+ubuntu@bcpc-vm1:~$ HADOOP_USER_NAME=hdfs hdfs dfsadmin -report
+Configured Capacity: 40781217792 (37.98 GB)
+Present Capacity: 40114298221 (37.36 GB)
+DFS Remaining: 39727463789 (37.00 GB)
+DFS Used: 386834432 (368.91 MB)
+DFS Used%: 0.96%
+Under replicated blocks: 0
+Blocks with corrupt replicas: 0
+Missing blocks: 0
+
+-------------------------------------------------
+Live datanodes (1):
+
+Name: 192.168.100.13:50010 (f-bcpc-vm3.bcpc.example.com)
+Hostname: bcpc-vm3.bcpc.example.com
+Decommission Status : Normal
+Configured Capacity: 40781217792 (37.98 GB)
+DFS Used: 386834432 (368.91 MB)
+Non DFS Used: 666919571 (636.02 MB)
+DFS Remaining: 39727463789 (37.00 GB)
+DFS Used%: 0.95%
+DFS Remaining%: 97.42%
+Configured Cache Capacity: 0 (0 B)
+Cache Used: 0 (0 B)
+Cache Remaining: 0 (0 B)
+Cache Used%: 100.00%
+Cache Remaining%: 0.00%
+Xceivers: 12
+Last contact: Fri Aug 14 21:08:23 EDT 2015
 ```
 
-BCPC Services
+BACH Services
 -------------
 
-BCPC currently relies upon a number of open-source packages:
+BACH currently relies upon a number of open-source packages:
 
- - [389 Directory Server](http://directory.fedoraproject.org/)
  - [Apache Bigtop](http://bigtop.apache.org/)
  - [Apache Hadoop](http://hadoop.apache.org/)
+ - [Apache Spark](http://spark.apache.org/)
  - [Apache HBase](http://hbase.apache.org/)
  - [Apache Hive](http://hive.apache.org/)
  - [Apache HTTP Server](http://httpd.apache.org/)
- - [Apache Kafka](http://kafka.apache.org/)
  - [Apache Mahout](http://mahout.apache.org/)
  - [Apache Oozie](http://oozie.apache.org/)
  - [Apache Pig](http://pig.apache.org/)
+ - [Apache Phoenix](http://phoenix.apache.org)
  - [Apache Sqoop](http://sqoop.apache.org/)
- - [Ceph](http://ceph.com/)
+ - [Apache Tez](http://tez.apache.org)
+ - [Apache Zookeeper](http://zookeeper.apache.org)
+ - [Sentric Hannibal](https://github.com/sentric/hannibal/)
+ - [Twitter HDFS-DU](https://github.com/twitter/hdfs-du)
  - [Chef](http://www.getchef.com/chef/)
  - [Cobbler](http://www.cobblerd.org/)
  - [Diamond](https://github.com/BrightcoveOS/Diamond)
@@ -150,13 +157,28 @@ BCPC currently relies upon a number of open-source packages:
  - [Graphite](http://graphite.readthedocs.org/en/latest/)
  - [HAProxy](http://haproxy.1wt.eu/)
  - [Keepalived](http://www.keepalived.org/)
- - [OpenStack](http://www.openstack.org/)
  - [Percona XtraDB Cluster](http://www.percona.com/software/percona-xtradb-cluster)
  - [PowerDNS](https://www.powerdns.com/)
- - [RabbitMQ](http://www.rabbitmq.com/)
  - [Ubuntu](http://www.ubuntu.com/)
  - [Vagrant](http://www.vagrantup.com/) - Verified with version 1.2.2
  - [VirtualBox](https://www.virtualbox.org/) - >= 4.3.x supported
  - [Zabbix](http://www.zabbix.com/)
 
 Thanks to all of these communities for producing this software!
+
+Contributing
+------------
+
+To propose changes to Chef-BACH, please fork the [GitHub repo](https://github.com/bloomberg/chef-bach)
+and issue a pull request with your proposed change. We are endeavoring to
+follow the following standards:
+
+Libraries:
+* [Chef Library Recommendations](https://www.chef.io/blog/2014/03/12/writing-libraries-in-chef-cookbooks/)
+
+All Chef Code:
+* [TomDoc](http://tomdoc.org/)
+* [RuboCop](http://batsov.com/rubocop/)
+* [Foodcritic](http://acrmp.github.io/foodcritic/)
+
+Otherwise generally follow [bbatsov/ruby-style-guide](https://github.com/bbatsov/ruby-style-guide)
