@@ -63,13 +63,19 @@
   <name>datanucleus.fixedDatastore</name>
   <value>true</value>
 </property>
-
+<% if node.run_list.expand(node.chef_environment).recipes.include?("bcpc-hadoop::hive_hcatalog")  %>
+<property>
+  <name>hive.metastore.uris</name>
+  <value>thrift://<%="#{float_host(node[:fqdn])}:9083" %></value>
+  <description>IP address (or fully-qualified domain name) and port of the metastore hosts</description>
+</property>
+<% else %>
 <property>
   <name>hive.metastore.uris</name>
   <value>thrift://<%=@hive_hosts.map{ |s| float_host(s[:hostname]) + ":9083" }.join(",") %></value>
   <description>IP address (or fully-qualified domain name) and port of the metastore hosts</description>
 </property>
-
+<% end %>
 <property>
   <name>hive.support.concurrency</name>
   <description>Enable Hive's Table Lock Manager Service</description>
@@ -90,6 +96,16 @@
 <property>
   <name>hive.warehouse.subdir.inherit.perms</name>
   <value>true</value>
+</property>
+
+<property>
+  <name>hive.server2.thrift.port</name>
+  <value><%= node[:bcpc][:hadoop][:hive][:hiveserver2][:port] %></value>
+</property>
+
+<property>
+  <name>hive.server2.thrift.bind.host</name>
+  <value><%= node[:bcpc][:floating][:ip] %></value>
 </property>
 
 <property>
@@ -116,10 +132,10 @@
   <description>The path to the Kerberos Keytab file containing the metastore thrift server's service principal.</description>
 </property>
 
-<% if node.run_list.expand(node.chef_environment).recipes.include?("bcpc-hadoop::hive_metastore")  %>
+<% if node.run_list.expand(node.chef_environment).recipes.include?("bcpc-hadoop::hive_hcatalog")  %>
 <property>
   <name>hive.metastore.kerberos.principal</name>
-  <value><%= node[:bcpc][:hadoop][:kerberos][:data][:hive][:principal] %>/<%=node[:bcpc][:hadoop][:kerberos][:data][:hive][:princhost] == "_HOST" ? float_host(node[:fqdn]) : node[:bcpc][:hadoop][:kerberos][:data][:hive][:princhost]%>@<%= node[:bcpc][:hadoop][:kerberos][:realm] %></value>
+  <value><%=node[:bcpc][:hadoop][:kerberos][:data][:hive][:principal]%>/<%=node[:bcpc][:hadoop][:kerberos][:data][:hive][:princhost] == "_HOST" ? float_host(node[:fqdn]) : node[:bcpc][:hadoop][:kerberos][:data][:hive][:princhost]%>@<%= node[:bcpc][:hadoop][:kerberos][:realm] %></value>
 </property>
 <% else %>
 <property>
@@ -131,16 +147,27 @@
 <!-- HiveServer2 Security Configuration -->
 <property>
   <name>hive.server2.authentication</name>
-  <value>KERBEROS</value>
+  <value><%= node[:bcpc][:hadoop][:hive][:hiveserver2][:authentication][:method] %></value>
 </property>
 
+<% if node[:bcpc][:hadoop][:hive][:hiveserver2][:authentication][:method].upcase == "LDAP" %>
+<property>
+  <name>hive.server2.authentication.ldap.url</name>
+  <value><%= node[:bcpc][:hadoop][:hive][:hiveserver2][:authentication][:ldap_url] %></value>
+</property>
+
+<property>
+  <name>hive.server2.authentication.ldap.Domain</name>
+  <value><%= node[:bcpc][:hadoop][:hive][:hiveserver2][:authentication][:ldap_domain] %></value>
+</property>
+<% end %>
 <property>
   <name>hive.server2.authentication.kerberos.keytab</name>
   <value><%= node[:bcpc][:hadoop][:kerberos][:keytab][:dir] %>/<%= node[:bcpc][:hadoop][:kerberos][:data][:hive][:keytab] %></value>
   <description>The path to the Kerberos Keytab file containing the metastore thrift server's service principal.</description>
 </property>
 
-<% if node.run_list.expand(node.chef_environment).recipes.include?("bcpc-hadoop::hive_server")  %>
+<% if node.run_list.expand(node.chef_environment).recipes.include?("bcpc-hadoop::hive_hcatalog")  %>
 <property>
   <name>hive.server2.authentication.kerberos.principal</name>
   <value><%=node[:bcpc][:hadoop][:kerberos][:data][:hive][:principal]%>/<%=node[:bcpc][:hadoop][:kerberos][:data][:hive][:princhost] == "_HOST" ? float_host(node[:fqdn]) : node[:bcpc][:hadoop][:kerberos][:data][:hive][:princhost]%>@<%= node[:bcpc][:hadoop][:kerberos][:realm] %></value>
@@ -148,7 +175,7 @@
 <% else %>
 <property>
   <name>hive.server2.authentication.kerberos.principal</name>
-  <value><%= node[:bcpc][:hadoop][:kerberos][:data][:hive][:principal] %>/<%=node[:bcpc][:hadoop][:kerberos][:data][:hive][:princhost] == "_HOST" ? "_HOST" : node[:bcpc][:hadoop][:kerberos][:data][:hive][:princhost]%>@<%= node[:bcpc][:hadoop][:kerberos][:realm] %></value>
+  <value><%=node[:bcpc][:hadoop][:kerberos][:data][:hive][:principal]%>/<%=node[:bcpc][:hadoop][:kerberos][:data][:hive][:princhost] == "_HOST" ? "_HOST" : node[:bcpc][:hadoop][:kerberos][:data][:hive][:princhost]%>@<%= node[:bcpc][:hadoop][:kerberos][:realm] %></value>
 </property>
 <% end %>
 <% end %>
@@ -178,6 +205,21 @@ characterEncoding=UTF-8&amp;user=<%=get_config("mysql-hive-table-stats-user")%>&
   <name>hive.stats.autogather</name>
   <value>true</value>
   <description>A flag to gather statistics automatically during the INSERT OVERWRITE command.</description>
+</property>
+
+<property>
+  <name>hive.server2.logging.operation.enabled</name>
+  <value>true</value>
+</property>
+
+<property>
+  <name>hive.server2.logging.operation.log.location</name>
+  <value>/tmp/${user.name}/operation_logs</value>
+</property>
+
+<property>
+  <name>hive.server2.logging.operation.verbose</name>
+  <value>true</value>
 </property>
 
 </configuration>
