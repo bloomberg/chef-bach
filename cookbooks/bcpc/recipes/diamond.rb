@@ -19,6 +19,10 @@
 
 include_recipe "bcpc::default"
 
+execute 'apt-get update' do
+  action :run
+end
+
 %w{python-support python-configobj python-pip python-httplib2}.each do |pkg|
     package pkg do
         action :upgrade
@@ -45,10 +49,10 @@ end
 
 bash "diamond-set-user" do
     user "root"
-    code <<-EOH
+    self.code <<-EOM
         sed --in-place '/^DIAMOND_USER=/d' /etc/default/diamond
         echo 'DIAMOND_USER="root"' >> /etc/default/diamond
-    EOH
+    EOM
     not_if "grep -e '^DIAMOND_USER=\"root\"' /etc/default/diamond"
     notifies :restart, "service[diamond]", :delayed
 end
