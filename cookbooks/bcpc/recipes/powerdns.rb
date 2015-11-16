@@ -26,7 +26,7 @@ nodes = results == "" ? node['fqdn'] : results
 
 chef_vault_secret "mysql-pdns" do
   data_bag 'os'
-  raw_data({ 'password' => get_config!('mysql-pdns-password') })
+  raw_data({ 'password' => get_config!('mysql-pdns-password')} )
   admins "#{ nodes },#{ bootstrap }"
   search '*:*'
   action :nothing
@@ -55,8 +55,6 @@ chef_gem 'mysql2' do
   compile_time false
 end
 
-package 'pdns-backend-mysql'
-
 mysql_connection_info = 
 {
  :host => node['pdns']['authoritative']['config']['gmysql-host'],
@@ -66,37 +64,7 @@ mysql_connection_info =
 
 mysql_database node['bcpc']['pdns_dbname'] do
   connection mysql_connection_info
-  # notifies :query, 'mysql_database[install-pdns-schema]', :immediately
   notifies :run, 'execute[install-pdns-schema]', :immediately
-end
-
-# #
-# # This schema file works great when installed via the mysql CLI, but
-# # it fails when Ruby reads it and feeds it.  This smells like an
-# # escaping problem.  Unfortunately, 'gsub' can break things that
-# # contain backspaces.  For now, it has been replaced with an
-# # 'execute' resource that invokes the mysql CLI.
-# #
-# mysql_database 'install-pdns-schema' do
-#   connection mysql_connection_info
-#   database_name node['bcpc']['pdns_dbname']
-#   sql lazy { 
-#     File.open('/usr/share/dbconfig-common/data/pdns-backend-mysql/install/mysql', 'rb')
-#         .read
-#         .gsub(/type=InnoDB/, 'engine=InnoDB')
-#   }
-#   action :nothing
-#   notifies :reload, 'service[pdns]'
-# end
-
-schema_path = '/usr/share/dbconfig-common/data/pdns-backend-mysql/install/mysql'
-execute 'install-pdns-schema' do
-  command "cat #{schema_path} | " +
-    "perl -nle 's/type=Inno/engine=Inno/g; print' | " +
-    "/usr/bin/mysql -u root " + 
-    "--password=#{get_config!('mysql-root-password')} pdns"
-  action :nothing
-  notifies :reload, 'service[pdns]'
 end
 
 mysql_database_user get_config!('mysql-pdns-user') do
@@ -116,6 +84,39 @@ mysql_database_user get_config!('mysql-pdns-user') do
 end
 
 include_recipe 'pdns::authoritative_package'
+
+#
+# This schema file works great when installed via the mysql CLI, but
+# it fails when Ruby reads it and feeds via a query resource.  This
+# smells like an escaping problem.
+#
+# For now, the query resource has been replaced with an 'execute'
+# resource that invokes the mysql CLI.
+#
+schema_path = '/usr/share/dbconfig-common/data/pdns-backend-mysql/install/mysql'
+
+mysql_command_string =
+  "/usr/bin/mysql -u root " + 
+  "--host=#{node['pdns']['authoritative']['config']['gmysql-host']} " +
+  "--password='#{get_config!('mysql-root-password')}' pdns"
+
+execute 'install-pdns-schema' do
+  command "cat #{schema_path} | " +
+    "perl -nle 's/type=Inno/engine=Inno/g; print' | " +
+    mysql_command_string
+
+  not_if {
+    c = Mixlib::ShellOut.new('echo "select id from domains limit 1;" | ' +
+                             mysql_command_string)
+    c.run_command
+    c.status.success?
+  }
+
+  sensitive true
+      
+  notifies :reload, 'service[pdns]'
+end
+
 
 reverse_dns_zone = node['bcpc']['floating']['reverse_dns_zone'] || calc_reverse_dns_zone(node['bcpc']['floating']['cidr'])
 
