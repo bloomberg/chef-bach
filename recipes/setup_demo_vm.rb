@@ -12,8 +12,8 @@ total_node_count = worker_node_count + 2
   my_netmask = '255.255.255.240'
 
   bach_cluster_node vm_name do
-    cpus 1
-    memory 3072
+    cpus node[:bach][:cluster][:demo][:cpus]
+    memory node[:bach][:cluster][:demo][:memory]
 
     management_ip vm_mgmt_ip
     management_netmask my_netmask

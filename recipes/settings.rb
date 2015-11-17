@@ -1,6 +1,6 @@
 require 'chef/provisioning/vagrant_driver'
 with_driver 'vagrant'
- 
+
 vagrant_box 'precise64' do
   url 'https://cloud-images.ubuntu.com/vagrant/precise/current/precise-server-cloudimg-amd64-vagrant-disk1.box'
 end
