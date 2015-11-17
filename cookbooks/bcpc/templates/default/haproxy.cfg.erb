@@ -6,34 +6,28 @@
 
 global
   daemon
-  user  haproxy
-  group  haproxy
-  pidfile  /var/run/haproxy.pid
+  user haproxy
+  group haproxy
+  pidfile /var/run/haproxy.pid
   log /dev/log local0 info
 
 defaults
-  log  global
-  maxconn  8000
+  log global
+  maxconn 8000
   source <%="#{node[:bcpc][:management][:vip]}"%>
-  mode  http
-  option httpclose
+  mode http
   option abortonclose
   option tcplog
   option dontlognull
   option nolinger
   option  redispatch
-  retries  3
-  timeout  http-request 10s
-  timeout  queue 1m
-  timeout  connect 5s
-  timeout  check 10s
-  timeout  client 30m
-  timeout  server 30m
-
-listen stats 127.0.0.1:1936
-  mode http
-  stats enable
-  stats uri /
+  retries 3
+  timeout http-request 10s
+  timeout queue 1m
+  timeout connect 5s
+  timeout check 10s
+  timeout client 30m
+  timeout server 30m
 
 listen stats <%="#{node[:bcpc][:management][:ip]}"%>:1936
   mode http
@@ -54,14 +48,24 @@ listen memcached <%="#{node[:bcpc][:management][:vip]}"%>:11211
 
 <% if @mysql_servers.length > 0 -%>
 listen mysql-galera <%="#{node[:bcpc][:management][:vip]}"%>:3306
-  timeout  client 24h
-  timeout  server 24h
+  timeout client 24h
+  timeout server 24h
   mode tcp
   balance leastconn
-  option  tcplog
-option tcpka
-  option httpchk
+  option tcplog
+  option tcpka
 <% @mysql_servers.each do |server| -%>
   <%= "server #{server['hostname']} #{server['bcpc']['management']['ip']}:3306 check port 3307 inter 1s rise 1 fall 1 observe layer4 backup" %>
+<% end -%>
+<% end -%>
+
+<% if @httpfs_servers.length > 0 -%>
+listen httpfs <%="#{node[:bcpc][:floating][:vip]}"%>:14000
+  timeout client 24h
+  timeout server 24h
+  balance roundrobin
+  option httpchk GET / 
+<% @httpfs_servers.each do |server| -%>
+  <%= "redirect code 301 prefix http://#{float_host(server['fqdn'])}:14000" %>
 <% end -%>
 <% end -%>
