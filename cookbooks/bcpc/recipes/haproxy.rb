@@ -55,8 +55,10 @@ end
 template "/etc/haproxy/haproxy.cfg" do
   source "haproxy.cfg.erb"
   mode 00644
-  variables(:mysql_servers => get_nodes_for("mysql","bcpc")
-  notifies :restart, "service[haproxy]", :immediately
+  variables(:mysql_servers => get_nodes_for("mysql", "bcpc"),
+    :httpfs_servers => get_nodes_for("httpfs", "bcpc-hadoop")
+  )
+	notifies :restart, "service[haproxy]", :immediately
 end
 
 service "haproxy" do
