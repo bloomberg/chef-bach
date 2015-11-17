@@ -44,30 +44,22 @@ package "haproxy" do
 end
 
 bash "enable-defaults-haproxy" do
-    user "root"
-    code <<-EOH
-        sed --in-place '/^ENABLED=/d' /etc/default/haproxy
-        echo 'ENABLED=1' >> /etc/default/haproxy
-    EOH
-    not_if "grep -e '^ENABLED=1' /etc/default/haproxy"
+  user "root"
+  code <<-EOH
+    sed --in-place '/^ENABLED=/d' /etc/default/haproxy
+    echo 'ENABLED=1' >> /etc/default/haproxy
+  EOH
+  not_if "grep -e '^ENABLED=1' /etc/default/haproxy"
 end
 
 template "/etc/haproxy/haproxy.cfg" do
-    source "haproxy.cfg.erb"
-    mode 00644
-	variables( :nova_servers => get_nodes_for("nova-work","bcpc"),
-                   :mysql_servers => get_nodes_for("mysql","bcpc"),
-                   :rabbitmq_servers => get_nodes_for("rabbitmq","bcpc"),
-                   :ldap_servers => get_nodes_for("389ds","bcpc"),
-                   :keystone_servers => get_nodes_for("keystone","bcpc"),
-                   :glance_servers => get_nodes_for("glance","bcpc"),
-                   :cinder_servers => get_nodes_for("cinder","bcpc"),
-                   :horizon_servers => get_nodes_for("horizon","bcpc"),
-                   :radosgw_servers => get_nodes_for("ceph-rgw","bcpc"))
-	notifies :restart, "service[haproxy]", :immediately
+  source "haproxy.cfg.erb"
+  mode 00644
+  variables(:mysql_servers => get_nodes_for("mysql","bcpc")
+  notifies :restart, "service[haproxy]", :immediately
 end
 
 service "haproxy" do
-    restart_command "service haproxy stop && service haproxy start && sleep 5"
-    action [ :enable, :start ]
+  restart_command "service haproxy stop && service haproxy start && sleep 5"
+  action [ :enable, :start ]
 end
