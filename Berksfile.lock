@@ -86,6 +86,7 @@ GRAPH
     bcpc (>= 0.5.0)
     dpkg_autostart (>= 0.0.0)
     java (>= 1.28.0)
+    maven (~> 2)
     pam (>= 0.0.0)
     sysctl (>= 0.0.0)
     ulimit (>= 0.0.0)

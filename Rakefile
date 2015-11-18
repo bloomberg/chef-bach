@@ -87,12 +87,12 @@ namespace :setup do
   end
 
   desc 'Provision a demo environment using Vagrant images'
-  task :demo_vm do
+  task :demo do
     chef_zero 'setup_demo_vm'
   end
 
   desc 'Provision a demo environment using pxe'
-  task :demo_vm do
+  task :pxe_demo do
     chef_zero 'setup_pxe_demo_vm'
   end
 
