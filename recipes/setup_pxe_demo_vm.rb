@@ -49,7 +49,13 @@ with_driver 'vagrant'
     end
   end
 
-  machine_execute "#{vm_name}-cobbler-registration" do    
+  machine_execute "#{vm_name}-cobbler-remove" do    
+    machine bootstrap_fqdn
+    chef_server chef_server_config_hash
+    command "cobbler system remove --name=#{vm_name}"
+  end
+
+  machine_execute "#{vm_name}-cobbler-add" do    
     machine bootstrap_fqdn
     chef_server chef_server_config_hash
 
@@ -57,15 +63,11 @@ with_driver 'vagrant'
       mac_address = get_vbox_vm_info(name: vm_name)
         .fetch('macaddress1').scan(/../).join(':')
 
-      remove_command = "cobbler system remove --name=#{vm_name}"
-      add_command =
-        "cobbler system add --name=#{vm_name} " +
+      "cobbler system add --name=#{vm_name} " +
         "--hostname=#{fqdn_for(vm_name)} " +
         "--profile=bcpc_host " +
         "--ip-address=#{vm_mgmt_ip} " +
         "--mac=#{mac_address}"
-
-      "#{remove_command}; #{add_command}"
     }
   end
 end

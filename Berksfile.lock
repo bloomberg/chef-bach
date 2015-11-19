@@ -17,11 +17,10 @@ DEPENDENCIES
   bcpc_jmxtrans
     path: cookbooks/bcpc_jmxtrans
   chef-vault
-    git: https://github.com/http-418/chef-vault
-    revision: 5c24c3c9c03fd19aeff18e5457bf4de5eb1f15a9
+    git: https://github.com/chef-cookbooks/chef-vault
+    revision: cd45d3485b84392b46fd93e3aaeb65bf9b7ebff1
   cobblerd
-    git: https://github.com/bloomberg/cobbler-cookbook
-    revision: 868334b4b4d3c760e9669a0adba0279e89d523bc
+    path: ../cobbler-cookbook
   hannibal
     path: cookbooks/hannibal
   jmxtrans
@@ -30,7 +29,8 @@ DEPENDENCIES
   kafka-bcpc
     path: cookbooks/kafka-bcpc
   pdns
-    path: ../pdns
+    git: https://github.com/http-418/pdns
+    revision: 525ec1aa5d3dd1d6849e82f9a08bd23e4817a01e
 
 GRAPH
   7-zip (1.0.2)
@@ -86,7 +86,7 @@ GRAPH
     bcpc (>= 0.5.0)
     dpkg_autostart (>= 0.0.0)
     java (>= 1.28.0)
-    maven (~> 2)
+    maven (>= 2.0.0)
     pam (>= 0.0.0)
     sysctl (>= 0.0.0)
     ulimit (>= 0.0.0)
@@ -105,9 +105,9 @@ GRAPH
   chef-vault (1.3.2)
   chef_handler (1.2.0)
   cobblerd (0.3.0)
-    apt (~> 2.4)
-    poise (~> 1.0)
-    yum-epel (~> 0.3)
+    apt (>= 0.0.0)
+    poise (~> 2.4)
+    yum-epel (>= 0.0.0)
   cron (1.7.0)
   database (4.0.9)
     postgresql (>= 1.0.0)
@@ -132,7 +132,7 @@ GRAPH
     ulimit (>= 0.0.0)
   logrotate (1.9.2)
   magic (1.5.0)
-  maven (2.0.0)
+  maven (2.0.1)
     ark (~> 0.9)
     java (~> 1.20)
     windows (>= 0.0.0)
@@ -147,7 +147,7 @@ GRAPH
     build-essential (>= 0.0.0)
     database (>= 0.0.0)
     resolvconf (>= 0.0.0)
-  poise (1.0.12)
+  poise (2.4.0)
   postgresql (3.4.21)
     apt (>= 1.9.0)
     build-essential (>= 0.0.0)
@@ -164,7 +164,7 @@ GRAPH
   ubuntu (1.2.0)
     apt (>= 0.0.0)
   ulimit (0.3.3)
-  windows (1.38.3)
+  windows (1.38.4)
     chef_handler (>= 0.0.0)
   yum (3.8.2)
   yum-chef (0.2.1)

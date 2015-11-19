@@ -3,4 +3,5 @@
 chef
 cookbooks
 environments
+local-mode-cache
 vendor
