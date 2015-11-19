@@ -1,3 +1,8 @@
+# Don't use proxies to talk to the bootstrap node's chef server.
+Chef::Config['no_proxy'] = "#{bootstrap_fqdn},#{bootstrap_ip}"
+ENV['no_proxy'] = Chef::Config['no_proxy']
+log "Resetting no_proxy variables to: #{Chef::Config['no_proxy']}"
+
 require 'chef/provisioning/ssh_driver'
 
 # Reminder: I can't provision external DNS on the bootstrap without knowing macs for a demo environment.  Ugly.  I guess "use a real external DNS" is gonna be a config parameter.
@@ -26,6 +31,11 @@ end
 worker_node_count = node[:bach][:cluster][:node_count].to_i
 total_node_count = worker_node_count + 2
 
+# We will use the vagrant driver to execute cobbler registrations on the bootstrap VM.
+# To do: use SSH driver, get credentials out of the data bags.
+require 'chef/provisioning/vagrant_driver'
+with_driver 'vagrant'
+
 1.upto(total_node_count).each do |n|
   vm_name = "bach-vm#{n}-b#{build_id}"
   vm_mgmt_ip = "10.0.101." + (3 + n).to_s
@@ -39,4 +49,23 @@ total_node_count = worker_node_count + 2
     end
   end
 
+  machine_execute "#{vm_name}-cobbler-registration" do    
+    machine bootstrap_fqdn
+    chef_server chef_server_config_hash
+
+    command lazy {
+      mac_address = get_vbox_vm_info(name: vm_name)
+        .fetch('macaddress1').scan(/../).join(':')
+
+      remove_command = "cobbler system remove --name=#{vm_name}"
+      add_command =
+        "cobbler system add --name=#{vm_name} " +
+        "--hostname=#{fqdn_for(vm_name)} " +
+        "--profile=bcpc_host " +
+        "--ip-address=#{vm_mgmt_ip} " +
+        "--mac=#{mac_address}"
+
+      "#{remove_command}; #{add_command}"
+    }
+  end
 end

@@ -181,3 +181,8 @@ machine bootstrap_fqdn do
   }
   role 'BCPC-Bootstrap'
 end
+
+machine_execute "blah-cobbler-registration" do    
+  machine bootstrap_fqdn
+  command "ls"
+end

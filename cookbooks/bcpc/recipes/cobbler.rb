@@ -47,6 +47,7 @@ node.default[:cobbler][:web_password] = get_config( 'web-password', 'cobbler', '
 
 package "isc-dhcp-server"
 
+include_recipe 'cobblerd'
 include_recipe "cobblerd::web"
 
 template "/etc/cobbler/settings" do
@@ -67,11 +68,13 @@ cobbler_image 'ubuntu-12.04-mini' do
   source "#{get_binary_server_url}/ubuntu-12.04-mini.iso"
   os_version 'precise'
   os_breed 'ubuntu'
+  action :import
 end
 
 cobbler_profile "bcpc_host" do
   kickstart "cobbler.bcpc_ubuntu_host.preseed"
   distro "ubuntu-12.04-mini-x86_64"
+  action :import
 end
 
 service "isc-dhcp-server" do

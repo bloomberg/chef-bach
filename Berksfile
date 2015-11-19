@@ -13,14 +13,15 @@ cookbook 'bcpc_jmxtrans', path: "./cookbooks/bcpc_jmxtrans"
 cookbook 'hannibal', path: "./cookbooks/hannibal"
 cookbook 'kafka-bcpc', path: "./cookbooks/kafka-bcpc"
 
-# chef-vault forked, pending acceptance of a PR.
+# chef-vault from git, pending release to supermarket
 cookbook 'chef-vault',
-  git: 'https://github.com/http-418/chef-vault'
+  git: 'https://github.com/chef-cookbooks/chef-vault',
+  revision: 'cd45d3485b84392b46fd93e3aaeb65bf9b7ebff1'
 
-# cobblerd 0.3.0 isn't on the supermarket.
+# cobblerd forked, pending destruction of earth by moon.
 cookbook 'cobblerd', 
-  git: 'https://github.com/bloomberg/cobbler-cookbook',
-  revision: '868334b4b4d3c760e9669a0adba0279e89d523bc'
+  git: 'https://github.com/http-418/cobbler-cookbook',
+  branch: 'cobbler_profile'
 
 # jmxtrans 1.0+ isn't on the supermarket.
 cookbook 'jmxtrans', 
@@ -29,4 +30,4 @@ cookbook 'jmxtrans',
 
 # pdns forked, pending acceptance of a PR.
 cookbook 'pdns',
-  path: '/home/ajones/src.dev/pdns'
+  git: 'https://github.com/http-418/pdns'
