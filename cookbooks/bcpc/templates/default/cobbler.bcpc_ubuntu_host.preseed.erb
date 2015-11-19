@@ -61,10 +61,10 @@ d-i     user-setup/allow-password-weak  boolean false
 d-i     user-setup/encrypt-home boolean false
 d-i     passwd/user-default-groups      string adm cdrom dialout lpadmin plugdev sambashare
 d-i     apt-setup/services-select       multiselect security
-<% if @node[:bcpc][:bootstrap][:proxy].nil? %>
+<% if @node[:bach][:http_proxy].nil? %>
 d-i     mirror/http/proxy string
 <% else %>
-d-i     mirror/http/proxy string <%= @node[:bcpc][:bootstrap][:proxy] %>
+d-i     mirror/http/proxy string <%= @node[:bach][:http_proxy] %>
 <% end %>
 <% if @node[:bcpc][:bootstrap][:mirror].nil? %>
 d-i     apt-setup/security_host string security.ubuntu.com

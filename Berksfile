@@ -20,8 +20,7 @@ cookbook 'chef-vault',
 
 # cobblerd forked, pending destruction of earth by moon.
 cookbook 'cobblerd', 
-  git: 'https://github.com/http-418/cobbler-cookbook',
-  branch: 'cobbler_profile'
+  git: 'https://github.com/http-418/cobbler-cookbook'
 
 # jmxtrans 1.0+ isn't on the supermarket.
 cookbook 'jmxtrans', 

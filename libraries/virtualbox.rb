@@ -91,6 +91,7 @@ def create_vbox_vm(name:)
   unless(target_controller_name == current_controller_name)
     system('vboxmanage', 'storagectl', name,
            '--name', target_controller_name,
+           '--portcount', '5',
            '--add', 'sata')
   end
 
