@@ -77,7 +77,7 @@ bash "create-hive-scratch" do
 end
 
 ruby_block "hive-metastore-database-creation" do
-  cmd = "mysql -uroot -p#{get_config('mysql-root-password')} -e"
+  cmd = "mysql -uroot -p#{get_config!('password','mysql-root','os')} -e"
   privs = "SELECT,INSERT,UPDATE,DELETE,LOCK TABLES,EXECUTE" # todo node[:bcpc][:hadoop][:hive_db_privs].join(",")
   block do
     if not system " #{cmd} 'SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = \"metastore\"' | grep -q metastore" then
@@ -89,7 +89,7 @@ ruby_block "hive-metastore-database-creation" do
         USE metastore;
         SOURCE /usr/hdp/current/hive-metastore/scripts/metastore/upgrade/mysql/hive-schema-0.14.0.mysql.sql;
         EOF
-      IO.popen("mysql -uroot -p#{get_config('mysql-root-password')}", "r+") do |db|
+      IO.popen("mysql -uroot -p#{get_config!('password','mysql-root','os')}", "r+") do |db|
         db.write code
       end
       self.notifies :enable, "service[hive-metastore]", :delayed

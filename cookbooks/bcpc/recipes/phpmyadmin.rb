@@ -24,7 +24,7 @@ bash "phpmyadmin-debconf-setup" do
   code <<-EOH
     set -e
     debconf-set-selections <<< 'phpmyadmin phpmyadmin/dbconfig-install boolean true'
-    debconf-set-selections <<< 'phpmyadmin phpmyadmin/mysql/admin-pass password #{get_config('mysql-root-password')}'
+    debconf-set-selections <<< 'phpmyadmin phpmyadmin/mysql/admin-pass password #{get_config!('password','mysql-root','os')}'
     debconf-set-selections <<< 'phpmyadmin phpmyadmin/mysql/app-pass password #{get_config('mysql-phpmyadmin-password')}' 
     debconf-set-selections <<< 'phpmyadmin phpmyadmin/reconfigure-webserver multiselect apache2' 
   EOH
