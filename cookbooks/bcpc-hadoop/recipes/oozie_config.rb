@@ -3,8 +3,35 @@
 # Description : To setup oozie configuration only.
 
 # Create oozie realted passwords
-make_config('oozie-keystore-password', secure_password)
-make_config('mysql-oozie-password', secure_password)
+oozie_keystore_password = get_config("oozie-keystore-password")
+if oozie_keystore_password.nil?
+  oozie_keystore_password = secure_password
+end
+
+mysql_oozie_password = get_config("mysql-oozie-password")
+if mysql_oozie_password.nil?
+  mysql_oozie_password = secure_password
+end
+
+bootstrap = get_bootstrap
+results = get_nodes_for("oozie_config").map!{ |x| x['fqdn'] }.join(",")
+nodes = results == "" ? node['fqdn'] : results
+
+chef_vault_secret "oozie-keystore" do
+  data_bag 'hadoop'
+  raw_data({ 'password' => oozie_keystore_password })
+  admins "#{ nodes },#{ bootstrap }"
+  search '*:*'
+  action :nothing
+end.run_action(:create_if_missing)
+
+chef_vault_secret "mysql-oozie" do
+  data_bag 'hadoop'
+  raw_data({ 'password' => mysql_oozie_password })
+  admins "#{ nodes },#{ bootstrap }"
+  search '*:*'
+  action :nothing
+end.run_action(:create_if_missing)
 
 directory "/etc/oozie/conf.#{node.chef_environment}" do
   owner "root"
@@ -33,7 +60,11 @@ end
   }.each do |t|
   template "/etc/oozie/conf/#{t}" do
     source "ooz_#{t}.erb"
-    mode 0644
+    if t == "oozie-site.xml"
+      mode 0640
+    else
+      mode 0644
+    end
     variables(:mysql_hosts => node[:bcpc][:hadoop][:mysql_hosts].map{ |m| m[:hostname] },
               :zk_hosts => node[:bcpc][:hadoop][:zookeeper][:servers],
               :ooz_hosts => node[:bcpc][:hadoop][:oozie_hosts],
