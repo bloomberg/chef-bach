@@ -70,4 +70,10 @@ with_driver 'vagrant'
         "--mac=#{mac_address}"
     }
   end
+  
+  machine_execute "#{vm_name}-cobbler-sync" do    
+    machine bootstrap_fqdn
+    chef_server chef_server_config_hash
+    command 'cobbler sync'
+  end
 end
