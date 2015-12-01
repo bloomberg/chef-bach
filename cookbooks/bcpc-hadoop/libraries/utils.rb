@@ -391,7 +391,7 @@ end
 
 def has_vip?
   cmd = Mixlib::ShellOut.new(
-    "ip addr show dev #{node[:bcpc][:management][:interface]}", :timeout => 10
+    "ip addr show", :timeout => 10
   ).run_command
   cmd.stderr.empty? && cmd.stdout.include?(node[:bcpc][:management][:vip])
 end

@@ -57,6 +57,8 @@ ruby_block "zabbix_monitor" do
       raise "No graphite hosts found"
     end
 
+    trapper_hosts = graphite_hosts + "," + node[:bcpc][:management][:vip]
+
     #cron_check_cond = Array.new
 
     # Create zabbix host group same as the chef environment name
@@ -172,7 +174,7 @@ ruby_block "zabbix_monitor" do
           :name => trigger_key, :description => trigger_key,
           :key_ => trigger_key, :type => 2, :value_type => value_type,
           :data_type => 0, :history => history_days, :trends => trend_days,
-          :hostid => "#{host_id}", :trapper_hosts => graphite_hosts,
+          :hostid => "#{host_id}", :trapper_hosts => trapper_hosts,
           :status => status
         }
 
