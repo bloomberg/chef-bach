@@ -183,6 +183,15 @@ if ! [[ -f python/pyrabbit-1.0.1.tar.gz ]]; then
 fi
 FILES="pyrabbit-1.0.1.tar.gz $FILES"
 
+if ! [[ -f python-pyparsing_2.0.6_all.deb ]]; then
+  while ! $(file pyparsing-2.0.6.zip | grep -q 'Zip archive data'); do
+    $CURL -O -L https://pypi.python.org/packages/source/p/pyparsing/pyparsing-2.0.6.zip
+  done
+  unzip -o pyparsing-2.0.6.zip; rm pyparsing-2.0.6.zip
+  fpm --epoch $EPOCH --log info --python-install-bin /opt/graphite/bin -f -s python -t deb pyparsing-2.0.6/setup.py
+fi
+FILES="python-pyparsing_2.0.6_all.deb $FILES"
+
 if ! [[ -f python-pytz_2015.6_all.deb ]]; then 
   while ! $(file pytz-2015.6.zip | grep -q 'Zip archive data'); do
     $CURL -O -L https://pypi.python.org/packages/source/p/pytz/pytz-2015.6.zip
