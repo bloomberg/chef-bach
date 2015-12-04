@@ -1,0 +1,21 @@
+drop table if exists leader_election;
+create table leader_election (
+  id tinyint unsigned not null,
+  host_id varchar(128) not null,
+  heartbeat timestamp not null default current_timestamp,
+  primary key (id)
+) engine=innodb;
+
+drop procedure if exists elect_leader;
+delimiter //
+create procedure elect_leader(in host varchar(128))
+begin
+  insert ignore into leader_election (
+    id, host_id, heartbeat
+  ) values (
+      1, host, now()
+  ) on duplicate key update
+      host_id = if(heartbeat < current_timestamp - interval <%= node['chef_client']['interval'].to_i + node['chef_client']['splay'].to_i %> second,values(host_id),host_id),
+      heartbeat = if(host_id = values(host_id),values(heartbeat),heartbeat);
+end//
+delimiter ;

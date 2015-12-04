@@ -304,7 +304,7 @@ ruby_block "zabbix_monitor" do
     #  Chef::Log.debug "Trigger cron_check already defined"
     #end
   end
-  only_if { has_vip? }
+  only_if { is_zabbix_leader?(node[:hostname]) }
 end
 
 cron "Run script to query graphite and send data to zabbix" do
@@ -312,4 +312,5 @@ cron "Run script to query graphite and send data to zabbix" do
   hour   "*"
   user   "nobody"
   command  "pgrep -u nobody 'zabbix_sender' > /dev/null || /usr/local/bin/run_zabbix_sender.sh"
+  action is_zabbix_leader?(node[:hostname]) ? :create : :delete
 end
