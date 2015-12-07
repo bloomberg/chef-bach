@@ -15,7 +15,7 @@ begin
   ) values (
       1, host, now()
   ) on duplicate key update
-      host_id = if(heartbeat < current_timestamp - interval <%= node['chef_client']['interval'].to_i + node['chef_client']['splay'].to_i %> second,values(host_id),host_id),
+      host_id = if(heartbeat < current_timestamp - interval <%= (node['bcpc']['zabbix']['chef_client_check_interval'] / 60).ceil %> minute,values(host_id),host_id),
       heartbeat = if(host_id = values(host_id),values(heartbeat),heartbeat);
 end//
 delimiter ;
