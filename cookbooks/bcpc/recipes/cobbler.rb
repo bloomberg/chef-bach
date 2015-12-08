@@ -37,7 +37,8 @@ end
 chef_vault_secret "cobbler" do
   data_bag 'os'
   raw_data({ 'web-password' => web_passwd, 'root-password' => root_passwd, 'root-password-salted' => root_passwd.crypt("$6$" + rand(36**8).to_s(36)) })
-  admins Chef::Config[:node_name]
+  admins [Chef::Config[:node_name],]
+  #node['bach']['cluster']['user']['name']]
   search '*:*'
   action :nothing
 end.run_action(:create_if_missing)

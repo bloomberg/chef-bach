@@ -11,7 +11,7 @@ directory gems_dir do
 end
 
 {
- 'chef-vault' => '2.2.4',
+ 'chef-vault' => '2.6.1',
  'mysql2' => '0.4.1',
  'patron' => '0.4.20',
  'sequel' => '4.27.0',
