@@ -97,33 +97,27 @@ link "#{Chef::Config[:chef_repo_path]}/.chef" do
   to cluster_data_dir
 end
 
+knife_environment = {'http_proxy'  => nil,
+                     'https_proxy' => nil,
+                     'HTTP_PROXY'  => nil,
+                     'HTTPS_PROXY' => nil,
+                     'KNIFE_HOME'  => cluster_data_dir}
+
 execute 'upload-cookbooks' do
   command "bundle exec knife cookbook -VV upload --all --cookbook-path #{Chef::Config[:cookbook_path]} --force"
-  environment({'http_proxy'  => nil,
-               'https_proxy' => nil,
-               'HTTP_PROXY'  => nil,
-               'HTTPS_PROXY' => nil,
-               'KNIFE_HOME'  => cluster_data_dir})
+  environment knife_environment
   cwd File.dirname(__FILE__)
 end
 
 execute 'upload-environments' do
   command "bundle exec knife upload -VV --force --chef-repo-path #{Chef::Config[:chef_repo_path]} environments"
-  environment({'http_proxy'  => nil,
-               'https_proxy' => nil,
-               'HTTP_PROXY'  => nil,
-               'HTTPS_PROXY' => nil,
-               'KNIFE_HOME'  => cluster_data_dir})
+  environment knife_environment
   cwd Chef::Config[:chef_repo_path]
 end
 
 execute 'upload-roles' do
   command "bundle exec knife upload -VV --force --chef-repo-path #{Chef::Config[:chef_repo_path]} roles"
-  environment({'http_proxy'  => nil,
-               'https_proxy' => nil,
-               'HTTP_PROXY'  => nil,
-               'HTTPS_PROXY' => nil,
-               'KNIFE_HOME'  => cluster_data_dir})
+  environment knife_environment
   cwd Chef::Config[:chef_repo_path]
 end
 
@@ -131,26 +125,18 @@ end
 # https://www.chef.io/blog/2014/11/10/security-update-hosted-chef/
 execute "update-bach-data-bag-acls" do
   command 'bundle exec knife acl add group clients containers data create,read,update '
-  environment({'http_proxy'  => nil,
-               'https_proxy' => nil,
-               'HTTP_PROXY'  => nil,
-               'HTTPS_PROXY' => nil,
-               'KNIFE_HOME'  => cluster_data_dir})
+  environment knife_environment
   cwd Chef::Config[:chef_repo_path]
 end
 
-# Allow clients to readeach other. Is this a good idea?
+# Allow clients to read each other. Is this a good idea?
 #
 # bcpc::haproxy attempts to read the bach-vm-bootstrap client when the
 # haproxy-stats secret is created.
 #
 execute "update-bach-client-acls" do
   command 'bundle exec knife acl add group clients containers clients read'
-  environment({'http_proxy'  => nil,
-               'https_proxy' => nil,
-               'HTTP_PROXY'  => nil,
-               'HTTPS_PROXY' => nil,
-               'KNIFE_HOME'  => cluster_data_dir})
+  environment knife_environment
   cwd Chef::Config[:chef_repo_path]
 end
 
@@ -172,17 +158,40 @@ if(node['bach']['https_proxy'])
      "https_proxy \"#{node['bach']['https_proxy']}\"\n"
 end   
 
-# Re-provision the bootstrap VM as its own client
+#
+# Re-provision the bootstrap VM as its own client.
+#
+# The first chef run is meant only to get us a client key on the Chef server.
+#
 machine bootstrap_fqdn do
   chef_server chef_server_config_hash
   add_machine_options :convergence_options => {
     :chef_config => bootstrap_chef_client_config,
     :ssl_verify_mode => :verify_none
   }
-  role 'BCPC-Bootstrap'
+  role 'Basic'
+  complete false
 end
 
-machine_execute "blah-cobbler-registration" do    
-  machine bootstrap_fqdn
-  command "ls"
+#
+# Pre-populate the cobbler root secret so that our user account is
+# able to read it.  This is a bug in Chef:
+#
+# https://github.com/chef/chef-server/issues/20
+#
+execute "create-cobbler-secret" do
+  command 'bundle exec knife vault'
+  environment knife_environment
+  cwd Chef::Config[:chef_repo_path]
 end
+
+# # Provision with a complete role.
+# machine bootstrap_fqdn do
+#   chef_server chef_server_config_hash
+#   add_machine_options :convergence_options => {
+#     :chef_config => bootstrap_chef_client_config,
+#     :ssl_verify_mode => :verify_none
+#   }
+#   role 'BCPC-Bootstrap'
+#   complete false
+# end

@@ -1,4 +1,5 @@
 DEPENDENCIES
+  apt
   bach_bootstrap
     path: cookbooks/bach_bootstrap
   bach_cluster
@@ -16,6 +17,8 @@ DEPENDENCIES
     path: cookbooks/bcpc-hadoop
   bcpc_jmxtrans
     path: cookbooks/bcpc_jmxtrans
+  chef-client
+  chef-ingredient
   chef-vault
     git: https://github.com/chef-cookbooks/chef-vault
     revision: cd45d3485b84392b46fd93e3aaeb65bf9b7ebff1
@@ -23,14 +26,20 @@ DEPENDENCIES
     path: ../cobbler-cookbook
   hannibal
     path: cookbooks/hannibal
+  java
   jmxtrans
     git: https://github.com/jmxtrans/jmxtrans-cookbook
     revision: d8ee2396eca91ef8e0e558490bde075869b787de
+  kafka
   kafka-bcpc
     path: cookbooks/kafka-bcpc
+  maven
+  ntp
+  pam
   pdns
     git: https://github.com/http-418/pdns
     revision: 525ec1aa5d3dd1d6849e82f9a08bd23e4817a01e
+  ubuntu
 
 GRAPH
   7-zip (1.0.2)
@@ -45,23 +54,7 @@ GRAPH
     bach_common (>= 0.0.0)
     chef-ingredient (>= 0.0.0)
   bach_cluster (0.1.0)
-    apt (>= 0.0.0)
-    bach_bootstrap (>= 0.0.0)
-    bach_repository (>= 0.0.0)
-    bach_spark (>= 0.0.0)
     bcpc (>= 0.0.0)
-    bcpc-hadoop (>= 0.0.0)
-    bcpc_jmxtrans (>= 0.0.0)
-    chef-client (>= 0.0.0)
-    chef-ingredient (>= 0.0.0)
-    hannibal (>= 0.0.0)
-    java (>= 0.0.0)
-    kafka (>= 0.0.0)
-    kafka-bcpc (>= 0.0.0)
-    maven (>= 0.0.0)
-    ntp (>= 0.0.0)
-    pam (>= 0.0.0)
-    ubuntu (>= 0.0.0)
   bach_common (0.1.0)
     apt (>= 0.0.0)
   bach_repository (0.1.0)
@@ -98,7 +91,7 @@ GRAPH
     cron (>= 1.2.0)
     logrotate (>= 1.2.0)
     windows (~> 1.37)
-  chef-ingredient (0.14.0)
+  chef-ingredient (0.15.0)
     apt-chef (>= 0.2.0)
     yum-chef (>= 0.2.0)
   chef-sugar (3.1.1)
@@ -132,7 +125,7 @@ GRAPH
     ulimit (>= 0.0.0)
   logrotate (1.9.2)
   magic (1.5.0)
-  maven (2.0.1)
+  maven (2.1.0)
     ark (~> 0.9)
     java (~> 1.20)
     windows (>= 0.0.0)
@@ -140,7 +133,7 @@ GRAPH
   ohai (2.0.4)
   openssl (4.4.0)
     chef-sugar (>= 3.1.1)
-  packagecloud (0.1.0)
+  packagecloud (0.1.1)
   pam (1.0.1)
   pdns (1.0.5)
     apt (>= 0.0.0)
@@ -159,7 +152,7 @@ GRAPH
   runit (1.7.4)
     packagecloud (>= 0.0.0)
   sudo (2.7.2)
-  sysctl (0.6.2)
+  sysctl (0.7.0)
     ohai (>= 0.0.0)
   ubuntu (1.2.0)
     apt (>= 0.0.0)
@@ -167,11 +160,11 @@ GRAPH
   windows (1.38.4)
     chef_handler (>= 0.0.0)
   yum (3.8.2)
-  yum-chef (0.2.1)
+  yum-chef (0.2.2)
     yum (>= 3.2)
   yum-epel (0.6.4)
     yum (~> 3.2)
-  zookeeper (2.13.0)
+  zookeeper (3.0.0)
     apt (>= 0.0.0)
     build-essential (>= 2.0.2)
     java (>= 0.0.0)

@@ -7,6 +7,7 @@ long_description 'bach_bootstrap contains recipes for a BACH bootstrap host'
 version          '0.1.0'
 
 supports 'ubuntu', '12.04'
+
 depends 'bach_common'
 depends 'chef-ingredient'
 

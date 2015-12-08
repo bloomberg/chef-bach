@@ -22,6 +22,15 @@ require 'chef/provisioning/ssh_driver'
 # wait until it answers on 22
 # use ssh profivisioning
 
+# chef_vault_secret "cobbler" do
+#   data_bag 'os'
+#   raw_data({ 'web-password' => web_passwd, 'root-password' => root_passwd, 'root-password-salted' => root_passwd.crypt("$6$" + rand(36**8).to_s(36)) })
+#   admins [Chef::Config[:node_name],]
+#   #node['bach']['cluster']['user']['name']]
+#   search '*:*'
+#   action :nothing
+# end.run_action(:create_if_missing)
+
 # See ROM-O-MATIC.md for instruction on how to generate a new gPXE ROM.
 cookbook_file pxe_rom_path do
   source 'gpxe-1.0.1-80861004.rom'

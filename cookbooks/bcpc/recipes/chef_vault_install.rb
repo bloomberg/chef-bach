@@ -19,5 +19,5 @@
 
 # See bach_repository::gems for correct version
 chef_gem 'chef-vault' do
-  version '2.2.4'
+  version '2.6.1'
 end
