@@ -204,8 +204,8 @@ ruby_block "upload-format-UUID-File" do
     Chef::Log.debug("layoutVersion stored in node is : #{node_layout_version}")
     Chef::Log.debug("layoutVersion stored in the file is #{cmd.stdout.to_i}")
 
-    if ( get_config("namenode_txn_fmt").nil? ) || ( cmd.stdout.to_i < node_layout_version )
-      make_config!("namenode_txn_fmt", Base64.encode64(IO.read("#{Chef::Config[:file_cache_path]}/nn_fmt.tgz")));
+    if ( get_bcpc_config("namenode_txn_fmt").nil? ) || ( cmd.stdout.to_i < node_layout_version )
+      make_bcpc_config!("namenode_txn_fmt", Base64.encode64(IO.read("#{Chef::Config[:file_cache_path]}/nn_fmt.tgz")));
       node.set[:bcpc][:hadoop][:hdfs][:layoutVersion] = cmd.stdout.to_i
       node.save
     elsif cmd.stdout.to_i > node_layout_version

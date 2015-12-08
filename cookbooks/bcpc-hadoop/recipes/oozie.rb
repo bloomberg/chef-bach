@@ -139,17 +139,17 @@ file "#{OOZIE_CLIENT_PATH}/oozie.sql" do
 end
 
 ruby_block "oozie-database-creation" do
-  cmd = "mysql -uroot -p#{get_config!('password','mysql-root','os')} -e"
+  cmd = "mysql -uroot -p#{get_bcpc_config('mysql-root-password')} -e"
   privs = "CREATE,INDEX,SELECT,INSERT,UPDATE,DELETE,LOCK TABLES,EXECUTE"
   block do
     if not system " #{cmd} 'SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = \"oozie\"' | grep oozie" then
       code = <<-EOF
-        CREATE DATABASE oozie;
-        GRANT #{privs} ON oozie.* TO 'oozie'@'%' IDENTIFIED BY '#{get_config('mysql-oozie-password')}';
-        GRANT #{privs} ON oozie.* TO 'oozie'@'localhost' IDENTIFIED BY '#{get_config('mysql-oozie-password')}';
-        FLUSH PRIVILEGES;
+                CREATE DATABASE oozie;
+                GRANT #{privs} ON oozie.* TO 'oozie'@'%' IDENTIFIED BY '#{get_bcpc_config('mysql-oozie-password')}';
+                GRANT #{privs} ON oozie.* TO 'oozie'@'localhost' IDENTIFIED BY '#{get_bcpc_config('mysql-oozie-password')}';
+                FLUSH PRIVILEGES;
       EOF
-      IO.popen("mysql -uroot -p#{get_config!('password','mysql-root','os')}", "r+") do |db|
+      IO.popen("mysql -uroot -p#{get_bcpc_config('mysql-root-password')}", "r+") do |db|
         db.write code
       end
       system "sudo -u oozie /usr/hdp/current/oozie-server/bin/ooziedb.sh create -sqlfile /usr/hdp/current/oozie-server/oozie.sql -run Validate DB Connection"

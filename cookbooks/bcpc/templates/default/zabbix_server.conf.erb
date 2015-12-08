@@ -102,7 +102,7 @@ DBName=<%="#{node[:bcpc][:zabbix_dbname]}"%>
 #
 # Mandatory: no
 # Default:
-DBUser=<%="#{get_config('mysql-zabbix-user')}"%>
+DBUser=<%="#{get_bcpc_config('mysql-zabbix-user')}"%>
 
 ### Option: DBPassword
 #   Database password. Ignored for SQLite.
@@ -110,7 +110,7 @@ DBUser=<%="#{get_config('mysql-zabbix-user')}"%>
 #
 # Mandatory: no
 # Default:
-DBPassword=<%="#{get_config!('password','mysql-zabbix','os')}"%>
+DBPassword=<%="#{get_bcpc_config!('password','mysql-zabbix','os')}"%>
 
 ### Option: DBSocket
 #   Path to MySQL socket.

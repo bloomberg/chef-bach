@@ -2,8 +2,8 @@
 # Recipe Name : hue_config
 # Description : To setup hue configuration only.
 
-make_config('mysql-hue-password', secure_password)
-make_config('hue-session-key', secure_password)
+make_bcpc_config('mysql-hue-password', secure_password)
+make_bcpc_config('hue-session-key', secure_password)
 
 directory "/etc/hue/conf.#{node.chef_environment}" do
   owner "root"

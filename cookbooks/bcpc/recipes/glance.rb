@@ -21,8 +21,8 @@ include_recipe "bcpc::mysql"
 include_recipe "bcpc::ceph-head"
 include_recipe "bcpc::openstack"
 
-make_config('mysql-glance-user', "glance")
-make_config('mysql-glance-password', secure_password)
+make_bcpc_config('mysql-glance-user', "glance")
+make_bcpc_config('mysql-glance-password', secure_password)
 
 package "glance" do
     action :upgrade
@@ -76,12 +76,11 @@ end
 
 ruby_block "glance-database-creation" do
     block do
-        mysql_root_password = get_config!('password','mysql-root','os')
-        if not system "mysql -uroot -p#{ mysql_root_password } -e 'SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = \"#{node['bcpc']['glance_dbname']}\"'|grep \"#{node['bcpc']['glance_dbname']}\"" then
-            %x[ mysql -uroot -p#{ mysql_root_password } -e "CREATE DATABASE #{node['bcpc']['glance_dbname']};"
-                mysql -uroot -p#{ mysql_root_password } -e "GRANT ALL ON #{node['bcpc']['glance_dbname']}.* TO '#{get_config('mysql-glance-user')}'@'%' IDENTIFIED BY '#{get_config('mysql-glance-password')}';"
-                mysql -uroot -p#{ mysql_root_password } -e "GRANT ALL ON #{node['bcpc']['glance_dbname']}.* TO '#{get_config('mysql-glance-user')}'@'localhost' IDENTIFIED BY '#{get_config('mysql-glance-password')}';"
-                mysql -uroot -p#{ mysql_root_password } -e "FLUSH PRIVILEGES;"
+        if not system "mysql -uroot -p#{get_bcpc_config('mysql-root-password')} -e 'SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = \"#{node['bcpc']['glance_dbname']}\"'|grep \"#{node['bcpc']['glance_dbname']}\"" then
+            %x[ mysql -uroot -p#{get_bcpc_config('mysql-root-password')} -e "CREATE DATABASE #{node['bcpc']['glance_dbname']};"
+                mysql -uroot -p#{get_bcpc_config('mysql-root-password')} -e "GRANT ALL ON #{node['bcpc']['glance_dbname']}.* TO '#{get_bcpc_config('mysql-glance-user')}'@'%' IDENTIFIED BY '#{get_bcpc_config('mysql-glance-password')}';"
+                mysql -uroot -p#{get_bcpc_config('mysql-root-password')} -e "GRANT ALL ON #{node['bcpc']['glance_dbname']}.* TO '#{get_bcpc_config('mysql-glance-user')}'@'localhost' IDENTIFIED BY '#{get_bcpc_config('mysql-glance-password')}';"
+                mysql -uroot -p#{get_bcpc_config('mysql-root-password')} -e "FLUSH PRIVILEGES;"
             ]
             self.notifies :run, "bash[glance-database-sync]", :immediately
             self.resolve_notification_references

@@ -17,7 +17,7 @@ service mysqlchk
         wait            = no
         user            = nobody
         server          = /usr/bin/clustercheck
-        server_args     = <%="#{get_config('mysql-check-user')}"%> <%="#{get_config!('password','mysql-check','os')}"%> 1
+        server_args     = <%="#{get_bcpc_config('mysql-check-user')}"%> <%="#{get_bcpc_config('mysql-check-password')}"%> 1
         log_on_failure  += USERID
         only_from       = <%="#{node[:bcpc][:management][:cidr]}"%>
         # recommended to put the IPs that need

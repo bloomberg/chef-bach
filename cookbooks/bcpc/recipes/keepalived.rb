@@ -19,9 +19,9 @@
 
 include_recipe "bcpc::default"
 
-make_config('keepalived-router-id', "#{(rand * 1000).to_i%254/2*2+1}")
+make_bcpc_config('keepalived-router-id', "#{(rand * 1000).to_i%254/2*2+1}")
 
-keepalived_password = get_config('keepalived-password')
+keepalived_password = get_bcpc_config('keepalived-password')
 if keepalived_password.nil?
   keepalived_password = secure_password
 end

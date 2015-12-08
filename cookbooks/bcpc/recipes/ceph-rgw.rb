@@ -105,21 +105,21 @@ execute "radosgw-all-starter" do
 end
 
 ruby_block "initialize-radosgw-admin-user" do
-  make_config('radosgw-admin-user', "radosgw")
-  make_config('radosgw-admin-access-key', secure_password_alphanum_upper(20))
-  make_config('radosgw-admin-secret-key', secure_password(40))
+  make_bcpc_config('radosgw-admin-user', "radosgw")
+  make_bcpc_config('radosgw-admin-access-key', secure_password_alphanum_upper(20))
+  make_bcpc_config('radosgw-admin-secret-key', secure_password(40))
   block do
-    rgw_admin = JSON.parse(%x[radosgw-admin user create --display-name="Admin" --uid="radosgw" --access_key=#{get_config('radosgw-admin-access-key')} --secret=#{get_config('radosgw-admin-secret-key')}])
+    rgw_admin = JSON.parse(%x[radosgw-admin user create --display-name="Admin" --uid="radosgw" --access_key=#{get_bcpc_config('radosgw-admin-access-key')} --secret=#{get_bcpc_config('radosgw-admin-secret-key')}])
   end
   not_if "radosgw-admin user info --uid='radosgw'"
 end
 
 ruby_block "initialize-radosgw-test-user" do
   block do
-    make_config('radosgw-test-user', "tester")
-    make_config('radosgw-test-access-key', secure_password_alphanum_upper(20))
-    make_config('radosgw-test-secret-key', secure_password(40))
-    rgw_admin = JSON.parse(%x[radosgw-admin user create --display-name="Tester" --uid="tester" --max-buckets=3 --access_key=#{get_config('radosgw-test-access-key')} --secret=#{get_config('radosgw-test-secret-key')} --caps="usage=read; user=read; bucket=read;" ])
+    make_bcpc_config('radosgw-test-user', "tester")
+    make_bcpc_config('radosgw-test-access-key', secure_password_alphanum_upper(20))
+    make_bcpc_config('radosgw-test-secret-key', secure_password(40))
+    rgw_admin = JSON.parse(%x[radosgw-admin user create --display-name="Tester" --uid="tester" --max-buckets=3 --access_key=#{get_bcpc_config('radosgw-test-access-key')} --secret=#{get_bcpc_config('radosgw-test-secret-key')} --caps="usage=read; user=read; bucket=read;" ])
   end
   not_if "radosgw-admin user info --uid='tester'"
 end

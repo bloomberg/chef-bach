@@ -1,8 +1,8 @@
 
 ruby_block "initialize-revelytix-config" do
     block do
-      make_config('revelytix_loom_ssl_password', secure_password)
-      make_config('revelitix_ssl_trust_password', secure_password)
+      make_bcpc_config('revelytix_loom_ssl_password', secure_password)
+      make_bcpc_config('revelitix_ssl_trust_password', secure_password)
     end
 end
 

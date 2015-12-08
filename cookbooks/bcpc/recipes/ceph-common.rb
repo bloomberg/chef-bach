@@ -34,15 +34,15 @@ end
     end
 end
 
-make_config('ceph-fs-uuid', %x[uuidgen -r].strip)
-make_config('ceph-mon-key', ceph_keygen)
+make_bcpc_config('ceph-fs-uuid', %x[uuidgen -r].strip)
+make_bcpc_config('ceph-mon-key', ceph_keygen)
 
 ruby_block 'write-ceph-mon-key' do
     block do
         %x[ ceph-authtool "/etc/ceph/ceph.mon.keyring" \
                 --create-keyring \
                 --name=mon. \
-                --add-key="#{get_config('ceph-mon-key')}" \
+                --add-key="#{get_bcpc_config('ceph-mon-key')}" \
                 --cap mon 'allow *'
         ]
     end

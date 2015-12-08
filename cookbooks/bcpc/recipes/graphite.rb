@@ -21,9 +21,9 @@
 include_recipe "bcpc::default"
 include_recipe "bcpc::apache2"
 
-make_config('mysql-graphite-user', "graphite")
+make_bcpc_config('mysql-graphite-user', "graphite")
 # backward compatibility
-mysql_graphite_password = get_config("mysql-graphite-password")
+mysql_graphite_password = get_bcpc_config("mysql-graphite-password")
 if mysql_graphite_password.nil?
   mysql_graphite_password = secure_password
 end
@@ -216,12 +216,11 @@ end
 
 ruby_block "graphite-database-creation" do
     block do
-        mysql_root_password = get_config!('password','mysql-root','os')
-        if not system "mysql -uroot -p#{ mysql_root_password } -e 'SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = \"#{node['bcpc']['graphite_dbname']}\"'|grep \"#{node['bcpc']['graphite_dbname']}\"" then
-            %x[ mysql -uroot -p#{ mysql_root_password } -e "CREATE DATABASE #{node['bcpc']['graphite_dbname']};"
-                mysql -uroot -p#{ mysql_root_password } -e "GRANT ALL ON #{node['bcpc']['graphite_dbname']}.* TO '#{get_config('mysql-graphite-user')}'@'%' IDENTIFIED BY '#{get_config!('password','mysql-graphite','os')}';"
-                mysql -uroot -p#{ mysql_root_password } -e "GRANT ALL ON #{node['bcpc']['graphite_dbname']}.* TO '#{get_config('mysql-graphite-user')}'@'localhost' IDENTIFIED BY '#{get_config!('password','mysql-graphite','os')}';"
-                mysql -uroot -p#{ mysql_root_password } -e "FLUSH PRIVILEGES;"
+        if not system "mysql -uroot -p#{get_bcpc_config('mysql-root-password')} -e 'SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = \"#{node['bcpc']['graphite_dbname']}\"'|grep \"#{node['bcpc']['graphite_dbname']}\"" then
+            %x[ mysql -uroot -p#{get_bcpc_config('mysql-root-password')} -e "CREATE DATABASE #{node['bcpc']['graphite_dbname']};"
+                mysql -uroot -p#{get_bcpc_config('mysql-root-password')} -e "GRANT ALL ON #{node['bcpc']['graphite_dbname']}.* TO '#{get_bcpc_config('mysql-graphite-user')}'@'%' IDENTIFIED BY '#{get_bcpc_config!('password','mysql-graphite','os')}';"
+                mysql -uroot -p#{get_bcpc_config('mysql-root-password')} -e "GRANT ALL ON #{node['bcpc']['graphite_dbname']}.* TO '#{get_bcpc_config('mysql-graphite-user')}'@'localhost' IDENTIFIED BY '#{get_bcpc_config!('password','mysql-graphite','os')}';"
+                mysql -uroot -p#{get_bcpc_config('mysql-root-password')} -e "FLUSH PRIVILEGES;"
             ]
             self.notifies :run, "bash[graphite-database-sync]", :immediately
             self.resolve_notification_references

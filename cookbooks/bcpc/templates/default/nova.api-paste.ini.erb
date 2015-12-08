@@ -108,8 +108,8 @@ auth_host = <%="#{node[:bcpc][:management][:vip]}"%>
 auth_port = 35357
 auth_protocol = https
 admin_tenant_name = <%="#{node[:bcpc][:admin_tenant]}"%>
-admin_user = <%="#{get_config('keystone-admin-user')}"%>
-admin_password = <%="#{get_config('keystone-admin-password')}"%>
+admin_user = <%="#{get_bcpc_config('keystone-admin-user')}"%>
+admin_password = <%="#{get_bcpc_config('keystone-admin-password')}"%>
 signing_dir = /tmp/keystone-signing-nova
 # Workaround for https://bugs.launchpad.net/nova/+bug/1154809
 auth_version = v2.0

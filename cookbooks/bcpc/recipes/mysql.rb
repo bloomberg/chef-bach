@@ -19,58 +19,12 @@
 
 include_recipe "bcpc::default"
 
-bootstrap = get_all_nodes.select{|s| s.hostname.include? 'bootstrap'}[0].fqdn
-
-nodes = get_nodes_for("mysql").map!{ |x| x['fqdn'] }.join(",")
-
-make_config('mysql-root-user', "root")
-
-mysql_root_password = get_config("mysql-root-password")
-if mysql_root_password.nil?
-  mysql_root_password = secure_password
-end
-
-chef_vault_secret "mysql-root" do
-  data_bag 'os'
-  raw_data({ 'password' => mysql_root_password })
-  admins "#{ nodes },#{ bootstrap }"
-  search '*:*'
-  action :nothing
-end.run_action(:create_if_missing)
-
-make_config('mysql-galera-user', "sst")
-
-# backward compatibility
-mysql_galera_password = get_config("mysql-galera-password")
-if mysql_galera_password.nil?
-  mysql_galera_password = secure_password
-end
-
-mysql_check_password = get_config("mysql-check-password")
-if mysql_check_password.nil?
-  mysql_check_password = secure_password
-end
-
-chef_vault_secret "mysql-galera" do
-  data_bag 'os'
-  raw_data({ 'password' => mysql_galera_password })
-  admins "#{ nodes },#{ bootstrap }"
-  search '*:*'
-  action :nothing
-end.run_action(:create_if_missing)
-
-#make_config('mysql-galera-password', secure_password)
-make_config('mysql-check-user', "check")
-
-chef_vault_secret "mysql-check" do
-  data_bag 'os'
-  raw_data({ 'password' => mysql_check_password })
-  admins "#{ nodes },#{ bootstrap }"
-  search '*:*'
-  action :nothing
-end.run_action(:create_if_missing)
-
-#make_config('mysql-check-password', secure_password)
+make_bcpc_config('mysql-root-user', "root")
+make_bcpc_config('mysql-root-password', secure_password)
+make_bcpc_config('mysql-galera-user', "sst")
+make_bcpc_config('mysql-galera-password', secure_password)
+make_bcpc_config('mysql-check-user', "check")
+make_bcpc_config('mysql-check-password', secure_password)
 
 apt_repository "percona" do
   uri node['bcpc']['repos']['mysql']
@@ -86,10 +40,10 @@ end
 bash "initial-mysql-config" do
   code <<-EOH
         mysql -u root -e "DROP USER ''@'localhost';
-                          GRANT USAGE ON *.* to '#{get_config('mysql-galera-user')}'@'%' IDENTIFIED BY '#{get_config!('password','mysql-galera','os')}';
-                          GRANT ALL PRIVILEGES on *.* TO '#{get_config('mysql-galera-user')}'@'%' IDENTIFIED BY '#{get_config!('password','mysql-galera','os')}';
-                          GRANT PROCESS ON *.* to '#{get_config('mysql-check-user')}'@'localhost' IDENTIFIED BY '#{get_config!('password','mysql-check','os')}';
-                          UPDATE mysql.user SET password=PASSWORD('#{get_config!('password','mysql-root','os')}') WHERE user='root'; FLUSH PRIVILEGES;
+                          GRANT USAGE ON *.* to '#{get_bcpc_config('mysql-galera-user')}'@'%' IDENTIFIED BY '#{get_bcpc_config('mysql-galera-password')}';
+                          GRANT ALL PRIVILEGES on *.* TO '#{get_bcpc_config('mysql-galera-user')}'@'%' IDENTIFIED BY '#{get_bcpc_config('mysql-galera-password')}';
+                          GRANT PROCESS ON *.* to '#{get_bcpc_config('mysql-check-user')}'@'localhost' IDENTIFIED BY '#{get_bcpc_config('mysql-check-password')}';
+                          UPDATE mysql.user SET password=PASSWORD('#{get_bcpc_config('mysql-root-password')}') WHERE user='root'; FLUSH PRIVILEGES;
                           UPDATE mysql.user SET host='%' WHERE user='root' and host='localhost';
                           FLUSH PRIVILEGES;"
         EOH
@@ -142,7 +96,7 @@ service "mysql" do
 end
 
 ruby_block "Check MySQL Quorum Status" do
-  status_cmd="mysql -u root -p#{get_config!('password','mysql-root','os')} -e \"SHOW STATUS LIKE 'wsrep_ready' \\G\" | grep -v 'Value: OFF'"
+  status_cmd="mysql -u root -p#{get_bcpc_config('mysql-root-password')} -e \"SHOW STATUS LIKE 'wsrep_ready' \\G\" | grep -v 'Value: OFF'"
   iter = 0
   poll_time = 0.5
   block do

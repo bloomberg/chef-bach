@@ -4,7 +4,7 @@ interface: <%= @node["bcpc"]["floating"]["cidr"] %>
 
 # overide the default testing user for this operation, 
 # compute_extension:floating_ips_bulk is an admin thing
-user: '<%="#{get_config('keystone-admin-user')}"%>'
-password: '<%="#{get_config('keystone-admin-password')}"%>'
+user: '<%="#{get_bcpc_config('keystone-admin-user')}"%>'
+password: '<%="#{get_bcpc_config('keystone-admin-password')}"%>'
 
 

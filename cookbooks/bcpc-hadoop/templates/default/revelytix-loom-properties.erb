@@ -101,7 +101,7 @@ ssl.keystore=<%= node.bcpc.revelytix.ssl_keystore %>
 # An obfuscated password is stored by prefixing the password with "OBF:".
 # The password can be obfuscated with the bin/password.sh script.
 #
-ssl.key-password=<%= get_config('revelytix_loom_ssl_password') %>
+ssl.key-password=<%= get_bcpc_config('revelytix_loom_ssl_password') %>
 
 # Configures the SSL truststore.  No default.
 # If nothing is specified, the keystore is used.
@@ -110,7 +110,7 @@ ssl.key-password=<%= get_config('revelytix_loom_ssl_password') %>
 
 # Configures the SSL truststore password.  No default.
 #
-# ssl.trust-password=<%= get_config("revelitix_ssl_trust_password") %>
+# ssl.trust-password=<%= get_bcpc_config("revelitix_ssl_trust_password") %>
 
 # HADOOP INTEGRATION
 # ==================

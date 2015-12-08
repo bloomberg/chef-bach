@@ -18,7 +18,7 @@
 
   # Set this to a random string, the longer the better.
   # This is used for secure hashing in the session store.
-  secret_key=<%=get_config('hue-session-key') %>
+  secret_key=<%=get_bcpc_config('hue-session-key') %>
 
   # Webserver listens on this address and port
   http_host=0.0.0.0
@@ -176,7 +176,7 @@
     host=localhost
     port=3306
     user=hue
-    password=<%=get_config('mysql-hue-password') %>
+    password=<%=get_bcpc_config('mysql-hue-password') %>
     name=desktop
     # Database engine is typically one of:
     # postgresql_psycopg2, mysql, or sqlite3

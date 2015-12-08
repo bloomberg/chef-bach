@@ -19,9 +19,9 @@
 
 include_recipe "bcpc::default"
 
-make_config('rabbitmq-user', "guest")
-make_config('rabbitmq-password', secure_password)
-make_config('rabbitmq-cookie', secure_password)
+make_bcpc_config('rabbitmq-user', "guest")
+make_bcpc_config('rabbitmq-password', secure_password)
+make_bcpc_config('rabbitmq-cookie', secure_password)
 
 apt_repository "rabbitmq" do
     uri node['bcpc']['repos']['rabbitmq']
@@ -111,7 +111,7 @@ end
 
 ruby_block "set-rabbitmq-guest-password" do
     block do
-        %x[ rabbitmqctl change_password "#{get_config('rabbitmq-user')}" "#{get_config('rabbitmq-password')}" ]
+        %x[ rabbitmqctl change_password "#{get_bcpc_config('rabbitmq-user')}" "#{get_bcpc_config('rabbitmq-password')}" ]
     end
 end
 

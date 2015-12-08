@@ -7,12 +7,12 @@
 [DEFAULT]
 
 # MySQL Connection
-sql_connection=mysql://<%="#{get_config('mysql-nova-user')}"%>:<%="#{get_config('mysql-nova-password')}"%>@<%="#{node[:bcpc][:management][:vip]}"%>/<%="#{node['bcpc']['nova_dbname']}"%>
+sql_connection=mysql://<%="#{get_bcpc_config('mysql-nova-user')}"%>:<%="#{get_bcpc_config('mysql-nova-password')}"%>@<%="#{node[:bcpc][:management][:vip]}"%>/<%="#{node['bcpc']['nova_dbname']}"%>
 sql_idle_timeout=3600
 
 # Rabbit message queue settings
 rabbit_host=<%="#{node[:bcpc][:management][:vip]}"%>
-rabbit_password=<%="#{get_config('rabbitmq-password')}"%>
+rabbit_password=<%="#{get_bcpc_config('rabbitmq-password')}"%>
 rabbit_ha_queues=False
 rabbit_durable_queues=True
 
@@ -20,7 +20,7 @@ rabbit_durable_queues=True
 #rpc_backend=nova.openstack.common.rpc.impl_qpid
 #qpid_hostname=<%="#{node[:bcpc][:management][:vip]}"%>
 #qpid_username=admin
-#qpid_password=<%="#{get_config('rabbitmq-password')}"%>
+#qpid_password=<%="#{get_bcpc_config('rabbitmq-password')}"%>
 
 # Nova API settings
 auth_strategy=keystone
@@ -91,7 +91,7 @@ image_service=nova.image.glance.GlanceImageService
 glance_api_servers=<%="#{node[:bcpc][:management][:vip]}"%>:9292
 
 # Cloudpipe
-vpn_image_id=<%="#{get_config('glance-cloudpipe-uuid')}"%>
+vpn_image_id=<%="#{get_bcpc_config('glance-cloudpipe-uuid')}"%>
 use_project_ca=True
 cnt_vpn_clients=5
 

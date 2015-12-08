@@ -5,5 +5,5 @@
 ################################################
 
 export RABBITMQ_NODE_IP_ADDRESS=<%="#{node[:bcpc][:management][:ip]}"%>
-export RABBITMQ_SERVER_START_ARGS="-setcookie <%="#{get_config('rabbitmq-cookie')}"%>"
+export RABBITMQ_SERVER_START_ARGS="-setcookie <%="#{get_bcpc_config('rabbitmq-cookie')}"%>"
 export ERL_EPMD_ADDRESS=<%="#{node[:bcpc][:management][:ip]}"%>
