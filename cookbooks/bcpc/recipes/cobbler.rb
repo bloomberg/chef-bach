@@ -20,16 +20,16 @@
 require 'digest/sha2'
 require 'chef-vault'
 
-make_config('cobbler-web-user', "cobbler")
+make_bcpc_config('cobbler-web-user', "cobbler")
 
 create_databag("os")
 
 # backward compatibility
-web_passwd = get_config('cobbler-web-password')
+web_passwd = get_bcpc_config('cobbler-web-password')
 if web_passwd.nil?
   web_passwd = secure_password
 end
-root_passwd = get_config('cobbler-root-password')
+root_passwd = get_bcpc_config('cobbler-root-password')
 if root_passwd.nil?
   root_passwd = secure_password
 end
@@ -43,8 +43,8 @@ chef_vault_secret "cobbler" do
   action :nothing
 end.run_action(:create_if_missing)
 
-node.default[:cobbler][:web_username] = get_config('cobbler-web-user')
-node.default[:cobbler][:web_password] = get_config( 'web-password', 'cobbler', 'os')
+node.default[:cobbler][:web_username] = get_bcpc_config('cobbler-web-user')
+node.default[:cobbler][:web_password] = get_bcpc_config( 'web-password', 'cobbler', 'os')
 
 package "isc-dhcp-server"
 

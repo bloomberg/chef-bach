@@ -5,8 +5,8 @@ from awsauth import S3Auth
 import sys
 
 
-aws_key = '<%="#{get_config('radosgw-test-access-key')}"%>'
-secret = '<%="#{get_config('radosgw-test-secret-key')}"%>'
+aws_key = '<%="#{get_bcpc_config('radosgw-test-access-key')}"%>'
+secret = '<%="#{get_bcpc_config('radosgw-test-secret-key')}"%>'
 server = '<%="#{node[:bcpc][:floating][:vip]}"%>:<%="#{node[:bcpc][:ports][:haproxy][:radosgw]}" %>'
  
 url = 'http://%s/admin/usage?format=json' % server

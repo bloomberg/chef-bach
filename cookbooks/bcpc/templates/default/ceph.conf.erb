@@ -5,7 +5,7 @@
 ################################################
 
 [global]
-    fsid = <%="#{get_config('ceph-fs-uuid')}"%>
+    fsid = <%="#{get_bcpc_config('ceph-fs-uuid')}"%>
     auth supported = cephx
     public network = <%= @node["bcpc"]["storage"]["cidr"] %>
     cluster network = <%= @node["bcpc"]["storage"]["cidr"] %>

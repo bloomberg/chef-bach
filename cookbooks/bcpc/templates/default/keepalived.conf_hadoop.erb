@@ -21,7 +21,7 @@ vrrp_sync_group VG1_<%="#{node[:bcpc][:region_name]}"%> {
 }
 
 vrrp_instance VI1_<%="#{node[:bcpc][:region_name]}"%> {
-  virtual_router_id <%="#{get_config('keepalived-router-id')}"%>
+  virtual_router_id <%="#{get_bcpc_config('keepalived-router-id')}"%>
 
   # for electing MASTER, highest priority wins.
   priority  <%= "#{255-node[:bcpc][:node_number].to_i}" %>
@@ -38,12 +38,12 @@ vrrp_instance VI1_<%="#{node[:bcpc][:region_name]}"%> {
   }
   authentication {
     auth_type PASS
-    auth_pass <%="#{get_config!('password','keepalived','os')}"%>
+    auth_pass <%="#{get_bcpc_config!('password','keepalived','os')}"%>
   }
 }
 
 vrrp_instance VI2_<%="#{node[:bcpc][:region_name]}"%> {
-  virtual_router_id <%="#{get_config('keepalived-router-id').to_i+1}"%>
+  virtual_router_id <%="#{get_bcpc_config('keepalived-router-id').to_i+1}"%>
 
   # for electing MASTER, highest priority wins.
   priority  <%= "#{255-node[:bcpc][:node_number].to_i}" %>
@@ -57,6 +57,6 @@ vrrp_instance VI2_<%="#{node[:bcpc][:region_name]}"%> {
   }
   authentication {
     auth_type PASS
-    auth_pass <%="#{get_config!('password','keepalived','os')}"%>
+    auth_pass <%="#{get_bcpc_config!('password','keepalived','os')}"%>
   }
 }

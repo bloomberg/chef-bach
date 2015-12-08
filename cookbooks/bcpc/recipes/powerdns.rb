@@ -17,8 +17,8 @@
 # limitations under the License.
 #
 
-make_config('mysql-pdns-user', "pdns")
-make_config('mysql-pdns-password', secure_password)
+make_bcpc_config('mysql-pdns-user', "pdns")
+make_bcpc_config('mysql-pdns-password', secure_password)
 
 bootstrap = get_bootstrap
 results = get_all_nodes.map!{ |x| x['fqdn'] }.join(",")
@@ -26,7 +26,7 @@ nodes = results == "" ? node['fqdn'] : results
 
 chef_vault_secret "mysql-pdns" do
   data_bag 'os'
-  raw_data({ 'password' => get_config!('mysql-pdns-password')} )
+  raw_data({ 'password' => get_bcpc_config!('mysql-pdns-password')} )
   admins "#{ nodes },#{ bootstrap }"
   search '*:*'
   action :nothing
@@ -43,8 +43,8 @@ end
 node.set['pdns']['authoritative']['gmysql'].tap do |config|
   config['gmysql-host'] = node[:bcpc][:management][:vip]
   config['gmysql-port'] = 3306
-  config['gmysql-user'] = get_config!('mysql-pdns-user')
-  config['gmysql-password'] = get_config!('mysql-pdns-password')
+  config['gmysql-user'] = get_bcpc_config!('mysql-pdns-user')
+  config['gmysql-password'] = get_bcpc_config!('mysql-pdns-password')
   config['gmysql-dbname'] = node['bcpc']['pdns_dbname']
   config['gmysql-dnssec'] = 'yes'
 end
@@ -59,7 +59,7 @@ mysql_connection_info =
 {
  :host => node['pdns']['authoritative']['config']['gmysql-host'],
  :username => 'root',
- :password => get_config!('mysql-root-password')
+ :password => get_bcpc_config!('mysql-root-password')
 }
 
 mysql_database node['bcpc']['pdns_dbname'] do
@@ -67,14 +67,14 @@ mysql_database node['bcpc']['pdns_dbname'] do
   notifies :run, 'execute[install-pdns-schema]', :immediately
 end
 
-mysql_database_user get_config!('mysql-pdns-user') do
+mysql_database_user get_bcpc_config!('mysql-pdns-user') do
   connection mysql_connection_info
-  password get_config!('mysql-pdns-password')
+  password get_bcpc_config!('mysql-pdns-password')
   action :create
   notifies :reload, 'service[pdns]'
 end
 
-mysql_database_user get_config!('mysql-pdns-user') do
+mysql_database_user get_bcpc_config!('mysql-pdns-user') do
   connection mysql_connection_info
   database_name node['bcpc']['pdns_dbname']
   host '%'
@@ -98,7 +98,7 @@ schema_path = '/usr/share/dbconfig-common/data/pdns-backend-mysql/install/mysql'
 mysql_command_string =
   "/usr/bin/mysql -u root " + 
   "--host=#{node['pdns']['authoritative']['config']['gmysql-host']} " +
-  "--password='#{get_config!('mysql-root-password')}' pdns"
+  "--password='#{get_bcpc_config!('mysql-root-password')}' pdns"
 
 execute 'install-pdns-schema' do
   command "cat #{schema_path} | " +
@@ -167,9 +167,9 @@ end
 #     ruby_block "create-management-dns-entry-#{static}" do
 #         block do
 #             if get_nodes_for(static).length >= 1 then
-#                 system "mysql -uroot -p#{get_config('mysql-root-password')} #{node[:bcpc][:pdns_dbname]} -e 'SELECT name FROM records_static' | grep -q \"#{static}.#{node[:bcpc][:domain_name]}\""
+#                 system "mysql -uroot -p#{get_bcpc_config('mysql-root-password')} #{node[:bcpc][:pdns_dbname]} -e 'SELECT name FROM records_static' | grep -q \"#{static}.#{node[:bcpc][:domain_name]}\""
 #                 if not $?.success? then
-#                     %x[ mysql -uroot -p#{get_config('mysql-root-password')} #{node[:bcpc][:pdns_dbname]} <<-EOH
+#                     %x[ mysql -uroot -p#{get_bcpc_config('mysql-root-password')} #{node[:bcpc][:pdns_dbname]} <<-EOH
 #                             INSERT INTO records_static (domain_id, name, content, type, ttl, prio) VALUES ((SELECT id FROM domains WHERE name='#{node[:bcpc][:domain_name]}'),'#{static}.#{node[:bcpc][:domain_name]}','#{node[:bcpc][:management][:vip]}','A',300,NULL);
 #                     ]
 #                 end

@@ -6,7 +6,7 @@
 
 [DEFAULT]
 # A "shared secret" between keystone and other openstack services
-admin_token = <%="#{get_config('keystone-admin-token')}"%>
+admin_token = <%="#{get_bcpc_config('keystone-admin-token')}"%>
 
 # The IP address of the network interface to listen on
 bind_host = <%=@node["bcpc"]["management"]["ip"]%>
@@ -82,7 +82,7 @@ log_dir = /var/log/keystone
 
 [sql]
 # The SQLAlchemy connection string used to connect to the database
-connection = mysql://<%="#{get_config('mysql-keystone-user')}"%>:<%="#{get_config('mysql-keystone-password')}"%>@<%=@node["bcpc"]["management"]["vip"]%>/<%=@node['bcpc']['keystone_dbname']%>
+connection = mysql://<%="#{get_bcpc_config('mysql-keystone-user')}"%>:<%="#{get_bcpc_config('mysql-keystone-password')}"%>@<%=@node["bcpc"]["management"]["vip"]%>/<%=@node['bcpc']['keystone_dbname']%>
 
 # the timeout before idle sql connections are reaped
 idle_timeout = 3600

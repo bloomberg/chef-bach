@@ -24,8 +24,8 @@ require 'openssl'
 require 'net/ssh'
 key = OpenSSL::PKey::RSA.new 2048;
 pubkey = "#{key.ssh_type} #{[ key.to_blob ].pack('m0')}"
-make_config('ssh-nova-private-key', key.to_pem)
-make_config('ssh-nova-public-key', pubkey)
+make_bcpc_config('ssh-nova-private-key', key.to_pem)
+make_bcpc_config('ssh-nova-public-key', pubkey)
 
 package "nova-compute-#{node[:bcpc][:virt_type]}" do
     action :upgrade
@@ -149,10 +149,10 @@ end
 
 ruby_block 'load-virsh-keys' do
     block do
-        if not system "virsh secret-list | grep -i #{get_config('libvirt-secret-uuid')}" then
+        if not system "virsh secret-list | grep -i #{get_bcpc_config('libvirt-secret-uuid')}" then
             %x[ ADMIN_KEY=`ceph --name mon. --keyring /etc/ceph/ceph.mon.keyring auth get-or-create-key client.admin`
                 virsh secret-define --file /etc/nova/virsh-secret.xml
-                virsh secret-set-value --secret #{get_config('libvirt-secret-uuid')} \
+                virsh secret-set-value --secret #{get_bcpc_config('libvirt-secret-uuid')} \
                     --base64 "$ADMIN_KEY"
             ]
         end

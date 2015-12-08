@@ -22,16 +22,16 @@ include_recipe "bcpc::openstack"
 include_recipe "bcpc::apache2"
 
 ruby_block "initialize-keystone-config" do
-    make_config('mysql-keystone-user', "keystone")
-    make_config('mysql-keystone-password', secure_password)
-    make_config('keystone-admin-token', secure_password)
-    make_config('keystone-admin-user', "admin")
-    make_config('keystone-admin-password', secure_password)
+    make_bcpc_config('mysql-keystone-user', "keystone")
+    make_bcpc_config('mysql-keystone-password', secure_password)
+    make_bcpc_config('keystone-admin-token', secure_password)
+    make_bcpc_config('keystone-admin-user', "admin")
+    make_bcpc_config('keystone-admin-password', secure_password)
     block do
-        if get_config('keystone-pki-certificate').nil? then
+        if get_bcpc_config('keystone-pki-certificate').nil? then
             temp = %x[openssl req -new -x509 -passout pass:temp_passwd -newkey rsa:2048 -out /dev/stdout -keyout /dev/stdout -days 1095 -subj "/C=#{node['bcpc']['country']}/ST=#{node['bcpc']['state']}/L=#{node['bcpc']['location']}/O=#{node['bcpc']['organization']}/OU=#{node['bcpc']['region_name']}/CN=keystone.#{node['bcpc']['domain_name']}/emailAddress=#{node['bcpc']['admin_email']}"]
-            make_config('keystone-pki-private-key', %x[echo "#{temp}" | openssl rsa -passin pass:temp_passwd -out /dev/stdout])
-            make_config('keystone-pki-certificate', %x[echo "#{temp}" | openssl x509])
+            make_bcpc_config('keystone-pki-private-key', %x[echo "#{temp}" | openssl rsa -passin pass:temp_passwd -out /dev/stdout])
+            make_bcpc_config('keystone-pki-certificate', %x[echo "#{temp}" | openssl x509])
         end
 
     end
@@ -114,11 +114,11 @@ end
 
 ruby_block "keystone-database-creation" do
     block do
-        if not system "mysql -uroot -p#{get_config('mysql-root-password')} -e 'SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = \"#{node['bcpc']['keystone_dbname']}\"'|grep \"#{node['bcpc']['keystone_dbname']}\"" then
-            %x[ mysql -uroot -p#{get_config('mysql-root-password')} -e "CREATE DATABASE #{node['bcpc']['keystone_dbname']};"
-                mysql -uroot -p#{get_config('mysql-root-password')} -e "GRANT ALL ON #{node['bcpc']['keystone_dbname']}.* TO '#{get_config('mysql-keystone-user')}'@'%' IDENTIFIED BY '#{get_config('mysql-keystone-password')}';"
-                mysql -uroot -p#{get_config('mysql-root-password')} -e "GRANT ALL ON #{node['bcpc']['keystone_dbname']}.* TO '#{get_config('mysql-keystone-user')}'@'localhost' IDENTIFIED BY '#{get_config('mysql-keystone-password')}';"
-                mysql -uroot -p#{get_config('mysql-root-password')} -e "FLUSH PRIVILEGES;"
+        if not system "mysql -uroot -p#{get_bcpc_config('mysql-root-password')} -e 'SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = \"#{node['bcpc']['keystone_dbname']}\"'|grep \"#{node['bcpc']['keystone_dbname']}\"" then
+            %x[ mysql -uroot -p#{get_bcpc_config('mysql-root-password')} -e "CREATE DATABASE #{node['bcpc']['keystone_dbname']};"
+                mysql -uroot -p#{get_bcpc_config('mysql-root-password')} -e "GRANT ALL ON #{node['bcpc']['keystone_dbname']}.* TO '#{get_bcpc_config('mysql-keystone-user')}'@'%' IDENTIFIED BY '#{get_bcpc_config('mysql-keystone-password')}';"
+                mysql -uroot -p#{get_bcpc_config('mysql-root-password')} -e "GRANT ALL ON #{node['bcpc']['keystone_dbname']}.* TO '#{get_bcpc_config('mysql-keystone-user')}'@'localhost' IDENTIFIED BY '#{get_bcpc_config('mysql-keystone-password')}';"
+                mysql -uroot -p#{get_bcpc_config('mysql-root-password')} -e "FLUSH PRIVILEGES;"
             ]
             self.notifies :run, "bash[keystone-database-sync]", :immediately
             self.resolve_notification_references
@@ -272,12 +272,12 @@ end
 
 
 bash "keystone-create-test-tenants" do
-  make_config('keystone-test-user', "tester")
-  make_config('keystone-test-password', secure_password)
+  make_bcpc_config('keystone-test-user', "tester")
+  make_bcpc_config('keystone-test-password', secure_password)
   code <<-EOH
         . /root/adminrc
         export KEYSTONE_ADMIN_TENANT_ID=`keystone tenant-get "#{node['bcpc']['admin_tenant']}" | grep " id " | awk '{print $4}'`
-        keystone user-create --name #{get_config('keystone-test-user')} --tenant-id $KEYSTONE_ADMIN_TENANT_ID --pass  #{get_config('keystone-test-password')} --enabled true
+        keystone user-create --name #{get_bcpc_config('keystone-test-user')} --tenant-id $KEYSTONE_ADMIN_TENANT_ID --pass  #{get_bcpc_config('keystone-test-password')} --enabled true
   EOH
-  only_if ". /root/keystonerc; . /root/adminrc; keystone user-get #{get_config('keystone-test-user')} 2>&1 | grep -e '^No user'"
+  only_if ". /root/keystonerc; . /root/adminrc; keystone user-get #{get_bcpc_config('keystone-test-user')} 2>&1 | grep -e '^No user'"
 end

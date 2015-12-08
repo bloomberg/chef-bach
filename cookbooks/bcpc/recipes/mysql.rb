@@ -19,12 +19,12 @@
 
 include_recipe "bcpc::default"
 
-make_config('mysql-root-user', "root")
-make_config('mysql-root-password', secure_password)
-make_config('mysql-galera-user', "sst")
-make_config('mysql-galera-password', secure_password)
-make_config('mysql-check-user', "check")
-make_config('mysql-check-password', secure_password)
+make_bcpc_config('mysql-root-user', "root")
+make_bcpc_config('mysql-root-password', secure_password)
+make_bcpc_config('mysql-galera-user', "sst")
+make_bcpc_config('mysql-galera-password', secure_password)
+make_bcpc_config('mysql-check-user', "check")
+make_bcpc_config('mysql-check-password', secure_password)
 
 apt_repository "percona" do
   uri node['bcpc']['repos']['mysql']
@@ -40,10 +40,10 @@ end
 bash "initial-mysql-config" do
   code <<-EOH
         mysql -u root -e "DROP USER ''@'localhost';
-                          GRANT USAGE ON *.* to '#{get_config('mysql-galera-user')}'@'%' IDENTIFIED BY '#{get_config('mysql-galera-password')}';
-                          GRANT ALL PRIVILEGES on *.* TO '#{get_config('mysql-galera-user')}'@'%' IDENTIFIED BY '#{get_config('mysql-galera-password')}';
-                          GRANT PROCESS ON *.* to '#{get_config('mysql-check-user')}'@'localhost' IDENTIFIED BY '#{get_config('mysql-check-password')}';
-                          UPDATE mysql.user SET password=PASSWORD('#{get_config('mysql-root-password')}') WHERE user='root'; FLUSH PRIVILEGES;
+                          GRANT USAGE ON *.* to '#{get_bcpc_config('mysql-galera-user')}'@'%' IDENTIFIED BY '#{get_bcpc_config('mysql-galera-password')}';
+                          GRANT ALL PRIVILEGES on *.* TO '#{get_bcpc_config('mysql-galera-user')}'@'%' IDENTIFIED BY '#{get_bcpc_config('mysql-galera-password')}';
+                          GRANT PROCESS ON *.* to '#{get_bcpc_config('mysql-check-user')}'@'localhost' IDENTIFIED BY '#{get_bcpc_config('mysql-check-password')}';
+                          UPDATE mysql.user SET password=PASSWORD('#{get_bcpc_config('mysql-root-password')}') WHERE user='root'; FLUSH PRIVILEGES;
                           UPDATE mysql.user SET host='%' WHERE user='root' and host='localhost';
                           FLUSH PRIVILEGES;"
         EOH
@@ -96,7 +96,7 @@ service "mysql" do
 end
 
 ruby_block "Check MySQL Quorum Status" do
-  status_cmd="mysql -u root -p#{get_config('mysql-root-password')} -e \"SHOW STATUS LIKE 'wsrep_ready' \\G\" | grep -v 'Value: OFF'"
+  status_cmd="mysql -u root -p#{get_bcpc_config('mysql-root-password')} -e \"SHOW STATUS LIKE 'wsrep_ready' \\G\" | grep -v 'Value: OFF'"
   iter = 0
   poll_time = 0.5
   block do

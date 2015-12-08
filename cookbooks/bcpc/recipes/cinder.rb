@@ -21,9 +21,9 @@ include_recipe "bcpc::mysql"
 include_recipe "bcpc::ceph-head"
 include_recipe "bcpc::openstack"
 
-make_config('mysql-cinder-user', "cinder")
-make_config('mysql-cinder-password', secure_password)
-make_config('libvirt-secret-uuid', %x[uuidgen -r].strip)
+make_bcpc_config('mysql-cinder-user', "cinder")
+make_bcpc_config('mysql-cinder-password', secure_password)
+make_bcpc_config('libvirt-secret-uuid', %x[uuidgen -r].strip)
 
 %w{cinder-api cinder-volume cinder-scheduler}.each do |pkg|
     package pkg do
@@ -60,11 +60,11 @@ end
 
 ruby_block "cinder-database-creation" do
     block do
-        if not system "mysql -uroot -p#{get_config('mysql-root-password')} -e 'SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = \"#{node['bcpc']['cinder_dbname']}\"'|grep \"#{node['bcpc']['cinder_dbname']}\"" then
-            %x[ mysql -uroot -p#{get_config('mysql-root-password')} -e "CREATE DATABASE #{node['bcpc']['cinder_dbname']};"
-                mysql -uroot -p#{get_config('mysql-root-password')} -e "GRANT ALL ON #{node['bcpc']['cinder_dbname']}.* TO '#{get_config('mysql-cinder-user')}'@'%' IDENTIFIED BY '#{get_config('mysql-cinder-password')}';"
-                mysql -uroot -p#{get_config('mysql-root-password')} -e "GRANT ALL ON #{node['bcpc']['cinder_dbname']}.* TO '#{get_config('mysql-cinder-user')}'@'localhost' IDENTIFIED BY '#{get_config('mysql-cinder-password')}';"
-                mysql -uroot -p#{get_config('mysql-root-password')} -e "FLUSH PRIVILEGES;"
+        if not system "mysql -uroot -p#{get_bcpc_config('mysql-root-password')} -e 'SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = \"#{node['bcpc']['cinder_dbname']}\"'|grep \"#{node['bcpc']['cinder_dbname']}\"" then
+            %x[ mysql -uroot -p#{get_bcpc_config('mysql-root-password')} -e "CREATE DATABASE #{node['bcpc']['cinder_dbname']};"
+                mysql -uroot -p#{get_bcpc_config('mysql-root-password')} -e "GRANT ALL ON #{node['bcpc']['cinder_dbname']}.* TO '#{get_bcpc_config('mysql-cinder-user')}'@'%' IDENTIFIED BY '#{get_bcpc_config('mysql-cinder-password')}';"
+                mysql -uroot -p#{get_bcpc_config('mysql-root-password')} -e "GRANT ALL ON #{node['bcpc']['cinder_dbname']}.* TO '#{get_bcpc_config('mysql-cinder-user')}'@'localhost' IDENTIFIED BY '#{get_bcpc_config('mysql-cinder-password')}';"
+                mysql -uroot -p#{get_bcpc_config('mysql-root-password')} -e "FLUSH PRIVILEGES;"
             ]
             self.notifies :run, "bash[cinder-database-sync]", :immediately
             self.resolve_notification_references

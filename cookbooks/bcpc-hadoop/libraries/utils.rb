@@ -56,7 +56,7 @@ def init_config
   end
 end
 
-def make_config(key, value)
+def make_bcpc_config(key, value)
   init_config if $dbi.nil?
   if $dbi[key].nil?
     $dbi[key] = (node['bcpc']['encrypt_data_bag'] ? Chef::EncryptedDataBagItem.encrypt_value(value, Chef::EncryptedDataBagItem.load_secret) : value)
@@ -70,7 +70,7 @@ def make_config(key, value)
   end
 end
 
-def make_config!(key, value)
+def make_bcpc_config!(key, value)
   init_config if $dbi.nil?
   $dbi[key] = (node['bcpc']['encrypt_data_bag'] ? Chef::EncryptedDataBagItem.encrypt_value(value, Chef::EncryptedDataBagItem.load_secret) : value)
   $dbi.save

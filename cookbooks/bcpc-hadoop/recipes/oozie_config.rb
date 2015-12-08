@@ -3,8 +3,8 @@
 # Description : To setup oozie configuration only.
 
 # Create oozie realted passwords
-make_config('oozie-keystore-password', secure_password)
-make_config('mysql-oozie-password', secure_password)
+make_bcpc_config('oozie-keystore-password', secure_password)
+make_bcpc_config('mysql-oozie-password', secure_password)
 
 directory "/etc/oozie/conf.#{node.chef_environment}" do
   owner "root"

@@ -30,8 +30,8 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': '<%="#{node['bcpc']['horizon_dbname']}"%>',
-        'USER': '<%="#{get_config('mysql-horizon-user')}"%>',
-        'PASSWORD': '<%="#{get_config('mysql-horizon-password')}"%>',
+        'USER': '<%="#{get_bcpc_config('mysql-horizon-user')}"%>',
+        'PASSWORD': '<%="#{get_bcpc_config('mysql-horizon-password')}"%>',
         'HOST': '<%="#{node[:bcpc][:management][:vip]}"%>',
         'default-character-set': 'utf8'
     },

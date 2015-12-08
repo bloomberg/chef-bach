@@ -21,10 +21,10 @@ include_recipe "bcpc::default"
 
 require 'uri'
 
-make_config('haproxy-stats-user', "haproxy")
+make_bcpc_config('haproxy-stats-user', "haproxy")
 
 # backward compatibility
-haproxy_stats_password = get_config("haproxy-stats-password")
+haproxy_stats_password = get_bcpc_config("haproxy-stats-password")
 if haproxy_stats_password.nil?
   haproxy_stats_password = secure_password
 end

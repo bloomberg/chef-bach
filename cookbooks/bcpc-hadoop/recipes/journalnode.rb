@@ -11,12 +11,12 @@ include_recipe 'bcpc-hadoop::hadoop_config'
   end
 end
 
-if get_config("namenode_txn_fmt") then
+if get_bcpc_config("namenode_txn_fmt") then
   file "#{Chef::Config[:file_cache_path]}/nn_fmt.tgz" do
     user "hdfs"
     group "hdfs"
     user 0644
-    content Base64.decode64(get_config("namenode_txn_fmt"))
+    content Base64.decode64(get_bcpc_config("namenode_txn_fmt"))
     not_if { node[:bcpc][:hadoop][:mounts].all? { |d| File.exists?("/disk/#{d}/dfs/jn/#{node.chef_environment}/current/VERSION") } }
   end
 end
@@ -50,7 +50,7 @@ node[:bcpc][:hadoop][:mounts].each do |d|
     cwd "/disk/#{d}/dfs/"
     code "tar xpzvf #{Chef::Config[:file_cache_path]}/nn_fmt.tgz"
     notifies :restart, "service[hadoop-hdfs-journalnode]"
-    only_if { not get_config("namenode_txn_fmt").nil? and not File.exists?("/disk/#{d}/dfs/jn/#{node.chef_environment}/current/VERSION") }
+    only_if { not get_bcpc_config("namenode_txn_fmt").nil? and not File.exists?("/disk/#{d}/dfs/jn/#{node.chef_environment}/current/VERSION") }
   end
 end
 

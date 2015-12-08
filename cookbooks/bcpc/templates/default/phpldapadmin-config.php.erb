@@ -26,6 +26,6 @@ $servers->setValue('server','host','<%="#{node[:bcpc][:management][:vip]}"%>');
 
 $servers->setValue('login','auth_type','session');
 
-$servers->setValue('login','bind_id','<%="#{get_config('389ds-rootdn-user')}"%>');
+$servers->setValue('login','bind_id','<%="#{get_bcpc_config('389ds-rootdn-user')}"%>');
 
 ?>

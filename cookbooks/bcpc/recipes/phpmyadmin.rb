@@ -20,12 +20,12 @@
 package "debconf-utils"
 
 bash "phpmyadmin-debconf-setup" do
-  make_config('mysql-phpmyadmin-password', secure_password)
+  make_bcpc_config('mysql-phpmyadmin-password', secure_password)
   code <<-EOH
     set -e
     debconf-set-selections <<< 'phpmyadmin phpmyadmin/dbconfig-install boolean true'
-    debconf-set-selections <<< 'phpmyadmin phpmyadmin/mysql/admin-pass password #{get_config('mysql-root-password')}'
-    debconf-set-selections <<< 'phpmyadmin phpmyadmin/mysql/app-pass password #{get_config('mysql-phpmyadmin-password')}' 
+    debconf-set-selections <<< 'phpmyadmin phpmyadmin/mysql/admin-pass password #{get_bcpc_config('mysql-root-password')}'
+    debconf-set-selections <<< 'phpmyadmin phpmyadmin/mysql/app-pass password #{get_bcpc_config('mysql-phpmyadmin-password')}' 
     debconf-set-selections <<< 'phpmyadmin phpmyadmin/reconfigure-webserver multiselect apache2' 
   EOH
   not_if "debconf-get-selections | grep phpmyadmin >/dev/null 2>&1"

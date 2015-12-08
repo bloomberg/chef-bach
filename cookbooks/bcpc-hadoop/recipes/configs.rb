@@ -107,7 +107,7 @@ if node[:bcpc][:hadoop][:kerberos][:enable] == true then
       group "root"
       mode "#{srvdat['perms']}"
       action :create_if_missing
-      content Base64.decode64(get_config!("#{config_host}-#{srvc}"))
+      content Base64.decode64(get_bcpc_config!("#{config_host}-#{srvc}"))
       only_if { user_exists?("#{srvdat['owner']}")  }
     end
 

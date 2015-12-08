@@ -69,7 +69,7 @@ def init_config
   end
 end
 
-def make_config(key, value)
+def make_bcpc_config(key, value)
   init_config if $dbi.nil?
   if $dbi[key].nil?
     $dbi[key] = (node['bcpc']['encrypt_data_bag'] ? Chef::EncryptedDataBagItem.encrypt_value(value, Chef::EncryptedDataBagItem.load_secret) : value)
@@ -87,7 +87,7 @@ end
 # bag: databag name of chef vault item; 
 # item: chef vault item; 
 # key: the key to retrieve password in the item
-def get_config(key, item=node.chef_environment, bag="configs")
+def get_bcpc_config(key, item=node.chef_environment, bag="configs")
   require 'chef-vault'
   begin
     entry = ChefVault::Item.load(bag, item)
@@ -115,8 +115,8 @@ def delete_config(key)
   end
 end
 
-def get_config!(key,item=node.chef_environment,bag="configs")
-  value = get_config(key,item,bag)
+def get_bcpc_config!(key,item=node.chef_environment,bag="configs")
+  value = get_bcpc_config(key,item,bag)
   raise "Failed to find value for #{key}!" if value.nil?
   return value
 end

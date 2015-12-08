@@ -21,12 +21,12 @@ logdir=/var/log/cinder
 osapi_volume_listen=<%="#{node[:bcpc][:management][:ip]}"%>
 
 # MySQL Connection
-sql_connection=mysql://<%="#{get_config('mysql-cinder-user')}"%>:<%="#{get_config('mysql-cinder-password')}"%>@<%="#{node[:bcpc][:management][:vip]}"%>/<%="#{node['bcpc']['cinder_dbname']}"%>
+sql_connection=mysql://<%="#{get_bcpc_config('mysql-cinder-user')}"%>:<%="#{get_bcpc_config('mysql-cinder-password')}"%>@<%="#{node[:bcpc][:management][:vip]}"%>/<%="#{node['bcpc']['cinder_dbname']}"%>
 sql_idle_timeout=3600
 
 # Rabbit message queue settings
 rabbit_host=<%="#{node[:bcpc][:management][:vip]}"%>
-rabbit_password=<%="#{get_config('rabbitmq-password')}"%>
+rabbit_password=<%="#{get_bcpc_config('rabbitmq-password')}"%>
 rabbit_ha_queues=False
 rabbit_durable_queues=True
 
@@ -34,7 +34,7 @@ rabbit_durable_queues=True
 #rpc_backend=cinder.openstack.common.rpc.impl_qpid
 #qpid_hostname=<%="#{node[:bcpc][:management][:vip]}"%>
 #qpid_username=admin
-#qpid_password=<%="#{get_config('rabbitmq-password')}"%>
+#qpid_password=<%="#{get_bcpc_config('rabbitmq-password')}"%>
 
 # Other service endpoints
 glance_host=<%="#{node[:bcpc][:management][:vip]}"%>
@@ -50,5 +50,5 @@ volume_driver=cinder.volume.drivers.rbd.RBDDriver
 volume_backend_name=<%="#{type.upcase}"%>
 rbd_user=admin
 rbd_pool=<%="#{node[:bcpc][:ceph][:volumes][:name]}-#{type}"%>
-rbd_secret_uuid=<%="#{get_config('libvirt-secret-uuid')}"%>
+rbd_secret_uuid=<%="#{get_bcpc_config('libvirt-secret-uuid')}"%>
 <% end -%>
