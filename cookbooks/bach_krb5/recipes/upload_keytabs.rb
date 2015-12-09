@@ -14,10 +14,10 @@ get_all_nodes().each do |h|
     ruby_block "uploading-keytab-for-#{config_key}" do
       block do
         keytab_file = "#{node[:bcpc][:hadoop][:kerberos][:keytab][:dir]}/#{keytab_host}/#{srvdat['keytab']}"
-        make_bach_krb5_config("#{config_key}",Base64.encode64(File.open(keytab_file,"rb").read))
+        make_bcpc_config("#{config_key}",Base64.encode64(File.open(keytab_file,"rb").read))
       end
       action :create
-      only_if {File.exists?("#{node[:bcpc][:hadoop][:kerberos][:keytab][:dir]}/#{keytab_host}/#{srvdat['keytab']}") && get_bach_krb5_config("#{config_host}-#{srvdat['principal']}").nil?}
+      only_if {File.exists?("#{node[:bcpc][:hadoop][:kerberos][:keytab][:dir]}/#{keytab_host}/#{srvdat['keytab']}") && get_bcpc_config("#{config_host}-#{srvdat['principal']}").nil?}
     end
   end
 end

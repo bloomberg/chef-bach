@@ -4,7 +4,7 @@ def principal_exists?(pname)
   princ_found = false
 
   begin
-    kadm5 = Kerberos::Kadm5.new(:principal => "#{node[:krb5][:admin_principal]}", :password => "#{get_bach_krb5_config!("krb5-admin-password")}")
+    kadm5 = Kerberos::Kadm5.new(:principal => "#{node[:krb5][:admin_principal]}", :password => "#{get_bcpc_config!("krb5-admin-password")}")
     kadm5_connected = true
   rescue Kerberos::Kadm5::Exception
     raise "Can't connect to KDC to verify if principal #{pname} exists."
