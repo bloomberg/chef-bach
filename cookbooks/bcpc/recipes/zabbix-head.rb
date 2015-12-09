@@ -20,8 +20,7 @@
 include_recipe "bcpc::mysql"
 include_recipe "bcpc::apache2"
 
-mysql_zabbix_user = 'zabbix'
-make_config('mysql-zabbix-user', mysql_zabbix_user)
+make_config('mysql-zabbix-user','zabbix')
 
 # backward compatibility
 mysql_zabbix_password = get_config("mysql-zabbix-password")
@@ -117,8 +116,8 @@ ruby_block "zabbix-database-creation" do
     mysql_root_password = get_config!('password','mysql-root','os')
     if not system "mysql -uroot -p#{ mysql_root_password } -e 'SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = \"#{node['bcpc']['zabbix_dbname']}\"'|grep \"#{node['bcpc']['zabbix_dbname']}\"" then
       puts %x[ mysql -uroot -p#{ mysql_root_password } -e "CREATE DATABASE #{node['bcpc']['zabbix_dbname']} CHARACTER SET UTF8;"
-        mysql -uroot -p#{ mysql_root_password } -e "GRANT ALL ON #{node['bcpc']['zabbix_dbname']}.* TO '#{get_config('mysql-zabbix-user')}'@'%' IDENTIFIED BY '#{get_config!('password','mysql-zabbix','os')}';"
-        mysql -uroot -p#{ mysql_root_password } -e "GRANT ALL ON #{node['bcpc']['zabbix_dbname']}.* TO '#{get_config('mysql-zabbix-user')}'@'localhost' IDENTIFIED BY '#{get_config!('password','mysql-zabbix','os')}';"
+        mysql -uroot -p#{ mysql_root_password } -e "GRANT ALL ON #{node['bcpc']['zabbix_dbname']}.* TO '#{get_config!('mysql-zabbix-user')}'@'%' IDENTIFIED BY '#{get_config!('password','mysql-zabbix','os')}';"
+        mysql -uroot -p#{ mysql_root_password } -e "GRANT ALL ON #{node['bcpc']['zabbix_dbname']}.* TO '#{get_config!('mysql-zabbix-user')}'@'localhost' IDENTIFIED BY '#{get_config!('password','mysql-zabbix','os')}';"
         mysql -uroot -p#{ mysql_root_password } -e "FLUSH PRIVILEGES;"
         mysql -uroot -p#{ mysql_root_password } #{node['bcpc']['zabbix_dbname']} < /usr/local/share/zabbix/schema.sql
         mysql -uroot -p#{ mysql_root_password } #{node['bcpc']['zabbix_dbname']} < /usr/local/share/zabbix/images.sql
@@ -140,21 +139,19 @@ template "/usr/local/share/zabbix/leader_election.sql" do
   notifies :run, "ruby_block[setup-leader-election]", :immediately
 end
 
-mysql_zabbix_password = get_config!('password','mysql-zabbix','os')
-
 # Keeping this query out of 'ruby_block "zabbix-database-creation"' so that the
 # table can be created on an existing cluster which already has zabbix db
 ruby_block "setup-leader-election" do
   block do
     puts %x[
-      mysql -u#{mysql_zabbix_user} -p#{mysql_zabbix_password} #{node['bcpc']['zabbix_dbname']} < /usr/local/share/zabbix/leader_election.sql 
+      mysql -u#{get_config!('mysql-zabbix-user')} -p#{get_config!('password','mysql-zabbix','os')} #{node['bcpc']['zabbix_dbname']} < /usr/local/share/zabbix/leader_election.sql 
     ]  
   end
   action :nothing
 end
 
 bash "elect_leader" do
-  code %Q{ mysql -u#{mysql_zabbix_user} -p#{mysql_zabbix_password} #{node['bcpc']['zabbix_dbname']} -e 'call elect_leader(\"#{node[:hostname]}\")' }
+  code %Q{ mysql -u#{get_config!('mysql-zabbix-user')} -p#{get_config!('password','mysql-zabbix','os')} #{node['bcpc']['zabbix_dbname']} -e 'call elect_leader(\"#{node[:hostname]}\")' }
   returns [0]
 end
 
