@@ -79,7 +79,7 @@ module BachCluster
     end
 
     def cluster_data_dir
-      "/tmp/bach_cluster_b#{build_id}"
+      "#{Chef::Config[:chef_repo_path]}/.chef"
     end
 
     def fqdn_for(name)
