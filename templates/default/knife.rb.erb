@@ -6,6 +6,7 @@ validation_client_name '<%= @validation_client_name %>'
 validation_key         '<%= @validation_key %>'
 cookbook_path          '<%= Chef::Config[:cookbook_path] %>'
 trusted_certs_dir      '<%= Chef::Config[:trusted_certs_dir] %>'
+data_bag_path          '<%= Chef::Config[:chef_repo_path] + "/.chef/data_bags" %>'
 
 # Dev/test environments don't have DNS, so we can't validate the server cert.
 ssl_verify_mode        :verify_none

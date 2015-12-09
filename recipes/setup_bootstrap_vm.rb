@@ -93,8 +93,9 @@ end
 
 # Generate a valid knife configuration
 render_knife_config
-link "#{Chef::Config[:chef_repo_path]}/.chef" do
-  to cluster_data_dir
+
+directory File.join(cluster_data_dir,'data_bags') do
+  action :create
 end
 
 knife_environment = {'http_proxy'  => nil,
@@ -124,16 +125,13 @@ end
 # Fix ACLs: allow clients to edit data bags like they did in Chef 11.x
 # https://www.chef.io/blog/2014/11/10/security-update-hosted-chef/
 execute "update-bach-data-bag-acls" do
-  command 'bundle exec knife acl add group clients containers data create,read,update '
+  command 'bundle exec knife acl add group clients containers data ' +
+    'create,read,update'
   environment knife_environment
   cwd Chef::Config[:chef_repo_path]
 end
 
-# Allow clients to read each other. Is this a good idea?
-#
-# bcpc::haproxy attempts to read the bach-vm-bootstrap client when the
-# haproxy-stats secret is created.
-#
+# Allow clients to read each other.
 execute "update-bach-client-acls" do
   command 'bundle exec knife acl add group clients containers clients read'
   environment knife_environment
@@ -174,24 +172,45 @@ machine bootstrap_fqdn do
 end
 
 #
-# Pre-populate the cobbler root secret so that our user account is
-# able to read it.  This is a bug in Chef:
+# Pre-populate the cobbler secrets so that our user account is
+# able to read them.  This requirement is a bug in Chef:
 #
 # https://github.com/chef/chef-server/issues/20
 #
+web_password = rand(36**24).to_s(36)
+root_password = rand(36**24).to_s(36)
+#
+# The $6$xxxxxx argument is an undocumented, "platform-dependent"
+# behavior that creates a salted SHA512 password hash.
+#
+# I don't know where this behavior does or doesn't work.
+#
+crypted_root_password = root_password.crypt('$6$' + rand(36**8).to_s(36))
+
 execute "create-cobbler-secret" do
-  command 'bundle exec knife vault'
+  command "knife vault create os cobbler " +
+    "'{\"web-password\": \"#{web_password}\", " +
+    "  \"root-password\": \"#{root_password}\", " +
+    "  \"root-password-salted\": \"#{crypted_root_password}\"}' " +
+    "-S '*:*' -A bach"
   environment knife_environment
   cwd Chef::Config[:chef_repo_path]
+
+  #
+  # The guard_interpreter is set to force the guard to inherit
+  # properties from the execute resource.
+  #
+  guard_interpreter :bash
+  not_if 'knife vault show os cobbler'
 end
 
-# # Provision with a complete role.
-# machine bootstrap_fqdn do
-#   chef_server chef_server_config_hash
-#   add_machine_options :convergence_options => {
-#     :chef_config => bootstrap_chef_client_config,
-#     :ssl_verify_mode => :verify_none
-#   }
-#   role 'BCPC-Bootstrap'
-#   complete false
-# end
+# Provision with a complete role.
+machine bootstrap_fqdn do
+  chef_server chef_server_config_hash
+  add_machine_options :convergence_options => {
+    :chef_config => bootstrap_chef_client_config,
+    :ssl_verify_mode => :verify_none
+  }
+  role 'BCPC-Bootstrap'
+  complete false
+end

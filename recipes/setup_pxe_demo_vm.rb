@@ -62,6 +62,7 @@ with_driver 'vagrant'
     machine bootstrap_fqdn
     chef_server chef_server_config_hash
     command "cobbler system remove --name=#{vm_name}"
+    ignore_failure true
   end
 
   machine_execute "#{vm_name}-cobbler-add" do    
