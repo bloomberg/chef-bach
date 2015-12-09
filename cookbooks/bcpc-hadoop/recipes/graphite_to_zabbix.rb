@@ -2,7 +2,8 @@ include_recipe "bcpc-hadoop::graphite_queries"
 
 template node['bcpc']['zabbix']['scripts']['sender'] do
   source "zabbix.run_zabbix_sender.sh.erb"
-  mode 0755
+  owner 'zabbix'
+  mode 0550
 end
 
 directory ::File.dirname(node['bcpc']['zabbix']['scripts']['mail']) do
@@ -308,9 +309,8 @@ ruby_block "zabbix_monitor" do
 end
 
 cron "Run script to query graphite and send data to zabbix" do
-  minute "*"
-  hour   "*"
-  user   "nobody"
-  command  "pgrep -u nobody 'zabbix_sender' > /dev/null || /usr/local/bin/run_zabbix_sender.sh"
-  action is_zabbix_leader?(node[:hostname]) ? :create : :delete
+  minute '*'
+  hour   '*'
+  user   'zabbix'
+  command  "pgrep -u zabbix 'zabbix_sender' > /dev/null || /usr/local/bin/run_zabbix_sender.sh"
 end
