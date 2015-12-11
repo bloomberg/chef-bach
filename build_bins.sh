@@ -6,8 +6,8 @@ set -x
 
 # Define the version of Zabbix server and zabbixapi gem to be downloaded
 # Refer https://github.com/bloomberg/chef-bcpc/issues/343
-ZABBIXAPI_VERSION=2.2.2
-ZABBIX_VERSION=2.2.9
+ZABBIXAPI_VERSION=2.4.5
+ZABBIX_VERSION=2.4.5
 
 # Define the appropriate version of each binary to grab/build
 VER_KIBANA=d1495fbf6e9c20c707ecd4a77444e1d486a1e7d6
