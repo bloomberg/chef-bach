@@ -41,7 +41,11 @@ end
   end
 end
 
-link "/etc/oozie/conf.#{node.chef_environment}/hive-site.xml" do
+directory "/etc/oozie/conf.#{node.chef_environment}/action-conf/hive" do
+  mode '0755'
+end
+
+link "/etc/oozie/conf.#{node.chef_environment}/action-conf/hive/hive-site.xml" do
   to "/etc/hive/conf.#{node.chef_environment}/hive-site.xml"
 end
 
