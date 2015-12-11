@@ -19,7 +19,7 @@ default["bcpc"]["hadoop"]["zabbix"]["escalation_period"] = 600
 
 # Interval within which chef-client is expected to run
 default["bcpc"]["hadoop"]["zabbix"]["chef_client_check_interval"] =
-  "#{((node['chef_client']['interval'].to_i + node['chef_client']['splay'].to_i) * 2 / 60).ceil}m"
+  "#{(node['bcpc']['zabbix']['chef_client_check_interval'] / 60).ceil}m"
 
 # Enable/Disable Zabbix alarming (Metrics will be collected and Triggers will change to
 # problem state but no alarms will be generated. One can still see the System State on Zabbix UI)

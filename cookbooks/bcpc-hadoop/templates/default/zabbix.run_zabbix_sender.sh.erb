@@ -1,5 +1,5 @@
 #!/bin/bash
-if ip addr show | grep "<%=node[:bcpc][:management][:vip]%>" > /dev/null
+if mysql -u<%="#{get_config('mysql-zabbix-user')}"%> -p<%="#{get_config!('password','mysql-zabbix','os')} #{node['bcpc']['zabbix_dbname']}"%> --raw --batch -e 'select host_id from leader_election where id=1' | grep "<%=node[:hostname]%>" > /dev/null
 then
   python /usr/local/bin/query_graphite.py | /usr/local/bin/zabbix_sender -z <%= node[:bcpc][:management][:vip] %> -p <%= node[:bcpc][:zabbix][:server_port] %> -T -i - > /dev/null
 fi
