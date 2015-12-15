@@ -46,6 +46,9 @@ default["bcpc"]["hadoop"]["namenode"]["jmx"]["port"] = 10111
 default["bcpc"]["hadoop"]["namenode"]["rpc"]["port"] = 8020
 default["bcpc"]["hadoop"]["namenode"]["http"]["port"] = 50070 
 default["bcpc"]["hadoop"]["namenode"]["https"]["port"] = 50470
+default["bcpc"]["hadoop"]["hbase"]["repl"]["enabled"] = false
+default["bcpc"]["hadoop"]["hbase"]["repl"]["peer_id"] =  node.chef_environment.gsub("-","_")
+default["bcpc"]["hadoop"]["hbase"]["repl"]["target"] = ""
 default["bcpc"]["hadoop"]["hbase"]["superusers"] = ["hbase"]
 # Interval in milli seconds when HBase major compaction need to be run. Disabled by default
 default["bcpc"]["hadoop"]["hbase"]["major_compact"]["time"] = 0

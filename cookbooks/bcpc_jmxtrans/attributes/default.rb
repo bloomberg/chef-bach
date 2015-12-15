@@ -345,6 +345,11 @@ default['jmxtrans']['default_queries']['hbase_rs'] = [
     "obj" => "Hadoop:service=HBase,name=RegionServer,sub=Regions,*",
     "result_alias" => "hb_regions"
   },
+  {   
+    "attr" => [],
+    "obj" => "Hadoop:service=HBase,name=RegionServer,sub=Replication,*",
+    "result_alias" => "hb_replication"
+  },
   {
     'obj' => "Hadoop:name=RegionServer,service=HBase,sub=Server",
     'result_alias' => "hb_rs_server",
