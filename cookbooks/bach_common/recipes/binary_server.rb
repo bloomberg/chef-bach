@@ -6,6 +6,11 @@
 # bootstrap host to serve binaries.  This recipe configures hosts to
 # talk to a binary server instead of the internet.
 #
+# Unfortunately, it appears something is pulling in the 'ubuntu'
+# recipe, which adds official repos.  I'm not sure how to resolve that
+# conflict.
+#
+include_recipe 'apt'
 
 binary_server_ip = node[:bcpc][:bootstrap][:server]
 binary_server_url = "http://#{binary_server_ip}"

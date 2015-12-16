@@ -3,6 +3,9 @@
 # Recipe:: git_proxy
 #
 
+include_recipe 'bach_common::apt_proxy'
+include_recipe 'apt'
+
 package 'git' do
   action :install
 end
