@@ -47,6 +47,47 @@
           "version": "HDP",
           "key": "hortonworks.key"
         },
+        "hbase": {
+          "bucketcache": {
+            "enabled": false
+          },
+          "repl": {
+            "enabled": false
+          },
+          "repl": {
+            "target": ""
+          },
+          "shortcircuit": {
+            "read": false
+          },
+          "region": {
+            "replication": {
+              "enabled": false
+            }
+          },
+          "ipc": {
+            "warn": {
+              "responsetime": 300
+            }
+          }          
+        },
+        "hbase_rs": {
+          "xmn": {
+            "size": 256
+          },
+          "xms": {
+            "size": 1024
+          },
+          "xmx": {
+            "size": 1024
+          },
+          "mx_dir_mem": {
+            "size": 256
+          },
+          "hdfs_dir_mem": {
+            "size": 128
+          }
+        },
         "oozie": {
           "memory_opts": "-Xmx512m -XX:MaxPermSize=64m"
         }
