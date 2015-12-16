@@ -13,3 +13,4 @@ if(node['bach']['http_proxy'] || node['bach']['https_proxy'])
                 :https_proxy => node['bach']['https_proxy'] })
   end
 end
+
