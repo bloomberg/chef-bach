@@ -1,20 +1,20 @@
 # -*- mode: enh-ruby -*-
-source "https://supermarket.chef.io"
+source 'https://supermarket.chef.io'
 
 metadata
 
 #
 # Local cookbooks, inside our repository.
 #
-cookbook 'bach_bootstrap', path: "./cookbooks/bach_bootstrap"
-cookbook 'bach_common', path: "./cookbooks/bach_common"
-cookbook 'bach_repository', path: "./cookbooks/bach_repository"
-cookbook 'bach_spark', path: "./cookbooks/bach_spark"
-cookbook 'bcpc', path: "./cookbooks/bcpc"
-cookbook 'bcpc-hadoop', path: "./cookbooks/bcpc-hadoop"
-cookbook 'bcpc_jmxtrans', path: "./cookbooks/bcpc_jmxtrans"
-cookbook 'hannibal', path: "./cookbooks/hannibal"
-cookbook 'kafka-bcpc', path: "./cookbooks/kafka-bcpc"
+cookbook 'bach_bootstrap', path: './cookbooks/bach_bootstrap'
+cookbook 'bach_common', path: './cookbooks/bach_common'
+cookbook 'bach_repository', path: './cookbooks/bach_repository'
+cookbook 'bach_spark', path: './cookbooks/bach_spark'
+cookbook 'bcpc', path: './cookbooks/bcpc'
+cookbook 'bcpc-hadoop', path: './cookbooks/bcpc-hadoop'
+cookbook 'bcpc_jmxtrans', path: './cookbooks/bcpc_jmxtrans'
+cookbook 'hannibal', path: './cookbooks/hannibal'
+cookbook 'kafka-bcpc', path: './cookbooks/kafka-bcpc'
 
 #
 # Upstream cookbooks
@@ -28,15 +28,15 @@ cookbook 'kafka-bcpc', path: "./cookbooks/kafka-bcpc"
 #
 # cat roles/*.json | grep recipe | perl -nle 's/\s//g; print' | sort -n | uniq | perl -nle 's/\"//g; s/^recipe//g; s/^.//; s/..$//; s/::.*//; print' | sort | uniq | perl -nle 'print "depends \"$_\""'
 #
-cookbook "apt"
-cookbook "chef-client"
-cookbook "chef-ingredient"
-cookbook "java"
-cookbook "kafka"
-cookbook "maven"
-cookbook "ntp"
-cookbook "pam"
-cookbook "ubuntu"
+cookbook 'apt'
+cookbook 'chef-client'
+cookbook 'chef-ingredient'
+cookbook 'java'
+cookbook 'kafka'
+cookbook 'maven'
+cookbook 'ntp'
+cookbook 'pam'
+cookbook 'ubuntu'
 
 #
 # Forked cookbooks
