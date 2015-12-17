@@ -42,9 +42,13 @@ package [
   timeout 3600
 end
 
+execute 'update-alternatives --set ruby /usr/bin/ruby1.9.1'
+
+execute 'update-alternatives --set gem /usr/bin/gem1.9.1'
+
 # The classic package mangler
 gem_package 'fpm' do
-  version '1.3.3'
+  version '1.4.0'
 end
 
 # Required for gem indexing
