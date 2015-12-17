@@ -41,6 +41,10 @@ end
   end
 end
 
+directory "/etc/oozie/conf.#{node.chef_environment}/action-conf" do
+  mode '0755'
+end
+
 directory "/etc/oozie/conf.#{node.chef_environment}/action-conf/hive" do
   mode '0755'
 end
