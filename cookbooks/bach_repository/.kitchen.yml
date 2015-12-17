@@ -19,7 +19,6 @@ platforms:
 suites:
   - name: bach_repository
     run_list:
-      - recipe[bach_common::kitchen-fixes]
       - recipe[apt]
       - recipe[bach_repository]
     attributes:
