@@ -93,7 +93,9 @@ module BachCluster
     def render_knife_config
       template File.join(cluster_data_dir, 'knife.rb') do
         variables({
-                   chef_server_url: chef_server_url,
+                   chef_server_url:
+                     "https://#{bootstrap_ip}/organizations/" +
+                     node['bach']['cluster']['organization']['name'],
                    user_name: node['bach']['cluster']['user']['name'],
                    client_key: "#{cluster_data_dir}/bach_user.pem",
                    validation_client_name: 

@@ -105,7 +105,7 @@ knife_environment = {'http_proxy'  => nil,
                      'KNIFE_HOME'  => cluster_data_dir}
 
 execute 'upload-cookbooks' do
-  command "bundle exec knife cookbook -VV upload --all --cookbook-path #{Chef::Config[:cookbook_path]} --force"
+  command "bundle exec knife cookbook -VV upload --all --cookbook-path #{Chef::Config[:chef_repo_path]}/vendor/cookbooks --force"
   environment knife_environment
   cwd File.dirname(__FILE__)
 end
@@ -161,12 +161,16 @@ end
 #
 # The first chef run is meant only to get us a client key on the Chef server.
 #
+convergence_options = {
+                       :chef_config => bootstrap_chef_client_config,
+                       :ssl_verify_mode => :verify_none,
+                      }
+
 machine bootstrap_fqdn do
   chef_server chef_server_config_hash
-  add_machine_options :convergence_options => {
-    :chef_config => bootstrap_chef_client_config,
-    :ssl_verify_mode => :verify_none
-  }
+  add_machine_options(:convergence_options => convergence_options,
+                      :vagrant_config => bootstrap_vm_configuration)
+  chef_environment node.chef_environment
   role 'Basic'
   complete false
 end
@@ -188,11 +192,12 @@ root_password = rand(36**24).to_s(36)
 crypted_root_password = root_password.crypt('$6$' + rand(36**8).to_s(36))
 
 execute "create-cobbler-secret" do
-  command "knife vault create os cobbler " +
+  command "bundle exec knife vault create os cobbler " +
     "'{\"web-password\": \"#{web_password}\", " +
     "  \"root-password\": \"#{root_password}\", " +
     "  \"root-password-salted\": \"#{crypted_root_password}\"}' " +
-    "-S '*:*' -A bach"
+    "-S '*:*' -A bach " +
+    "-M client"
   environment knife_environment
   cwd Chef::Config[:chef_repo_path]
 
@@ -207,10 +212,9 @@ end
 # Provision with a complete role.
 machine bootstrap_fqdn do
   chef_server chef_server_config_hash
-  add_machine_options :convergence_options => {
-    :chef_config => bootstrap_chef_client_config,
-    :ssl_verify_mode => :verify_none
-  }
+  add_machine_options(:convergence_options => convergence_options,
+                      :vagrant_config => bootstrap_vm_configuration)
+  chef_environment node.chef_environment
   role 'BCPC-Bootstrap'
   complete false
 end
