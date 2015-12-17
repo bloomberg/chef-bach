@@ -69,15 +69,13 @@ ruby_block "wait-for-reindex" do
       Chef::Log.debug("Result: #{r.inspect}")
       !cmd.error?
     end
-    search_string = "name:bach-vm1-b#{build_id}*"
-    until(find_client(search_string))
-      Chef::Log.info("Waiting for #{search_string} to appear in index")
-      sleep 10
-    end
-    search_string = "name:bach-vm2-b#{build_id}*"
-    until(find_client(search_string))
-      Chef::Log.info("Waiting for #{search_string} to appear in index")
-      sleep 10
+    
+    ["name:bach-vm1-b#{build_id}*",
+     "name:bach-vm2-b#{build_id}*"].each do |search_string|
+      until(find_client(search_string))
+        Chef::Log.info("Waiting for #{search_string} to appear in index")
+        sleep 10
+      end
     end
   end
 end
@@ -86,7 +84,7 @@ end
 machine fqdn_for("bach-vm1-b#{build_id}") do
   role 'BCPC-Hadoop-Head-Namenode-NoHA'
   role 'BCPC-Hadoop-Head-HBase'
-  #role 'Copylog''
+  role 'Copylog'
 end
 
 # Re-converge the second head node with added runlist items.
@@ -94,7 +92,7 @@ machine fqdn_for("bach-vm2-b#{build_id}") do
   role 'BCPC-Hadoop-Head-Namenode-Standby'
   role 'BCPC-Hadoop-Head-MapReduce'
   role 'BCPC-Hadoop-Head-Hive'
-  #role 'Copylog''
+  role 'Copylog'
 end
 
 # Skip 1 and 2, they are our head nodes.
@@ -103,7 +101,7 @@ end
   vm_name = fqdn_for("bach-vm#{n}-b#{build_id}") # XXX: replace with helper!
   machine vm_name do
     role 'BCPC-Hadoop-Worker'
-    #role 'Copylog''
+    role 'Copylog'
   end
 end
 
