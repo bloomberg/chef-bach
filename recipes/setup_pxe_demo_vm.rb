@@ -20,12 +20,6 @@ log "Resetting no_proxy variables to: #{Chef::Config['no_proxy']}"
 # wait until it answers on 22
 # use ssh profivisioning
 
-# See ROM-O-MATIC.md for instruction on how to generate a new gPXE ROM.
-cookbook_file pxe_rom_path do
-  source 'gpxe-1.0.1-80861004.rom'
-  mode 0660
-end
-
 worker_node_count = node[:bach][:cluster][:node_count].to_i
 total_node_count = worker_node_count + 2
 
@@ -50,6 +44,7 @@ pxe_vms.each do |vm|
   ruby_block "#{vm[:name]}-create" do
     block do
       create_vbox_vm(name: vm[:name])
+      kill_dhcp_for_vm(name: vm[:name])
     end
   end
 

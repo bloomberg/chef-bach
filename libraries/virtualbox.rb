@@ -1,27 +1,3 @@
-# See ROM-O-MATIC.md for instruction on how to generate a new gPXE ROM.
-def pxe_rom_path
-  File.join(Chef::Config.file_cache_path, 'gpxe.rom')
-end
-
-# Turns VirtualBox VM data into a Ruby hash.
-def get_vbox_vm_info(name:)
-  require 'mixlib/shellout'
-
-  c = Mixlib::ShellOut.new('vboxmanage', 'showvminfo',
-                           name, '--machinereadable')
-  c.run_command
-
-  if c.status.success?
-    tuples = c.stdout.split("\n")
-      .map{ |element| element.split("=") }
-      .flatten
-      .map{ |string| string.gsub(/^"/, '').gsub(/"$/, '') }
-    Hash[*tuples]
-  else
-    nil
-  end
-end
-
 def create_vbox_vm(name:)
   if get_vbox_vm_info(name: name).nil?
     system('vboxmanage', 'createvm',
@@ -129,6 +105,41 @@ end
 def destroy_vbox_vm(name:)
 end
 
+# Turns VirtualBox VM data into a Ruby hash.
+def get_vbox_vm_info(name:)
+  require 'mixlib/shellout'
+
+  c = Mixlib::ShellOut.new('vboxmanage', 'showvminfo',
+                           name, '--machinereadable')
+  c.run_command
+
+  if c.status.success?
+    tuples = c.stdout.split("\n")
+      .map{ |element| element.split("=") }
+      .flatten
+      .map{ |string| string.gsub(/^"/, '').gsub(/"$/, '') }
+    Hash[*tuples]
+  else
+    nil
+  end
+end
+
+# VirtualBox sometimes has DHCP servers configured on hostonly networks.
+# This method removes DHCP servers from all networks used by the given VM.
+def kill_dhcp_for_vm(name:)
+  if(system('pgrep VBoxNetDHCP'))
+    vm_info = get_vbox_vm_info(name: name)
+    raise "VM '#{name}' not found!" if vm_info.nil?
+
+    vbox_interfaces =
+      vm_info.select{ |k,v| k =~ /^hostonlyadapter\d+$/ }.values
+
+    vbox_interfaces.each do |if_name|
+      system('vboxmanage', 'dhcpserver', 'remove', '--ifname', if_name)
+    end
+  end
+end
+
 def start_vbox_vm(name:)
   info = get_vbox_vm_info(name: name)
   raise "Cannot start non-existent VM: #{name}" if info.nil?
@@ -146,20 +157,4 @@ def start_vbox_vm(name:)
     end
   end
   return true
-end
-
-def ssh_check(ip:, username:, password:)
-  require 'net/ssh'
-  begin
-    Net::SSH.start(ip, username,
-                   :auth_methods => ['password'],
-                   :config => false,
-                   :password => password,
-                   :timeout => 60,
-                   :user_known_hosts_file => '/dev/null') do |ssh|
-      ssh.exec!('ls')
-    end
-  rescue Net::SSH::Disconnect, Errno::ECONNREFUSED
-    return false
-  end
 end
