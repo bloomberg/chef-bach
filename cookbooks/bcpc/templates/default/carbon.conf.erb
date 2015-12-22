@@ -43,17 +43,16 @@ USE_RATIO_RESET=False
 MIN_RESET_STAT_FLOW=1000
 MIN_RESET_RATIO=0.9
 MIN_RESET_INTERVAL=121
+METRIC_CLIENT_IDLE_TIMEOUT = <%="#{node[:bcpc][:graphite][:carbon][:relay][:idle_timeout]}"%> 
 
 [aggregator]
 LINE_RECEIVER_INTERFACE = <%="#{node[:bcpc][:graphite][:ip]}"%>
 LINE_RECEIVER_PORT = 2023
-
 PICKLE_RECEIVER_INTERFACE = <%="#{node[:bcpc][:graphite][:ip]}"%>
 PICKLE_RECEIVER_PORT = 2024
 DESTINATIONS = <%= "#{@servers.map{|x| x['mgmt_ip']+':2004'}.join(', ')}" %>
 REPLICATION_FACTOR = 1
 MAX_QUEUE_SIZE = 10000
 USE_FLOW_CONTROL = True
-METRIC_CLIENT_IDLE_TIMEOUT = <%="#{node[:bcpc][:graphite][:carbon][:relay][:idle_timeout]}"%> 
 MAX_DATAPOINTS_PER_MESSAGE = 500
 MAX_AGGREGATION_INTERVALS = 5
