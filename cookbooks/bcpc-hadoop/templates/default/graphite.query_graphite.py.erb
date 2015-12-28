@@ -3,9 +3,26 @@ import urllib
 import urllib2
 import json
 import sys
+import logging
+from logging.handlers import RotatingFileHandler
+
+LOGGER = None
+
+def create_log(path):
+  """  
+  Creates a rotating log
+  """
+  global LOGGER
+  LOGGER = logging.getLogger('query_graphite')
+  LOGGER.setLevel(logging.<%= @log_level %>)
+  handler = RotatingFileHandler(path, maxBytes=<%= @max_bytes %>, backupCount=<%= @backup_count %>)
+  formatter = logging.Formatter('%(asctime)s %(levelname)s - %(message)s')
+  handler.setFormatter(formatter)
+  LOGGER.addHandler(handler)
 
 def query_graphite(url):
-  """Function to make query to graphite to retrive monitoring data
+  """
+  Function to make query to graphite to retrive monitoring data
   Returns data for the query in json format. Refer document
   http://graphite.readthedocs.org/en/1.0/url-api.html for details
   Accepts url formatted to make a query to graphite. Time out to get
@@ -13,6 +30,7 @@ def query_graphite(url):
   Keyword arguments:
   url: graphite jsp api url along with the query parameter
   """
+
   req = urllib2.Request(url)
   response = urllib2.urlopen(req,timeout=30)
   res = response.read()
@@ -20,7 +38,8 @@ def query_graphite(url):
   return data
 
 def write_data(zbxhost, zbxkey, data):
-  """Function to parse the json object retruned by graphite query
+  """
+  Function to parse the json object retruned by graphite query
   and generate data in the format zabbix_sender protocol needs
   Refer to zabbix sender man pages for details.
   https://www.zabbix.com/documentation/1.8/manpages/zabbix_sender
@@ -38,10 +57,12 @@ def write_data(zbxhost, zbxkey, data):
       ]
   }]
   """
+  
   for entry in data:
     for key,value in entry.iteritems():
       if key == 'datapoints':
         for v in value:
+          ts = str(v[1])
           if (v[0] is None):
             val = 0
           else:
@@ -49,12 +70,20 @@ def write_data(zbxhost, zbxkey, data):
               val = int(v[0])
             except ValueError:
               val = 0
-          out = "%s %s %s %d" % (zbxhost,zbxkey,str(v[1]),val)
-          sys.stdout.write(out+'\n')
+              LOGGER.warn("Cannot convert %s.%s(%s) to int" + \
+                          (zbxkey, ts, str(v[0])))
+          out = "%s %s %s %d" % (zbxhost,zbxkey,ts,val)
+          sys.stdout.write(out + '\n')
 
-if __name__ == "__main__":
-  with open("/usr/local/etc/query_graphite.config","r") as fin:
+def main():
+  create_log("<%= @log_file %>")
+  LOGGER.info('start')
+  with open('/usr/local/etc/query_graphite.config','r') as fin:
     config = json.load(fin)
-    for entry in config["queries"]:
-      graphite_data=query_graphite(entry["graphite_url"])
-      write_data(entry["zabbix_host"],entry["zabbix_key"],graphite_data)
+    for entry in config['queries']:
+      graphite_data=query_graphite(entry['graphite_url'])
+      write_data(entry['zabbix_host'],entry['zabbix_key'],graphite_data)
+  LOGGER.info('end')
+
+if __name__ == '__main__':
+  main()
