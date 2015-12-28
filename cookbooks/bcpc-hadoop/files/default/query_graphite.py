@@ -43,10 +43,13 @@ def write_data(zbxhost, zbxkey, data):
       if key == 'datapoints':
         for v in value:
           if (v[0] is None):
-            val = 0.0
+            val = 0
           else:
-            val = v[0]
-          out = "%s %s %s %0.1f" % (zbxhost,zbxkey,str(v[1]),val)
+            try:
+              val = int(v[0])
+            except ValueError:
+              val = 0
+          out = "%s %s %s %d" % (zbxhost,zbxkey,str(v[1]),val)
           sys.stdout.write(out+'\n')
 
 if __name__ == "__main__":

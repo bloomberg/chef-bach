@@ -158,7 +158,7 @@ ruby_block "zabbix_monitor" do
           trend_days = attrs['trend_days']
         end
         if attrs['value_type'].nil?
-          value_type = 0 # default = numeric float
+          value_type = 3 # default = numeric unsigned
         else
           value_type = attrs['value_type']
         end
