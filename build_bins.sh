@@ -44,6 +44,7 @@ apt-get -y update
 
 # Install tools needed for packaging
 apt-get -y install git rubygems make pkg-config pbuilder python-mock python-configobj python-support cdbs python-all-dev python-stdeb libmysqlclient-dev libldap2-dev ruby-dev gcc patch rake ruby1.9.3 ruby1.9.1-dev python-pip python-setuptools dpkg-dev apt-utils haveged libtool autoconf automake autotools-dev unzip rsync autogen
+
 if [[ -z `gem list --local fpm | grep fpm | cut -f1 -d" "` ]]; then
   gem install fpm --no-ri --no-rdoc -v 1.3.3
 fi
@@ -221,7 +222,7 @@ if ! [[ -f python-carbon_0.9.10_all.deb  && \
   #$CURL -O -L https://github.com/graphite-project/graphite-web/archive/master.zip
   #unzip -o master.zip; rm master.zip
   while ! $(file https_intracluster.zip | grep -q 'Zip archive data'); do
-    $CURL -O -L https://github.com/pu239ppy/graphite-web/archive/https_intracluster.zip 
+    $CURL -L https://github.com/pu239ppy/graphite-web/archive/https_intracluster_private.zip -o https_intracluster.zip 
   done
   unzip -o https_intracluster.zip
   while ! $(file carbon_master.zip | grep -q 'Zip archive data'); do
