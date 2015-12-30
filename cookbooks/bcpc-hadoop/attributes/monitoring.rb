@@ -31,3 +31,10 @@ default["bcpc"]["hadoop"]["graphite"]["metric_fetch_period"] = 2
 # Override Graphite/Zabbix queries/triggers here
 default["bcpc"]["hadoop"]["graphite"]["basic_queries"] = {} # Basic OS/Node Queries
 default["bcpc"]["hadoop"]["graphite"]["service_queries"] = {} # Service specific queries
+
+default["bcpc"]["hadoop"]["zabbix"]["query_graphite"] = {
+  'log_file' => '/var/log/zabbix/query_graphite.log',
+  'logging_level' => 'DEBUG',
+  'rolling_max_bytes' => 20971520, # 20mb
+  'rolling_backup_count' => 3 
+}

@@ -18,8 +18,13 @@ template node['bcpc']['zabbix']['scripts']['mail'] do
   mode 0755
 end
 
-cookbook_file node['bcpc']['zabbix']['scripts']['query_graphite'] do
-  source "query_graphite.py"
+template node['bcpc']['zabbix']['scripts']['query_graphite'] do
+  source "graphite.query_graphite.py.erb"
+  variables(:log_file => node[:bcpc][:hadoop][:zabbix][:query_graphite][:log_file],
+            :log_level => node[:bcpc][:hadoop][:zabbix][:query_graphite][:logging_level],
+            :max_bytes => node[:bcpc][:hadoop][:zabbix][:query_graphite][:rolling_max_bytes],
+            :backup_count => node[:bcpc][:hadoop][:zabbix][:query_graphite][:rolling_backup_count]
+           )
   mode 0744
   owner "root"
   group "root"
@@ -158,7 +163,7 @@ ruby_block "zabbix_monitor" do
           trend_days = attrs['trend_days']
         end
         if attrs['value_type'].nil?
-          value_type = 0 # default = numeric float
+          value_type = 3 # default = numeric unsigned
         else
           value_type = attrs['value_type']
         end
