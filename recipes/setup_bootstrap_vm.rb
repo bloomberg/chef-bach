@@ -98,12 +98,6 @@ directory File.join(cluster_data_dir,'data_bags') do
   action :create
 end
 
-knife_environment = {'http_proxy'  => nil,
-                     'https_proxy' => nil,
-                     'HTTP_PROXY'  => nil,
-                     'HTTPS_PROXY' => nil,
-                     'KNIFE_HOME'  => cluster_data_dir}
-
 execute 'upload-cookbooks' do
   command "bundle exec knife cookbook -VV upload --all --cookbook-path #{Chef::Config[:chef_repo_path]}/vendor/cookbooks --force"
   environment knife_environment
@@ -164,6 +158,7 @@ end
 convergence_options = {
                        :chef_config => bootstrap_chef_client_config,
                        :ssl_verify_mode => :verify_none,
+                       :chef_version => Chef::VERSION
                       }
 
 machine bootstrap_fqdn do
@@ -206,7 +201,7 @@ execute "create-cobbler-secret" do
   # properties from the execute resource.
   #
   guard_interpreter :bash
-  not_if 'knife vault show os cobbler'
+  not_if 'bundle exec knife vault show os cobbler -M client'
 end
 
 # Provision with a complete role.
