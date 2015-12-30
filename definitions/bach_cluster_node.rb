@@ -8,14 +8,6 @@
 # have a single resource object that caches the previously set values.
 #
 
-chef_client_config =
-  <<-EOM.gsub(/^ {4}/,'')
-    # Unfortunately, we are using an IP addr in the chef URL.
-    # For at least the first run, SSL validation is disabled.
-    verify_api_cert false
-    ssl_verify_mode :verify_none
-  EOM
-
 define :bach_cluster_node do
   name = params[:name]
   cpus = params[:cpus] || 1
@@ -52,6 +44,7 @@ define :bach_cluster_node do
     add_machine_options(:convergence_options => 
                         {
                          :chef_config => chef_client_config,
+                         :chef_version => Chef::VERSION,
                          :ssl_verify_mode => :verify_none
                         })
     chef_server chef_server_config_hash

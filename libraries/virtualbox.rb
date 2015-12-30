@@ -53,31 +53,28 @@ def create_vbox_vm(name:)
 
   bootstrap_info = get_vbox_vm_info(name: bootstrap_vm_name)
 
-  hostonly_adapter_keys.each do |key|
-    raise "no host interface (vboxnetn) found for #{key}!" unless bootstrap_info[key]
+  hostonly_adapter_keys.each do |adapter_name|
+    unless bootstrap_info.has_key?(adapter_name)
+      raise "no host interface (vboxnetN) found for #{adapter_name}!"
+    end
   end
 
-  iface1, iface2, iface3 =
-    bootstrap_info.values_at(*hostonly_adapter_keys)
+  adapters = bootstrap_info.values_at(*hostonly_adapter_keys)
 
   system('vboxmanage', 'modifyvm', name,
          '--nic1', 'hostonly',
-         '--hostonlyadapter1', iface1,
+         '--hostonlyadapter1', adapters[0],
          '--nictype1', '82543gc')
   
   system('vboxmanage', 'modifyvm', name,
          '--nic2', 'hostonly',
-         '--hostonlyadapter2', iface2,
+         '--hostonlyadapter2', adapters[1],
          '--nictype2', '82543gc')
   
   system('vboxmanage', 'modifyvm', name,
          '--nic3', 'hostonly',
-         '--hostonlyadapter3', iface3,
+         '--hostonlyadapter3', adapters[2],
          '--nictype3', '82543gc')
-
-  system('vboxmanage', 'setextradata', name,
-         'vboxinternal/devices/pcbios/0/config/lanbootrom',
-         pxe_rom_path)
 
   system('vboxmanage', 'modifyvm', name,
          '--boot1', 'disk',
@@ -130,4 +127,39 @@ def create_vbox_vm(name:)
 end
 
 def destroy_vbox_vm(name:)
+end
+
+def start_vbox_vm(name:)
+  info = get_vbox_vm_info(name: name)
+  raise "Cannot start non-existent VM: #{name}" if info.nil?
+  if info['VMState'] != 'running'
+    require 'mixlib/shellout'
+
+    c = Mixlib::ShellOut.new('vboxmanage', 'startvm', name,
+                             '--type', 'headless')
+    c.run_command
+
+    if c.status.success?
+      Chef::Log.warn("Started #{name}.")
+    else
+      raise "Failed to start VM:\n#{c.inspect}"
+    end
+  end
+  return true
+end
+
+def ssh_check(ip:, username:, password:)
+  require 'net/ssh'
+  begin
+    Net::SSH.start(ip, username,
+                   :auth_methods => ['password'],
+                   :config => false,
+                   :password => password,
+                   :timeout => 60,
+                   :user_known_hosts_file => '/dev/null') do |ssh|
+      ssh.exec!('ls')
+    end
+  rescue Net::SSH::Disconnect, Errno::ECONNREFUSED
+    return false
+  end
 end

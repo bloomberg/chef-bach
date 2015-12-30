@@ -44,6 +44,18 @@ module BachCluster
     def chef_client_attributes
     end
 
+    def chef_client_config
+    <<-EOM.gsub(/^ {6}/,'')
+      # Unfortunately, we are using an IP addr in the chef URL.
+      # For at least the first run, SSL validation is disabled.
+      verify_api_cert false
+      ssl_verify_mode :verify_none
+
+      # chef-provisioning doesn't automatically get this.
+      no_proxy '#{bootstrap_fqdn},#{bootstrap_ip},localhost'
+    EOM
+    end
+
     def chef_server_attributes
       { 
        'chef-server' => { 
@@ -82,12 +94,45 @@ module BachCluster
       "#{Chef::Config[:chef_repo_path]}/.chef"
     end
 
+    def cobbler_root_password      
+      require 'json'
+      require 'mixlib/shellout'
+      
+      vault_command =
+        Mixlib::ShellOut.new('bundle', 'exec',
+                             'knife', 'vault', 'show',
+                             'os', 'cobbler',
+                             '-F', 'json',
+                             '-p', 'all',
+                             '-m', 'client',
+                             :env => knife_environment,
+                             :cwd => Chef::Config[:chef_repo_path])
+      
+      vault_command.run_command
+      
+      if !vault_command.status.success?
+        raise 'Could not retrieve cobbler password!\n' +
+          vault_command.stdout + '\n' +
+          vault_command.stderr
+      end
+      
+      JSON.parse(vault_command.stdout)['root-password']
+    end
+
     def fqdn_for(name)
       if name.end_with?(node[:bcpc][:domain_name])
         name
       else
         name + '.' + node[:bcpc][:domain_name]
       end
+    end
+
+    def knife_environment
+      {'http_proxy'  => nil,
+       'https_proxy' => nil,
+       'HTTP_PROXY'  => nil,
+       'HTTPS_PROXY' => nil,
+       'KNIFE_HOME'  => cluster_data_dir}
     end
 
     def render_knife_config
