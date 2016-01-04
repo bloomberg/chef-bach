@@ -7,18 +7,10 @@ default['bcpc']['country'] = "US"
 default['bcpc']['state'] = "NY"
 default['bcpc']['location'] = "New York"
 default['bcpc']['organization'] = "Bloomberg"
-# Can be "folsom" or "grizzly"
-default['bcpc']['openstack_release'] = "grizzly"
-# Can be "updates" or "proposed"
-default['bcpc']['openstack_branch'] = "proposed"
-# Should be kvm (or qemu if testing in VMs)
-default['bcpc']['virt_type'] = "kvm"
 # Region name for this cluster
 default['bcpc']['region_name'] = node.chef_environment
 # Domain name that will be used for DNS
 default['bcpc']['domain_name'] = "bcpc.example.com"
-# Key if Cobalt+VMS is to be used
-default['bcpc']['vms_key'] = nil
 
 default['bcpc']['encrypt_data_bag'] = false
 
@@ -44,29 +36,7 @@ default['bcpc']['bootstrap']['dhcp_subnet'] = "10.0.100.0"
 #  Ceph settings for the cluster
 #
 ###########################################
-default['bcpc']['ceph']['pgs_per_node'] = 1024
-default['bcpc']['ceph']['hdd_disks'] = [ "sdb", "sdc" ]
-default['bcpc']['ceph']['ssd_disks'] = [ "sdd", "sde" ]
-default['bcpc']['ceph']['enabled_pools'] = [ "ssd", "hdd" ]
 # The 'portion' parameters should add up to ~100 across all pools
-default['bcpc']['ceph']['rgw']['replicas'] = 3
-default['bcpc']['ceph']['rgw']['portion'] = 33
-default['bcpc']['ceph']['rgw']['type'] = 'hdd'
-default['bcpc']['ceph']['images']['replicas'] = 3
-default['bcpc']['ceph']['images']['portion'] = 33
-default['bcpc']['ceph']['images']['type'] = 'ssd'
-default['bcpc']['ceph']['images']['name'] = "images"
-default['bcpc']['ceph']['volumes']['replicas'] = 3
-default['bcpc']['ceph']['volumes']['portion'] = 33
-default['bcpc']['ceph']['volumes']['name'] = "volumes"
-default['bcpc']['ceph']['vms_disk']['replicas'] = 3
-default['bcpc']['ceph']['vms_disk']['portion'] = 10
-default['bcpc']['ceph']['vms_disk']['type'] = 'ssd'
-default['bcpc']['ceph']['vms_disk']['name'] = "vmsdisk"
-default['bcpc']['ceph']['vms_mem']['replicas'] = 3
-default['bcpc']['ceph']['vms_mem']['portion'] = 10
-default['bcpc']['ceph']['vms_mem']['type'] = 'ssd'
-default['bcpc']['ceph']['vms_mem']['name'] = "vmsmem"
 
 ###########################################
 #
@@ -101,17 +71,8 @@ default['bcpc']['dns_servers'] = [ "8.8.8.8", "8.8.4.4" ]
 #  Repos for things we rely on
 #
 ###########################################
-default['bcpc']['repos']['ceph'] = "http://www.ceph.com/debian-dumpling"
-default['bcpc']['repos']['ceph-extras'] = "http://www.ceph.com/packages/ceph-extras/debian"
-default['bcpc']['repos']['ceph-el6-x86_64'] = "http://ceph.com/rpm-dumpling/el6/x86_64"
-default['bcpc']['repos']['ceph-el6-noarch'] = "http://ceph.com/rpm-dumpling/el6/noarch"
-default['bcpc']['repos']['rabbitmq'] = "http://www.rabbitmq.com/debian"
 default['bcpc']['repos']['mysql'] = "http://repo.percona.com/apt"
-default['bcpc']['repos']['openstack'] = "http://ubuntu-cloud.archive.canonical.com/ubuntu"
 default['bcpc']['repos']['hwraid'] = "http://hwraid.le-vert.net/ubuntu"
-default['bcpc']['repos']['ceph-apache'] = "http://gitbuilder.ceph.com/apache2-deb-precise-x86_64-basic/ref/master"
-default['bcpc']['repos']['ceph-fcgi'] = "http://gitbuilder.ceph.com/libapache-mod-fastcgi-deb-precise-x86_64-basic/ref/master"
-default['bcpc']['repos']['gridcentric'] = "http://downloads.gridcentric.com/packages/%s/%s/ubuntu"
 default['bcpc']['repos']['ubuntu-tools'] = "http://ppa.launchpad.net/canonical-support/support-tools/ubuntu"
 default['bcpc']['ubuntu']['version'] = "precise"
 
@@ -120,11 +81,6 @@ default['bcpc']['ubuntu']['version'] = "precise"
 #  Default names for db's, pools, and users
 #
 ###########################################
-default['bcpc']['nova_dbname'] = "nova"
-default['bcpc']['cinder_dbname'] = "cinder"
-default['bcpc']['glance_dbname'] = "glance"
-default['bcpc']['horizon_dbname'] = "horizon"
-default['bcpc']['keystone_dbname'] = "keystone"
 default['bcpc']['pdns_dbname'] = "pdns"
 default['bcpc']['zabbix_dbname'] = "zabbix"
 
@@ -143,10 +99,6 @@ default['bcpc']['zabbix']['scripts']['query_graphite'] = "/usr/local/bin/query_g
 
 default['bcpc']['keepalived']['config_template'] = "keepalived.conf_openstack"
 
-default[:bcpc][:ports][:apache][:radosgw] = 8080
-default[:bcpc][:ports][:apache][:radosgw_https] = 8443
-default[:bcpc][:ports][:haproxy][:radosgw] = 80
-default[:bcpc][:ports][:haproxy][:radosgw_https] = 443
 
 #################################################
 #  attributes for chef vault download and install
