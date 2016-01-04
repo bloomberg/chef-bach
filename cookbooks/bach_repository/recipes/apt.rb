@@ -60,16 +60,6 @@ execute 'generate-packages-file' do
   umask 0222
 end
 
-file "#{apt_bins_path}/Release" do
-  mode 0444
-  content <<-EOM.gsub(/^ {4}/,'')
-    Version: #{apt_repo_version}
-    Suite: #{apt_repo_version}
-    Component: main
-    Architecture: amd64
-  EOM
-end
-
 temporary_release_file = Tempfile.new('bach_repo_release').path
 release_file_path = apt_directory + '/Release'
 execute 'generate-release-file' do
@@ -84,6 +74,10 @@ execute 'generate-release-file' do
     mv #{temporary_release_file} #{release_file_path}
   EOM
   umask 0222
+end
+
+file "#{apt_bins_path}/Release" do
+  mode 0444
 end
 
 execute 'sign-release-file' do
