@@ -4,4 +4,5 @@ chef
 cookbooks
 environments
 local-mode-cache
+provisioning
 vendor
