@@ -198,7 +198,7 @@ execute "create-cobbler-secret" do
 
   #
   # The guard_interpreter is set to force the guard to inherit
-  # properties from the execute resource.
+  # the environment and cwd from the execute resource.
   #
   guard_interpreter :bash
   not_if 'bundle exec knife vault show os cobbler -M client'

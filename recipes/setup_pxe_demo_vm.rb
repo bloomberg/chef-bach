@@ -88,6 +88,25 @@ end
 require 'chef/provisioning/ssh_driver'
 with_driver 'ssh'
 
+# Don't start SSH provisioning until the first node is up.
+# (We have to wait for OS installation to complete.)
+require 'chef/provisioning/transport/ssh'
+
+ssh_options = {:password => cobbler_root_password,
+               :user_known_hosts_file => '/dev/null'}
+
+ssh_transport =
+  Chef::Provisioning::Transport::SSH.new(:host => pxe_vms.first[:mgmt_ip],
+                                         :username => 'root',
+                                         :ssh_options => ssh_options)
+
+unless ssh_transport.available?
+  while !ssh_transport.available
+    Chef::Log.info("Waiting for #{pxe_vms.first[:name]} to respond..")
+    sleep 60
+  end
+end
+
 # Initial setup via SSH provisioner
 pxe_vms.each do |vm|
   convergence_options =
@@ -102,8 +121,7 @@ pxe_vms.each do |vm|
     {
      :ip_address => vm[:mgmt_ip],
      :username => 'root',
-     :ssh_options => {:password => cobbler_root_password,
-                      :user_known_hosts_file => '/dev/null'}
+     :ssh_options => ssh_options
     }
   
   machine fqdn_for(vm[:name]) do
