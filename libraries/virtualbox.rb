@@ -84,6 +84,11 @@ def create_vbox_vm(name:)
   require 'pathname'
   vm_path = Pathname.new(get_vbox_vm_info(name: name)['CfgFile']).dirname
 
+  attached_disks =
+    get_vbox_vm_info(name: name).select{ |k,v|
+      k.start_with?(target_controller_name) &&
+      v.end_with?('vdi') }.values
+ 
   ['sda', 'sdb','sdc','sdd','sde'].each_with_index do |dev,i|
     disk_path = File.join(vm_path, "#{name}-#{dev}.vdi")
 
@@ -93,12 +98,14 @@ def create_vbox_vm(name:)
              '--size', (20 * 1024).to_s)
     end
 
-    system('vboxmanage', 'storageattach', name, 
-           '--storagectl', target_controller_name,
-           '--port', (i + 1).to_s, 
-           '--device', 0.to_s, 
-           '--type', 'hdd', 
-           '--medium', disk_path)
+    unless attached_disks.include?(disk_path)
+      system('vboxmanage', 'storageattach', name, 
+             '--storagectl', target_controller_name,
+             '--port', (i + 1).to_s, 
+             '--device', 0.to_s, 
+             '--type', 'hdd', 
+             '--medium', disk_path)
+    end
   end
 end
 
