@@ -166,8 +166,15 @@ machine bootstrap_fqdn do
   add_machine_options(:convergence_options => convergence_options,
                       :vagrant_config => bootstrap_vm_configuration)
   chef_environment node.chef_environment
+  recipe 'bach_bootstrap::chef-server'
   role 'Basic'
-  complete false
+  #
+  # This is marked complete so that we overwrite the runlist.
+  #
+  # (If the runlist is not overwritten, chef may attempt to load
+  # deleted chef-vault secrets before can be recreated.)
+  #
+  complete true
 end
 
 #

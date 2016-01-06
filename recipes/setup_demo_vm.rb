@@ -34,49 +34,13 @@ total_node_count = worker_node_count + 2
 end
 
 # Force the chef server to rebuild its solr index.
-# (Index rebuild via knife is no longer supported.)
-machine_execute 'chef-server-reindex' do
-  machine bootstrap_fqdn
-  chef_server chef_server_config_hash
-  command "chef-server-ctl reindex " +
-    node[:bach][:cluster][:organization][:name]
-end
+rebuild_chef_index
 
+# Wait for the head nodes to appear in the index.
 ruby_block "wait-for-reindex" do
   block do
-    #
-    # We're calling out to knife instead of using the Chef API because
-    # I couldn't figure out how to call Cheffish by hand from a ruby
-    # block.
-    #
-    # This is definitely the wrong way to do this.
-    #
-    # We created a .chef/knife.rb when we set up the bootstrap server,
-    # so knife is already configured.
-    #
-    def find_client(string)
-      command_string = 
-        'env -u http_proxy -u https_proxy -u no_proxy ' +
-        ' -u HTTP_PROXY -u HTTPS_PROXY -u NO_PROXY ' +
-        "knife search client '#{string}' " +
-        '2>&1 >/dev/null | grep -v 0 | grep found'
-
-      Chef::Log.debug("Running: #{command_string}")
-
-      cmd = Mixlib::ShellOut.new(command_string,
-                                 :cwd => Chef::Config[:chef_repo_path])
-      r = cmd.run_command
-      Chef::Log.debug("Result: #{r.inspect}")
-      !cmd.error?
-    end
-    
-    ["name:bach-vm1-b#{build_id}*",
-     "name:bach-vm2-b#{build_id}*"].each do |search_string|
-      until(find_client(search_string))
-        Chef::Log.info("Waiting for #{search_string} to appear in index")
-        sleep 10
-      end
-    end
+    wait_until_indexed("name:bach-vm1-b#{build_id}*",
+                       "name:bach-vm2-b#{build_id}*")
   end
 end
 

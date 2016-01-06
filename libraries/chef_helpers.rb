@@ -135,6 +135,17 @@ module BachCluster
        'KNIFE_HOME'  => cluster_data_dir}
     end
 
+    def rebuild_chef_index
+      # Force the chef server to rebuild its solr index.
+      # (Index rebuild via knife is no longer supported.)
+      machine_execute 'chef-server-reindex' do
+        machine bootstrap_fqdn
+        chef_server chef_server_config_hash
+        command "chef-server-ctl reindex " +
+          node[:bach][:cluster][:organization][:name]
+      end
+    end
+    
     def render_knife_config
       template File.join(cluster_data_dir, 'knife.rb') do
         variables({
@@ -149,6 +160,41 @@ module BachCluster
                    validation_key: 
                      "#{cluster_data_dir}/bach_validator.pem",
                   })
+      end
+    end
+
+    def wait_until_indexed(*target_vms)
+      #
+      # We're calling out to knife instead of using the Chef API because
+      # I couldn't figure out how to call Cheffish by hand from a ruby
+      # block.
+      #
+      # This is definitely the wrong way to do this.
+      #
+      # We created a .chef/knife.rb when we set up the bootstrap server,
+      # so knife is already configured.
+      #
+      def find_client(string)
+        command_string = 
+          'env -u http_proxy -u https_proxy -u no_proxy ' +
+          ' -u HTTP_PROXY -u HTTPS_PROXY -u NO_PROXY ' +
+          "knife search client '#{string}' " +
+          '2>&1 >/dev/null | grep -v 0 | grep found'
+
+        Chef::Log.debug("Running: #{command_string}")
+
+        cmd = Mixlib::ShellOut.new(command_string,
+                                   :cwd => Chef::Config[:chef_repo_path])
+        r = cmd.run_command
+        Chef::Log.debug("Result: #{r.inspect}")
+        !cmd.error?
+      end
+      
+      target_vms.each do |search_string|
+        until(find_client(search_string))
+          Chef::Log.info("Waiting for #{search_string} to appear in index")
+          sleep 10
+        end
       end
     end
   end

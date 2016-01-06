@@ -88,22 +88,37 @@ end
 require 'chef/provisioning/ssh_driver'
 with_driver 'ssh'
 
-# Don't start SSH provisioning until the first node is up.
-# (We have to wait for OS installation to complete.)
-require 'chef/provisioning/transport/ssh'
-
-ssh_options = {:password => cobbler_root_password,
+ssh_options = {:auth_methods => ['password'],
+               :config => false,
+               :number_of_password_prompts => 0,
+               :password => cobbler_root_password,
                :user_known_hosts_file => '/dev/null'}
 
-ssh_transport =
-  Chef::Provisioning::Transport::SSH.new(:host => pxe_vms.first[:mgmt_ip],
-                                         :username => 'root',
-                                         :ssh_options => ssh_options)
+# Don't start SSH provisioning until the first node is up.
+# (We have to wait for OS installation to complete.)
+ruby_block 'wait-for-first-os-install' do
+  block do
+    require 'chef/provisioning/transport/ssh'
+    require 'timeout'
 
-unless ssh_transport.available?
-  while !ssh_transport.available
-    Chef::Log.info("Waiting for #{pxe_vms.first[:name]} to respond..")
-    sleep 60
+    options = {}
+    config = { :log_level => Chef::Config.log_level }
+
+    ssh_transport =
+      Chef::Provisioning::Transport::SSH.new(pxe_vms.first[:mgmt_ip],
+                                             'root',
+                                             ssh_options,
+                                             options,
+                                             config)
+
+    # If it takes more than half an hour for the first node to respond,
+    # something is really broken.
+    Timeout::timeout(1800) do
+      while !ssh_transport.available?
+        Chef::Log.info("Waiting for #{pxe_vms.first[:name]} to respond..")
+        sleep 60
+      end
+    end
   end
 end
 
@@ -134,6 +149,17 @@ pxe_vms.each do |vm|
     recipe 'bach_common::apt_proxy'
     recipe 'bach_common::binary_server'
     role 'Basic'
+  end
+end
+
+# Force the chef server to rebuild its solr index.
+rebuild_chef_index
+
+# Wait for the head nodes to appear in the index.
+ruby_block "wait-for-reindex" do
+  block do
+    wait_until_indexed("name:bach-vm1-b#{build_id}*",
+                       "name:bach-vm2-b#{build_id}*")
   end
 end
 
