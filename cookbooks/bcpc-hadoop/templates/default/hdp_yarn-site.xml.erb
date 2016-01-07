@@ -238,7 +238,7 @@
   </property>
 
   <property>
-    <name>resource.percentage-physical-cpu-limit</name>
+    <name>yarn.nodemanager.resource.percentage-physical-cpu-limit</name>
     <value><%= (node['bcpc']['hadoop']['yarn']['nodemanager']['avail_vcpu']['count'] ? \
                  node['bcpc']['hadoop']['yarn']['nodemanager']['avail_vcpu']['count']/node['cpu']['total'] :
                  node['bcpc']['hadoop']['yarn']['nodemanager']['avail_vcpu']['ratio'] * 100).floor %></value>
