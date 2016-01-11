@@ -2,11 +2,6 @@
   "name": "Test-Laptop",
   "override_attributes": {
     "bcpc": {
-      "virt_type" : "qemu",
-      "ceph": {
-        "hdd_disks" : [ "sdb", "sdc" ],
-        "ssd_disks" : [ "sdd", "sde" ]
-      },
       "domain_name" : "bcpc.example.com",
       "management": {
         "vip" : "10.0.100.5",
@@ -42,7 +37,7 @@
         "hdfs" : {
           "dfs_replication_factor" : 1
         },
-        "disks" : ["sdb" , "sdc" ],
+        "disks" : ["sdb" , "sdc", "sdd", "sde"],
         "distribution": {
           "version": "HDP",
           "key": "hortonworks.key"
