@@ -7,6 +7,7 @@ default['bcpc']['graphite']['log']['retention'] = 15
 default['bcpc']['graphite']['data']['retention'] = 15
 default['bcpc']['graphite']['timezone'] = "'America/New_York'"
 default['bcpc']['graphite']['carbon_fileno_limit'] = 4096
+default['bcpc']['graphite']['install_dir'] = "/opt/graphite"
 default['bcpc']['graphite']['local_storage_dir'] = "/opt/graphite/storage"
 default['bcpc']['graphite']['local_data_dir'] = "/opt/graphite/storage/whisper"
 default['bcpc']['graphite']['local_log_dir'] = "/opt/graphite/storage/log"
