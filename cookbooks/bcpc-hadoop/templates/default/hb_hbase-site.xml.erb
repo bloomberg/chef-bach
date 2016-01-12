@@ -295,4 +295,9 @@
     <name>hbase.replication</name>
     <value>true</value>
   </property>
+
+  <property>
+    <name>hbase.coprocessor.abortonerror</name>
+    <value><%= node["bcpc"]["hadoop"]["hbase_rs"]["coprocessor"]["abortonerror"] %></value>
+  </property>
 </configuration>
