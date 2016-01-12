@@ -50,7 +50,7 @@ d-i     clock-setup/ntp boolean true
 d-i     clock-setup/ntp-server  string <%= @node[:ntp][:servers].first %>
 # This will install the base 12.04 kernel image.  If you comment out the
 # following line, it will install the upgraded kernel LTS stack.
-d-i     base-installer/kernel/image     string linux-server
+d-i     base-installer/kernel/image     string <%= @node[:bcpc][:bootstrap][:preseed][:kernel] %>
 d-i     passwd/root-login       boolean false
 d-i     passwd/make-user        boolean true
 d-i     passwd/user-fullname    string ubuntu
