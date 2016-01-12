@@ -278,6 +278,15 @@
     <!-- Default proxyuser configuration for Hue -->
 
   <% if node[:bcpc][:hadoop][:kerberos][:enable] == true then %> 
+
+  <property>
+    <name>oozie.credentials.credentialclasses</name>
+    <value>
+      hcat=org.apache.oozie.action.hadoop.HCatCredentials,
+      hive2=org.apache.oozie.action.hadoop.Hive2Credentials
+    </value>
+  </property>
+
   <property>
     <name>oozie.authentication.kerberos.principal</name>
     <value><%=node[:bcpc][:hadoop][:kerberos][:data][:spnego][:principal]%>/<%=node[:bcpc][:hadoop][:kerberos][:data][:spnego][:princhost]=="_HOST" ? float_host(node[:fqdn]) : node[:bcpc][:hadoop][:kerberos][:data][:spnego][:princhost]%>@<%=node[:bcpc][:hadoop][:kerberos][:realm]%></value>
