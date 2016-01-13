@@ -50,7 +50,7 @@ d-i     clock-setup/ntp boolean true
 d-i     clock-setup/ntp-server  string <%= @node[:ntp][:servers].first %>
 # This will install the base 12.04 kernel image.  If you comment out the
 # following line, it will install the upgraded kernel LTS stack.
-d-i     base-installer/kernel/image     string linux-server
+d-i     base-installer/kernel/image     string <%= @node[:bcpc][:bootstrap][:preseed][:kernel] %>
 d-i     passwd/root-login       boolean false
 d-i     passwd/make-user        boolean true
 d-i     passwd/user-fullname    string ubuntu
@@ -94,4 +94,7 @@ d-i     debian-installer/exit/poweroff  boolean false
 d-i     pkgsel/include string openssh-server lldpd
 
 d-i     preseed/late_command string <%= @node[:bcpc][:bootstrap][:preseed][:late_command] %> && \
+        in-target apt-get -y install linux-crashdump kdump-tools && \
+        in-target sed -i 's/USE_KDUMP=0/USE_KDUMP=1/' /etc/default/kdump-tools; \
+        in-target sed -i 's/#MAKEDUMP_ARGS="-c -d 31"/MAKEDUMP_ARGS="-c -d 31"/' /etc/default/kdump-tools && \
         wget "http://$http_server:$http_port/cblr/svc/op/nopxe/system/$system_name" -O /dev/null

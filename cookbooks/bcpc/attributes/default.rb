@@ -22,10 +22,10 @@ default['bcpc']['vms_key'] = nil
 
 default['bcpc']['encrypt_data_bag'] = false
 
+# Specify the kernel you wish to install. For default latest LTS kernel use "linux-server"
+default['bcpc']['bootstrap']['preseed']['kernel'] = "linux-generic-lts-trusty"
 default['bcpc']['bootstrap']['preseed']['add_kernel_opts'] = "console=ttyS0"
-
 default['bcpc']['bootstrap']['preseed']['late_command'] = "true"
-
 default['bcpc']['bootstrap']['admin_users'] = []
 
 ###########################################
