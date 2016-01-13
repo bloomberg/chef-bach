@@ -12,6 +12,11 @@ default['jmxtrans']['default_queries']['zookeeper'] = [
      'obj' => "org.apache.ZooKeeperService:name0=ReplicatedServer_id*",
      'result_alias' => "zookeeper",
      'attr' => [ "QuorumSize" ]
+  },
+  {
+    'obj' => "org.apache.ZooKeeperService:name0=ReplicatedServer_id*,name1=replica.*,name2=Follower,name3=InMemoryDataTree",
+    'result_alias' => "zookeeper",
+    'attr' => [ "NodeCount" ]
   }
 ]
 default['jmxtrans']['default_queries']['kafka'] = [
