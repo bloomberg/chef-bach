@@ -94,4 +94,7 @@ d-i     debian-installer/exit/poweroff  boolean false
 d-i     pkgsel/include string openssh-server lldpd
 
 d-i     preseed/late_command string <%= @node[:bcpc][:bootstrap][:preseed][:late_command] %> && \
+        in-target apt-get -y install linux-crashdump kdump-tools && \
+        in-target sed -i 's/USE_KDUMP=0/USE_KDUMP=1/' /etc/default/kdump-tools; \
+        in-target sed -i 's/#MAKEDUMP_ARGS="-c -d 31"/MAKEDUMP_ARGS="-c -d 31"/' /etc/default/kdump-tools && \
         wget "http://$http_server:$http_port/cblr/svc/op/nopxe/system/$system_name" -O /dev/null
