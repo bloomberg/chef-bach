@@ -40,6 +40,25 @@ chef_vault_secret "mysql-graphite" do
   action :nothing
 end.run_action(:create_if_missing)
 
+# if we are using a dedicated disk create a directory before packages start instaling
+if node[:bcpc][:graphite][:graphite_disk] != nil then
+  disk_index = node[:bcpc][:hadoop][:disks].index(node[:bcpc][:graphite][:graphite_disk])
+  if disk_index == nil then
+    Chef::Application.fatal!('node[:bcpc][:graphite][:graphite_disk] specifies a disk not found in node[:bcpc][:hadoop][:disks]!')
+  end
+
+  directory "/disk/#{disk_index}/graphite" do
+    owner "root"
+    group "root"
+    recursive false
+  end
+
+  link node[:bcpc][:graphite][:install_dir] do
+    to "/disk/#{disk_index}/graphite"
+    link_type :symbolic
+  end
+end
+
 %w{python-pytz python-pyparsing python-mysqldb python-pip python-cairo python-django-tagging python-ldap python-twisted python-memcache python-pyparsing}.each do |pkg|
   package pkg do
     action :upgrade

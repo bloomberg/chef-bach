@@ -2,6 +2,9 @@
   "name": "Test-Laptop",
   "override_attributes": {
     "bcpc": {
+      "graphite": {
+        "graphite_disk": "sde"
+      },
       "domain_name" : "bcpc.example.com",
       "management": {
         "vip" : "10.0.100.5",
@@ -38,6 +41,7 @@
           "dfs_replication_factor" : 1
         },
         "disks" : ["sdb" , "sdc", "sdd", "sde"],
+        "head_disks" : ["sdb" , "sdc", "sdd"],
         "distribution": {
           "version": "HDP",
           "key": "hortonworks.key"
