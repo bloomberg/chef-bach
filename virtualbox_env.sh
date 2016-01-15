@@ -20,7 +20,7 @@ if [[ -z "$VBM" ]]; then
         then
             echo "ERROR: VirtualBox $version is less than $MIN_VERSION.x!" >&2
             echo "  Only VirtualBox >= $MIN_VERSION.x is officially supported." >&2
-            exit 1
+            #exit 1
         fi
     }
 

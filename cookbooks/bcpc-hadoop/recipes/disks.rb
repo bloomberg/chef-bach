@@ -1,6 +1,11 @@
+# vim: tabstop=2:shiftwidth=2:softtabstop=2 
 package "xfsprogs" do
   action :install
 end
+
+reservation_requests = node[:bcpc][:hadoop][:disks][:reservation_requests]
+available_disks = node[:bcpc][:hadoop][:disks][:available_disks]
+role_min_disk = node[:bcpc][:hadoop][:disks][:role_min_disk]
 
 directory "/disk" do
   owner "root"
@@ -9,8 +14,8 @@ directory "/disk" do
   action :create
 end
 
-if node[:bcpc][:hadoop][:disks].length > 0 then
-  node[:bcpc][:hadoop][:disks].each_index do |i|
+if available_disks.length > 0 then
+  available_disks.each_index do |i|
     directory "/disk/#{i}" do
       owner "root"
       group "root"
@@ -19,7 +24,7 @@ if node[:bcpc][:hadoop][:disks].length > 0 then
       recursive true
     end
    
-    d = node[:bcpc][:hadoop][:disks][i]
+    d = available_disks[i]
     execute "mkfs -t xfs -f /dev/#{d}" do
       not_if "file -s /dev/#{d} | grep -q 'SGI XFS filesystem'"
     end
@@ -31,17 +36,22 @@ if node[:bcpc][:hadoop][:disks].length > 0 then
       action [:enable, :mount]
     end
   end
-  if node.roles.include? "BCPC-Hadoop-Head" and node[:bcpc][:hadoop][:head_disks] != nil then
-    mnt_idxs = node[:bcpc][:hadoop][:head_disks].map do |dsk| 
-      node[:bcpc][:hadoop][:disks].index(dsk)
+
+  # is our role included in the list
+  if not (node[:bcpc][:hadoop][:disks][:disk_reserve_roles] & node.roles).empty? then 
+    # make sure we have enough disks to fulfill reservations and 
+    # also normal opration of the DN and NN 
+    if reservation_requests.length > available_disks.length
+      Chef::Application.fatal!('Reservations exceeds available disks')
     end
-    if mnt_idxs.include?(nil) then
-      Chef::Application.fatal!('node[:bcpc][:hadoop][:head_disks] specifies a disk not found in node[:bcpc][:hadoop][:disks]!')
+    if available_disks.length - reservation_requests.length < role_min_disk 
+      Chef::Application.fatal!('Minimum disk requirement not met')
     end
-    node.set[:bcpc][:hadoop][:mounts] = mnt_idxs
-  else 
-    node.set[:bcpc][:hadoop][:mounts] = (0..node[:bcpc][:hadoop][:disks].length-1).to_a
+    mount_indexes = (0..available_disks.length-1).to_a - reservation_requests.each_index.to_a
+    node.set[:bcpc][:hadoop][:mounts] = mount_indexes
+  else
+     node.set[:bcpc][:hadoop][:mounts] = (0..available_disks.length-1).to_a
   end
 else
-  Chef::Application.fatal!('Please specify some node[:bcpc][:hadoop][:disks]!')
+  Chef::Application.fatal!('Please specify some node[:bcpc][:hadoop][:disks][:available_disks]!')
 end
