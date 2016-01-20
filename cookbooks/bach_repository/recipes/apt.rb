@@ -89,5 +89,5 @@ execute 'sign-release-file' do
 end
 
 execute 'apt-fix-repository-perms' do
-  command "chmod -R a+r #{apt_bins_path}"
+  command "chmod -R a+r #{apt_directory}"
 end
