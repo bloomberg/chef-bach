@@ -19,7 +19,7 @@ SCPCMD="./nodescp    $ENVIRONMENT $IP"
 SSHCMD="./nodessh.sh $ENVIRONMENT $IP"
 
 echo "copy files..."
-for f in zap-ceph-disks.sh install-chef.sh finish-worker.sh finish-head.sh; do
+for f in install-chef.sh finish-worker.sh finish-head.sh; do
   $SCPCMD $f ubuntu@$IP:/home/ubuntu || (echo "copying $f failed" > /dev/stderr; exit 1)
 done
 
@@ -34,9 +34,6 @@ $SSHCMD "sed -i 's/^deb-src/\#deb-src/g' /etc/apt/sources.list" sudo
 
 echo "setup chef"
 $SSHCMD "/home/ubuntu/install-chef.sh $binary_server_host $binary_server_url $chef_server_ip `hostname`" sudo
-
-echo "zap disks"
-$SSHCMD "/home/ubuntu/zap-ceph-disks.sh" sudo
 
 echo "temporarily adjust system time to avoid time skew related failures"
 GOODDATE=`date`
