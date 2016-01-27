@@ -10,3 +10,5 @@ default['bcpc']['hadoop']['yarn']['historyserver']['heap']["size"] = 128
 default['bcpc']['hadoop']['yarn']['historyserver']['heap']["ratio"] = 0
 default["bcpc"]["hadoop"]["yarn"]["resourcemanager"]["port"] = 8032
 default['bcpc']['hadoop']['yarn']['aux_services']['mapreduce_shuffle']['class'] = 'org.apache.hadoop.mapred.ShuffleHandler'
+default['bcpc']['hadoop']['yarn']['opts']['jute_buffer'] = 6291456
+
