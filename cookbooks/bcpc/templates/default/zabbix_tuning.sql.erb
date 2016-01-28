@@ -1,0 +1,16 @@
+/* Housekeeping related settings 
+** Can be accessed on the UI by navigating to 
+** Administration -> General -> Select Housekeeping in the upper right 
+** hand side dropdown menu. */
+UPDATE zabbix.config SET
+hk_events_trigger = <%= @storage_retention %>,
+hk_events_internal = <%= @storage_retention %>,
+hk_events_discovery = <%= @storage_retention %>,
+hk_events_autoreg = <%= @storage_retention %>,
+hk_services = <%= @storage_retention %>,
+hk_audit = <%= @storage_retention %>,
+hk_sessions = <%= @storage_retention %>,
+hk_history = <%= @history_retention %>,
+hk_trends = <%= @storage_retention %>,
+hk_history_global = 1,
+hk_trends_global = 1;

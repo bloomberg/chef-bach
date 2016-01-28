@@ -21,20 +21,24 @@ end
 template node['bcpc']['zabbix']['scripts']['query_graphite'] do
   source "graphite.query_graphite.py.erb"
   variables(:log_file => node[:bcpc][:hadoop][:zabbix][:query_graphite][:log_file],
+            :config_file => node[:bcpc][:hadoop][:zabbix][:query_graphite][:config_file],
             :log_level => node[:bcpc][:hadoop][:zabbix][:query_graphite][:logging_level],
             :max_bytes => node[:bcpc][:hadoop][:zabbix][:query_graphite][:rolling_max_bytes],
-            :backup_count => node[:bcpc][:hadoop][:zabbix][:query_graphite][:rolling_backup_count]
+            :backup_count => node[:bcpc][:hadoop][:zabbix][:query_graphite][:rolling_backup_count],
+            :graphite_url => "https://#{node['bcpc']['management']['vip']}:#{node[:bcpc][:graphite][:web_port]}",
+            :metric_fetch_period => node[:bcpc][:hadoop][:graphite][:metric_fetch_period],
+            :worker_count => node[:bcpc][:hadoop][:graphite][:worker_count]
            )
   mode 0744
   owner "root"
   group "root"
 end
 
-template "/usr/local/etc/query_graphite.config" do
+template node[:bcpc][:hadoop][:zabbix][:query_graphite][:config_file] do
   source "graphite.query_graphite.config.erb"
   mode 0544
   zabbix_triggers = node.run_state["zabbix_triggers"] or {}
-  variables(:triggers => zabbix_triggers )
+  variables(:queries => zabbix_triggers.map{ |host,item| item.map{ |key, attr| attr['query'] }}.flatten.to_set )
 end
 
 ruby_block "zabbix_monitor" do
@@ -152,16 +156,6 @@ ruby_block "zabbix_monitor" do
         # zabbix sender processes.
         # For details about the parameter values refer to Zabbix documentaton
         # https://www.zabbix.com/documentation/2.2/manual/api/reference/item
-        if attrs['history_days'].nil?
-          history_days = node['bcpc']['hadoop']['zabbix']['history_days']
-        else
-          history_days = params['history_days']
-        end
-        if attrs['trend_days'].nil?
-          trend_days = node['bcpc']['hadoop']['zabbix']['trend_days']
-        else
-          trend_days = attrs['trend_days']
-        end
         if attrs['value_type'].nil?
           value_type = 3 # default = numeric unsigned
         else
@@ -179,9 +173,8 @@ ruby_block "zabbix_monitor" do
         item_info = {
           :name => trigger_key, :description => trigger_key,
           :key_ => trigger_key, :type => 2, :value_type => value_type,
-          :data_type => 0, :history => history_days, :trends => trend_days,
-          :hostid => "#{host_id}", :trapper_hosts => trapper_hosts,
-          :status => status
+          :data_type => 0, :hostid => "#{host_id}", 
+          :trapper_hosts => trapper_hosts, :status => status
         }
 
         if (item_id = existing_items[trigger_key]).nil?
@@ -211,77 +204,59 @@ ruby_block "zabbix_monitor" do
         expr = "{" + "#{trigger_host}" + ":" + trigger_key + "." +
           "#{attrs['trigger_val']}" + "}" + "#{attrs['trigger_cond']}"
 
+        trigger_info = {
+          :description => trigger_name,
+          :expression => expr,
+          :comments => attrs['trigger_desc'],
+          :priority => attrs['severity'],
+          :status => status,
+          :dependencies => dependencies
+        }
         if (trigger_id = existing_triggers[trigger_name]).nil?
-          createTriggersArr.push({
-            :description => trigger_name,
-            :expression => expr,
-            :comments => attrs['trigger_desc'],
-            :priority => attrs['severity'],
-            :status => status,
-            :dependencies => dependencies
-          })
+          createTriggersArr.push(trigger_info)
 
           # For all triggers, a companion trigger is created to check whether
           # the zabbix sender cron job is active and sends data to Zabbix.
           #cron_check_cond << "{" + "#{trigger_host}" + ":" + trigger_key +
           #  ".nodata(#{node["bcpc"]["hadoop"]["zabbix"]["cron_check_time"]})}=1"
         else
-          updateTriggersArr.push({
-            :triggerid => trigger_id,
-            :expression => expr,
-            :comments => attrs['trigger_desc'],
-            :priority => attrs['severity'],
-            :status => status,
-            :dependencies => dependencies
-          })
+          trigger_info[:triggerid] = trigger_id
+          updateTriggersArr.push(trigger_info)
         end # End of "if (trigger_id = existing_triggers[trigger_name]).nil?"
 
         # Create/Update Actions
         action_status = node[:bcpc][:hadoop][:zabbix][:enable_alarming] ? status : 1
         esc_period = attrs['esc_period'].nil? ? node[:bcpc][:hadoop][:zabbix][:escalation_period] : attrs['esc_period']
 
-        if (action_id = existing_actions["#{trigger_name}_action"]).nil?
-          createActionsArr.push({
-            "name" => "#{trigger_name}_action", "eventsource" => 0,
-            "evaltype" => 1, "status" => action_status, "esc_period" => esc_period,
+        action_info = {
+          'status' => action_status, 'esc_period' => esc_period,
+          'filter'=> {  
+            'evaltype' => 1,
             'conditions' => [
               {"conditiontype" => 3,"operator" => 2,"value" => trigger_name},
               {"conditiontype" => 5,"operator" => 0,"value" => 1},
-              {"conditiontype" => 16,"operator" => 7}
-            ],
-            'operations' => [{
-              "operationtype" => 1, "esc_step_from" => 2, "esc_step_to" => 2,
-              "opcommand" => {
-                "command" => "#{node['bcpc']['zabbix']['scripts']['mail']}" +
-                  " {TRIGGER.NAME} #{node.chef_environment}" +
-                  " #{attrs['severity']} '#{attrs['trigger_desc']}'" +
-                  " #{trigger_host} #{attrs['route_to']}",
-                "type" => "0", "execute_on" => "1"
-              },
-              "opcommand_hst" => ["hostid" => 0]
-            }]
-          })
+              {"conditiontype" => 16,"operator" => 7, "value" => ''}
+            ]
+          },
+          'operations' => [{
+            "operationtype" => 1, "esc_step_from" => 2, "esc_step_to" => 2,
+            "opcommand" => {
+              "command" => "#{node['bcpc']['zabbix']['scripts']['mail']}" +
+                " {TRIGGER.NAME} #{node.chef_environment}" +
+                " #{attrs['severity']} '#{attrs['trigger_desc']}'" +
+                " #{trigger_host} #{attrs['route_to']}",
+              "type" => "0", "execute_on" => "1"
+            },
+            "opcommand_hst" => ["hostid" => 0]
+          }]
+        }
+        if (action_id = existing_actions["#{trigger_name}_action"]).nil?
+          action_info[:name] = "#{trigger_name}_action"
+          action_info[:eventsource] = 0  
+          createActionsArr.push(action_info)
         else
-          updateActionsArr.push({
-            "actionid" => action_id, "evaltype" => 1, "status" => action_status,
-            "esc_period" => esc_period,
-            'conditions' => [
-              {"conditiontype" => 3, "operator" => 2, "value" => trigger_name},
-              {"conditiontype" => 5, "operator" => 0, "value" => 1},
-              {"conditiontype" => 16, "operator" => 7}
-            ],
-            'operations' => [{
-              "operationtype" => 1, "esc_step_from" => 2, "esc_step_to" => 2,
-              "opcommand" => {
-                "command" => "#{node['bcpc']['zabbix']['scripts']['mail']}" +
-                  " {TRIGGER.NAME} #{node.chef_environment}" +
-                  " #{attrs['severity']} '#{attrs['trigger_desc']}'" +
-                  " #{trigger_host} #{attrs['route_to']}",
-                 "type" => "0", "execute_on" => "1"
-              },
-              "opcommand_hst" => ["hostid" => 0]
-            }]
-          })
+          action_info[:actionid] = action_id
+          updateActionsArr.push(action_info)
         end # "if (action_id = existing_actions["#{trigger_name}_action"]).nil?"
       end #queries.each
 

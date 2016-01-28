@@ -124,6 +124,7 @@ template "/etc/mysql/conf.d/wsrep.cnf" do
   source "wsrep.cnf.erb"
   mode 00644
   variables( :max_connections => [get_nodes_for('mysql','bcpc').length*50+get_all_nodes.length*5, 200].max,
+             :innodb_buffer_pool_size => node['bcpc']['mysql']['innodb_buffer_pool_size'],
              :servers => get_nodes_for('mysql','bcpc') )
   notifies :restart, "service[mysql]", :immediate
 end

@@ -58,6 +58,8 @@ innodb_log_buffer_size=8M
 # Use direct I/O to avoid double buffering writes
 innodb_flush_method=O_DIRECT
 
+innodb_buffer_pool_size=<%= @innodb_buffer_pool_size %>M
+
 # Query Cache is not supported with wsrep
 query_cache_size=0
 query_cache_type=0

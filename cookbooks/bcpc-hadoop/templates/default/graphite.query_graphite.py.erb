@@ -1,89 +1,126 @@
 #!/usr/bin/python
-import urllib
 import urllib2
 import json
 import sys
 import logging
+import time
+import re
 from logging.handlers import RotatingFileHandler
+from multiprocessing.pool import ThreadPool as Pool
 
 LOGGER = None
 
-def create_log(path):
-  """  
-  Creates a rotating log
-  """
-  global LOGGER
-  LOGGER = logging.getLogger('query_graphite')
-  LOGGER.setLevel(logging.<%= @log_level %>)
-  handler = RotatingFileHandler(path, maxBytes=<%= @max_bytes %>, backupCount=<%= @backup_count %>)
-  formatter = logging.Formatter('%(asctime)s %(levelname)s - %(message)s')
-  handler.setFormatter(formatter)
-  LOGGER.addHandler(handler)
+class GraphiteToZabbix(object):
 
-def query_graphite(url):
-  """
-  Function to make query to graphite to retrive monitoring data
-  Returns data for the query in json format. Refer document
-  http://graphite.readthedocs.org/en/1.0/url-api.html for details
-  Accepts url formatted to make a query to graphite. Time out to get
-  a valid response from graphite URL is 30 seconds
-  Keyword arguments:
-  url: graphite jsp api url along with the query parameter
-  """
+  def __init__(self, threads=1):
+    self.cn = self.__class__.__name__
+    self.graphite_url = "<%= @graphite_url %>/render?from=-<%= @metric_fetch_period %>min&format=json&target=%s"
+    self.threads = threads
+    self.re_strip_function = re.compile("^(.+\()(.+)(\))$")
+    # On applying "self.re_strip_function", which index(start=1) in match.groups has the result 
+    self.re_query_field = 2
+    self._main()
 
-  req = urllib2.Request(url)
-  response = urllib2.urlopen(req,timeout=30)
-  res = response.read()
-  data = json.loads(res)
-  return data
+  def create_log(self, path):
+    """  
+    Creates a rotating log
+    """
 
-def write_data(zbxhost, zbxkey, data):
-  """
-  Function to parse the json object retruned by graphite query
-  and generate data in the format zabbix_sender protocol needs
-  Refer to zabbix sender man pages for details.
-  https://www.zabbix.com/documentation/1.8/manpages/zabbix_sender
-  Accepts host name defined in zabbix, the zabbix item defined in
-  the zabbix host to which the data corresponds to  and the data
-  Keyword arguments:
-  zbxhost: the zabbix host name to which the data will be attached to
-  zbxkey: the zabbix key to which the data will be attached to
-  data: json data returned from querying graphite. Sample data
-  [{
-    "target": "entries",
-      "datapoints": [
-        [1.0, 1311836008],
-        [2.0, 1311836009]
-      ]
-  }]
-  """
-  
-  for entry in data:
-    for key,value in entry.iteritems():
-      if key == 'datapoints':
-        for v in value:
-          ts = str(v[1])
-          if (v[0] is None):
-            val = 0
-          else:
-            try:
-              val = int(v[0])
-            except ValueError:
-              val = 0
-              LOGGER.warn("Cannot convert %s.%s(%s) to int" + \
-                          (zbxkey, ts, str(v[0])))
-          out = "%s %s %s %d" % (zbxhost,zbxkey,ts,val)
-          sys.stdout.write(out + '\n')
+    global LOGGER
+    LOGGER = logging.getLogger(__name__)
+    LOGGER.setLevel(logging.<%= @log_level %>)
+    handler = RotatingFileHandler(path, maxBytes=<%= @max_bytes %>, backupCount=<%= @backup_count %>)
+    formatter = logging.Formatter('%(asctime)s %(levelname)s - %(message)s')
+    handler.setFormatter(formatter)
+    LOGGER.addHandler(handler)
 
-def main():
-  create_log("<%= @log_file %>")
-  LOGGER.info('start')
-  with open('/usr/local/etc/query_graphite.config','r') as fin:
-    config = json.load(fin)
-    for entry in config['queries']:
-      graphite_data=query_graphite(entry['graphite_url'])
-      write_data(entry['zabbix_host'],entry['zabbix_key'],graphite_data)
-  LOGGER.info('end')
+  def query_graphite(self, target):
+    """
+    Query graphite to retrieve monitoring data
+    Time out to get a valid response from graphite URL is 30 seconds
+    """
 
+    target = target.strip()
+    req = urllib2.Request(self.graphite_url % target)
+    s_time = time.time()
+    data = None
+    try:
+      response = urllib2.urlopen(req,timeout=30)
+      res = response.read()
+      data = json.loads(res)
+    except Exception as e:
+      LOGGER.error('%s', e)
+    finally:
+      e_time = time.time() - s_time
+      LOGGER.debug("%s took %d sec" % (target, e_time))
+    return data
+
+  def fetch_query_from_function(self, blob_query):
+    """
+    Parse item part from query
+    """
+
+    match_obj = self.re_strip_function.match(blob_query)
+    if match_obj:
+      blob_query = match_obj.group(self.re_query_field)
+    return blob_query
+
+  def get_zbx_keys(self, target):
+    """
+    Parse the host and item that was queried.
+    The format should match the item names in Zabbix.
+    """
+
+    query = self.fetch_query_from_function(target)
+    parts = query.split('.')
+    host = parts[1]
+    item = target
+    if parts[0] == 'servers':
+      item = '.'.join(str(s) for s in parts[1:]) 
+    elif parts[0] == 'jmx':
+      item = host + '.' + parts[-1]
+    return (host, item)
+
+  def write_data(self, data):
+    """
+    Parse the json object returned by graphite query
+    and generate data in the format zabbix_sender protocol needs
+    Refer to zabbix sender man pages for details.
+    https://www.zabbix.com/documentation/2.4/manpages/zabbix_sender
+    """
+
+    for entry in data:
+      item_id = "%s %s" % self.get_zbx_keys(entry['target'])
+      try:
+        output = ["%s %s %d" % (item_id, str(e[1]), int(e[0]) if e[0] else 0) for e in entry['datapoints']] 
+      except ValueError:
+        LOGGER.warn("Error while formatting values for %s" % (item_id))
+      if output:
+        sys.stdout.write('\n'.join(output) + '\n')
+ 
+  def process_query(self, query):
+    """
+    Process a single graphite query
+    """
+    data = self.query_graphite(query)
+    if data:
+      self.write_data(data)
+
+  def _main(self):
+    self.create_log("<%= @log_file %>")
+    LOGGER.info('start')
+    with open("<%= @config_file %>",'r') as f:
+      queries = f.readlines()
+    pool = Pool(processes=self.threads)  
+    try:
+      pool.map(self.process_query, queries)
+    except Exception as e:
+      LOGGER.error('%s', e)
+      pass
+    finally:
+      pool.close()
+      pool.join()  
+    LOGGER.info('end')
+ 
 if __name__ == '__main__':
-  main()
+  GraphiteToZabbix(threads=<%= @worker_count %>)

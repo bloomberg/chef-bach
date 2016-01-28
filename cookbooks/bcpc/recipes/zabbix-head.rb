@@ -131,6 +131,27 @@ ruby_block "zabbix-database-creation" do
   end
 end
 
+template "/usr/local/share/zabbix/tuning.sql" do
+  source "zabbix_tuning.sql.erb"
+  variables(
+    :history_retention => node['bcpc']['zabbix']['retention_history'],
+    :storage_retention => node['bcpc']['zabbix']['retention_default']
+  )
+  owner "root"
+  group "root"
+  mode 00644
+  notifies :run, "ruby_block[customize-zabbix-config]", :immediately
+end
+
+ruby_block "customize-zabbix-config" do
+  block do
+    puts %x[
+      mysql -u#{get_config!('mysql-zabbix-user')} -p#{get_config!('password','mysql-zabbix','os')} #{node['bcpc']['zabbix_dbname']} < /usr/local/share/zabbix/tuning.sql
+    ]
+  end
+  action :nothing
+end
+
 template "/usr/local/share/zabbix/leader_election.sql" do
   source "zabbix.leader_election.sql.erb"
   owner "root"
@@ -157,7 +178,9 @@ end
 
 service "zabbix-server" do
   provider Chef::Provider::Service::Upstart
+  supports :status => true, :restart => true, :reload => false
   action [ :enable, :start ]
+  subscribes :restart, "ruby_block[customize-zabbix-config]", :delayed
 end
 
 %w{traceroute php5-mysql php5-gd}.each do |pkg|
