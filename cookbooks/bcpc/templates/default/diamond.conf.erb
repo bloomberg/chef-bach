@@ -161,7 +161,7 @@ batch = 100
 # path_suffix =
 
 # Default Poll Interval (seconds)
-interval = 10
+interval = 15
 
 [[KSMCollector]]
 enabled = True
@@ -178,46 +178,20 @@ enabled = True
 [[NtpdCollector]]
 enabled = True
 
-[[CephCollector]]
-enabled = True
-
-<% if node[:bcpc][:virt_type] == "kvm" -%>
-[[KVMCollector]]
-enabled = True
-
-[[IPMISensorCollector]]
-enabled = True
-
-[[SmartCollector]]
-enabled = False
-<% end -%>
-
 <% if @servers.include?(node) -%>
 [[HAProxyCollector]]
 enabled = True
 url=http://127.0.0.1:1936/haproxy?stats;csv
 
-[[ElasticSearchCollector]]
-enabled = False
-host=<%="#{node[:bcpc][:management][:ip]}"%>
-
-#[[MemcachedCollector]]
-#enabled = True
-
-[[PowerDNSCollector]]
-enabled = True
+[[MemcachedCollector]]
+enabled = False 
 
 <% if @has_mysql -%>
 [[MySQLCollector]]
-enabled = True
+enabled = False 
 hosts=<%="#{get_config('mysql-root-user')}"%>:<%="#{get_config!('password','mysql-root','os')}"%>@<%="#{node[:bcpc][:management][:ip]}"%>:3306/<%="#{node['bcpc']['nova_dbname']}"%>
 innodb = True
 <% end -%>
-
-[[RabbitMQCollector]]
-enabled = True
-host=<%="#{node[:bcpc][:management][:ip]}"%>:55672
-password=<%="#{get_config('rabbitmq-password')}"%>
 
 <% end -%>
 

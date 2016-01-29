@@ -234,7 +234,6 @@ default['jmxtrans']['default_queries']['namenode'] = [
         "PercentBlockPoolUsed",
         "PercentRemaining",
         "PercentUsed",
-        "Safemode",
         "SoftwareVersion",
         "Threads",
         "Total",
