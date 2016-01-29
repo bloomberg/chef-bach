@@ -7,4 +7,4 @@ default[:bcpc][:hadoop][:dir_threads] = 32
 default[:bcpc][:hadoop][:group_dir_mode] = "770"
 default[:bcpc][:hadoop][:user_dir_mode] = "755"
 default[:bcpc][:hadoop][:group_dir_prohibited_groups] = ['^users$', '^svn.*$', '^git.*$', 'dba']
-default[:bcpc][:hadoop][:ldap_query_keytab] = "#{node[:bcpc][:hadoop][:kerberos][:keytab][:dir]}/#{node[:bcpc][:hadoop][:kerberos][:namenode][:keytab]}"
+default[:bcpc][:hadoop][:ldap_query_keytab] = "#{node[:bcpc][:hadoop][:kerberos][:keytab][:dir]}/#{node[:bcpc][:hadoop][:kerberos][:data][:namenode][:keytab]}"
