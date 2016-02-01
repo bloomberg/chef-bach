@@ -25,7 +25,7 @@ node.normal['bcpc']['hadoop']['graphite']['service_queries']['hbase_master'] = {
      'enable' => true,
      'trigger_dep' => ["NameNodeAvailability"],
      'trigger_desc' => "HBase master seems to be down",
-     'severity' => 5,
+     'severity' => 4,
      'route_to' => "admin"
   },
   'hbaseheapmem' => {
@@ -45,7 +45,7 @@ node.normal['bcpc']['hadoop']['graphite']['service_queries']['hbase_master'] = {
      'enable' => true,
      'trigger_dep' => ["HBaseMasterAvailability"],
      'trigger_desc' => "HBase region server seems to be down",
-     'severity' => 5,
+     'severity' => 3,
      'route_to' => "admin"
   }
 }
