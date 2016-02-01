@@ -100,7 +100,7 @@ monitored_nodes_objs.each do |node_obj|
         'trigger_dep' => ["#{host}_NodeAvailability"],
         'enable' => true,
         'trigger_desc' => "Disk seems to be full or down",
-        'severity' => 3,
+        'severity' => 2,
         'route_to' => "admin"
       }
     end
@@ -115,7 +115,7 @@ monitored_nodes_objs.each do |node_obj|
         'trigger_dep' => ["#{host}_NodeAvailability"],
         'enable' => true,
         'trigger_desc' => "More than 90% of disk space used",
-        'severity' => 3,
+        'severity' => 2,
         'route_to' => "tenant"
       }
     end
