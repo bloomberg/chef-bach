@@ -164,6 +164,9 @@ service "generally run oozie" do
   supports :status => true, :restart => true, :reload => false
   subscribes :restart, "template[/etc/oozie/conf/oozie-site.xml]", :delayed
   subscribes :restart, "template[/etc/oozie/conf/oozie-env.sh]", :delayed
+  subscribes :restart, "template[/etc/hadoop/conf/hdfs-site.xml]", :delayed
+  subscribes :restart, "template[/etc/hadoop/conf/core-site.xml]", :delayed
+  subscribes :restart, "template[/etc/hadoop/conf/hadoop-env.sh]", :delayed
 end
 
 ruby_block "Oozie Down" do
