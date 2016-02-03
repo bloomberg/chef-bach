@@ -1,3 +1,5 @@
+.bundle
+vendor
 .rake_test_cache
 id_rsa
 secret_file
