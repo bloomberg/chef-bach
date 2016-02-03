@@ -75,7 +75,20 @@ ruby_block "zabbix_monitor" do
     hostgroup_id = zbx.hostgroups.get_id(:name => "#{node.chef_environment}")
     if hostgroup_id.nil?
       hostgroup_id = zbx.hostgroups.create(:name => "#{node.chef_environment}")
-    end
+
+      # Permission Guests usergroup to read hostgroup_id
+      guests_ugroup_id = zbx.usergroups.get_id(:name => 'Guests')
+      if guests_ugroup_id.nil?
+        Chef::Log.info("Could not find 'Guests' user group in zabbix")
+      else
+        ret = zbx.usergroups.set_perms(
+                :usrgrpid => guests_ugroup_id, :hostgroupids => [hostgroup_id], 
+                :permission => 2)
+        if ret.nil?
+          Chef::Log.info("Failed to permission 'Guests' to read #{node.chef_environment}")
+        end
+      end   
+    end #if hostgroup_id.nil?
 
     # Get existing actions
     actions = zbx.query(

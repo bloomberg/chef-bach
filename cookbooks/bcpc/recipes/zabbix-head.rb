@@ -47,11 +47,6 @@ if zabbix_admin_password.nil?
   zabbix_admin_password = secure_password
 end
 
-zabbix_guest_password = get_config("zabbix-guest-password")
-if zabbix_guest_password.nil?
-  zabbix_guest_password = secure_password
-end
-
 chef_vault_secret "zabbix-admin" do
   data_bag 'os'
   raw_data({ 'password' => zabbix_admin_password })
@@ -61,14 +56,6 @@ chef_vault_secret "zabbix-admin" do
 end.run_action(:create_if_missing)
 
 make_config('zabbix-guest-user', "guest")
-
-chef_vault_secret "zabbix-guest" do
-  data_bag 'os'
-  raw_data({ 'password' => zabbix_guest_password })
-  admins "#{ nodes },#{ bootstrap }"
-  search '*:*'
-  action :nothing
-end.run_action(:create_if_missing)
 
 remote_file "/tmp/zabbix-server.tar.gz" do
   source "#{get_binary_server_url}/zabbix-server.tar.gz"
@@ -124,7 +111,7 @@ ruby_block "zabbix-database-creation" do
         mysql -uroot -p#{ mysql_root_password } #{node['bcpc']['zabbix_dbname']} < /usr/local/share/zabbix/data.sql
         HASH=`echo -n "#{get_config!('password','zabbix-admin','os')}" | md5sum | awk '{print $1}'`
         mysql -uroot -p#{ mysql_root_password } #{node['bcpc']['zabbix_dbname']} -e "UPDATE users SET passwd=\\"$HASH\\" WHERE alias=\\"#{get_config('zabbix-admin-user')}\\";"
-        HASH=`echo -n "#{get_config!('password','zabbix-guest','os')}" | md5sum | awk '{print $1}'`
+        HASH=`echo -n "" | md5sum | awk '{print $1}'`
         mysql -uroot -p#{ mysql_root_password } #{node['bcpc']['zabbix_dbname']} -e "UPDATE users SET passwd=\\"$HASH\\" WHERE alias=\\"#{get_config('zabbix-guest-user')}\\";"
       ]
     end
