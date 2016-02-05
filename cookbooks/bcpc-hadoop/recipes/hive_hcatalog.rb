@@ -126,6 +126,8 @@ service "hive-metastore" do
   subscribes :restart, "template[/etc/hive/conf/hive-log4j.properties]", :delayed
   subscribes :restart, "bash[extract-mysql-connector]", :delayed
   subscribes :restart, "directory[/var/log/hive/gc]", :delayed
+  subscribes :restart, "template[/etc/hadoop/conf/hdfs-site.xml]", :delayed
+  subscribes :restart, "template[/etc/hadoop/conf/core-site.xml]", :delayed
 end
 
 service "hive-server2" do
@@ -135,4 +137,6 @@ service "hive-server2" do
   subscribes :restart, "template[/etc/hive/conf/hive-log4j.properties]", :delayed
   subscribes :restart, "bash[extract-mysql-connector]", :delayed
   subscribes :restart, "directory[/var/log/hive/gc]", :delayed
+  subscribes :restart, "template[/etc/hadoop/conf/hdfs-site.xml]", :delayed
+  subscribes :restart, "template[/etc/hadoop/conf/core-site.xml]", :delayed
 end
