@@ -1,7 +1,7 @@
 module BachCluster
   module ChefHelpers
     def bootstrap_fqdn
-      bootstrap_vm_name + '.' + node['bcpc']['domain_name']
+      fqdn_for(bootstrap_vm_name)
     end
 
     def bootstrap_ip
@@ -52,7 +52,8 @@ module BachCluster
       ssl_verify_mode :verify_none
 
       # chef-provisioning doesn't automatically get this.
-      no_proxy '#{bootstrap_fqdn},#{bootstrap_ip},localhost'
+      no_proxy '#{bootstrap_fqdn},#{bootstrap_ip},' +
+               '#{node[:bcpc][:management][:vip]},localhost'
     EOM
     end
 
@@ -125,6 +126,11 @@ module BachCluster
       else
         name + '.' + node[:bcpc][:domain_name]
       end
+    end
+
+    def install_sh_url
+      # This script is created by the bach_repository::chef recipe.
+      "http://#{bootstrap_ip}/chef-install.sh"
     end
 
     def knife_environment

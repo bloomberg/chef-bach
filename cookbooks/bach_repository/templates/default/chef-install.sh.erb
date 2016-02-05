@@ -1,0 +1,16 @@
+#!/bin/bash
+# -*- mode: shell-script -*-
+#
+# This script installs the universal Chef package for Ubuntu
+# from a hardcoded bootstrap host.
+#
+# The script is generated from a Chef template, which inserts the
+# bootstrap host URL.
+#
+
+set -e
+
+DEB_FILE=`mktemp -t chef-install-XXXXX.deb`
+wget -O "<%= @download_url %>" "$DEB_FILE" 2> /tmp/wget.err
+dpkg -i "$DEB_FILE"
+rm "$DEB_FILE"

@@ -90,9 +90,10 @@ with_driver 'ssh'
 
 ssh_options = {:auth_methods => ['password'],
                :config => false,
-               :number_of_password_prompts => 0,
                :password => cobbler_root_password,
                :user_known_hosts_file => '/dev/null'}
+
+prompts = {:number_of_password_prompts => 0}
 
 # Don't start SSH provisioning until the first node is up.
 # (We have to wait for OS installation to complete.)
@@ -107,7 +108,7 @@ ruby_block 'wait-for-first-os-install' do
     ssh_transport =
       Chef::Provisioning::Transport::SSH.new(pxe_vms.first[:mgmt_ip],
                                              'root',
-                                             ssh_options,
+                                             ssh_options.merge(prompts),
                                              options,
                                              config)
 
@@ -126,10 +127,10 @@ end
 pxe_vms.each do |vm|
   convergence_options =
     {
-     :bootstrap_proxy => Chef::Config['http_proxy'], 
      :chef_config => chef_client_config,
      :chef_version => Chef::VERSION,
-     :ssl_verify_mode => :verify_none
+     :ssl_verify_mode => :verify_none,
+     :install_sh_url => install_sh_url
     }
   
   transport_options =
@@ -149,6 +150,7 @@ pxe_vms.each do |vm|
     recipe 'bach_common::apt_proxy'
     recipe 'bach_common::binary_server'
     role 'Basic'
+    complete true
   end
 end
 
