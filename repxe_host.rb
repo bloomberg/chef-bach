@@ -12,16 +12,22 @@
 #
 # To use from the command line:
 #
-#  1. Run 'bundle install --deployment' on a bootstrap node with
+#  1. If necessary, configure your local rubygems mirror.
+#     Replace 'http://mirror.example.com' with your actual mirror.
+#     ```
+#     bundle config mirror.https://rubygems.org http://mirror.example.com
+#     ```
+#
+#  2. Run 'bundle install --deployment' on a bootstrap node with
 #     access to a rubygems mirror.
 #
-#  2. If not already using the target bootstrap, sync the updated
+#  3. If not already using the target bootstrap, sync the updated
 #     repository, including 'vendor' directory, to the target
 #     bootstrap.
 #
-#  3. Run 'bundle exec ./repxe_host.rb <hostname>' to begin the process.
+#  4. Run 'bundle exec ./repxe_host.rb <hostname>' to begin the process.
 #
-#  4. When prompted, manually reboot the host, then press enter.
+#  5. When prompted, manually reboot the host, then press enter.
 #
 # It is also possible to use methods from this script at a ruby REPL
 # instead of running the script from a UNIX shell.  To load methods
