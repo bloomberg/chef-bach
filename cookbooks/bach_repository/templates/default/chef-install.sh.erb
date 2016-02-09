@@ -11,6 +11,6 @@
 set -e
 
 DEB_FILE=`mktemp -t chef-install-XXXXX.deb`
-wget -O "<%= @download_url %>" "$DEB_FILE" 2> /tmp/wget.err
+wget -O "$DEB_FILE" "<%= @download_url %>" 2> /tmp/wget.err
 dpkg -i "$DEB_FILE"
 rm "$DEB_FILE"
