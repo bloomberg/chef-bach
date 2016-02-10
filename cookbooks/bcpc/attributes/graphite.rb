@@ -18,3 +18,4 @@ default['bcpc']['graphite']['carbon']['storage'] = {
 }
 default['bcpc']['graphite']['django']['version'] = "1.5.4" 
 default['bcpc']['graphite']['carbon']['relay']['idle_timeout'] = 1800 
+default['bcpc']['graphite']['carbon']['cache']['MAX_UPDATES_PER_SECOND'] = 170 
