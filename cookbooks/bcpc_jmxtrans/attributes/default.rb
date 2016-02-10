@@ -7,6 +7,40 @@ default['jmxtrans']['sw']="jmxtrans-20120525-210643-4e956b1144.zip"
 # Also refer to the jmxtrans community cookbook if queries of the category you are planning to add is
 # already existing in the defualt attributes file
 #
+default['jmxtrans']['default_queries']['nodemanager'] = [
+  {
+    'obj' => "Hadoop:service=NodeManager,name=NodeManagerMetrics",
+    'result_alias' => "NodeManager",
+    'attr' => []
+  }
+]
+default['jmxtrans']['default_queries']['resourcemanager'] = [
+  { 
+    'obj' => "Hadoop:service=ResourceManager,name=ClusterMetrics*",
+    'result_alias' => "ResourceManager",
+    'attr' => [ "NumActiveNMs" ]
+  }, 
+  {
+    'type_name' => ["name", "q0", "user"],
+    'obj' => "Hadoop:service=ResourceManager,name=QueueMetrics,q0=root,user=*",
+    'result_alias' => "ResourceManager",
+    'attr' => [ 
+                "AppsRunning",                                  
+                "AppsPending",                                  
+                "AllocatedMB",                                  
+                "AllocatedVCores",                              
+                "AllocatedContainers",                          
+                "PendingMB",                                    
+                "PendingVCores",                                
+                "PendingContainers",                            
+                "ReservedMB",                                   
+                "ReservedVCores",                               
+                "ReservedContainers",                           
+                "ActiveUsers",                                  
+                "ActiveApplications"                            
+    ]           
+  }     
+]
 default['jmxtrans']['default_queries']['zookeeper'] = [
   {
      'obj' => "org.apache.ZooKeeperService:name0=ReplicatedServer_id*",
