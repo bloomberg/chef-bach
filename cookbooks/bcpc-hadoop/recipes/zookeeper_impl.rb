@@ -1,6 +1,6 @@
 
 include_recipe 'dpkg_autostart'
-include_recipe 'bcpc-hadoop::zookeeper_config'
+
 dpkg_autostart "zookeeper-server" do
   allow false
 end
@@ -14,6 +14,8 @@ end
 user_ulimit "zookeeper" do
   filehandle_limit 32769
 end
+
+include_recipe 'bcpc-hadoop::zookeeper_config'
 
 template "/tmp/zkServer.sh" do
   source "zk_zkServer.sh.orig.erb"
