@@ -17,8 +17,15 @@
 # limitations under the License.
 #
 
-require 'openssl'
-include_recipe "bcpc::default"
+include_recipe 'bcpc::default'
+include_recipe 'bach_common::binary_server'
+
+chef_gem 'chef-vault' do
+  # This version needs to be made available on the binary server.
+  # See bach_repository::gems.
+  version '2.6.1'
+  compile_time true if respond_to?(:compile_time)
+end
 
 template "/tmp/openssl.cnf" do
     source "openssl.cnf.erb"
