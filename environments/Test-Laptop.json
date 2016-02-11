@@ -37,6 +37,11 @@
       },
       "dns_servers" : [ "8.8.8.8", "8.8.4.4" ],
       "hadoop" : {
+        "yarn" : {
+          "resourcemanager" : {
+            "yarn.client.failover-sleep-base-ms": 30000
+          }
+        },
         "hdfs" : {
           "dfs_replication_factor" : 1
         },

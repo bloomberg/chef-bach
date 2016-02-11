@@ -21,6 +21,11 @@
   </property>
 
   <property>
+    <name>yarn.client.failover-sleep-base-ms</name>
+    <value><%=node["bcpc"]["hadoop"]["yarn"]["resourcemanager"]["yarn.client.failover-sleep-base-ms"]%></value>
+  </property>
+
+  <property>
     <name>yarn.resourcemanager.ha.rm-ids</name>
     <value><%=@rm_hosts.map{ |s| "rm#{node.chef_environment}#{s[:node_number]}" }.join(",") %></value>
   </property>
