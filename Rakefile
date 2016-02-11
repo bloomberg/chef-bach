@@ -94,16 +94,25 @@ namespace :setup do
     chef_zero 'setup_bootstrap_vm'
   end
 
-  desc 'Provision a demo environment using Vagrant images'
-  task :demo do
-    chef_zero 'setup_demo_vm'
+  desc 'Provision a Hadoop demo environment using Vagrant images'
+  task :hadoop_demo_vagrant do
+    chef_zero 'setup_hadoop_demo_vagrant'
   end
 
-  desc 'Provision a demo environment using pxe'
-  task :pxe_demo do
-    chef_zero 'setup_pxe_demo_vm'
+  desc 'Provision a Hadoop demo environment using PXE installation'
+  task :hadoop_demo_pxe do
+    chef_zero 'setup_hadoop_demo_pxe'
   end
 
+  desc 'Provision a Kafka demo environment using Vagrant images'
+  task :kafka_demo_vagrant do
+    chef_zero 'setup_kafka_demo_vagrant'
+  end
+
+  desc 'Provision a Kafka demo environment using PXE installation'
+  task :kafka_demo_pxe do
+    chef_zero 'setup_kafka_demo_pxe'
+  end
 end
 
 namespace :destroy do
