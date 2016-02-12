@@ -65,7 +65,7 @@ ruby_block "generate_group_dirs" do
             # Chef::Log does not seem to work in RubyBlocks and may not be thread safe
             # puts will step on itself but splat to the screen if in debug mode
             puts "Group: #{group}" if Chef::Config[:log_level] == :debug
-            new_dir_creation(node[:bcpc][:hadoop][:hdfs_url], "/groups/#{group}", "hdfs:#{group}", node[:bcpc][:hadoop][:hadoop][:group_dir_mode], node.run_context)
+            new_dir_creation(node[:bcpc][:hadoop][:hdfs_url], "/groups/#{group}", "#{group}:#{group}", node[:bcpc][:hadoop][:hadoop][:group_dir_mode], node.run_context)
           end
         rescue ThreadError => e
         end
