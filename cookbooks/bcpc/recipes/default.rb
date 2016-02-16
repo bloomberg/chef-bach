@@ -43,7 +43,6 @@ flot_bitlen = (node['bcpc']['floating']['cidr'].match /\d+\.\d+\.\d+\.\d+\/(\d+)
 flot_bitlen = 24 if flot_bitlen == 16
 flot_hostaddr = IPAddr.new(node['bcpc']['management']['ip'])<<flot_bitlen>>flot_bitlen
 
-node.set['bcpc']['node_number'] = mgmt_hostaddr.to_i.to_s
 node.set['bcpc']['storage']['ip'] = ((IPAddr.new(node['bcpc']['storage']['cidr'])>>(32-stor_bitlen)<<(32-stor_bitlen))|stor_hostaddr).to_s
 node.set['bcpc']['floating']['ip'] = ((IPAddr.new(node['bcpc']['floating']['cidr'])>>(32-flot_bitlen)<<(32-flot_bitlen))|flot_hostaddr).to_s
 

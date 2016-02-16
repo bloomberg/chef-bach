@@ -49,3 +49,7 @@ default[:bcpc][:hadoop][:zookeeper][:snap][:retain_count] = 5
 
 #ZooKeeper snapshot purge interval in hours
 default[:bcpc][:hadoop][:zookeeper][:snap][:purge_interval] = 24
+
+# Node ID for zookeeper.
+default[:bcpc][:hadoop][:zookeeper][:myid] =
+  (node[:bcpc][:node_number].to_i % 255).to_s

@@ -28,6 +28,36 @@ default['bcpc']['bootstrap']['preseed']['add_kernel_opts'] = "console=ttyS0"
 default['bcpc']['bootstrap']['preseed']['late_command'] = "true"
 default['bcpc']['bootstrap']['admin_users'] = []
 
+#
+# The node_number is used to derive Kafka broker IDs, Zookeeper myid
+# files, keepalived node priorities, and other values.  It must be
+# unique within a cluster.
+#
+# The node number is generated from the integer value of the
+# management interface mac_address, modulo Java's Integer.MAX_VALUE.
+#
+# On the provisioning node and during early bootstrap, we won't have
+# any of these values, in which case we just don't set the
+# node_number.
+#
+management_interface = begin
+                         interface_name = node[:bcpc][:management][:interface]
+                         node[:network][:interfaces][interface_name]
+                       rescue
+                         nil
+                       end
+
+if management_interface
+  mac_address = management_interface[:addresses].select{ |addr,hash|
+    hash['family'] == 'lladdr'
+  }.keys.first
+
+  max_value = (2**31 - 1) # Java Integer.MAX_VALUE
+  integer_mac = mac_address.downcase.split(':').join.to_i(base=16)
+  default['bcpc']['node_number'] = integer_mac % max_value
+end  
+
+
 ###########################################
 #
 #  Host-specific defaults for the cluster
