@@ -161,6 +161,10 @@ convergence_options = {
                        :chef_version => Chef::VERSION
                       }
 
+if node['bach']['http_proxy']
+  convergence_options.merge({ :bootstrap_proxy => node['bach']['http_proxy'] })
+end
+
 machine bootstrap_fqdn do
   chef_server chef_server_config_hash
   add_machine_options(:convergence_options => convergence_options,
