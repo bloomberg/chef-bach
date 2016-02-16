@@ -2,7 +2,7 @@
 source 'https://rubygems.org'
 
 gem 'berkshelf', '~>3'
-gem 'chef', '12.6.0'
+gem 'chef', '12.7.2'
 #
 # chef-provisioning is pinned at v1.2.1 until two critical issues are fixed:
 # 1. https://github.com/chef/chef-provisioning/issues/474
