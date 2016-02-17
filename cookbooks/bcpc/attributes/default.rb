@@ -54,7 +54,7 @@ if management_interface
 
   max_value = (2**31 - 1) # Java Integer.MAX_VALUE
   integer_mac = mac_address.downcase.split(':').join.to_i(base=16)
-  default['bcpc']['node_number'] = integer_mac % max_value
+  node.set['bcpc']['node_number'] = integer_mac % max_value
 end  
 
 
