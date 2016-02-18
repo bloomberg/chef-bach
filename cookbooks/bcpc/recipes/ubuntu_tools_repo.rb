@@ -14,3 +14,10 @@ package "sosreport" do
   action :upgrade
 end
 
+package "traceroute" do
+  action :upgrade
+end
+
+package "iotop" do
+  action :upgrade
+end
