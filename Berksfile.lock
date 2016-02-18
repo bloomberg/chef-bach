@@ -118,6 +118,7 @@ GRAPH
     ark (>= 0.0.0)
   kafka (0.8.0)
   kafka-bcpc (0.1.0)
+    bcpc (>= 0.0.0)
     bcpc-hadoop (>= 0.0.0)
     kafka (>= 0.0.0)
     pam (>= 0.0.0)

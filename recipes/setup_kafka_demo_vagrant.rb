@@ -29,7 +29,8 @@ total_node_count = worker_node_count + 2
               'recipe[bach_common::binary_server]',
               'role[Basic]', 
              ]
-    #complete true # Completely overwrite the runlist.
+
+    complete true # Completely overwrite the runlist.
   end
 end
 
@@ -44,25 +45,19 @@ ruby_block "wait-for-reindex" do
   end
 end
 
-# Re-converge the ZK cluster (first three nodes) with added runlist items.
-1.upto(3).each do |n|
-  machine fqdn_for("bach-vm#{n}-b#{build_id}") do
-    role 'BCPC-Kafka-Head-Zookeeper'
+# Converge the ZK cluster (first three nodes) with added runlist items.
+# ZK has to be converged twice so that node search works.
+2.times do
+  1.upto(3).each do |n|
+    machine fqdn_for("bach-vm#{n}-b#{build_id}") do
+      role 'BCPC-Kafka-Head-Zookeeper'
+    end
   end
 end
 
 # Reconverge remaining nodes (Kafka servers) with the complete runlist.
 4.upto(total_node_count).each do |n|
-  vm_name = fqdn_for("bach-vm#{n}-b#{build_id}") # XXX: replace with helper!
-  machine vm_name do
+  machine fqdn_for("bach-vm#{n}-b#{build_id}") do
     role 'BCPC-Kafka-Head-Server'
-  end
-end
-
-# Re-run chef on every node by notifying machine resources.
-1.upto(total_node_count).each do |n|
-  vm_name = fqdn_for("bach-vm#{n}-b#{build_id}") # XXX: replace with helper!
-  log "Re-converging #{vm_name}" do
-    notifies :converge, "machine[#{vm_name}]", :immediately
   end
 end
