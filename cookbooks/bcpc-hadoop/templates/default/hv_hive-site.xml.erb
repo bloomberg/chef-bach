@@ -116,7 +116,7 @@
   <description>The path to the Kerberos Keytab file containing the metastore thrift server's service principal.</description>
 </property>
 
-<% if node.run_list.expand(node.chef_environment).recipes.include?("bcpc-hadoop::hive_metastore")  %>
+<% if node.run_list.expand(node.chef_environment).recipes.include?("bcpc-hadoop::hive_hcatalog") %>
 <property>
   <name>hive.metastore.kerberos.principal</name>
   <value><%= node[:bcpc][:hadoop][:kerberos][:data][:hive][:principal] %>/<%=node[:bcpc][:hadoop][:kerberos][:data][:hive][:princhost] == "_HOST" ? float_host(node[:fqdn]) : node[:bcpc][:hadoop][:kerberos][:data][:hive][:princhost]%>@<%= node[:bcpc][:hadoop][:kerberos][:realm] %></value>
@@ -140,7 +140,7 @@
   <description>The path to the Kerberos Keytab file containing the metastore thrift server's service principal.</description>
 </property>
 
-<% if node.run_list.expand(node.chef_environment).recipes.include?("bcpc-hadoop::hive_server")  %>
+<% if node.run_list.expand(node.chef_environment).recipes.include?("bcpc-hadoop::hive_hcatalog") %>
 <property>
   <name>hive.server2.authentication.kerberos.principal</name>
   <value><%=node[:bcpc][:hadoop][:kerberos][:data][:hive][:principal]%>/<%=node[:bcpc][:hadoop][:kerberos][:data][:hive][:princhost] == "_HOST" ? float_host(node[:fqdn]) : node[:bcpc][:hadoop][:kerberos][:data][:hive][:princhost]%>@<%= node[:bcpc][:hadoop][:kerberos][:realm] %></value>
