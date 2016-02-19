@@ -9,7 +9,7 @@ LOCAL_DATA_DIR = <%= node['bcpc']['graphite']['local_data_dir'] %>
 LOG_DIR =  <%= node['bcpc']['graphite']['local_log_dir'] %>
 ENABLE_LOGROTATION = True
 MAX_CACHE_SIZE = inf
-MAX_UPDATES_PER_SECOND = 500
+MAX_UPDATES_PER_SECOND = <%= node['bcpc']['graphite']['carbon']['cache']['MAX_UPDATES_PER_SECOND'] %>
 MAX_CREATES_PER_MINUTE = inf
 LINE_RECEIVER_INTERFACE = <%="#{node[:bcpc][:management][:ip]}"%>
 LINE_RECEIVER_PORT = 2003
