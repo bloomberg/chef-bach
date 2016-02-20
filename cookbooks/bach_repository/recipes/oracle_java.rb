@@ -38,3 +38,11 @@ remote_file "#{bins_dir}/jdk-7u51-linux-x64.tar.gz" do
   mode 0444
   checksum '77367c3ef36e0930bf3089fb41824f4b8cf55dcc8f43cce0868f7687a474f55c'
 end
+
+remote_file "#{bins_dir}/jdk-8u74-linux-x64.tar.gz" do
+  source 'http://download.oracle.com/otn-pub/java/jdk/8u74-b02/jdk-8u74-linux-x64.tar.gz'
+  user 'root'
+  group 'root'
+  mode 0444
+  checksum '0bfd5d79f776d448efc64cb47075a52618ef76aabb31fde21c5c1018683cdddd'
+end
