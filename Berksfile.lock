@@ -41,7 +41,7 @@ DEPENDENCIES
   pam
   pdns
     git: https://github.com/http-418/pdns
-    revision: 525ec1aa5d3dd1d6849e82f9a08bd23e4817a01e
+    revision: d19ddd90a1d373ff03c6ca6e2215b73c8ecd9a12
   ubuntu
 
 GRAPH
@@ -122,6 +122,7 @@ GRAPH
     bcpc-hadoop (>= 0.0.0)
     kafka (>= 0.0.0)
     pam (>= 0.0.0)
+    pdns (>= 0.0.0)
     sysctl (>= 0.0.0)
     ulimit (>= 0.0.0)
   logrotate (1.9.2)

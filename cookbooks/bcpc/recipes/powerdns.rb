@@ -17,164 +17,169 @@
 # limitations under the License.
 #
 
-make_bcpc_config('mysql-pdns-user', "pdns")
-make_bcpc_config('mysql-pdns-password', secure_password)
+#
+# If we have a BCPC MySQL cluster, we'll use that for PowerDNS, and
+# all nodes will share it.
+#
+# Otherwise, this recipe will configure an independent SQLite-backed
+# PDNS on each node on which it is run.  Since Chef inserts all
+# cluster-internal records, at least those records will remain in sync
+# without sharing storage.
+#
+if node[:bcpc][:management][:vip] and get_nodes_for("mysql").length() > 0
+  make_bcpc_config('mysql-pdns-user', "pdns")
+  make_bcpc_config('mysql-pdns-password', secure_password)
 
-bootstrap = get_bootstrap
-results = get_all_nodes.map!{ |x| x['fqdn'] }.join(",")
-nodes = results == "" ? node['fqdn'] : results
+  bootstrap = get_bootstrap
+  results = get_all_nodes.map!{ |x| x['fqdn'] }.join(",")
+  nodes = results == "" ? node['fqdn'] : results
 
-chef_vault_secret "mysql-pdns" do
-  data_bag 'os'
-  raw_data({ 'password' => get_bcpc_config!('mysql-pdns-password')} )
-  admins "#{ nodes },#{ bootstrap }"
-  search '*:*'
-  action :nothing
-end.run_action(:create_if_missing)
+  node.set['pdns']['authoritative']['package']['backends'] = ['gmysql']
+  node.set['pdns']['authoritative']['config']['disable_axfr'] = false
 
-node.set['pdns']['authoritative']['package']['backends'] = ['gmysql']
-node.set['pdns']['authoritative']['config']['disable_axfr'] = false
+  node.set['pdns']['authoritative']['config'].tap do |config|
+    config['launch'] = 'gmysql'
+    config['recursor'] = node[:bcpc][:dns_servers][0]
+  end
 
-node.set['pdns']['authoritative']['config'].tap do |config|
-  config['launch'] = 'gmysql'
-  config['recursor'] = node[:bcpc][:dns_servers][0]
-end
+  node.set['pdns']['authoritative']['gmysql'].tap do |config|
+    config['gmysql-host'] = node[:bcpc][:management][:vip]
+    config['gmysql-port'] = 3306
+    config['gmysql-user'] = get_bcpc_config!('mysql-pdns-user')
+    config['gmysql-password'] = get_bcpc_config!('mysql-pdns-password')
+    config['gmysql-dbname'] = node['bcpc']['pdns_dbname']
+    config['gmysql-dnssec'] = 'yes'
+  end
 
-node.set['pdns']['authoritative']['gmysql'].tap do |config|
-  config['gmysql-host'] = node[:bcpc][:management][:vip]
-  config['gmysql-port'] = 3306
-  config['gmysql-user'] = get_bcpc_config!('mysql-pdns-user')
-  config['gmysql-password'] = get_bcpc_config!('mysql-pdns-password')
-  config['gmysql-dbname'] = node['bcpc']['pdns_dbname']
-  config['gmysql-dnssec'] = 'yes'
-end
+  package 'libmysqlclient-dev'
 
-package 'libmysqlclient-dev'
+  chef_gem 'mysql2' do
+    compile_time false
+  end
 
-chef_gem 'mysql2' do
-  compile_time false
-end
+  mysql_connection_info = lambda do
+    {
+     :host => node['pdns']['authoritative']['gmysql']['gmysql-host'],
+     :port => node['pdns']['authoritative']['gmysql']['gmysql-port'],
+     :username => 'root',
+     :password => get_bcpc_config!('mysql-root-password')
+    }
+  end
 
-mysql_connection_info = 
-{
- :host => node['pdns']['authoritative']['config']['gmysql-host'],
- :username => 'root',
- :password => get_bcpc_config!('mysql-root-password')
-}
+  mysql_database node['bcpc']['pdns_dbname'] do
+    connection lazy { mysql_connection_info.call }
+    notifies :run, 'execute[install-pdns-schema]', :immediately
+  end
 
-mysql_database node['bcpc']['pdns_dbname'] do
-  connection mysql_connection_info
-  notifies :run, 'execute[install-pdns-schema]', :immediately
-end
+  mysql_database_user get_bcpc_config!('mysql-pdns-user') do
+    connection lazy { mysql_connection_info.call }
+    password get_bcpc_config!('mysql-pdns-password')
+    action :create
+    notifies :reload, 'service[pdns]'
+  end
 
-mysql_database_user get_bcpc_config!('mysql-pdns-user') do
-  connection mysql_connection_info
-  password get_bcpc_config!('mysql-pdns-password')
-  action :create
-  notifies :reload, 'service[pdns]'
-end
+  mysql_database_user get_bcpc_config!('mysql-pdns-user') do
+    connection lazy { mysql_connection_info.call }
+    database_name node['bcpc']['pdns_dbname']
+    host '%'
+    privileges [:all]
+    action :grant
+    notifies :reload, 'service[pdns]'
+  end
 
-mysql_database_user get_bcpc_config!('mysql-pdns-user') do
-  connection mysql_connection_info
-  database_name node['bcpc']['pdns_dbname']
-  host '%'
-  privileges [:all]
-  action :grant
-  notifies :reload, 'service[pdns]'
+  include_recipe 'pdns::authoritative_package'
+
+  #
+  # This schema file works great when installed via the mysql CLI, but
+  # it fails when Ruby reads it and feeds via a query resource.  This
+  # smells like an escaping problem.
+  #
+  # For now, the query resource has been replaced with an 'execute'
+  # resource that invokes the mysql CLI.
+  #
+  schema_path = '/usr/share/dbconfig-common/data/pdns-backend-mysql/install/mysql'
+
+  mysql_command_string = lambda do
+    "/usr/bin/mysql -u root " + 
+      "--host=#{node['pdns']['authoritative']['config']['gmysql-host']} " +
+      "--password='#{get_bcpc_config!('mysql-root-password')}' pdns"
+  end
+
+  execute 'install-pdns-schema' do
+    command lazy {
+      "cat #{schema_path} | " +
+        "perl -nle 's/type=Inno/engine=Inno/g; print' | " +
+        mysql_command_string.call
+    }
+
+    not_if lazy {
+      c = Mixlib::ShellOut.new('echo "select id from domains limit 1;" | ' +
+                               mysql_command_string.call)
+      c.run_command
+      c.status.success?
+    }
+
+    sensitive true
+    
+    notifies :reload, 'service[pdns]'
+  end
+
 end
 
 include_recipe 'pdns::authoritative_package'
 
-#
-# This schema file works great when installed via the mysql CLI, but
-# it fails when Ruby reads it and feeds via a query resource.  This
-# smells like an escaping problem.
-#
-# For now, the query resource has been replaced with an 'execute'
-# resource that invokes the mysql CLI.
-#
-schema_path = '/usr/share/dbconfig-common/data/pdns-backend-mysql/install/mysql'
-
-mysql_command_string =
-  "/usr/bin/mysql -u root " + 
-  "--host=#{node['pdns']['authoritative']['config']['gmysql-host']} " +
-  "--password='#{get_bcpc_config!('mysql-root-password')}' pdns"
-
-execute 'install-pdns-schema' do
-  command "cat #{schema_path} | " +
-    "perl -nle 's/type=Inno/engine=Inno/g; print' | " +
-    mysql_command_string
-
-  not_if {
-    c = Mixlib::ShellOut.new('echo "select id from domains limit 1;" | ' +
-                             mysql_command_string)
-    c.run_command
-    c.status.success?
-  }
-
-  sensitive true
-      
-  notifies :reload, 'service[pdns]'
-end
-
-
 reverse_dns_zone = node['bcpc']['floating']['reverse_dns_zone'] || calc_reverse_dns_zone(node['bcpc']['floating']['cidr'])
 
-Chef::Log.warn("Reverse DNS zone: #{reverse_dns_zone}")
+Chef::Log.info("Reverse DNS zone: #{reverse_dns_zone}")
 
 pdns_domain node[:bcpc][:domain_name] do
   soa_ip node[:bcpc][:floating][:vip]
 end
 
 get_all_nodes.each do |server|
-    ruby_block "create-dns-entry-#{server['hostname']}" do
-        block do
-            mysql_root_password = get_config!('password','mysql-root','os')
-            # check if we have a float address
-            if server['bcpc']['management']['ip'] != server['bcpc']['floating']['ip'] then
-              r = Chef::Resource::PdnsRecord.new(float_host(server['hostname']), 
-                                                 run_context)
-              r.domain(node[:bcpc][:domain_name])
-              r.content(server[:bcpc][:floating][:ip])
-              r.type('A')
-              r.ttl(300)
-              r.run_action(:create)
-            end
+  ruby_block "create-dns-entry-#{server['hostname']}" do
+    block do
+      # check if we have a float address
+      if server['bcpc']['management']['ip'] != server['bcpc']['floating']['ip'] then
+        float_name =
+          float_host(server['hostname']) + '.' + node[:bcpc][:domain_name]
+        
+        r = Chef::Resource::PdnsRecord.new(float_name,
+                                           run_context)
+        r.domain(node[:bcpc][:domain_name])
+        r.content(server[:bcpc][:floating][:ip])
+        r.type('A')
+        r.ttl(300)
+        r.run_action(:create)
+      end
 
-            # check if we have a storage address
-            if server['bcpc']['management']['ip'] != server['bcpc']['storage']['ip'] then
-              r = Chef::Resource::PdnsRecord.new(storage_host(server['hostname']), 
-                                                 run_context)
-              r.domain(node[:bcpc][:domain_name])
-              r.content(server[:bcpc][:storage][:ip])
-              r.type('A')
-              r.ttl(300)
-              r.run_action(:create)
-            end
+      # check if we have a storage address
+      if server['bcpc']['management']['ip'] != server['bcpc']['storage']['ip'] then
+        storage_name =
+          storage_host(server['hostname']) + '.' + node[:bcpc][:domain_name]
+        
+        r = Chef::Resource::PdnsRecord.new(storage_name,
+                                           run_context)
+        r.domain(node[:bcpc][:domain_name])
+        r.content(server[:bcpc][:storage][:ip])
+        r.type('A')
+        r.ttl(300)
+        r.run_action(:create)
+      end
 
-            # add a record for the management IP
-            r = Chef::Resource::PdnsRecord.new(server['hostname'], 
-                                               run_context)
-            r.domain(node[:bcpc][:domain_name])
-            r.content(server[:bcpc][:management][:ip])
-            r.type('A')
-            r.ttl(300)
-            r.run_action(:create)
-        end
+      if server['bcpc']['management']['ip']
+        # add a record for the management IP
+        management_name = server['hostname'] + '.' + node[:bcpc][:domain_name]
+        r = Chef::Resource::PdnsRecord.new(management_name,
+                                           run_context)
+        r.domain(node[:bcpc][:domain_name])
+        r.content(server['bcpc']['management']['ip'])
+        r.type('A')
+        r.ttl(300)
+        r.run_action(:create)
+      else
+        Chef::Log.warn("No IP address found for host #{server['hostname']}!")
+      end
     end
+  end
 end
-
-# %w{openstack graphite zabbix}.each do |static|
-#     ruby_block "create-management-dns-entry-#{static}" do
-#         block do
-#             if get_nodes_for(static).length >= 1 then
-#                 system "mysql -uroot -p#{get_bcpc_config('mysql-root-password')} #{node[:bcpc][:pdns_dbname]} -e 'SELECT name FROM records_static' | grep -q \"#{static}.#{node[:bcpc][:domain_name]}\""
-#                 if not $?.success? then
-#                     %x[ mysql -uroot -p#{get_bcpc_config('mysql-root-password')} #{node[:bcpc][:pdns_dbname]} <<-EOH
-#                             INSERT INTO records_static (domain_id, name, content, type, ttl, prio) VALUES ((SELECT id FROM domains WHERE name='#{node[:bcpc][:domain_name]}'),'#{static}.#{node[:bcpc][:domain_name]}','#{node[:bcpc][:management][:vip]}','A',300,NULL);
-#                     ]
-#                 end
-#             end
-#         end
-#     end
-# end

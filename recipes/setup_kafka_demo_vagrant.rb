@@ -27,7 +27,8 @@ total_node_count = worker_node_count + 2
     run_list [
               'recipe[bach_common::apt_proxy]',
               'recipe[bach_common::binary_server]',
-              'role[Basic]', 
+              'role[Basic]',
+              'recipe[bcpc::default]'
              ]
 
     complete true # Completely overwrite the runlist.
@@ -50,6 +51,9 @@ end
 2.times do
   1.upto(3).each do |n|
     machine fqdn_for("bach-vm#{n}-b#{build_id}") do
+      # Only the VM cluster needs PowerDNS.
+      # Real clusters use production DNS.
+      recipe 'bcpc::powerdns'
       role 'BCPC-Kafka-Head-Zookeeper'
     end
   end

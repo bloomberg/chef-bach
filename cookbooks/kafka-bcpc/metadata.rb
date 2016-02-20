@@ -11,6 +11,7 @@ depends "sysctl"
 depends "bcpc"
 depends "bcpc-hadoop"
 depends "pam"
+depends "pdns"
 depends "ulimit"
 
 %w(ubuntu).each do |os|
