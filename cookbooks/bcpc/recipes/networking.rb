@@ -188,6 +188,19 @@ bash "interface-mgmt-make-static-if-dhcp" do
   pkill -u root dhclient
   EOH
   only_if "cat /etc/network/interfaces | grep #{node[:bcpc][:management][:interface]} | grep dhcp"
+  # This is fragile.
+  # Failure is unimportant, because we overwrite the file two seconds from now.
+  ignore_failure true
+end
+
+execute 'resolvconf-dhclient-disable' do
+  command "resolvconf -d #{node[:bcpc][:management][:interface]}.dhclient"
+  ignore_failure true
+end
+
+execute 'pkill-dhclient' do
+  command 'pkill -u root dhclient'
+  only_if 'pgrep -u root dhclient'
 end
 
 if node[:bcpc][:management][:interface] != node[:bcpc][:storage][:interface]
