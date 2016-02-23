@@ -208,7 +208,7 @@ end
 
 execute 'pkill-dhclient' do
   command 'pkill -u root dhclient'
-  ignore_failure true
+  only_if 'pgrep -u root dhclient'
 end
 
 if node[:bcpc][:management][:interface] != node[:bcpc][:storage][:interface]
