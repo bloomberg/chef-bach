@@ -298,4 +298,9 @@
     <value>true</value>
   </property>
   <% end # if node[:bcpc][:hadoop][:kerberos][:enable] == true then %>
+
+  <property>
+    <name>yarn.scheduler.fair.preemption</name>
+    <value><%= node["bcpc"]["hadoop"]["yarn"]["scheduler"]["fair"]["preemption"] %></value>
+  </property>
 </configuration>

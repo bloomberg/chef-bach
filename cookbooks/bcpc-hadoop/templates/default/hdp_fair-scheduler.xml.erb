@@ -1,15 +1,21 @@
 <?xml version="1.0"?>
 <allocations>
-  <queue name="default">
+  <defaultQueueSchedulingPolicy>DRF</defaultQueueSchedulingPolicy>
+  <queue name="default" type="parent">
     <weight>1.0</weight>
-    <schedulingPolicy>fair</schedulingPolicy>
     <fairSharePreemptionTimeout>150</fairSharePreemptionTimeout>
-    <minResources>128 mb,1vcores</minResources>
+    <minResources><%= node["bcpc"]["hadoop"]["yarn"]["scheduler"]["minimum-allocation-mb"] * node["bcpc"]["hadoop"]["yarn"]["scheduler"]["fair"]["min-vcores"] %> mb,<%= node["bcpc"]["hadoop"]["yarn"]["scheduler"]["fair"]["min-vcores"] %>vcores</minResources>
   </queue>
 
   <queuePlacementPolicy>
     <rule name="specified" />
-    <rule name="secondaryGroupExistingQueue" create="false" />
-    <rule name="default" />
+    <rule name="nestedUserQueue">
+      <rule name="secondaryGroupExistingQueue" create="false" />
+    </rule>
+    <rule name="nestedUserQueue">
+      <rule name="default" queue="default"/>
+    </rule>
+    <rule name="reject"/>
   </queuePlacementPolicy>
 </allocations>
+
