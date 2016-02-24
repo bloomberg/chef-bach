@@ -120,4 +120,51 @@
     <name>hadoop.user.group.static.mapping.overrides</name>
     <value>hdfs=hadoop,hdfs;yarn=mapred,hadoop;</value>
   </property>
+  <% if node[:bcpc][:hadoop][:hdfs][:ldap][:integration] == true %>
+   <!-- HDFS LDAP Mapping configuration -->
+  <property>
+    <name>hadoop.security.group.mapping</name>
+    <value>org.apache.hadoop.security.LdapGroupsMapping</value>
+  </property>
+
+  <property>
+    <name>hadoop.security.group.mapping.ldap.bind.user</name>
+    <value><%= node[:bcpc][:hadoop][:hdfs][:ldap][:user] %></value>
+  </property>
+
+  <property>
+    <name>hadoop.security.group.mapping.ldap.bind.password.file</name>
+    <value>/etc/hadoop/conf/ldap-conn-pass.txt</value>
+  </property>
+
+  <property>
+    <name>hadoop.security.group.mapping.ldap.url</name>
+    <value>ldap://<%= node[:bcpc][:hadoop][:hdfs][:ldap][:domain] %>:<%= node[:bcpc][:hadoop][:hdfs][:ldap][:port] %></value>
+  </property>
+
+  <property>
+    <name>hadoop.security.group.mapping.ldap.base</name>
+    <value>DC=<%= node[:bcpc][:hadoop][:hdfs][:ldap][:domain].split('.')[0] %>,DC=<%= node[:bcpc][:hadoop][:hdfs][:ldap][:domain].split('.')[1] %>,DC=<%= node[:bcpc][:hadoop][:hdfs][:ldap][:domain].split('.')[2] %></value>
+  </property>
+
+  <property>
+    <name>hadoop.security.group.mapping.ldap.search.filter.user</name>
+    <value><%= node[:bcpc][:hadoop][:hdfs][:ldap][:search][:filter][:user].encode(:xml => :text) %></value>
+  </property>
+
+  <property>
+    <name>hadoop.security.group.mapping.ldap.search.filter.group</name>
+    <value><%= node[:bcpc][:hadoop][:hdfs][:ldap][:search][:filter][:group] %></value>
+  </property>
+
+  <property>
+    <name>hadoop.security.group.mapping.ldap.search.attr.member</name>
+    <value>member</value>
+  </property>
+
+  <property>
+    <name>hadoop.security.group.mapping.ldap.search.attr.group.name</name>
+    <value>cn</value>
+  </property>
+  <% end %>
 </configuration>

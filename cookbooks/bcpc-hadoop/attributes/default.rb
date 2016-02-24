@@ -119,3 +119,11 @@ default['jmxtrans']['run_interval'] = "15"
 default[:bcpc][:hadoop][:os][:group][:hadoop][:members]=["hdfs","yarn"]
 default[:bcpc][:hadoop][:os][:group][:hdfs][:members]=["hdfs"]
 default[:bcpc][:hadoop][:os][:group][:mapred][:members]=["yarn"]
+
+default[:bcpc][:hadoop][:hdfs][:ldap][:integration] = false
+default[:bcpc][:hadoop][:hdfs][:ldap][:user] = "" #must be LDAP DN
+default[:bcpc][:hadoop][:hdfs][:ldap][:domain] = "BCPC.EXAMPLE.COM"
+default[:bcpc][:hadoop][:hdfs][:ldap][:port] = 389
+default[:bcpc][:hadoop][:hdfs][:ldap][:password] =  nil
+default[:bcpc][:hadoop][:hdfs][:ldap][:search][:filter][:user]="(&(objectclass=user)(sAMAccountName={0}))"
+default[:bcpc][:hadoop][:hdfs][:ldap][:search][:filter][:group]="(objectClass=group)"
