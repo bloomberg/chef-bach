@@ -36,11 +36,7 @@ if node[:bcpc][:management][:vip] and get_nodes_for("mysql").length() > 0
 
   node.set['pdns']['authoritative']['package']['backends'] = ['gmysql']
   node.set['pdns']['authoritative']['config']['disable_axfr'] = false
-
-  node.set['pdns']['authoritative']['config'].tap do |config|
-    config['launch'] = 'gmysql'
-    config['recursor'] = node[:bcpc][:dns_servers][0]
-  end
+  node.set['pdns']['authoritative']['config']['launch'] = 'gmysql'
 
   node.set['pdns']['authoritative']['gmysql'].tap do |config|
     config['gmysql-host'] = node[:bcpc][:management][:vip]
@@ -125,6 +121,9 @@ if node[:bcpc][:management][:vip] and get_nodes_for("mysql").length() > 0
   end
 
 end
+
+node.set['pdns']['authoritative']['config']['recursor'] =
+  node[:bcpc][:dns_servers][0]
 
 include_recipe 'pdns::authoritative_package'
 

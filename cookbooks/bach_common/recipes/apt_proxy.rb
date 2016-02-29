@@ -2,7 +2,8 @@
 # Cookbook Name:: bach_common
 # Recipe:: apt_proxy
 #
-
+# TODO: only use the proxy for public mirrors.
+#
 if(node['bach']['http_proxy'] || node['bach']['https_proxy'])
   template '/etc/apt/apt.conf.d/00proxy' do
     user 'root'
