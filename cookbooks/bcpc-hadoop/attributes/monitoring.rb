@@ -1,8 +1,6 @@
-default["bcpc"]["hadoop"]["zabbix"]["history_days"] = 1
-default["bcpc"]["hadoop"]["zabbix"]["trend_days"] = 15
-default["bcpc"]["hadoop"]["zabbix"]["cron_check_time"] = 240
-default["bcpc"]["hadoop"]["zabbix"]["mail_source"] = "zabbix.zbx_mail.sh.erb"
 default["bcpc"]["hadoop"]["zabbix"]["cookbook"] = nil 
+default["bcpc"]["hadoop"]["zabbix"]["mail_source"] = "zabbix.zbx_mail.sh.erb"
+default["bcpc"]["hadoop"]["zabbix"]["cron_check_time"] = 240
 
 # Time (in seconds) between Steps performed in a Zabbix Action.
 # Refer following link for documentation on Zabbix Action Escalations:
@@ -15,7 +13,7 @@ default["bcpc"]["hadoop"]["zabbix"]["cookbook"] = nil
 # for eg: it going to PROBLEM state are still recorded and displayed on Zabbix;
 # just that it will delay execution of the set action.
 # Can override this setting by specifying 'esc_period' attribute in Action definition
-default["bcpc"]["hadoop"]["zabbix"]["escalation_period"] = 600 
+default["bcpc"]["hadoop"]["zabbix"]["escalation_period"] = 300
 
 # Interval within which chef-client is expected to run
 default["bcpc"]["hadoop"]["zabbix"]["chef_client_check_interval"] =
@@ -26,7 +24,13 @@ default["bcpc"]["hadoop"]["zabbix"]["chef_client_check_interval"] =
 default["bcpc"]["hadoop"]["zabbix"]["enable_alarming"] = true
 
 # Amount of metric data to be fetched from graphite (in minutes) and sent to zabbix
-default["bcpc"]["hadoop"]["graphite"]["metric_fetch_period"] = 2 
+default["bcpc"]["hadoop"]["graphite"]["metric_fetch_period"] = 2
+
+# Number of workers to process graphite-to-zabbix queries
+default["bcpc"]["hadoop"]["graphite"]["worker_count"] = [node['cpu']['total'] / 2, 3].max 
+
+# Amount of metric data to check (in minutes) to determine if an item is in problem state
+default["bcpc"]["hadoop"]["zabbix"]["trigger_chk_period"] = 2
 
 # Override Graphite/Zabbix queries/triggers here
 default["bcpc"]["hadoop"]["graphite"]["basic_queries"] = {} # Basic OS/Node Queries
@@ -34,6 +38,7 @@ default["bcpc"]["hadoop"]["graphite"]["service_queries"] = {} # Service specific
 
 default["bcpc"]["hadoop"]["zabbix"]["query_graphite"] = {
   'log_file' => '/var/log/zabbix/query_graphite.log',
+  'config_file' => '/usr/local/etc/query_graphite.config',
   'logging_level' => 'DEBUG',
   'rolling_max_bytes' => 20971520, # 20mb
   'rolling_backup_count' => 3 

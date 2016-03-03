@@ -1,9 +1,7 @@
-node.normal['bcpc']['hadoop']['graphite']['service_queries']['namenode'] = {
-  'nnheapmem' => {
-     'type' => "jmx",
-     'query' => "memory.HeapMemoryUsage_committed",
-     'trigger_val' => "max(61,0)",
-     'value_type' => 3,
+node.set['bcpc']['hadoop']['graphite']['service_queries']['namenode'] = {
+  'namenode.HeapMemoryUsage_committed' => {
+     'query' => "minSeries(jmx.namenode.*.memory.HeapMemoryUsage_committed)",
+     'trigger_val' => "max(#{node["bcpc"]["hadoop"]["zabbix"]["trigger_chk_period"]}m)",
      'trigger_cond' => "=0",
      'trigger_name' => "NameNodeAvailability",
      'enable' => true,
@@ -11,10 +9,5 @@ node.normal['bcpc']['hadoop']['graphite']['service_queries']['namenode'] = {
      'trigger_desc' => "Namenode service seems to be down",
      'severity' => 5,
      'route_to' => "admin"
-  },
-  'numstaledn' => {
-     'type' => "jmx",
-     'query' => "nn_fs_name_system_state.FSNamesystemState.NumStaleDataNodes",
-     'enable' => true
   }
 }

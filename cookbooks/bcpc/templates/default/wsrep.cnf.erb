@@ -39,6 +39,27 @@ innodb_autoinc_lock_mode=2
 # This is a must for paralell applying
 innodb_locks_unsafe_for_binlog=1
 
+# Less thrash on restarts by dumping and loading buffer pools
+innodb_buffer_pool_dump_at_shutdown=ON
+innodb_buffer_pool_load_at_startup=ON
+
+# Write to disk on each commit, but only flush once per second
+innodb_flush_log_at_trx_commit=2
+
+# Put each table in it's own file
+innodb_file_per_table=1
+
+# Set log file larger than the 5M default
+innodb_log_file_size=64M
+
+# Set memory buffer size for the log
+innodb_log_buffer_size=8M
+
+# Use direct I/O to avoid double buffering writes
+innodb_flush_method=O_DIRECT
+
+innodb_buffer_pool_size=<%= @innodb_buffer_pool_size %>M
+
 # Query Cache is not supported with wsrep
 query_cache_size=0
 query_cache_type=0

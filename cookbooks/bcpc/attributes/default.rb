@@ -132,23 +132,15 @@ default['bcpc']['admin_tenant'] = "AdminTenant"
 default['bcpc']['admin_role'] = "Admin"
 default['bcpc']['member_role'] = "Member"
 default['bcpc']['admin_email'] = "admin@localhost.com"
-
-default['bcpc']['zabbix']['user'] = "zabbix"
-default['bcpc']['zabbix']['group'] = "adm"
-default['bcpc']['zabbix']['server_port'] = 10051
-default['bcpc']['zabbix']['web_port'] = 7777
-default['bcpc']['zabbix']['scripts']['sender'] = "/usr/local/bin/run_zabbix_sender.sh"
-default['bcpc']['zabbix']['scripts']['mail'] = "/usr/local/bin/zbx_mail.sh"
-default['bcpc']['zabbix']['scripts']['query_graphite'] = "/usr/local/bin/query_graphite.py"
-# Interval (in seconds) during which we expect chef-client to have run at least once
-default['bcpc']['zabbix']['chef_client_check_interval'] = (node['chef_client']['interval'].to_i + node['chef_client']['splay'].to_i) * 2
-
 default['bcpc']['keepalived']['config_template'] = "keepalived.conf_openstack"
 
 default[:bcpc][:ports][:apache][:radosgw] = 8080
 default[:bcpc][:ports][:apache][:radosgw_https] = 8443
 default[:bcpc][:ports][:haproxy][:radosgw] = 80
 default[:bcpc][:ports][:haproxy][:radosgw_https] = 443
+
+# Memory where InnoDB caches table and index data (in MB). Default is 128M.
+default['bcpc']['mysql']['innodb_buffer_pool_size'] = [(node[:memory][:total].to_i / 1024 * 0.02).floor, 128].max
 
 #################################################
 #  attributes for chef vault download and install

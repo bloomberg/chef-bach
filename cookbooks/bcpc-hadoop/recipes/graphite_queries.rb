@@ -12,20 +12,20 @@ monitored_nodes_objs = get_all_nodes.select { |n| not n.hostname =~ /bootstrap/ 
 # To enable them, set "enable=true" in the json structure
 triggers = {
   'bcpc-bootstrap' => {
-    'chef_client_success_bcpc-bootstrap' => {
-      'type' => "chef",
-      'query' => "success",
-      'trigger_val' => "max(#{node["bcpc"]["hadoop"]["zabbix"]["chef_client_check_interval"]}, 0)",
+    'chef.bcpc-bootstrap.success' => {
+      'query' => "chef.*.success",
+      'trigger_val' => "max(30m)",
       'trigger_cond' => "=0",
-      'trigger_name' => "bcpc-bootstrap_ChefClientFailure",
+      'trigger_name' => "bcpc-bootstrap_ChefClientNotRun",
       'enable' => true,
-      'trigger_desc' => "Chef-client seems to be failing/stopped",
+      'trigger_desc' => "Chef-client hasn't run in 30m",
       'severity' => 2,
       'route_to' => "admin"
     }
   }
 }
 
+trigger_chk_period = "#{node["bcpc"]["hadoop"]["zabbix"]["trigger_chk_period"]}m"
 monitored_nodes_objs.each do |node_obj|
   host = node_obj.hostname
   # Copy overrrides
@@ -39,10 +39,9 @@ monitored_nodes_objs.each do |node_obj|
   
   # Selectively add defaults
   if triggers[host]["memory_active_#{host}"].nil?
-    triggers[host]["memory_active_#{host}"] = {
-      'type' => "servers",
-      'query' => "memory.Active",
-      'trigger_val' => "max(61,0)",
+    triggers[host]["#{host}.memory.Active"] = {
+      'query' => "servers.*.memory.Active",
+      'trigger_val' => "max(#{trigger_chk_period})",
       'trigger_cond' => "=0",
       'trigger_name' => "#{host}_NodeAvailability",
       'enable' => true,
@@ -52,17 +51,29 @@ monitored_nodes_objs.each do |node_obj|
     }
   end
   if triggers[host]["chef_client_success_#{host}"].nil?
-    triggers[host]["chef_client_success_#{host}"] = {
-      'type' => "chef",
-      'query' => "success",
-      'trigger_val' => "max(" +
-        "#{node["bcpc"]["hadoop"]["zabbix"]["chef_client_check_interval"]}, 0" +
-      ")",
+    triggers[host]["chef.#{host}.success"] = {
+      'query' => "chef.*.success",
+      'trigger_val' => "max(#{node["bcpc"]["hadoop"]["zabbix"]["chef_client_check_interval"]})",
       'trigger_cond' => "=0",
+      'trigger_name' => "#{host}_ChefClientNotRun",
+      'trigger_dep' => ["#{host}_NodeAvailability"],
+      'enable' => true,
+      'trigger_desc' => "Chef-client hasn't run in #{node["bcpc"]["hadoop"]["zabbix"]["chef_client_check_interval"]}", 
+      'severity' => 1,
+      'route_to' => "admin"
+    }
+  end
+  if triggers[host]["chef_client_fail_#{host}"].nil?
+    triggers[host]["chef.#{host}.fail"] = {
+      'query' => "chef.*.fail",
+      'trigger_val' => "max(" +
+        "#{node["bcpc"]["hadoop"]["zabbix"]["chef_client_check_interval"]}" +
+      ")",
+      'trigger_cond' => "=1",
       'trigger_name' => "#{host}_ChefClientFailure",
       'trigger_dep' => ["#{host}_NodeAvailability"],
       'enable' => true,
-      'trigger_desc' => "Chef-client seems to be failing/stopped",
+      'trigger_desc' => "Chef-client failed",
       'severity' => 1,
       'route_to' => "admin"
     }
@@ -90,11 +101,10 @@ monitored_nodes_objs.each do |node_obj|
   }
 
   disk_size_hash.each do |disk,size|
-    if triggers[host]["#{disk}_space_avail_#{host}"].nil?
-      triggers[host]["#{disk}_space_avail_#{host}"] = {
-        'type' => "servers",
-        'query' => "diskspace.#{disk}.byte_avail",
-        'trigger_val' => "max(61,0)",
+    if triggers[host]["#{host}.diskspace.#{disk}.byte_avail"].nil?
+      triggers[host]["#{host}.diskspace.#{disk}.byte_avail"] = {
+        'query' => "servers.*.diskspace.*.byte_avail",
+        'trigger_val' => "max(#{trigger_chk_period})",
         'trigger_cond' => "=0",
         'trigger_name' => "#{host}_#{disk}_Availability",
         'trigger_dep' => ["#{host}_NodeAvailability"],
@@ -105,11 +115,10 @@ monitored_nodes_objs.each do |node_obj|
       }
     end
 
-    if triggers[host]["#{disk}_space_used_#{host}"].nil?
-      triggers[host]["#{disk}_space_used_#{host}"] = {
-        'type' => "servers",
-        'query' => "diskspace.#{disk}.byte_used",
-        'trigger_val' => "max(61,0)",
+    if triggers[host]["#{host}.diskspace.#{disk}.byte_used"].nil?
+      triggers[host]["#{host}.diskspace.#{disk}.byte_used"] = {
+        'query' => "servers.*.diskspace.*.byte_used",
+        'trigger_val' => "max(#{trigger_chk_period})",
         'trigger_cond' => ">#{(size * 0.90).ceil}G",
         'trigger_name' => "#{host}_#{disk}_SpaceUsed",
         'trigger_dep' => ["#{host}_NodeAvailability"],

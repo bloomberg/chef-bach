@@ -80,7 +80,7 @@ def make_config!(key, value)
 end
 
 def get_head_nodes
-  results = search(:node, "role:BCPC-Headnode AND chef_environment:#{node.chef_environment}")
+  results = search(:node, "role:BCPC-Hadoop-Head* AND chef_environment:#{node.chef_environment}")
   results.map!{ |x| x['hostname'] == node[:hostname] ? node : x }
   return (results == []) ? [node] : results.sort
 end

@@ -243,6 +243,7 @@ ListenIP=<%="#{node[:bcpc][:management][:vip]}"%>
 # Range: 1-24
 # Default:
 # HousekeepingFrequency=1
+HousekeepingFrequency=4
 
 ### Option: MaxHousekeeperDelete
 #   The table "housekeeper" contains "tasks" for housekeeping procedure in the format:
@@ -256,6 +257,7 @@ ListenIP=<%="#{node[:bcpc][:management][:vip]}"%>
 # Range: 0-1000000
 # Default:
 # MaxHousekeeperDelete=500
+MaxHousekeeperDelete=1000
 
 ### Option: DisableHousekeeping
 #   If set to 1, disables housekeeping.
@@ -281,6 +283,7 @@ ListenIP=<%="#{node[:bcpc][:management][:vip]}"%>
 # Range: 128K-2G
 # Default:
 # CacheSize=8M
+CacheSize=16M
 
 ### Option: CacheUpdateFrequency
 #   How often Zabbix will perform update of configuration cache, in seconds.
@@ -306,6 +309,7 @@ ListenIP=<%="#{node[:bcpc][:management][:vip]}"%>
 # Range: 128K-2G
 # Default:
 # HistoryCacheSize=8M
+HistoryCacheSize=32M
 
 ### Option: TrendCacheSize
 #   Size of trend cache, in bytes.
