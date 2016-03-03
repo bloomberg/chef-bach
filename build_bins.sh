@@ -69,18 +69,21 @@ if ! [[ -f mysql-connector-java-5.1.34.tar.gz ]]; then
 fi
 FILES="mysql-connector-java-5.1.34.tar.gz $FILES"
 
-# Fetch Kafka Tar
-for version in 0.8.1 0.8.1.1; do
-  mkdir -p kafka/${version}/
-  if ! [[ -f kafka/${version}/kafka_2.9.2-${version}.tgz ]]; then
-    pushd kafka/${version}/
-    while ! $(file kafka_2.9.2-${version}.tgz | grep -q 'gzip compressed data'); do
-      $CURL -O -L https://archive.apache.org/dist/kafka/${version}/kafka_2.9.2-${version}.tgz
-    done
-    popd
-  fi
-  FILES="kafka_2.9.2-${version}.tgz $FILES"
-done
+# Fetch Kafka 0.8 Tar
+if ! [[ -f kafka_2.9.2_0.8.1.1.tgz ]]; then
+  while ! $(file kafka_2.9.2_0.8.1.1.tgz | grep -q 'gzip compressed data'); do
+    $CURL -O -L https://archive.apache.org/dist/kafka/0.8.1.1/kafka_2.9.2_0.8.1.1.tgz
+  done
+fi
+FILES="kafka_2.9.2_0.8.1.1.tgz $FILES"
+
+# Fetch Kafka 0.9 Tar
+if ! [[ -f kafka_2.11_0.9.0.0.tgz ]]; then
+  while ! $(file kafka_2.11_0.9.0.0.tgz | grep -q 'gzip compressed data'); do
+    $CURL -O -L https://archive.apache.org/dist/kafka/0.9.0.0/kafka_2.11_0.9.0.0.tgz
+  done
+fi
+FILES="kafka_2.11_0.9.0.0.tgz $FILES"
 
 # Fetch Java 7 Tar
 if ! [[ -f jdk-7u51-linux-x64.tar.gz ]]; then
