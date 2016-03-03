@@ -35,7 +35,7 @@
 
 <property>
   <name>javax.jdo.option.ConnectionURL</name>
-  <value>jdbc:mysql:loadbalance://<%=@mysql_hosts.join(',')%>:3306/metastore?loadBalanceBlacklistTimeout=5000</value>
+  <value>jdbc:mysql:loadbalance://<%=@template_vars[:mysql_hosts].join(',')%>:3306/metastore?loadBalanceBlacklistTimeout=5000</value>
   <description>the URL of the MySQL database</description>
 </property>
 
@@ -51,7 +51,7 @@
 
 <property>
   <name>javax.jdo.option.ConnectionPassword</name>
-  <value><%=get_config("mysql-hive-password") %></value>
+  <value><%=@template_vars[:hive_sql_password]%></value>
 </property>
 
 <property>
@@ -66,7 +66,7 @@
 
 <property>
   <name>hive.metastore.uris</name>
-  <value>thrift://<%=@hive_hosts.map{ |s| float_host(s[:hostname]) + ":9083" }.join(",") %></value>
+  <value>thrift://<%=@template_vars[:hive_hosts].map{ |s| float_host(s[:hostname]) + ":9083" }.join(",") %></value>
   <description>IP address (or fully-qualified domain name) and port of the metastore hosts</description>
 </property>
 
@@ -79,7 +79,7 @@
 <property>
   <name>hive.zookeeper.quorum</name>
   <description>Zookeeper quorum used by Hive's Table Lock Manager</description>
-  <value><%= @zk_hosts.map{ |s| float_host(s[:hostname]) }.join(",")%></value>
+  <value><%= @template_vars[:zk_hosts].map{ |s| float_host(s[:hostname]) }.join(",")%></value>
 </property>
 
 <property>
@@ -94,7 +94,7 @@
 
 <property>
   <name>hive.metastore.warehouse.dir</name>
-  <value><%= "#{node['bcpc']['hadoop']['hdfs_url']}/user/hive/warehouse" %></value>
+  <value><%=@template_vars[:warehouse]%></value>
 </property>
 
 <property>
@@ -102,7 +102,7 @@
   <value>/tmp/hive-${user.name}</value>
 </property>
 
-<% if node[:bcpc][:hadoop][:kerberos][:enable] == true then %>
+<% if @template_vars[:kerberos_enabled] == true then %>
 
 <property>
   <name>hive.metastore.sasl.enabled</name>
@@ -112,21 +112,14 @@
 
 <property>
   <name>hive.metastore.kerberos.keytab.file</name>
-  <value><%= node[:bcpc][:hadoop][:kerberos][:keytab][:dir] %>/<%= node[:bcpc][:hadoop][:kerberos][:data][:hive][:keytab] %></value>
+  <value><%= @template_vars[:metastore_keytab]%></value>
   <description>The path to the Kerberos Keytab file containing the metastore thrift server's service principal.</description>
 </property>
 
-<% if node.run_list.expand(node.chef_environment).recipes.include?("bcpc-hadoop::hive_hcatalog") %>
 <property>
   <name>hive.metastore.kerberos.principal</name>
-  <value><%= node[:bcpc][:hadoop][:kerberos][:data][:hive][:principal] %>/<%=node[:bcpc][:hadoop][:kerberos][:data][:hive][:princhost] == "_HOST" ? float_host(node[:fqdn]) : node[:bcpc][:hadoop][:kerberos][:data][:hive][:princhost]%>@<%= node[:bcpc][:hadoop][:kerberos][:realm] %></value>
+  <value><%= @template_vars[:metastore_princ]%></value>
 </property>
-<% else %>
-<property>
-  <name>hive.metastore.kerberos.principal</name>
-  <value><%= node[:bcpc][:hadoop][:kerberos][:data][:hive][:principal] %>/<%=node[:bcpc][:hadoop][:kerberos][:data][:hive][:princhost] == "_HOST" ? "_HOST" : node[:bcpc][:hadoop][:kerberos][:data][:hive][:princhost]%>@<%= node[:bcpc][:hadoop][:kerberos][:realm] %></value>
-</property>
-<% end %>
 
 <!-- HiveServer2 Security Configuration -->
 <property>
@@ -136,21 +129,14 @@
 
 <property>
   <name>hive.server2.authentication.kerberos.keytab</name>
-  <value><%= node[:bcpc][:hadoop][:kerberos][:keytab][:dir] %>/<%= node[:bcpc][:hadoop][:kerberos][:data][:hive][:keytab] %></value>
+  <value><%= @template_vars[:server_keytab]%></value>
   <description>The path to the Kerberos Keytab file containing the metastore thrift server's service principal.</description>
 </property>
 
-<% if node.run_list.expand(node.chef_environment).recipes.include?("bcpc-hadoop::hive_hcatalog") %>
 <property>
   <name>hive.server2.authentication.kerberos.principal</name>
-  <value><%=node[:bcpc][:hadoop][:kerberos][:data][:hive][:principal]%>/<%=node[:bcpc][:hadoop][:kerberos][:data][:hive][:princhost] == "_HOST" ? float_host(node[:fqdn]) : node[:bcpc][:hadoop][:kerberos][:data][:hive][:princhost]%>@<%= node[:bcpc][:hadoop][:kerberos][:realm] %></value>
+  <value><%=@template_vars[:server_princ]%></value>
 </property>
-<% else %>
-<property>
-  <name>hive.server2.authentication.kerberos.principal</name>
-  <value><%= node[:bcpc][:hadoop][:kerberos][:data][:hive][:principal] %>/<%=node[:bcpc][:hadoop][:kerberos][:data][:hive][:princhost] == "_HOST" ? "_HOST" : node[:bcpc][:hadoop][:kerberos][:data][:hive][:princhost]%>@<%= node[:bcpc][:hadoop][:kerberos][:realm] %></value>
-</property>
-<% end %>
 <% end %>
 
 <property>
@@ -165,8 +151,8 @@
 
 <property>
   <name>hive.stats.dbconnectionstring</name>
-  <value>jdbc:mysql:loadbalance://<%=@mysql_hosts.join(',')%>:3306/hive_table_stats?useUnicode=true&amp;
-characterEncoding=UTF-8&amp;user=<%=get_config("mysql-hive-table-stats-user")%>&amp;password=<%=get_config("mysql-hive-table-stats-password")%></value>
+  <value>jdbc:mysql:loadbalance://<%=@template_vars[:mysql_hosts].join(',')%>:3306/hive_table_stats?useUnicode=true&amp;
+characterEncoding=UTF-8&amp;user=<%=@template_vars[:stats_user]%>&amp;password=<%=@template_vars[:stats_sql_password]%></value>
 </property>
 
 <property> 
