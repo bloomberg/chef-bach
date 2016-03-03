@@ -82,13 +82,21 @@ for version in 0.8.1 0.8.1.1; do
   FILES="kafka_2.9.2-${version}.tgz $FILES"
 done
 
-# Fetch Java Tar
+# Fetch Java 7 Tar
 if ! [[ -f jdk-7u51-linux-x64.tar.gz ]]; then
   while ! $(file jdk-7u51-linux-x64.tar.gz | grep -q 'gzip compressed data'); do
     $CURL -O -L -C - -b "oraclelicense=accept-securebackup-cookie" http://download.oracle.com/otn-pub/java/jdk/7u51-b13/jdk-7u51-linux-x64.tar.gz   
   done
 fi
 FILES="jdk-7u51-linux-x64.tar.gz $FILES"
+
+# Fetch Java 8 Tar
+if ! [[ -f jdk-8u74-linux-x64.tar.gz ]]; then
+  while ! $(file jdk-8u74-linux-x64.tar.gz | grep -q 'gzip compressed data'); do
+    $CURL -O -L -C - -b "oraclelicense=accept-securebackup-cookie" http://download.oracle.com/otn-pub/java/jdk/8u74-b02/jdk-8u74-linux-x64.tar.gz
+  done
+fi
+FILES="jdk-8u74-linux-x64.tar.gz $FILES"
 
 if ! [[ -f UnlimitedJCEPolicyJDK7.zip ]]; then
   while ! $(file UnlimitedJCEPolicyJDK7.zip | grep -q 'Zip archive data'); do
