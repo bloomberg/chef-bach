@@ -14,7 +14,7 @@ bash "update-hadoop-conf-alternatives" do
 end
 if ( node[:bcpc][:hadoop][:hdfs][:ldap][:integration] == true )
 
-  ldap_pwd = ( node[:bcpc][:hadoop][:hdfs][:ldap][:password].nil? ? get_config('password', 'ldap', 'os') : node[:bcpc][:hadoop][:hdfs][:ldap][:password] )
+  ldap_pwd = ( node[:bcpc][:hadoop][:hdfs][:ldap][:password].nil? ? get_bcpc_config('password', 'ldap', 'os') : node[:bcpc][:hadoop][:hdfs][:ldap][:password] )
 
   file "/etc/hadoop/conf/ldap-conn-pass.txt" do
     content "#{ldap_pwd}"

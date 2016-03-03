@@ -65,10 +65,10 @@ log "bcpc::bootstrap has been commented out, but not removed from roles"
 #   command "cd ~/chef-bcpc; git pull local master; knife role from file roles/*.json; knife cookbook upload -a; knife environment from file environments/#{node.chef_environment}.json"
 # end
 
-<<<<<<< variant A
-link '/etc/chef/client.d/knife.rb' do
-  to '/home/vagrant/chef-bcpc/.chef/knife.rb'
-end
->>>>>>> variant B
+
+# link '/etc/chef/client.d/knife.rb' do
+#   to '/home/vagrant/chef-bcpc/.chef/knife.rb'
+# end
+
 # package 'sshpass'
-======= end
+

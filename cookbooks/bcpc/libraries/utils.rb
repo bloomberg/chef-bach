@@ -308,7 +308,7 @@ end
 #
 # Returns true if given host is the Zabbix leader, false otherwise 
 def is_zabbix_leader?(host)
-  leader_check = "mysql -u#{get_config('mysql-zabbix-user')} -p#{get_config!('password','mysql-zabbix','os')} #{node['bcpc']['zabbix_dbname']} --raw --batch -e 'select host_id from leader_election where id=1' "
+  leader_check = "mysql -u#{get_bcpc_config('mysql-zabbix-user')} -p#{get_bcpc_config!('password','mysql-zabbix','os')} #{node['bcpc']['zabbix_dbname']} --raw --batch -e 'select host_id from leader_election where id=1' "
   cmd = Mixlib::ShellOut.new(
     leader_check, :timeout => 10
   ).run_command

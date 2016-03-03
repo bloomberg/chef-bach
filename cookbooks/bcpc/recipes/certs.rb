@@ -56,7 +56,7 @@ ruby_block "initialize-ssh-keys" do
     notifies :create, 'ruby_block[chef_vault_secret]', :immediately
 end
 
-ssh_private_key = get_config("ssh-private-key")
+ssh_private_key = get_bcpc_config("ssh-private-key")
 if ssh_private_key.nil?
   ssh_private_key = key.to_pem
 end
@@ -75,8 +75,8 @@ ruby_block "chef_vault_secret" do
       ssl_certificate = %x[echo "#{node[:temp][:value]}" | openssl x509]
       ssl_private_key = %x[echo "#{node[:temp][:value]}" | openssl rsa -passin pass:temp_passwd -out /dev/stdout]
     else
-      ssl_certificate = get_config("ssl-certificate")
-      ssl_private_key = get_config("ssl-private-key")
+      ssl_certificate = get_bcpc_config("ssl-certificate")
+      ssl_private_key = get_bcpc_config("ssl-private-key")
     end
     vault_resource = resources("chef_vault_secret[ssl]")
     vault_resource.raw_data({ 'private-key' => ssl_private_key, "certificate" => ssl_certificate })
@@ -89,8 +89,8 @@ chef_vault_secret "ssl" do
     ssl_certificate = %x[echo "#{node[:temp][:value]}" | openssl x509]
     ssl_private_key = %x[echo "#{node[:temp][:value]}" | openssl rsa -passin pass:temp_passwd -out /dev/stdout]
   else
-    ssl_certificate = get_config("ssl-certificate")
-    ssl_private_key = get_config("ssl-private-key")
+    ssl_certificate = get_bcpc_config("ssl-certificate")
+    ssl_private_key = get_bcpc_config("ssl-private-key")
   end
   data_bag 'os'
   raw_data ({ 'private-key' => ssl_private_key, 'certificate' => ssl_certificate })

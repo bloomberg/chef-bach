@@ -132,7 +132,6 @@ ruby_block "zabbix-database-creation" do
             ]
         end
     end
-  end
 end
 
 template "/usr/local/share/zabbix/leader_election.sql" do
@@ -148,14 +147,14 @@ end
 ruby_block "setup-leader-election" do
   block do
     puts %x[
-      mysql -u#{get_config!('mysql-zabbix-user')} -p#{get_config!('password','mysql-zabbix','os')} #{node['bcpc']['zabbix_dbname']} < /usr/local/share/zabbix/leader_election.sql 
+      mysql -u#{get_bcpc_config!('mysql-zabbix-user')} -p#{get_bcpc_config!('password','mysql-zabbix','os')} #{node['bcpc']['zabbix_dbname']} < /usr/local/share/zabbix/leader_election.sql 
     ]  
   end
   action :nothing
 end
 
 bash "elect_leader" do
-  code %Q{ mysql -u#{get_config!('mysql-zabbix-user')} -p#{get_config!('password','mysql-zabbix','os')} #{node['bcpc']['zabbix_dbname']} -e 'call elect_leader(\"#{node[:hostname]}\")' }
+  code(%Q{ mysql -u#{get_bcpc_config!('mysql-zabbix-user')} -p#{get_bcpc_config!('password','mysql-zabbix','os')} #{node['bcpc']['zabbix_dbname']} -e 'call elect_leader(\"#{node[:hostname]}\")'})
   returns [0]
 end
 
