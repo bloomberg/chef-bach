@@ -35,9 +35,4 @@ $SSHCMD "sed -i 's/^deb-src/\#deb-src/g' /etc/apt/sources.list" sudo
 echo "setup chef"
 $SSHCMD "/home/ubuntu/install-chef.sh $binary_server_host $binary_server_url $chef_server_ip `hostname`" sudo
 
-echo "temporarily adjust system time to avoid time skew related failures"
-GOODDATE=`date`
-$SSHCMD "date -s '$GOODDATE'" sudo
-
 echo "done."
-
