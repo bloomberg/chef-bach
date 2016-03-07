@@ -17,6 +17,8 @@
 # limitations under the License.
 #
 
+include_recipe 'bcpc::chef_vault_install'
+
 make_config('mysql-pdns-user', "pdns")
 
 mysql_pdns_password = get_config("mysql-pdns-password")
