@@ -8,6 +8,9 @@ default[:bcpc][:hadoop][:zookeeper][:conf_dir] = '/etc/zookeeper/conf'
 # Data directory for Zookeeper state
 default[:bcpc][:hadoop][:zookeeper][:data_dir] = '/var/lib/zookeeper'
 
+# Data log directory for Zookeeper state
+default[:bcpc][:hadoop][:zookeeper][:data_log_dir] = '/var/lib/zookeeper'
+
 # Log directory for Zookeeper state
 default[:bcpc][:hadoop][:zookeeper][:log_dir] = '/var/log/zookeeper'
 
