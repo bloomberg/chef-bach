@@ -7,7 +7,7 @@
 ################################################
 
 export JAVA_HOME=<%= node["bcpc"]["hadoop"]["java"] %>
-export ZOO_LOG_DIR=/var/log/zookeeper
+export ZOO_LOG_DIR=<%= node[:bcpc][:hadoop][:zookeeper][:log_dir] %>
 export ZOO_PID_DIR=/var/run/zookeeper
 export ZOOPIDFILE=$ZOO_PID_DIR/zookeeper-server
 export ZOOCFGDIR=<%= node[:bcpc][:hadoop][:zookeeper][:conf_dir] %>
