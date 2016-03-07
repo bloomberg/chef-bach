@@ -40,7 +40,7 @@
         "dhcp_subnet" : "10.0.100.0",
         "dhcp_range" : "10.0.100.14 10.0.100.250"
       },
-      "dns_servers" : ["8.8.8.8"],
+      "dns_servers" : [ "8.8.8.8", "8.8.4.4" ],
       "hadoop" : {
         "yarn" : {
           "resourcemanager" : {
