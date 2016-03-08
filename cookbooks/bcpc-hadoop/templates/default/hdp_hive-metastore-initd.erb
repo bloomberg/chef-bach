@@ -87,7 +87,7 @@ start() {
     # Autodetect JDBC drivers for metastore
     exec_env="HADOOP_CLASSPATH=${HADOOP_CLASSPATH}:${BIGTOP_CLASSPATH} $exec_env"
 
-    HIVE_METASTORE_OPTS=" -hiveconf hive.log.file=${DAEMON}.log -hiveconf hive.log.dir=`dirname $LOG_FILE` "
+    HIVE_METASTORE_OPTS="$HIVE_METASTORE_OPTS -hiveconf hive.log.file=${DAEMON}.log -hiveconf hive.log.dir=`dirname $LOG_FILE` "
 
     su -s /bin/bash $SVC_USER -c "$exec_env nohup nice -n 0 \
         $EXEC_PATH --service metastore $HIVE_METASTORE_OPTS \
