@@ -77,7 +77,3 @@ end
    )
  end
 end
-
-package "openjdk-7-jdk" do
-    action :upgrade
-end

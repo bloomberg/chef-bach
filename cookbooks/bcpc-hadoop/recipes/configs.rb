@@ -62,7 +62,6 @@ package "hdp-select" do
 end
 
 # Install Java
-include_recipe "bcpc-hadoop::java_config"
 include_recipe "java::default"
 include_recipe "java::oracle_jce"
 

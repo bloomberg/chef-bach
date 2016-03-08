@@ -35,7 +35,6 @@ default["bcpc"]["hadoop"]["namenode"]["rpc"]["port"] = 8020
 default["bcpc"]["hadoop"]["namenode"]["http"]["port"] = 50070 
 default["bcpc"]["hadoop"]["namenode"]["https"]["port"] = 50470
 default["bcpc"]["hadoop"]["kafka"]["jmx"]["port"] = 9995
-default["bcpc"]["hadoop"]["java"] = "/usr/lib/jvm/java-1.7.0-openjdk-amd64"
 default["bcpc"]["hadoop"]["topology"]["script"] = "topology"
 default["bcpc"]["hadoop"]["topology"]["cookbook"] = "bcpc-hadoop"
 default["bcpc"]["hadoop"]["hive"]["hive_table_stats_db"] = "hive_table_stats"
@@ -127,3 +126,14 @@ default[:bcpc][:hadoop][:hdfs][:ldap][:port] = 389
 default[:bcpc][:hadoop][:hdfs][:ldap][:password] =  nil
 default[:bcpc][:hadoop][:hdfs][:ldap][:search][:filter][:user]="(&(objectclass=user)(sAMAccountName={0}))"
 default[:bcpc][:hadoop][:hdfs][:ldap][:search][:filter][:group]="(objectClass=group)"
+
+default["bcpc"]["hadoop"]["java"] = "/usr/lib/jvm/java-7-oracle-amd64"
+
+default['java']['install_flavor'] = "oracle"
+default['java']['accept_license_agreement'] = true
+default['java']['jdk_version'] = 7
+default['java']['jdk']['7']['x86_64']['url'] = get_binary_server_url + "jdk-7u51-linux-x64.tar.gz"
+default['java']['jdk']['7']['i586']['url'] = get_binary_server_url + "jdk-7u51-linux-i586.tar.gz"
+default['java']['oracle']['jce']['7']['url'] = get_binary_server_url + "UnlimitedJCEPolicyJDK7.zip"
+default['java']['oracle']['jce']['8']['url'] = get_binary_server_url + "jce_policy-8.zip"
+default['java']['oracle']['jce']['enabled'] = true
