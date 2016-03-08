@@ -1,0 +1,13 @@
+{
+  "name": "BCPC-Hadoop-Yarn-TimelineServer",
+  "default_attributes": {
+  },
+  "json_class": "Chef::Role",
+  "run_list": [
+    "recipe[bcpc-hadoop::application_timelineserver]"
+  ],
+  "description": "Application TImelineServer",
+  "chef_type": "role",
+  "override_attributes": {
+  }
+}

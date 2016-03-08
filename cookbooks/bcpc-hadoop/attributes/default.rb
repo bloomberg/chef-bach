@@ -4,6 +4,8 @@
 #
 #############################################
 
+
+default['yarn']['timelineservice']['hostname']=""
 default["bcpc"]["hadoop"] = {}
 default["bcpc"]["zookeeper"]["id"] = 0
 default["bcpc"]["namenode"]["id"] = -1
