@@ -88,6 +88,7 @@ end
 # item: chef vault item; 
 # key: the key to retrieve password in the item
 def get_config(key, item=node.chef_environment, bag="configs")
+  require 'chef-vault'
   begin
     entry = ChefVault::Item.load(bag, item)
     return entry[key]
