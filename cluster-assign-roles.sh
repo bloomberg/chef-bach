@@ -85,7 +85,7 @@ function install_stub {
     local role="${BASH_REMATCH[1]}"
     local ip="${BASH_REMATCH[2]}"
     local fqdn="${BASH_REMATCH[3]}"
-    sudo knife node show $fqdn $KNIFE_ADMIN 2>/dev/null >/dev/null ||  install_machines "role[Basic],recipe[bcpc::default],recipe[bcpc::networking]${BANG}${ip}${BANG}${fqdn}" &
+    sudo knife node show $fqdn $KNIFE_ADMIN 2>/dev/null >/dev/null ||  install_machines "role[Basic],recipe[bcpc::default],recipe[bcpc::chef_vault_install],recipe[bcpc::networking]${BANG}${ip}${BANG}${fqdn}" &
   done
   wait
   # verify all nodes created knife node objects -- and thus installed
