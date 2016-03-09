@@ -232,23 +232,28 @@ end
 # returns a array of hash with the requested attributes
 # [ { :node_number => "val", :hostname => "nameval" }, ...]
 #
-def get_req_node_attributes(node_objects,srch_keys)
-  result = Array.new
-  node_objects.each do |obj|
-    temp = Hash.new
-    srch_keys.each do |name, key|
-      begin
-        val = key.split('.').reduce(obj) {|memo, key| memo[key]}
-      rescue NoMethodError
-        Chef::Log.fatal "Node #{obj} does not have key #{key}!"
-        raise
+def get_req_node_attributes(node_objects, search_keys)
+  
+  # Gets a path out of a nested hash.
+  # get_path(node, "bcpc.node_number") => node['bcpc']['node_number]
+  def get_path(object, path)
+    path.split('.').reduce(object){ |memo, i_key|
+      if memo.nil?
+        Chef::Log.warn("Required attribute missing: #{path}")
+        nil
+      else
+        memo[i_key]
       end
-      temp[name] = val
-    end
-    result.push(temp)
+    }
   end
-  return result
+  
+  node_objects.map do |node_object|
+    search_keys.map {|short_name, hash_path|
+      { short_name => get_path(node,hash_path) }
+    }.reduce(:merge)
+  end
 end
+
 
 #
 # Restarting of hadoop processes need to be controlled in a way that all the nodes
