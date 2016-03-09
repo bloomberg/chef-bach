@@ -2,6 +2,7 @@
 
 name             'bach_krb5'
 maintainer       'Bloomberg Finance L.P.'
+maintainer_email 'compute@bloomberg.net'
 description      'Wrapper cookbook for krb5 community cookbook'
 long_description IO.read(File.join(File.dirname(__FILE__), 'README.md'))
 version          '0.1.0'
