@@ -27,7 +27,7 @@ cat << EOF > .chef/knife.rb
 require 'rubygems'
 require 'ohai'
 o = Ohai::System.new
-o.all_plugins
+o.all_plugins(['fqdn','hostname','ipaddress'])
  
 log_level                :info
 node_name                o[:fqdn]
@@ -52,11 +52,15 @@ https_proxy ENV['https_proxy']
 no_proxy no_proxy_string
 ENV['GIT_SSL_NO_VERIFY'] = 'true'
 File.umask(0007)
+
+if ENV['https_proxy']
+  ssl_verify_mode :verify_none
+end
 EOF
 cd cookbooks
 
 # allow versions on cookbooks via "cookbook version"
-for cookbook in "apt 2.4.0" python build-essential ubuntu cron "chef-client 4.2.4" "chef-vault 1.3.0" ntp yum logrotate yum-epel sysctl chef_handler 7-zip seven_zip "windows 1.36.6" ark sudo ulimit pam ohai "poise 1.0.12" graphite_handler java maven "krb5 2.0.0"; do
+for cookbook in "apt 2.4.0" python build-essential ubuntu cron "chef-client 4.2.4" "chef-vault 1.3.2" ntp yum logrotate yum-epel sysctl chef_handler 7-zip seven_zip "windows 1.36.6" ark sudo ulimit pam ohai "poise 1.0.12" graphite_handler java maven "krb5 2.0.0" resolvconf database postgresql openssl chef-sugar; do
   if [[ ! -d ${cookbook% *} ]]; then
      # unless the proxy was defined this knife config will be the same as the one generated above
     knife cookbook site download $cookbook --config ../.chef/knife.rb
@@ -70,3 +74,4 @@ if [[ ! -d kafka ]]; then
 fi
 [[ -d jmxtrans ]] || git clone https://github.com/jmxtrans/jmxtrans-cookbook.git jmxtrans
 [[ -d cobblerd ]] || git clone https://github.com/cbaenziger/cobbler-cookbook.git cobblerd -b cobbler_profile
+[[ -d pdns ]] || git clone https://github.com/http-418/pdns.git pdns

@@ -30,8 +30,8 @@ if [[ ! -f /etc/apt/sources.list.d/bcpc.list ]]; then
 fi
 
 if dpkg -s chef 2>/dev/null | grep -q ^Status.*installed && \
-   dpkg -s chef 2>/dev/null | grep -q ^Version.*11; then
-  echo chef is installed
+   dpkg -s chef 2>/dev/null | grep -q ^Version.*12; then
+  echo chef client 12.x is installed
 else
   apt-get -y install chef
   /opt/chef/embedded/bin/gem sources --add file://$(pwd)/bins/
@@ -43,8 +43,8 @@ mkdir -p /etc/chef/ohai/hints/
 touch /etc/chef/ohai/hints/openstack.json
 
 if dpkg -s chef-server 2>/dev/null | grep -q ^Status.*installed && \
-   dpkg -s chef 2>/dev/null | grep -q ^Version.*11; then
-  echo chef-server is installed
+   dpkg -s chef-server 2>/dev/null | grep -q ^Version.*11; then
+  echo chef-server 11.x is installed
 else
   apt-get -y install chef-server
   mkdir /etc/chef-server

@@ -296,15 +296,19 @@ if [ ! -f zabbix-agent.tar.gz ] || [ ! -f zabbix-server.tar.gz ]; then
 fi
 FILES="zabbix-agent.tar.gz zabbix-server.tar.gz $FILES"
 
-# Gather the Chef packages and provide a dpkg repo
-opscode_urls="https://opscode-omnibus-packages.s3.amazonaws.com/ubuntu/12.04/x86_64/chef_11.12.8-2_amd64.deb
-https://opscode-omnibus-packages.s3.amazonaws.com/ubuntu/12.04/x86_64/chef-server_11.1.1-1_amd64.deb"
-for url in $opscode_urls; do
-  if ! [[ -f $(basename $url) ]]; then
-    $CURL -L -O $url
-  fi
-done
+# Gather the Chef packages
+CHEF_CLIENT_FILE=chef_11.18.12-1_amd64.deb
+if [[ ! -f $CHEF_CLIENT_FILE ]]; then
+    $CURL -L -o $CHEF_CLIENT_FILE "https://opscode-omnibus-packages.s3.amazonaws.com/ubuntu/10.04/x86_64/$CHEF_CLIENT_FILE"
+fi
+FILES="$CHEF_CLIENT_FILE $FILES"
+   
+if [[ ! -f 'chef-server_11.1.7-1_amd64.deb' ]]; then
+   $CURL -L -o 'chef-server_11.1.7-1_amd64.deb' "https://packagecloud.io/chef/stable/packages/ubuntu/precise/chef-server_11.1.7-1_amd64.deb/download"
+fi
+FILES="chef-server_11.1.7-1_amd64.deb $FILES"
 
+   
 ###################
 # generate apt-repo
 dpkg-scanpackages . > ${APT_REPO_BINS}/Packages
