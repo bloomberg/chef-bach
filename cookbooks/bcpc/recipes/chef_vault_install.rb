@@ -20,20 +20,17 @@
 require 'pathname'
 require 'rubygems'
 
-gem_path = Pathname.new(Gem.ruby).dirname.join("gem").to_s
-chef_gemspec = "/opt/chef/embedded/lib/ruby/gems/1.9.1/specifications/chef-vault-2.2.4.gemspec"
-
 gem_package "chef-vault" do
-  gem_binary gem_path
+  gem_binary Pathname.new(Gem.ruby).dirname.join("gem").to_s
   version ">=0.0.0"
   action :nothing
 end.run_action(:install)
 
 # set the gemspec permission
-file chef_gemspec do
-  owner 'root'
-  mode "644"
-  action :nothing
-end.run_action(:create)
+begin
+  File.chmod( 0444, *Dir.glob(Gem.dir + "/specifications/*.gemspec") )
+rescue
+  Chef::Log.warn("Failed to correct permissions on gemspecs!")
+end
 
 Gem.clear_paths
