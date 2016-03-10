@@ -249,7 +249,7 @@ def get_req_node_attributes(node_objects, search_keys)
   
   node_objects.map do |node_object|
     search_keys.map {|short_name, hash_path|
-      { short_name => get_path(node,hash_path) }
+      { short_name => get_path(node_object,hash_path) }
     }.reduce(:merge)
   end
 end
