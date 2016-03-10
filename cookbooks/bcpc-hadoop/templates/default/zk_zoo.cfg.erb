@@ -29,6 +29,9 @@ syncLimit=<%= node[:bcpc][:hadoop][:zookeeper][:sync_limit] %>
 # the directory where the snapshot is stored.
 dataDir=<%= node[:bcpc][:hadoop][:zookeeper][:data_dir] %>
 
+# the directory where the txn log is stored
+dataLogDir=<%= node[:bcpc][:hadoop][:zookeeper][:data_log_dir] %>
+
 # the port at which the clients will connect
 clientPort=<%= node[:bcpc][:hadoop][:zookeeper][:port] %>
 
