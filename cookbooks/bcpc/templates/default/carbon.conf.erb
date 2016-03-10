@@ -13,7 +13,7 @@ MAX_UPDATES_PER_SECOND = <%= node['bcpc']['graphite']['carbon']['cache']['MAX_UP
 MAX_CREATES_PER_MINUTE = inf
 LINE_RECEIVER_INTERFACE = <%="#{node[:bcpc][:management][:ip]}"%>
 LINE_RECEIVER_PORT = 2003
-ENABLE_UDP_LISTENER = False
+ENABLE_UDP_LISTENER = True
 UDP_RECEIVER_INTERFACE = <%="#{node[:bcpc][:management][:ip]}"%>
 UDP_RECEIVER_PORT = 2003
 PICKLE_RECEIVER_INTERFACE = <%="#{node[:bcpc][:management][:ip]}"%>
