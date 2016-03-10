@@ -183,8 +183,8 @@ default[:bcpc][:ports][:haproxy][:radosgw_https] = 443
 #################################################
 #  attributes for chef vault download and install
 #################################################
-default['bcpc']['chefvault']['filename'] = "chef-vault-2.2.4.gem"
-default['bcpc']['chefvault']['checksum'] = "8d89c96554f614ec2a80ef20e98b0574c355a6ea119a30bd49aa9cfdcde15b4a"
+default['bcpc']['chefvault']['filename'] = 'chef-vault-2.8.0.gem'
+default['bcpc']['chefvault']['checksum'] = '18b7404bd21d9b2b59bd80193736c6fda0049d94e16004bdc435759729577b35'
 # gems package pathname
 default['bcpc']['bin_dir']['gems'] = '/home/vagrant/chef-bcpc/bins/gems'
 # rubygems download website URL

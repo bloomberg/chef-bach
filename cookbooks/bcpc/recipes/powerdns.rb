@@ -119,7 +119,6 @@ if node[:bcpc][:management][:vip] and get_nodes_for("mysql").length() > 0
     
     notifies :reload, 'service[pdns]'
   end
-
 end
 
 node.set['pdns']['authoritative']['config']['recursor'] =

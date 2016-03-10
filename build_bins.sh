@@ -69,12 +69,12 @@ if ! [[ -f mysql-connector-java-5.1.34.tar.gz ]]; then
 fi
 FILES="mysql-connector-java-5.1.34.tar.gz $FILES"
 
-# Fetch Kafka Tar
-KAFKA_FILE=kafka_2.11-0.9.0.0.tgz
 # Fetch Kafka 0.9 Tar
-if ! [[ -f $KAFKA_FILE ]]; then
-  while ! $(file $KAFKA_FILE | grep -q 'gzip compressed data'); do
-      $CURL -O -L http://archive.apache.org/dist/kafka/0.9.0.0/$KAFKA_FILE
+KAFKA_FILE=kafka_2.11-0.9.0.0.tgz
+mkdir -p kafka/0.9.0.0
+if ! [[ -f kafka/0.9.0.0/$KAFKA_FILE ]]; then
+  while ! $(file kafka/0.9.0.0/$KAFKA_FILE | grep -q 'gzip compressed data'); do
+      $CURL -o kafka/0.9.0.0/$KAFKA_FILE -L http://archive.apache.org/dist/kafka/0.9.0.0/$KAFKA_FILE
   done
 fi
 FILES="$KAFKA_FILE $FILES"
@@ -111,6 +111,15 @@ FILES="jce_policy-8.zip $FILES"
 
 # Pull all the gems required for the cluster 
 for i in patron wmi-lite simple-graphite; do
+  if ! [[ -f gems/${i}.gem ]]; then
+    gem fetch ${i}
+    ln -s ${i}-*.gem ${i}.gem || true
+  fi
+  FILES="${i}*.gem $FILES"
+done
+
+# Pull all the gems required for pdns
+for i in sequel sqlite3; do
   if ! [[ -f gems/${i}.gem ]]; then
     gem fetch ${i}
     ln -s ${i}-*.gem ${i}.gem || true
