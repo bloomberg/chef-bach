@@ -66,6 +66,7 @@ end
 default['bcpc']['bootstrap']['interface'] = "eth0"
 default['bcpc']['bootstrap']['pxe_interface'] = "eth1"
 default['bcpc']['bootstrap']['server'] = "10.0.100.3"
+default['bcpc']['bootstrap']['vip'] = node['bcpc']['bootstrap']['server']
 default['bcpc']['bootstrap']['dhcp_range'] = "10.0.100.14 10.0.100.250"
 default['bcpc']['bootstrap']['dhcp_subnet'] = "10.0.100.0"
 
@@ -103,25 +104,10 @@ default['bcpc']['ceph']['vms_mem']['name'] = "vmsmem"
 #  Network settings for the cluster
 #
 ###########################################
-default['bcpc']['management']['vip'] = "10.17.1.15"
-default['bcpc']['management']['netmask'] = "255.255.255.0"
-default['bcpc']['management']['cidr'] = "10.17.1.0/24"
-default['bcpc']['management']['gateway'] = "10.17.1.1"
-default['bcpc']['management']['interface'] = "eth0"
+default['bcpc']['management']['vip'] = "1.2.3.5"
+default['bcpc']['management']['ip'] = "1.2.3.4"
 
 default['bcpc']['metadata']['ip'] = "169.254.169.254"
-
-default['bcpc']['storage']['netmask'] = "255.255.255.0"
-default['bcpc']['storage']['cidr'] = "100.100.0.0/24"
-default['bcpc']['storage']['gateway'] = "100.100.0.1"
-default['bcpc']['storage']['interface'] = "eth1"
-
-default['bcpc']['floating']['vip'] = "192.168.43.15"
-default['bcpc']['floating']['netmask'] = "255.255.255.0"
-default['bcpc']['floating']['cidr'] = "192.168.43.0/24"
-default['bcpc']['floating']['gateway'] = "192.168.43.2"
-default['bcpc']['floating']['available_subnet'] = "192.168.43.128/25"
-default['bcpc']['floating']['interface'] = "eth2"
 
 default['bcpc']['ntp_servers'] = [ "pool.ntp.org" ]
 default['bcpc']['dns_servers'] = [ "8.8.8.8", "8.8.4.4" ]

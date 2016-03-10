@@ -19,31 +19,55 @@
 
 require 'ipaddr'
 
-mgmt_cidr = IPAddr.new(node['bcpc']['management']['cidr'])
+ifs = node[:network][:interfaces].keys
 
-ifs=node[:network][:interfaces].keys
 # create a hash of ipaddresses -- skip interfaces without addresses
-ips= ifs.map{ |a| node[:network][:interfaces][a].attribute?(:addresses) and
+ips = ifs.map{ |a| node[:network][:interfaces][a].attribute?(:addresses) and
                      node[:network][:interfaces][a][:addresses] or {}}.reduce({}, :merge)
 
-# select the first IP address which is on the management network
-node.set['bcpc']['management']['ip'] = ips.select {|ip,v| v['family'] == "inet" and
-                                                   ip != node['bcpc']['management']['vip'] and
-                                                   mgmt_cidr===ip}.first[0]
+# build a list of networks on this machine
+nets = ips.keys.select{ |ip| ips[ip]['family'] == "inet" }.map{ |ip| IPAddr.new("#{ip}/#{ips[ip]['prefixlen']}") }
 
-mgmt_bitlen = (node['bcpc']['management']['cidr'].match /\d+\.\d+\.\d+\.\d+\/(\d+)/)[1].to_i
+# find which subnet contains this machine's management network
+subnet = node[:bcpc][:networks].keys.map do |env_net|
+  matches = nets.select{|n| n == IPAddr.new(node[:bcpc][:networks][env_net][:management][:cidr])}
+  if matches.length >= 1
+    env_net
+  else
+    false
+  end
+end.select{|n| n}.first
+
+raise "Could not find subnet!" if subnet.nil?
+node.set['bcpc']['management']['subnet'] = subnet
+
+mgmt_cidr = IPAddr.new(node['bcpc']['networks'][subnet]['management']['cidr'])
+mgmt_vip = IPAddr.new(node['bcpc']['networks'][subnet]['management']['vip'])
+
+# select the first IP address which is on the management network
+plausible_ips = ips.select {|ip,v| v['family'] == "inet" and
+                            ip != mgmt_vip and mgmt_cidr===ip}.first
+if not plausible_ips or plausible_ips.length < 1
+  raise "Unable to find any plausible IPs for node['bcpc']['management']['ip']\nPossible IPs: #{ips}\nCan not match #{mgmt_vip} and must be in network #{subnet} -- #{mgmt_cidr.to_range}"
+end
+
+node.set['bcpc']['management']['ip'] = ips.select {|ip,v| v['family'] == "inet" and
+                                                   ip != mgmt_vip and mgmt_cidr===ip}.first[0]
+
+mgmt_bitlen = (node['bcpc']['networks'][subnet]['management']['cidr'].match /\d+\.\d+\.\d+\.\d+\/(\d+)/)[1].to_i
 mgmt_hostaddr = IPAddr.new(node['bcpc']['management']['ip'])<<mgmt_bitlen>>mgmt_bitlen
 
-stor_bitlen = (node['bcpc']['storage']['cidr'].match /\d+\.\d+\.\d+\.\d+\/(\d+)/)[1].to_i
+stor_bitlen = (node['bcpc']['networks'][subnet]['storage']['cidr'].match /\d+\.\d+\.\d+\.\d+\/(\d+)/)[1].to_i
 stor_hostaddr = IPAddr.new(node['bcpc']['management']['ip'])<<stor_bitlen>>stor_bitlen
 
-flot_bitlen = (node['bcpc']['floating']['cidr'].match /\d+\.\d+\.\d+\.\d+\/(\d+)/)[1].to_i
+flot_bitlen = (node['bcpc']['networks'][subnet]['floating']['cidr'].match /\d+\.\d+\.\d+\.\d+\/(\d+)/)[1].to_i
 ##If we have a full class B, then simply leave the 3rd octet alone and use the 4th octet from mgmt ip
 #Then we leave the rest of the float Ips for the VMs
 flot_bitlen = 24 if flot_bitlen == 16
 flot_hostaddr = IPAddr.new(node['bcpc']['management']['ip'])<<flot_bitlen>>flot_bitlen
 
-node.set['bcpc']['storage']['ip'] = ((IPAddr.new(node['bcpc']['storage']['cidr'])>>(32-stor_bitlen)<<(32-stor_bitlen))|stor_hostaddr).to_s
-node.set['bcpc']['floating']['ip'] = ((IPAddr.new(node['bcpc']['floating']['cidr'])>>(32-flot_bitlen)<<(32-flot_bitlen))|flot_hostaddr).to_s
+node.set['bcpc']['node_number'] = mgmt_hostaddr.to_i.to_s
+node.set['bcpc']['storage']['ip'] = ((IPAddr.new(node['bcpc']['networks'][subnet]['storage']['cidr'])>>(32-stor_bitlen)<<(32-stor_bitlen))|stor_hostaddr).to_s
+node.set['bcpc']['floating']['ip'] = ((IPAddr.new(node['bcpc']['networks'][subnet]['floating']['cidr'])>>(32-flot_bitlen)<<(32-flot_bitlen))|flot_hostaddr).to_s
 
 node.save rescue nil

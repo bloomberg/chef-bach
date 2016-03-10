@@ -18,6 +18,8 @@ cookbooks/*/
 !cookbooks/hannibal
 !cookbooks/kafka-bcpc
 !cookbooks/bach_krb5
+!cookbooks/bfd
+!cookbooks/cobblerd
 cookbooks/*/coverage
 cookbooks/*/vendor
 *.lock

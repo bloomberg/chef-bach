@@ -8,6 +8,7 @@ version          "0.5.0"
 
 depends "chef-vault"
 depends "apt", ">= 1.9.2"
+depends "bfd"
 depends "ubuntu", ">= 1.1.2"
 depends "chef-client", ">= 2.2.2"
 depends "cron", ">= 1.2.2"

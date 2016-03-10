@@ -17,6 +17,9 @@
 # limitations under the License.
 #
 
+subnet = node[:bcpc][:management][:subnet]
+raise "Did not get a subnet" if not subnet
+
 #
 # If we have a BCPC MySQL cluster, we'll use that for PowerDNS, and
 # all nodes will share it.
@@ -26,7 +29,7 @@
 # cluster-internal records, at least those records will remain in sync
 # without sharing storage.
 #
-if node[:bcpc][:management][:vip] and get_nodes_for("mysql").length() > 0
+if node[:bcpc]['networks'][subnet][:management][:vip] and get_nodes_for("mysql").length() > 0
   make_bcpc_config('mysql-pdns-user', "pdns")
   make_bcpc_config('mysql-pdns-password', secure_password)
 
@@ -39,7 +42,7 @@ if node[:bcpc][:management][:vip] and get_nodes_for("mysql").length() > 0
   node.set['pdns']['authoritative']['config']['launch'] = 'gmysql'
 
   node.set['pdns']['authoritative']['gmysql'].tap do |config|
-    config['gmysql-host'] = node[:bcpc][:management][:vip]
+    config['gmysql-host'] = node[:bcpc]['networks'][subnet][:management][:vip]
     config['gmysql-port'] = 3306
     config['gmysql-user'] = get_bcpc_config!('mysql-pdns-user')
     config['gmysql-password'] = get_bcpc_config!('mysql-pdns-password')
@@ -126,12 +129,12 @@ node.set['pdns']['authoritative']['config']['recursor'] =
 
 include_recipe 'pdns::authoritative_package'
 
-reverse_dns_zone = node['bcpc']['floating']['reverse_dns_zone'] || calc_reverse_dns_zone(node['bcpc']['floating']['cidr'])
+reverse_dns_zone = node['bcpc']['networks'][subnet]['floating']['reverse_dns_zone'] || calc_reverse_dns_zone(node['bcpc']['networks'][subnet]['floating']['cidr'])
 
 Chef::Log.info("Reverse DNS zone: #{reverse_dns_zone}")
 
 pdns_domain node[:bcpc][:domain_name] do
-  soa_ip node[:bcpc][:floating][:vip]
+  soa_ip node[:bcpc]['networks'][subnet][:floating][:vip]
 end
 
 get_all_nodes.each do |server|

@@ -75,3 +75,4 @@ fi
 [[ -d jmxtrans ]] || git clone https://github.com/jmxtrans/jmxtrans-cookbook.git jmxtrans
 [[ -d cobblerd ]] || git clone https://github.com/cbaenziger/cobbler-cookbook.git cobblerd -b cobbler_profile
 [[ -d pdns ]] || git clone https://github.com/http-418/pdns.git pdns
+[[ -d bfd ]] || git clone https://github.com/bloomberg/openbfdd-cookbook.git bfd
