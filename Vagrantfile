@@ -33,7 +33,7 @@ end
 
 chef_env = JSON.parse(File.read(json_file.join(",")))
 cluster_environment = chef_env["name"]
-bootstrap_hostname = chef_env["override_attributes"]["bcpc"]["bootstrap"]["hostname"]
+bootstrap_hostname = "bach-#{cluster_environment}-bootstrap"
 bootstrap_domain = chef_env["override_attributes"]["bcpc"]["domain_name"]
 
 $local_environment = cluster_environment
