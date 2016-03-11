@@ -10,7 +10,6 @@
     "recipe[bcpc-hadoop::default]",
     "recipe[kafka-bcpc::default]", 
     "recipe[kafka-bcpc::setattr]",
-    "recipe[bcpc-hadoop::java_config]",
     "recipe[java::oracle]", 
     "recipe[kafka::default]",
     "recipe[kafka-bcpc::kafka]",
