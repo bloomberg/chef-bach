@@ -31,3 +31,5 @@ default["bcpc"]["hadoop"]["hbase"]["ipc"]["warn"]["responsetime"] = 250
 default["bcpc"]["hadoop"]["hbase_master"]["hfilecleaner"]["ttl"] = 3600000
 default["bcpc"]["hadoop"]["hbase_master"]["jmx"]["port"] = 10101
 default["bcpc"]["hadoop"]["hbase_rs"]["jmx"]["port"] = 10102
+#Apache Phoenix related attributes 
+default["bcpc"]["hadoop"]["phoenix"]["tracing"]["enabled"] = false

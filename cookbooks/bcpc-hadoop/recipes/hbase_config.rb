@@ -23,7 +23,7 @@ else
  dns_server = node[:bcpc][:dns_servers][0]
 end
 
-%w{hadoop-metrics.properties
+%w{hadoop-metrics2-hbase.properties
    hbase-env.sh
    hbase-policy.xml
    hbase-site.xml
