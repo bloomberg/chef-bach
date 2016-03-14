@@ -11,11 +11,14 @@
       "recipe[bcpc::chef_vault_download]",
       "recipe[bcpc::chef_vault_install]",
       "recipe[bcpc::cobbler]",
-      "role[Hannibal-Build]",
+      "recipe[java::default]",
+      "recipe[bcpc-hadoop::maven_config]",
+      "recipe[maven::default]",
+      "recipe[hannibal::hannibal_build]",
       "recipe[bach_spark::spark_package]",
       "recipe[bcpc::mysql_connector]",
       "recipe[bcpc::rotate_chef_nginx_access_log]",
-      "role[HDFSDU-Build]"
+      "recipe[hdfsdu::build]"
     ],
     "description": "A bootstrap node in a BCPC cluster",
     "chef_type": "role",
