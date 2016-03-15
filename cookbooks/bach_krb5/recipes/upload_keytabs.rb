@@ -1,4 +1,8 @@
 require 'base64'
+
+# create databag keytabs for keytab files
+create_databag('keytabs')
+
 # Upload keytabs to chef-server
 get_all_nodes().each do |h|
   node[:bcpc][:hadoop][:kerberos][:data].each do |srvc, srvdat|
@@ -8,16 +12,24 @@ get_all_nodes().each do |h|
 
     # Delete existing configuration item (if requested)
     config_key = "#{config_host}-#{srvc}"
-    delete_config(config_key) if node[:bcpc][:hadoop][:kerberos][:keytab][:recreate] == true
+
+# Delete existing configuration item (if requested)
+    chef_vault_secret "#{ config_key }" do
+      data_bag 'keytabs'
+      admins ""
+      action :delete
+      only_if { node[:bcpc][:hadoop][:kerberos][:keytab][:recreate] }
+    end
 
     # Crete configuration in data bag
-    ruby_block "uploading-keytab-for-#{config_key}" do
-      block do
-        keytab_file = "#{node[:bcpc][:hadoop][:kerberos][:keytab][:dir]}/#{keytab_host}/#{srvdat['keytab']}"
-        make_config("#{config_key}",Base64.encode64(File.open(keytab_file,"rb").read))
-      end
-      action :create
-      only_if {File.exists?("#{node[:bcpc][:hadoop][:kerberos][:keytab][:dir]}/#{keytab_host}/#{srvdat['keytab']}") && get_config("#{config_host}-#{srvdat['principal']}").nil?}
+    keytab_file = "#{node[:bcpc][:hadoop][:kerberos][:keytab][:dir]}/#{keytab_host}/#{srvdat['keytab']}"
+    chef_vault_secret "#{ config_key }" do
+      data_bag 'keytabs'
+      raw_data lazy { ({ 'krb5_key' => Base64.encode64(File.open(keytab_file,"rb").read)) }
+      admins "#{ h[:fqdn] }"
+      search ''
+      action :create_if_missing
+      only_if { File.exists?("#{node[:bcpc][:hadoop][:keytab][:dir] }/#{ keytab_host }/#{ srvdat['keytab'] }") }
     end
   end
 end
