@@ -16,9 +16,9 @@ To compile these gems, at a minimum, you will require the following packages:
 - zlib1g-dev
 
 ## Quickstart
-1. Make sure /opt/chefdk/embedded/bin is in your PATH
+1. Make sure `/opt/chefdk/embedded/bin` is in your `PATH` variable
 2. Check out this repository
-3. Run `rake setup:prerequisites setup:environment[1] setup:bootstrap_vm setup:demo` to set up the minimal cluster -- 2 heads, 1 worker.  "setup:environment[3]" will configure 2 heads, 3 workers, and so on.
+3. Run `rake setup:prerequisites setup:environment[1] setup:bootstrap_vm setup:hadoop_demo_vagrant` to set up the minimal cluster -- 2 heads, 1 worker.  `setup:environment[3]` will configure 2 heads, 3 workers, and so on.
 
 ### Internal Cheating
 Apply the chef-bach-hypervisor cookbook first to handle all known prerequisites.
