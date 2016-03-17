@@ -77,7 +77,7 @@ start() {
 
     LOG_FILE=/var/log/hive/${DAEMON}.out
 
-    HIVE_SERVER2_OPTS=" -hiveconf hive.log.file=${DAEMON}.log -hiveconf hive.log.dir=`dirname $LOG_FILE` "
+    HIVE_SERVER2_OPTS="$HIVE_SERVER2_OPTS -hiveconf hive.log.file=${DAEMON}.log -hiveconf hive.log.dir=`dirname $LOG_FILE` "
 
     su -s /bin/bash $SVC_USER -c "nohup nice -n 0 \
         $EXEC_PATH --service hiveserver2 -hiveconf hive.metastore.uris=' ' $HIVE_SERVER2_OPTS \
