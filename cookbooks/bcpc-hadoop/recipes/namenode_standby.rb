@@ -137,6 +137,7 @@ if @node['bcpc']['hadoop']['hdfs']['HA'] == true then
     supports :status => true, :restart => true, :reload => false
     subscribes :restart, "link[/etc/init.d/hadoop-hdfs-namenode]", :immediate
     subscribes :restart, "template[/etc/hadoop/conf/hdfs-site.xml]", :delayed
+    subscribes :restart, "template[/etc/hadoop/conf/hadoop-metrics2.properties]", :delayed
     subscribes :restart, "template[/etc/hadoop/conf/core-site.xml]", :delayed
     subscribes :restart, "template[/etc/hadoop/conf/hdfs-policy.xml]", :delayed
     subscribes :restart, "template[/etc/hadoop/conf/hadoop-env.sh]", :delayed

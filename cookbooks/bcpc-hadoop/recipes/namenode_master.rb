@@ -166,6 +166,7 @@ service "generally run hadoop-hdfs-namenode" do
   supports :status => true, :restart => true, :reload => false
   service_name "hadoop-hdfs-namenode"
   subscribes :restart, "link[/etc/init.d/hadoop-hdfs-namenode]", :immediate
+  subscribes :restart, "template[/etc/hadoop/conf/hadoop-metrics2.properties]", :delayed
   subscribes :restart, "template[/etc/hadoop/conf/hdfs-site.xml]", :delayed
   subscribes :restart, "template[/etc/hadoop/conf/core-site.xml]", :delayed
   subscribes :restart, "template[/etc/hadoop/conf/hdfs-policy.xml]", :delayed
