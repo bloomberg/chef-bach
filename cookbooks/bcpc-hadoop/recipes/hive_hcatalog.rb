@@ -1,4 +1,4 @@
-#
+
 #  Installing Hive & Hcatalog
 #
 include_recipe "bcpc-hadoop::hive_config"
@@ -72,6 +72,15 @@ bash "create-hive-scratch" do
   hdfs dfs -mkdir -p /tmp/scratch
   hdfs dfs -chmod -R 1777 /tmp/scratch
   hdfs dfs -chown -R hive:hdfs /tmp/scratch
+  EOH
+  user "hdfs"
+end
+
+bash "create-beeline-scratchroot" do
+  code <<-EOH
+  hadoop fs -mkdir -p /tmp/hive-hive
+  hadoop fs -chmod 1777 /tmp/hive-hive
+  hadoop fs -chown hive /tmp/hive-hive
   EOH
   user "hdfs"
 end
