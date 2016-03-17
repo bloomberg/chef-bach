@@ -1,5 +1,6 @@
+# vim: tabstop=2:shiftwidth=2:softtabstop=2 
 #
-#  Installing Hive & Hcatalog
+# Installing Hive & Hcatalog
 #
 include_recipe "bcpc-hadoop::hive_config"
 include_recipe "bcpc-hadoop::hive_table_stat"
