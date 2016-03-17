@@ -2,6 +2,7 @@ keytab_dir = node[:bcpc][:hadoop][:kerberos][:keytab][:dir]
 realm = node[:bcpc][:hadoop][:kerberos][:realm]
 
 get_all_nodes().each do |h|
+  next if h[:hostname].match('bootstrap')
   # Create directory for the the host to store keytabs
   directory "#{keytab_dir}/#{float_host(h[:fqdn])}" do
     action :create
@@ -45,6 +46,7 @@ end
 
 
 get_all_nodes().each do |h|
+  next if h[:hostname].match('bootstrap')
   node[:bcpc][:hadoop][:kerberos][:data].each do |ke, va|
     service_principal = va['principal']
     host_fqdn = float_host(h[:fqdn])
