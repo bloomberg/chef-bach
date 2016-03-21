@@ -193,14 +193,35 @@ function hadoop_install {
     rm -f $status_file
   }
   trap clean_up_status_file EXIT
-  for m in $(printf ${hosts// /\\n} | grep -i "BCPC-Hadoop-Worker" | sort); do
-    [[ "$m" =~ $REGEX ]]
+  
+  printf "Assigning roles for Worker...\n"
+  for h in $(printf ${hosts// /\\n} | grep -i "BCPC-Hadoop-Worker" | sort); do
+    [[ "$h" =~ $REGEX ]]
+    local role="${BASH_REMATCH[1]}"
+    local ip="${BASH_REMATCH[2]}"
     local fqdn="${BASH_REMATCH[3]}"
-    # authenticate the node one by one
-    vaults=$(sudo ./find_resources.rb $fqdn | tail -1)
-    sudo ./node_auth.rb $vaults $fqdn
-    install_machines $m &
+    sudo knife node run_list add $fqdn "$role" $KNIFE_ADMIN &
   done
+
+  if printf ${hosts// /\\n} | grep -q "BCPC-Hadoop-Worker"; then
+    # Making sure that the run_list is updated in solr index and is available for search during chef-client run
+    num_hosts=$(printf ${hosts// /\\n} | grep -i "BCPC-Hadoop-Worker" | wc -l)
+    while true; do
+      printf "Waiting for Chef Solr to update\n"
+      sleep 0.5
+      [[ $num_hosts -eq $(sudo knife search node "role:BCPC-Hadoop-Worker" $KNIFE_ADMIN | grep '^Node Name:' | wc -l) ]] && break
+    done
+
+    for m in $(printf ${hosts// /\\n} | grep -i "BCPC-Hadoop-Worker" | sort); do
+      [[ "$m" =~ $REGEX ]]
+      local fqdn="${BASH_REMATCH[3]}"
+      # authenticate the node one by one
+      vaults=$(sudo ./find_resources.rb $fqdn | tail -1)
+      sudo ./node_auth.rb $vaults $fqdn
+      install_machines $m || echo "$m" >> $status_file &
+    done
+  fi
+
   wait
   failures=$(wc -l $status_file | sed 's/ .*//')
   if [[ $failures -ne 0 ]]; then

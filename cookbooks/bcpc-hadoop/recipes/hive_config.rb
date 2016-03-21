@@ -4,14 +4,31 @@
 # Description : To setup hive configuration only. No hive package will be installed through this Recipe
 #
 
+# check and create the data bag "hadoop"
+create_databag("hadoop")
 
-#Create hive password
-make_config('mysql-hive-password', secure_password)
+#Create hive password with back compatiblity
+mysql_hive_password = get_config("mysql-hive-password")
+if mysql_hive_password.nil?
+  mysql_hive_password = secure_password
+end
+
+bootstrap = get_bootstrap
+results = get_nodes_for("hive_config").map!{ |x| x['fqdn'] }.join(",")
+nodes = results == "" ? node['fqdn'] : results
 
 # Hive table stats user
 make_config('mysql-hive-table-stats-user', node["bcpc"]["hadoop"]["hive"]["hive_table_stats_db_user"])
 make_config('mysql-hive-table-stats-password', secure_password)
 
+chef_vault_secret "mysql-hive" do
+  data_bag 'hadoop'
+  raw_data({ 'password' => mysql_hive_password })
+  admins "#{ nodes },#{ bootstrap }"
+  search '*:*'
+  action :nothing
+end.run_action(:create_if_missing)
+  
 %w{hive webhcat hcat hive-hcatalog}.each do |w|
   directory "/etc/#{w}/conf.#{node.chef_environment}" do
     owner "root"
