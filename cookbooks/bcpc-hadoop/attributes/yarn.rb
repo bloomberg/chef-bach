@@ -14,3 +14,5 @@ default["bcpc"]["hadoop"]["yarn"]["resourcemanager"]["port"] = 8032
 default['bcpc']['hadoop']['yarn']['aux_services']['mapreduce_shuffle']['class'] = 'org.apache.hadoop.mapred.ShuffleHandler'
 default['bcpc']['hadoop']['yarn']['opts']['jute_buffer'] = 6291456
 default["bcpc"]["hadoop"]["yarn"]["resourcemanager"]["yarn.client.failover-sleep-base-ms"] = 150
+default['bcpc']['hadoop']['nodemanager']['jmx']['port'] = 3131
+default['bcpc']['hadoop']['resourcemanager']['jmx']['port'] = 3131

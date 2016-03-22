@@ -38,6 +38,11 @@
                     "type": "hbase_rs",
                     "service": "hbase-regionserver",
                     "service_cmd": "org.apache.hadoop.hbase.regionserver.HRegionServer"
+                 },
+                 {
+                   "type": "nodemanager",
+                   "service": "hadoop-yarn-nodemanager",
+                   "service_cmd": "org.apache.hadoop.yarn.server.nodemanager.NodeManager"
                  }
         ]
       }

@@ -1,3 +1,5 @@
+# vim: tabstop=2:shiftwidth=2:softtabstop=2 
+#
 include_recipe 'dpkg_autostart'
 include_recipe 'bcpc-hadoop::hadoop_config'
 node[:bcpc][:hadoop][:mounts].each do |i|

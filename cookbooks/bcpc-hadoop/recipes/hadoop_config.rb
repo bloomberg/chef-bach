@@ -63,17 +63,26 @@ template "/etc/hadoop/conf/topology" do
   mode 0655
 end
 
-%w{yarn-env.sh
-  hadoop-env.sh}.each do |t|
- template "/etc/hadoop/conf/#{t}" do
-   source "hdp_#{t}.erb"
-   mode 0555
-   variables(:nn_hosts => node[:bcpc][:hadoop][:nn_hosts],
-             :zk_hosts => node[:bcpc][:hadoop][:zookeeper][:servers],
-             :jn_hosts => node[:bcpc][:hadoop][:jn_hosts],
-             :mounts => node[:bcpc][:hadoop][:mounts],
-             :nn_jmx_port => node[:bcpc][:hadoop][:namenode][:jmx][:port],
-             :dn_jmx_port => node[:bcpc][:hadoop][:datanode][:jmx][:port]
-   )
- end
+template "/etc/hadoop/conf/hadoop-env.sh" do
+  source "hdp_hadoop-env.sh.erb"
+  mode 0555
+  variables(
+    :nn_jmx_port => node[:bcpc][:hadoop][:namenode][:jmx][:port],
+    :dn_jmx_port => node[:bcpc][:hadoop][:datanode][:jmx][:port]
+  )
+end
+
+template "/etc/hadoop/conf/yarn-env.sh" do
+  source "hdp_yarn-env.sh.erb"
+  mode 0555
+  variables(
+   :yarn_jute_maxbuffer => node['bcpc']['hadoop']['yarn']['opts']['jute_buffer'],
+   :nm_jmx_port => node[:bcpc][:hadoop][:nodemanager][:jmx][:port],
+   :rm_jmx_port => node[:bcpc][:hadoop][:resourcemanager][:jmx][:port]
+  )
+end  
+
+
+package "openjdk-7-jdk" do
+    action :upgrade
 end

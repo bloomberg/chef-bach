@@ -69,10 +69,20 @@ YARN_OPTS="$YARN_OPTS -Dyarn.id.str=$YARN_IDENT_STRING"
 YARN_OPTS="$YARN_OPTS -Dhadoop.root.logger=${YARN_ROOT_LOGGER:-INFO,console}"
 YARN_OPTS="$YARN_OPTS -Dyarn.root.logger=${YARN_ROOT_LOGGER:-INFO,console}"
 YARN_OPTS="$YARN_OPTS -Dyarn.policy.file=$YARN_POLICYFILE"
-YARN_OPTS="$YARN_OPTS -Djute.maxbuffer=<%= node['bcpc']['hadoop']['yarn']['opts']['jute_buffer'] %>"
+YARN_OPTS="$YARN_OPTS -Djute.maxbuffer=<%= @yarn_jute_maxbuffer %>"
 
 if [ "x$JAVA_LIBRARY_PATH" != "x" ]; then
   YARN_OPTS="$YARN_OPTS -Djava.library.path=$JAVA_LIBRARY_PATH"
 fi
 
 export YARN_OPTS
+
+YARN_NODEMANAGER_OPTS="-Dcom.sun.management.jmxremote.ssl=false"
+YARN_NODEMANAGER_OPTS="$YARN_NODEMANAGER_OPTS -Dcom.sun.management.jmxremote.authenticate=false"
+YARN_NODEMANAGER_OPTS="$YARN_NODEMANAGER_OPTS -Dcom.sun.management.jmxremote.port=<%= @nm_jmx_port %>"
+export YARN_NODEMANAGER_OPTS
+
+YARN_RESOURCEMANAGER_OPTS="-Dcom.sun.management.jmxremote.ssl=false"
+YARN_RESOURCEMANAGER_OPTS="$YARN_RESOURCEMANAGER_OPTS -Dcom.sun.management.jmxremote.authenticate=false"
+YARN_RESOURCEMANAGER_OPTS="$YARN_RESOURCEMANAGER_OPTS -Dcom.sun.management.jmxremote.port=<%= @rm_jmx_port %>"
+export YARN_RESOURCEMANAGER_OPTS 
