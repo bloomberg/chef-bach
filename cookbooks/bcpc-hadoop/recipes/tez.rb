@@ -3,9 +3,10 @@
 # Recipe Name : TEZ
 # Description : To setup TEZ
 #
+::Chef::Recipe.send(:include, Bcpc_Hadoop::Helper)
 
-package 'tez' do
-  action :upgrade
+package hwx_pkg_str('tez', node[:bcpc][:hadoop][:distribution][:release]) do
+  action :install
 end
 
 directory "/etc/tez/conf.#{node.chef_environment}" do
@@ -33,26 +34,26 @@ bash "make_apps_tez_dir" do
   hdfs dfs -mkdir -p /apps/tez
 EOH
   user "hdfs"
-  not_if "hdfs dfs -test /apps/tez/", :user => "hdfs"
+  not_if "hdfs dfs -test -d /apps/tez/", :user => "hdfs"
 end
 
 bash "make_dir_to_copy_tez_targz" do
   code <<EOH
-  hdfs dfs -mkdir -p /hdp/apps/2.2.0.0-2041/tez/ 
-  hdfs dfs -put /usr/hdp/2.2.0.0-2041/tez/lib/tez.tar.gz /hdp/apps/2.2.0.0-2041/tez/
+  hdfs dfs -mkdir -p /hdp/apps/#{node[:bcpc][:hadoop][:distribution][:release]}/tez/ 
+  hdfs dfs -put /usr/hdp/#{node[:bcpc][:hadoop][:distribution][:release]}/tez/lib/tez.tar.gz /hdp/apps/#{node[:bcpc][:hadoop][:distribution][:release]}/tez/
   hdfs dfs -chown -R hdfs:hadoop /hdp
-  hdfs dfs -chmod -R 555 /hdp/apps/2.2.0.0-2041/tez
-  hdfs dfs -chmod -R 444 /hdp/apps/2.2.0.0-2041/tez/tez.tar.gz
+  hdfs dfs -chmod -R 555 /hdp/apps/#{node[:bcpc][:hadoop][:distribution][:release]}/tez
+  hdfs dfs -chmod -R 444 /hdp/apps/#{node[:bcpc][:hadoop][:distribution][:release]}/tez/tez.tar.gz
 EOH
   user "hdfs"
-  not_if "hdfs dfs -test -f /hdp/apps/2.2.0.0-2041/tez/tez.tar.gz", :user => "hdfs"
-  only_if "echo 'test'|sudo -u hdfs hdfs dfs -copyFromLocal - /tmp/tez-test"
+  not_if "hdfs dfs -test -f /hdp/apps/#{node[:bcpc][:hadoop][:distribution][:release]}/tez/tez.tar.gz", :user => "hdfs"
+  only_if "echo 'test'| hdfs dfs -copyFromLocal - /user/hdfs/chef-tez-test", :user => "hdfs"
   notifies :run,"bash[delete-tez-temp-file]",:immediately
 end
 
 bash "delete-tez-temp-file" do
   code <<-EOH
-  hdfs dfs -rm /tmp/tez-test
+  hdfs dfs -rm /user/hdfs/chef-tez-test
   EOH
   user "hdfs"
   action :nothing

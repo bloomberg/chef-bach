@@ -64,7 +64,6 @@ for cookbook in "apt 2.4.0" python build-essential ubuntu cron "chef-client 4.2.
     rm ${cookbook% *}*.tar.gz
   fi
 done
-[[ -d dpkg_autostart ]] || git clone https://github.com/hw-cookbooks/dpkg_autostart.git
 if [[ ! -d kafka ]]; then
   git clone https://github.com/mthssdrbrg/kafka-cookbook.git kafka
 fi

@@ -1,3 +1,5 @@
+::Chef::Recipe.send(:include, Bcpc_Hadoop::Helper)
+::Chef::Resource::Bash.send(:include, Bcpc_Hadoop::Helper)
 include_recipe 'bcpc-hadoop::hbase_config'
 include_recipe 'bcpc-hadoop::hbase_queries'
 
@@ -14,16 +16,19 @@ node.default['bcpc']['hadoop']['copylog']['hbase_master_out'] = {
     'docopy' => true
 }
 
-%w{
-hbase
-hbase-master
-hbase-thrift
-libsnappy1
-phoenix
-}.each do |p|
+%W(#{hwx_pkg_str('hbase', node[:bcpc][:hadoop][:distribution][:release])}
+   #{hwx_pkg_str('phoenix', node[:bcpc][:hadoop][:distribution][:release])}
+   libsnappy1).each do |p|
   package p do
-    action :install
+    action :upgrade
   end
+end
+
+%w{hbase-master
+hbase-client
+phoenix-client
+}.each do |p|
+  hdp_select(p, node[:bcpc][:hadoop][:distribution][:active_release])
 end
 
 user_ulimit "hbase" do
@@ -40,12 +45,12 @@ bash "create-hbase-dir" do
   not_if "sudo -u hdfs hadoop fs -test -d /hbase"
 end
 
-directory "/usr/hdp/current/hbase-master/lib/native/Linux-amd64-64" do
+directory "/usr/hdp/#{node[:bcpc][:hadoop][:distribution][:active_release]}/hbase/lib/native/Linux-amd64-64" do
   recursive true
   action :create
- end
+end
 
-link "/usr/hdp/current/hbase-master/lib/native/Linux-amd64-64/libsnappy.so" do
+link "/usr/hdp/#{node[:bcpc][:hadoop][:distribution][:active_release]}/hbase/lib/native/Linux-amd64-64/libsnappy.so" do
   to "/usr/lib/libsnappy.so.1"
 end
 
@@ -63,6 +68,7 @@ service "hbase-master" do
   subscribes :restart, "template[/etc/hbase/conf/hbase-env.sh]", :delayed
   subscribes :restart, "template[/etc/hbase/conf/log4j.properties]", :delayed
   subscribes :restart, "template[/etc/hadoop/conf/hdfs-site.xml]", :delayed
+  subscribes :restart, "bash[hdp-select hbase-master]", :delayed
   subscribes :restart, "user_ulimit[hbase]", :delayed
   subscribes :restart, "template[/etc/hadoop/conf/core-site.xml]", :delayed
 end

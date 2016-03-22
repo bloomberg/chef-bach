@@ -43,14 +43,14 @@
 export JAVA_HOME=<%= node["bcpc"]["hadoop"]["java"] %>
 
 export HADOOP_HOME_WARN_SUPPRESS=true
-export HADOOP_HOME=/usr/hdp/2.2.0.0-2041/hadoop
-export HADOOP_PREFIX=/usr/hdp/2.2.0.0-2041/hadoop
+export HADOOP_HOME=/usr/hdp/<%= node[:bcpc][:hadoop][:distribution][:active_release] %>/hadoop
+export HADOOP_PREFIX=/usr/hdp/<%= node[:bcpc][:hadoop][:distribution][:active_release] %>/hadoop
 export HADOOP_CONF_DIR=/etc/hadoop/conf
 export HADOOP_COMMON_HOME=/usr/lib/hadoop
-export HADOOP_HDFS_HOME=/usr/hdp/2.2.0.0-2041/hadoop-hdfs
-export HADOOP_MAPRED_HOME=/usr/hdp/2.2.0.0-2041/hadoop-mapreduce
-export HADOOP_YARN_HOME=/usr/hdp/2.2.0.0-2041/hadoop-yarn
-export HADOOP_LIBEXEC_DIR=/usr/hdp/2.2.0.0-2041/hadoop/libexec
+export HADOOP_HDFS_HOME=/usr/hdp/<%= node[:bcpc][:hadoop][:distribution][:active_release] %>/hadoop-hdfs
+export HADOOP_MAPRED_HOME=/usr/hdp/<%= node[:bcpc][:hadoop][:distribution][:active_release] %>/hadoop-mapreduce
+export HADOOP_YARN_HOME=/usr/hdp/<%= node[:bcpc][:hadoop][:distribution][:active_release] %>/hadoop-yarn
+export HADOOP_LIBEXEC_DIR=/usr/hdp/<%= node[:bcpc][:hadoop][:distribution][:active_release] %>/hadoop/libexec
 
 export HTTPFS_USER=httpfs
 export HTTPFS_CONFIG=/etc/hadoop-httpfs/conf
@@ -60,4 +60,4 @@ export HTTPFS_CATALINA_HOME=/usr/lib/bigtop-tomcat
 
 export CATALINA_PID=/var/run/hadoop-httpfs/hadoop-httpfs-httpfs.pid
 export CATALINA_TMPDIR=/var/run/hadoop-httpfs/
-export CATALINA_BASE=/usr/hdp/2.2.0.0-2041/hadoop-httpfs
+export CATALINA_BASE=/usr/hdp/<%= node[:bcpc][:hadoop][:distribution][:active_release] %>/hadoop-httpfs

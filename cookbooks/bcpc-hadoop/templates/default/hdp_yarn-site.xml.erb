@@ -132,9 +132,15 @@
   </property>
 
   <property>
+    <name>yarn.nodemanager.address</name>
+    <value><%=float_host(node[:hostname])%>:<%=node["bcpc"]["hadoop"]["yarn"]["nodemanager"]["port"]%></value>
+  </property>
+
+  <property>
     <name>yarn.nodemanager.hostname</name>
     <value><%= float_host(node[:hostname]) %></value>
   </property>
+
   <% end # if node.run_list.expand(node.chef_environment).recipes.include?("bcpc-hadoop::datanode") %>
 
   <property>
@@ -213,11 +219,6 @@
   <property>
     <name>yarn.nodemanager.linux-container-executor.resources-handler.class</name>
     <value>org.apache.hadoop.yarn.server.nodemanager.util.CgroupsLCEResourcesHandler</value>
-  </property>
-
-  <property>
-    <name>yarn.nodemanager.linux-container-executor.group</name>
-    <value>yarn</value>
   </property>
 
   <property>

@@ -8,29 +8,36 @@
 # This can be achieved by adding the Copylog role as the last role to the node
 # Since flume writes into HDFS nodes running this recipe should have HDFS
 # client components installed on them.
-
-
-dpkg_autostart "flume-agent" do
-  allow false
-end
+::Chef::Recipe.send(:include, Bcpc_Hadoop::Helper)
+::Chef::Resource::Bash.send(:include, Bcpc_Hadoop::Helper)
+::Chef::Resource::Link.send(:include, Bcpc_Hadoop::Helper)
 
 %w{flume flume-agent}.each do |p|
-  package p do
+  package hwx_pkg_str(p, node[:bcpc][:hadoop][:distribution][:release]) do
     action :upgrade
   end
 end
 
-service "flume-agent" do
-  action [:stop, :disable]
+hdp_select('flume-server', node[:bcpc][:hadoop][:distribution][:active_release])
+
+link "/etc/init.d/flume-agent-multi" do
+  to "/usr/hdp/#{node[:bcpc][:hadoop][:distribution][:active_release]}/flume/etc/init.d/flume-agent"
+  notifies :run, "bash[kill flume-java]", :immediate
+end
+
+bash "kill flume-java" do
+  code "pkill -u flume -f java"
+  action :nothing
+  returns [0, 1]
 end
 
 bash "make_shared_logs_dir" do
-  code <<EOH
+  code <<-EOH
   hdfs dfs -mkdir -p #{node['bcpc']['hadoop']['hdfs_url']}/user/flume/logs/ && \
   hdfs dfs -chown -R flume #{node['bcpc']['hadoop']['hdfs_url']}/user/flume/
-EOH
+  EOH
   user "hdfs"
-  not_if "hdfs dfs -test #{node['bcpc']['hadoop']['hdfs_url']}/user/flume/logs/", :user => "hdfs"
+  not_if "hdfs dfs -test -d #{node['bcpc']['hadoop']['hdfs_url']}/user/flume/logs/", :user => "hdfs"
 end
 
 template "/etc/flume/conf/flume-env.sh" do
@@ -38,14 +45,6 @@ template "/etc/flume/conf/flume-env.sh" do
   owner "root"
   group "root"
   mode "0755"
-end
-
-template "/etc/init.d/flume-agent-multi" do
-  source "flume_flume-agent.erb"
-  owner "root"
-  group "root"
-  mode "0755"
-  action :create
 end
 
 if node['bcpc']['hadoop']['copylog_enable']

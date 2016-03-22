@@ -11,17 +11,17 @@ export HADOOP_OPTS="-Djava.net.preferIPv4Stack=true ${HADOOP_OPTS}"
 export HADOOP_LOG_DIR=/var/log/hadoop-hdfs
  
 # History server logs
-export HADOOP_MAPRED_LOG_DIR=/var/log/hadoop-hdfs
- 
+export HADOOP_MAPRED_LOG_DIR=/var/log/hadoop-mapreduce
+
 # Where log files are stored in the secure data environment.
 export HADOOP_SECURE_DN_LOG_DIR=/var/log/hadoop-hdfs
- 
+
 # The directory where pid files are stored.
 export HADOOP_PID_DIR=/var/run/hadoop-hdfs
 export HADOOP_SECURE_DN_PID_DIR=/var/run/hadoop-hdfs
  
 # History server pid
-export HADOOP_MAPRED_PID_DIR=/var/run/hadoop-hdfs
+export HADOOP_MAPRED_PID_DIR=/var/run/hadoop-mapreduce
  
 # A string representing this instance of hadoop.
 export HADOOP_IDENT_STRING="$USER"

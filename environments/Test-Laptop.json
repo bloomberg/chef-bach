@@ -2,8 +2,14 @@
   "name": "Test-Laptop",
   "override_attributes": {
     "spark": {
+      "download" : {
+        "url": "http://apache.arvixe.com/spark/spark-1.6.0/",
+        "file": {
+          "name": "spark-1.6.0-bin-without-hadoop"
+        }
+      },
       "package": {
-        "install_meta": false
+        "version": "1.6.0"
       }
     },
     "bcpc": {
@@ -41,6 +47,10 @@
         "dhcp_range" : "10.0.100.14 10.0.100.250"
       },
       "dns_servers" : [ "8.8.8.8", "8.8.4.4" ],
+      "repos" : {
+        "hortonworks": "http://public-repo-1.hortonworks.com/HDP/ubuntu12/2.x/updates/2.3.4.0",
+        "hdp_utils": "http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.20/repos/ubuntu12"
+      },
       "hadoop" : {
         "yarn" : {
           "resourcemanager" : {
@@ -54,7 +64,8 @@
         "head_disks" : ["sdb" , "sdc", "sdd"],
         "distribution": {
           "version": "HDP",
-          "key": "hortonworks.key"
+          "key": "hortonworks.key",
+          "release": "2.3.4.0-3485"
         },
         "hbase": {
           "bucketcache": {
@@ -100,10 +111,6 @@
         "oozie": {
           "memory_opts": "-Xmx512m -XX:MaxPermSize=64m"
         }
-      },
-      "repos" : {
-        "hortonworks" : "http://public-repo-1.hortonworks.com/HDP/ubuntu12/2.x/GA/2.2.0.0",
-        "hdp_utils" : "http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.20/repos/ubuntu12"
       }
     },
     "kafka": {
