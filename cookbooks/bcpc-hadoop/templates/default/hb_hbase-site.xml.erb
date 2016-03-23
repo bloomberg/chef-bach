@@ -112,6 +112,16 @@
   </property>
 
   <% if node[:bcpc][:hadoop][:kerberos][:enable] == true then %>
+  <property>
+    <name>hbase.fs.tmp.dir</name>
+    <value><%= node["bcpc"]["hadoop"]["hbase"]["fs_tmp_dir"] %></value>
+  </property>
+
+  <property>
+    <name>hbase.bulkload.staging.dir</name>
+    <value>${hbase.fs.tmp.dir}</value>
+  </property>
+
   <!-- HBase Authorization Configuration -->
   <property> 
     <name>hbase.security.authorization</name> 
@@ -311,4 +321,5 @@
     <name>hbase.replication</name>
     <value>true</value>
   </property>
+
 </configuration>

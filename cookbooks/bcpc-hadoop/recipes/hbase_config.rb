@@ -55,4 +55,13 @@ if node[:bcpc][:hadoop][:kerberos][:enable] == true then
       mode 0644
     end
   end
+
+  hbase_fs_tmp_dir = node["bcpc"]["hadoop"]["hbase"]["fs_tmp_dir"]
+  bash "create-hbase-fs-tmp-dir" do
+    code <<-EOH
+    hdfs dfs -mkdir -p #{hbase_fs_tmp_dir}
+    hdfs dfs -chown -R hbase:hadoop #{hbase_fs_tmp_dir} 
+    EOH
+    user "hdfs"
+  end
 end 

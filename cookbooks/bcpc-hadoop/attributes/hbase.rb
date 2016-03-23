@@ -33,3 +33,4 @@ default["bcpc"]["hadoop"]["hbase_master"]["jmx"]["port"] = 10101
 default["bcpc"]["hadoop"]["hbase_rs"]["jmx"]["port"] = 10102
 #Apache Phoenix related attributes 
 default["bcpc"]["hadoop"]["phoenix"]["tracing"]["enabled"] = false
+default["bcpc"]["hadoop"]["hbase"]["fs_tmp_dir"] = "/user/hbase/hbase-staging"
