@@ -1,3 +1,5 @@
+default['bcpc']['hadoop']['hbase']['root_dir'] = "#{node['bcpc']['hadoop']['hdfs_url']}/hbase"
+default['bcpc']['hadoop']['hbase']['bulkload_staging_dir'] = "#{node['bcpc']['hadoop']['hdfs_url']}/tmp"
 default["bcpc"]["hadoop"]["hbase"]["repl"]["enabled"] = false
 default["bcpc"]["hadoop"]["hbase"]["repl"]["peer_id"] =  node.chef_environment.gsub("-","_")
 default["bcpc"]["hadoop"]["hbase"]["repl"]["target"] = ""

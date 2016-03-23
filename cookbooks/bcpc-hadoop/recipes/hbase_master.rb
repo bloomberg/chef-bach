@@ -39,10 +39,23 @@ service "hbase-thrift" do
   action :disable
 end 
 
-bash "create-hbase-dir" do
-  code "hadoop fs -mkdir -p /hbase; hadoop fs -chown hbase:hadoop /hbase"
-  user "hdfs"
-  not_if "sudo -u hdfs hadoop fs -test -d /hbase"
+bash 'create-hbase-dir' do
+  code  <<-EOH
+    hdfs dfs -mkdir -p #{node['bcpc']['hadoop']['hbase']['root_dir']}
+    hdfs dfs -chown hbase:hadoop #{node['bcpc']['hadoop']['hbase']['root_dir']}
+  EOH
+  user 'hdfs'
+  not_if "hdfs dfs -test -d #{node['bcpc']['hadoop']['hbase']['root_dir']}", :user => 'hdfs'
+end
+
+bash 'create-hbase-staging-dir' do
+  code <<-EOH
+    hdfs dfs -mkdir -p #{node['bcpc']['hadoop']['hbase']['bulkload_staging_dir']}
+    hdfs dfs -chown hbase:hadoop #{node['bcpc']['hadoop']['hbase']['bulkload_staging_dir']}
+    hdfs dfs -chmod 711 #{node['bcpc']['hadoop']['hbase']['bulkload_staging_dir']}
+  EOH
+  user 'hdfs'
+  not_if "hdfs dfs -test -d #{node['bcpc']['hadoop']['hbase']['bulkload_staging_dir']}", :user => 'hdfs'
 end
 
 directory "/usr/hdp/#{node[:bcpc][:hadoop][:distribution][:active_release]}/hbase/lib/native/Linux-amd64-64" do

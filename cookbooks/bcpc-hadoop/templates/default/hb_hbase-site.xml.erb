@@ -16,7 +16,12 @@
 <configuration>
   <property>
     <name>hbase.rootdir</name>
-    <value><%= node['bcpc']['hadoop']['hdfs_url'] %>/hbase</value>
+    <value><%= node['bcpc']['hadoop']['hbase']['root_dir'] %></value>
+  </property>
+
+  <property>
+    <name>hbase.bulkload.staging.dir</name>
+    <value><%= node['bcpc']['hadoop']['hbase']['bulkload_staging_dir'] %></value>
   </property>
 
   <property>
