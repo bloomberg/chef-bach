@@ -25,7 +25,8 @@ chef_env = JSON.parse(File.read(json_file.join(",")))
 bridge_if = chef_env["override_attributes"]["bcpc"]["bootstrap"]["pxe_interface"]
 ip_address = chef_env["override_attributes"]["bcpc"]["bootstrap"]["server"]
 env_name = chef_env["name"]
-host_name = "bcpc-cluster-#{env_name}-bootstrap"
+bootstrap_domain = chef_env["override_attributes"]["bcpc"]["domain_name"]
+host_name = "bach-#{env_name}-bootstrap.#{bootstrap_domain}"
 
 puts "Base dir   : #{base_dir}"
 puts "Json file  : #{json_file}"
