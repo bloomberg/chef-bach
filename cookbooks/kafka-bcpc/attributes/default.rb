@@ -30,6 +30,6 @@ default[:kafka][:broker][:controlled][:shutdown][:retry][:backoff][:ms] = 5000
 default[:kafka][:version] = '0.9.0.0'
 default[:kafka][:scala_version] = '2.11'
 default[:kafka][:checksum] = '6e20a86cb1c073b83cede04ddb2e92550c77ae8139c4affb5d6b2a44447a4028'
-override[:kafka][:md5sum] = ''
+default[:kafka][:md5sum] = '084fb80cdc8c72dc75bc3519a5d2cc5c'
 default[:kafka][:log_dir] = '/var/log/kafka'
 
