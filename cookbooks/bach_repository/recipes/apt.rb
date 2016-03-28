@@ -76,10 +76,6 @@ execute 'generate-release-file' do
   umask 0222
 end
 
-file "#{apt_bins_path}/Release" do
-  mode 0444
-end
-
 execute 'sign-release-file' do
   command <<-EOM
   gpg --no-tty -abs \
@@ -90,4 +86,8 @@ execute 'sign-release-file' do
       #{release_file_path}
   EOM
   umask 0222
+end
+
+execute 'apt-fix-repository-perms' do
+  command "chmod -R a+r #{apt_directory}"
 end

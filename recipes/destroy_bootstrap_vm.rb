@@ -26,3 +26,8 @@ end
 directory cluster_data_dir do
   action :delete
 end
+
+directory "#{Chef::Config[:chef_repo_path]}/provisioning" do
+  action :delete
+  recursive true
+end

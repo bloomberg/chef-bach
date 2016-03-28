@@ -14,11 +14,41 @@ default['bcpc']['domain_name'] = "bcpc.example.com"
 
 default['bcpc']['encrypt_data_bag'] = false
 
+# Specify the kernel you wish to install. For default latest LTS kernel use "linux-server"
+default['bcpc']['bootstrap']['preseed']['kernel'] = "linux-generic-lts-trusty"
 default['bcpc']['bootstrap']['preseed']['add_kernel_opts'] = "console=ttyS0"
-
 default['bcpc']['bootstrap']['preseed']['late_command'] = "true"
-
 default['bcpc']['bootstrap']['admin_users'] = []
+
+#
+# The node_number is used to derive Kafka broker IDs, Zookeeper myid
+# files, keepalived node priorities, and other values.  It must be
+# unique within a cluster.
+#
+# The node number is generated from the integer value of the
+# management interface mac_address, modulo Java's Integer.MAX_VALUE.
+#
+# On the provisioning node and during early bootstrap, we won't have
+# any of these values, in which case we just don't set the
+# node_number.
+#
+management_interface = begin
+                         interface_name = node[:bcpc][:management][:interface]
+                         node[:network][:interfaces][interface_name]
+                       rescue
+                         nil
+                       end
+
+if management_interface
+  mac_address = management_interface[:addresses].select{ |addr,hash|
+    hash['family'] == 'lladdr'
+  }.keys.first
+
+  max_value = (2**31 - 1) # Java Integer.MAX_VALUE
+  integer_mac = mac_address.downcase.split(':').join.to_i(base=16)
+  node.set['bcpc']['node_number'] = integer_mac % max_value
+end  
+
 
 ###########################################
 #
@@ -96,6 +126,8 @@ default['bcpc']['zabbix']['web_port'] = 7777
 default['bcpc']['zabbix']['scripts']['sender'] = "/usr/local/bin/run_zabbix_sender.sh"
 default['bcpc']['zabbix']['scripts']['mail'] = "/usr/local/bin/zbx_mail.sh"
 default['bcpc']['zabbix']['scripts']['query_graphite'] = "/usr/local/bin/query_graphite.py"
+# Interval (in seconds) during which we expect chef-client to have run at least once
+default['bcpc']['zabbix']['chef_client_check_interval'] = (node['chef_client']['interval'].to_i + node['chef_client']['splay'].to_i) * 2
 
 default['bcpc']['keepalived']['config_template'] = "keepalived.conf_openstack"
 

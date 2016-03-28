@@ -32,7 +32,9 @@ require 'thread'
 # Hadoop breaks principal into 3 parts  (Service, FQDN and REALM)
 
 HOSTNAME_ATTR_SRCH_KEYS = {'hostname' => 'fqdn'}
-HOSTNAME_NODENO_ATTR_SRCH_KEYS = {'hostname' => 'fqdn', 'node_number' => 'bcpc.node_number'}
+HOSTNAME_NODENO_ATTR_SRCH_KEYS = {'hostname' => 'fqdn',
+                                  'node_number' => 'bcpc.node_number',
+                                  'zookeeper_myid' => 'bcpc.hadoop.zookeeper.myid'}
 MGMT_IP_ATTR_SRCH_KEYS = {'mgmt_ip' => 'bcpc.management.ip'}
 
 def init_config
@@ -382,16 +384,60 @@ def group_exists?(group_name)
   chk_grp_cmd = "getent group #{group_name}"
   Chef::Log.debug("Executing command: #{chk_grp_cmd}")
   cmd = Mixlib::ShellOut.new(chk_grp_cmd, :timeout => 10).run_command
-  return  cmd.exitstatus == 0 ? true : false 
+  return cmd.exitstatus == 0 ? true : false 
 end
 
 def get_group_action(group_name)
-  return  group_exists?(group_name) ? :manage : :create 
+  return group_exists?(group_name) ? :manage : :create 
 end
 
 def has_vip?
   cmd = Mixlib::ShellOut.new(
-    "ip addr show dev #{node[:bcpc][:management][:interface]}", :timeout => 10
+    "ip addr show", :timeout => 10
   ).run_command
   cmd.stderr.empty? && cmd.stdout.include?(node[:bcpc][:management][:vip])
+end
+
+# Internal: Check if oozie server is running on the given host.
+#
+# host - Endpoint (FQDN/IP) on which Oozie server is available.
+#
+# Examples
+#
+#   oozie_running?("f-bcpc-vm2.bcpc.example.com")
+#   # => true
+#
+# Returns true if oozie server is operational with 'NORMAL' status, false otherwise.
+def oozie_running?(host)
+    oozie_url = "sudo -u oozie oozie admin -oozie http://#{host}:11000/oozie -status"
+    cmd = Mixlib::ShellOut.new(
+      oozie_url, :timeout => 20
+    ).run_command
+    Chef::Log.debug("Oozie status: #{cmd.stdout}")
+    cmd.exitstatus == 0 && cmd.stdout.include?('NORMAL')
+end
+
+# Internal: Have the specified Oozie host update its ShareLib to the latest lib_<timestamp> 
+#           sharelib directory on hdfs:/user/oozie/share/lib/, without having to restart 
+#           that Oozie server. Oozie server, by default, uses the latest one when it (re)starts.
+#
+# host - Endpoint (FQDN/IP) on which Oozie server is available.
+#
+# Returns nothing. 
+def update_oozie_sharelib(host)
+  if oozie_running?(host) 
+    update_sharelib = "sudo -u oozie oozie admin -oozie http://#{host}:11000/oozie -sharelibupdate"
+    cmd = Mixlib::ShellOut.new(
+      update_sharelib, :timeout => 20
+    ).run_command
+    if cmd.exitstatus == 0
+      Chef::Log.info("Sharelibupdate: Updated sharelib on #{host}")
+    else
+      Chef::Log.info("Sharelibupdate: sharelibupdate command failed on #{host}")
+      Chef::Log.info("  stdout: #{cmd.stdout}")
+      Chef::Log.info("  stderr: #{cmd.stderr}")
+    end 
+  else
+    Chef::Log.info("Sharelibupdate: Oozie server not running on #{host}")
+  end
 end

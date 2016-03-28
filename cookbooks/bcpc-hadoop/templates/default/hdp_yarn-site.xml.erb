@@ -21,6 +21,11 @@
   </property>
 
   <property>
+    <name>yarn.client.failover-sleep-base-ms</name>
+    <value><%=node["bcpc"]["hadoop"]["yarn"]["resourcemanager"]["yarn.client.failover-sleep-base-ms"]%></value>
+  </property>
+
+  <property>
     <name>yarn.resourcemanager.ha.rm-ids</name>
     <value><%=@rm_hosts.map{ |s| "rm#{node.chef_environment}#{s[:node_number]}" }.join(",") %></value>
   </property>
@@ -238,7 +243,7 @@
   </property>
 
   <property>
-    <name>resource.percentage-physical-cpu-limit</name>
+    <name>yarn.nodemanager.resource.percentage-physical-cpu-limit</name>
     <value><%= (node['bcpc']['hadoop']['yarn']['nodemanager']['avail_vcpu']['count'] ? \
                  node['bcpc']['hadoop']['yarn']['nodemanager']['avail_vcpu']['count']/node['cpu']['total'] :
                  node['bcpc']['hadoop']['yarn']['nodemanager']['avail_vcpu']['ratio'] * 100).floor %></value>
@@ -293,4 +298,9 @@
     <value>true</value>
   </property>
   <% end # if node[:bcpc][:hadoop][:kerberos][:enable] == true then %>
+
+  <property>
+    <name>yarn.scheduler.fair.preemption</name>
+    <value><%= node["bcpc"]["hadoop"]["yarn"]["scheduler"]["fair"]["preemption"] %></value>
+  </property>
 </configuration>

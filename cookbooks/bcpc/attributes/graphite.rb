@@ -7,6 +7,7 @@ default['bcpc']['graphite']['log']['retention'] = 15
 default['bcpc']['graphite']['data']['retention'] = 15
 default['bcpc']['graphite']['timezone'] = "'America/New_York'"
 default['bcpc']['graphite']['carbon_fileno_limit'] = 4096
+default['bcpc']['graphite']['install_dir'] = "/opt/graphite"
 default['bcpc']['graphite']['local_storage_dir'] = "/opt/graphite/storage"
 default['bcpc']['graphite']['local_data_dir'] = "/opt/graphite/storage/whisper"
 default['bcpc']['graphite']['local_log_dir'] = "/opt/graphite/storage/log"
@@ -17,3 +18,4 @@ default['bcpc']['graphite']['carbon']['storage'] = {
 }
 default['bcpc']['graphite']['django']['version'] = "1.5.4" 
 default['bcpc']['graphite']['carbon']['relay']['idle_timeout'] = 1800 
+default['bcpc']['graphite']['carbon']['cache']['MAX_UPDATES_PER_SECOND'] = 170 

@@ -47,7 +47,7 @@ monitored_nodes_objs.each do |node_obj|
       'trigger_name' => "#{host}_NodeAvailability",
       'enable' => true,
       'trigger_desc' => "Node seems to be down",
-      'severity' => 5,
+      'severity' => 3,
       'route_to' => "admin"
     }
   end
@@ -58,7 +58,6 @@ monitored_nodes_objs.each do |node_obj|
       'trigger_val' => "max(" +
         "#{node["bcpc"]["hadoop"]["zabbix"]["chef_client_check_interval"]}, 0" +
       ")",
-      'value_type' => 0,
       'trigger_cond' => "=0",
       'trigger_name' => "#{host}_ChefClientFailure",
       'trigger_dep' => ["#{host}_NodeAvailability"],
@@ -96,13 +95,12 @@ monitored_nodes_objs.each do |node_obj|
         'type' => "servers",
         'query' => "diskspace.#{disk}.byte_avail",
         'trigger_val' => "max(61,0)",
-        'value_type' => 0,
         'trigger_cond' => "=0",
         'trigger_name' => "#{host}_#{disk}_Availability",
         'trigger_dep' => ["#{host}_NodeAvailability"],
         'enable' => true,
         'trigger_desc' => "Disk seems to be full or down",
-        'severity' => 4,
+        'severity' => 3,
         'route_to' => "admin"
       }
     end
@@ -112,9 +110,9 @@ monitored_nodes_objs.each do |node_obj|
         'type' => "servers",
         'query' => "diskspace.#{disk}.byte_used",
         'trigger_val' => "max(61,0)",
-        'value_type' => 0,
-        'trigger_cond' => ">#{(size * 0.90).round(2)}G",
+        'trigger_cond' => ">#{(size * 0.90).ceil}G",
         'trigger_name' => "#{host}_#{disk}_SpaceUsed",
+        'trigger_dep' => ["#{host}_NodeAvailability"],
         'enable' => true,
         'trigger_desc' => "More than 90% of disk space used",
         'severity' => 3,

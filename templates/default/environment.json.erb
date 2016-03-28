@@ -21,11 +21,9 @@
 	}
     },
     "bcpc": {
-	"virt_type" : "qemu",
-	"ceph": {
-          "hdd_disks" : [ "sdb", "sdc" ],
-          "ssd_disks" : [ "sdd", "sde" ]
-	},
+      "graphite": {
+        "graphite_disk": "sde"
+      },
       "domain_name" : "bcpc.example.com",
       "management": {
         "vip" : "10.0.101.3",
@@ -56,15 +54,62 @@
         "dhcp_subnet" : "10.0.101.0",
         "dhcp_range" : "10.0.101.4 10.0.101.14"
       },
-      "dns_servers" : [ "10.16.23.33", "10.16.23.17" ],
+      "dns_servers" : ["8.8.8.8"],
       "hadoop" : {
+        "yarn" : {
+          "resourcemanager" : {
+            "yarn.client.failover-sleep-base-ms": 30000
+          }
+        },
         "hdfs" : {
           "dfs_replication_factor" : 1
         },
-        "disks" : ["sdb" , "sdc" ],
+        "disks" : ["sdb" , "sdc", "sdd", "sde"],
+        "head_disks" : ["sdb" , "sdc", "sdd"],
         "distribution": {
           "version": "HDP",
           "key": "hortonworks.key"
+        },
+        "hbase": {
+          "bucketcache": {
+            "enabled": false
+          },
+          "repl": {
+            "enabled": false
+          },
+          "repl": {
+            "target": ""
+          },
+          "shortcircuit": {
+            "read": false
+          },
+          "region": {
+            "replication": {
+              "enabled": false
+            }
+          },
+          "ipc": {
+            "warn": {
+              "responsetime": 300
+            }
+          }          
+        },
+        "hbase_rs": {
+          "xmn": {
+            "size": 256
+          },
+          "xms": {
+            "size": 1024
+          },
+          "xmx": {
+            "size": 1024
+          },
+          "mx_dir_mem": {
+            "size": 256
+          },
+          "hdfs_dir_mem": {
+            "size": 128
+          }
         },
         "oozie": {
           "memory_opts": "-Xmx512m -XX:MaxPermSize=64m"
@@ -76,10 +121,6 @@
       }
     },
     "kafka": {
-      "version": "0.8.1.1",
-      "scala_version": "2.9.2",
-      "checksum": "",
-      "md5_checksum": "",
       "log_dir": "/disk/0"
     },
     "ntp": {

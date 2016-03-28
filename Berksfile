@@ -1,20 +1,20 @@
 # -*- mode: enh-ruby -*-
-source 'https://supermarket.chef.io'
+source "https://supermarket.chef.io"
 
 metadata
 
 #
 # Local cookbooks, inside our repository.
 #
-cookbook 'bach_bootstrap', path: './cookbooks/bach_bootstrap'
-cookbook 'bach_common', path: './cookbooks/bach_common'
-cookbook 'bach_repository', path: './cookbooks/bach_repository'
-cookbook 'bach_spark', path: './cookbooks/bach_spark'
-cookbook 'bcpc', path: './cookbooks/bcpc'
-cookbook 'bcpc-hadoop', path: './cookbooks/bcpc-hadoop'
-cookbook 'bcpc_jmxtrans', path: './cookbooks/bcpc_jmxtrans'
-cookbook 'hannibal', path: './cookbooks/hannibal'
-cookbook 'kafka-bcpc', path: './cookbooks/kafka-bcpc'
+cookbook 'bach_bootstrap', path: "./cookbooks/bach_bootstrap"
+cookbook 'bach_common', path: "./cookbooks/bach_common"
+cookbook 'bach_repository', path: "./cookbooks/bach_repository"
+cookbook 'bach_spark', path: "./cookbooks/bach_spark"
+cookbook 'bcpc', path: "./cookbooks/bcpc"
+cookbook 'bcpc-hadoop', path: "./cookbooks/bcpc-hadoop"
+cookbook 'bcpc_jmxtrans', path: "./cookbooks/bcpc_jmxtrans"
+cookbook 'hannibal', path: "./cookbooks/hannibal"
+cookbook 'kafka-bcpc', path: "./cookbooks/kafka-bcpc"
 
 #
 # Upstream cookbooks
@@ -28,15 +28,14 @@ cookbook 'kafka-bcpc', path: './cookbooks/kafka-bcpc'
 #
 # cat roles/*.json | grep recipe | perl -nle 's/\s//g; print' | sort -n | uniq | perl -nle 's/\"//g; s/^recipe//g; s/^.//; s/..$//; s/::.*//; print' | sort | uniq | perl -nle 'print "depends \"$_\""'
 #
-cookbook 'apt'
-cookbook 'chef-client'
-cookbook 'chef-ingredient'
-cookbook 'java'
-cookbook 'kafka'
-cookbook 'maven'
-cookbook 'ntp'
-cookbook 'pam'
-cookbook 'ubuntu'
+cookbook "apt"
+cookbook "chef-client"
+cookbook "chef-ingredient"
+cookbook "java"
+cookbook "maven"
+cookbook "ntp"
+cookbook "pam"
+cookbook "ubuntu"
 
 #
 # Forked cookbooks
@@ -55,6 +54,11 @@ cookbook 'cobblerd',
 cookbook 'jmxtrans', 
   git: 'https://github.com/jmxtrans/jmxtrans-cookbook',
   revision: 'd8ee2396eca91ef8e0e558490bde075869b787de'
+
+# 'kafka' has an entry on the supermarket, but it's the wrong cookbook.
+cookbook 'kafka',
+  git: 'https://github.com/mthssdrbrg/kafka-cookbook.git',
+  revision: '0e05b5bf562c39b7c1a2e059412be91b6402703f'
 
 # pdns forked, pending acceptance of a PR.
 cookbook 'pdns',

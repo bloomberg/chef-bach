@@ -40,7 +40,26 @@ chef_vault_secret "mysql-graphite" do
   action :nothing
 end.run_action(:create_if_missing)
 
-%w{python-pytz python-pyparsing python-mysqldb python-pip python-cairo python-django-tagging python-ldap python-twisted python-memcache}.each do |pkg|
+# if we are using a dedicated disk create a directory before packages start instaling
+if node[:bcpc][:graphite][:graphite_disk] != nil then
+  disk_index = node[:bcpc][:hadoop][:disks].index(node[:bcpc][:graphite][:graphite_disk])
+  if disk_index == nil then
+    Chef::Application.fatal!('node[:bcpc][:graphite][:graphite_disk] specifies a disk not found in node[:bcpc][:hadoop][:disks]!')
+  end
+
+  directory "/disk/#{disk_index}/graphite" do
+    owner "root"
+    group "root"
+    recursive false
+  end
+
+  link node[:bcpc][:graphite][:install_dir] do
+    to "/disk/#{disk_index}/graphite"
+    link_type :symbolic
+  end
+end
+
+%w{python-pytz python-pyparsing python-mysqldb python-pip python-cairo python-django-tagging python-ldap python-twisted python-memcache python-pyparsing}.each do |pkg|
   package pkg do
     action :upgrade
   end
@@ -113,6 +132,17 @@ directory "#{node['bcpc']['graphite']['local_data_dir']}" do
   recursive true
 end
 
+directory "#{node['bcpc']['graphite']['local_log_dir']}/webapp" do
+  owner "www-data"
+  group "www-data"
+end
+
+["info.log", "exception.log" ].each do |f|
+  file "#{node['bcpc']['graphite']['local_log_dir']}/webapp/#{f}" do
+    owner "www-data"
+    group "www-data"
+  end
+end
 
 template "/opt/graphite/conf/carbon.conf" do
   source "carbon.conf.erb"
@@ -182,12 +212,6 @@ template "/opt/graphite/webapp/graphite/local_settings.py" do
     :servers => mysql_servers,
     :min_quorum => mysql_servers.length/2 + 1 )
   notifies :restart, "service[apache2]", :delayed
-end
-
-execute "graphite-storage-ownership" do
-  user "root"
-  command "chown -R www-data:www-data /opt/graphite/storage"
-  not_if "ls -ald /opt/graphite/storage | awk '{print $3}' | grep www-data"
 end
 
 ruby_block "graphite-database-creation" do

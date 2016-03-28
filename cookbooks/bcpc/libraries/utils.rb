@@ -94,8 +94,12 @@ def get_bcpc_config(key, item=node.chef_environment, bag="configs")
     return entry[key]
   rescue ChefVault::Exceptions::KeysNotFound
     if bag != "configs"
+    begin
       entry = Chef::DataBagItem.load(bag,item)
       return entry[key]
+    rescue Net::HTTPServerException
+      return nil
+    end
     else
       init_config if $dbi.nil?
       Chef::Log.info  "------------ Fetching value for key \"#{key}\""
@@ -293,3 +297,21 @@ def calc_reverse_dns_zone(cidr)
 
 end
 
+# Internal: Check if the given host is the Zabbix leader 
+#
+# host - host id (eg: hostname) 
+#
+# Examples
+#
+#   is_zabbix_leader?("bcpc-vm1")
+#   # => true
+#
+# Returns true if given host is the Zabbix leader, false otherwise 
+def is_zabbix_leader?(host)
+  leader_check = "mysql -u#{get_bcpc_config('mysql-zabbix-user')} -p#{get_bcpc_config!('password','mysql-zabbix','os')} #{node['bcpc']['zabbix_dbname']} --raw --batch -e 'select host_id from leader_election where id=1' "
+  cmd = Mixlib::ShellOut.new(
+    leader_check, :timeout => 10
+  ).run_command
+  Chef::Log.debug("is_zabbix_leader: #{cmd.stdout}")
+  cmd.exitstatus == 0 && cmd.stdout.include?(host)
+end

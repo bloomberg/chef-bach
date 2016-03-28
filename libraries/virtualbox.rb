@@ -1,27 +1,3 @@
-# See ROM-O-MATIC.md for instruction on how to generate a new gPXE ROM.
-def pxe_rom_path
-  File.join(Chef::Config.file_cache_path, 'gpxe.rom')
-end
-
-# Turns VirtualBox VM data into a Ruby hash.
-def get_vbox_vm_info(name:)
-  require 'mixlib/shellout'
-
-  c = Mixlib::ShellOut.new('vboxmanage', 'showvminfo',
-                           name, '--machinereadable')
-  c.run_command
-
-  if c.status.success?
-    tuples = c.stdout.split("\n")
-      .map{ |element| element.split("=") }
-      .flatten
-      .map{ |string| string.gsub(/^"/, '').gsub(/"$/, '') }
-    Hash[*tuples]
-  else
-    nil
-  end
-end
-
 def create_vbox_vm(name:)
   if get_vbox_vm_info(name: name).nil?
     system('vboxmanage', 'createvm',
@@ -108,6 +84,11 @@ def create_vbox_vm(name:)
   require 'pathname'
   vm_path = Pathname.new(get_vbox_vm_info(name: name)['CfgFile']).dirname
 
+  attached_disks =
+    get_vbox_vm_info(name: name).select{ |k,v|
+      k.start_with?(target_controller_name) &&
+      v.end_with?('vdi') }.values
+ 
   ['sda', 'sdb','sdc','sdd','sde'].each_with_index do |dev,i|
     disk_path = File.join(vm_path, "#{name}-#{dev}.vdi")
 
@@ -117,16 +98,53 @@ def create_vbox_vm(name:)
              '--size', (20 * 1024).to_s)
     end
 
-    system('vboxmanage', 'storageattach', name, 
-           '--storagectl', target_controller_name,
-           '--port', (i + 1).to_s, 
-           '--device', 0.to_s, 
-           '--type', 'hdd', 
-           '--medium', disk_path)
+    unless attached_disks.include?(disk_path)
+      system('vboxmanage', 'storageattach', name, 
+             '--storagectl', target_controller_name,
+             '--port', (i + 1).to_s, 
+             '--device', 0.to_s, 
+             '--type', 'hdd', 
+             '--medium', disk_path)
+    end
   end
 end
 
 def destroy_vbox_vm(name:)
+end
+
+# Turns VirtualBox VM data into a Ruby hash.
+def get_vbox_vm_info(name:)
+  require 'mixlib/shellout'
+
+  c = Mixlib::ShellOut.new('vboxmanage', 'showvminfo',
+                           name, '--machinereadable')
+  c.run_command
+
+  if c.status.success?
+    tuples = c.stdout.split("\n")
+      .map{ |element| element.split("=") }
+      .flatten
+      .map{ |string| string.gsub(/^"/, '').gsub(/"$/, '') }
+    Hash[*tuples]
+  else
+    nil
+  end
+end
+
+# VirtualBox sometimes has DHCP servers configured on hostonly networks.
+# This method removes DHCP servers from all networks used by the given VM.
+def kill_dhcp_for_vm(name:)
+  if(system('pgrep VBoxNetDHCP'))
+    vm_info = get_vbox_vm_info(name: name)
+    raise "VM '#{name}' not found!" if vm_info.nil?
+
+    vbox_interfaces =
+      vm_info.select{ |k,v| k =~ /^hostonlyadapter\d+$/ }.values
+
+    vbox_interfaces.each do |if_name|
+      system('vboxmanage', 'dhcpserver', 'remove', '--ifname', if_name)
+    end
+  end
 end
 
 def start_vbox_vm(name:)
@@ -146,20 +164,4 @@ def start_vbox_vm(name:)
     end
   end
   return true
-end
-
-def ssh_check(ip:, username:, password:)
-  require 'net/ssh'
-  begin
-    Net::SSH.start(ip, username,
-                   :auth_methods => ['password'],
-                   :config => false,
-                   :password => password,
-                   :timeout => 60,
-                   :user_known_hosts_file => '/dev/null') do |ssh|
-      ssh.exec!('ls')
-    end
-  rescue Net::SSH::Disconnect, Errno::ECONNREFUSED
-    return false
-  end
 end

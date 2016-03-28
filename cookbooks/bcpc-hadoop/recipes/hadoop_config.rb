@@ -12,6 +12,18 @@ bash "update-hadoop-conf-alternatives" do
     update-alternatives --set hadoop-conf /etc/hadoop/conf.#{node.chef_environment}
   }
 end
+if ( node[:bcpc][:hadoop][:hdfs][:ldap][:integration] == true )
+
+  ldap_pwd = ( node[:bcpc][:hadoop][:hdfs][:ldap][:password].nil? ? get_bcpc_config('password', 'ldap', 'os') : node[:bcpc][:hadoop][:hdfs][:ldap][:password] )
+
+  file "/etc/hadoop/conf/ldap-conn-pass.txt" do
+    content "#{ldap_pwd}"
+    mode 0444
+    owner "hdfs"
+    group "hadoop"
+    sensitive true
+  end
+end
 
 hadoop_conf_files = %w{capacity-scheduler.xml
    core-site.xml

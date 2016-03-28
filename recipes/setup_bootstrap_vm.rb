@@ -161,13 +161,24 @@ convergence_options = {
                        :chef_version => Chef::VERSION
                       }
 
+if node['bach']['http_proxy']
+  convergence_options.merge({ :bootstrap_proxy => node['bach']['http_proxy'] })
+end
+
 machine bootstrap_fqdn do
   chef_server chef_server_config_hash
   add_machine_options(:convergence_options => convergence_options,
                       :vagrant_config => bootstrap_vm_configuration)
   chef_environment node.chef_environment
+  recipe 'bach_bootstrap::chef-server'
   role 'Basic'
-  complete false
+  #
+  # This is marked complete so that we overwrite the runlist.
+  #
+  # (If the runlist is not overwritten, chef may attempt to load
+  # deleted chef-vault secrets before can be recreated.)
+  #
+  complete true
 end
 
 #
@@ -198,7 +209,7 @@ execute "create-cobbler-secret" do
 
   #
   # The guard_interpreter is set to force the guard to inherit
-  # properties from the execute resource.
+  # the environment and cwd from the execute resource.
   #
   guard_interpreter :bash
   not_if 'bundle exec knife vault show os cobbler -M client'

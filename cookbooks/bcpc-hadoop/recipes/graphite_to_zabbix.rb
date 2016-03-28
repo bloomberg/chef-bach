@@ -2,7 +2,8 @@ include_recipe "bcpc-hadoop::graphite_queries"
 
 template node['bcpc']['zabbix']['scripts']['sender'] do
   source "zabbix.run_zabbix_sender.sh.erb"
-  mode 0755
+  owner 'zabbix'
+  mode 0550
 end
 
 directory ::File.dirname(node['bcpc']['zabbix']['scripts']['mail']) do
@@ -17,8 +18,13 @@ template node['bcpc']['zabbix']['scripts']['mail'] do
   mode 0755
 end
 
-cookbook_file node['bcpc']['zabbix']['scripts']['query_graphite'] do
-  source "query_graphite.py"
+template node['bcpc']['zabbix']['scripts']['query_graphite'] do
+  source "graphite.query_graphite.py.erb"
+  variables(:log_file => node[:bcpc][:hadoop][:zabbix][:query_graphite][:log_file],
+            :log_level => node[:bcpc][:hadoop][:zabbix][:query_graphite][:logging_level],
+            :max_bytes => node[:bcpc][:hadoop][:zabbix][:query_graphite][:rolling_max_bytes],
+            :backup_count => node[:bcpc][:hadoop][:zabbix][:query_graphite][:rolling_backup_count]
+           )
   mode 0744
   owner "root"
   group "root"
@@ -56,6 +62,8 @@ ruby_block "zabbix_monitor" do
       Chef::Log.error("No graphite hosts found")
       raise "No graphite hosts found"
     end
+
+    trapper_hosts = graphite_hosts + "," + node[:bcpc][:management][:vip]
 
     #cron_check_cond = Array.new
 
@@ -155,7 +163,7 @@ ruby_block "zabbix_monitor" do
           trend_days = attrs['trend_days']
         end
         if attrs['value_type'].nil?
-          value_type = 0 # default = numeric float
+          value_type = 3 # default = numeric unsigned
         else
           value_type = attrs['value_type']
         end
@@ -172,7 +180,7 @@ ruby_block "zabbix_monitor" do
           :name => trigger_key, :description => trigger_key,
           :key_ => trigger_key, :type => 2, :value_type => value_type,
           :data_type => 0, :history => history_days, :trends => trend_days,
-          :hostid => "#{host_id}", :trapper_hosts => graphite_hosts,
+          :hostid => "#{host_id}", :trapper_hosts => trapper_hosts,
           :status => status
         }
 
@@ -229,17 +237,20 @@ ruby_block "zabbix_monitor" do
         end # End of "if (trigger_id = existing_triggers[trigger_name]).nil?"
 
         # Create/Update Actions
+        action_status = node[:bcpc][:hadoop][:zabbix][:enable_alarming] ? status : 1
+        esc_period = attrs['esc_period'].nil? ? node[:bcpc][:hadoop][:zabbix][:escalation_period] : attrs['esc_period']
+
         if (action_id = existing_actions["#{trigger_name}_action"]).nil?
           createActionsArr.push({
             "name" => "#{trigger_name}_action", "eventsource" => 0,
-            "evaltype" => 1, "status" => status, "esc_period" => 120,
+            "evaltype" => 1, "status" => action_status, "esc_period" => esc_period,
             'conditions' => [
               {"conditiontype" => 3,"operator" => 2,"value" => trigger_name},
               {"conditiontype" => 5,"operator" => 0,"value" => 1},
               {"conditiontype" => 16,"operator" => 7}
             ],
             'operations' => [{
-              "operationtype" => 1,
+              "operationtype" => 1, "esc_step_from" => 2, "esc_step_to" => 2,
               "opcommand" => {
                 "command" => "#{node['bcpc']['zabbix']['scripts']['mail']}" +
                   " {TRIGGER.NAME} #{node.chef_environment}" +
@@ -252,15 +263,15 @@ ruby_block "zabbix_monitor" do
           })
         else
           updateActionsArr.push({
-            "actionid" => action_id, "evaltype" => 1, "status" => status,
-            "esc_period" => 120,
+            "actionid" => action_id, "evaltype" => 1, "status" => action_status,
+            "esc_period" => esc_period,
             'conditions' => [
               {"conditiontype" => 3, "operator" => 2, "value" => trigger_name},
               {"conditiontype" => 5, "operator" => 0, "value" => 1},
               {"conditiontype" => 16, "operator" => 7}
             ],
             'operations' => [{
-              "operationtype" => 1,
+              "operationtype" => 1, "esc_step_from" => 2, "esc_step_to" => 2,
               "opcommand" => {
                 "command" => "#{node['bcpc']['zabbix']['scripts']['mail']}" +
                   " {TRIGGER.NAME} #{node.chef_environment}" +
@@ -299,12 +310,12 @@ ruby_block "zabbix_monitor" do
     #  Chef::Log.debug "Trigger cron_check already defined"
     #end
   end
-  only_if { has_vip? }
+  only_if { is_zabbix_leader?(node[:hostname]) }
 end
 
 cron "Run script to query graphite and send data to zabbix" do
-  minute "*"
-  hour   "*"
-  user   "nobody"
-  command  "/usr/local/bin/run_zabbix_sender.sh"
+  minute '*'
+  hour   '*'
+  user   'zabbix'
+  command  "pgrep -u zabbix 'zabbix_sender' > /dev/null || /usr/local/bin/run_zabbix_sender.sh"
 end

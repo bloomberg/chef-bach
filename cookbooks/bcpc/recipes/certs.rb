@@ -17,7 +17,15 @@
 # limitations under the License.
 #
 
-include_recipe "bcpc::default"
+include_recipe 'bcpc::default'
+include_recipe 'bach_common::binary_server'
+
+chef_gem 'chef-vault' do
+  # This version needs to be made available on the binary server.
+  # See bach_repository::gems.
+  version '2.6.1'
+  compile_time true if respond_to?(:compile_time)
+end
 
 template "/tmp/openssl.cnf" do
     source "openssl.cnf.erb"
@@ -26,11 +34,16 @@ template "/tmp/openssl.cnf" do
     mode 00644
 end
 
+node.default[:temp][:value] = ""
+bootstrap = get_all_nodes.select{|s| s.hostname.include? 'bootstrap'}[0].fqdn
+key = OpenSSL::PKey::RSA.new 2048;
+
+results = get_nodes_for("certs").map!{ |x| x['fqdn'] }.join(",")
+nodes = results == "" ? node['fqdn'] : results
+
 ruby_block "initialize-ssh-keys" do
     block do
-        require 'openssl'
         require 'net/ssh'
-        key = OpenSSL::PKey::RSA.new 2048;
         pubkey = "#{key.ssh_type} #{[ key.to_blob ].pack('m0')}"
         make_bcpc_config('ssh-private-key', key.to_pem)
         make_bcpc_config('ssh-public-key', pubkey)
@@ -40,6 +53,50 @@ ruby_block "initialize-ssh-keys" do
             make_bcpc_config('ssl-certificate', %x[echo "#{temp}" | openssl x509])
         end
     end
+    notifies :create, 'ruby_block[chef_vault_secret]', :immediately
+end
+
+ssh_private_key = get_bcpc_config("ssh-private-key")
+if ssh_private_key.nil?
+  ssh_private_key = key.to_pem
+end
+
+chef_vault_secret "ssh" do
+  data_bag 'os'
+  raw_data({ "private-key" => key.to_pem })
+  admins "#{ nodes },#{ bootstrap }"
+  search '*:*'
+  action :create_if_missing
+end
+
+ruby_block "chef_vault_secret" do
+  block do
+    if node[:temp][:value] != ""
+      ssl_certificate = %x[echo "#{node[:temp][:value]}" | openssl x509]
+      ssl_private_key = %x[echo "#{node[:temp][:value]}" | openssl rsa -passin pass:temp_passwd -out /dev/stdout]
+    else
+      ssl_certificate = get_bcpc_config("ssl-certificate")
+      ssl_private_key = get_bcpc_config("ssl-private-key")
+    end
+    vault_resource = resources("chef_vault_secret[ssl]")
+    vault_resource.raw_data({ 'private-key' => ssl_private_key, "certificate" => ssl_certificate })
+  end
+  action :nothing
+end
+
+chef_vault_secret "ssl" do
+  if node[:temp][:value] != ""
+    ssl_certificate = %x[echo "#{node[:temp][:value]}" | openssl x509]
+    ssl_private_key = %x[echo "#{node[:temp][:value]}" | openssl rsa -passin pass:temp_passwd -out /dev/stdout]
+  else
+    ssl_certificate = get_bcpc_config("ssl-certificate")
+    ssl_private_key = get_bcpc_config("ssl-private-key")
+  end
+  data_bag 'os'
+  raw_data ({ 'private-key' => ssl_private_key, 'certificate' => ssl_certificate })
+  admins "#{ nodes },#{ bootstrap }"
+  search '*:*'
+  action :create_if_missing
 end
 
 directory "/root/.ssh" do

@@ -115,11 +115,13 @@ if node['bcpc']['hadoop']['hdfs']['HA'] == true then
     action [:enable, :start]
     supports :status => true, :restart => true, :reload => false
     subscribes :restart, "template[/etc/hadoop/conf/hdfs-site.xml]", :delayed
+    subscribes :restart, "template[/etc/hadoop/conf/core-site.xml]", :delayed
     subscribes :restart, "template[/etc/hadoop/conf/hdfs-policy.xml]", :delayed
     subscribes :restart, "template[/etc/hadoop/conf/hadoop-env.sh]", :delayed
     subscribes :restart, "template[/etc/hadoop/conf/topology]", :delayed
     subscribes :restart, "user_ulimit[hdfs]", :delayed
     subscribes :restart, "directory[/var/log/hadoop-hdfs/gc/]", :delayed
+    subscribes :restart, "file[/etc/hadoop/conf/ldap-conn-pass.txt]", :delayed
   end
 else
   Chef::Log.info "Not running standby namenode services yet -- HA disabled!"

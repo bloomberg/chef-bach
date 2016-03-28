@@ -12,4 +12,5 @@ nodes/
 trusted_certs/
 
 # chef-provisioning VMs
+provisioning/
 vms/

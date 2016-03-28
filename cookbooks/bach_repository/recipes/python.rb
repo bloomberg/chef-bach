@@ -33,14 +33,22 @@ end
 get_pip_path = python_dir + '/get-pip.py'
 
 remote_file get_pip_path do
-  source 'https://raw.githubusercontent.com/pypa/pip/7.1.0/contrib/get-pip.py'
-  checksum '51ef604ed2852f6b57b675ebefc4b807cffd2300bfc885761365988d19d227ad'
+  source 'https://raw.githubusercontent.com/pypa/pip/8.0.0/contrib/get-pip.py'
+  checksum 'd1f66b3848abc6fd1aeda3bb7461101f6a909c3b08efa3ecc1f561712269469c'
   mode 0555
 end
 
 execute 'get-pip.py' do
   command "#{get_pip_path} #{pip_proxy_option} #{pip_cert_option}"
-  not_if '/usr/local/bin/pip --version | grep 7.1'
+  not_if '/usr/local/bin/pip --version | grep 8.0'
+end
+
+file '/etc/pip.conf' do
+  mode 0444
+  content <<-EOM.gsub(/^ {4}/,'')
+    [global]
+    cert = /etc/ssl/certs/ca-certificates.crt
+  EOM
 end
 
 execute 'new-pip-upgrade-setuptools' do

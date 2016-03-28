@@ -6,15 +6,17 @@ total_node_count = worker_node_count + 2
 #
 # Chef-vault renders most data bag info unusable after destroying the
 # chef client VMs.  As a result, it's best to delete the entire
-# databag.
+# data bag.
 #
 chef_data_bag 'os' do
   action :delete
+  chef_server chef_server_config_hash
   ignore_failure true
 end
 
 chef_data_bag 'configs' do
   action :delete
+  chef_server chef_server_config_hash
   ignore_failure true
 end
 

@@ -14,18 +14,7 @@ default["bcpc"]["repos"]["hdp_utils"] = 'http://public-repo-1.hortonworks.com/HD
 default["bcpc"]["hadoop"]["disks"] = []
 default["bcpc"]["hadoop"]["oozie"]["admins"] = []
 default["bcpc"]["hadoop"]["oozie"]["memory_opts"] = "-Xmx2048m -XX:MaxPermSize=256m"
-default["bcpc"]["hadoop"]["yarn"]["log-aggregation_retain-seconds"] = 60*60*24*31
-default["bcpc"]["hadoop"]["yarn"]["nodemanager"]["avail_memory"]["ratio"] = 0.5
-default["bcpc"]["hadoop"]["yarn"]["nodemanager"]["avail_memory"]["size"] = nil
-default["bcpc"]["hadoop"]["yarn"]["nodemanager"]["avail_vcpu"]["ratio"] = 0.5
-default["bcpc"]["hadoop"]["yarn"]["nodemanager"]["avail_vcpu"]["count"] = nil
-default["bcpc"]["hadoop"]["yarn"]["nodemanager"]["port"] = 45454
-default["bcpc"]["hadoop"]["yarn"]["scheduler"]["class"] = "org.apache.hadoop.yarn.server.resourcemanager.scheduler.fair.FairScheduler"
-default["bcpc"]["hadoop"]["yarn"]["scheduler"]["minimum-allocation-mb"] = 256
-default['bcpc']['hadoop']['yarn']['historyserver']['heap']["size"] = 128
-default['bcpc']['hadoop']['yarn']['historyserver']['heap']["ratio"] = 0
-default["bcpc"]["hadoop"]["yarn"]["resourcemanager"]["port"] = 8032
-default['bcpc']['hadoop']['yarn']['aux_services']['mapreduce_shuffle']['class'] = 'org.apache.hadoop.mapred.ShuffleHandler'
+default["bcpc"]["hadoop"]["oozie"]["sharelib_checksum"] = nil
 default["bcpc"]["hadoop"]["hdfs"]["HA"] = false
 default["bcpc"]["hadoop"]["hdfs"]["failed_volumes_tolerated"] = 1
 default["bcpc"]["hadoop"]["hdfs"]["dfs_replication_factor"] = 3
@@ -45,11 +34,6 @@ default["bcpc"]["hadoop"]["namenode"]["jmx"]["port"] = 10111
 default["bcpc"]["hadoop"]["namenode"]["rpc"]["port"] = 8020
 default["bcpc"]["hadoop"]["namenode"]["http"]["port"] = 50070 
 default["bcpc"]["hadoop"]["namenode"]["https"]["port"] = 50470
-default["bcpc"]["hadoop"]["hbase"]["superusers"] = ["hbase"]
-# Interval in milli seconds when HBase major compaction need to be run. Disabled by default
-default["bcpc"]["hadoop"]["hbase"]["major_compact"]["time"] = 0
-default["bcpc"]["hadoop"]["hbase_master"]["jmx"]["port"] = 10101
-default["bcpc"]["hadoop"]["hbase_rs"]["jmx"]["port"] = 10102
 default["bcpc"]["hadoop"]["kafka"]["jmx"]["port"] = 9995
 default["bcpc"]["hadoop"]["java"] = "/usr/lib/jvm/java-1.7.0-openjdk-amd64"
 default["bcpc"]["hadoop"]["topology"]["script"] = "topology"
@@ -135,3 +119,11 @@ default['jmxtrans']['run_interval'] = "15"
 default[:bcpc][:hadoop][:os][:group][:hadoop][:members]=["hdfs","yarn"]
 default[:bcpc][:hadoop][:os][:group][:hdfs][:members]=["hdfs"]
 default[:bcpc][:hadoop][:os][:group][:mapred][:members]=["yarn"]
+
+default[:bcpc][:hadoop][:hdfs][:ldap][:integration] = false
+default[:bcpc][:hadoop][:hdfs][:ldap][:user] = "" #must be LDAP DN
+default[:bcpc][:hadoop][:hdfs][:ldap][:domain] = "BCPC.EXAMPLE.COM"
+default[:bcpc][:hadoop][:hdfs][:ldap][:port] = 389
+default[:bcpc][:hadoop][:hdfs][:ldap][:password] =  nil
+default[:bcpc][:hadoop][:hdfs][:ldap][:search][:filter][:user]="(&(objectclass=user)(sAMAccountName={0}))"
+default[:bcpc][:hadoop][:hdfs][:ldap][:search][:filter][:group]="(objectClass=group)"

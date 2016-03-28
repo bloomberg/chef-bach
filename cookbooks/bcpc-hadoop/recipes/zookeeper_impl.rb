@@ -1,6 +1,6 @@
 
 include_recipe 'dpkg_autostart'
-include_recipe 'bcpc-hadoop::zookeeper_config'
+
 dpkg_autostart "zookeeper-server" do
   allow false
 end
@@ -14,6 +14,8 @@ end
 user_ulimit "zookeeper" do
   filehandle_limit 32769
 end
+
+include_recipe 'bcpc-hadoop::zookeeper_config'
 
 template "/tmp/zkServer.sh" do
   source "zk_zkServer.sh.orig.erb"
@@ -66,12 +68,12 @@ template "/usr/hdp/2.2.0.0-2041/zookeeper/bin/zkServer.sh" do
 end
 
 bash "init-zookeeper" do
-  code "service zookeeper-server init --myid=#{node[:bcpc][:node_number]}"
+  code "service zookeeper-server init --myid=#{node[:bcpc][:hadoop][:zookeeper][:myid]}"
   not_if { ::File.exists?("#{node[:bcpc][:hadoop][:zookeeper][:data_dir]}/myid") }
 end
 
 file "#{node[:bcpc][:hadoop][:zookeeper][:data_dir]}/myid" do
-  content node[:bcpc][:node_number]
+  content node[:bcpc][:hadoop][:zookeeper][:myid]
   owner node[:bcpc][:hadoop][:zookeeper][:owner]
   group node[:bcpc][:hadoop][:zookeeper][:group]
   mode 0644

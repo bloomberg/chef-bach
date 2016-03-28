@@ -65,3 +65,5 @@ JMX_OPTS="-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.ssl=fals
 export HADOOP_NAMENODE_OPTS="$HADOOP_NAMENODE_OPTS $JMX_OPTS -Dcom.sun.management.jmxremote.port=<%= @nn_jmx_port %>"
 export HADOOP_DATANODE_OPTS="$HADOOP_DATANODE_OPTS $JMX_OPTS -Dcom.sun.management.jmxremote.port=<%= @dn_jmx_port %>"
 <% end %>
+
+export HADOOP_NAMENODE_OPTS="$HADOOP_NAMENODE_OPTS -Dhadoop.security.logger=INFO,RFAS -Dhdfs.audit.logger=INFO,RFAAUDIT"
