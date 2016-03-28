@@ -304,4 +304,10 @@
     <name>yarn.scheduler.fair.preemption</name>
     <value><%= node["bcpc"]["hadoop"]["yarn"]["scheduler"]["fair"]["preemption"] %></value>
   </property>
+
+  <property>
+    <name>yarn.nodemanager.vmem-check-enabled</name>
+    <value><%= node['bcpc']['hadoop']['yarn']['nodemanager']['vmem-check-enabled'] %></value>
+  </property>
+
 </configuration>
