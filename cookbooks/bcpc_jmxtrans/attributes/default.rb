@@ -471,3 +471,7 @@ default['jmxtrans']['default_queries']['hbase_rs'] = [
     ]
   } 
 ]
+
+# Override defaults for the jmxtrans cookbook
+default['jmxtrans']['run_interval'] = "15"
+

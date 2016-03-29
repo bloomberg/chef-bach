@@ -109,9 +109,6 @@ default['bcpc']['hadoop']['copylog_enable'] = true
 # File rollup interval in secs for log data copied into HDFS through Flume
 default['bcpc']['hadoop']['copylog_rollup_interval'] = 86400
 
-# Override defaults for the jmxtrans cookbook
-default['jmxtrans']['run_interval'] = "15"
-
 # Ensure the following group mappings in the group database
 default[:bcpc][:hadoop][:os][:group][:hadoop][:members]=["hdfs","yarn"]
 default[:bcpc][:hadoop][:os][:group][:hdfs][:members]=["hdfs"]
