@@ -1,17 +1,6 @@
 {
   "name": "Test-Laptop",
   "override_attributes": {
-    "spark": {
-      "download" : {
-        "url": "http://apache.arvixe.com/spark/spark-1.6.0/",
-        "file": {
-          "name": "spark-1.6.0-bin-without-hadoop"
-        }
-      },
-      "package": {
-        "version": "1.6.0"
-      }
-    },
     "bcpc": {
       "graphite": {
         "graphite_disk": "sde"
