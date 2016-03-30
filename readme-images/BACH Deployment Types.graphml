@@ -15,6 +15,25 @@
   <graph edgedefault="directed" id="G">
     <data key="d7"/>
     <node id="n0">
+      <data key="d5"/>
+      <data key="d6">
+        <y:ShapeNode>
+          <y:Geometry height="469.92092289010316" width="1202.4625136612021" x="194.10586520947186" y="1680.9375"/>
+          <y:Fill color="#C0C0C0" transparent="false"/>
+          <y:BorderStyle color="#000000" type="line" width="1.0"/>
+          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" hasText="false" height="4.0" modelName="custom" textColor="#000000" visible="true" width="4.0" x="599.2312568306011" y="232.96046144505158">
+            <y:LabelModel>
+              <y:SmartNodeLabelModel distance="4.0"/>
+            </y:LabelModel>
+            <y:ModelParameter>
+              <y:SmartNodeLabelModelParameter labelRatioX="0.0" labelRatioY="0.0" nodeRatioX="0.0" nodeRatioY="0.0" offsetX="0.0" offsetY="0.0" upX="0.0" upY="-1.0"/>
+            </y:ModelParameter>
+          </y:NodeLabel>
+          <y:Shape type="rectangle"/>
+        </y:ShapeNode>
+      </data>
+    </node>
+    <node id="n1">
       <data key="d6">
         <y:ShapeNode>
           <y:Geometry height="378.0" width="1067.0" x="287.0" y="124.0"/>
@@ -35,7 +54,7 @@ Desktop</y:NodeLabel>
         </y:ShapeNode>
       </data>
     </node>
-    <node id="n1">
+    <node id="n2">
       <data key="d6">
         <y:ShapeNode>
           <y:Geometry height="378.0" width="442.0" x="287.0" y="1186.75"/>
@@ -53,18 +72,18 @@ Hypervisor<y:LabelModel>
         </y:ShapeNode>
       </data>
     </node>
-    <node id="n2">
+    <node id="n3">
       <data key="d6">
         <y:ShapeNode>
           <y:Geometry height="189.0" width="235.3086025408349" x="390.3456987295826" y="1339.75"/>
           <y:Fill color="#FFFF00" transparent="false"/>
           <y:BorderStyle color="#000000" type="line" width="1.0"/>
-          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="bold" hasBackgroundColor="false" hasLineColor="false" height="17.96875" modelName="sides" modelPosition="n" textColor="#000000" visible="true" width="79.1171875" x="78.09570752041748" y="-21.96875">Virtual Box</y:NodeLabel>
+          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="bold" hasBackgroundColor="false" hasLineColor="false" height="17.96875" modelName="sides" modelPosition="n" textColor="#000000" visible="true" width="79.1171875" x="78.09570752041742" y="-21.96875">Virtual Box</y:NodeLabel>
           <y:Shape type="rectangle"/>
         </y:ShapeNode>
       </data>
     </node>
-    <node id="n3">
+    <node id="n4">
       <data key="d6">
         <y:ShapeNode>
           <y:Geometry height="314.0" width="824.0" x="370.0" y="152.0"/>
@@ -75,7 +94,7 @@ Hypervisor<y:LabelModel>
         </y:ShapeNode>
       </data>
     </node>
-    <node id="n4">
+    <node id="n5">
       <data key="d6">
         <y:ShapeNode>
           <y:Geometry height="127.0" width="110.0" x="403.0" y="296.0"/>
@@ -86,7 +105,7 @@ Hypervisor<y:LabelModel>
         </y:ShapeNode>
       </data>
     </node>
-    <node id="n5">
+    <node id="n6">
       <data key="d6">
         <y:ShapeNode>
           <y:Geometry height="127.0" width="110.0" x="711.0" y="296.0"/>
@@ -97,7 +116,7 @@ Hypervisor<y:LabelModel>
         </y:ShapeNode>
       </data>
     </node>
-    <node id="n6">
+    <node id="n7">
       <data key="d6">
         <y:ShapeNode>
           <y:Geometry height="127.0" width="110.0" x="873.0" y="296.0"/>
@@ -108,7 +127,7 @@ Hypervisor<y:LabelModel>
         </y:ShapeNode>
       </data>
     </node>
-    <node id="n7">
+    <node id="n8">
       <data key="d6">
         <y:ShapeNode>
           <y:Geometry height="127.0" width="110.0" x="1035.0" y="296.0"/>
@@ -119,7 +138,7 @@ Hypervisor<y:LabelModel>
         </y:ShapeNode>
       </data>
     </node>
-    <node id="n8">
+    <node id="n9">
       <data key="d6">
         <y:ShapeNode>
           <y:Geometry height="13.0" width="785.0" x="403.0" y="165.0"/>
@@ -130,7 +149,7 @@ Hypervisor<y:LabelModel>
         </y:ShapeNode>
       </data>
     </node>
-    <node id="n9">
+    <node id="n10">
       <data key="d6">
         <y:ShapeNode>
           <y:Geometry height="13.0" width="785.0" x="403.0" y="184.0"/>
@@ -141,7 +160,7 @@ Hypervisor<y:LabelModel>
         </y:ShapeNode>
       </data>
     </node>
-    <node id="n10">
+    <node id="n11">
       <data key="d6">
         <y:ShapeNode>
           <y:Geometry height="13.0" width="785.0" x="403.0" y="203.0"/>
@@ -152,7 +171,7 @@ Hypervisor<y:LabelModel>
         </y:ShapeNode>
       </data>
     </node>
-    <node id="n11">
+    <node id="n12">
       <data key="d6">
         <y:ShapeNode>
           <y:Geometry height="127.0" width="110.0" x="453.0" y="1358.75"/>
@@ -163,7 +182,7 @@ Hypervisor<y:LabelModel>
         </y:ShapeNode>
       </data>
     </node>
-    <node id="n12">
+    <node id="n13">
       <data key="d6">
         <y:ShapeNode>
           <y:Geometry height="127.0" width="110.0" x="789.0" y="1358.75"/>
@@ -174,7 +193,7 @@ Hypervisor<y:LabelModel>
         </y:ShapeNode>
       </data>
     </node>
-    <node id="n13">
+    <node id="n14">
       <data key="d6">
         <y:ShapeNode>
           <y:Geometry height="127.0" width="110.0" x="951.0" y="1358.75"/>
@@ -185,7 +204,7 @@ Hypervisor<y:LabelModel>
         </y:ShapeNode>
       </data>
     </node>
-    <node id="n14">
+    <node id="n15">
       <data key="d6">
         <y:ShapeNode>
           <y:Geometry height="127.0" width="110.0" x="1113.0" y="1358.75"/>
@@ -196,7 +215,7 @@ Hypervisor<y:LabelModel>
         </y:ShapeNode>
       </data>
     </node>
-    <node id="n15">
+    <node id="n16">
       <data key="d6">
         <y:ShapeNode>
           <y:Geometry height="13.0" width="493.00000000000006" x="773.0" y="1227.75"/>
@@ -207,7 +226,7 @@ Hypervisor<y:LabelModel>
         </y:ShapeNode>
       </data>
     </node>
-    <node id="n16">
+    <node id="n17">
       <data key="d6">
         <y:ShapeNode>
           <y:Geometry height="13.0" width="493.00000000000006" x="773.0" y="1246.75"/>
@@ -218,7 +237,7 @@ Hypervisor<y:LabelModel>
         </y:ShapeNode>
       </data>
     </node>
-    <node id="n17">
+    <node id="n18">
       <data key="d6">
         <y:ShapeNode>
           <y:Geometry height="13.0" width="493.00000000000006" x="773.0" y="1265.75"/>
@@ -229,7 +248,7 @@ Hypervisor<y:LabelModel>
         </y:ShapeNode>
       </data>
     </node>
-    <node id="n18">
+    <node id="n19">
       <data key="d6">
         <y:ShapeNode>
           <y:Geometry height="378.0" width="1067.0" x="287.0" y="685.375"/>
@@ -241,7 +260,7 @@ Hypervisor<y:LabelModel>
         </y:ShapeNode>
       </data>
     </node>
-    <node id="n19">
+    <node id="n20">
       <data key="d6">
         <y:ShapeNode>
           <y:Geometry height="314.0" width="824.0" x="370.0" y="713.375"/>
@@ -252,7 +271,7 @@ Hypervisor<y:LabelModel>
         </y:ShapeNode>
       </data>
     </node>
-    <node id="n20">
+    <node id="n21">
       <data key="d6">
         <y:ShapeNode>
           <y:Geometry height="127.0" width="110.0" x="403.0" y="857.375"/>
@@ -263,7 +282,7 @@ Hypervisor<y:LabelModel>
         </y:ShapeNode>
       </data>
     </node>
-    <node id="n21">
+    <node id="n22">
       <data key="d6">
         <y:ShapeNode>
           <y:Geometry height="127.0" width="110.0" x="711.0" y="857.375"/>
@@ -274,7 +293,7 @@ Hypervisor<y:LabelModel>
         </y:ShapeNode>
       </data>
     </node>
-    <node id="n22">
+    <node id="n23">
       <data key="d6">
         <y:ShapeNode>
           <y:Geometry height="127.0" width="110.0" x="873.0" y="857.375"/>
@@ -285,7 +304,7 @@ Hypervisor<y:LabelModel>
         </y:ShapeNode>
       </data>
     </node>
-    <node id="n23">
+    <node id="n24">
       <data key="d6">
         <y:ShapeNode>
           <y:Geometry height="127.0" width="110.0" x="1035.0" y="857.375"/>
@@ -296,7 +315,7 @@ Hypervisor<y:LabelModel>
         </y:ShapeNode>
       </data>
     </node>
-    <node id="n24">
+    <node id="n25">
       <data key="d6">
         <y:ShapeNode>
           <y:Geometry height="13.0" width="785.0" x="403.0" y="764.375"/>
@@ -307,7 +326,7 @@ Hypervisor<y:LabelModel>
         </y:ShapeNode>
       </data>
     </node>
-    <node id="n25">
+    <node id="n26">
       <data key="d6">
         <y:ShapeNode>
           <y:Geometry height="127.0" width="110.0" x="451.5" y="1873.3749999999995"/>
@@ -318,7 +337,7 @@ Hypervisor<y:LabelModel>
         </y:ShapeNode>
       </data>
     </node>
-    <node id="n26">
+    <node id="n27">
       <data key="d6">
         <y:ShapeNode>
           <y:Geometry height="127.0" width="110.0" x="759.5" y="1873.3749999999995"/>
@@ -329,7 +348,7 @@ Hypervisor<y:LabelModel>
         </y:ShapeNode>
       </data>
     </node>
-    <node id="n27">
+    <node id="n28">
       <data key="d6">
         <y:ShapeNode>
           <y:Geometry height="127.0" width="110.0" x="921.5" y="1873.3749999999995"/>
@@ -340,7 +359,7 @@ Hypervisor<y:LabelModel>
         </y:ShapeNode>
       </data>
     </node>
-    <node id="n28">
+    <node id="n29">
       <data key="d6">
         <y:ShapeNode>
           <y:Geometry height="127.0" width="110.0" x="1083.5" y="1873.3749999999995"/>
@@ -351,7 +370,7 @@ Hypervisor<y:LabelModel>
         </y:ShapeNode>
       </data>
     </node>
-    <node id="n29">
+    <node id="n30">
       <data key="d6">
         <y:ShapeNode>
           <y:Geometry height="13.0" width="785.0" x="451.5" y="1742.3749999999995"/>
@@ -362,7 +381,7 @@ Hypervisor<y:LabelModel>
         </y:ShapeNode>
       </data>
     </node>
-    <node id="n30">
+    <node id="n31">
       <data key="d6">
         <y:ShapeNode>
           <y:Geometry height="13.0" width="785.0" x="451.5" y="1761.3749999999995"/>
@@ -373,7 +392,7 @@ Hypervisor<y:LabelModel>
         </y:ShapeNode>
       </data>
     </node>
-    <node id="n31">
+    <node id="n32">
       <data key="d6">
         <y:ShapeNode>
           <y:Geometry height="13.0" width="785.0" x="451.5" y="1780.3749999999995"/>
@@ -384,7 +403,7 @@ Hypervisor<y:LabelModel>
         </y:ShapeNode>
       </data>
     </node>
-    <node id="n32">
+    <node id="n33">
       <data key="d6">
         <y:SVGNode>
           <y:Geometry height="70.13700103759766" width="56.558998107910156" x="248.94100189208982" y="1760.3064994812012"/>
@@ -404,7 +423,7 @@ Hypervisor<y:LabelModel>
         </y:SVGNode>
       </data>
     </node>
-    <node id="n33">
+    <node id="n34">
       <data key="d6">
         <y:ShapeNode>
           <y:Geometry height="54.95659722222223" width="80.99826388888891" x="1499.362847222222" y="267.7690972222222"/>
@@ -421,7 +440,7 @@ Hypervisor<y:LabelModel>
         </y:ShapeNode>
       </data>
     </node>
-    <node id="n34">
+    <node id="n35">
       <data key="d6">
         <y:ShapeNode>
           <y:Geometry height="54.95659722222223" width="80.99826388888891" x="1499.362847222222" y="340.78993055555554"/>
@@ -438,7 +457,7 @@ Hypervisor<y:LabelModel>
         </y:ShapeNode>
       </data>
     </node>
-    <node id="n35">
+    <node id="n36">
       <data key="d6">
         <y:ShapeNode>
           <y:Geometry height="54.95659722222223" width="80.99826388888891" x="1499.3628472222217" y="413.8107638888889"/>
@@ -456,7 +475,7 @@ Hardware<y:LabelModel>
         </y:ShapeNode>
       </data>
     </node>
-    <node id="n36">
+    <node id="n37">
       <data key="d6">
         <y:ShapeNode>
           <y:Geometry height="54.95659722222223" width="80.99826388888891" x="1499.362847222222" y="486.83159722222234"/>
@@ -474,7 +493,7 @@ Machine<y:LabelModel>
         </y:ShapeNode>
       </data>
     </node>
-    <node id="n37">
+    <node id="n38">
       <data key="d6">
         <y:ShapeNode>
           <y:Geometry height="54.95659722222223" width="80.99826388888891" x="1499.3628472222217" y="194.74826388888883"/>
@@ -491,7 +510,7 @@ Machine<y:LabelModel>
         </y:ShapeNode>
       </data>
     </node>
-    <node id="n38">
+    <node id="n39">
       <data key="d6">
         <y:ShapeNode>
           <y:Geometry height="30.0" width="30.0" x="1439.362847222222" y="571.7881944444446"/>
@@ -509,7 +528,7 @@ Machine<y:LabelModel>
         </y:ShapeNode>
       </data>
     </node>
-    <node id="n39">
+    <node id="n40">
       <data key="d6">
         <y:ShapeNode>
           <y:Geometry height="30.0" width="30.0" x="1610.3611111111109" y="571.7881944444446"/>
@@ -527,7 +546,7 @@ Machine<y:LabelModel>
         </y:ShapeNode>
       </data>
     </node>
-    <node id="n40">
+    <node id="n41">
       <data key="d6">
         <y:ShapeNode>
           <y:Geometry height="30.0" width="30.0" x="1439.362847222222" y="631.7881944444446"/>
@@ -545,7 +564,7 @@ Machine<y:LabelModel>
         </y:ShapeNode>
       </data>
     </node>
-    <node id="n41">
+    <node id="n42">
       <data key="d6">
         <y:ShapeNode>
           <y:Geometry height="30.0" width="30.0" x="1610.3611111111109" y="631.7881944444446"/>
@@ -563,7 +582,7 @@ Machine<y:LabelModel>
         </y:ShapeNode>
       </data>
     </node>
-    <node id="n42">
+    <node id="n43">
       <data key="d6">
         <y:ShapeNode>
           <y:Geometry height="30.0" width="30.0" x="1439.362847222222" y="148.24652777777777"/>
@@ -581,7 +600,7 @@ Machine<y:LabelModel>
         </y:ShapeNode>
       </data>
     </node>
-    <node id="n43">
+    <node id="n44">
       <data key="d6">
         <y:ShapeNode>
           <y:Geometry height="30.0" width="30.0" x="1610.3611111111109" y="148.24652777777777"/>
@@ -599,7 +618,7 @@ Machine<y:LabelModel>
         </y:ShapeNode>
       </data>
     </node>
-    <node id="n44">
+    <node id="n45">
       <data key="d6">
         <y:ShapeNode>
           <y:Geometry height="1.0" width="1067.0" x="287.0" y="1186.5625"/>
@@ -610,18 +629,18 @@ Machine<y:LabelModel>
         </y:ShapeNode>
       </data>
     </node>
-    <node id="n45">
+    <node id="n46">
       <data key="d6">
         <y:ShapeNode>
           <y:Geometry height="1.0" width="1067.0" x="287.0" y="1735.3749999999995"/>
           <y:Fill hasColor="false" transparent="false"/>
           <y:BorderStyle hasColor="false" type="line" width="1.0"/>
-          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="16" fontStyle="bold" hasBackgroundColor="false" hasLineColor="false" height="22.625" modelName="sides" modelPosition="n" textColor="#000000" visible="true" width="148.421875" x="459.2890625" y="-26.625">Physical Cluster</y:NodeLabel>
+          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="16" fontStyle="bold" hasBackgroundColor="false" hasLineColor="false" height="22.625" modelName="sides" modelPosition="n" textColor="#000000" visible="true" width="473.5234375" x="296.73828125" y="-26.625">Physical Cluster - Hardware Bootstrap (Deprecated)</y:NodeLabel>
           <y:Shape type="rectangle"/>
         </y:ShapeNode>
       </data>
     </node>
-    <node id="n46">
+    <node id="n47">
       <data key="d6">
         <y:ShapeNode>
           <y:Geometry height="561.6840277777778" width="210.12152777777783" x="1439.362847222222" y="124.0"/>
@@ -632,7 +651,7 @@ Machine<y:LabelModel>
         </y:ShapeNode>
       </data>
     </node>
-    <node id="n47">
+    <node id="n48">
       <data key="d6">
         <y:SVGNode>
           <y:Geometry height="70.13700103759766" width="56.558998107910156" x="97.34867338967442" y="1186.75"/>
@@ -652,7 +671,7 @@ Machine<y:LabelModel>
         </y:SVGNode>
       </data>
     </node>
-    <node id="n48">
+    <node id="n49">
       <data key="d6">
         <y:SVGNode>
           <y:Geometry height="70.13700103759766" width="56.558998107910156" x="143.69734677934883" y="140.6354975845411"/>
@@ -672,7 +691,7 @@ Machine<y:LabelModel>
         </y:SVGNode>
       </data>
     </node>
-    <node id="n49">
+    <node id="n50">
       <data key="d6">
         <y:SVGNode>
           <y:Geometry height="70.13700103759766" width="56.558998107910156" x="143.69734677934883" y="685.375"/>
@@ -692,7 +711,7 @@ Machine<y:LabelModel>
         </y:SVGNode>
       </data>
     </node>
-    <node id="n50">
+    <node id="n51">
       <data key="d6">
         <y:ShapeNode>
           <y:Geometry height="30.0" width="30.0" x="443.0" y="532.0"/>
@@ -709,7 +728,19 @@ Machine<y:LabelModel>
         </y:ShapeNode>
       </data>
     </node>
-    <edge id="e0" source="n4" target="n5">
+    <node id="n52">
+      <data key="d5"/>
+      <data key="d6">
+        <y:ShapeNode>
+          <y:Geometry height="17.96875" width="69.70703125" x="753.646484375" y="1097.3828125"/>
+          <y:Fill color="#FFFFFF" transparent="false"/>
+          <y:BorderStyle color="#000000" type="line" width="1.0"/>
+          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="17.96875" modelName="internal" modelPosition="c" textColor="#000000" visible="true" width="69.70703125" x="0.0" y="0.0">vagrant up</y:NodeLabel>
+          <y:Shape type="rectangle"/>
+        </y:ShapeNode>
+      </data>
+    </node>
+    <edge id="e0" source="n5" target="n6">
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="44.0" sy="-41.5" tx="-4.0" ty="-41.5"/>
@@ -719,19 +750,19 @@ Machine<y:LabelModel>
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e1" source="n4" target="n5">
+    <edge id="e1" source="n5" target="n6">
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="-1.0" sy="-14.5" tx="19.0" ty="-14.5"/>
           <y:LineStyle color="#000000" type="line" width="1.0"/>
           <y:Arrows source="none" target="standard"/>
-          <y:EdgeLabel alignment="center" backgroundColor="#FFFFFF" configuration="AutoFlippingLabel" distance="2.0" fontFamily="Dialog" fontSize="12" fontStyle="plain" height="17.96875" lineColor="#000000" modelName="six_pos" modelPosition="shead" preferredPlacement="anywhere" ratio="0.5" textColor="#000000" visible="true" width="93.888671875" x="10.1103515625" y="-19.96875">Chef Bootstrap<y:PreferredPlacementDescriptor angle="0.0" angleOffsetOnRightSide="0" angleReference="absolute" angleRotationOnRightSide="co" distance="-1.0" frozen="true" placement="anywhere" side="anywhere" sideReference="relative_to_edge_flow"/>
+          <y:EdgeLabel alignment="center" backgroundColor="#FFFFFF" configuration="AutoFlippingLabel" distance="2.0" fontFamily="Dialog" fontSize="12" fontStyle="plain" height="17.96875" lineColor="#000000" modelName="six_pos" modelPosition="thead" preferredPlacement="anywhere" ratio="0.5" textColor="#000000" visible="true" width="93.888671875" x="93.9716796875" y="-19.96875">Chef Bootstrap<y:PreferredPlacementDescriptor angle="0.0" angleOffsetOnRightSide="0" angleReference="absolute" angleRotationOnRightSide="co" distance="-1.0" frozen="true" placement="anywhere" side="anywhere" sideReference="relative_to_edge_flow"/>
           </y:EdgeLabel>
           <y:BendStyle smoothed="false"/>
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e2" source="n4" target="n0">
+    <edge id="e2" source="n5" target="n1">
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="0.0" sy="0.0" tx="-444.0" ty="68.0">
@@ -752,7 +783,7 @@ Machine<y:LabelModel>
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e3" source="n5" target="n0">
+    <edge id="e3" source="n6" target="n1">
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="22.5" sy="50.5" tx="-32.0" ty="-49.0">
@@ -774,7 +805,7 @@ Machine<y:LabelModel>
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e4" source="n6" target="n0">
+    <edge id="e4" source="n7" target="n1">
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="12.5" sy="50.5" tx="120.5" ty="-43.0">
@@ -796,7 +827,7 @@ Machine<y:LabelModel>
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e5" source="n7" target="n0">
+    <edge id="e5" source="n8" target="n1">
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="37.5" sy="50.5" tx="285.5" ty="-29.0">
@@ -818,19 +849,19 @@ Machine<y:LabelModel>
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e6" source="n4" target="n5">
+    <edge id="e6" source="n5" target="n6">
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="0.0" sy="18.5" tx="1.0" ty="18.5"/>
           <y:LineStyle color="#000000" type="line" width="1.0"/>
           <y:Arrows source="standard" target="standard"/>
-          <y:EdgeLabel alignment="center" backgroundColor="#FFFFFF" configuration="AutoFlippingLabel" distance="2.0" fontFamily="Dialog" fontSize="12" fontStyle="plain" height="17.96875" lineColor="#000000" modelName="six_pos" modelPosition="shead" preferredPlacement="anywhere" ratio="0.5" textColor="#000000" visible="true" width="70.146484375" x="10.0919189453125" y="-19.96875">Chef Client<y:PreferredPlacementDescriptor angle="0.0" angleOffsetOnRightSide="0" angleReference="absolute" angleRotationOnRightSide="co" distance="-1.0" frozen="true" placement="anywhere" side="anywhere" sideReference="relative_to_edge_flow"/>
+          <y:EdgeLabel alignment="center" backgroundColor="#FFFFFF" configuration="AutoFlippingLabel" distance="2.0" fontFamily="Dialog" fontSize="12" fontStyle="plain" height="17.96875" lineColor="#000000" modelName="six_pos" modelPosition="thead" preferredPlacement="anywhere" ratio="0.5" textColor="#000000" visible="true" width="70.146484375" x="117.6954345703125" y="-19.96875">Chef Client<y:PreferredPlacementDescriptor angle="0.0" angleOffsetOnRightSide="0" angleReference="absolute" angleRotationOnRightSide="co" distance="-1.0" frozen="true" placement="anywhere" side="anywhere" sideReference="relative_to_edge_flow"/>
           </y:EdgeLabel>
           <y:BendStyle smoothed="false"/>
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e7" source="n10" target="n4">
+    <edge id="e7" source="n11" target="n5">
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="-377.17773338123385" sy="6.474371843191278" tx="-39.67773338123385" ty="-35.5"/>
@@ -840,7 +871,7 @@ Machine<y:LabelModel>
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e8" source="n9" target="n4">
+    <edge id="e8" source="n10" target="n5">
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="-364.0247491861904" sy="6.4756277137067" tx="-26.524749186190377" ty="0.5"/>
@@ -850,7 +881,7 @@ Machine<y:LabelModel>
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e9" source="n8" target="n4">
+    <edge id="e9" source="n9" target="n5">
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="-349.0" sy="6.5234375" tx="-11.5" ty="-1.5"/>
@@ -860,7 +891,7 @@ Machine<y:LabelModel>
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e10" source="n10" target="n5">
+    <edge id="e10" source="n11" target="n6">
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="-75.39339789208441" sy="6.522745537377773" tx="-45.89339789208441" ty="-45.5"/>
@@ -870,7 +901,7 @@ Machine<y:LabelModel>
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e11" source="n9" target="n5">
+    <edge id="e11" source="n10" target="n6">
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="-63.0" sy="6.5078125" tx="-33.5" ty="-50.5"/>
@@ -880,7 +911,7 @@ Machine<y:LabelModel>
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e12" source="n8" target="n5">
+    <edge id="e12" source="n9" target="n6">
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="-49.424069039400024" sy="6.488591807354766" tx="-19.924069039400024" ty="-20.5"/>
@@ -890,7 +921,7 @@ Machine<y:LabelModel>
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e13" source="n10" target="n6">
+    <edge id="e13" source="n11" target="n7">
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="89.0" sy="6.4921875" tx="-43.5" ty="-24.5"/>
@@ -900,7 +931,7 @@ Machine<y:LabelModel>
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e14" source="n9" target="n6">
+    <edge id="e14" source="n10" target="n7">
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="99.0" sy="6.4609375" tx="-33.5" ty="11.5"/>
@@ -910,7 +941,7 @@ Machine<y:LabelModel>
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e15" source="n8" target="n6">
+    <edge id="e15" source="n9" target="n7">
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="109.0" sy="6.4921875" tx="-23.5" ty="6.5"/>
@@ -920,7 +951,7 @@ Machine<y:LabelModel>
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e16" source="n10" target="n7">
+    <edge id="e16" source="n11" target="n8">
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="252.18230974657058" sy="6.508981324578656" tx="-42.31769025342942" ty="2.5"/>
@@ -930,7 +961,7 @@ Machine<y:LabelModel>
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e17" source="n9" target="n7">
+    <edge id="e17" source="n10" target="n8">
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="260.0" sy="6.5078125" tx="-34.5" ty="44.5"/>
@@ -940,7 +971,7 @@ Machine<y:LabelModel>
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e18" source="n8" target="n7">
+    <edge id="e18" source="n9" target="n8">
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="267.0" sy="6.4609375" tx="-27.5" ty="31.5"/>
@@ -950,7 +981,7 @@ Machine<y:LabelModel>
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e19" source="n8" target="n0">
+    <edge id="e19" source="n9" target="n1">
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0"/>
@@ -960,7 +991,7 @@ Machine<y:LabelModel>
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e20" source="n4" target="n6">
+    <edge id="e20" source="n5" target="n7">
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="6.5" sy="-42.5" tx="-1.5" ty="-42.5">
@@ -972,7 +1003,7 @@ Machine<y:LabelModel>
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e21" source="n4" target="n7">
+    <edge id="e21" source="n5" target="n8">
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="2.5" sy="-42.5" tx="0.5" ty="-42.5">
@@ -984,7 +1015,7 @@ Machine<y:LabelModel>
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e22" source="n4" target="n6">
+    <edge id="e22" source="n5" target="n7">
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="-0.5" sy="-15.5" tx="0.5" ty="-15.5">
@@ -996,7 +1027,7 @@ Machine<y:LabelModel>
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e23" source="n4" target="n7">
+    <edge id="e23" source="n5" target="n8">
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="11.5" sy="-15.5" tx="0.5" ty="-15.5">
@@ -1008,7 +1039,7 @@ Machine<y:LabelModel>
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e24" source="n4" target="n6">
+    <edge id="e24" source="n5" target="n7">
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="0.0" sy="18.5" tx="0.5" ty="18.5">
@@ -1020,7 +1051,7 @@ Machine<y:LabelModel>
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e25" source="n4" target="n7">
+    <edge id="e25" source="n5" target="n8">
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="0.0" sy="18.5" tx="0.0" ty="18.5">
@@ -1032,7 +1063,7 @@ Machine<y:LabelModel>
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e26" source="n4" target="n5">
+    <edge id="e26" source="n5" target="n6">
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="0.0" sy="-42.5" tx="0.0" ty="-42.5"/>
@@ -1044,7 +1075,7 @@ Machine<y:LabelModel>
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e27" source="n11" target="n12">
+    <edge id="e27" source="n12" target="n13">
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="44.0" sy="-41.5" tx="-4.0" ty="-41.5"/>
@@ -1054,7 +1085,7 @@ Machine<y:LabelModel>
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e28" source="n11" target="n12">
+    <edge id="e28" source="n12" target="n13">
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="-1.0" sy="-14.5" tx="19.0" ty="-14.5"/>
@@ -1066,7 +1097,7 @@ Machine<y:LabelModel>
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e29" source="n11" target="n1">
+    <edge id="e29" source="n12" target="n2">
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="0.0" sy="0.0" tx="-183.9250234301782" ty="68.0">
@@ -1088,7 +1119,7 @@ Vagrantfile.baremetal)<y:LabelModel>
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e30" source="n12" target="n1">
+    <edge id="e30" source="n13" target="n2">
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="22.5" sy="50.5" tx="41.71368322399252" ty="-55.66666666666674">
@@ -1103,7 +1134,7 @@ Vagrantfile.baremetal)<y:LabelModel>
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e31" source="n13" target="n1">
+    <edge id="e31" source="n14" target="n2">
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="12.5" sy="50.5" tx="97.8828491096532" ty="-42.66666666666674">
@@ -1118,7 +1149,7 @@ Vagrantfile.baremetal)<y:LabelModel>
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e32" source="n14" target="n1">
+    <edge id="e32" source="n15" target="n2">
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="20.5" sy="50.5" tx="152.39456419868782" ty="-26.666666666666742">
@@ -1142,7 +1173,7 @@ ipmi chassis boot net<y:LabelModel>
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e33" source="n11" target="n12">
+    <edge id="e33" source="n12" target="n13">
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="0.0" sy="18.5" tx="1.0" ty="18.5"/>
@@ -1154,7 +1185,7 @@ ipmi chassis boot net<y:LabelModel>
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e34" source="n17" target="n11">
+    <edge id="e34" source="n18" target="n12">
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="-233.0" sy="-0.16666666666674246" tx="-39.67773338123385" ty="-35.5">
@@ -1170,7 +1201,7 @@ ipmi chassis boot net<y:LabelModel>
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e35" source="n17" target="n12">
+    <edge id="e35" source="n18" target="n13">
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="-221.3933978920844" sy="6.4973958333332575" tx="-45.89339789208441" ty="-45.5"/>
@@ -1180,7 +1211,7 @@ ipmi chassis boot net<y:LabelModel>
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e36" source="n16" target="n12">
+    <edge id="e36" source="n17" target="n13">
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="-209.0" sy="6.5286458333332575" tx="-33.5" ty="-50.5"/>
@@ -1190,7 +1221,7 @@ ipmi chassis boot net<y:LabelModel>
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e37" source="n15" target="n12">
+    <edge id="e37" source="n16" target="n13">
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="-195.42406903940002" sy="-6.5026041666667425" tx="-19.924069039400024" ty="-20.5"/>
@@ -1200,7 +1231,7 @@ ipmi chassis boot net<y:LabelModel>
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e38" source="n17" target="n13">
+    <edge id="e38" source="n18" target="n14">
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="-57.0" sy="6.4973958333332575" tx="-43.5" ty="-24.5"/>
@@ -1210,7 +1241,7 @@ ipmi chassis boot net<y:LabelModel>
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e39" source="n16" target="n13">
+    <edge id="e39" source="n17" target="n14">
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="-47.0" sy="6.4817708333332575" tx="-33.5" ty="11.5"/>
@@ -1220,7 +1251,7 @@ ipmi chassis boot net<y:LabelModel>
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e40" source="n15" target="n13">
+    <edge id="e40" source="n16" target="n14">
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="-37.0" sy="6.5286458333332575" tx="-23.5" ty="6.5"/>
@@ -1230,7 +1261,7 @@ ipmi chassis boot net<y:LabelModel>
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e41" source="n17" target="n14">
+    <edge id="e41" source="n18" target="n15">
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="106.18230974657058" sy="6.5130208333332575" tx="-42.31769025342942" ty="2.5"/>
@@ -1240,7 +1271,7 @@ ipmi chassis boot net<y:LabelModel>
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e42" source="n16" target="n14">
+    <edge id="e42" source="n17" target="n15">
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="117.9124015748032" sy="6.5130208333332575" tx="-34.5" ty="44.5"/>
@@ -1250,7 +1281,7 @@ ipmi chassis boot net<y:LabelModel>
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e43" source="n15" target="n14">
+    <edge id="e43" source="n16" target="n15">
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="127.61712598425197" sy="6.4973958333332575" tx="-24.5" ty="-35.16666666666674"/>
@@ -1260,7 +1291,7 @@ ipmi chassis boot net<y:LabelModel>
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e44" source="n11" target="n13">
+    <edge id="e44" source="n12" target="n14">
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="6.5" sy="-42.5" tx="-1.5" ty="-42.5">
@@ -1272,7 +1303,7 @@ ipmi chassis boot net<y:LabelModel>
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e45" source="n11" target="n14">
+    <edge id="e45" source="n12" target="n15">
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="2.5" sy="-42.5" tx="0.5" ty="-42.5">
@@ -1284,7 +1315,7 @@ ipmi chassis boot net<y:LabelModel>
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e46" source="n11" target="n13">
+    <edge id="e46" source="n12" target="n14">
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="-0.5" sy="-15.5" tx="0.5" ty="-15.5">
@@ -1296,7 +1327,7 @@ ipmi chassis boot net<y:LabelModel>
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e47" source="n11" target="n14">
+    <edge id="e47" source="n12" target="n15">
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="11.5" sy="-15.5" tx="0.5" ty="-15.5">
@@ -1308,7 +1339,7 @@ ipmi chassis boot net<y:LabelModel>
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e48" source="n11" target="n13">
+    <edge id="e48" source="n12" target="n14">
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="0.0" sy="18.5" tx="0.5" ty="18.5">
@@ -1320,7 +1351,7 @@ ipmi chassis boot net<y:LabelModel>
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e49" source="n11" target="n14">
+    <edge id="e49" source="n12" target="n15">
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="0.0" sy="18.5" tx="0.0" ty="18.5">
@@ -1332,7 +1363,7 @@ ipmi chassis boot net<y:LabelModel>
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e50" source="n11" target="n12">
+    <edge id="e50" source="n12" target="n13">
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="0.0" sy="-42.5" tx="0.0" ty="-42.5"/>
@@ -1344,7 +1375,7 @@ ipmi chassis boot net<y:LabelModel>
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e51" source="n1" target="n17">
+    <edge id="e51" source="n2" target="n18">
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="191.5" sy="-103.5" tx="0.0" ty="0.0"/>
@@ -1354,7 +1385,7 @@ ipmi chassis boot net<y:LabelModel>
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e52" source="n1" target="n16">
+    <edge id="e52" source="n2" target="n17">
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="170.5" sy="-122.5" tx="0.0" ty="0.0"/>
@@ -1364,7 +1395,7 @@ ipmi chassis boot net<y:LabelModel>
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e53" source="n1" target="n15">
+    <edge id="e53" source="n2" target="n16">
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="109.5" sy="-141.5" tx="0.0" ty="0.0"/>
@@ -1374,7 +1405,7 @@ ipmi chassis boot net<y:LabelModel>
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e54" source="n20" target="n21">
+    <edge id="e54" source="n21" target="n22">
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="-1.0" sy="-14.5" tx="19.0" ty="-14.5"/>
@@ -1386,7 +1417,7 @@ ipmi chassis boot net<y:LabelModel>
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e55" source="n20" target="n18">
+    <edge id="e55" source="n21" target="n19">
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="-2.187499999999943" sy="51.5625" tx="-353.375" ty="-166.0">
@@ -1396,7 +1427,7 @@ ipmi chassis boot net<y:LabelModel>
           </y:Path>
           <y:LineStyle color="#000000" type="line" width="1.0"/>
           <y:Arrows source="standard" target="none"/>
-          <y:EdgeLabel alignment="center" backgroundColor="#FFFFFF" configuration="AutoFlippingLabel" distance="2.0" fontFamily="Dialog" fontSize="12" fontStyle="plain" height="17.96875" lineColor="#000000" modelName="custom" preferredPlacement="anywhere" ratio="0.5" textColor="#000000" visible="true" width="141.080078125" x="-57.835696646023166" y="128.78687949401933">Vagrant OpenStack Up<y:LabelModel>
+          <y:EdgeLabel alignment="center" backgroundColor="#FFFFFF" configuration="AutoFlippingLabel" distance="2.0" fontFamily="Dialog" fontSize="12" fontStyle="plain" height="17.96875" lineColor="#000000" modelName="custom" preferredPlacement="anywhere" ratio="0.5" textColor="#000000" visible="true" width="127.76171875" x="-51.17651695852322" y="128.78687949401933">vagrant up bcpcchef<y:LabelModel>
               <y:SmartEdgeLabelModel autoRotationEnabled="false" defaultAngle="0.0" defaultDistance="10.0"/>
             </y:LabelModel>
             <y:ModelParameter>
@@ -1408,73 +1439,49 @@ ipmi chassis boot net<y:LabelModel>
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e56" source="n21" target="n18">
+    <edge id="e56" source="n22" target="n52">
       <data key="d10">
         <y:PolyLineEdge>
-          <y:Path sx="22.5" sy="50.5" tx="-32.0" ty="-49.0">
+          <y:Path sx="22.5" sy="50.5" tx="0.0" ty="-8.984375">
             <y:Point x="852.0" y="971.375"/>
             <y:Point x="852.0" y="1135.375"/>
             <y:Point x="788.5" y="1135.375"/>
           </y:Path>
           <y:LineStyle color="#000000" type="line" width="1.0"/>
           <y:Arrows source="standard" target="none"/>
-          <y:EdgeLabel alignment="center" backgroundColor="#FFFFFF" configuration="AutoFlippingLabel" distance="2.0" fontFamily="Dialog" fontSize="12" fontStyle="plain" height="17.96875" lineColor="#000000" modelName="custom" preferredPlacement="anywhere" ratio="0.5" textColor="#000000" visible="true" width="141.080078125" x="-71.315185546875" y="155.015625">Vagrant OpenStack Up<y:LabelModel>
-              <y:SmartEdgeLabelModel autoRotationEnabled="false" defaultAngle="0.0" defaultDistance="10.0"/>
-            </y:LabelModel>
-            <y:ModelParameter>
-              <y:SmartEdgeLabelModelParameter angle="0.0" distance="30.0" distanceToCenter="true" position="center" ratio="0.5" segment="-2"/>
-            </y:ModelParameter>
-            <y:PreferredPlacementDescriptor angle="0.0" angleOffsetOnRightSide="0" angleReference="absolute" angleRotationOnRightSide="co" distance="-1.0" frozen="true" placement="anywhere" side="anywhere" sideReference="relative_to_edge_flow"/>
-          </y:EdgeLabel>
           <y:BendStyle smoothed="true"/>
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e57" source="n22" target="n18">
+    <edge id="e57" source="n23" target="n52">
       <data key="d10">
         <y:PolyLineEdge>
-          <y:Path sx="12.5" sy="50.5" tx="120.5" ty="-43.0">
+          <y:Path sx="12.5" sy="50.5" tx="0.0" ty="0.0">
             <y:Point x="1010.0" y="965.875"/>
             <y:Point x="1010.0" y="1136.375"/>
-            <y:Point x="941.0" y="1136.375"/>
+            <y:Point x="788.5" y="1135.375"/>
           </y:Path>
           <y:LineStyle color="#000000" type="line" width="1.0"/>
           <y:Arrows source="standard" target="none"/>
-          <y:EdgeLabel alignment="center" backgroundColor="#FFFFFF" configuration="AutoFlippingLabel" distance="2.0" fontFamily="Dialog" fontSize="12" fontStyle="plain" height="17.96875" lineColor="#000000" modelName="custom" preferredPlacement="anywhere" ratio="0.5" textColor="#000000" visible="true" width="141.080078125" x="-78.061279296875" y="159.380615234375">Vagrant OpenStack Up<y:LabelModel>
-              <y:SmartEdgeLabelModel autoRotationEnabled="false" defaultAngle="0.0" defaultDistance="10.0"/>
-            </y:LabelModel>
-            <y:ModelParameter>
-              <y:SmartEdgeLabelModelParameter angle="0.0" distance="30.0" distanceToCenter="true" position="center" ratio="0.5" segment="-2"/>
-            </y:ModelParameter>
-            <y:PreferredPlacementDescriptor angle="0.0" angleOffsetOnRightSide="0" angleReference="absolute" angleRotationOnRightSide="co" distance="-1.0" frozen="true" placement="anywhere" side="anywhere" sideReference="relative_to_edge_flow"/>
-          </y:EdgeLabel>
           <y:BendStyle smoothed="true"/>
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e58" source="n23" target="n18">
+    <edge id="e58" source="n24" target="n52">
       <data key="d10">
         <y:PolyLineEdge>
-          <y:Path sx="37.5" sy="50.5" tx="285.5" ty="-29.0">
+          <y:Path sx="37.5" sy="50.5" tx="0.0" ty="0.0">
             <y:Point x="1171.0" y="971.375"/>
             <y:Point x="1171.0" y="1135.375"/>
-            <y:Point x="1106.0" y="1135.375"/>
+            <y:Point x="788.5" y="1135.375"/>
           </y:Path>
           <y:LineStyle color="#000000" type="line" width="1.0"/>
           <y:Arrows source="standard" target="none"/>
-          <y:EdgeLabel alignment="center" backgroundColor="#FFFFFF" configuration="AutoFlippingLabel" distance="2.0" fontFamily="Dialog" fontSize="12" fontStyle="plain" height="17.96875" lineColor="#000000" modelName="custom" preferredPlacement="anywhere" ratio="0.5" textColor="#000000" visible="true" width="141.080078125" x="-76.99951171875" y="155.015625">Vagrant OpenStack Up<y:LabelModel>
-              <y:SmartEdgeLabelModel autoRotationEnabled="false" defaultAngle="0.0" defaultDistance="10.0"/>
-            </y:LabelModel>
-            <y:ModelParameter>
-              <y:SmartEdgeLabelModelParameter angle="0.0" distance="30.0" distanceToCenter="true" position="center" ratio="0.5" segment="-2"/>
-            </y:ModelParameter>
-            <y:PreferredPlacementDescriptor angle="0.0" angleOffsetOnRightSide="0" angleReference="absolute" angleRotationOnRightSide="co" distance="-1.0" frozen="true" placement="anywhere" side="anywhere" sideReference="relative_to_edge_flow"/>
-          </y:EdgeLabel>
           <y:BendStyle smoothed="true"/>
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e59" source="n20" target="n21">
+    <edge id="e59" source="n21" target="n22">
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="0.0" sy="18.5" tx="1.0" ty="18.5"/>
@@ -1486,7 +1493,7 @@ ipmi chassis boot net<y:LabelModel>
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e60" source="n24" target="n20">
+    <edge id="e60" source="n25" target="n21">
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="-377.17773338123385" sy="6.474371843191278" tx="-39.67773338123385" ty="-35.5"/>
@@ -1496,7 +1503,7 @@ ipmi chassis boot net<y:LabelModel>
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e61" source="n24" target="n21">
+    <edge id="e61" source="n25" target="n22">
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="-75.39339789208441" sy="6.522745537377773" tx="-45.89339789208441" ty="-45.5"/>
@@ -1506,7 +1513,7 @@ ipmi chassis boot net<y:LabelModel>
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e62" source="n24" target="n22">
+    <edge id="e62" source="n25" target="n23">
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="89.0" sy="6.4921875" tx="-43.5" ty="-24.5"/>
@@ -1516,7 +1523,7 @@ ipmi chassis boot net<y:LabelModel>
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e63" source="n24" target="n23">
+    <edge id="e63" source="n25" target="n24">
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="252.18230974657058" sy="6.508981324578656" tx="-42.31769025342942" ty="2.5"/>
@@ -1526,7 +1533,7 @@ ipmi chassis boot net<y:LabelModel>
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e64" source="n20" target="n22">
+    <edge id="e64" source="n21" target="n23">
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="-0.5" sy="-15.5" tx="0.5" ty="-15.5">
@@ -1538,7 +1545,7 @@ ipmi chassis boot net<y:LabelModel>
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e65" source="n20" target="n23">
+    <edge id="e65" source="n21" target="n24">
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="11.5" sy="-15.5" tx="0.5" ty="-15.5">
@@ -1550,7 +1557,7 @@ ipmi chassis boot net<y:LabelModel>
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e66" source="n20" target="n22">
+    <edge id="e66" source="n21" target="n23">
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="0.0" sy="18.5" tx="0.5" ty="18.5">
@@ -1562,7 +1569,7 @@ ipmi chassis boot net<y:LabelModel>
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e67" source="n20" target="n23">
+    <edge id="e67" source="n21" target="n24">
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="0.0" sy="18.5" tx="0.0" ty="18.5">
@@ -1574,7 +1581,7 @@ ipmi chassis boot net<y:LabelModel>
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e68" source="n25" target="n26">
+    <edge id="e68" source="n26" target="n27">
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="44.0" sy="-41.5" tx="-4.0" ty="-41.5"/>
@@ -1584,7 +1591,7 @@ ipmi chassis boot net<y:LabelModel>
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e69" source="n25" target="n26">
+    <edge id="e69" source="n26" target="n27">
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="-1.0" sy="-14.5" tx="19.0" ty="-14.5"/>
@@ -1596,7 +1603,7 @@ ipmi chassis boot net<y:LabelModel>
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e70" source="n25" target="n32">
+    <edge id="e70" source="n26" target="n33">
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="-55.02791341145826" sy="-43.062499999999545" tx="25.958897157263266" ty="35.081663469704836">
@@ -1617,7 +1624,7 @@ Install<y:LabelModel>
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e71" source="n26" target="n32">
+    <edge id="e71" source="n27" target="n33">
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="22.5" sy="50.5" tx="-17.031679261529746" ty="35.09384940893051">
@@ -1640,7 +1647,7 @@ ipmi chassis boot net<y:LabelModel>
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e72" source="n27" target="n32">
+    <edge id="e72" source="n28" target="n33">
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="12.5" sy="50.5" tx="-18.574195185624376" ty="35.022577666609095">
@@ -1654,7 +1661,7 @@ ipmi chassis boot net<y:LabelModel>
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e73" source="n28" target="n32">
+    <edge id="e73" source="n29" target="n33">
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="37.5" sy="50.5" tx="-16.121343883038776" ty="35.02695002354267">
@@ -1668,7 +1675,7 @@ ipmi chassis boot net<y:LabelModel>
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e74" source="n25" target="n26">
+    <edge id="e74" source="n26" target="n27">
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="0.0" sy="18.5" tx="1.0" ty="18.5"/>
@@ -1680,7 +1687,7 @@ ipmi chassis boot net<y:LabelModel>
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e75" source="n31" target="n25">
+    <edge id="e75" source="n32" target="n26">
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="-377.17773338123385" sy="6.474371843191278" tx="-39.67773338123385" ty="-35.5"/>
@@ -1690,7 +1697,7 @@ ipmi chassis boot net<y:LabelModel>
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e76" source="n30" target="n25">
+    <edge id="e76" source="n31" target="n26">
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="-364.0247491861904" sy="6.4756277137067" tx="-26.524749186190377" ty="0.5"/>
@@ -1700,7 +1707,7 @@ ipmi chassis boot net<y:LabelModel>
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e77" source="n29" target="n25">
+    <edge id="e77" source="n30" target="n26">
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="-349.0" sy="6.5234375" tx="-11.5" ty="-1.5"/>
@@ -1710,7 +1717,7 @@ ipmi chassis boot net<y:LabelModel>
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e78" source="n31" target="n26">
+    <edge id="e78" source="n32" target="n27">
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="-75.39339789208441" sy="6.522745537377773" tx="-45.89339789208441" ty="-45.5"/>
@@ -1720,7 +1727,7 @@ ipmi chassis boot net<y:LabelModel>
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e79" source="n30" target="n26">
+    <edge id="e79" source="n31" target="n27">
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="-63.0" sy="6.5078125" tx="-33.5" ty="-50.5"/>
@@ -1730,7 +1737,7 @@ ipmi chassis boot net<y:LabelModel>
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e80" source="n29" target="n26">
+    <edge id="e80" source="n30" target="n27">
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="-49.424069039400024" sy="6.488591807354766" tx="-19.924069039400024" ty="-20.5"/>
@@ -1740,7 +1747,7 @@ ipmi chassis boot net<y:LabelModel>
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e81" source="n31" target="n27">
+    <edge id="e81" source="n32" target="n28">
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="89.0" sy="6.4921875" tx="-43.5" ty="-24.5"/>
@@ -1750,7 +1757,7 @@ ipmi chassis boot net<y:LabelModel>
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e82" source="n30" target="n27">
+    <edge id="e82" source="n31" target="n28">
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="99.0" sy="6.4609375" tx="-33.5" ty="11.5"/>
@@ -1760,7 +1767,7 @@ ipmi chassis boot net<y:LabelModel>
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e83" source="n29" target="n27">
+    <edge id="e83" source="n30" target="n28">
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="109.0" sy="6.4921875" tx="-23.5" ty="6.5"/>
@@ -1770,7 +1777,7 @@ ipmi chassis boot net<y:LabelModel>
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e84" source="n31" target="n28">
+    <edge id="e84" source="n32" target="n29">
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="252.18230974657058" sy="6.508981324578656" tx="-42.31769025342942" ty="2.5"/>
@@ -1780,7 +1787,7 @@ ipmi chassis boot net<y:LabelModel>
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e85" source="n30" target="n28">
+    <edge id="e85" source="n31" target="n29">
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="260.0" sy="6.5078125" tx="-34.5" ty="44.5"/>
@@ -1790,7 +1797,7 @@ ipmi chassis boot net<y:LabelModel>
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e86" source="n29" target="n28">
+    <edge id="e86" source="n30" target="n29">
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="267.0" sy="6.4609375" tx="-27.5" ty="31.5"/>
@@ -1800,7 +1807,7 @@ ipmi chassis boot net<y:LabelModel>
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e87" source="n25" target="n27">
+    <edge id="e87" source="n26" target="n28">
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="6.5" sy="-42.5" tx="-1.5" ty="-42.5">
@@ -1812,7 +1819,7 @@ ipmi chassis boot net<y:LabelModel>
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e88" source="n25" target="n28">
+    <edge id="e88" source="n26" target="n29">
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="2.5" sy="-42.5" tx="0.5" ty="-42.5">
@@ -1824,7 +1831,7 @@ ipmi chassis boot net<y:LabelModel>
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e89" source="n25" target="n27">
+    <edge id="e89" source="n26" target="n28">
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="-0.5" sy="-15.5" tx="0.5" ty="-15.5">
@@ -1836,7 +1843,7 @@ ipmi chassis boot net<y:LabelModel>
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e90" source="n25" target="n28">
+    <edge id="e90" source="n26" target="n29">
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="11.5" sy="-15.5" tx="0.5" ty="-15.5">
@@ -1848,7 +1855,7 @@ ipmi chassis boot net<y:LabelModel>
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e91" source="n25" target="n27">
+    <edge id="e91" source="n26" target="n28">
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="0.0" sy="18.5" tx="0.5" ty="18.5">
@@ -1860,7 +1867,7 @@ ipmi chassis boot net<y:LabelModel>
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e92" source="n25" target="n28">
+    <edge id="e92" source="n26" target="n29">
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="0.0" sy="18.5" tx="0.0" ty="18.5">
@@ -1872,7 +1879,7 @@ ipmi chassis boot net<y:LabelModel>
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e93" source="n25" target="n26">
+    <edge id="e93" source="n26" target="n27">
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="0.0" sy="-42.5" tx="0.0" ty="-42.5"/>
@@ -1884,7 +1891,7 @@ ipmi chassis boot net<y:LabelModel>
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e94" source="n32" target="n25">
+    <edge id="e94" source="n33" target="n26">
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="0.0" sy="35.077729407697916" tx="0.0" ty="0.0">
@@ -1892,7 +1899,7 @@ ipmi chassis boot net<y:LabelModel>
           </y:Path>
           <y:LineStyle color="#000000" type="line" width="1.0"/>
           <y:Arrows source="none" target="standard"/>
-          <y:EdgeLabel alignment="center" backgroundColor="#FFFFFF" configuration="AutoFlippingLabel" distance="2.0" fontFamily="Dialog" fontSize="12" fontStyle="plain" height="17.96875" lineColor="#000000" modelName="custom" preferredPlacement="anywhere" ratio="0.5" textColor="#000000" visible="true" width="108.0859375" x="31.655860137299385" y="97.43786621093727">Install Chef-BCPC<y:LabelModel>
+          <y:EdgeLabel alignment="center" backgroundColor="#FFFFFF" configuration="AutoFlippingLabel" distance="2.0" fontFamily="Dialog" fontSize="12" fontStyle="plain" height="17.96875" lineColor="#000000" modelName="custom" preferredPlacement="anywhere" ratio="0.5" textColor="#000000" visible="true" width="109.703125" x="30.245933389992103" y="97.43786621093727">Install Chef-BACH<y:LabelModel>
               <y:SmartEdgeLabelModel autoRotationEnabled="false" defaultAngle="0.0" defaultDistance="10.0"/>
             </y:LabelModel>
             <y:ModelParameter>
@@ -1904,7 +1911,7 @@ ipmi chassis boot net<y:LabelModel>
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e95" source="n11" target="n1">
+    <edge id="e95" source="n12" target="n2">
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="-52.66493055555554" sy="28.28472222222217" tx="-188.2986111111111" ty="152.90972222222217">
@@ -1927,7 +1934,7 @@ Bootstrap<y:LabelModel>
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e96" source="n11" target="n1">
+    <edge id="e96" source="n12" target="n2">
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="-32.048611111111086" sy="49.986111111111086" tx="-164.42708333333337" ty="137.71875">
@@ -1949,7 +1956,7 @@ Bootstrap<y:LabelModel>
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e97" source="n38" target="n39">
+    <edge id="e97" source="n39" target="n40">
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0"/>
@@ -1967,7 +1974,7 @@ Bootstrap<y:LabelModel>
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e98" source="n40" target="n41">
+    <edge id="e98" source="n41" target="n42">
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0"/>
@@ -1986,7 +1993,7 @@ Action<y:LabelModel>
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e99" source="n42" target="n43">
+    <edge id="e99" source="n43" target="n44">
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0"/>
@@ -2005,7 +2012,7 @@ Connection<y:LabelModel>
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e100" source="n47" target="n1">
+    <edge id="e100" source="n48" target="n2">
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="20.345467265227427" sy="35.08143184835103" tx="-14.533446183575052" ty="-101.51220289855087">
@@ -2026,7 +2033,7 @@ Install<y:LabelModel>
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e101" source="n47" target="n1">
+    <edge id="e101" source="n48" target="n2">
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="0.0" sy="35.077729407697916" tx="-127.1281159420289" ty="-63.70582608695668">
@@ -2047,7 +2054,7 @@ Vagrant Install<y:LabelModel>
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e102" source="n47" target="n1">
+    <edge id="e102" source="n48" target="n2">
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="-25.783689351841915" sy="37.86407919134626" tx="-112.00556521739122" ty="-25.624125603864968">
@@ -2055,8 +2062,8 @@ Vagrant Install<y:LabelModel>
           </y:Path>
           <y:LineStyle color="#000000" type="line" width="1.0"/>
           <y:Arrows source="none" target="standard"/>
-          <y:EdgeLabel alignment="center" backgroundColor="#FFFFFF" configuration="AutoFlippingLabel" distance="2.0" fontFamily="Dialog" fontSize="12" fontStyle="plain" height="31.9375" lineColor="#000000" modelName="custom" preferredPlacement="anywhere" ratio="0.5" textColor="#000000" visible="true" width="140.564453125" x="21.571690335287713" y="74.47450720863503">Copy Pre-Built
-Bootstrap Vagrant Box<y:LabelModel>
+          <y:EdgeLabel alignment="center" backgroundColor="#FFFFFF" configuration="AutoFlippingLabel" distance="2.0" fontFamily="Dialog" fontSize="12" fontStyle="plain" height="31.9375" lineColor="#000000" modelName="custom" preferredPlacement="anywhere" ratio="0.5" textColor="#000000" visible="true" width="131.435546875" x="29.883802027173516" y="74.47450720863503">Copy VBox Bootstrap
+Vagrant Box<y:LabelModel>
               <y:SmartEdgeLabelModel autoRotationEnabled="false" defaultAngle="0.0" defaultDistance="10.0"/>
             </y:LabelModel>
             <y:ModelParameter>
@@ -2068,7 +2075,7 @@ Bootstrap Vagrant Box<y:LabelModel>
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e103" source="n48" target="n0">
+    <edge id="e103" source="n49" target="n1">
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="4.752347078630692" sy="35.07388595463104" tx="-440.8883285024154" ty="-80.1924637681158">
@@ -2076,8 +2083,8 @@ Bootstrap Vagrant Box<y:LabelModel>
           </y:Path>
           <y:LineStyle color="#000000" type="line" width="1.0"/>
           <y:Arrows source="none" target="standard"/>
-          <y:EdgeLabel alignment="center" backgroundColor="#FFFFFF" configuration="AutoFlippingLabel" distance="2.0" fontFamily="Dialog" fontSize="12" fontStyle="plain" height="31.9375" lineColor="#000000" modelName="custom" preferredPlacement="anywhere" ratio="0.5" textColor="#000000" visible="true" width="68.1484375" x="19.57215128731508" y="6.060908424267012">Install
-Chef-BCPC<y:LabelModel>
+          <y:EdgeLabel alignment="center" backgroundColor="#FFFFFF" configuration="AutoFlippingLabel" distance="2.0" fontFamily="Dialog" fontSize="12" fontStyle="plain" height="31.9375" lineColor="#000000" modelName="custom" preferredPlacement="anywhere" ratio="0.5" textColor="#000000" visible="true" width="69.765625" x="18.154285158342248" y="6.060908424267012">Clone
+Chef-BACH<y:LabelModel>
               <y:SmartEdgeLabelModel autoRotationEnabled="false" defaultAngle="0.0" defaultDistance="10.0"/>
             </y:LabelModel>
             <y:ModelParameter>
@@ -2089,7 +2096,7 @@ Chef-BCPC<y:LabelModel>
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e104" source="n48" target="n0">
+    <edge id="e104" source="n49" target="n1">
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="0.0" sy="0.0" tx="-508.93980676328493" ty="-48.687149758453984">
@@ -2110,7 +2117,7 @@ Chef-BCPC<y:LabelModel>
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e105" source="n49" target="n18">
+    <edge id="e105" source="n50" target="n19">
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="0.0" sy="0.0" tx="-401.06023468727835" ty="-70.08124154589382">
@@ -2119,8 +2126,7 @@ Chef-BCPC<y:LabelModel>
           </y:Path>
           <y:LineStyle color="#000000" type="line" width="1.0"/>
           <y:Arrows source="none" target="standard"/>
-          <y:EdgeLabel alignment="center" backgroundColor="#FFFFFF" configuration="AutoFlippingLabel" distance="2.0" fontFamily="Dialog" fontSize="12" fontStyle="plain" height="45.90625" lineColor="#000000" modelName="custom" preferredPlacement="anywhere" ratio="0.5" textColor="#000000" visible="true" width="181.263671875" x="-76.17119094992532" y="60.89715200879368">Vagrant Up
-Vagrant Up bcpcchef
+          <y:EdgeLabel alignment="center" backgroundColor="#FFFFFF" configuration="AutoFlippingLabel" distance="2.0" fontFamily="Dialog" fontSize="12" fontStyle="plain" height="31.9375" lineColor="#000000" modelName="custom" preferredPlacement="anywhere" ratio="0.5" textColor="#000000" visible="true" width="181.263671875" x="-76.17119094992532" y="67.88152700879368">Vagrant
 (using Vagrantfile.openstack)<y:LabelModel>
               <y:SmartEdgeLabelModel autoRotationEnabled="false" defaultAngle="0.0" defaultDistance="10.0"/>
             </y:LabelModel>
@@ -2133,7 +2139,7 @@ Vagrant Up bcpcchef
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e106" source="n4" target="n50">
+    <edge id="e106" source="n5" target="n51">
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0">
@@ -2142,6 +2148,17 @@ Vagrant Up bcpcchef
           <y:LineStyle color="#000000" type="line" width="1.0"/>
           <y:Arrows source="none" target="standard"/>
           <y:BendStyle smoothed="true"/>
+        </y:PolyLineEdge>
+      </data>
+    </edge>
+    <edge id="e107" source="n19" target="n52">
+      <data key="d9"/>
+      <data key="d10">
+        <y:PolyLineEdge>
+          <y:Path sx="-32.0" sy="5.648970856101869" tx="0.0" ty="0.0"/>
+          <y:LineStyle color="#000000" type="line" width="1.0"/>
+          <y:Arrows source="none" target="none"/>
+          <y:BendStyle smoothed="false"/>
         </y:PolyLineEdge>
       </data>
     </edge>
