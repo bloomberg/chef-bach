@@ -27,7 +27,7 @@ ruby_block "hive_table_stats_db" do
   cmd = "mysql -uroot -p#{get_config!('password','mysql-root','os')} -e"
   privs = "ALL" # todo node[:bcpc][:hadoop][:hive_db_privs].join(",")
   block do
-    if not system " #{cmd} 'SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = #{node["bcpc"]["hadoop"]["hive"]["hive_table_stats_db"]}' | grep -q #{node["bcpc"]["hadoop"]["hive"]["hive_table_stats_db"]}" then
+    if not system " #{cmd} 'SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = \"#{node["bcpc"]["hadoop"]["hive"]["hive_table_stats_db"]}\"' | grep -q #{node["bcpc"]["hadoop"]["hive"]["hive_table_stats_db"]}" then
       code = <<-EOF
         CREATE DATABASE #{node["bcpc"]["hadoop"]["hive"]["hive_table_stats_db"]};
         GRANT #{privs} ON #{node["bcpc"]["hadoop"]["hive"]["hive_table_stats_db"]}.* TO '#{node["bcpc"]["hadoop"]["hive"]["hive_table_stats_db_user"]}'@'%' IDENTIFIED BY '#{get_config('mysql-hive-table-stats-password')}';
