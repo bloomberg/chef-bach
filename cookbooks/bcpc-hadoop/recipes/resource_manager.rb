@@ -54,6 +54,9 @@ bash "kill yarn-resourcemanager" do
   returns [0, 1]
 end
 
+hdfs_write = "echo 'test' | hdfs dfs -copyFromLocal - /user/hdfs/chef-mapred-test"
+hdfs_remove = "hdfs dfs -rm -skipTrash /user/hdfs/chef-mapred-test"
+
 bash "setup-mapreduce-app" do
   code <<-EOH
   hdfs dfs -mkdir -p /hdp/apps/#{node[:bcpc][:hadoop][:distribution][:release]}/mapreduce/
@@ -64,7 +67,7 @@ bash "setup-mapreduce-app" do
   EOH
   user "hdfs"
   not_if "hdfs dfs -test -f /hdp/apps/#{node[:bcpc][:hadoop][:distribution][:release]}/mapreduce/mapreduce.tar.gz", :user => "hdfs" 
-  only_if "echo 'test' | hdfs dfs -copyFromLocal - /user/hdfs/chef-mapred-test", :user => "hdfs"
+  only_if "#{hdfs_write} && #{hdfs_remove}", :user => "hdfs"
 end
 
 bash "delete-temp-file" do
