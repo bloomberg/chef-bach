@@ -101,6 +101,22 @@
   <name>hive.exec.scratchdir</name>
   <value>/tmp/hive-${user.name}</value>
 </property>
+<% if node[:bcpc][:hadoop][:hive][:hiveserver2][:authentication][:method].upcase == "LDAP" %>
+<property>
+  <name>hive.server2.authentication</name>
+  <value><%= node[:bcpc][:hadoop][:hive][:hiveserver2][:authentication][:method] %></value>
+</property>
+
+<property>
+  <name>hive.server2.authentication.ldap.url</name>
+  <value><%= node[:bcpc][:hadoop][:hive][:hiveserver2][:authentication][:ldap_url] %></value>
+</property>
+
+<property>
+  <name>hive.server2.authentication.ldap.Domain</name>
+  <value><%= node[:bcpc][:hadoop][:hive][:hiveserver2][:authentication][:ldap_domain] %></value>
+</property>
+<% end %>
 
 <% if @template_vars[:kerberos_enabled] == true then %>
 
@@ -122,10 +138,12 @@
 </property>
 
 <!-- HiveServer2 Security Configuration -->
+<% if node[:bcpc][:hadoop][:hive][:hiveserver2][:authentication][:method].upcase == "KERBEROS" %>
 <property>
   <name>hive.server2.authentication</name>
-  <value>KERBEROS</value>
+  <value><%= node[:bcpc][:hadoop][:hive][:hiveserver2][:authentication][:method] %></value>
 </property>
+<% end %>
 
 <property>
   <name>hive.server2.authentication.kerberos.keytab</name>
