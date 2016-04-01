@@ -8,17 +8,18 @@ node.default['bcpc']['hadoop']['copylog']['datanode'] = {
     'docopy' => true
 }
 
-hdp_select_pkgs = %w{hadoop-yarn-nodemanager
-                     hadoop-hdfs-datanode
-                     hadoop-client}
+hdp_select_pkgs = %w{
+  hadoop-yarn-nodemanager
+  hadoop-hdfs-datanode
+  hadoop-client}
 
-(hdp_select_pkgs.map{|p| hwx_pkg_str(p, node[:bcpc][:hadoop][:distribution][:release])} +
-                  %W{hadoop-mapreduce
-                     sqoop
-                     hadooplzo
-                     hadooplzo-native
-                     #{node['bcpc']['mysql']['connector']['package']['short_name']}
-                     cgroup-bin}).each do |pkg|
+(hdp_select_pkgs + %W{
+  hadoop-mapreduce
+  sqoop
+  hadooplzo
+  hadooplzo-native}.map{|p| hwx_pkg_str(p, node[:bcpc][:hadoop][:distribution][:release])} + %W{
+  #{node['bcpc']['mysql']['connector']['package']['short_name']}
+  cgroup-bin}).each do |pkg|
   package pkg do
     action :install
   end
