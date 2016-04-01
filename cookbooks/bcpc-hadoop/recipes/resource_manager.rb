@@ -29,7 +29,7 @@ end
 end
 
 bash "create-hdfs-yarn-log" do
-  code "hdfs dfs -mkdir -p /var/log/hadoop-yarn && hdfs dfs -chmod 1777 /var/log/hadoop-yarn && hdfs dfs -chown yarn:mapred /var/log/hadoosp-yarn"
+  code "hdfs dfs -mkdir -p /var/log/hadoop-yarn && hdfs dfs -chmod 0777 /var/log/hadoop-yarn && hdfs dfs -chown yarn:mapred /var/log/hadoosp-yarn"
   user "hdfs"
   not_if "hdfs dfs -test -d /var/log/hadoop-yarn", :user => "hdfs"
 end
