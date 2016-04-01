@@ -118,7 +118,7 @@
 
   <property>
     <name>hadoop.user.group.static.mapping.overrides</name>
-    <value>hdfs=hadoop,hdfs;yarn=mapred,hadoop;</value>
+    <value>hdfs=hadoop,hdfs;yarn=mapred,hadoop;mapred=mapred;</value>
   </property>
   <% if node[:bcpc][:hadoop][:hdfs][:ldap][:integration] == true %>
    <!-- HDFS LDAP Mapping configuration -->
