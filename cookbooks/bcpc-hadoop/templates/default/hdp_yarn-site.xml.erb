@@ -309,5 +309,11 @@
     <name>yarn.nodemanager.vmem-check-enabled</name>
     <value><%= node['bcpc']['hadoop']['yarn']['nodemanager']['vmem-check-enabled'] %></value>
   </property>
+  <% if @hs_hosts.count > 0 %>
+  <property>
+    <name>yarn.log.server.url</name>
+    <value>http://<%="#{float_host(@hs_hosts.map{|i| i[:hostname] }.sort.first)}:19888" if not @hs_hosts.empty?%>/jobhistory/logs</value>
+  </property>
+  <% end %>
 
 </configuration>
