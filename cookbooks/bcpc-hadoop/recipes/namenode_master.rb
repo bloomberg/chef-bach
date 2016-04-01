@@ -273,9 +273,3 @@ bash "create-hdfs-history" do
   user "hdfs"
   not_if "sudo -u hdfs #{hdfs_cmd} dfs -test -d /user/history"
 end
-
-bash "create-hdfs-yarn-log" do
-  code "#{hdfs_cmd} dfs -mkdir -p /var/log/hadoop-yarn; #{hdfs_cmd} dfs -chown yarn:mapred /var/log/hadoop-yarn"
-  user "hdfs"
-  not_if "sudo -u hdfs #{hdfs_cmd} dfs -test -d /var/log/hadoop-yarn"
-end
