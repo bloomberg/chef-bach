@@ -67,6 +67,7 @@ GRAPH
     bcpc-hadoop (>= 0.0.0)
   bcpc (0.5.0)
     apt (>= 1.9.2)
+    bach_common (>= 0.0.0)
     chef-client (>= 2.2.2)
     chef-vault (>= 0.0.0)
     cobblerd (>= 0.3.0)

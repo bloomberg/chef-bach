@@ -38,7 +38,7 @@ node.default[:temp][:value] = ""
 bootstrap = get_all_nodes.select{|s| s.hostname.include? 'bootstrap'}[0].fqdn
 key = OpenSSL::PKey::RSA.new 2048;
 
-results = get_nodes_for("certs").map!{ |x| x['fqdn'] }.join(",")
+results = get_all_nodes.map!{ |x| x['fqdn'] }.join(",")
 nodes = results == "" ? node['fqdn'] : results
 
 ruby_block "initialize-ssh-keys" do
@@ -66,7 +66,6 @@ chef_vault_secret "ssh" do
   raw_data({ "private-key" => key.to_pem })
   admins "#{ nodes },#{ bootstrap }"
   search '*:*'
-  action :create_if_missing
 end
 
 ruby_block "chef_vault_secret" do
@@ -96,7 +95,6 @@ chef_vault_secret "ssl" do
   raw_data ({ 'private-key' => ssl_private_key, 'certificate' => ssl_certificate })
   admins "#{ nodes },#{ bootstrap }"
   search '*:*'
-  action :create_if_missing
 end
 
 directory "/root/.ssh" do

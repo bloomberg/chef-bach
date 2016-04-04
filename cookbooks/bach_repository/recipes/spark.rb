@@ -13,7 +13,7 @@ spark_pkg_version = "1.4.1"
 spark_tar_file = "spark-#{spark_pkg_version}-bin-hadoop2.6.tgz"
 spark_extracted_file_name = "spark-#{spark_pkg_version}-bin-hadoop2.6"
 spark_deb_path =
-  "#{bins_dir}/#{spark_pkg_prefix}_#{spark_pkg_version}_amd64.deb"
+  "#{bins_dir}/#{spark_pkg_prefix}-#{spark_pkg_version}_#{spark_pkg_version}_amd64.deb"
 
 remote_file "#{bins_dir}/#{spark_tar_file}" do
   source "http://d3kbcqa49mib13.cloudfront.net/#{spark_tar_file}"
@@ -32,7 +32,7 @@ bash "build_spark_package" do
   group 'root'
   code("fpm -s dir -t deb \ " +
        "--prefix #{spark_install_dir}/#{spark_pkg_version} \ " +
-       "-n #{spark_pkg_prefix} -v #{spark_pkg_version} \ " +
+       "-n #{spark_pkg_prefix}-#{spark_pkg_version} -v #{spark_pkg_version} \ " +
        "--description \"Spark Package with Hadoop 2.6\" -p #{bins_dir} *")
   umask 0002
   creates spark_deb_path

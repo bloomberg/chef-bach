@@ -108,15 +108,15 @@ if node[:bcpc][:management][:vip] and get_nodes_for("mysql").length() > 0
         mysql_command_string.call
     }
 
-    not_if lazy {
+    not_if {
       c = Mixlib::ShellOut.new('echo "select id from domains limit 1;" | ' +
                                mysql_command_string.call)
       c.run_command
       c.status.success?
     }
 
-    sensitive true
-    
+   sensitive true
+
     notifies :reload, 'service[pdns]'
   end
 
