@@ -6,7 +6,6 @@
   "run_list": [
     "role[Basic]",
     "role[BCPC-Hadoop-Head]",
-    "recipe[bcpc-hadoop::resource_manager]",
     "recipe[bcpc-hadoop::historyserver]",
     "recipe[bcpc-hadoop::oozie]"
   ],
