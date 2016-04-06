@@ -13,7 +13,7 @@ default[:spark][:bin][:dir] = "#{node[:spark][:package][:base]}/#{node[:spark][:
 ## Spark Configuration
 default.bach_spark.config.spark.driver.extraLibraryPath = "/usr/hdp/current/hadoop-client/lib/native:/usr/hdp/current/hadoop-client/lib/native/Linux-amd64-64"
 default.bach_spark.config.spark.executor.extraLibraryPath = "/usr/hdp/current/hadoop-client/lib/native:/usr/hdp/current/hadoop-client/lib/native/Linux-amd64-64"
-default.bach_spark.spark.config.executor.extraJavaOptions = "-verbose:gc -XX:+PrintHeapAtGC -XX:+PrintGCDetails -XX:+PrintGCTimeStamps -XX:+PrintGCDateStamps -XX:+PrintTenuringDistribution -XX:+UseNUMA -XX:+PrintGCApplicationStoppedTime -XX:+UseCompressedOops -XX:+PrintClassHistogram -XX:+PrintGCApplicationConcurrentTime"
+default.bach_spark.config.spark.executor.extraJavaOptions = "-verbose:gc -XX:+PrintHeapAtGC -XX:+PrintGCDetails -XX:+PrintGCTimeStamps -XX:+PrintGCDateStamps -XX:+PrintTenuringDistribution -XX:+UseNUMA -XX:+PrintGCApplicationStoppedTime -XX:+UseCompressedOops -XX:+PrintClassHistogram -XX:+PrintGCApplicationConcurrentTime"
 default.bach_spark.config.spark.shuffle.consolidateFiles = true
 default.bach_spark.config.spark.shuffle.io.numConnectionsPerPeer =  2
 default.bach_spark.config.spark.history.fs.logDirectory = "#{node['spark']['hdfs_url']}/spark-history"
@@ -27,7 +27,7 @@ default.bach_spark.config.spark.yarn.queue = "spark"
 default.bach_spark.config.spark.master = "yarn-client"
 
 # Spark environment configuration
-default.bach_spark.environment.SPARK_LOCAL_IP = node.bcpc.floating.ip
+default.bach_spark.environment.SPARK_LOCAL_IP = node[:bcpc][:floating][:ip]
 default.bach_spark.environment.SPARK_PUBLIC_DNS = float_host(node['fqdn'])
 default.bach_spark.environment.HADOOP_CONF_DIR = "/etc/hadoop/conf"
 default.bach_spark.environment.HIVE_CONF_DIR = "/etc/hive/conf"
