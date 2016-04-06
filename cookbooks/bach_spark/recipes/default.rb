@@ -22,6 +22,10 @@ end
 template "#{spark_bin_dir}/conf/spark-defaults.conf" do
   source 'spark-defaults.conf.erb'
   mode 0755
+  helper :config do
+    node.bach_spark.config.sort_by(&:first)
+  end
+  helpers(Spark::Configuration)
 end
 
 link "/#{spark_bin_dir}/lib/spark-yarn-shuffle.jar" do
