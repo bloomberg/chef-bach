@@ -17,6 +17,10 @@ end
 template "#{spark_bin_dir}/conf/spark-env.sh" do
   source 'spark-env.sh.erb'
   mode 0755
+  helper :config do
+    node.bach_spark.environment.sort_by(&:first)
+  end
+  helpers(Spark::Configuration)
 end
 
 template "#{spark_bin_dir}/conf/spark-defaults.conf" do

@@ -1,7 +1,9 @@
 module Spark
   module Configuration
-    def render_option(prefix, value)
-      prefix = convert_key(prefix)
+    def render_option(prefix, value, delimiter=" ", keyConvert=true)
+
+      prefix = convert_key(prefix) if keyConvert
+
       case value
       when Hash
         lines = value.map do |key, val|
@@ -9,9 +11,9 @@ module Spark
         end
         lines.join($/)
       when Array
-        %(#{prefix} #{render_array_value(value)})
+        %(#{prefix}#{delimiter}#{render_array_value(value)})
       else
-        %(#{prefix} #{value})
+        %(#{prefix}#{delimiter}#{value})
       end
     end
 
