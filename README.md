@@ -72,13 +72,22 @@ also manually create the databag & item (as per the example in
 ``data_bags/configs/Example.json``) and manually upload it if you'd rather not
 bother with the whole ``admin`` thing for the first run.
 
-So, to add this machine a role, one can update the ``cluster.txt`` file and ensure
+To assign machines a role, one can update the ``cluster.txt`` file and ensure
 all necessary information is provided as per [cluster-readme.txt](./cluster-readme.txt).
 
-Alternatively, using the script [tests/automated_install.sh](./tests/automated_install.sh),
-one can run through what is the expected "happy-path" install. This simple
-install supports only changing DNS, proxy and VM resource settings. (This is
-the basis of our automated build tests.)
+Using the script [tests/automated_install.sh](./tests/automated_install.sh),
+one can run through what is the expected "happy-path" install for a single
+machine running (by default) four VirtualBox VMs. This simple install supports
+only changing DNS, proxy and VM resource settings. (This is the basis of our
+automated build tests.)
+
+Other Deployment Flavors
+------------------------
+
+In addition to the "happy-path" integration test using `automated_install.sh` there are ways to deploy on OpenStack or to bare-metal hosts. Lastly, for those using [test-kitchen](http://kitchen.ci/) there are various test-kitchen [suites](./.kitchen.yml) one can run as well.
+
+A view of the various full-cluster deployment types:
+![Flow Chart of BACH Deployment Flavors -- VBox, OpenStack, Vagrant Bootstrap/Baremetal, Baremetal Only][bach_deployments]
 
 Using a BACH cluster
 --------------------
@@ -178,7 +187,22 @@ Libraries:
 
 All Chef Code:
 * [TomDoc](http://tomdoc.org/)
-* [RuboCop](http://batsov.com/rubocop/)
-* [Foodcritic](http://acrmp.github.io/foodcritic/)
+
+Static Code Analysis:
+* Warnings not increased:
+  * [RuboCop](http://batsov.com/rubocop/)
+  * [Foodcritic](http://acrmp.github.io/foodcritic/)
+    * [Etsy rules](https://github.com/etsy/foodcritic-rules)
+    * [CustomInk rules](https://github.com/customink-webops/foodcritic-rules)
+* Markup Verified With:
+  * JSON: `python -m json.tool <json files>`
+  * XML: `xmllint --format <xml files>`
+  * ERB: `erb -P -x -T '-' <erb file> | ruby -c`
 
 Otherwise generally follow [bbatsov/ruby-style-guide](https://github.com/bbatsov/ruby-style-guide)
+
+The GitHub workflow we follow is captured below:
+![Flow Chart of GitHub Workflow from Issue or PR created to PR in progress and Code Review to Issue or PR resolved][gh_workflow]
+
+[gh_workflow]: https://github.com/bloomberg/chef-bach/blob/pages/readme-images/GitHub%20Workflow.png "GitHub process captured in yWorks yEd flow-chart"
+[bach_deployments]: https://github.com/bloomberg/chef-bach/blob/pages/readme-images/BACH%20Deployment%20Types.png "BACH deployment options in yWorks yEd diagram"
