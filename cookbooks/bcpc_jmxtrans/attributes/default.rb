@@ -54,6 +54,7 @@ default['jmxtrans']['default_queries']['kafka'] = [
         "Value" 
       ]
   },
+  {
     'typeNames' => ["name","request"],
     'obj' => "kafka.network:type=RequestMetrics,name=*,request=*",
     'result_alias' => "kafka.network.RequestMetrics",
@@ -97,9 +98,6 @@ default['jmxtrans']['default_queries']['kafka'] = [
         "FifteenMinuteRate"
       ]
   }
-
-
-
 ]
 default['jmxtrans']['default_queries']['datanode'] = [
   {
