@@ -44,7 +44,8 @@ if node[:bcpc][:management][:vip] and get_nodes_for("mysql").length() > 0
     config['gmysql-user'] = get_bcpc_config!('mysql-pdns-user')
     config['gmysql-password'] = get_bcpc_config!('mysql-pdns-password')
     config['gmysql-dbname'] = node['bcpc']['pdns_dbname']
-    config['gmysql-dnssec'] = 'yes'
+   # config['gmysql-dnssec'] = 'yes'
+    config['gmysql-dnssec'] = 'false'
   end
 
   package 'libmysqlclient-dev'
@@ -124,6 +125,9 @@ end
 
 node.set['pdns']['authoritative']['config']['recursor'] =
   node[:bcpc][:dns_servers][0]
+
+# mkoni need to set local_address to mgmt and floating VIPs
+#node.set['pdns']['recursor']['config']['local_address'] =
 
 include_recipe 'pdns::authoritative_package'
 
