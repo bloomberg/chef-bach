@@ -45,10 +45,10 @@ Vagrant.configure("2") do |config|
 
     # Chef provisioning
     bootstrap.vm.provision "chef_solo" do |chef|
-      chef.environments_path = [[:vm,""]]
+      chef.environments_path = [[:vm,"environments"]]
       chef.environment = env_name
-      chef.cookbooks_path = [[:vm,""]]
-      chef.roles_path = [[:vm,""]]
+      chef.cookbooks_path = [[:vm,"cookbooks"]]
+      chef.roles_path = [[:vm,"roles"]]
       chef.add_recipe("bcpc::bootstrap_network")
       chef.log_level="debug"
       chef.verbose_logging=true
@@ -57,10 +57,10 @@ Vagrant.configure("2") do |config|
 
     # Chef provisioning
     bootstrap.vm.provision "chef_solo" do |chef|
-      chef.environments_path = [[:vm,""]]
+      chef.environments_path = [[:vm,"environments"]]
       chef.environment = env_name
-      chef.cookbooks_path = [[:vm,""]]
-      chef.roles_path = [[:vm,""]]
+      chef.cookbooks_path = [[:vm,"cookbooks"]]
+      chef.roles_path = [[:vm,"roles"]]
       chef.add_recipe("bcpc::bootstrap_knife")
       chef.log_level="debug"
       chef.verbose_logging=true
@@ -72,10 +72,10 @@ Vagrant.configure("2") do |config|
 
     # Chef provisioning
     bootstrap.vm.provision "chef_solo" do |chef|
-      chef.environments_path = [[:vm,""]]
+      chef.environments_path = [[:vm,"environments"]]
       chef.environment = env_name
-      chef.cookbooks_path = [[:vm,""]]
-      chef.roles_path = [[:vm,""]]
+      chef.cookbooks_path = [[:vm,"cookbooks"]]
+      chef.roles_path = [[:vm,"roles"]]
       chef.add_recipe("bcpc::bootstrap_cleanup")
       chef.log_level="debug"
       chef.verbose_logging=true
@@ -90,10 +90,10 @@ Vagrant.configure("2") do |config|
 
     # Chef provisioning
     bootstrap.vm.provision "chef_solo" do |chef|
-      chef.environments_path = [[:vm,""]]
+      chef.environments_path = [[:vm,"environments"]]
       chef.environment = env_name
-      chef.cookbooks_path = [[:vm,""]]
-      chef.roles_path = [[:vm,""]]
+      chef.cookbooks_path = [[:vm,"cookbooks"]]
+      chef.roles_path = [[:vm,"roles"]]
       chef.add_recipe("bcpc::bootstrap_config")
       chef.log_level="debug"
       chef.verbose_logging=true
