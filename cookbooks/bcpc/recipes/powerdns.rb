@@ -26,6 +26,8 @@
 # cluster-internal records, at least those records will remain in sync
 # without sharing storage.
 #
+#
+
 if node[:bcpc][:management][:vip] and get_nodes_for("mysql").length() > 0
   make_bcpc_config('mysql-pdns-user', "pdns")
   make_bcpc_config('mysql-pdns-password', secure_password)
@@ -44,7 +46,7 @@ if node[:bcpc][:management][:vip] and get_nodes_for("mysql").length() > 0
     config['gmysql-user'] = get_bcpc_config!('mysql-pdns-user')
     config['gmysql-password'] = get_bcpc_config!('mysql-pdns-password')
     config['gmysql-dbname'] = node['bcpc']['pdns_dbname']
-    config['gmysql-dnssec'] = 'yes'
+    config['gmysql-dnssec'] = 'no'
   end
 
   package 'libmysqlclient-dev'
@@ -108,15 +110,15 @@ if node[:bcpc][:management][:vip] and get_nodes_for("mysql").length() > 0
         mysql_command_string.call
     }
 
-    not_if lazy {
+    not_if {
       c = Mixlib::ShellOut.new('echo "select id from domains limit 1;" | ' +
                                mysql_command_string.call)
       c.run_command
       c.status.success?
     }
 
-    sensitive true
-    
+   sensitive true
+
     notifies :reload, 'service[pdns]'
   end
 
@@ -124,6 +126,10 @@ end
 
 node.set['pdns']['authoritative']['config']['recursor'] =
   node[:bcpc][:dns_servers][0]
+
+# mkoni need to set local_address to mgmt and floating VIPs
+#node.set['pdns']['authoritative']['config']['local_address'] = [ '10.0.101.3' , '10.0.101.35']
+node.set['pdns']['authoritative']['config']['local_address'] = [ node[:bcpc][:floating][:vip] , node[:bcpc][:management][:vip] ]
 
 include_recipe 'pdns::authoritative_package'
 
@@ -135,6 +141,10 @@ pdns_domain node[:bcpc][:domain_name] do
   soa_ip node[:bcpc][:floating][:vip]
 end
 
+pdns_domain reverse_dns_zone  do
+  soa_ip node[:bcpc][:floating][:vip]
+end
+
 get_all_nodes.each do |server|
   ruby_block "create-dns-entry-#{server['hostname']}" do
     block do
@@ -143,13 +153,23 @@ get_all_nodes.each do |server|
         float_name =
           float_host(server['hostname']) + '.' + node[:bcpc][:domain_name]
         
-        r = Chef::Resource::PdnsRecord.new(float_name,
+        fwdR = Chef::Resource::PdnsRecord.new(float_name, run_context)
+        fwdR.domain(node[:bcpc][:domain_name])
+        fwdR.content(server[:bcpc][:floating][:ip])
+        fwdR.type('A')
+        fwdR.ttl(300)
+        fwdR.run_action(:create)
+
+        # Create reverse record
+        revR = Chef::Resource::PdnsRecord.new(calc_reverse_ip_address(server[:bcpc][:floating][:ip]),
                                            run_context)
-        r.domain(node[:bcpc][:domain_name])
-        r.content(server[:bcpc][:floating][:ip])
-        r.type('A')
-        r.ttl(300)
-        r.run_action(:create)
+        revR.domain(reverse_dns_zone)
+        revR.content(float_name)
+        revR.type('PTR')
+        revR.ttl(300)
+        revR.run_action(:create)
+
+
       end
 
       # check if we have a storage address
@@ -157,25 +177,44 @@ get_all_nodes.each do |server|
         storage_name =
           storage_host(server['hostname']) + '.' + node[:bcpc][:domain_name]
         
-        r = Chef::Resource::PdnsRecord.new(storage_name,
+        fwdR = Chef::Resource::PdnsRecord.new(storage_name, run_context)
+
+        fwdR.domain(node[:bcpc][:domain_name])
+        fwdR.content(server[:bcpc][:storage][:ip])
+        fwdR.type('A')
+        fwdR.ttl(300)
+        fwdR.run_action(:create)
+
+        # Create reverse record
+        revR = Chef::Resource::PdnsRecord.new(calc_reverse_ip_address(server[:bcpc][:storage][:ip]),
                                            run_context)
-        r.domain(node[:bcpc][:domain_name])
-        r.content(server[:bcpc][:storage][:ip])
-        r.type('A')
-        r.ttl(300)
-        r.run_action(:create)
+        revR.domain(reverse_dns_zone)
+        revR.content(storage_name)
+        revR.type('PTR')
+        revR.ttl(300)
+        revR.run_action(:create)
+
       end
 
       if server['bcpc']['management']['ip']
         # add a record for the management IP
         management_name = server['hostname'] + '.' + node[:bcpc][:domain_name]
-        r = Chef::Resource::PdnsRecord.new(management_name,
+        fwdR = Chef::Resource::PdnsRecord.new(management_name, run_context)
+        fwdR.domain(node[:bcpc][:domain_name])
+        fwdR.content(server['bcpc']['management']['ip'])
+        fwdR.type('A')
+        fwdR.ttl(300)
+        fwdR.run_action(:create)
+
+        # Create reverse record
+        revR = Chef::Resource::PdnsRecord.new(calc_reverse_ip_address(server[:bcpc][:management][:ip]),
                                            run_context)
-        r.domain(node[:bcpc][:domain_name])
-        r.content(server['bcpc']['management']['ip'])
-        r.type('A')
-        r.ttl(300)
-        r.run_action(:create)
+        revR.domain(reverse_dns_zone)
+        revR.content(management_name)
+        revR.type('PTR')
+        revR.ttl(300)
+        revR.run_action(:create)
+
       else
         Chef::Log.warn("No IP address found for host #{server['hostname']}!")
       end
