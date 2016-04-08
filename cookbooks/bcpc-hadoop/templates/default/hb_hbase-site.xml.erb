@@ -106,16 +106,6 @@
     <description>Factory to create the Phoenix RPC Scheduler that uses separate queues for index and metadata updates</description>
   </property>
 
-  <property>
-    <name>dfs.client.read.shortcircuit</name>
-    <value>true</value>
-  </property>
-
-  <property>
-    <name>dfs.domain.socket.path</name>
-    <value>/var/run/hadoop-hdfs/dn._PORT</value>
-  </property>
-
   <% if node[:bcpc][:hadoop][:kerberos][:enable] == true then %>
   <!-- HBase Authorization Configuration -->
   <property> 
