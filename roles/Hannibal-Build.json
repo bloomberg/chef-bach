@@ -5,7 +5,7 @@
     "json_class": "Chef::Role",
     "run_list": [
       "recipe[java::default]",
-      "recipe[bcpc-hadoop::maven_config]",
+      "recipe[bach_hadoop::maven_config]",
       "recipe[maven::default]",
       "recipe[hannibal::hannibal_build]"
     ],

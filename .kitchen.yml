@@ -10,7 +10,7 @@ platforms:
     run_list:
       - 'recipe[apt::default]'
       - 'recipe[java::oracle]'
-      - 'recipe[bcpc-hadoop::hdp_repo]'
+      - 'recipe[bach_hadoop::hdp_repo]'
     attributes: {
       java: {
         oracle: {

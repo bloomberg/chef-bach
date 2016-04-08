@@ -8,7 +8,7 @@ version          '0.1.0'
 
 depends "krb5"
 depends "bcpc"
-depends "bcpc-hadoop"
+depends "bach_hadoop"
 
 %w(ubuntu).each do |os|
   supports os

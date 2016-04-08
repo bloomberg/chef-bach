@@ -10,7 +10,7 @@ node.override['java']['jdk']['7']['i586']['url'] = get_binary_server_url + "jdk-
 # Get Kafka ZooKeeper servers
 # Override ZooKeeper related node attribute if Kafka specific ZooKeeper quorum is used
 if node[:use_hadoop_zookeeper_quorum]
-  zk_hosts = get_node_attributes(HOSTNAME_NODENO_ATTR_SRCH_KEYS,"zookeeper_server","bcpc-hadoop")
+  zk_hosts = get_node_attributes(HOSTNAME_NODENO_ATTR_SRCH_KEYS,"zookeeper_server","bach_hadoop")
 else
   zk_hosts = get_req_node_attributes(get_zk_nodes,HOSTNAME_NODENO_ATTR_SRCH_KEYS)
   node.override[:bcpc][:hadoop][:zookeeper][:servers] = zk_hosts
