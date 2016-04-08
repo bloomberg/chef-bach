@@ -30,6 +30,7 @@
     "recipe[bcpc-hadoop::hdp_repo]",
     "recipe[kafka-bcpc::zookeeper_server]",
     "recipe[bcpc::diamond]",
+    "recipe[bcpc-hadoop::graphite_to_zabbix]",
     "recipe[bcpc_jmxtrans]"
   ],
   "description": "Zookeeper Role for Kafka Machines",
