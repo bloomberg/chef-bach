@@ -266,7 +266,7 @@ def float_host(*args)
 end
 
 def storage_host(*args)
-  if node[:bcpc][:management][:ip] != node[:bcpc][:floating][:ip]
+  if node[:bcpc][:management][:ip] != node[:bcpc][:storage][:ip]
     return ("s-" + args.join('.'))
   else
     return args.join('.')
@@ -295,6 +295,13 @@ def calc_reverse_dns_zone(cidr)
 
   return reverse_ip
 
+end
+
+# 10.0.100.123 => "123.100.0.10.in-addr.arpa"
+def calc_reverse_ip_address(ip)
+
+    ipAddr = IPAddr.new(ip)
+    reverse_ip = ipAddr.reverse
 end
 
 # Internal: Check if the given host is the Zabbix leader 
