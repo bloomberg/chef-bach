@@ -48,6 +48,9 @@
         "hdp_utils": "http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.20/repos/ubuntu12"
       },
       "hadoop" : {
+        "environment" : {
+          "profile" : ""
+        },
         "yarn" : {
           "resourcemanager" : {
             "yarn.client.failover-sleep-base-ms": 30000
