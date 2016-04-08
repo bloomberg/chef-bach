@@ -1,0 +1,24 @@
+<workflow-app name="WorkFlowForShellAction" xmlns="uri:oozie:workflow:0.4">
+    <start to="shellAction"/>
+    <action name="shellAction">
+        <shell xmlns="uri:oozie:shell-action:0.2">
+	    <job-tracker>${jobTracker}</job-tracker>
+            <name-node>${nameNode}</name-node>
+            <configuration>
+                <property>
+                    <name>oozie.launcher.mapred.job.queue.name</name>
+                    <value>default</value>
+                </property>
+            </configuration>
+	    <exec>script.sh</exec>
+            <file>/tmp/oozie/shell-hadoopsh/script.sh#script.sh</file>    
+    	<capture-output/>
+        </shell>
+    <ok to="end"/>
+    <error to="killAction"/>
+    </action>
+    <kill name="killAction">
+        <message>"Killed job due to error"</message>
+    </kill>
+    <end name="end"/>
+</workflow-app>
