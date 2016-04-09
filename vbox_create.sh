@@ -244,7 +244,9 @@ ip=${2-10.0.100.3}
     vagrant ssh -c "test -f /etc/default/grub.ucf-dist && sudo mv /etc/default/grub.ucf-dist /etc/default/grub" || true
     # Duplicate what d-i's apt-setup generators/50mirror does when set in preseed
     if [ -n "$http_proxy" ]; then
-      if [ -z "`vagrant ssh -c "grep Acquire::http::Proxy /etc/apt/apt.conf"`" ]; then
+      proxy_found=true
+      vagrant ssh -c "grep Acquire::http::Proxy /etc/apt/apt.conf" || proxy_found=false
+      if [ $proxy_found == "false" ]; then
         vagrant ssh -c "echo 'Acquire::http::Proxy \"$http_proxy\";' | sudo tee -a /etc/apt/apt.conf"
       fi
     fi
