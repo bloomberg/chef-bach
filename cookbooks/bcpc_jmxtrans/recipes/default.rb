@@ -60,6 +60,14 @@ graphite_hosts.each do |host|
     break
   end
 end
+
+#
+# replace the jmxtrans.sh with one that does not have unsupported gc optimizations, short term fix
+#
+template "#{node['jmxtrans']['home']}/jmxtrans.sh" do
+  source "jmxtrans.sh.erb"
+  mode 0755 
+end
 #
 # Add services of processes on this node from which jmx data are collected by jmxtrans 
 #
