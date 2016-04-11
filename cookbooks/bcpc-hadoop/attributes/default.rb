@@ -11,6 +11,21 @@ default["bcpc"]["hadoop"]["distribution"]["release"] = '2.3.4.0-3485'
 default["bcpc"]["hadoop"]["distribution"]["active_release"] = node["bcpc"]["hadoop"]["distribution"]["release"]
 # disks to use for Hadoop activities (expected to be an environment or role set variable)
 default["bcpc"]["hadoop"]["disks"] = []
+default["bcpc"]["hadoop"]["hadoop_home_warn_suppress"] = 1
+default["bcpc"]["hadoop"]["hadoop_log_dir"] = "/var/log/hadoop-hdfs"
+default["bcpc"]["hadoop"]["hadoop_mapred_log_dir"] = "/var/log/hadoop-mapreduce"
+default["bcpc"]["hadoop"]["hadoop_secure_dn_log_dir"] = "/var/log/hadoop-hdfs"
+default["bcpc"]["hadoop"]["hadoop_pid_dir"] = "/var/run/hadoop-hdfs"
+default["bcpc"]["hadoop"]["hadoop_secure_dn_pid_dir"] = "/var/run/hadoop-hdfs"
+default["bcpc"]["hadoop"]["hadoop_mapred_pid_dir"] = "/var/run/hadoop-mapreduce"
+default["bcpc"]["hadoop"]["hadoop_secure_dn_user"] = "hdfs"
+default["bcpc"]["hadoop"]["core"]["yarn"]["nodemanager"]["linux-container-executor"]["group"] = "yarn"
+default["bcpc"]["hadoop"]["core"]["mapreduce"]["framework"]["name"] = "yarn"
+default["bcpc"]["hadoop"]["core"]["net"]["topology"]["script"]["file"]["name"] = "/etc/hadoop/conf/topology"
+default["bcpc"]["hadoop"]["core"]["hadoop"]["user"]["group"]["static"]["mapping"]["overrides"] = "hdfs=hadoop,hdfs;yarn=mapred,hadoop;mapred=mapred;"
+default["bcpc"]["hadoop"]["core"]["hadoop"]["security"]["group"]["mapping"]["ldap"]["bind"]["password"]["file"] = "/etc/hadoop/conf/ldap-conn-pass.txt"
+default["bcpc"]["hadoop"]["core"]["hadoop"]["security"]["group"]["mapping"]["ldap"]["search"]["attr"]["member"] = "member"
+default["bcpc"]["hadoop"]["core"]["hadoop"]["security"]["group"]["mapping"]["ldap"]["search"]["attr"]["group"]["name"] = "cn"
 default["bcpc"]["hadoop"]["oozie"]["admins"] = []
 default["bcpc"]["hadoop"]["oozie"]["memory_opts"] = "-Xmx2048m -XX:MaxPermSize=256m"
 default["bcpc"]["hadoop"]["oozie"]["sharelib_checksum"] = nil
@@ -114,6 +129,20 @@ default[:bcpc][:hadoop][:os][:group][:hadoop][:members]=["hdfs","yarn"]
 default[:bcpc][:hadoop][:os][:group][:hdfs][:members]=["hdfs"]
 default[:bcpc][:hadoop][:os][:group][:mapred][:members]=["yarn"]
 
+default["bcpc"]["hadoop"]["hdfs"]["dfs"]["namenode"]["audit"]["log"]["async"] = true
+default["bcpc"]["hadoop"]["hdfs"]["dfs"]["webhdfs"]["enabled"] = true
+default["bcpc"]["hadoop"]["hdfs"]["dfs"]["client"]["read"]["shortcircuit"] = true
+default["bcpc"]["hadoop"]["hdfs"]["dfs"]["domain"]["socket"]["path"] = "/var/run/hadoop-hdfs/dn._PORT"
+default["bcpc"]["hadoop"]["hdfs"]["dfs"]["client"]["file-block-storage-locations"]["timeout"] = 3000
+default["bcpc"]["hadoop"]["hdfs"]["dfs"]["datanode"]["hdfs-blocks-metadata"]["enabled"] = true
+default["bcpc"]["hadoop"]["hdfs"]["dfs"]["namenode"]["datanode"]["registration"]["ip-hostname-check"] = false
+default["bcpc"]["hadoop"]["hdfs"]["dfs"]["namenode"]["avoid"]["read"]["stale"]["datanode"] = true
+default["bcpc"]["hadoop"]["hdfs"]["dfs"]["namenode"]["avoid"]["write"]["stale"]["datanode"] = true
+default["bcpc"]["hadoop"]["hdfs"]["dfs"]["hosts"]["exclude"] = "/etc/hadoop/conf/dfs.exclude"
+default["bcpc"]["hadoop"]["hdfs"]["dfs"]["datanode"]["du"]["reserved"] = 1073741824
+default["bcpc"]["hadoop"]["hdfs"]["dfs"]["permissions"]["superusergroup"] = "hdfs"
+default["bcpc"]["hadoop"]["hdfs"]["dfs"]["cluster"]["administrators"] = "hdfs"
+default["bcpc"]["hadoop"]["hdfs"]["dfs"]["dfs"]["ha"]["automatic-failover"]["enabled"] = true
 default[:bcpc][:hadoop][:hdfs][:ldap][:integration] = false
 default[:bcpc][:hadoop][:hdfs][:ldap][:user] = "" #must be LDAP DN
 default[:bcpc][:hadoop][:hdfs][:ldap][:domain] = "BCPC.EXAMPLE.COM"

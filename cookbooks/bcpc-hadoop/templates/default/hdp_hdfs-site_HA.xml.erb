@@ -1,7 +1,7 @@
 <configuration>
   <property>
     <name>dfs.ha.automatic-failover.enabled</name>
-    <value>true</value>
+    <value><%= node["bcpc"]["hadoop"]["hdfs"]["dfs"]["dfs"]["ha"]["automatic-failover"]["enabled"]%></value>
   </property>
 
   <property>

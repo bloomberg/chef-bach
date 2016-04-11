@@ -61,17 +61,17 @@
 
   <property>
     <name>yarn.nodemanager.linux-container-executor.group</name>
-    <value>yarn</value>
+    <value><%= node["bcpc"]["hadoop"]["core"]["yarn"]["nodemanager"]["linux-container-executor"]["group"]%></value>
   </property>
 
   <property>
     <name>mapreduce.framework.name</name>
-    <value>yarn</value>
+    <value><%= node["bcpc"]["hadoop"]["core"]["mapreduce"]["framework"]["name"]%></value>
   </property>
 
   <property>
     <name>net.topology.script.file.name</name>
-    <value>/etc/hadoop/conf/topology</value>
+    <value><%= node["bcpc"]["hadoop"]["core"]["net"]["topology"]["script"]["file"]["name"]%></value>
   </property>
 
   <property>
@@ -118,7 +118,7 @@
 
   <property>
     <name>hadoop.user.group.static.mapping.overrides</name>
-    <value>hdfs=hadoop,hdfs;yarn=mapred,hadoop;mapred=mapred;</value>
+    <value><%= node["bcpc"]["hadoop"]["core"]["hadoop"]["user"]["group"]["static"]["mapping"]["overrides"]%></value>
   </property>
   <% if node[:bcpc][:hadoop][:hdfs][:ldap][:integration] == true %>
    <!-- HDFS LDAP Mapping configuration -->
@@ -134,7 +134,7 @@
 
   <property>
     <name>hadoop.security.group.mapping.ldap.bind.password.file</name>
-    <value>/etc/hadoop/conf/ldap-conn-pass.txt</value>
+    <value><%= node["bcpc"]["hadoop"]["core"]["hadoop"]["security"]["group"]["mapping"]["ldap"]["bind"]["password"]["file"]%></value>
   </property>
 
   <property>
@@ -159,12 +159,12 @@
 
   <property>
     <name>hadoop.security.group.mapping.ldap.search.attr.member</name>
-    <value>member</value>
+    <value><%= node["bcpc"]["hadoop"]["core"]["hadoop"]["security"]["group"]["mapping"]["ldap"]["search"]["attr"]["member"]%></value>
   </property>
 
   <property>
     <name>hadoop.security.group.mapping.ldap.search.attr.group.name</name>
-    <value>cn</value>
+    <value><%= node["bcpc"]["hadoop"]["core"]["hadoop"]["security"]["group"]["mapping"]["ldap"]["search"]["attr"]["group"]["name"]%></value>
   </property>
   <% end %>
 </configuration>

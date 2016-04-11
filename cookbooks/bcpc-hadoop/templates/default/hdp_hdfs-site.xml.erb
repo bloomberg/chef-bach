@@ -16,7 +16,7 @@
 
   <property>
     <name>dfs.namenode.audit.log.async</name>
-    <value>true</value>
+    <value><%= node["bcpc"]["hadoop"]["hdfs"]["dfs"]["namenode"]["audit"]["log"]["async"]%></value>
   </property>
 
   <property>
@@ -81,32 +81,32 @@
 
   <property>
     <name>dfs.webhdfs.enabled</name>
-    <value>true</value>
+    <value><%= node["bcpc"]["hadoop"]["hdfs"]["dfs"]["webhdfs"]["enabled"]%></value>
   </property>
 
   <property>
     <name>dfs.client.read.shortcircuit</name>
-    <value>true</value>
+    <value><%= node["bcpc"]["hadoop"]["hdfs"]["dfs"]["client"]["read"]["shortcircuit"]%></value>
   </property>
 
   <property>
     <name>dfs.domain.socket.path</name>
-    <value>/var/run/hadoop-hdfs/dn._PORT</value>
+    <value><%= node["bcpc"]["hadoop"]["hdfs"]["dfs"]["domain"]["socket"]["path"]%></value>
   </property>
 
   <property>
     <name>dfs.client.file-block-storage-locations.timeout</name>
-    <value>3000</value>
+    <value><%= node["bcpc"]["hadoop"]["hdfs"]["dfs"]["client"]["file-block-storage-locations"]["timeout"]%></value>
   </property>
 
   <property>
     <name>dfs.datanode.hdfs-blocks-metadata.enabled</name>
-    <value>true</value>
+    <value><%= node["bcpc"]["hadoop"]["hdfs"]["dfs"]["datanode"]["hdfs-blocks-metadata"]["enabled"]%></value>
   </property>
 
   <property>
     <name>dfs.namenode.datanode.registration.ip-hostname-check</name>
-    <value>false</value>
+    <value><%= node["bcpc"]["hadoop"]["hdfs"]["dfs"]["namenode"]["datanode"]["registration"]["ip-hostname-check"]%></value>
   </property>
 
   <property>
@@ -121,23 +121,23 @@
 
   <property>
     <name>dfs.namenode.avoid.read.stale.datanode</name>
-    <value>true</value>
+    <value><%= node["bcpc"]["hadoop"]["hdfs"]["dfs"]["namenode"]["avoid"]["read"]["stale"]["datanode"]%></value>
   </property>
 
   <property>
     <name>dfs.namenode.avoid.write.stale.datanode</name>
-    <value>true</value>
+    <value><%= node["bcpc"]["hadoop"]["hdfs"]["dfs"]["namenode"]["avoid"]["write"]["stale"]["datanode"]%></value>
   </property>
 
   <property>
     <name>dfs.hosts.exclude</name>
-    <value>/etc/hadoop/conf/dfs.exclude</value>
+    <value><%= node["bcpc"]["hadoop"]["hdfs"]["dfs"]["hosts"]["exclude"]%></value>
   </property>
 
   <property>
     <name>dfs.datanode.du.reserved</name>
     <!-- Reserve 1GB on each datanode -->
-    <value>1073741824</value>
+    <value><%= node["bcpc"]["hadoop"]["hdfs"]["dfs"]["datanode"]["du"]["reserved"]%></value>
   </property>
 
   <property>
@@ -182,7 +182,7 @@
 
   <property>
     <name>dfs.permissions.superusergroup</name>
-    <value>hdfs</value>
+    <value><%= node["bcpc"]["hadoop"]["hdfs"]["dfs"]["permissions"]["superusergroup"]%></value>
   </property>
 
   <property>
@@ -217,7 +217,7 @@
 
   <property> 
     <name>dfs.cluster.administrators</name> 
-    <value>hdfs</value> 
+    <value><%= node["bcpc"]["hadoop"]["hdfs"]["dfs"]["cluster"]["administrators"]%></value> 
     <description>ACL for who all can view the default servlets in the HDFS</description> 
   </property> 
 
