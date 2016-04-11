@@ -41,7 +41,7 @@ default['jmxtrans']['default_queries']['kafka'] = [
       ]
   },
   {
-    'typeNames' => ["name","topic"],
+    'type_name' => ["name","topic"],
     'obj' => "kafka.server:type=BrokerTopicMetrics,name=*, topic=*",
     'result_alias' => "kafka.BrokerTopicMetrics.perTopic",
     'attr' =>
@@ -62,7 +62,7 @@ default['jmxtrans']['default_queries']['kafka'] = [
       ]
   },
   {
-    'typeNames' => ["name","request"],
+    'type_name' => ["name","request"],
     'obj' => "kafka.network:type=RequestMetrics,name=*,request=*",
     'result_alias' => "kafka.network.RequestMetrics",
     'attr' =>
