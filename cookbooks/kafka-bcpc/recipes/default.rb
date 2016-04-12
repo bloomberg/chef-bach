@@ -25,7 +25,7 @@ if not node.has_key?('pam_d') or not node['pam_d'].has_key?('services') or not n
 end
 
 # set vm.swapiness to 0 (to lessen swapping)
-include_recipe 'sysctl::default'
-sysctl_param 'vm.swappiness' do
-  value 0
-end
+#include_recipe 'sysctl::default'
+#sysctl_param 'vm.swappiness' do
+#  value 0
+#end
