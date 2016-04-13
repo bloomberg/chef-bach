@@ -21,7 +21,7 @@ default['jmxtrans']['default_queries']['zookeeper'] = [
 ]
 default['jmxtrans']['default_queries']['kafka'] = [
   {
-    'obj' => "\\\"kafka.server\\\":type=\\\"BrokerTopicMetrics\\\",name=*",
+    'obj' => "kafka.server:type=BrokerTopicMetrics,name=*",
     'result_alias' => "kafka.BrokerTopicMetrics",
     'attr' => 
       [ 
@@ -33,14 +33,75 @@ default['jmxtrans']['default_queries']['kafka'] = [
       ]
   },
   {
-    'obj' => "\\\"kafka.server\\\":type=\\\"DelayedFetchRequestMetrics\\\",name=*",
-    'result_alias' => "kafka.server.DelayedFetchRequestMetrics",
+    'obj' => "kafka.controller:type=KafkaController,name=*",
+    'result_alias' => "kafka.KafkaController",
     'attr' => 
       [ 
-        "Count", 
-        "MeanRate", 
-        "OneMinuteRate", 
+        "Value" 
+      ]
+  },
+  {
+    'type_name' => ["name","topic"],
+    'obj' => "kafka.server:type=BrokerTopicMetrics,name=*, topic=*",
+    'result_alias' => "kafka.BrokerTopicMetrics.perTopic",
+    'attr' =>
+      [
+        "Count",
+        "MeanRate",
+        "OneMinuteRate",
+        "FiveMinuteRate",
+        "FifteenMinuteRate"
+      ]
+  },
+  {
+    'obj' => "kafka.server:type=ReplicaManager,name=*",
+    'result_alias' => "kafka.ReplicaManager",
+    'attr' => 
+      [ 
+        "Value" 
+      ]
+  },
+  {
+    'type_name' => ["name","request"],
+    'obj' => "kafka.network:type=RequestMetrics,name=*,request=*",
+    'result_alias' => "kafka.network.RequestMetrics",
+    'attr' =>
+      [
+        "Count",
+        "MeanRate",
+        "OneMinuteRate",
+        "FiveMinuteRate",
+        "FifteenMinuteRate" 
+      ]
+  },
+  {
+    'obj' => "kafka.controller:type=ControllerStats,name=*",
+    'result_alias' => "kafka.server.ControllerStats",
+    'attr' =>
+      [
+        "Count",
+        "FifteenMinuteRate", 
         "FiveMinuteRate", 
+        "OneMinuteRate"
+      ]
+  },
+  {
+    'obj' => "kafka.server:type=ReplicaFetcherManager,name=MaxLag,clientId=Replica",
+    'result_alias' => "kafka.ReplicaFetcherManager",
+    'attr' =>
+      [
+        "Value"
+      ]
+  },
+  {
+    'obj' => "kafka.server:type=ReplicaManager,name=*",
+    'result_alias' => "kafka.ReplicaManager",
+    'attr' =>
+      [
+        "Count",
+        "MeanRate",
+        "OneMinuteRate",
+        "FiveMinuteRate",
         "FifteenMinuteRate"
       ]
   }

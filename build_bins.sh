@@ -74,7 +74,7 @@ KAFKA_FILE=kafka_2.11-0.9.0.0.tgz
 mkdir -p kafka/0.9.0.0
 if ! [[ -f kafka/0.9.0.0/$KAFKA_FILE ]]; then
   while ! $(file kafka/0.9.0.0/$KAFKA_FILE | grep -q 'gzip compressed data'); do
-      $CURL -o kafka/0.9.0.0/$KAFKA_FILE -L http://archive.apache.org/dist/kafka/0.9.0.0/$KAFKA_FILE
+      $CURL -o kafka/0.9.0.0/$KAFKA_FILE -L http://mirrors.ocf.berkeley.edu/apache/kafka/0.9.0.0/$KAFKA_FILE
   done
 fi
 FILES="$KAFKA_FILE $FILES"

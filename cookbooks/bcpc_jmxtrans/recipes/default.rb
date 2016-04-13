@@ -60,6 +60,20 @@ graphite_hosts.each do |host|
     break
   end
 end
+
+ruby_block 'Check GC_OPTS exists in jmxtrans.sh' do
+  block do
+    raise "jmxtrans.sh does not have GC_OPTS"
+  end
+  not_if "grep GC_OPTS= #{node['jmxtrans']['home']}/jmxtrans.sh"
+end
+
+replace_or_add "replace GC_OPTS with other stuff" do
+  path "/opt/jmxtrans/jmxtrans.sh"
+  pattern "GC_OPTS=.*"
+  line 'GC_OPTS=${GC_OPTS:-"-Xms${HEAP_SIZE}M -Xmx${HEAP_SIZE}M -XX:PermSize=${PERM_SIZE}m -XX:MaxPermSize=${MAX_PERM_SIZE}m"}'
+end
+
 #
 # Add services of processes on this node from which jmx data are collected by jmxtrans 
 #
