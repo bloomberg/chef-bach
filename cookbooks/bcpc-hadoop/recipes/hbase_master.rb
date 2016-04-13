@@ -100,5 +100,4 @@ if node["bcpc"]["hadoop"]["phoenix"]["tracing"]["enabled"]
     EOH
     user "hbase"
   end
-
 end
