@@ -99,8 +99,6 @@ if node["bcpc"]["hadoop"]["phoenix"]["tracing"]["enabled"]
     HBASE_CONF_PATH=/etc/hadoop/conf:/etc/hbase/conf /usr/hdp/current/phoenix-client/bin/sqlline.py "#{node[:bcpc][:hadoop][:zookeeper][:servers].map{ |s| float_host(s[:hostname])}.join(",")}:#{node[:bcpc][:hadoop][:zookeeper][:port]}:/hbase" /tmp/trace_table.sql
     EOH
     user "hbase"
-    not_if <<-EOH
-    echo "select count(1) from SYSTEM.TRACING_STATS" | HBASE_CONF_PATH=/etc/hadoop/conf:/etc/hbase/conf /usr/hdp/current/phoenix-client/bin/sqlline.py "#{node[:bcpc][:hadoop][:zookeeper][:servers].map{ |s| float_host(s[:hostname])}.join(",")}:#{node[:bcpc][:hadoop][:zookeeper][:port]}:/hbase"
-    EOH
   end
+
 end
