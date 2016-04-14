@@ -22,7 +22,7 @@
 
   <property>
     <name>mapreduce.framework.name</name>
-    <value>yarn</value>
+    <value><%= node["bcpc"]["hadoop"]["mapreduce"]["framework"]["name"]%></value>
   </property>
 
   <property>
@@ -37,17 +37,17 @@
 
   <property>
     <name>mapreduce.map.output.compress</name>
-    <value>true</value>
+    <value><%= node["bcpc"]["hadoop"]["mapreduce"]["map"]["output"]["compress"]%></value>
   </property>
 
   <property>
     <name>mapred.map.output.compress.codec</name>  
-    <value>org.apache.hadoop.io.compress.SnappyCodec</value>
+    <value><%= node["bcpc"]["hadoop"]["mapred"]["map"]["output"]["compress"]["codec"]%></value>
   </property>
 
   <property>
     <name>yarn.app.mapreduce.am.log.level</name>
-    <value>DEBUG</value>
+    <value><%= node["bcpc"]["hadoop"]["yarn"]["app"]["mapreduce"]["am"]["log"]["level"]%></value>
   </property>
 
   <property>
@@ -62,7 +62,7 @@
 
   <property>
     <name>yarn.app.mapreduce.am.staging-dir</name>
-    <value>/user</value>
+    <value><%= node["bcpc"]["hadoop"]["yarn"]["app"]["mapreduce"]["am"]["staging-dir"]%></value>
   </property>
   <% if node[:bcpc][:hadoop][:kerberos][:enable] == true then %>
   <property>
