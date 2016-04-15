@@ -17,3 +17,4 @@ default["bcpc"]["hadoop"]["yarn"]["resourcemanager"]["yarn.client.failover-sleep
 default['bcpc']['hadoop']['nodemanager']['jmx']['port'] = 3131
 default['bcpc']['hadoop']['resourcemanager']['jmx']['port'] = 3131
 default['bcpc']['hadoop']['yarn']['nodemanager']['vmem-check-enabled'] = false
+default['bcpc']['hadoop']['yarn']['timeline-service']['client']['max-retries'] = 0
