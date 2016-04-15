@@ -7,6 +7,7 @@ default["bcpc"]["hadoop"]["hbase"]["superusers"] = ["hbase"]
 # Interval in milli seconds when HBase major compaction need to be run. Disabled by default
 default["bcpc"]["hadoop"]["hbase"]["major_compact"]["time"] = 0
 default["bcpc"]["hadoop"]["hbase"]["bucketcache"]["enabled"] = false
+default["bcpc"]["hadoop"]["hbase_rs"]["coprocessor"]["abortonerror"] = true
 default["bcpc"]["hadoop"]["hbase_rs"]["xmn"]["size"] = 256
 default["bcpc"]["hadoop"]["hbase_rs"]["xms"]["size"] = 1024
 default["bcpc"]["hadoop"]["hbase_rs"]["xmx"]["size"] = 1024
