@@ -81,8 +81,3 @@ template "/etc/hadoop/conf/yarn-env.sh" do
    :rm_jmx_port => node[:bcpc][:hadoop][:resourcemanager][:jmx][:port]
   )
 end  
-
-
-package "openjdk-7-jdk" do
-    action :upgrade
-end
