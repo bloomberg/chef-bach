@@ -69,12 +69,12 @@
 
   <property>
     <name>yarn.resourcemanager.recovery.enabled</name>
-    <value>true</value>
+    <value><%= node["bcpc"]["hadoop"]["yarn"]["resourcemanager"]["recovery"]["enabled"]%></value>
   </property>
 
   <property>
     <name>yarn.resourcemanager.store.class</name>
-    <value>org.apache.hadoop.yarn.server.resourcemanager.recovery.ZKRMStateStore</value>
+    <value><%= node["bcpc"]["hadoop"]["yarn"]["resourcemanager"]["store"]["class"]%></value>
   </property>
 
   <property>
@@ -84,7 +84,7 @@
 
   <property>
     <name>yarn.client.failover-proxy-provider</name>
-    <value>org.apache.hadoop.yarn.client.ConfiguredRMFailoverProxyProvider</value>
+    <value><%= node["bcpc"]["hadoop"]["yarn"]["client"]["failover-proxy-provider"]%></value>
   </property>
   <% else # if @rm_hosts.length >= 2 %>
 
@@ -167,58 +167,58 @@
 
   <property>
     <name>yarn.nodemanager.remote-app-log-dir</name>
-    <value>/var/log/hadoop-yarn/apps</value>
+    <value><%= node["bcpc"]["hadoop"]["yarn"]["nodemanager"]["remote-app-log-dir"]%></value>
     <description>Where to aggregate logs on HDFS</description>
   </property>
 
   <property>
     <name>yarn.log-aggregation-enable</name>
-    <value>true</value>
+    <value><%= node["bcpc"]["hadoop"]["yarn"]["log-aggregation-enable"]%></value>
   </property>
 
   <property>
     <name>yarn.log-aggregation.retain-seconds</name>
-    <value><%= node["bcpc"]["hadoop"]["yarn"]["log-aggregation_retain-seconds"] %></value>
+    <value><%= node["bcpc"]["hadoop"]["yarn"]["log-aggregation_retain-seconds"]%></value>
   </property>
 
   <property>
     <name>yarn.nodemanager.log-aggregation.roll-monitoring-interval-seconds</name>
-    <value>1800</value>
+    <value><%= node["bcpc"]["hadoop"]["yarn"]["nodemanager"]["log-aggregation"]["roll-monitoring-interval-seconds"]%></value>
   </property>
 
   <property>
     <name>yarn.nodemanager.log-aggregation.compression-type</name>
-    <value>gz</value>
+    <value><%= node["bcpc"]["hadoop"]["yarn"]["nodemanager"]["log-aggregation"]["compression-type"]%></value>
   </property>
 
   <property>
     <name>yarn.nodemanager.container-executor.class</name>
-    <value>org.apache.hadoop.yarn.server.nodemanager.LinuxContainerExecutor</value>
+    <value><%= node["bcpc"]["hadoop"]["yarn"]["nodemanager"]["container-executor"]["class"]%></value>
   </property>
 
   <property>
     <name>yarn.resourcemanager.nodes.exclude-path</name>
-    <value>/etc/hadoop/conf/yarn.exclude</value>
+    <value><%= node["bcpc"]["hadoop"]["yarn"]["resourcemanager"]["nodes"]["exclude-path"]%></value>
   </property>
 
   <property>
     <name>yarn.nodemanager.linux-container-executor.group</name>
-    <value>yarn</value>
+    <value><%= node["bcpc"]["hadoop"]["yarn.nodemanager.linux-container-executor.group"]%></value>
   </property>
 
   <property>
     <name>yarn.nodemanager.linux-container-executor.nonsecure-mode.limit-users</name>
-    <value>false</value>
+    <value><%= node["bcpc"]["hadoop"]["yarn"]["nodemanager"]["linux-container-executor"]["nonsecure-mode"]["limit-users"]%></value>
   </property>
 
   <property>
     <name>yarn.nodemanager.linux-container-executor.resources-handler.class</name>
-    <value>org.apache.hadoop.yarn.server.nodemanager.util.CgroupsLCEResourcesHandler</value>
+    <value><%= node["bcpc"]["hadoop"]["yarn"]["nodemanager"]["linux-container-executor"]["resources-handler"]["class"]%></value>
   </property>
 
   <property>
     <name>yarn.nodemanager.linux-container-executor.cgroups.mount-path</name>
-    <value>/sys/fs/cgroup/</value>
+    <value><%= node["bcpc"]["hadoop"]["yarn"]["nodemanager"]["linux-container-executor"]["cgroups"]["mount-path"]%></value>
   </property>
 
   <property>
@@ -321,6 +321,4 @@
     <name>yarn.timeline-service.client.max-retries</name>
     <value><%= node['bcpc']['hadoop']['yarn']['timeline-service']['client']['max-retries'] %></value>
   </property>
-
-
 </configuration>

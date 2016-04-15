@@ -3,7 +3,7 @@
   <defaultQueueSchedulingPolicy>DRF</defaultQueueSchedulingPolicy>
   <queue name="default" type="parent">
     <weight>1.0</weight>
-    <fairSharePreemptionTimeout>150</fairSharePreemptionTimeout>
+    <fairSharePreemptionTimeout><%= node['bcpc']['hadoop']['yarn']['fairsharepreemptiontimeout']%></fairSharePreemptionTimeout>
     <minResources><%= node["bcpc"]["hadoop"]["yarn"]["scheduler"]["minimum-allocation-mb"] * node["bcpc"]["hadoop"]["yarn"]["scheduler"]["fair"]["min-vcores"] %> mb,<%= node["bcpc"]["hadoop"]["yarn"]["scheduler"]["fair"]["min-vcores"] %>vcores</minResources>
   </queue>
 
