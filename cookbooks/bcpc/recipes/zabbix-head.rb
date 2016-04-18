@@ -186,7 +186,7 @@ file "/etc/php5/apache2/conf.d/zabbix.ini" do
     max_input_time = 300
     date.timezone = America/New_York
   EOH
-  notifies :restart, "service[apache2]", :delayed
+  notifies :run, "ruby_block[run_state_apache2_restart]", :immediate
 end
 
 template "/usr/local/share/zabbix/php/conf/zabbix.conf.php" do
@@ -194,7 +194,7 @@ template "/usr/local/share/zabbix/php/conf/zabbix.conf.php" do
   user node[:bcpc][:zabbix][:user]
   group "www-data"
   mode 00640
-  notifies :restart, "service[apache2]", :delayed
+  notifies :run, "ruby_block[run_state_apache2_restart]", :immediate
 end
 
 template "/etc/apache2/sites-available/zabbix-web" do
@@ -202,7 +202,7 @@ template "/etc/apache2/sites-available/zabbix-web" do
   owner "root"
   group "root"
   mode 00644
-  notifies :restart, "service[apache2]", :delayed
+  notifies :run, "ruby_block[run_state_apache2_restart]", :immediate
 end
 
 bash "apache-enable-zabbix-web" do
@@ -211,7 +211,7 @@ bash "apache-enable-zabbix-web" do
     a2ensite zabbix-web
   EOH
   not_if "test -r /etc/apache2/sites-enabled/zabbix-web"
-  notifies :restart, "service[apache2]", :delayed
+  notifies :run, "ruby_block[run_state_apache2_restart]", :immediate
 end
 
 include_recipe "bcpc::zabbix-work"
@@ -234,4 +234,16 @@ cookbook_file "/usr/local/bin/check" do
   source "checks/check"
   owner "root"
   mode "00755"
+end
+
+ruby_block "run_state_apache2_restart" do
+  block do
+    node.run_state['restart_apache2_needed'] = true
+  end
+  action :nothing
+end
+
+service "apache2" do
+  action :restart
+  only_if { node.run_state['restart_apache2_needed']  == true }
 end

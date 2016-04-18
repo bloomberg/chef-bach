@@ -90,6 +90,7 @@ end
 
 service "apache2" do
     action [ :enable, :start ]
+    supports [ :start, :stop, :restart, :status, :reload ]
 end
 
 template "/var/www/index.html" do
