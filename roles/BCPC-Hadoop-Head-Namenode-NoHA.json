@@ -4,7 +4,7 @@
   "run_list": [
     "role[Basic]",
     "role[BCPC-Hadoop-Head]",
-    "recipe[bcpc-hadoop::namenode_no_HA]",
+    "recipe[bach_hadoop::namenode_no_HA]",
     "recipe[bcpc_jmxtrans]"
   ],
   "description": "Non-HA version of Hadoop 1 role in a BCPC Hadoop cluster",

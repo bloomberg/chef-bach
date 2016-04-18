@@ -8,7 +8,7 @@ version          '0.1.0'
 
 depends "kafka"
 depends "sysctl"
-depends "bcpc-hadoop"
+depends "bach_hadoop"
 depends "pam"
 depends "ulimit"
 

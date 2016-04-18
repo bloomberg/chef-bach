@@ -4,7 +4,7 @@
     },
     "json_class": "Chef::Role",
     "run_list": [
-      "recipe[bcpc-hadoop::copylog]"
+      "recipe[bach_hadoop::copylog]"
     ],
     "description": "Copies log to centralized location",
     "chef_type": "role",

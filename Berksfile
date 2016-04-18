@@ -1,7 +1,7 @@
 source "https://api.berkshelf.com"
 
 cookbook 'bcpc', path: 'cookbooks/bcpc'
-cookbook 'bcpc-hadoop', path: 'cookbooks/bcpc-hadoop'
+cookbook 'bach_hadoop', path: 'cookbooks/bach_hadoop'
 cookbook 'bach_common', path: 'cookbooks/bach_common'
 cookbook 'bach_krb5', path: 'cookbooks/bach_krb5'
 cookbook 'bach_spark', path: 'cookbooks/bach_spark'

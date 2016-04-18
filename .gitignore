@@ -13,7 +13,7 @@ cookbooks/*/
 !cookbooks/bach_common
 !cookbooks/bach_spark
 !cookbooks/bcpc
-!cookbooks/bcpc-hadoop
+!cookbooks/bach_hadoop
 !cookbooks/bcpc_jmxtrans
 !cookbooks/hannibal
 !cookbooks/kafka-bcpc
