@@ -11,25 +11,17 @@ default["bcpc"]["hadoop"]["distribution"]["release"] = '2.3.4.0-3485'
 default["bcpc"]["hadoop"]["distribution"]["active_release"] = node["bcpc"]["hadoop"]["distribution"]["release"]
 # disks to use for Hadoop activities (expected to be an environment or role set variable)
 default["bcpc"]["hadoop"]["disks"] = []
-default["bcpc"]["hadoop"]["hadoop_home_warn_suppress"] = 1
-default["bcpc"]["hadoop"]["hadoop_log_dir"] = "/var/log/hadoop-hdfs"
-default["bcpc"]["hadoop"]["hadoop_mapred_ident_string"] = "mapred"
-default["bcpc"]["hadoop"]["hadoop_mapred_log_dir"] = "/var/log/hadoop-mapreduce"
-default["bcpc"]["hadoop"]["hadoop_secure_dn_log_dir"] = "/var/log/hadoop-hdfs"
-default["bcpc"]["hadoop"]["hadoop_pid_dir"] = "/var/run/hadoop-hdfs"
-default["bcpc"]["hadoop"]["hadoop_secure_dn_pid_dir"] = "/var/run/hadoop-hdfs"
-default["bcpc"]["hadoop"]["hadoop_mapred_pid_dir"] = "/var/run/hadoop-mapreduce"
-default["bcpc"]["hadoop"]["hadoop_secure_dn_user"] = "hdfs"
-default["bcpc"]["hadoop"]["core"]["yarn"]["nodemanager"]["linux-container-executor"]["group"] = "yarn"
-default["bcpc"]["hadoop"]["core"]["mapreduce"]["framework"]["name"] = "yarn"
-default["bcpc"]["hadoop"]["core"]["net"]["topology"]["script"]["file"]["name"] = "/etc/hadoop/conf/topology"
-default["bcpc"]["hadoop"]["core"]["hadoop"]["user"]["group"]["static"]["mapping"]["overrides"] = "hdfs=hadoop,hdfs;yarn=mapred,hadoop;mapred=mapred;"
-default["bcpc"]["hadoop"]["core"]["hadoop"]["security"]["group"]["mapping"]["ldap"]["bind"]["password"]["file"] = "/etc/hadoop/conf/ldap-conn-pass.txt"
-default["bcpc"]["hadoop"]["core"]["hadoop"]["security"]["group"]["mapping"]["ldap"]["search"]["attr"]["member"] = "member"
-default["bcpc"]["hadoop"]["core"]["hadoop"]["security"]["group"]["mapping"]["ldap"]["search"]["attr"]["group"]["name"] = "cn"
-default["bcpc"]["hadoop"]["oozie"]["admins"] = []
-default["bcpc"]["hadoop"]["oozie"]["memory_opts"] = "-Xmx2048m -XX:MaxPermSize=256m"
-default["bcpc"]["hadoop"]["oozie"]["sharelib_checksum"] = nil
+default["bcpc"]["hadoop"]["hadoop"]["bin"]["path"] = "/usr/bin/hadoop"
+default["bcpc"]["hadoop"]["hadoop"]["config"]["dir"] = "/etc/hadoop/conf"
+-default["bcpc"]["hadoop"]["hadoop_home_warn_suppress"] = 1
+-default["bcpc"]["hadoop"]["hadoop_log_dir"] = "/var/log/hadoop-hdfs"
+-default["bcpc"]["hadoop"]["hadoop_mapred_ident_string"] = "mapred"
+-default["bcpc"]["hadoop"]["hadoop_mapred_log_dir"] = "/var/log/hadoop-mapreduce"
+-default["bcpc"]["hadoop"]["hadoop_secure_dn_log_dir"] = "/var/log/hadoop-hdfs"
+-default["bcpc"]["hadoop"]["hadoop_pid_dir"] = "/var/run/hadoop-hdfs"
+-default["bcpc"]["hadoop"]["hadoop_secure_dn_pid_dir"] = "/var/run/hadoop-hdfs"
+-default["bcpc"]["hadoop"]["hadoop_mapred_pid_dir"] = "/var/run/hadoop-mapreduce"
+-default["bcpc"]["hadoop"]["hadoop_secure_dn_user"] = "hdfs"
 default["bcpc"]["hadoop"]["hdfs"]["HA"] = false
 default["bcpc"]["hadoop"]["hdfs"]["failed_volumes_tolerated"] = 1
 default["bcpc"]["hadoop"]["hdfs"]["dfs_replication_factor"] = 3

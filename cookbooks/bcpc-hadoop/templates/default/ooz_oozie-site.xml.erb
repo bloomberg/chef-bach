@@ -53,7 +53,7 @@
 
     <property>
       <name>oozie.systemmode</name>
-      <value>NORMAL</value>
+      <value><%= node["bcpc"]["hadoop"]["oozie"]["systemmode"]%></value>
       <description>
         System mode for  Oozie at startup.
       </description>
@@ -61,7 +61,7 @@
 
     <property>
       <name>oozie.service.AuthorizationService.security.enabled</name>
-      <value>false</value>
+      <value><%= node["bcpc"]["hadoop"]["oozie"]["service"]["AuthorizationService"]["security"]["enabled"]%></value>
       <description>
         Specifies whether security (user name/admin role) is enabled or not.
         If disabled any user can manage Oozie system and manage any job.
@@ -70,7 +70,7 @@
 
     <property>
       <name>oozie.service.PurgeService.older.than</name>
-      <value>30</value>
+      <value><%= node["bcpc"]["hadoop"]["oozie"]["service"]["PurgeService"]["older"]["than"]%></value>
       <description>
         Jobs older than this value, in days, will be purged by the PurgeService.
       </description>
@@ -78,7 +78,7 @@
 
     <property>
       <name>oozie.service.PurgeService.purge.interval</name>
-      <value>3600</value>
+      <value><%= node["bcpc"]["hadoop"]["oozie"]["service"]["PurgeService"]["purge"]["interval"]%></value>
       <description>
         Interval at which the purge service will run, in seconds.
       </description>
@@ -86,19 +86,19 @@
 
     <property>
       <name>oozie.service.CallableQueueService.queue.size</name>
-      <value>10000</value>
+      <value><%= node["bcpc"]["hadoop"]["oozie"]["service"]["CallableQueueService"]["queue"]["size"]%></value>
       <description>Max callable queue size</description>
     </property>
 
     <property>
       <name>oozie.service.CallableQueueService.threads</name>
-      <value>10</value>
+      <value><%= node["bcpc"]["hadoop"]["oozie"]["service"]["CallableQueueService"]["threads"]%></value>
       <description>Number of threads used for executing callables</description>
     </property>
 
     <property>
       <name>oozie.service.CallableQueueService.callable.concurrency</name>
-      <value>3</value>
+      <value><%= node["bcpc"]["hadoop"]["oozie"]["service"]["CallableQueueService"]["callable"]["concurrency"]%></value>
       <description>
         Maximum concurrency for a given callable type.
         Each command is a callable type (submit, start, run, signal, job, jobs, suspend,resume, etc).
@@ -111,14 +111,14 @@
     <property>
       <name>oozie.service.coord.normal.default.timeout
       </name>
-      <value>120</value>
+      <value><%= node["bcpc"]["hadoop"]["oozie"]["service"]["coord"]["normal"]["default"]["timeout"]%></value>
       <description>Default timeout for a coordinator action input check (in minutes) for normal job.
         -1 means infinite timeout</description>
     </property>
 
     <property>
       <name>oozie.db.schema.name</name>
-      <value>oozie</value>
+      <value><%= node["bcpc"]["hadoop"]["oozie"]["db"]["schema"]["name"]%></value>
       <description>
         Oozie DataBase Name
       </description>
@@ -126,7 +126,7 @@
 
     <property>
       <name>oozie.service.JPAService.create.db.schema</name>
-      <value>false</value>
+      <value><%= node["bcpc"]["hadoop"]["oozie"]["service"]["JPAService"]["create"]["db"]["schema"]%></value>
       <description>
         Creates Oozie DB.
         If set to true, it creates the DB schema if it does not exist. If the DB schema exists is a NOP.
@@ -137,7 +137,7 @@
     <% if @ooz_hosts.length >= 2 %>
     <property>
       <name>oozie.base.url</name>
-      <value>http://<%=node[:bcpc][:management][:vip]%>:11000/oozie</value>
+      <value>http://<%=node[:bcpc][:management][:vip]%>:<%=node["bcpc"]["hadoop"]["oozie_port"]%>/oozie</value>
       <description>
         http url to access Oozie
       </description>
@@ -181,7 +181,7 @@
 
     <property>
       <name>oozie.service.JPAService.pool.max.active.conn</name>
-      <value>100</value>
+      <value><%= node["bcpc"]["hadoop"]["oozie"]["service"]["JPAService"]["pool"]["max"]["active"]["conn"]%></value>
       <description>
         Max number of connections.
       </description>
@@ -239,7 +239,7 @@
 
     <property>
       <name>oozie.authentication.token.validity</name>
-      <value>36000</value>
+      <value><%= node["bcpc"]["hadoop"]["oozie"]["authentication"]["token"]["validity"]%></value>
       <description>
         Indicates how long (in seconds) an authentication token is valid before it has
         to be renewed.
