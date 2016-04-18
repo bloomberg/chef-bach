@@ -11,9 +11,8 @@ default["bcpc"]["hadoop"]["distribution"]["release"] = '2.3.4.0-3485'
 default["bcpc"]["hadoop"]["distribution"]["active_release"] = node["bcpc"]["hadoop"]["distribution"]["release"]
 # disks to use for Hadoop activities (expected to be an environment or role set variable)
 default["bcpc"]["hadoop"]["disks"] = []
-default["bcpc"]["hadoop"]["oozie"]["admins"] = []
-default["bcpc"]["hadoop"]["oozie"]["memory_opts"] = "-Xmx2048m -XX:MaxPermSize=256m"
-default["bcpc"]["hadoop"]["oozie"]["sharelib_checksum"] = nil
+default["bcpc"]["hadoop"]["hadoop"]["bin"]["path"] = "/usr/bin/hadoop"
+default["bcpc"]["hadoop"]["hadoop"]["config"]["dir"] = "/etc/hadoop/conf"
 default["bcpc"]["hadoop"]["hdfs"]["HA"] = false
 default["bcpc"]["hadoop"]["hdfs"]["failed_volumes_tolerated"] = 1
 default["bcpc"]["hadoop"]["hdfs"]["dfs_replication_factor"] = 3

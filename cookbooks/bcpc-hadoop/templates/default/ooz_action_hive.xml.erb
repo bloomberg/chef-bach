@@ -10,11 +10,11 @@
 <configuration>
    <property>
       <name>hadoop.bin.path</name>
-      <value>/usr/bin/hadoop</value>
+      <value><%= node["bcpc"]["hadoop"]["hadoop"]["bin"]["path"]%></value>
    </property>
 
    <property>
       <name>hadoop.config.dir</name>
-      <value>/etc/hadoop/conf</value>
+      <value><%= node["bcpc"]["hadoop"]["hadoop"]["config"]["dir"]%></value>
    </property>
 </configuration>
