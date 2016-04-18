@@ -284,22 +284,6 @@ end
     end
 end
 
-%w{s3}.each do |static|
-    ruby_block "create-floating-dns-entry-#{static}" do
-        block do
-            mysql_root_password = get_config!('password','mysql-root','os')
-            if get_nodes_for("ceph-rgw").length >= 1 then
-                system "mysql -uroot -p#{ mysql_root_password } #{node[:bcpc][:pdns_dbname]} -e 'SELECT name FROM records_static' | grep -q \"#{static}.#{node[:bcpc][:domain_name]}\""
-               if not $?.success? then
-                   %x[ mysql -uroot -p#{ mysql_root_password } #{node[:bcpc][:pdns_dbname]} <<-EOH
-                           INSERT INTO records_static (domain_id, name, content, type, ttl, prio) VALUES ((SELECT id FROM domains WHERE name='#{node[:bcpc][:domain_name]}'),'#{static}.#{node[:bcpc][:domain_name]}','#{node[:bcpc]['networks'][subnet][:floating][:vip]}','A',300,NULL);
-                   ]
-               end
-            end
-        end
-    end
-end
-
 template "/etc/powerdns/pdns.d/pdns.local.gmysql" do
     source "pdns.local.gmysql.erb"
     owner "pdns"
