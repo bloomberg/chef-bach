@@ -31,12 +31,19 @@ printf "#### Setup configuration files\n"
 # setup vagrant
 $SEDINPLACE 's/vb.gui = true/vb.gui = false/' Vagrantfile
 
+# prepare the stub environment
+mkdir -p ../cluster
+cp -r stub-environment/* ../cluster
+
 # setup proxy_setup.sh
 [[ -n "$PROXY" ]] && $SEDINPLACE "s/#export PROXY=.*\"/export PROXY=\"$PROXY\"/" proxy_setup.sh
 
 # setup environment file
 $SEDINPLACE "s/\"dns_servers\" : \[ \"8.8.8.8\", \"8.8.4.4\" \]/\"dns_servers\" : \[ $DNS_SERVERS \]/" environments/${ENVIRONMENT}.json
 [[ -n "$PROXY" ]] && $SEDINPLACE -e "s#\(\"bootstrap\": {\)#\1\\\n\"proxy\" : \"http://$PROXY\",#" -e $'s/\\\\n/\\\n/' environments/${ENVIRONMENT}.json
+
+# pull back the modified environment so that it can be copied to remote host
+tar -czf cluster.tgz ../cluster
 
 printf "#### Setup VB's and Bootstrap\n"
 source ./vbox_create.sh
