@@ -36,7 +36,7 @@
 
   <property>
     <name>hbase.cluster.distributed</name>
-    <value>true</value>
+    <value><%= node["bcpc"]["hadoop"]["hbase"]["cluster"]["distributed"] %></value>
   </property>
 
   <property>
@@ -86,7 +86,7 @@
 
   <property>
     <name>hbase.defaults.for.version.skip</name>
-    <value>true</value>
+    <value><%= node["bcpc"]["hadoop"]["hbase"]["defaults"]["for"]["version"]["skip"]%></value>
   </property>
 
   <property>
@@ -104,16 +104,6 @@
     <name>hbase.rpc.controllerfactory.class</name>
     <value>org.apache.hadoop.hbase.ipc.controller.ServerRpcControllerFactory</value>
     <description>Factory to create the Phoenix RPC Scheduler that uses separate queues for index and metadata updates</description>
-  </property>
-
-  <property>
-    <name>dfs.client.read.shortcircuit</name>
-    <value>true</value>
-  </property>
-
-  <property>
-    <name>dfs.domain.socket.path</name>
-    <value>/var/run/hadoop-hdfs/dn._PORT</value>
   </property>
 
   <% if node[:bcpc][:hadoop][:kerberos][:enable] == true then %>
@@ -197,25 +187,25 @@
 
   <property>
     <name>dfs.client.read.shortcircuit.buffer.size</name>
-    <value>131072</value>
+    <value><%= node["bcpc"]["hadoop"]["hbase"]["dfs"]["client"]["read"]["shortcircuit"]["buffer"]["size"]%></value>
   </property>
   <% end %>
 
   <property>
     <name>hbase.regionserver.handler.count</name>
-    <value>128</value>
+    <value><%= node["bcpc"]["hadoop"]["hbase"]["regionserver"]["handler"]["count"]%></value>
   </property>
 
   <!-- Log responses which take longer than 250ms -->
   <property>
     <name>hbase.ipc.warn.response.time</name>
-    <value><%= node["bcpc"]["hadoop"]["hbase"]["ipc"]["warn"]["responsetime"]%></value>
+    <value><%= node["bcpc"]["hadoop"]["hbase"]["ipc"]["warn"]["response"]["time"]%></value>
   </property>
 
   <!-- Log responses which are larger than 1MB -->
   <property>
     <name>hbase.ipc.warn.response.size</name>
-    <value>1048576</value>
+    <value><%= node["bcpc"]["hadoop"]["hbase"]["ipc"]["warn"]["response"]["size"]%></value>
   </property>
 
   <property>
