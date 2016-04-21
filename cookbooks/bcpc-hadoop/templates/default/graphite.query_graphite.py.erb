@@ -50,6 +50,7 @@ class GraphiteToZabbix(object):
       data = json.loads(res)
     except Exception as e:
       LOGGER.error('%s', e)
+      sys.stdout.write("%s %d %d\n" % ('graphite-to-zabbix graphite-to-zabbix.QueryResultError',int(time.time()),1))
     finally:
       e_time = time.time() - s_time
       LOGGER.debug("%s took %d sec" % (target, e_time))
@@ -95,6 +96,7 @@ class GraphiteToZabbix(object):
         output = ["%s %s %d" % (item_id, str(e[1]), int(e[0]) if e[0] else 0) for e in entry['datapoints']] 
       except ValueError:
         LOGGER.warn("Error while formatting values for %s" % (item_id))
+        sys.stdout.write("%s %d %d\n" % ('graphite-to-zabbix graphite-to-zabbix.QueryResultFormatError',int(time.time()),1))
       if output:
         sys.stdout.write('\n'.join(output) + '\n')
  
@@ -105,6 +107,9 @@ class GraphiteToZabbix(object):
     data = self.query_graphite(query)
     if data:
       self.write_data(data)
+    else:
+      LOGGER.warn("Returned empty result for query %s" % (query))
+      sys.stdout.write("%s %d %d\n" % ('graphite-to-zabbix graphite-to-zabbix.QueryResultEmpty',int(time.time()),1))
 
   def _main(self):
     self.create_log("<%= @log_file %>")
