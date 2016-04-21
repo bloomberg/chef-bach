@@ -96,6 +96,7 @@ class GraphiteToZabbix(object):
         output = ["%s %s %d" % (item_id, str(e[1]), int(e[0]) if e[0] else 0) for e in entry['datapoints']] 
       except ValueError:
         LOGGER.warn("Error while formatting values for %s" % (item_id))
+        sys.stdout.write("%s %d %d\n" % ('graphite-to-zabbix graphite-to-zabbix.QueryResultFormatError',int(time.time()),1))
       if output:
         sys.stdout.write('\n'.join(output) + '\n')
  

@@ -41,8 +41,19 @@ triggers = {
       'trigger_cond' => "=1",
       'trigger_name' => "graphite-to-zabbix_QueryResultError",
       'enable' => true,
-      'trigger_desc' => "Graphite to zabbix query got return an error",
+      'trigger_desc' => "Graphite to zabbix query returned an error",
       'severity' => 4,
+      'route_to' => "admin",
+      'is_graphite_query' => false
+    },
+    'graphite-to-zabbix.QueryResultFormatError' => {
+      'query' => "graphite-to-zabbix.QueryResultFormatError",
+      'trigger_val' => "max(3m)",
+      'trigger_cond' => "=1",
+      'trigger_name' => "graphite-to-zabbix_QueryResultFormatError",
+      'enable' => true,
+      'trigger_desc' => "Graphite to zabbix query result could not be formatted",
+      'severity' => 2,
       'route_to' => "admin",
       'is_graphite_query' => false
     }
