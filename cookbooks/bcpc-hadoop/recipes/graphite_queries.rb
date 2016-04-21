@@ -22,6 +22,30 @@ triggers = {
       'severity' => 2,
       'route_to' => "admin"
     }
+  },
+  'graphite-to-zabbix' => {
+    'graphite-to-zabbix.QueryResultEmpty' => {
+      'query' => "graphite-to-zabbix.QueryResultEmpty",
+      'trigger_val' => "max(3m)",
+      'trigger_cond' => "=1",
+      'trigger_name' => "graphite-to-zabbix_QueryResultEmpty",
+      'enable' => true,
+      'trigger_desc' => "Graphite to zabbix query got empty result",
+      'severity' => 2,
+      'route_to' => "admin",
+      'is_graphite_query' => false
+    },
+    'graphite-to-zabbix.QueryResultError' => {
+      'query' => "graphite-to-zabbix.QueryResultError",
+      'trigger_val' => "max(3m)",
+      'trigger_cond' => "=1",
+      'trigger_name' => "graphite-to-zabbix_QueryResultError",
+      'enable' => true,
+      'trigger_desc' => "Graphite to zabbix query got return an error",
+      'severity' => 4,
+      'route_to' => "admin",
+      'is_graphite_query' => false
+    }
   }
 }
 
