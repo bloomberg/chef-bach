@@ -10,6 +10,10 @@ include_recipe 'bcpc-hadoop::hadoop_config'
   hdp_select(pkg, node[:bcpc][:hadoop][:distribution][:active_release])
 end
 
+configure_kerberos 'historyserver_kerb' do
+  service_name 'historyserver'
+end
+
 template "/etc/hadoop/conf/mapred-env.sh" do
   source "hdp_mapred-env.sh.erb"
   mode 0655

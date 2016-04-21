@@ -24,6 +24,10 @@ bash "kill hdfs-httpfs" do
   returns [0, 1]
 end
 
+configure_kerberos 'httpfs_kerb' do
+  service_name 'httpfs'
+end
+
 service "hadoop-httpfs" do
   action [:enable, :start]
   supports :status => true, :restart => true, :reload => false

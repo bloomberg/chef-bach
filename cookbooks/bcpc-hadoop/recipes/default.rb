@@ -66,3 +66,11 @@ end.run_action(:install)
 
 Gem.clear_paths
 require 'zookeeper'
+
+execute "correct-gem-permissions" do
+  command 'find /opt/chef/embedded/lib/ruby/gems -type f -exec chmod a+r {} \; && ' +
+          'find /opt/chef/embedded/lib/ruby/gems -type d -exec chmod a+rx {} \;'
+  user "root"
+   action :nothing
+end.run_action(:run)
+

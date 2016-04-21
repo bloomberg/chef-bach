@@ -26,6 +26,10 @@ user_ulimit "hive" do
   process_limit 65536
 end
 
+configure_kerberos 'hive_kerb' do
+  service_name 'hive'
+end
+
 bash "create-hive-user-home" do
   code <<-EOH
   hdfs dfs -mkdir -p /user/hive

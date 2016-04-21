@@ -10,6 +10,7 @@
     "recipe[bcpc::networking]",
     "recipe[bcpc-hadoop::disks]",
     "recipe[bcpc-hadoop::hdp_repo]",
+    "recipe[bach_krb5::krb5_client]",
     "recipe[bcpc-hadoop::configs]",
     "recipe[pam::default]",
     "recipe[bach_spark::default]",

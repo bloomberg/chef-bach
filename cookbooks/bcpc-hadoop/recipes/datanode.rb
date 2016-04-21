@@ -51,6 +51,17 @@ user_ulimit "yarn" do
   process_limit 65536
 end
 
+configure_kerberos 'datanode_kerb' do
+  service_name 'datanode'
+end
+
+configure_kerberos 'nodemanager_kerb' do
+  service_name 'nodemanager'
+end
+
+configure_kerberos 'mapred_kerb' do
+  service_name 'historyserver'
+end
 # need to ensure hdfs user is in hadoop and hdfs
 # groups. Packages will not add hdfs if it
 # is already created at install time (e.g. if

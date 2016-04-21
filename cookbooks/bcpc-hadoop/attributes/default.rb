@@ -162,3 +162,6 @@ default['java']['oracle']['jce']['8']['url'] = get_binary_server_url + "jce_poli
 
 # Set the JAVA_HOME for Hadoop components
 default['bcpc']['hadoop']['java'] = '/usr/lib/jvm/java-7-oracle-amd64'
+
+
+default['bcpc']['cluster']['file_path'] = "/home/vagrant/chef-bcpc/cluster.txt"

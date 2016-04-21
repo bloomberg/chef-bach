@@ -10,6 +10,10 @@ include_recipe 'bcpc-hadoop::hadoop_config'
   hdp_select(pkg, node[:bcpc][:hadoop][:distribution][:active_release])
 end
 
+configure_kerberos 'journalnode_kerb' do
+  service_name 'journalnode'
+end
+
 if get_config("namenode_txn_fmt") then
   file "#{Chef::Config[:file_cache_path]}/nn_fmt.tgz" do
     user "hdfs"

@@ -54,6 +54,10 @@ bash "kill yarn-resourcemanager" do
   returns [0, 1]
 end
 
+configure_kerberos 'rm_kerb' do
+  service_name 'resourcemanager'
+end
+
 hdfs_write = "echo 'test' | hdfs dfs -copyFromLocal - /user/hdfs/chef-mapred-test"
 hdfs_remove = "hdfs dfs -rm -skipTrash /user/hdfs/chef-mapred-test"
 

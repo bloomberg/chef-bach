@@ -92,6 +92,10 @@ node[:bcpc][:hadoop][:mounts].each do |d|
   end
 end
 
+configure_kerberos 'namenode_kerb' do
+  service_name 'namenode'
+end
+
 bash "format namenode" do
   code "#{hdfs_cmd} namenode -format -nonInteractive -force"
   user "hdfs"
