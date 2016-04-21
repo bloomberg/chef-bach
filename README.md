@@ -160,7 +160,7 @@ BACH currently relies upon a number of open-source packages:
  - [Sentric Hannibal](https://github.com/sentric/hannibal/)
  - [Twitter HDFS-DU](https://github.com/twitter/hdfs-du)
  - [Chef](http://www.getchef.com/chef/)
- - [Cobbler](http://www.cobblerd.org/)
+ - [Cobbler](http://cobbler.github.io/)
  - [Diamond](https://github.com/BrightcoveOS/Diamond)
  - [Etherboot](http://etherboot.org/)
  - [Graphite](http://graphite.readthedocs.org/en/latest/)
