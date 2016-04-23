@@ -53,6 +53,15 @@ if node['bcpc']['hadoop']['copylog_enable']
     action [:enable, :start]
     subscribes :restart, "template[/etc/flume/conf/flume-env.sh]", :delayed
   end
+
+  template '/etc/flume/conf/log4j.properties' do
+    source "flume_log4j.properties.erb"
+    mode '0644'
+    owner 'flume'
+    group 'flume'
+    action :create
+  end
+
   node['bcpc']['hadoop']['copylog'].each do |id,f|
     if f['docopy'] 
       template "/etc/flume/conf/flume-#{id}.conf" do

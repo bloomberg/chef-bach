@@ -23,12 +23,17 @@
 #
 node.default['bcpc']['hadoop']['copylog']['syslog'] = {
     'logfile' => "/var/log/syslog",
-    'docopy' => false
+    'docopy' => true
 }
 
 node.default['bcpc']['hadoop']['copylog']['authlog'] = {
     'logfile' => "/var/log/auth.log",
     'docopy' => false
+}
+
+node.default['bcpc']['hadoop']['copylog']['cheflog'] = {
+    'logfile' => "#{node['chef_client']['log_dir']}/#{node['chef_client']['log_file']}",
+    'docopy' => true
 }
 
 # ensure the Zookeeper Gem is available for use in later recipes
