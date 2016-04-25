@@ -49,8 +49,6 @@ default["bcpc"]["hadoop"]["yarn"]["app"]["mapreduce"]["am"]["staging-dir"] = "/u
 default["bcpc"]["hadoop"]["kafka"]["jmx"]["port"] = 9995
 default["bcpc"]["hadoop"]["topology"]["script"] = "topology"
 default["bcpc"]["hadoop"]["topology"]["cookbook"] = "bcpc-hadoop"
-default["bcpc"]["hadoop"]["hive"]["hive_table_stats_db"] = "hive_table_stats"
-default["bcpc"]["hadoop"]["hive"]["hive_table_stats_db_user"] = "hive_table_stats"
 
 # Setting balancer bandwidth to default value as per hdfs-default.xml
 default["bcpc"]["hadoop"]["balancer"]["bandwidth"] = 1048576

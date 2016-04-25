@@ -29,7 +29,7 @@
 
 <property>
   <name>hive.metastore.client.socket.timeout</name>
-  <value><%= node[:bcpc][:hadoop][:hive][:metastore][:client][:socket][:timeout]%></value>
+  <value><%= node[:bcpc][:hadoop][:hive][:site_xml][:hive][:metastore][:client][:socket][:timeout]%></value>
   <description>MetaStore Client socket timeout in seconds</description>
 </property>
 
@@ -46,7 +46,7 @@
 
 <property>
   <name>javax.jdo.option.ConnectionUserName</name>
-  <value><%= node[:bcpc][:hadoop][:hive][:javax][:jdo][:option][:ConnectionUserName]%></value>
+  <value><%= node[:bcpc][:hadoop][:hive][:site_xml][:javax][:jdo][:option][:ConnectionUserName]%></value>
 </property>
 
 <property>
@@ -56,12 +56,12 @@
 
 <property>
   <name>datanucleus.autoCreateSchema</name>
-  <value><%= node[:bcpc][:hadoop][:hive][:datanucleus][:autoCreateSchema]%></value>
+  <value><%= node[:bcpc][:hadoop][:hive][:site_xml][:datanucleus][:autoCreateSchema]%></value>
 </property>
 
 <property>
   <name>datanucleus.fixedDatastore</name>
-  <value><%= node[:bcpc][:hadoop][:hive][:datanucleus][:fixedDatastore]%></value>
+  <value><%= node[:bcpc][:hadoop][:hive][:site_xml][:datanucleus][:fixedDatastore]%></value>
 </property>
 
 <property>
@@ -73,7 +73,7 @@
 <property>
   <name>hive.support.concurrency</name>
   <description>Enable Hive's Table Lock Manager Service</description>
-  <value><%= node[:bcpc][:hadoop][:hive][:support][:concurrency]%></value>
+  <value><%= node[:bcpc][:hadoop][:hive][:site_xml][:hive][:support][:concurrency]%></value>
 </property>
 
 <property>
@@ -84,12 +84,12 @@
 
 <property>
   <name>hive.metastore.execute.setugi</name>
-  <value><%= node[:bcpc][:hadoop][:hive][:metastore][:execute][:setugi]%></value>
+  <value><%= node[:bcpc][:hadoop][:hive][:site_xml][:hive][:metastore][:execute][:setugi]%></value>
 </property>
 
 <property>
   <name>hive.warehouse.subdir.inherit.perms</name>
-  <value><%= node[:bcpc][:hadoop][:hive][:warehouse][:subdir][:inherit][:perms]%></value>
+  <value><%= node[:bcpc][:hadoop][:hive][:site_xml][:hive][:warehouse][:subdir][:inherit][:perms]%></value>
 </property>
 
 <property>
@@ -101,20 +101,20 @@
   <name>hive.exec.scratchdir</name>
   <value>/tmp/hive-${user.name}</value>
 </property>
-<% if node[:bcpc][:hadoop][:hive][:hiveserver2][:authentication][:method].upcase == "LDAP" %>
+<% if node[:bcpc][:hadoop][:hive][:site_xml][:hive][:server2][:authentication].upcase == "LDAP" rescue nil %>
 <property>
   <name>hive.server2.authentication</name>
-  <value><%= node[:bcpc][:hadoop][:hive][:hiveserver2][:authentication][:method] %></value>
+  <value><%= node[:bcpc][:hadoop][:hive][:site_xml][:hive][:server2][:authentication] %></value>
 </property>
 
 <property>
   <name>hive.server2.authentication.ldap.url</name>
-  <value><%= node[:bcpc][:hadoop][:hive][:hiveserver2][:authentication][:ldap_url] %></value>
+  <value><%= node[:bcpc][:hadoop][:hive][:site_xml][:hive][:server2][:authentication][:ldap][:url] %></value>
 </property>
 
 <property>
   <name>hive.server2.authentication.ldap.Domain</name>
-  <value><%= node[:bcpc][:hadoop][:hive][:hiveserver2][:authentication][:ldap_domain] %></value>
+  <value><%= node[:bcpc][:hadoop][:hive][:site_xml][:hive][:server2][:authentication][:ldap][:domain] %></value>
 </property>
 <% end %>
 
@@ -138,10 +138,10 @@
 </property>
 
 <!-- HiveServer2 Security Configuration -->
-<% if node[:bcpc][:hadoop][:hive][:hiveserver2][:authentication][:method].upcase == "KERBEROS" %>
+<% if node[:bcpc][:hadoop][:hive][:site_xml][:hive][:server2][:authentication].upcase == "KERBEROS" rescue nil %>
 <property>
   <name>hive.server2.authentication</name>
-  <value><%= node[:bcpc][:hadoop][:hive][:hiveserver2][:authentication][:method] %></value>
+  <value><%= node[:bcpc][:hadoop][:hive][:site_xml][:hive][:server2][:authentication] %></value>
 </property>
 <% end %>
 
@@ -180,13 +180,13 @@ characterEncoding=UTF-8&amp;user=<%=@template_vars[:stats_user]%>&amp;password=<
 
 <property>
   <name>hive.stats.autogather</name>
-  <value><%= node[:bcpc][:hadoop][:hive][:stats][:autogather]%></value>
+  <value><%= node[:bcpc][:hadoop][:hive][:site_xml][:hive][:stats][:autogather]%></value>
   <description>A flag to gather statistics automatically during the INSERT OVERWRITE command.</description>
 </property>
 
 <property>
   <name>hive.server2.logging.operation.enabled</name>
-  <value><%= node[:bcpc][:hadoop][:hive][:server2][:logging][:operation][:enabled]%></value>
+  <value><%= node[:bcpc][:hadoop][:hive][:site_xml][:hive][:server2][:logging][:operation][:enabled]%></value>
 </property>
 
 <property>
@@ -196,6 +196,6 @@ characterEncoding=UTF-8&amp;user=<%=@template_vars[:stats_user]%>&amp;password=<
 
 <property>
   <name>hive.server2.logging.operation.verbose</name>
-  <value><%= node[:bcpc][:hadoop][:hive][:server2][:logging][:operation][:verbose]%></value>
+  <value><%= node[:bcpc][:hadoop][:hive][:site_xml][:hive][:server2][:logging][:operation][:verbose]%></value>
 </property>
 </configuration>

@@ -79,5 +79,25 @@ module Bcpc_Hadoop
       prohibited_regexs = prohibited_groups.map{ |regex_str| Regexp.new(regex_str) }
       return !prohibited_regexs.map!{ |r| r.match(group) }.any?
     end
+
+    # Convert a nested hash to a flat hash suitable for *site.xml
+    #
+    # { a: { b: 1, c: 2 } } => { a.b: 1, a.c: 2 }
+    #
+    # Usage: flatten_hash(nested_hash)
+    def flatten_hash(node, acc = {}, namespace = nil)
+      prefix = "#{namespace}." if namespace
+
+      if node.kind_of?(Hash)
+        node.each do |key,value|
+          fixed_key = key.to_s.gsub(/\./, '_')
+          flatten_hash(value, acc, "#{prefix}#{fixed_key}")
+        end
+      else
+        acc[namespace] = node
+      end
+      
+      return acc
+    end
   end
 end
