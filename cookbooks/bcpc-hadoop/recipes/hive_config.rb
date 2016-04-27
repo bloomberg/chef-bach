@@ -29,27 +29,6 @@ stats_password = make_config('mysql-hive-table-stats-password', secure_password)
   end
 end
 
-# Set up hive configs
-template "/etc/hive/conf/hive-env.sh" do
-  source "hv_hive-env.sh.erb"
-  mode 0644
-  variables(
-    :java_home => node[:bcpc][:hadoop][:java],
-    :hadoop_heapsize => node[:bcpc][:hadoop][:hive][:env_sh][:HADOOP_HEAPSIZE],
-    :hadoop_opts => node[:bcpc][:hadoop][:hive][:env_sh][:HADOOP_OPTS]
-  )
-end
-
-template "/etc/hive/conf/hive-exec-log4j.properties" do
-  source "hv_hive-exec-log4j.properties.erb"
-  mode 0644
-end
-
-template "/etc/hive/conf/hive-log4j.properties" do
-  source "hv_hive-log4j.properties.erb"
-  mode 0644
-end
-
 hive_site_vars = {
   :is_hive_server => node.run_list.expand(node.chef_environment).recipes.include?("bcpc-hadoop::hive_hcatalog"),
   :mysql_hosts => node[:bcpc][:hadoop][:mysql_hosts].map{ |m| m[:hostname] },
@@ -88,16 +67,6 @@ if node.run_list.expand(node.chef_environment).recipes.include?("bcpc-hadoop::hi
   "#{node[:bcpc][:hadoop][:kerberos][:data][:hive][:principal]}/#{node[:bcpc][:hadoop][:kerberos][:data][:hive][:princhost] == '_HOST' ? float_host(node[:fqdn]) : node[:bcpc][:hadoop][:kerberos][:data][:hive][:princhost]}@#{node[:bcpc][:hadoop][:kerberos][:realm]}"
 else
   "#{node[:bcpc][:hadoop][:kerberos][:data][:hive][:principal]}/#{node[:bcpc][:hadoop][:kerberos][:data][:hive][:princhost] == '_HOST' ? '_HOST' : node[:bcpc][:hadoop][:kerberos][:data][:hive][:princhost]}@#{node[:bcpc][:hadoop][:kerberos][:realm]}"
-end
-
-template "/etc/hive/conf/hive-site.xml" do
-  source "hv_hive-site.xml.erb"
-  mode 0644
-  variables(:template_vars => hive_site_vars)
-end
-
-link "/etc/hive-hcatalog/conf.#{node.chef_environment}/hive-site.xml" do
-  to "/etc/hive/conf.#{node.chef_environment}/hive-site.xml"
 end
 
 generated_values =
@@ -153,14 +122,30 @@ environment_values = flatten_hash(site_xml)
 # environment and attribute files.
 complete_hive_site_hash = generated_values.merge(environment_values)
 
-template '/etc/hive/conf/hive-site.fresh.xml' do
+template '/etc/hive/conf/hive-site.xml' do
   source 'generic_site.xml.erb'
   mode 0644
   variables(:options => complete_hive_site_hash)
 end
 
-template "/etc/hive/conf/hive-env.fresh.sh" do
+link "/etc/hive-hcatalog/conf.#{node.chef_environment}/hive-site.xml" do
+  to "/etc/hive/conf.#{node.chef_environment}/hive-site.xml"
+end
+
+template "/etc/hive/conf/hive-env.sh" do
   source "generic_env.sh.erb"
   mode 0644
   variables(:options => node[:bcpc][:hadoop][:hive][:env_sh])
+end
+
+# This template contains no variables/substitutions.
+template "/etc/hive/conf/hive-exec-log4j.properties" do
+  source "hv_hive-exec-log4j.properties.erb"
+  mode 0644
+end
+
+# This template contains no variables/substitutions.
+template "/etc/hive/conf/hive-log4j.properties" do
+  source "hv_hive-log4j.properties.erb"
+  mode 0644
 end

@@ -6,29 +6,28 @@ default["bcpc"]["hadoop"]["hive"]["hive_table_stats_db_user"] =
 # These will become key/value pairs in 'hive_site.xml'
 default[:bcpc][:hadoop][:hive][:site_xml].tap do |site_xml|
   # hive.* options
-  site_xml[:hive][:aux][:jars][:path] =
+  site_xml['hive.aux.jars.path'] =
     'file:///usr/share/java/mysql-connector-java.jar'
-  site_xml[:hive][:exec][:scratchdir] =
+  site_xml['hive.exec.scratchdir'] =
     '/tmp/hive-${user.name}'
-  site_xml[:hive][:metastore][:client][:socket][:timeout] = 3600
-  site_xml[:hive][:metastore][:execute][:setugi] = true
-  site_xml[:hive][:server2][:logging][:operation].tap do |logging_operation|
-    logging_operation[:enabled] = true
-    logging_operation[:log][:location] = '/tmp/${user.name}/operation_logs'
-    logging_operation[:verbose] = true
-  end
-  site_xml[:hive][:stats][:autogather] = true
-  site_xml[:hive][:stats][:dbclass] = 'jdbc:mysql'
-  site_xml[:hive][:stats][:jdbcdriver] = 'com.mysql.jdbc.Driver'
-  site_xml[:hive][:support][:concurrency] = true
-  site_xml[:hive][:warehouse][:subdir][:inherit][:perms] = true
+  site_xml['hive.metastore.client.socket.timeout'] = 3600
+  site_xml['hive.metastore.execute.setugi'] = true
+  site_xml['hive.server2.logging.operation.enabled'] = true
+  site_xml['hive.server2.logging.operation.log.location'] =
+    '/tmp/${user.name}/operation_logs'
+  site_xml['hive.server2.logging.operation.verbose'] = true
+  site_xml['hive.stats.autogather'] = true
+  site_xml['hive.stats.dbclass'] = 'jdbc:mysql'
+  site_xml['hive.stats.jdbcdriver'] = 'com.mysql.jdbc.Driver'
+  site_xml['hive.support.concurrency'] = true
+  site_xml['hive.warehouse.subdir.inherit.perms'] = true
 
   # All other prefixes
-  site_xml[:datanucleus][:autoCreateSchema] = false
-  site_xml[:datanucleus][:fixedDatastore] = true
-  site_xml[:javax][:jdo][:option][:ConnectionDriverName] = nil
-  site_xml[:javax][:jdo][:option][:ConnectionPassword] = nil
-  site_xml[:javax][:jdo][:option][:ConnectionUserName] = "hive"
+  site_xml['datanucleus.autoCreateSchema'] = false
+  site_xml['datanucleus.fixedDatastore'] = true
+  site_xml['javax.jdo.option.ConnectionDriverName'] = nil
+  site_xml['javax.jdo.option.ConnectionPassword'] = nil
+  site_xml['javax.jdo.option.ConnectionUserName'] = "hive"
 end
 
 # These will become key/value pairs in 'hive-env.sh'
