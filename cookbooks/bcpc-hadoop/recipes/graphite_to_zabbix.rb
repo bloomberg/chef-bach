@@ -38,7 +38,7 @@ template node[:bcpc][:hadoop][:zabbix][:query_graphite][:config_file] do
   source "graphite.query_graphite.config.erb"
   mode 0544
   zabbix_triggers = node.run_state["zabbix_triggers"] or {}
-  variables(:queries => zabbix_triggers.map{ |host,item| item.map{ |key, attr| attr['query'] }}.flatten.to_set )
+  variables(:queries => zabbix_triggers.map{ |host,item| item.select{|key, attr| !attr.key?('is_graphite_query') || attr['is_graphite_query'] }.map{ |key, attr| attr['query'] }}.flatten.to_set )
 end
 
 ruby_block "zabbix_monitor" do
