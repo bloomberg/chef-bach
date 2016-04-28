@@ -115,12 +115,12 @@ site_xml = node[:bcpc][:hadoop][:hive][:site_xml]
 
 # flatten_hash converts the tree of node object values to a hash with
 # dot-notation keys.
-environment_values = flatten_hash(site_xml)
+#environment_values = flatten_hash(site_xml)
 
 # The complete hash for hive_site.xml is a merger of values
 # dynamically generated in this recipe, and hardcoded values from the
 # environment and attribute files.
-complete_hive_site_hash = generated_values.merge(environment_values)
+complete_hive_site_hash = generated_values.merge(site_xml)
 
 template '/etc/hive/conf/hive-site.xml' do
   source 'generic_site.xml.erb'
