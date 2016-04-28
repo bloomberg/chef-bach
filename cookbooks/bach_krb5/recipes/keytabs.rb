@@ -1,9 +1,9 @@
 keytab_dir = node[:bcpc][:hadoop][:kerberos][:keytab][:dir]
 realm = node[:bcpc][:hadoop][:kerberos][:realm]
 
-get_all_nodes().each do |h|
+get_cluster_nodes().each do |h|
   # Create directory for the the host to store keytabs
-  directory "#{keytab_dir}/#{float_host(h[:fqdn])}" do
+  directory "#{keytab_dir}/#{float_host(h)}" do
     action :create
     owner "root"
     group "root"
@@ -15,7 +15,7 @@ get_all_nodes().each do |h|
   node[:bcpc][:hadoop][:kerberos][:data].each do |ke, va|
   
     service_principal = va['principal']
-    host_fqdn = float_host(h[:fqdn])
+    host_fqdn = float_host(h)
     keytab_file = va['keytab']
   
     # Delete the existing kerberos principal if principal is being recreated
@@ -44,10 +44,10 @@ get_all_nodes().each do |h|
 end
 
 
-get_all_nodes().each do |h|
+get_cluster_nodes().each do |h|
   node[:bcpc][:hadoop][:kerberos][:data].each do |ke, va|
     service_principal = va['principal']
-    host_fqdn = float_host(h[:fqdn])
+    host_fqdn = float_host(h)
     keytab_file = va['keytab']
 
     # Create the keytab file

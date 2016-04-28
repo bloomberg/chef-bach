@@ -1,10 +1,10 @@
 require 'base64'
 # Upload keytabs to chef-server
-get_all_nodes().each do |h|
+get_cluster_nodes().each do |h|
   node[:bcpc][:hadoop][:kerberos][:data].each do |srvc, srvdat|
     # Set host based on configuration
-    config_host=srvdat['princhost'] == "_HOST" ? float_host(h[:hostname]) : srvdat['princhost'].split('.')[0]
-    keytab_host=srvdat['princhost'] == "_HOST" ? float_host(h[:fqdn]) : srvdat['princhost']
+    config_host=srvdat['princhost'] == "_HOST" ? float_host(h.split('.')[0]) : srvdat['princhost'].split('.')[0]
+    keytab_host=srvdat['princhost'] == "_HOST" ? float_host(h) : srvdat['princhost']
 
     # Delete existing configuration item (if requested)
     config_key = "#{config_host}-#{srvc}"

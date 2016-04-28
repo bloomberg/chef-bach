@@ -86,6 +86,10 @@ node[:bcpc][:hadoop][:mounts].each do |d|
   end
 end
 
+configure_kerberos 'namenode_kerb' do
+  service_name 'namenode'
+end
+
 if @node['bcpc']['hadoop']['hdfs']['HA'] == true then
   bash "#{hdfs_cmd} namenode -bootstrapStandby -force -nonInteractive" do
     code "#{hdfs_cmd} namenode -bootstrapStandby -force -nonInteractive"
@@ -137,6 +141,7 @@ if @node['bcpc']['hadoop']['hdfs']['HA'] == true then
     supports :status => true, :restart => true, :reload => false
     subscribes :restart, "link[/etc/init.d/hadoop-hdfs-namenode]", :immediate
     subscribes :restart, "template[/etc/hadoop/conf/hdfs-site.xml]", :delayed
+    subscribes :restart, "template[/etc/hadoop/conf/hadoop-metrics2.properties]", :delayed
     subscribes :restart, "template[/etc/hadoop/conf/core-site.xml]", :delayed
     subscribes :restart, "template[/etc/hadoop/conf/hdfs-policy.xml]", :delayed
     subscribes :restart, "template[/etc/hadoop/conf/hadoop-env.sh]", :delayed

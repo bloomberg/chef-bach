@@ -4,9 +4,9 @@
 #
 ################################################
 
-export YARN_LOG_DIR=/var/log/hadoop-yarn
-export YARN_PID_DIR=/var/run/hadoop-yarn
-export YARN_IDENT_STRING=yarn
+export YARN_LOG_DIR=<%= node['bcpc']['hadoop']['yarn']['yarn_log_dir']%>
+export YARN_PID_DIR=<%= node['bcpc']['hadoop']['yarn']['yarn_pid_dir']%>
+export YARN_IDENT_STRING=<%= node['bcpc']['hadoop']['yarn']['yarn_ident_string']%>
 
 # User for YARN daemons
 export HADOOP_YARN_USER=${HADOOP_YARN_USER:-yarn}

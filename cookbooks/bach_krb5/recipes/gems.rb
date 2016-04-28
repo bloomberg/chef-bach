@@ -20,14 +20,9 @@ gem_package "rkerberos" do
   action :nothing
 end.run_action(:install)
 
-file "correct-permissions-for-rkerberos" do
-  path "/opt/chef/embedded/lib/ruby/gems/1.9.1/specifications/rkerberos-0.1.3.gemspec"
-  mode 0644
+execute "correct-gem-permissions" do
+  command 'find /opt/chef/embedded/lib/ruby/gems -type f -exec chmod a+r {} \; && ' +
+          'find /opt/chef/embedded/lib/ruby/gems -type d -exec chmod a+rx {} \;'
+  user "root"
   action :nothing
-end.run_action(:touch)
-
-file "correct-permissions-for-rake-compiler" do
-  path "/opt/chef/embedded/lib/ruby/gems/1.9.1/specifications/rake-compiler-0.9.5.gemspec"
-  mode 0644 
-  action :nothing
-end.run_action(:touch)
+end.run_action(:run)

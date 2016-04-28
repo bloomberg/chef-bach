@@ -1,3 +1,3 @@
-export HADOOP_MAPRED_IDENT_STRING=mapred
-export HADOOP_MAPRED_PID_DIR=/var/run/hadoop-mapreduce
-export HADOOP_MAPRED_LOG_DIR=/var/log/hadoop-mapreduce
+export HADOOP_MAPRED_IDENT_STRING=<%= node["bcpc"]["hadoop"]["hadoop_mapred_ident_string"]%>
+export HADOOP_MAPRED_PID_DIR=<%= node["bcpc"]["hadoop"]["hadoop_mapred_pid_dir"]%>
+export HADOOP_MAPRED_LOG_DIR=<%= node["bcpc"]["hadoop"]["hadoop_mapred_log_dir"]%>

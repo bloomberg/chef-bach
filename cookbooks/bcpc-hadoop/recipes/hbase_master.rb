@@ -31,6 +31,10 @@ phoenix-client
   hdp_select(p, node[:bcpc][:hadoop][:distribution][:active_release])
 end
 
+configure_kerberos 'hbase_kerb' do
+  service_name 'hbase'
+end
+
 user_ulimit "hbase" do
   filehandle_limit 32769
 end

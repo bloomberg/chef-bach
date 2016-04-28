@@ -355,34 +355,6 @@ Boostrapping these nodes will take quite a long time - as much as an
 hour or more. You can monitor progress by logging into the VMs and
 using tools such as 'top' or 'ps'.
 
-Using BCPC
-==========
-
-If the VIP is configured against 10.0.100.5 (this is the default for the
-Test-Laptop environment), then you can go to ``https://10.0.100.5/horizon/`` to
-go to the OpenStack interface.  To find the OpenStack credentials, look in the
-data bag for your environment under ``keystone-admin-user`` and
-``keystone-admin-password``:
-
-```
-ubuntu@bcpc-bootstrap:~/chef-bcpc$ knife data bag show configs Test-Laptop | grep keystone-admin
-keystone-admin-password:       abcdefgh
-keystone-admin-token:          this-is-my-token
-keystone-admin-user:           admin
-
-```
-
-To check on ``Ceph``:
-
-```
-ubuntu@bcpc-vm1:~$ ceph -s
-   health HEALTH_OK
-   monmap e1: 1 mons at {bcpc-vm1=172.16.100.11:6789/0}, election epoch 2, quorum 0 bcpc-vm1
-   osdmap e94: 12 osds: 12 up, 12 in
-    pgmap v705: 2192 pgs: 2192 active+clean; 80333 KB data, 729 MB used, 227 GB / 227 GB avail
-   mdsmap e4: 1/1/1 up {0=bcpc-vm1=up:active}
-```
-
 Setting up a private repos mirror
 =================================
 
@@ -423,11 +395,8 @@ index d844783..9a9e53a 100644
          "dhcp_range" : "10.0.100.10 10.0.100.250"
        },
 +      "repos": {
-+        "ceph": "http://10.0.100.3/ceph-dumpling",
-+        "ceph-extras": "http://10.0.100.3/ceph-extras",
 +        "rabbitmq": "http://10.0.100.3/rabbitmq",
 +        "mysql": "http://10.0.100.3/percona",
-+        "openstack": "http://10.0.100.3/ubuntu-cloud",
 +        "hwraid": "http://10.0.100.3/hwraid"
 +      },
        "ntp_servers" : [ "0.pool.ntp.org", "1.pool.ntp.org", "2.pool.ntp.org", "3.pool.ntp.org" ],

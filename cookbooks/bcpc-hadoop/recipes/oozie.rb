@@ -12,6 +12,10 @@ end
   hdp_select(pkg, node[:bcpc][:hadoop][:distribution][:active_release])
 end
 
+configure_kerberos 'oozie_kerb' do
+  service_name 'oozie'
+end
+
 OOZIE_LIB_PATH="/usr/hdp/#{node[:bcpc][:hadoop][:distribution][:active_release]}/oozie"
 OOZIE_CLIENT_PATH='/usr/hdp/current/oozie-client'
 OOZIE_SERVER_PATH="/usr/hdp/#{node[:bcpc][:hadoop][:distribution][:active_release]}/oozie/oozie-server"

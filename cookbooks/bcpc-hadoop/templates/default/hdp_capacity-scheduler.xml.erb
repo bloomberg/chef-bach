@@ -11,7 +11,7 @@
 
   <property>
     <name>yarn.scheduler.capacity.maximum-applications</name>
-    <value>10000</value>
+    <value><%= node["bcpc"]["hadoop"]["yarn"]["scheduler"]["capacity"]["maximum-applications"]%></value>
     <description>
       Maximum number of applications that can be pending and running.
     </description>
@@ -19,7 +19,7 @@
 
   <property>
     <name>yarn.scheduler.capacity.maximum-am-resource-percent</name>
-    <value>0.1</value>
+    <value><%= node["bcpc"]["hadoop"]["yarn"]["scheduler"]["capacity"]["maximum-am-resource-percent"]%></value>
     <description>
       Maximum percent of resources in the cluster which can be used to run 
       application masters i.e. controls number of concurrent running
@@ -29,7 +29,7 @@
 
   <property>
     <name>yarn.scheduler.capacity.resource-calculator</name>
-    <value>org.apache.hadoop.yarn.util.resource.DefaultResourceCalculator</value>
+    <value><%= node["bcpc"]["hadoop"]["yarn"]["scheduler"]["capacity"]["resource-calculator"]%></value>
     <description>
       The ResourceCalculator implementation to be used to compare 
       Resources in the scheduler.
@@ -41,7 +41,7 @@
 
   <property>
     <name>yarn.scheduler.capacity.root.queues</name>
-    <value>default</value>
+    <value><%= node["bcpc"]["hadoop"]["yarn"]["scheduler"]["capacity"]["root"]["queues"]%></value>
     <description>
       The queues at the this level (root is the root queue).
     </description>
@@ -49,13 +49,13 @@
 
   <property>
     <name>yarn.scheduler.capacity.root.default.capacity</name>
-    <value>100</value>
+    <value><%= node["bcpc"]["hadoop"]["yarn"]["scheduler"]["capacity"]["root"]["default"]["capacity"]%></value>
     <description>Default queue target capacity.</description>
   </property>
 
   <property>
     <name>yarn.scheduler.capacity.root.default.user-limit-factor</name>
-    <value>1</value>
+    <value><%= node["bcpc"]["hadoop"]["yarn"]["scheduler"]["capacity"]["root"]["default"]["user-limit-factor"]%></value>
     <description>
       Default queue user limit a percentage from 0.0 to 1.0.
     </description>
@@ -63,7 +63,7 @@
 
   <property>
     <name>yarn.scheduler.capacity.root.default.maximum-capacity</name>
-    <value>100</value>
+    <value><%= node["bcpc"]["hadoop"]["yarn"]["scheduler"]["capacity"]["root"]["default"]["maximum-capacity"]%></value>
     <description>
       The maximum capacity of the default queue. 
     </description>
@@ -71,7 +71,7 @@
 
   <property>
     <name>yarn.scheduler.capacity.root.default.state</name>
-    <value>RUNNING</value>
+    <value><%= node["bcpc"]["hadoop"]["yarn"]["scheduler"]["capacity"]["root"]["default"]["state"]%></value>
     <description>
       The state of the default queue. State can be one of RUNNING or STOPPED.
     </description>
@@ -79,7 +79,7 @@
 
   <property>
     <name>yarn.scheduler.capacity.root.default.acl_submit_applications</name>
-    <value>*</value>
+    <value><%= node["bcpc"]["hadoop"]["yarn"]["yarn"]["scheduler"]["capacity"]["root"]["default"]["acl_submit_applications"]%></value>
     <description>
       The ACL of who can submit jobs to the default queue.
     </description>
@@ -87,7 +87,7 @@
 
   <property>
     <name>yarn.scheduler.capacity.root.default.acl_administer_queue</name>
-    <value>*</value>
+    <value><%= node["bcpc"]["hadoop"]["yarn"]["scheduler"]["capacity"]["root"]["default"]["acl_administer_queue"]%></value>
     <description>
       The ACL of who can administer jobs on the default queue.
     </description>
@@ -95,7 +95,7 @@
 
   <property>
     <name>yarn.scheduler.capacity.node-locality-delay</name>
-    <value>-1</value>
+    <value><%= node["bcpc"]["hadoop"]["yarn"]["scheduler"]["capacity"]["node-locality-delay"]%></value>
     <description>
       Number of missed scheduling opportunities after which the CapacityScheduler 
       attempts to schedule rack-local containers. 

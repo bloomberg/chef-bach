@@ -13,6 +13,10 @@ user_ulimit "zookeeper" do
   filehandle_limit 32769
 end
 
+configure_kerberos 'zookeeper_kerb' do
+  service_name 'zookeeper'
+end
+   
 directory "/var/run/zookeeper" do 
   owner "zookeeper"
   group "zookeeper"

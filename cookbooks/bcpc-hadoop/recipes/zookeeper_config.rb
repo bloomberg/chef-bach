@@ -28,11 +28,10 @@ end
   end
 end
 
-if node[:bcpc][:hadoop][:kerberos][:enable] == true then
-  %w{zookeeper-client.jaas zookeeper-server.jaas}.each do |t|
-    template "/etc/zookeeper/conf/#{t}" do
-      source "zk_#{t}.erb"
-      mode 0644
-    end
+%w{zookeeper-client.jaas zookeeper-server.jaas}.each do |t|
+  template "/etc/zookeeper/conf/#{t}" do
+    source "zk_#{t}.erb"
+    mode 0644
+    only_if { node[:bcpc][:hadoop][:kerberos][:enable] }
   end
 end

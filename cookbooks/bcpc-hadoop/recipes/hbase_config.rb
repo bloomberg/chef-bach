@@ -45,14 +45,13 @@ end
   end
 end
 
-if node[:bcpc][:hadoop][:kerberos][:enable] == true then 
-  %w{
-    hbase-client.jaas
-    hbase-server.jaas
-    regionserver.jaas}.each do |t|
-    template "/etc/hbase/conf/#{t}" do
-      source "hb_#{t}.erb"
-      mode 0644
-    end
+%w{
+  hbase-client.jaas
+  hbase-server.jaas
+  regionserver.jaas}.each do |t|
+  template "/etc/hbase/conf/#{t}" do
+    source "hb_#{t}.erb"
+    mode 0644
+    only_if { node[:bcpc][:hadoop][:kerberos][:enable] }
   end
-end 
+end
