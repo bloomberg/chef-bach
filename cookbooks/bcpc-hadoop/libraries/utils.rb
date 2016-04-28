@@ -118,8 +118,12 @@ end
 def get_namenodes()
   # Logic to get all namenodes if running in HA
   # or to get only the master namenode if not running in HA
-  if node['bcpc']['hadoop']['hdfs']['HA'] then
-    nn_hosts = get_nodes_for("namenode*")
+  if node['bcpc']['hadoop']['hdfs']['HA']
+    nnrole = search(:node, "role:BCPC-Hadoop-Head-Namenode* AND chef_environment:#{node.chef_environment}")
+    nnroles = search(:node, "roles:BCPC-Hadoop-Head-Namenode* AND chef_environment:#{node.chef_environment}")
+    puts "nnrole: #{nnrole}"
+    puts "nnroles:#{nnroles}"
+    nn_hosts = nnrole | nnroles
   else
     nn_hosts = get_nodes_for("namenode_no_HA")
   end

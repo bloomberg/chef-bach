@@ -10,22 +10,7 @@ include_recipe 'bcpc-hadoop::hadoop_config'
   hdp_select(pkg, node[:bcpc][:hadoop][:distribution][:active_release])
 end
 
-configure_kerberos 'journalnode_kerb' do
-  service_name 'journalnode'
-end
-
-if get_config("namenode_txn_fmt") then
-  file "#{Chef::Config[:file_cache_path]}/nn_fmt.tgz" do
-    user "hdfs"
-    group "hdfs"
-    user 0644
-    content Base64.decode64(get_config("namenode_txn_fmt"))
-    not_if { node[:bcpc][:hadoop][:mounts].all? { |d| File.exists?("/disk/#{d}/dfs/jn/#{node.chef_environment}/current/VERSION") } }
-  end
-end
-
 [node[:bcpc][:hadoop][:mounts].first].each do |d|
-
   # Per chef-documentation for directory resource's recursive attribute:
   # For the owner, group, and mode attributes, the value of this attribute applies only to the leaf directory
   # Hence, we create "/disk/#{d}/dfs/jn/" to have "jn" dir owned by hdfs and then
@@ -46,14 +31,6 @@ end
     mode 0755
     action :create
     recursive true
-  end
-
-  bash "unpack-nn-fmt-image-to-disk-#{d}" do
-    user "root"
-    cwd "/disk/#{d}/dfs/"
-    code "tar xpzvf #{Chef::Config[:file_cache_path]}/nn_fmt.tgz"
-    notifies :restart, "service[hadoop-hdfs-journalnode]"
-    only_if { not get_config("namenode_txn_fmt").nil? and not File.exists?("/disk/#{d}/dfs/jn/#{node.chef_environment}/current/VERSION") }
   end
 end
 
@@ -96,11 +73,23 @@ link "/etc/init.d/hadoop-hdfs-journalnode" do
   notifies :run, 'bash[kill hdfs-journalnode]', :immediate
 end
 
+configure_kerberos 'namenode_kerb' do
+  service_name 'namenode'
+end
+
+configure_kerberos 'journalnode_kerb' do
+  service_name 'journalnode'
+end
+
 bash "kill hdfs-journalnode" do
   code "pkill -u hdfs -f journalnode"
   action :nothing
   returns [0, 1]
 end
+
+jnKeytab = node[:bcpc][:hadoop][:kerberos][:data][:journalnode][:keytab]
+nnKeytab = node[:bcpc][:hadoop][:kerberos][:data][:namenode][:keytab]
+keyTabDir = node[:bcpc][:hadoop][:kerberos][:keytab][:dir]
 
 service "hadoop-hdfs-journalnode" do
   action [:start, :enable]
@@ -109,5 +98,6 @@ service "hadoop-hdfs-journalnode" do
   subscribes :restart, "template[/etc/hadoop/conf/hdfs-site.xml]", :delayed
   subscribes :restart, "template[/etc/hadoop/conf/hdfs-site_HA.xml]", :delayed
   subscribes :restart, "template[/etc/hadoop/conf/hadoop-env.sh]", :delayed
+  subscribes :restart, "file[#{keyTabDir}/#{jnKeytab}]", :delayed
+  subscribes :restart, "file[#{keyTabDir}/#{nnKeytab}]", :delayed
 end
-

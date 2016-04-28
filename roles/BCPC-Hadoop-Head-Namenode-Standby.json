@@ -3,7 +3,7 @@
   "json_class": "Chef::Role",
   "run_list": [
     "role[Basic]",
-    "role[BCPC-Hadoop-Head]",
+    "recipe[bcpc-hadoop::configs]",
     "recipe[bcpc-hadoop::namenode_standby]",
     "recipe[bcpc_jmxtrans]"
   ],

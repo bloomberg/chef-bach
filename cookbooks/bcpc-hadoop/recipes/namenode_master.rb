@@ -190,60 +190,6 @@ end
 # So we fake the formatting of the txn directories by copying over current/VERSION
 # this tricks the journalnodes and namenodes into thinking they've been formatted.
 
-ruby_block "create-format-UUID-File" do
-  block do
-    Dir.chdir("/disk/#{node[:bcpc][:hadoop][:mounts][0]}/dfs/") do
-      system("tar czvf #{Chef::Config[:file_cache_path]}/nn_fmt.tgz nn/current/VERSION jn/#{node.chef_environment}/current/VERSION")
-    end
-  end
-  action :run
-  only_if { File.exists?("/disk/#{node[:bcpc][:hadoop][:mounts][0]}/dfs/nn/current/VERSION") and  File.exists?("/disk/#{node[:bcpc][:hadoop][:mounts][0]}/dfs/jn/#{node.chef_environment}/current/VERSION") }
-end
-
-ruby_block "upload-format-UUID-File" do
-  block do
-    cmdStrCount = "zgrep -a -i layoutVersion #{Chef::Config[:file_cache_path]}/nn_fmt.tgz|wc -l"
-    cmdStrUnqCount = "zgrep -a -i layoutVersion #{Chef::Config[:file_cache_path]}/nn_fmt.tgz|uniq|wc -l"
-    cmdStrLayVersn = "zgrep -a -i layoutVersion #{Chef::Config[:file_cache_path]}/nn_fmt.tgz|uniq|cut -d'=' -f2"
-
-    cmd = Mixlib::ShellOut.new(cmdStrCount, :timeout => 10).run_command
-    cmd.error!
-    Chef::Log.debug("Total number of version lines : #{cmd.stdout}") 
-    if cmd.stdout.to_i != 2
-      raise("Couldn't find required number of layoutVersion records");
-    end
-
-    cmd = Mixlib::ShellOut.new(cmdStrUnqCount, :timeout => 10).run_command
-    cmd.error!
-    Chef::Log.debug("Total number of unique version lines : #{cmd.stdout}")
-    if cmd.stdout.to_i != 1
-      raise("Mismatched layoutVersion records between JN and NN in local file");
-    end
-    
-    node_layout_version = 0
-    if node[:bcpc][:hadoop][:hdfs].key?('layoutVersion')
-      node_layout_version = node[:bcpc][:hadoop][:hdfs][:layoutVersion]
-    end
-
-    cmd = Mixlib::ShellOut.new(cmdStrLayVersn, :timeout => 10).run_command
-    cmd.error!
-    Chef::Log.debug("layoutVersion stored in node is : #{node_layout_version}")
-    Chef::Log.debug("layoutVersion stored in the file is #{cmd.stdout.to_i}")
-
-    if ( get_config("namenode_txn_fmt").nil? ) || ( cmd.stdout.to_i > node_layout_version )
-      make_config!("namenode_txn_fmt", Base64.encode64(IO.read("#{Chef::Config[:file_cache_path]}/nn_fmt.tgz")));
-      node.set[:bcpc][:hadoop][:hdfs][:layoutVersion] = cmd.stdout.to_i
-      node.save
-    elsif cmd.stdout.to_i < node_layout_version
-      raise("New HDFS layoutVersion is higher than old HDFS layoutVersion: #{cmd.stdout.to_i} > #{node_layout_version}")
-    end
-
-  end
-  action :run
-  ignore_failure true
-  only_if { File.exists?("#{Chef::Config[:file_cache_path]}/nn_fmt.tgz") }
-end
-
 bash "reload hdfs nodes" do
   code "#{hdfs_cmd} dfsadmin -refreshNodes"
   user "hdfs"
