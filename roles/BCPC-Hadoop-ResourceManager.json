@@ -1,9 +1,8 @@
 {
-  "name": "BCPC-Hadoop-Head-ResourceManager",
+  "name": "BCPC-Hadoop-ResourceManager",
   "json_class": "Chef::Role",
   "run_list": [
     "role[Basic]",
-    "role[BCPC-Hadoop-Head]",
     "recipe[bcpc-hadoop::resource_manager]"
   ],
   "description": "A highly-available head node in a BCPC Hadoop cluster",

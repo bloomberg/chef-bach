@@ -1,17 +1,16 @@
 {
-  "name": "BCPC-Hadoop-Head-Namenode-NoHA",
+  "name": "BCPC-Hadoop-Namenode",
   "json_class": "Chef::Role",
   "run_list": [
     "role[Basic]",
-    "role[BCPC-Hadoop-Head]",
-    "recipe[bcpc-hadoop::namenode_no_HA]",
+    "recipe[bcpc-hadoop::namenode_master]",
     "recipe[bcpc_jmxtrans]"
   ],
-  "description": "Non-HA version of Hadoop 1 role in a BCPC Hadoop cluster",
+  "description": "A highly-available head node in a BCPC Hadoop cluster",
   "chef_type": "role",
   "default_attributes" : {
     "jmxtrans":  {
-      "servers":  [
+      "servers": [
                  {
                     "type": "namenode",
                     "service": "hadoop-hdfs-namenode",
@@ -24,7 +23,7 @@
     "bcpc": {
       "hadoop": {
         "hdfs": {
-          "HA": false
+          "HA": true
         }
       }
     }

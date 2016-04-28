@@ -1,12 +1,12 @@
 {
-  "name": "BCPC-Hadoop-Head-Hive",
+  "name": "BCPC-Hadoop-MapReduce",
   "default_attributes": {
   },
   "json_class": "Chef::Role",
   "run_list": [
     "role[Basic]",
-    "role[BCPC-Hadoop-Head]",
-    "recipe[bcpc-hadoop::hive_hcatalog]"
+    "recipe[bcpc-hadoop::historyserver]",
+    "recipe[bcpc-hadoop::oozie]"
   ],
   "description": "A highly-available head node in a BCPC Hadoop cluster",
   "chef_type": "role",

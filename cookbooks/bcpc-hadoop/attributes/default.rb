@@ -29,7 +29,7 @@ default["bcpc"]["hadoop"]["core"]["hadoop"]["security"]["group"]["mapping"]["lda
 default["bcpc"]["hadoop"]["core"]["hadoop"]["security"]["group"]["mapping"]["ldap"]["search"]["attr"]["group"]["name"] = "cn"
 default["bcpc"]["hadoop"]["hadoop"]["bin"]["path"] = "/usr/bin/hadoop"
 default["bcpc"]["hadoop"]["hadoop"]["config"]["dir"] = "/etc/hadoop/conf"
-default["bcpc"]["hadoop"]["hdfs"]["HA"] = false
+default["bcpc"]["hadoop"]["hdfs"]["HA"] = true
 default["bcpc"]["hadoop"]["hdfs"]["failed_volumes_tolerated"] = 1
 default["bcpc"]["hadoop"]["hdfs"]["dfs_replication_factor"] = 3
 default["bcpc"]["hadoop"]["hdfs"]["dfs_blocksize"] = "128m"

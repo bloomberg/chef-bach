@@ -1,10 +1,10 @@
 {
-  "name": "BCPC-Hadoop-Head-Namenode",
+  "name": "BCPC-Hadoop-Namenode-Standby",
   "json_class": "Chef::Role",
   "run_list": [
     "role[Basic]",
-    "role[BCPC-Hadoop-Head]",
-    "recipe[bcpc-hadoop::namenode_master]",
+    "recipe[bcpc-hadoop::configs]",
+    "recipe[bcpc-hadoop::namenode_standby]",
     "recipe[bcpc_jmxtrans]"
   ],
   "description": "A highly-available head node in a BCPC Hadoop cluster",
@@ -21,12 +21,5 @@
       }
   },
   "override_attributes": {
-    "bcpc": {
-      "hadoop": {
-        "hdfs": {
-          "HA": true
-        }
-      }
-    }
   }
 }
