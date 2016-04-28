@@ -25,8 +25,10 @@ default[:bcpc][:hadoop][:hive][:site_xml].tap do |site_xml|
   # All other prefixes
   site_xml['datanucleus.autoCreateSchema'] = false
   site_xml['datanucleus.fixedDatastore'] = true
-  site_xml['javax.jdo.option.ConnectionUserName'] = "hive"
 end
+
+gc_log_name = "gc.log-#{rand(9999)}-#{node[:hostname]}-" +
+  `date +\'%Y%m%d%H%M\'`.chomp + '.log'
 
 # These will become key/value pairs in 'hive-env.sh'
 default[:bcpc][:hadoop][:hive][:env_sh].tap do |env_sh|
@@ -41,8 +43,7 @@ default[:bcpc][:hadoop][:hive][:env_sh].tap do |env_sh|
     '-XX:+PrintGCDetails ' +
     '-XX:+PrintGCTimeStamps ' +
     '-XX:+PrintGCDateStamps ' +
-    '-Xloggc:/var/log/hive/gc/' +
-             'gc.log-$$-$(hostname)-$(date +\'%Y%m%d%H%M\').log ' +
+    "-Xloggc:/var/log/hive/gc/#{gc_log_name}" +
     '-XX:+PrintTenuringDistribution ' +
     '-XX:+PrintGCApplicationStoppedTime ' +
     '-XX:+PrintGCApplicationConcurrentTime ' +
