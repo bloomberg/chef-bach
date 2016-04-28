@@ -4,5 +4,5 @@
 # Local changes may be reverted.
 #
 <% (@options || {}).each do |name, value| %>
-export <%= name.to_s %>=<%= value.to_s %>
+export <%= name.to_s %>=<%= value.to_s.shellescape %>
 <% end %>

@@ -25,8 +25,6 @@ default[:bcpc][:hadoop][:hive][:site_xml].tap do |site_xml|
   # All other prefixes
   site_xml['datanucleus.autoCreateSchema'] = false
   site_xml['datanucleus.fixedDatastore'] = true
-  site_xml['javax.jdo.option.ConnectionDriverName'] = nil
-  site_xml['javax.jdo.option.ConnectionPassword'] = nil
   site_xml['javax.jdo.option.ConnectionUserName'] = "hive"
 end
 

@@ -27,6 +27,7 @@ default["bcpc"]["hadoop"]["hdfs"]["failed_volumes_tolerated"] = 1
 default["bcpc"]["hadoop"]["hdfs"]["dfs_replication_factor"] = 3
 default["bcpc"]["hadoop"]["hdfs"]["dfs_blocksize"] = "128m"
 default['bcpc']['hadoop']['hdfs_url']="hdfs://#{node.chef_environment}/"
+default[:bcpc][:hadoop][:jute][:maxbuffer] = 6291456
 default["bcpc"]["hadoop"]["jmx_enabled"] = true
 default["bcpc"]["hadoop"]["datanode"]["xmx"]["max_size"] = 4096
 default["bcpc"]["hadoop"]["datanode"]["xmx"]["max_ratio"] = 0.25
@@ -49,6 +50,9 @@ default["bcpc"]["hadoop"]["yarn"]["app"]["mapreduce"]["am"]["staging-dir"] = "/u
 default["bcpc"]["hadoop"]["kafka"]["jmx"]["port"] = 9995
 default["bcpc"]["hadoop"]["topology"]["script"] = "topology"
 default["bcpc"]["hadoop"]["topology"]["cookbook"] = "bcpc-hadoop"
+
+default['bcpc']['hadoop']['nodemanager']['jmx']['port'] = 3131
+default['bcpc']['hadoop']['resourcemanager']['jmx']['port'] = 3131
 
 # Setting balancer bandwidth to default value as per hdfs-default.xml
 default["bcpc"]["hadoop"]["balancer"]["bandwidth"] = 1048576
