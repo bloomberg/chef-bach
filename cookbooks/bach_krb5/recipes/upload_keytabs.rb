@@ -1,6 +1,7 @@
 require 'base64'
 # Upload keytabs to chef-server
 get_all_nodes().each do |h|
+  next if h[:hostname].match('bootstrap')
   node[:bcpc][:hadoop][:kerberos][:data].each do |srvc, srvdat|
     # Set host based on configuration
     config_host=srvdat['princhost'] == "_HOST" ? float_host(h[:hostname]) : srvdat['princhost'].split('.')[0]
