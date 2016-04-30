@@ -5,7 +5,7 @@ default[:bcpc][:hadoop][:yarn][:env_sh].tap do |env_sh|
   env_sh[:YARN_PID_DIR] = '/var/run/hadoop-yarn'
   env_sh[:YARN_IDENT_STRING] = 'yarn'
   env_sh[:HADOOP_YARN_USER] = 'yarn'
-  env_sh[:YARN_CONF_DIR] = '"${YARN_CONF_DIR:-$YARN_HOME/conf}"'
+  env_sh[:YARN_CONF_DIR] = '$YARN_HOME/conf'
   env_sh[:JAVA_HOME] = node[:bcpc][:hadoop][:java]
   env_sh[:JAVA] = File.join(env_sh[:JAVA_HOME], 'bin', 'java')
   env_sh[:YARN_HEAPSIZE] = '-Xmx1000m'
