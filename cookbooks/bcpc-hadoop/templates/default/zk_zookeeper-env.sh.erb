@@ -12,8 +12,8 @@ export ZOO_PID_DIR=/var/run/zookeeper
 export ZOOPIDFILE=$ZOO_PID_DIR/zookeeper-server
 export ZOOCFGDIR=<%= node[:bcpc][:hadoop][:zookeeper][:conf_dir] %>
 export ZOO_DATADIR_AUTOCREATE_DISABLE=1
-SERVER_JVMFLAGS="$SERVER_JVMFLAGS -Djute.maxbuffer=<%= node['bcpc']['hadoop']['jute']['maxbuffer'] %>"
-CLIENT_JVMFLAGS="$CLIENT_JVMFLAGS -Djute.maxbuffer=<%= node['bcpc']['hadoop']['jute']['maxbuffer'] %>"
+SERVER_JVMFLAGS="$SERVER_JVMFLAGS -Djute.maxbuffer=<%= node['bcpc']['hadoop']['yarn']['opts']['jute_buffer'] %>"
+CLIENT_JVMFLAGS="$CLIENT_JVMFLAGS -Djute.maxbuffer=<%= node['bcpc']['hadoop']['yarn']['opts']['jute_buffer'] %>"
 <% if node[:bcpc][:hadoop].attribute?(:jmx_enabled) and node[:bcpc][:hadoop][:jmx_enabled] %>
 export JMXPORT=<%= @zk_jmx_port %>
 <% end %>

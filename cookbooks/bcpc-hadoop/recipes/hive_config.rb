@@ -4,7 +4,6 @@
 # Description : To setup hive configuration only. No hive package will be installed through this Recipe
 #
 
-
 #Create hive password
 hive_password = make_config('mysql-hive-password', secure_password)
 
@@ -28,16 +27,6 @@ stats_password = make_config('mysql-hive-table-stats-password', secure_password)
       update-alternatives --set #{w}-conf /etc/#{w}/conf.#{node.chef_environment}
     })
   end
-end
-
-template "/etc/hive/conf/hive-exec-log4j.properties" do
-  source "hv_hive-exec-log4j.properties.erb"
-  mode 0644
-end
-
-template "/etc/hive/conf/hive-log4j.properties" do
-  source "hv_hive-log4j.properties.erb"
-  mode 0644
 end
 
 hive_site_vars = {
@@ -85,15 +74,9 @@ generated_values =
  'javax.jdo.option.ConnectionURL' =>
    hive_site_vars[:mysql_hosts].join(',') +
    ':3306/metastore?loadBalanceBlacklistTimeout=5000',
-
- 'javax.jdo.option.ConnectionUserName' =>
-   'hive', 
-
- 'javax.jdo.option.ConnectionPassword' =>
+ 
+ 'javax.jdo.option.ConnectionURL' =>
    hive_site_vars[:hive_sql_password],
-
- 'javax.jdo.option.ConnectionDriverName' =>
-   'com.mysql.jdbc.Driver',
 
  'hive.metastore.uris' =>
    hive_site_vars[:hive_hosts]
@@ -128,10 +111,15 @@ if hive_site_vars[:kerberos_enabled]
   generated_values.merge!(kerberos_values)
 end
 
+site_xml = node[:bcpc][:hadoop][:hive][:site_xml]
+
+# flatten_hash converts the tree of node object values to a hash with
+# dot-notation keys.
+environment_values = flatten_hash(site_xml)
+
 # The complete hash for hive_site.xml is a merger of values
 # dynamically generated in this recipe, and hardcoded values from the
 # environment and attribute files.
-environment_values = node[:bcpc][:hadoop][:hive][:site_xml]
 complete_hive_site_hash = generated_values.merge(environment_values)
 
 template '/etc/hive/conf/hive-site.xml' do
@@ -148,4 +136,16 @@ template "/etc/hive/conf/hive-env.sh" do
   source "generic_env.sh.erb"
   mode 0644
   variables(:options => node[:bcpc][:hadoop][:hive][:env_sh])
+end
+
+# This template contains no variables/substitutions.
+template "/etc/hive/conf/hive-exec-log4j.properties" do
+  source "hv_hive-exec-log4j.properties.erb"
+  mode 0644
+end
+
+# This template contains no variables/substitutions.
+template "/etc/hive/conf/hive-log4j.properties" do
+  source "hv_hive-log4j.properties.erb"
+  mode 0644
 end

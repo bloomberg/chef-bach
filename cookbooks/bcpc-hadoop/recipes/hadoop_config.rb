@@ -7,10 +7,10 @@ directory "/etc/hadoop/conf.#{node.chef_environment}" do
 end
 
 bash "update-hadoop-conf-alternatives" do
-  code(%Q{
+  code %Q{
     update-alternatives --install /etc/hadoop/conf hadoop-conf /etc/hadoop/conf.#{node.chef_environment} 50
     update-alternatives --set hadoop-conf /etc/hadoop/conf.#{node.chef_environment}
-  })
+  }
 end
 if ( node[:bcpc][:hadoop][:hdfs][:ldap][:integration] == true )
 
@@ -36,6 +36,8 @@ hadoop_conf_files = %w{capacity-scheduler.xml
    slaves
    ssl-client.xml
    ssl-server.xml
+   yarn-site.xml
+   yarn.exclude
    dfs.exclude
 }
 node[:bcpc][:hadoop][:hdfs][:HA] == true and hadoop_conf_files.insert(-1,"hdfs-site_HA.xml")
@@ -69,4 +71,12 @@ template "/etc/hadoop/conf/hadoop-env.sh" do
   )
 end
 
-include_recipe 'bcpc-hadoop::yarn_config'
+template "/etc/hadoop/conf/yarn-env.sh" do
+  source "hdp_yarn-env.sh.erb"
+  mode 0555
+  variables(
+   :yarn_jute_maxbuffer => node['bcpc']['hadoop']['yarn']['opts']['jute_buffer'],
+   :nm_jmx_port => node[:bcpc][:hadoop][:nodemanager][:jmx][:port],
+   :rm_jmx_port => node[:bcpc][:hadoop][:resourcemanager][:jmx][:port]
+  )
+end  
