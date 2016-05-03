@@ -28,6 +28,7 @@ default["bcpc"]["hadoop"]["hdfs"]["dfs_replication_factor"] = 3
 default["bcpc"]["hadoop"]["hdfs"]["dfs_blocksize"] = "128m"
 default['bcpc']['hadoop']['hdfs_url']="hdfs://#{node.chef_environment}/"
 default["bcpc"]["hadoop"]["jmx_enabled"] = true
+default[:bcpc][:hadoop][:jute][:maxbuffer] = 6291456
 default["bcpc"]["hadoop"]["datanode"]["xmx"]["max_size"] = 4096
 default["bcpc"]["hadoop"]["datanode"]["xmx"]["max_ratio"] = 0.25
 default["bcpc"]["hadoop"]["datanode"]["max"]["xferthreads"] = 16384
