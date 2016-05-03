@@ -1,3 +1,28 @@
+default['bcpc']['hadoop']['yarn']['aux_services']['mapreduce_shuffle']['class'] = 'org.apache.hadoop.mapred.ShuffleHandler'
+default["bcpc"]["hadoop"]["yarn"]["fairsharepreemptiontimeout"] = 150
+default['bcpc']['hadoop']['yarn']['historyserver']['heap']["size"] = 128
+default['bcpc']['hadoop']['yarn']['historyserver']['heap']["ratio"] = 0
+default["bcpc"]["hadoop"]["yarn"]["nodemanager"]["avail_memory"]["ratio"] = 0.5
+default["bcpc"]["hadoop"]["yarn"]["nodemanager"]["avail_memory"]["size"] = nil
+default["bcpc"]["hadoop"]["yarn"]["nodemanager"]["avail_vcpu"]["ratio"] = 0.5
+default["bcpc"]["hadoop"]["yarn"]["nodemanager"]["avail_vcpu"]["count"] = nil
+default["bcpc"]["hadoop"]["yarn"]["nodemanager"]["port"] = 45454
+default["bcpc"]["hadoop"]["yarn"]["nodemanager"]["jmx"]["port"] = 3131
+default["bcpc"]["hadoop"]["yarn"]["resourcemanager"]["port"] = 8032
+default["bcpc"]["hadoop"]["yarn"]["resourcemanager"]["jmx"]["port"] = 3131
+default["bcpc"]["hadoop"]["yarn"]["scheduler"]["capacity"]["maximum-applications"] = 10000
+default["bcpc"]["hadoop"]["yarn"]["scheduler"]["capacity"]["maximum-am-resource-percent"] = 0.1
+default["bcpc"]["hadoop"]["yarn"]["scheduler"]["capacity"]["resource-calculator"] = "org.apache.hadoop.yarn.util.resource.DefaultResourceCalculator"
+default["bcpc"]["hadoop"]["yarn"]["scheduler"]["capacity"]["root"]["queues"] = "default"
+default["bcpc"]["hadoop"]["yarn"]["scheduler"]["capacity"]["root"]["default"]["capacity"] = 100
+default["bcpc"]["hadoop"]["yarn"]["scheduler"]["capacity"]["root"]["default"]["user-limit-factor"] = 1
+default["bcpc"]["hadoop"]["yarn"]["scheduler"]["capacity"]["root"]["default"]["maximum-capacity"] = 100
+default["bcpc"]["hadoop"]["yarn"]["scheduler"]["capacity"]["root"]["default"]["state"] = "RUNNING"
+default["bcpc"]["hadoop"]["yarn"]["yarn"]["scheduler"]["capacity"]["root"]["default"]["acl_submit_applications"] = "*"
+default["bcpc"]["hadoop"]["yarn"]["scheduler"]["capacity"]["root"]["default"]["acl_administer_queue"] = "*"
+default["bcpc"]["hadoop"]["yarn"]["scheduler"]["capacity"]["node-locality-delay"] = -1
+default["bcpc"]["hadoop"]["yarn"]["scheduler"]["fair"]["min-vcores"] = 2
+
 default[:bcpc][:hadoop][:yarn][:env_sh].tap do |env_sh|
   env_sh[:YARN_LOG_DIR] = '/var/log/hadoop-yarn'
   env_sh[:YARN_PID_DIR] = '/var/run/hadoop-yarn'
@@ -26,42 +51,14 @@ default[:bcpc][:hadoop][:yarn][:env_sh].tap do |env_sh|
     '-Dcom.sun.management.jmxremote.ssl=false ' +
     '-Dcom.sun.management.jmxremote.authenticate=false ' +
     '-Dcom.sun.management.jmxremote.port=' +
-    node[:bcpc][:hadoop][:nodemanager][:jmx][:port].to_s
+    node[:bcpc][:hadoop][:yarn][:nodemanager][:jmx][:port].to_s
 
   env_sh[:YARN_NODEMANAGER_OPTS] =
     '-Dcom.sun.management.jmxremote.ssl=false ' +
     '-Dcom.sun.management.jmxremote.authenticate=false ' +
     '-Dcom.sun.management.jmxremote.port=' +
-    node[:bcpc][:hadoop][:resourcemanager][:jmx][:port].to_s
+    node[:bcpc][:hadoop][:yarn][:resourcemanager][:jmx][:port].to_s
 end
-
-default["bcpc"]["hadoop"]["yarn"]["nodemanager"]["avail_memory"]["ratio"] = 0.5
-default["bcpc"]["hadoop"]["yarn"]["nodemanager"]["avail_memory"]["size"] = nil
-default["bcpc"]["hadoop"]["yarn"]["nodemanager"]["avail_vcpu"]["ratio"] = 0.5
-default["bcpc"]["hadoop"]["yarn"]["nodemanager"]["avail_vcpu"]["count"] = nil
-default["bcpc"]["hadoop"]["yarn"]["nodemanager"]["port"] = 45454
-
-
-default["bcpc"]["hadoop"]["yarn"]["scheduler"]["fair"]["min-vcores"] = 2
-default['bcpc']['hadoop']['yarn']['historyserver']['heap']["size"] = 128
-default['bcpc']['hadoop']['yarn']['historyserver']['heap']["ratio"] = 0
-default["bcpc"]["hadoop"]["yarn"]["resourcemanager"]["port"] = 8032
-default['bcpc']['hadoop']['yarn']['aux_services']['mapreduce_shuffle']['class'] = 'org.apache.hadoop.mapred.ShuffleHandler'
-default["bcpc"]["hadoop"]["yarn"]["fairsharepreemptiontimeout"] = 150
-default["bcpc"]["hadoop"]["yarn"]["scheduler"]["capacity"]["maximum-applications"] = 10000
-default["bcpc"]["hadoop"]["yarn"]["scheduler"]["capacity"]["maximum-am-resource-percent"] = 0.1
-default["bcpc"]["hadoop"]["yarn"]["scheduler"]["capacity"]["resource-calculator"] = "org.apache.hadoop.yarn.util.resource.DefaultResourceCalculator"
-default["bcpc"]["hadoop"]["yarn"]["scheduler"]["capacity"]["root"]["queues"] = "default"
-default["bcpc"]["hadoop"]["yarn"]["scheduler"]["capacity"]["root"]["default"]["capacity"] = 100
-default["bcpc"]["hadoop"]["yarn"]["scheduler"]["capacity"]["root"]["default"]["user-limit-factor"] = 1
-default["bcpc"]["hadoop"]["yarn"]["scheduler"]["capacity"]["root"]["default"]["maximum-capacity"] = 100
-default["bcpc"]["hadoop"]["yarn"]["scheduler"]["capacity"]["root"]["default"]["state"] = "RUNNING"
-default["bcpc"]["hadoop"]["yarn"]["yarn"]["scheduler"]["capacity"]["root"]["default"]["acl_submit_applications"] = "*"
-default["bcpc"]["hadoop"]["yarn"]["scheduler"]["capacity"]["root"]["default"]["acl_administer_queue"] = "*"
-default["bcpc"]["hadoop"]["yarn"]["scheduler"]["capacity"]["node-locality-delay"] = -1
-
-
-
 
 default[:bcpc][:hadoop][:yarn][:site_xml].tap do |site_xml|
   site_xml['yarn.application.classpath'] =

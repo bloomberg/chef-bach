@@ -76,7 +76,7 @@ template "/etc/hadoop/conf/yarn-env.sh" do
   mode 0555
   variables(
    :yarn_jute_maxbuffer => node[:bcpc][:hadoop][:jute][:maxbuffer],
-   :nm_jmx_port => node[:bcpc][:hadoop][:nodemanager][:jmx][:port],
-   :rm_jmx_port => node[:bcpc][:hadoop][:resourcemanager][:jmx][:port]
+   :nm_jmx_port => node[:bcpc][:hadoop][:yarn][:nodemanager][:jmx][:port],
+   :rm_jmx_port => node[:bcpc][:hadoop][:yarn][:resourcemanager][:jmx][:port]
   )
 end  
