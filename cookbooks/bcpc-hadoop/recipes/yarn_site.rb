@@ -148,7 +148,7 @@ if node[:bcpc][:hadoop][:kerberos][:enable]
        true,
     }
 
-  kerberos = node[:bcpc][:hadoop][:kerberos][:data]
+  kerberos_data = node[:bcpc][:hadoop][:kerberos][:data]
 
   if kerberos_data[:nodemanager][:princhost] == '_HOST'
     kerberos_host_part = if node.run_list.expand(node.chef_environment).recipes
@@ -188,7 +188,7 @@ yarn_site_generated_values.merge!({'yarn.log.server.url' =>
 complete_yarn_site_hash =
   yarn_site_generated_values.merge(yarn_site_values)
 
-template "/etc/hadoop/conf/yarn-site.xml" do
+template "/etc/hadoop/conf/yarn-site.old.xml" do
   source "hdp_yarn-site.xml.erb"
   mode 0644
   variables(:nn_hosts => node[:bcpc][:hadoop][:nn_hosts],
@@ -200,7 +200,7 @@ template "/etc/hadoop/conf/yarn-site.xml" do
             :mounts => node[:bcpc][:hadoop][:mounts])
 end
 
-template "/etc/hadoop/conf/yarn-site.fresh.xml" do
+template "/etc/hadoop/conf/yarn-site.xml" do
   source "generic_site.xml.erb"
   mode 0644
   variables(:options => complete_yarn_site_hash)
