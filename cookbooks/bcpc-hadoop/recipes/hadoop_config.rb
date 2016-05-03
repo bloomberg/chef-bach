@@ -36,8 +36,6 @@ hadoop_conf_files = %w{capacity-scheduler.xml
    slaves
    ssl-client.xml
    ssl-server.xml
-   yarn-site.xml
-   yarn.exclude
    dfs.exclude
 }
 node[:bcpc][:hadoop][:hdfs][:HA] == true and hadoop_conf_files.insert(-1,"hdfs-site_HA.xml")
@@ -71,4 +69,4 @@ template "/etc/hadoop/conf/hadoop-env.sh" do
   )
 end
 
-include_recipe 'bcpc-hadoop::yarn_env'
+include_recipe 'bcpc-hadoop::yarn_config'
