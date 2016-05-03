@@ -132,6 +132,11 @@
   </property>
 
   <property>
+    <name>yarn.nodemanager.address</name>
+    <value><%=float_host(node[:hostname])%>:<%=node["bcpc"]["hadoop"]["yarn"]["nodemanager"]["port"]%></value>
+  </property>
+
+  <property>
     <name>yarn.nodemanager.hostname</name>
     <value><%= float_host(node[:hostname]) %></value>
   </property>
