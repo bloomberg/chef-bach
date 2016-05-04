@@ -47,10 +47,10 @@
         "hortonworks": "http://public-repo-1.hortonworks.com/HDP/ubuntu12/2.x/updates/2.3.4.0",
         "hdp_utils": "http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.20/repos/ubuntu12"
       },
-      "hadoop" : {
-        "environment" : {
+      "cluster" : {
           "profile" : ""
-        },
+      },
+      "hadoop" : {
         "yarn" : {
           "resourcemanager" : {
             "yarn.client.failover-sleep-base-ms": 30000
