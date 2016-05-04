@@ -13,7 +13,7 @@ node.set[:bcpc][:hadoop][:graphite][:service_queries][:hbase_master] = {
      'route_to' => "admin"
   },
   'hbase_master.numRegionServers' => {
-     'query' => "minSeries(jmx.hbase_master.*.hbm_server.Master.numRegionServers)",
+     'query' => "maxSeries(jmx.hbase_master.*.hbm_server.Master.numRegionServers)",
      'trigger_val' => "max(#{trigger_chk_period})",
      'trigger_cond' => "<#{node[:bcpc][:hadoop][:rs_hosts].length}",
      'trigger_name' => "HBaseRSAvailability",
