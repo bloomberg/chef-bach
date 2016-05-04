@@ -9,7 +9,14 @@ describe Bcpc_Hadoop::Helper do
     end
 
     # load a bcpc-hadoop recipe to test cookbook attributes cover business rules
-    let(:chef_run) { ChefSpec::SoloRunner.converge("recipe[bcpc-hadoop::hdfs_group_directories]") }
+    let(:chef_run) do
+      ChefSpec::SoloRunner.new do |node|
+        Fauxhai.mock(platform: 'ubuntu', version: '12.04')
+        node.set['memory']['total'] = 1024
+        node.set['cpu']['total'] = 1
+        node.set[:bcpc][:hadoop][:group_dir_prohibited_groups] = ['^users$', '^svn.*$', '^git.*$', 'dba']
+      end.converge("recipe[bcpc-hadoop::hdfs_group_directories]")
+    end
     let(:node) { chef_run.node }
 
     acceptable_group_names = ["foosvn", "barusers"]
