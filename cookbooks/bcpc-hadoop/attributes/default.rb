@@ -42,9 +42,6 @@ default["bcpc"]["hadoop"]["namenode"]["rpc"]["port"] = 8020
 default["bcpc"]["hadoop"]["namenode"]["http"]["port"] = 50070 
 default["bcpc"]["hadoop"]["namenode"]["https"]["port"] = 50470
 default["bcpc"]["hadoop"]["mapreduce"]["framework"]["name"] = "yarn"
-default["bcpc"]["hadoop"]["mapreduce"]["map"]["output"]["compress"] = true
-default["bcpc"]["hadoop"]["mapred"]["map"]["output"]["compress"]["codec"] = "org.apache.hadoop.io.compress.SnappyCodec"
-default["bcpc"]["hadoop"]["yarn"]["app"]["mapreduce"]["am"]["log"]["level"] = "DEBUG"
 default["bcpc"]["hadoop"]["yarn"]["app"]["mapreduce"]["am"]["staging-dir"] = "/user"
 default["bcpc"]["hadoop"]["kafka"]["jmx"]["port"] = 9995
 default["bcpc"]["hadoop"]["topology"]["script"] = "topology"
@@ -124,28 +121,6 @@ default['bcpc']['hadoop']['copylog_rollup_interval'] = 86400
 default[:bcpc][:hadoop][:os][:group][:hadoop][:members]=["hdfs","yarn"]
 default[:bcpc][:hadoop][:os][:group][:hdfs][:members]=["hdfs"]
 default[:bcpc][:hadoop][:os][:group][:mapred][:members]=["yarn"]
-
-default["bcpc"]["hadoop"]["hdfs"]["dfs"]["namenode"]["audit"]["log"]["async"] = true
-default["bcpc"]["hadoop"]["hdfs"]["dfs"]["webhdfs"]["enabled"] = true
-default["bcpc"]["hadoop"]["hdfs"]["dfs"]["client"]["read"]["shortcircuit"] = true
-default["bcpc"]["hadoop"]["hdfs"]["dfs"]["domain"]["socket"]["path"] = "/var/run/hadoop-hdfs/dn._PORT"
-default["bcpc"]["hadoop"]["hdfs"]["dfs"]["client"]["file-block-storage-locations"]["timeout"] = 3000
-default["bcpc"]["hadoop"]["hdfs"]["dfs"]["datanode"]["hdfs-blocks-metadata"]["enabled"] = true
-default["bcpc"]["hadoop"]["hdfs"]["dfs"]["namenode"]["datanode"]["registration"]["ip-hostname-check"] = false
-default["bcpc"]["hadoop"]["hdfs"]["dfs"]["namenode"]["avoid"]["read"]["stale"]["datanode"] = true
-default["bcpc"]["hadoop"]["hdfs"]["dfs"]["namenode"]["avoid"]["write"]["stale"]["datanode"] = true
-default["bcpc"]["hadoop"]["hdfs"]["dfs"]["hosts"]["exclude"] = "/etc/hadoop/conf/dfs.exclude"
-default["bcpc"]["hadoop"]["hdfs"]["dfs"]["datanode"]["du"]["reserved"] = 1073741824
-default["bcpc"]["hadoop"]["hdfs"]["dfs"]["permissions"]["superusergroup"] = "hdfs"
-default["bcpc"]["hadoop"]["hdfs"]["dfs"]["cluster"]["administrators"] = "hdfs"
-default["bcpc"]["hadoop"]["hdfs"]["dfs"]["dfs"]["ha"]["automatic-failover"]["enabled"] = true
-default[:bcpc][:hadoop][:hdfs][:ldap][:integration] = false
-default[:bcpc][:hadoop][:hdfs][:ldap][:user] = "" #must be LDAP DN
-default[:bcpc][:hadoop][:hdfs][:ldap][:domain] = "BCPC.EXAMPLE.COM"
-default[:bcpc][:hadoop][:hdfs][:ldap][:port] = 389
-default[:bcpc][:hadoop][:hdfs][:ldap][:password] =  nil
-default[:bcpc][:hadoop][:hdfs][:ldap][:search][:filter][:user]="(&(objectclass=user)(sAMAccountName={0}))"
-default[:bcpc][:hadoop][:hdfs][:ldap][:search][:filter][:group]="(objectClass=group)"
 
 # Override defaults for the Java cookbook
 default['java']['jdk_version'] = 7
