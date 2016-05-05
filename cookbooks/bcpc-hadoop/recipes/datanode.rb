@@ -21,7 +21,7 @@ hdp_pkg_strs = (hdp_select_pkgs + %W{
 
 hdp_pkg_strs + %W{
   #{node['bcpc']['mysql']['connector']['package']['short_name']}
-  cgroup-bin}).each do |pkg|
+  cgroup-bin}.each do |pkg|
   package pkg do
     action :install
   end
