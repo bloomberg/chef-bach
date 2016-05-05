@@ -144,6 +144,10 @@ if node[:bcpc][:hadoop][:kerberos][:enable]
        node[:bcpc][:hadoop][:kerberos][:keytab][:dir] + '/' +
        node[:bcpc][:hadoop][:kerberos][:data][:nodemanager][:keytab],
 
+     'yarn.resourcemanager.keytab' =>
+       node[:bcpc][:hadoop][:kerberos][:keytab][:dir] + '/' +
+       node[:bcpc][:hadoop][:kerberos][:data][:resourcemanager][:keytab],
+
      'yarn.resourcemanager.webapp.delegation-token-auth-filter.enabled' =>
        true,
     }
@@ -151,23 +155,35 @@ if node[:bcpc][:hadoop][:kerberos][:enable]
   kerberos_data = node[:bcpc][:hadoop][:kerberos][:data]
 
   if kerberos_data[:nodemanager][:princhost] == '_HOST'
-    kerberos_host_part = if node.run_list.expand(node.chef_environment).recipes
+    kerberos_host = if node.run_list.expand(node.chef_environment).recipes
                              .include?('bcpc-hadoop::datanode')
                            '_HOST'
                          else
                            float_host(node[:fqdn])
                          end
   else
-    kerberos_host_part =
-      kerberos_data[:nodemanager][:princhost] + '@' +
-      node[:bcpc][:hadoop][:realm]
+    kerberos_host = kerberos_data[:nodemanager][:princhost]
   end
 
   nm_kerberos_principal =
-    kerberos_data[:nodemanager][:principal] + '/' + kerberos_host_part
-  
+    kerberos_data[:nodemanager][:principal] + '/' + kerberos_host + '@' +
+      node[:bcpc][:hadoop][:kerberos][:realm]
+
+  if kerberos_data[:resourcemanager][:princhost] == '_HOST'
+    kerberos_host = '_HOST'
+  else
+    kerberos_host = kerberos_data[:resourcemanager][:princhost] 
+  end
+
+  rm_kerberos_principal =
+    kerberos_data[:resourcemanager][:principal] + '/' + kerberos_host + '@' +
+      node[:bcpc][:hadoop][:kerberos][:realm] 
+
   yarn_site_generated_values.merge!({'yarn.nodemanager.principal' =>
                                      nm_kerberos_principal})
+
+  yarn_site_generated_values.merge!({'yarn.resourcemanager.principal' =>
+                                     rm_kerberos_principal})
   
   yarn_site_generated_values.merge!(kerberos_properties)
 end
