@@ -52,7 +52,7 @@ if rm_hosts.length >= 2
        rm_target + ':8031',
      'yarn.resourcemanager.address.' + rm_name =>
        rm_target +
-       node["bcpc"]["hadoop"]["yarn"]["resourcemanager"]["port"],
+       node["bcpc"]["hadoop"]["yarn"]["resourcemanager"]["port"].to_s,
      'yarn.resourcemanager.scheduler.address.' + rm_name =>
        rm_target + ':8030',
      'yarn.resourcemanager.admin.address.' + rm_name =>
@@ -112,7 +112,7 @@ if node.run_list.expand(node.chef_environment).recipes
      
      'yarn.nodemanager.address' =>
        float_host(node[:hostname]) + ':' +
-       node["bcpc"]["hadoop"]["yarn"]["nodemanager"]["port"],
+       node["bcpc"]["hadoop"]["yarn"]["nodemanager"]["port"].to_s,
 
      'yarn.nodemanager.bind-host' =>
        node[:bcpc][:floating][:ip],
@@ -157,9 +157,9 @@ if node[:bcpc][:hadoop][:kerberos][:enable]
   if kerberos_data[:nodemanager][:princhost] == '_HOST'
     kerberos_host = if node.run_list.expand(node.chef_environment).recipes
                              .include?('bcpc-hadoop::datanode')
-                           '_HOST'
-                         else
                            float_host(node[:fqdn])
+                         else
+                           '_HOST'
                          end
   else
     kerberos_host = kerberos_data[:nodemanager][:princhost]
