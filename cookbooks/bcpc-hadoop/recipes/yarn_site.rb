@@ -156,18 +156,18 @@ if node[:bcpc][:hadoop][:kerberos][:enable]
 
   if kerberos_data[:nodemanager][:princhost] == '_HOST'
     kerberos_host = if node.run_list.expand(node.chef_environment).recipes
-                             .include?('bcpc-hadoop::datanode')
-                           float_host(node[:fqdn])
-                         else
-                           '_HOST'
-                         end
+                      .include?('bcpc-hadoop::datanode')
+                      float_host(node[:fqdn])
+                    else
+                      '_HOST'
+                    end
   else
     kerberos_host = kerberos_data[:nodemanager][:princhost]
   end
 
   nm_kerberos_principal =
     kerberos_data[:nodemanager][:principal] + '/' + kerberos_host + '@' +
-      node[:bcpc][:hadoop][:kerberos][:realm]
+    node[:bcpc][:hadoop][:kerberos][:realm]
 
   if kerberos_data[:resourcemanager][:princhost] == '_HOST'
     kerberos_host = '_HOST'
@@ -177,7 +177,7 @@ if node[:bcpc][:hadoop][:kerberos][:enable]
 
   rm_kerberos_principal =
     kerberos_data[:resourcemanager][:principal] + '/' + kerberos_host + '@' +
-      node[:bcpc][:hadoop][:kerberos][:realm] 
+    node[:bcpc][:hadoop][:kerberos][:realm] 
 
   yarn_site_generated_values.merge!({'yarn.nodemanager.principal' =>
                                      nm_kerberos_principal})
@@ -190,21 +190,19 @@ end
 
 # This is another set of cached node searches.
 hs_hosts = node[:bcpc][:hadoop][:hs_hosts]
-yarn_log_server_url =
-  if not hs_hosts.empty?
-    'http://' +
+if not hs_hosts.empty?
+  yarn_log_server_url =    'http://' +
     float_host(hs_hosts.map{ |h| h[:hostname] }.sort.first) +
     ':1988' + '/jobhistory/logs'
-  else
-    nil
-  end
-yarn_site_generated_values.merge!({'yarn.log.server.url' =>
-                                   yarn_log_server_url})
+
+  yarn_site_generated_values.merge!({'yarn.log.server.url' =>
+                                     yarn_log_server_url})
+end
 
 complete_yarn_site_hash =
   yarn_site_generated_values.merge(yarn_site_values)
 
-template "/etc/hadoop/conf/yarn-site.old.xml" do
+template "/etc/hadoop/conf/yarn-site.xml" do
   source "hdp_yarn-site.xml.erb"
   mode 0644
   variables(:nn_hosts => node[:bcpc][:hadoop][:nn_hosts],
@@ -216,7 +214,7 @@ template "/etc/hadoop/conf/yarn-site.old.xml" do
             :mounts => node[:bcpc][:hadoop][:mounts])
 end
 
-template "/etc/hadoop/conf/yarn-site.xml" do
+template "/etc/hadoop/conf/yarn-site.fresh.xml" do
   source "generic_site.xml.erb"
   mode 0644
   variables(:options => complete_yarn_site_hash)

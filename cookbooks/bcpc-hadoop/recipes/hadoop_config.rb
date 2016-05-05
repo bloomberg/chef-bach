@@ -25,22 +25,19 @@ if ( node[:bcpc][:hadoop][:hdfs][:ldap][:integration] == true )
   end
 end
 
-hadoop_conf_files = %w{capacity-scheduler.xml
-   core-site.xml
+hadoop_templates =
+  %w{
+   capacity-scheduler.xml
    fair-scheduler.xml
-   hadoop-metrics2.properties
-   hadoop-policy.xml
-   hdfs-site.xml
-   log4j.properties
    mapred-site.xml
    slaves
-   ssl-client.xml
-   ssl-server.xml
-   dfs.exclude
-}
-node[:bcpc][:hadoop][:hdfs][:HA] == true and hadoop_conf_files.insert(-1,"hdfs-site_HA.xml")
+  }
 
-hadoop_conf_files.each do |t|
+if node[:bcpc][:hadoop][:hdfs][:HA]
+  hadoop_templates.insert(-1,"hdfs-site_HA.xml")
+end
+
+hadoop_templates.each do |t|
    template "/etc/hadoop/conf/#{t}" do
      source "hdp_#{t}.erb"
      mode 0644
@@ -52,6 +49,24 @@ hadoop_conf_files.each do |t|
                :hs_hosts => node[:bcpc][:hadoop][:hs_hosts],
                :mounts => node[:bcpc][:hadoop][:mounts])
    end
+end
+
+# These files have no <%= %> blocks.
+hadoop_non_templates =
+  %w{
+   hadoop-metrics2.properties
+   hadoop-policy.xml
+   log4j.properties
+   ssl-client.xml
+   ssl-server.xml
+   dfs.exclude
+  }
+
+hadoop_non_templates.each do |t|
+  template "/etc/hadoop/conf/#{t}" do
+    source "hdp_#{t}.erb"
+    mode 0644
+  end
 end
 
 template "/etc/hadoop/conf/topology" do
@@ -69,4 +84,6 @@ template "/etc/hadoop/conf/hadoop-env.sh" do
   )
 end
 
+include_recipe 'bcpc-hadoop::core_site'
 include_recipe 'bcpc-hadoop::yarn_config'
+include_recipe 'bcpc-hadoop::hdfs_site'
