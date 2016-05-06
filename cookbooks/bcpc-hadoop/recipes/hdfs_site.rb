@@ -10,7 +10,7 @@ hdfs_site_generated_values =
    node[:bcpc][:hadoop][:nn_hosts]
    .map{ |s| "namenode#{s[:node_number]}" }.join(','),
  
- 'dfs.datanode.name.dir' =>
+ 'dfs.datanode.data.dir' =>
    node[:bcpc][:hadoop][:mounts]
    .map{ |d| "file:///disk/#{d}/dfs/dn" }.join(','),
 
@@ -24,15 +24,18 @@ namenode_properties = node[:bcpc][:hadoop][:nn_hosts].map do |host|
   {
    'dfs.namenode.rpc-address.' + node.chef_environment +
      '.namenode' + host[:node_number].to_s =>
-     node[:bcpc][:hadoop][:namenode][:rpc][:port],
+     float_host(host[:hostname]) + ':' +
+     node[:bcpc][:hadoop][:namenode][:rpc][:port].to_s,
    
    'dfs.namenode.http-address.' + node.chef_environment +
      '.namenode' + host[:node_number].to_s =>
-     node[:bcpc][:hadoop][:namenode][:http][:port],
+     float_host(host[:hostname]) + ':' +
+     node[:bcpc][:hadoop][:namenode][:http][:port].to_s,
    
    'dfs.namenode.https-address.' + node.chef_environment +
      '.namenode' + host[:node_number].to_s =>
-     node[:bcpc][:hadoop][:namenode][:https][:port],
+     float_host(host[:hostname]) + ':' +
+     node[:bcpc][:hadoop][:namenode][:https][:port].to_s,
   }
 end.reduce({},:merge)
 hdfs_site_generated_values.merge!(namenode_properties)
@@ -103,7 +106,7 @@ if node[:bcpc][:hadoop][:kerberos][:enable]
 
      'dfs.block.access.token.enable' => true,
 
-     'dfs.permissions.supergroup' =>
+     'dfs.permissions.superusergroup' =>
        dfs[:permissions][:superusergroup],
 
      'dfs.web.authentication.kerberos.principal' =>

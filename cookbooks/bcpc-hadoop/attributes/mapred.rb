@@ -8,7 +8,7 @@ default["bcpc"]["hadoop"]["yarn"]["app"]["mapreduce"]["am"]["log"]["level"] = "D
 default["bcpc"]["hadoop"]["yarn"]["app"]["mapreduce"]["am"]["staging-dir"] = "/user"
 
 default[:bcpc][:hadoop][:mapreduce][:site_xml].tap do |site_xml|
-  site_xml['mapreduce.admin.child.java.opts'] =
+  site_xml['mapreduce.admin.map.child.java.opts'] =
     '-server -Djava.net.preferIPv4Stack=true -Dhdp.version=' +
     node[:bcpc][:hadoop][:distribution][:release].to_s
 

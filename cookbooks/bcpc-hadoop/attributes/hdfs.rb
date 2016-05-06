@@ -52,6 +52,12 @@ default[:bcpc][:hadoop][:hdfs][:site_xml].tap do |site_xml|
     site_xml['dfs.ha.fencing.methods'] =
       'shell(/bin/true)'
   end
+
+  site_xml['dfs.webhdfs.enabled'] =
+    dfs[:webhdfs][:enabled]
+
+  site_xml['dfs.client.read.shortcircuit'] =
+    dfs[:client][:read][:shortcircuit]
   
   site_xml['dfs.domain.socket.path'] =
     dfs[:domain][:socket][:path]
@@ -66,10 +72,10 @@ default[:bcpc][:hadoop][:hdfs][:site_xml].tap do |site_xml|
     dfs[:namenode][:datanode][:registration]['ip-hostname-check']
 
   site_xml['dfs.datanode.ipc.address'] =
-    node[:bcpc][:floating][:ip]
+    node[:bcpc][:floating][:ip].to_s + ':50020'
 
   site_xml['dfs.client.local.interfaces'] =
-    node[:bcpc][:floating][:ip]
+    node[:bcpc][:floating][:ip].to_s + '/32'
 
   site_xml['dfs.namenode.avoid.read.stale.datanode'] =
     dfs[:namenode][:avoid][:read][:stale][:datanode]
