@@ -1,7 +1,8 @@
 require 'shellwords'
 
-# These should be deleted when the old templates are removed.
+# These should probably be deleted when the old templates are removed.
 # They are only used here.
+default["bcpc"]["hadoop"]["mapreduce"]["framework"]["name"] = "yarn"
 default["bcpc"]["hadoop"]["mapreduce"]["map"]["output"]["compress"] = true
 default["bcpc"]["hadoop"]["mapred"]["map"]["output"]["compress"]["codec"] = "org.apache.hadoop.io.compress.SnappyCodec"
 default["bcpc"]["hadoop"]["yarn"]["app"]["mapreduce"]["am"]["log"]["level"] = "DEBUG"
@@ -22,6 +23,9 @@ default[:bcpc][:hadoop][:mapreduce][:site_xml].tap do |site_xml|
      File.join(hdp_path, 'hadoop', 'lib', 'native'),
      File.join(hdp_path, 'hadoop', 'lib', 'native', 'Linux-amd64-64'),
     ].map{ |s| s.shellescape }.join(':')
+
+  site_xml['mapreduce.framework.name'] =
+    node["bcpc"]["hadoop"]["mapreduce"]["framework"]["name"]
 
   site_xml['mapreduce.application.classpath'] =
     [
@@ -51,5 +55,26 @@ default[:bcpc][:hadoop][:mapreduce][:site_xml].tap do |site_xml|
     node["bcpc"]["hadoop"]["yarn"]["app"]["mapreduce"]["am"]["log"]["level"]
 
   site_xml['yarn.app.mapreduce.am.staging-dir'] =
-    node["bcpc"]["hadoop"]["yarn"]["app"]["mapreduce"]["am"]["staging-dir"]  
+    node["bcpc"]["hadoop"]["yarn"]["app"]["mapreduce"]["am"]["staging-dir"]
+
+  min_allocation =
+    node['bcpc']['hadoop']['yarn']['scheduler']['minimum-allocation-mb']
+
+  site_xml['mapreduce.map.memory.mb'] =
+    min_allocation.round
+ 
+  site_xml['mapreduce.map.java.opts'] =
+    "-Xmx" + (0.8 * min_allocation).round.to_s + "m"
+
+  site_xml['mapreduce.reduce.memory.mb'] =
+    2 * min_allocation.round
+  
+  site_xml['mapreduce.reduce.java.opts'] =
+    "-Xmx" + (0.8 * 2 * min_allocation).round.to_s + "m"
+
+  site_xml['yarn.app.mapreduce.am.resource.mb'] =
+    2 * min_allocation.round
+  
+  site_xml['yarn.app.mapreduce.am.command-opts'] =
+    "-Xmx" + (0.8 * 2 * min_allocation).round.to_s + "m"
 end

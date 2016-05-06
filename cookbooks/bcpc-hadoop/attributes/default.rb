@@ -1,4 +1,4 @@
-############################################
+###########################################
 #
 #  Hadoop specific configs
 #
@@ -41,8 +41,6 @@ default["bcpc"]["hadoop"]["namenode"]["jmx"]["port"] = 10111
 default["bcpc"]["hadoop"]["namenode"]["rpc"]["port"] = 8020
 default["bcpc"]["hadoop"]["namenode"]["http"]["port"] = 50070 
 default["bcpc"]["hadoop"]["namenode"]["https"]["port"] = 50470
-default["bcpc"]["hadoop"]["mapreduce"]["framework"]["name"] = "yarn"
-default["bcpc"]["hadoop"]["yarn"]["app"]["mapreduce"]["am"]["staging-dir"] = "/user"
 default["bcpc"]["hadoop"]["kafka"]["jmx"]["port"] = 9995
 default["bcpc"]["hadoop"]["topology"]["script"] = "topology"
 default["bcpc"]["hadoop"]["topology"]["cookbook"] = "bcpc-hadoop"
