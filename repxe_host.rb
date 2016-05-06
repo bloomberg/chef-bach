@@ -233,7 +233,7 @@ def restart_host(entry)
   #   raise "IPMI is unimplemented!"
   # end
 
-  puts 'Please reboot ' + entry['hostname'] + ', then hit enter'
+  puts 'Please reboot ' + entry['hostname'] + ' into pxe-boot mode, then hit enter'
   STDIN.gets;
 end
 
@@ -321,6 +321,65 @@ def find_chef_env()
   JSON.parse(env_command.stdout)['chef_environment']
 end
 
+   
+def get_mounted_disks(chef_env, vm_entry)
+   c = Mixlib::ShellOut.new('./nodessh.sh', chef_env, vm_entry['hostname'], 'df -h')
+   c.run_command
+   disks=c.stdout.split("\n") 
+   disks = disks[1..disks.length]
+   # return all disks mapped to /disk/#
+   return disks.map{ |disk| disk.split(" ")[-1]  }.map{|disk| /\/disk\/\d+/.match(disk) == nil ? nil : disk}.compact
+end
+   
+def unmount_disks(chef_env, vm_entry)
+   puts 'Unmounting disks.'
+   get_mounted_disks(chef_env, vm_entry).each do |disk|
+      puts 'unmounting ' + disk
+      c = Mixlib::ShellOut.new('./nodessh.sh', chef_env, vm_entry['hostname'], 'umount '+disk, 'sudo')
+      c.run_command
+      if !c.status.success?
+        raise 'Could not unmount ' + disk + ' ' + c.stdout + '\n' + c.stderr
+      else
+        puts 'Unmounted ' + disk
+      end
+   end
+end
+
+def stop_all_services(chef_env, vm_entry)
+  puts 'Stopping services.'
+  ['chef-client',
+   'jmxtrans',
+   'hbase-regionserver', 
+   'hadoop-hdfs-datanode',
+   'hadoop-httpfs',
+   'hadoop-yarn-nodemanager'].each do |service|
+      c = Mixlib::ShellOut.new('./nodessh.sh', chef_env, vm_entry['hostname'], 'service ' + service + ' stop', 'sudo')
+      c.run_command
+      if !c.status.success?
+        puts 'Could not stop service ' + service + ' ' + c.stdout + '\n' + c.stderr
+      else
+        puts 'Stopped ' + service
+      end
+   
+   end
+end
+
+def shutdown_box(chef_env, vm_entry)
+   c = Mixlib::ShellOut.new('./nodessh.sh', chef_env, vm_entry['hostname'], 'shutdown -h now', 'sudo')
+   c.run_command
+   if !c.status.success?
+     raise 'Could not shut down host ' + vm_entry['hostname'] + '\n' + c.stdout + '\n' + c.stderr
+   else
+     puts 'Host has been shut down.'
+   end
+end
+
+# Graceful shutdown - bring down all services, unmount disks, shutdown
+def graceful_shutdown(chef_env, vm_entry)
+   #stop_all_services(chef_env, vm_entry)
+   unmount_disks(chef_env, vm_entry)
+   shutdown_box(chef_env, vm_entry)
+end
 #
 # This conditional allows us to use the methods into irb instead of
 # invoking the script from a UNIX shell.
@@ -338,15 +397,17 @@ if __FILE__ == $PROGRAM_NAME
     exit(-1)
   end
 
+  puts 'Repxe script started for node ' + ARGV[0]
   chef_env = find_chef_env
+  graceful_shutdown(chef_env, vm_entry)
+  delete_node_data(vm_entry)
+  rotate_vault_keys
   cobbler_unenroll(vm_entry)
   cobbler_enroll(vm_entry)
   cobbler_sync
-  delete_node_data(vm_entry)
   restart_host(vm_entry)
   wait_for_host(vm_entry)
   cluster_assign_roles(chef_env, :basic, vm_entry)
   rotate_vault_keys
-  cluster_assign_roles(chef_env, :hadoop)
   cluster_assign_roles(chef_env, :hadoop, vm_entry)
 end
