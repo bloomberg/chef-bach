@@ -13,8 +13,8 @@ default[:bcpc][:hadoop][:core][:site_xml].tap do |site_xml|
   site_xml['fs.defaultFS'] = node[:bcpc][:hadoop][:hdfs_url]
   site_xml['hadoop.proxyuser.hive.hosts'] = '*'
   site_xml['hadoop.proxyuser.hive.groups'] = '*'
-  site_xml['hadoop.proxyuser.httpsfs.hosts'] = '*'
-  site_xml['hadoop.proxyuser.httpsfs.groups'] = '*'
+  site_xml['hadoop.proxyuser.httpfs.hosts'] = '*'
+  site_xml['hadoop.proxyuser.httpfs.groups'] = '*'
   site_xml['hadoop.proxyuser.hue.hosts'] = '*'
   site_xml['hadoop.proxyuser.hue.groups'] = '*'
   site_xml['hadoop.proxyuser.oozie.hosts'] = '*'
