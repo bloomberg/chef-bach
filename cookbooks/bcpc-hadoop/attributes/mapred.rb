@@ -2,7 +2,6 @@ require 'shellwords'
 
 # These should probably be deleted when the old templates are removed.
 # They are only used here.
-default["bcpc"]["hadoop"]["mapreduce"]["framework"]["name"] = "yarn"
 default["bcpc"]["hadoop"]["mapreduce"]["map"]["output"]["compress"] = true
 default["bcpc"]["hadoop"]["mapred"]["map"]["output"]["compress"]["codec"] = "org.apache.hadoop.io.compress.SnappyCodec"
 default["bcpc"]["hadoop"]["yarn"]["app"]["mapreduce"]["am"]["log"]["level"] = "DEBUG"

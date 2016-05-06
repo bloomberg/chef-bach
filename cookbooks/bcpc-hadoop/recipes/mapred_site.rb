@@ -33,14 +33,14 @@ if node[:bcpc][:hadoop][:kerberos][:enable]
   end
 
   jobhistory_principal =
-    kerberos_data[:nodemanager][:principal] + '/' + kerberos_host + '@' +
+    kerberos_data[:historyserver][:principal] + '/' + kerberos_host + '@' +
     node[:bcpc][:hadoop][:kerberos][:realm]
 
   kerberos_properties =
     {
      'mapreduce.jobhistory.keytab' =>
        node[:bcpc][:hadoop][:kerberos][:keytab][:dir] + '/' +
-       kerberos_data[:jobhistory][:keytab],
+       kerberos_data[:historyserver][:keytab],
      
      'mapreduce.jobhistory.principal' =>
        jobhistory_principal,

@@ -163,7 +163,6 @@ default['bcpc']['hadoop']['yarn']['nodemanager']['vmem-check-enabled'] = false
 default["bcpc"]["hadoop"]["yarn"]["resourcemanager"]["nodes"]["exclude-path"] = "/etc/hadoop/conf/yarn.exclude"
 default["bcpc"]["hadoop"]["yarn"]["scheduler"]["class"] = "org.apache.hadoop.yarn.server.resourcemanager.scheduler.fair.FairScheduler"
 default["bcpc"]["hadoop"]["yarn"]["scheduler"]["fair"]["preemption"] = true
-default["bcpc"]["hadoop"]["yarn"]["scheduler"]["minimum-allocation-mb"] = 256
 default['bcpc']['hadoop']['yarn']['timeline-service']['client']['max-retries'] = 0
 
 ### Delete these. (end) ###
