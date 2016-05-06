@@ -74,8 +74,11 @@ default[:bcpc][:hadoop][:hdfs][:site_xml].tap do |site_xml|
   site_xml['dfs.datanode.ipc.address'] =
     node[:bcpc][:floating][:ip].to_s + ':50020'
 
+  # XXX warning subnet will be unset until our second Chef run
+  # after it is set from the bcpc cookbook
+  subnet = node['bcpc']['management']['subnet']
   site_xml['dfs.client.local.interfaces'] =
-    node[:bcpc][:floating][:ip].to_s + '/32'
+    node['bcpc']['networks'][subnet]['floating']['interface']
 
   site_xml['dfs.namenode.avoid.read.stale.datanode'] =
     dfs[:namenode][:avoid][:read][:stale][:datanode]

@@ -179,10 +179,10 @@ if node.run_list.expand(node.chef_environment).recipes
        node[:bcpc][:floating][:ip] + ':8485',
      
      'dfs.journalnode.http-address' =>
-       node[:bcpc][:floating][:ip] + '8480',
+       node[:bcpc][:floating][:ip] + ':8480',
      
      'dfs.journalnode.https-address' =>
-       node[:bcpc][:floating][:ip] + '8481',
+       node[:bcpc][:floating][:ip] + ':8481',
     }
 
   hdfs_site_generated_values.merge!(jn_properties)
@@ -204,7 +204,6 @@ if node.run_list.expand(node.chef_environment).recipes
   hdfs_site_generated_values.merge!(dn_properties)
 end
 
-
 if node[:bcpc][:hadoop][:hdfs][:HA]
   # This is a cached node search.
   zk_hosts = node[:bcpc][:hadoop][:zookeeper][:servers]
@@ -217,7 +216,8 @@ if node[:bcpc][:hadoop][:hdfs][:HA]
      
      'dfs.namenode.shared.edits.dir' =>
        'qjournal://' +
-       zk_hosts.map{ |s| float_host(s[:hostname]) + ":8485" }.join(";"),
+       zk_hosts.map{ |s| float_host(s[:hostname]) + ":8485" }.join(";") +
+       '/' + node.chef_environment,
 
      # Why is this added twice?
      'dfs.journalnode.edits.dir' =>
@@ -229,18 +229,6 @@ end
 complete_hdfs_site_hash = hdfs_site_generated_values.merge(hdfs_site_values)
 
 template "/etc/hadoop/conf/hdfs-site.xml" do
-  source "hdp_hdfs-site.xml.erb"
-  mode 0644
-  variables(:nn_hosts => node[:bcpc][:hadoop][:nn_hosts],
-            :zk_hosts => node[:bcpc][:hadoop][:zookeeper][:servers],
-            :jn_hosts => node[:bcpc][:hadoop][:jn_hosts],
-            :rm_hosts => node[:bcpc][:hadoop][:rm_hosts],
-            :dn_hosts => node[:bcpc][:hadoop][:dn_hosts],
-            :hs_hosts => node[:bcpc][:hadoop][:hs_hosts],
-            :mounts => node[:bcpc][:hadoop][:mounts])
-end
-
-template "/etc/hadoop/conf/hdfs-site.fresh.xml" do
   source "generic_site.xml.erb"
   mode 0644
   variables(:options => complete_hdfs_site_hash)

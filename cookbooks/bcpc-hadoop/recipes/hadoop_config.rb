@@ -32,10 +32,6 @@ hadoop_templates =
    slaves
   }
 
-if node[:bcpc][:hadoop][:hdfs][:HA]
-  hadoop_templates.insert(-1,"hdfs-site_HA.xml")
-end
-
 hadoop_templates.each do |t|
    template "/etc/hadoop/conf/#{t}" do
      source "hdp_#{t}.erb"
