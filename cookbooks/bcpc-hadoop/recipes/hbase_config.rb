@@ -12,10 +12,10 @@ directory "/etc/hbase/conf.#{node.chef_environment}" do
 end
 
 bash "update-hbase-conf-alternatives" do
-  code %Q{
+  code(%Q{
     update-alternatives --install /etc/hbase/conf hbase-conf /etc/hbase/conf.#{node.chef_environment} 50
     update-alternatives --set hbase-conf /etc/hbase/conf.#{node.chef_environment}
-  }
+  })
 end
 
 if get_nodes_for("powerdns", "bcpc").length > 0
