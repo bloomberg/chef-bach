@@ -217,7 +217,7 @@
 
   <property> 
     <name>dfs.cluster.administrators</name> 
-    <value>hdfs</value> 
+    <value><%= node[:bcpc][:hadoop][:hdfs][:admins].join(',') %></value>
     <description>ACL for who all can view the default servlets in the HDFS</description> 
   </property> 
 

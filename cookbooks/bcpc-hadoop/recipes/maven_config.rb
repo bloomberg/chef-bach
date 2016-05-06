@@ -14,3 +14,19 @@ remote_file "/home/vagrant/chef-bcpc/bins/#{maven_file}" do
   mode 0555
   checksum node['maven']['checksum']
 end
+
+# Setup custom maven config
+directory '/root/.m2' do
+  owner 'root'
+  group 'root'
+  mode '0755'
+  action :create
+end
+
+template "maven_settings.xml" do
+  path '/root/.m2/settings.xml'
+  source 'maven_settings.xml.erb'
+  owner 'root' 
+  group 'root'
+  mode '0644'
+end
