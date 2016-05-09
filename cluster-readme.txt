@@ -39,15 +39,6 @@ cluster-whatsup.sh
   Finds out which nodes are responding on the network. Install fping
   to make this fast.
 
-cluster-check.sh
-
-  *OpenStack Specific*
-  Checks nodes list in cluster.txt for being up, having default routes
-  on the storage and management networks and running well-known OpenStack
-  services. Pass a role to limit the checks to machines in that
-  role. Useful after bringing up a cluster to verify the basic health
-  of all nodes.
-
 cluster-vip.sh
 
   Using your environment file, this tool finds the current VIP

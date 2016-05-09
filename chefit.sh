@@ -19,7 +19,7 @@ SCPCMD="./nodescp    $ENVIRONMENT $IP"
 SSHCMD="./nodessh.sh $ENVIRONMENT $IP"
 
 echo "copy files..."
-for f in install-chef.sh finish-worker.sh finish-head.sh; do
+for f in install-chef.sh; do
   $SCPCMD $f ubuntu@$IP:/home/ubuntu || (echo "copying $f failed" > /dev/stderr; exit 1)
 done
 

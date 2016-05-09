@@ -136,16 +136,6 @@ def get_all_nodes
   return results.sort
 end
 
-def get_ceph_osd_nodes
-  results = search(:node, "recipes:bcpc\\:\\:ceph-work AND chef_environment:#{node.chef_environment}")
-  if results.any?{|x| x['hostname'] == node[:hostname]}
-    results.map!{|x| x['hostname'] == node[:hostname] ? node : x}
-  else
-    results.push(node)
-  end
-  return results.sort
-end
-
 def get_cached_head_node_names
   headnodes = []
   begin 
@@ -247,14 +237,6 @@ def secure_password_alphanum_upper(len=20)
         pw << alphanum_upper[raw_pw.bytes().to_a()[pw.length] % alphanum_upper.length]
     end
     pw
-end
-
-def ceph_keygen()
-    key = "\x01\x00"
-    key += ::OpenSSL::Random.random_bytes(8)
-    key += "\x10\x00"
-    key += ::OpenSSL::Random.random_bytes(16)
-    Base64.encode64(key).strip
 end
 
 def float_host(*args)
