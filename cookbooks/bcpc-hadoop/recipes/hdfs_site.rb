@@ -46,12 +46,7 @@ if node[:bcpc][:hadoop][:kerberos][:enable]
   kerberos_data = node[:bcpc][:hadoop][:kerberos][:data]
 
   if kerberos_data[:spnego][:princhost] == '_HOST'
-    spnego_host = if node.run_list.expand(node.chef_environment).recipes
-                      .include?('bcpc-hadoop::datanode')
-                    float_host(node[:fqdn])
-                  else
-                    '_HOST'
-                  end
+    spnego_host = '_HOST'
   else
     spnego_host = kerberos_data[:spnego][:princhost]
   end
@@ -64,12 +59,7 @@ if node[:bcpc][:hadoop][:kerberos][:enable]
                             kerberos_data[:namenode][:spnego_keytab])
 
   if kerberos_data[:namenode][:princhost] == '_HOST'
-    namenode_host = if node.run_list.expand(node.chef_environment).recipes
-                      .include?('bcpc-hadoop::namenode')
-                    float_host(node[:fqdn])
-                  else
-                    '_HOST'
-                  end
+    namenode_host = '_HOST'
   else
     namenode_host = kerberos_data[:namenode][:princhost]
   end
@@ -86,7 +76,7 @@ if node[:bcpc][:hadoop][:kerberos][:enable]
                   .include?('bcpc-hadoop::datanode')
                 float_host(node[:fqdn])
               else
-                '_HOST'
+                kerberos_data[:datanode][:princhost]
               end
   else
     dn_host = kerberos_data[:datanode][:princhost]
@@ -141,7 +131,7 @@ if node[:bcpc][:hadoop][:kerberos][:enable]
       .include?('bcpc-hadoop::journalnode')
 
     if kerberos_data[:journalnode][:princhost] == '_HOST'
-      jn_host = float_host(node[:fqdn])
+      jn_host = "_HOST"
     else
       jn_host = kerberos_data[:journalnode][:princhost]
     end
@@ -197,7 +187,7 @@ if node.run_list.expand(node.chef_environment).recipes
      'dfs.datanode.address' =>
        node[:bcpc][:floating][:ip] + ':1004',
      
-     'dfs.datanode.http-address' =>
+     'dfs.datanode.http.address' =>
        node[:bcpc][:floating][:ip] + ':1006',
     }
 
