@@ -490,5 +490,5 @@ if __FILE__ == $PROGRAM_NAME
   cluster_assign_roles(chef_env, :basic, vm_entry)
   rotate_vault_keys
   cluster_assign_roles(chef_env, :hadoop, vm_entry)
-  start_chef_client(chev_env, vm_entry)
+  start_chef_client(chef_env, vm_entry)
 end
