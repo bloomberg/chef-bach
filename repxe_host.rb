@@ -25,7 +25,9 @@
 #     repository, including 'vendor' directory, to the target
 #     bootstrap.
 #
-#  4. Run 'bundle exec ./repxe_host.rb <hostname>' to begin the process.
+#  4. Run 'bundle exec ./repxe_host.rb -m <hostname>' to begin the process.
+#     To run on a brand new node that doesn't need to be shut down first, run:
+#     'bundle exec ./repxe_host.rb -m <hostname> -s'
 #
 #  5. When prompted, manually reboot the host, then press enter.
 #
@@ -49,6 +51,7 @@ require 'chef/provisioning/transport/ssh'
 require 'mixlib/shellout'
 require 'pry'
 require 'timeout'
+require 'optparse'
 
 def cluster_assign_roles(environment,type,entry=nil)
   types = [ 'basic', 'hadoop', 'kafka' ]
@@ -345,14 +348,66 @@ def unmount_disks(chef_env, vm_entry)
    end
 end
 
+def confirm_chef_client_down(chef_env, vm_entry)
+  #
+  # If it takes more than 2 minutes
+  # something is really broken.
+  #
+  # This will make 30 attempts with a 1 minute sleep between attempts,
+  # or timeout after 31 minutes.
+  #
+  command = "ps -ef | grep chef-client | grep -v grep"
+  Timeout::timeout(120) do
+    max = 5
+    1.upto(max) do |idx|
+      c = Mixlib::ShellOut.new('./nodessh.sh', chef_env, vm_entry['hostname'], command )
+      c.run_command
+      if c.exitstatus == 1 and c.stdout == ''
+        puts "chef client is down"
+        return
+      else
+        puts "Waiting for chef to go down (attempt #{idx}/#{max})"
+        sleep 30
+      end
+    end
+  end
+
+end
+
+def kill_chef_client(chef_env, vm_entry)
+  puts 'Stopping chef-client'
+  ['service chef-client stop ',
+   'pkill -f chef-client'].each do |command|
+      c = Mixlib::ShellOut.new('./nodessh.sh', chef_env, vm_entry['hostname'], command, 'sudo')
+      c.run_command
+   end
+   confirm_chef_client_down(chef_env, vm_entry)
+   puts "Chef client is down"
+end
+
+def start_chef_client(chef_env, vm_entry)
+   puts 'Starting chef-client'
+   c = Mixlib::ShellOut.new('./nodessh.sh', chef_env, vm_entry['hostname'], 'service chef-client start', 'sudo')
+   c.run_command
+   if !c.status.success?
+      puts 'Chef client did not start successfully: ' + c.stdout + '\n' + c.stderr
+   else
+      puts 'Chef client started.'
+   end
+end
+
 def stop_all_services(chef_env, vm_entry)
   puts 'Stopping services.'
-  ['chef-client',
-   'jmxtrans',
+  ['jmxtrans',
    'hbase-regionserver', 
+   'hbase-master',
    'hadoop-hdfs-datanode',
    'hadoop-httpfs',
-   'hadoop-yarn-nodemanager'].each do |service|
+   'hadoop-yarn-nodemanager',
+   'hadoop-hdfs-journalnode',
+   'hadoop-hdfs-namenode',
+   'hadoop-hdfs-zkfc',
+   'haproxy'].each do |service|
       c = Mixlib::ShellOut.new('./nodessh.sh', chef_env, vm_entry['hostname'], 'service ' + service + ' stop', 'sudo')
       c.run_command
       if !c.status.success?
@@ -376,7 +431,9 @@ end
 
 # Graceful shutdown - bring down all services, unmount disks, shutdown
 def graceful_shutdown(chef_env, vm_entry)
-   #stop_all_services(chef_env, vm_entry)
+   puts 'Running graceful shutdown of ' + vm_entry['hostname']
+   kill_chef_client(chef_env, vm_entry)
+   stop_all_services(chef_env, vm_entry)
    unmount_disks(chef_env, vm_entry)
    shutdown_box(chef_env, vm_entry)
 end
@@ -385,21 +442,44 @@ end
 # invoking the script from a UNIX shell.
 #
 if __FILE__ == $PROGRAM_NAME
-  if ARGV[0].nil?
-    puts "Usage: bundle exec ./repxe_host.rb <hostname>"
+  options = { :shutdown => true }
+
+  parser = OptionParser.new do|opts|
+	opts.banner = "Usage: repxe_host.rb [options]"
+	opts.on('-s', '--skipShutdown', 'Skip Shutdown') do 
+		options[:shutdown] = false;
+	end
+
+	opts.on('-m', '--machine machine', 'Machine') do |machine|
+		options[:machine] = machine
+                puts 'found an option for machine with value ' + machine
+	end
+
+	opts.on('-h', '--help', 'Displays Help') do
+		puts opts
+		exit
+	end
+  end
+ 
+  parser.parse!
+
+  if options[:machine].nil?
+    puts parser
     exit(-1)
   end
 
-  vm_entry = get_entry(ARGV[0])
+  vm_entry = get_entry(options[:machine])
 
   if vm_entry.nil?
-    puts "'#{ARGV[0]}' was not found in cluster.txt!"
+    puts "'#{options[:machine]}' was not found in cluster.txt!"
     exit(-1)
   end
 
-  puts 'Repxe script started for node ' + ARGV[0]
+  puts 'Repxe script started for node ' + options[:machine]
   chef_env = find_chef_env
-  graceful_shutdown(chef_env, vm_entry)
+  if options[:shutdown]
+  	graceful_shutdown(chef_env, vm_entry)
+  end
   delete_node_data(vm_entry)
   rotate_vault_keys
   cobbler_unenroll(vm_entry)
@@ -410,4 +490,5 @@ if __FILE__ == $PROGRAM_NAME
   cluster_assign_roles(chef_env, :basic, vm_entry)
   rotate_vault_keys
   cluster_assign_roles(chef_env, :hadoop, vm_entry)
+  start_chef_client(chev_env, vm_entry)
 end
