@@ -21,5 +21,6 @@ end
 template "/etc/hadoop/conf/capacity-scheduler.fresh.xml" do
   source "generic_site.xml.erb"
   mode 0644
-  variables(:options => note[:bcpc][:hadoop][:scheduler][:capacity][:xml])
+  variables(:options =>
+            node[:bcpc][:hadoop][:yarn][:scheduler][:capacity][:xml])
 end
