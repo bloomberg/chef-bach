@@ -1,7 +1,8 @@
 default["bcpc"]["hadoop"]["yarn"]["scheduler"]["capacity"].tap do |capacity|
   capacity["maximum-applications"] = 10000
   capacity["maximum-am-resource-percent"] = 0.1
-  capacity["resource-calculator"] = "org.apache.hadoop.yarn.util.resource.DefaultResourceCalculator"
+  capacity["resource-calculator"] =
+    "org.apache.hadoop.yarn.util.resource.DefaultResourceCalculator"
   capacity["root"]["queues"] = "default"
   capacity["root"]["default"]["capacity"] = 100
   capacity["root"]["default"]["user-limit-factor"] = 1
@@ -11,7 +12,6 @@ default["bcpc"]["hadoop"]["yarn"]["scheduler"]["capacity"].tap do |capacity|
   capacity["root"]["default"]["acl_administer_queue"] = "*"
   capacity["node-locality-delay"] = -1
 end
-
 
 capacity = node[:bcpc][:hadoop][:yarn][:scheduler][:capacity]
 
