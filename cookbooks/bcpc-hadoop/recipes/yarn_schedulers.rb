@@ -1,6 +1,5 @@
 hadoop_templates =
   %w{
-   capacity-scheduler.xml
    fair-scheduler.xml
   }
 
@@ -18,7 +17,7 @@ hadoop_templates.each do |t|
    end
 end
 
-template "/etc/hadoop/conf/capacity-scheduler.fresh.xml" do
+template "/etc/hadoop/conf/capacity-scheduler.xml" do
   source "generic_site.xml.erb"
   mode 0644
   variables(:options =>
