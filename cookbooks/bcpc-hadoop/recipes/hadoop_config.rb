@@ -7,14 +7,19 @@ directory "/etc/hadoop/conf.#{node.chef_environment}" do
 end
 
 bash "update-hadoop-conf-alternatives" do
-  code(%Q{
-    update-alternatives --install /etc/hadoop/conf hadoop-conf /etc/hadoop/conf.#{node.chef_environment} 50
-    update-alternatives --set hadoop-conf /etc/hadoop/conf.#{node.chef_environment}
-  })
+  code "update-alternatives --install /etc/hadoop/conf hadoop-conf " +
+    "/etc/hadoop/conf.#{node.chef_environment} 50\n" +
+    "update-alternatives --set hadoop-conf " +
+    "/etc/hadoop/conf.#{node.chef_environment}\n"
 end
-if ( node[:bcpc][:hadoop][:hdfs][:ldap][:integration] == true )
 
-  ldap_pwd = ( node[:bcpc][:hadoop][:hdfs][:ldap][:password].nil? ? get_config('password', 'ldap', 'os') : node[:bcpc][:hadoop][:hdfs][:ldap][:password] )
+if node[:bcpc][:hadoop][:hdfs][:ldap][:integration]
+  ldap_pwd =
+    if node[:bcpc][:hadoop][:hdfs][:ldap][:password].nil?
+      get_config('password', 'ldap', 'os')
+    else
+      node[:bcpc][:hadoop][:hdfs][:ldap][:password]
+    end
 
   file "/etc/hadoop/conf/ldap-conn-pass.txt" do
     content "#{ldap_pwd}"
@@ -25,25 +30,10 @@ if ( node[:bcpc][:hadoop][:hdfs][:ldap][:integration] == true )
   end
 end
 
-hadoop_templates =
-  %w{
-   capacity-scheduler.xml
-   fair-scheduler.xml
-   slaves
-  }
-
-hadoop_templates.each do |t|
-   template "/etc/hadoop/conf/#{t}" do
-     source "hdp_#{t}.erb"
-     mode 0644
-     variables(:nn_hosts => node[:bcpc][:hadoop][:nn_hosts],
-               :zk_hosts => node[:bcpc][:hadoop][:zookeeper][:servers],
-               :jn_hosts => node[:bcpc][:hadoop][:jn_hosts],
-               :rm_hosts => node[:bcpc][:hadoop][:rm_hosts],
-               :dn_hosts => node[:bcpc][:hadoop][:dn_hosts],
-               :hs_hosts => node[:bcpc][:hadoop][:hs_hosts],
-               :mounts => node[:bcpc][:hadoop][:mounts])
-   end
+file '/etc/hadoop/conf/slaves' do
+  mode 0644
+  content "localhost\n" +
+    node[:bcpc][:hadoop][:dn_hosts].map{ |h| float_host(h) }.join("\n")
 end
 
 # These files have no <%= %> blocks.
@@ -66,7 +56,9 @@ end
 
 template "/etc/hadoop/conf/topology" do
   source "#{node["bcpc"]["hadoop"]["topology"]["script"]}.erb"
-  cookbook node["bcpc"]["hadoop"]["topology"]["cookbook"] if node["bcpc"]["hadoop"]["topology"]["cookbook"]
+  if node["bcpc"]["hadoop"]["topology"]["cookbook"]
+    cookbook node["bcpc"]["hadoop"]["topology"]["cookbook"]
+  end
   mode 0655
 end
 
