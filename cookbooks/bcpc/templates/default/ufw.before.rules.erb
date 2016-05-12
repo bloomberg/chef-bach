@@ -18,9 +18,10 @@
 :POSTROUTING ACCEPT [0:0]
 
 # Forward traffic from internal interfaces through our outbound NAT interface.
--A POSTROUTING -s <%="#{node[:bcpc][:management][:cidr]}"%> -o <%="#{node[:bcpc][:bootstrap][:interface]}"%> -j MASQUERADE
--A POSTROUTING -s <%="#{node[:bcpc][:storage][:cidr]}"%> -o <%="#{node[:bcpc][:bootstrap][:interface]}"%> -j MASQUERADE
--A POSTROUTING -s <%="#{node[:bcpc][:floating][:cidr]}"%> -o <%="#{node[:bcpc][:bootstrap][:interface]}"%> -j MASQUERADE
+<% subnet = node[:bcpc][:management][:subnet] %> 
+-A POSTROUTING -s <%="#{node[:bcpc][:networks][subnet][:management][:cidr]}"%> -o <%="#{node[:bcpc][:bootstrap][:interface]}"%> -j MASQUERADE
+-A POSTROUTING -s <%="#{node[:bcpc][:networks][subnet][:storage][:cidr]}"%> -o <%="#{node[:bcpc][:bootstrap][:interface]}"%> -j MASQUERADE
+-A POSTROUTING -s <%="#{node[:bcpc][:networks][subnet][:floating][:cidr]}"%> -o <%="#{node[:bcpc][:bootstrap][:interface]}"%> -j MASQUERADE
 
 # don't delete the 'COMMIT' line or these nat table rules won't be processed
 COMMIT

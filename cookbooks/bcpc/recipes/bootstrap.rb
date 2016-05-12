@@ -17,7 +17,76 @@
 # limitations under the License.
 #
 
+%w{make gcc pkg-config libaugeas-dev}.each do |pkg|
+  package pkg do
+    action :nothing
+  end.run_action(:install)
+end
+
+require 'pathname'
+require 'rubygems'
+gem_path = Pathname.new(Gem.ruby).dirname.join('gem').to_s
+
+gem_package 'ruby-augeas' do
+    gem_binary gem_path
+    version ">=0.0.0"
+    action :nothing
+end.run_action(:install)
+
+#
+# With a restrictive umask chef installs gemspec files with permission 770 on bootstrap node 
+# Need to change it so that all the users can read it without which knife without sudo will fail
+#
+Gem.path.each do |dir|
+  Dir[Pathname.new(dir).join("specifications","ruby-augeas*")].each do |val|
+    file "#{val}" do
+      action :create
+      mode "0644"
+    end
+  end
+end
+
+Gem.clear_paths
+require 'augeas'
+
 include_recipe "bcpc::default"
+
+if node[:bcpc][:networks].length > 1
+  include_recipe "bfd::default"
+  bfd_session "Global Bootstrap VIP Connect" do
+    action :connect
+    remote_ip node[:bcpc][:networks][node[:bcpc][:management][:subnet]][:management][:gateway]
+    local_ip node[:bcpc][:management][:ip]
+  end
+  Augeas::open do |aug|
+    aug.set("/augeas/load/Interfaces/incl", "/etc/network/interfaces.d/*")
+    aug.load
+    # Check if an interface file defines the VIP address already -- ifconfig seems a bit loose in its checks
+    if aug.match("/files/etc/network/interfaces.d/*/iface/address[. = '#{node[:bcpc][:bootstrap][:vip]}']").length == 0
+      ifconfig node[:bcpc][:bootstrap][:vip] do
+        device "#{node[:bcpc][:bootstrap][:pxe_interface]}:0"
+        mask "255.255.255.255"
+        action [:add]
+      end
+    end
+  end
+  ifs = node[:network][:interfaces].keys
+  # create a hash of ipaddresses -- skip interfaces without addresses
+  ips = ifs.map{ |a| node[:network][:interfaces][a].attribute?(:addresses) and
+                     node[:network][:interfaces][a][:addresses] or {}}.reduce({}, :merge)
+  if not ips.keys.include?(node[:bcpc][:bootstrap][:vip]) 
+    ifconfig node[:bcpc][:bootstrap][:vip] do
+      device "#{node[:bcpc][:bootstrap][:pxe_interface]}:0"
+      mask "255.255.255.255"
+      action [:enable]
+    end
+  end
+  bfd_session "Global Bootstrap VIP Up" do
+    action :up
+    remote_ip node[:bcpc][:networks][node[:bcpc][:management][:subnet]][:management][:gateway]
+    local_ip node[:bcpc][:management][:ip]
+  end
+end
 
 node[:bcpc][:bootstrap][:admin_users].each do |user_name|
   user user_name do

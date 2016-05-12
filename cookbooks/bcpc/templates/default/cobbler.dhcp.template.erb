@@ -22,19 +22,24 @@ allow bootp;
 ignore client-updates;
 set vendorclass = option vendor-class-identifier;
 
-subnet <%= @subnet %> netmask <%="#{node[:bcpc][:management][:netmask]}"%> {
-     option routers             <%="#{node[:bcpc][:management][:gateway]}"%>;
-     option domain-name-servers <%="#{@node[:bcpc][:dns_servers].join(', ')}" %>;
-     option subnet-mask         <%="#{node[:bcpc][:management][:netmask]}"%>;
-     option domain-name         "<%="#{node[:bcpc][:domain_name]}"%>";
-     <% if @range %>
-     <%= "range dynamic-bootp        #{@range};" %>
+<% require 'ipaddr'
+   @subnets.keys.each do |subnet|
+     subnet_node = @node[:bcpc][:networks][subnet][:management]
+%>
+subnet <%= IPAddr.new(subnet_node[:cidr]).to_string %> netmask <%= subnet_node[:netmask] %> {
+     option routers             <%= subnet_node[:gateway] %>;
+     option domain-name-servers <%= @node[:bcpc][:dns_servers].join(', ') %>;
+     option subnet-mask         <%= subnet_node[:netmask] %>;
+     option domain-name         "<%= @node[:bcpc][:domain_name] %>";
+     <% if subnet_node.attribute?("dhcp_range") and subnet_node[:dhcp_range] %>
+     <%= "range dynamic-bootp        #{subnet_node[:dhcp_range]};" %>
      <% end %>
      filename                   "/pxelinux.0";
      default-lease-time         21600;
      max-lease-time             43200;
      next-server                $next_server;
 }
+<% end %>
 
 #for dhcp_tag in $dhcp_tags.keys():
     ## group could be subnet if your dhcp tags line up with your subnets
