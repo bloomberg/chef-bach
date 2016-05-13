@@ -23,7 +23,6 @@ default.bach_spark.config.spark.logConf = true
 default.bach_spark.config.spark.dynamicAllocation.enabled = true
 default.bach_spark.config.spark.shuffle.service.enabled = true
 default.bach_spark.config.spark.yarn.jar = "#{node['spark']['hdfs_url']}/apps/spark/#{node[:spark][:package][:version]}/spark-assembly.jar" 
-default.bach_spark.config.spark.yarn.queue = "spark"
 default.bach_spark.config.spark.master = "yarn-client"
 
 # Spark environment configuration
