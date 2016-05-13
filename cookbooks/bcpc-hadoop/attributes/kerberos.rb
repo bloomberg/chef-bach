@@ -1,5 +1,5 @@
 # Kerberos settings 
-default[:bcpc][:hadoop][:kerberos][:enable] = false
+default[:bcpc][:hadoop][:kerberos][:enable] = true
 default[:bcpc][:hadoop][:kerberos][:realm] = "BCPC.EXAMPLE.COM"
 default[:bcpc][:hadoop][:kerberos][:data] = {
         :namenode => {"principal" => "nn", "keytab" => "nn.service.keytab", "owner" => "hdfs", "princhost" => "_HOST", "perms"=> "0600", "spnego_keytab" => "nn.service.keytab"},
@@ -13,6 +13,7 @@ default[:bcpc][:hadoop][:kerberos][:data] = {
         :hbase => {"principal" => "hbase", "keytab" => "hbase.service.keytab", "owner" => "hbase", "princhost" => "_HOST", "perms" => "0600", "spnego_keytab" =>  "hbase.service.keytab"},
         :httpfs => {"principal" => "httpfs", "keytab" => "httpfs.service.keytab", "owner" => "httpfs", "princhost"  => "_HOST", "perms" => "0600", "spnego_keytab" => "httpfs.service.keytab"},
         :hive => {"principal" => "hive", "keytab" => "hive.service.keytab", "owner" => "hive", "princhost" => "_HOST", "perms" => "0600", "spnego_keytab" => "hive.service.keytab"},
+        :flume=> {"principal" => "flume", "keytab" => "flume.service.keytab", "owner" => "flume", "princhost" => "_HOST", "perms" => "0600", "spnego_keytab" => "flume.service.keytab"},
         :oozie => {"principal" => "oozie", "keytab" => "oozie.service.keytab", "owner" => "oozie", "princhost" => "_HOST", "perms" => "0600", "spnego_keytab" => "oozie.service.keytab"}}
 default[:bcpc][:hadoop][:kerberos][:keytab][:dir] = "/etc/security/keytabs"
 default[:bcpc][:hadoop][:kerberos][:keytab][:recreate] = false

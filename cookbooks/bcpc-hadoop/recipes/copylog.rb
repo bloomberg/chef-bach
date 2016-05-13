@@ -25,6 +25,10 @@ link "/etc/init.d/flume-agent-multi" do
   notifies :run, "bash[kill flume-java]", :immediate
 end
 
+configure_kerberos 'flume_kerb' do
+  service_name 'flume'
+end
+
 bash "kill flume-java" do
   code "pkill -u flume -f java"
   action :nothing

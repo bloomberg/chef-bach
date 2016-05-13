@@ -1,0 +1,54 @@
+{
+  "name": "BCPC-Hadoop-Worker",
+  "json_class": "Chef::Role",
+  "run_list": [
+    "role[Basic]",
+    "recipe[bcpc::chef_vault_install]",
+    "recipe[bcpc::default]",
+    "recipe[bcpc::ubuntu_tools_repo]",
+    "recipe[bcpc-hadoop::default]",
+    "recipe[bcpc::networking]",
+    "recipe[bcpc-hadoop::disks]",
+    "recipe[bcpc-hadoop::hdp_repo]",
+    "recipe[bach_krb5::krb5_client]",
+    "recipe[bcpc-hadoop::configs]",
+    "recipe[pam::default]",
+    "recipe[bach_spark::default]",
+    "recipe[bcpc-hadoop::datanode]",
+    "recipe[bach_spark::cluster_install]",
+    "recipe[bcpc-hadoop::httpfs]",
+    "recipe[bcpc-hadoop::region_server]",
+    "recipe[bcpc-hadoop::pig]",
+    "recipe[bcpc-hadoop::tez]",
+    "recipe[bcpc-hadoop::mahout]",
+    "recipe[bcpc-hadoop::oozie_client]",
+    "recipe[bcpc::diamond]",
+    "recipe[bcpc_jmxtrans]"
+  ],
+  "description": "A highly-available head node in a BCPC Hadoop cluster",
+  "chef_type": "role",
+  "default_attributes" : {
+    "jmxtrans":  {
+      "servers":  [
+                 {
+                    "type": "datanode",
+                    "service": "hadoop-hdfs-datanode",
+                    "service_cmd": "org.apache.hadoop.hdfs.server.datanode.DataNode"
+                 },
+                 {
+                    "type": "hbase_rs",
+                    "service": "hbase-regionserver",
+                    "service_cmd": "org.apache.hadoop.hbase.regionserver.HRegionServer"
+                 },
+                 {
+                   "type": "nodemanager",
+                   "service": "hadoop-yarn-nodemanager",
+                   "service_cmd": "org.apache.hadoop.yarn.server.nodemanager.NodeManager"
+                 }
+        ]
+      }
+  },
+  "override_attributes": {
+  }
+}
+

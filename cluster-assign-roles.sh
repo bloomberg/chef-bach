@@ -4,7 +4,7 @@
 # - The environment is needed to find the root password of the machines
 #   and to provide the environment in which to chef them
 #
-# - An install_type is needed; options are OpenStack or Hadoop
+# - An install_type is needed; options are Hadoop, Kafka, Bootstrap or Basic
 #
 # - If no hostname is provided, all nodes will be attempted
 #
@@ -15,7 +15,6 @@
 #   recipe[RECIPE-NAME], only nodes marked for that action are attempted
 #
 # - A node may be excluded by setting its action to SKIP
-
 set -x
 set -o errtrace
 set -o errexit
@@ -97,47 +96,6 @@ function install_stub {
 }
 
 ########################################################################
-# Perform OpenStack install
-# Arguments: $* - hosts (as output from parse_cluster_txt)
-# Runs the end-to-end install in the proper order for OpenStack installs
-# Install method:
-# First, install first headnode -- which needs to be an admin
-# Next, install head-nodes start to finish and back to start synchronously
-# (this ensures all headnodes know of eachother)
-# Lastly, install workers in parallel)
-function openstack_install {
-  local hosts="$*"
-  shopt -u nocasematch
-  printf "Doing OpenStack style install...\n"
-
-  first_head_node=$(printf ${hosts// /\\n} | grep -i "head" | sort | head -1)
-  [[ "$first_head_node" =~ $REGEX ]] && first_head_node_fqdn="${BASH_REMATCH[3]}" || \
-    (printf "Failed to parse hosts\n"; exit 1 )
-  # chef does not always use the same hostname as cluster.txt (be fast and loose and find the chef hostname)
-  first_head_node_hostname=${first_head_node_fqdn%%.*}
-  install_stub "$first_head_node"
-  # set the first node to admin for creating data bags (short-circuit failures in-case machine already is an admin)
-  chef_head_node_name=$(sudo knife client list $KNIFE_ADMIN | egrep "^${first_head_node_hostname}\..*$|^${first_head_node_hostname}$")
-  printf "/\"admin\": false\ns/false/true\nw\nq\n" | EDITOR=ed sudo -E knife client edit $chef_head_node_name $KNIFE_ADMIN || /bin/true
-
-  # Do head nodes first and group by type of head
-  printf "Installing heads...\n"
-  install_machines $(printf ${hosts// /\\n} | grep -i "head" | sort)
-  # Redo head nodes in reverse order to ensure they know about eachother
-  # (the last node already knows everyone in the universe of heads)
-  printf "Acquainting heads...\n"
-  install_machines $(printf ${hosts// /\\n} | grep -i "head" | sort | head -n -1 | tac)
-  # Do everything else next and group by type of node
-  printf "Installing workers...\n"
-  for m in $(printf ${hosts// /\\n} | grep -vi "head" | sort); do
-    ( install_machines $m || exit 1 )&
-  done
-  wait
-  # remove admin from first headnode
-  printf "/\"admin\": true\ns/true/false\nw\nq\n" | EDITOR=ed sudo -E knife client edit "$chef_head_node_name" $KNIFE_ADMIN 
-}
-
-########################################################################
 # Perform Hadoop install
 # Arguments: $* - hosts (as output from parse_cluster_txt)
 # Method:
@@ -171,15 +129,31 @@ function hadoop_install {
     printf "/\"admin\": false\ns/false/true\nw\nq\n" | EDITOR=ed sudo -E knife client edit "${BASH_REMATCH[3]}" $KNIFE_ADMIN || /bin/true
   done
 
-  printf "Installing heads...\n"
-  for m in $(printf ${hosts// /\\n} | grep -i "BCPC-Hadoop-Head"| sort); do
-    [[ "$m" =~ $REGEX ]]
-    local fqdn="${BASH_REMATCH[3]}"
-    # authenticate the node one by one
-    vaults=$(sudo ./find_resources.rb $fqdn | tail -1)
-    sudo ./node_auth.rb $vaults $fqdn
-    install_machines $m
-  done
+  if printf ${hosts// /\\n} | grep -q "BCPC-Hadoop-Head"; then
+    # Making sure that the run_list is updated in solr index and is available for search during chef-client run
+    num_hosts=$(printf ${hosts// /\\n} | grep -i "BCPC-Hadoop-Head" | wc -l)
+    while true; do
+      printf "Waiting for Chef Solr to update\n"
+      sleep 0.5
+      roleCount=$(sudo knife search node "role:BCPC-Hadoop-Head-Namenode*" $KNIFE_ADMIN | grep '^Node Name:' | wc -l)
+      rolesCount=$(sudo knife search node "roles:BCPC-Hadoop-Head-Namenode*" $KNIFE_ADMIN | grep '^Node Name:' | wc -l)
+      if [[ $num_hosts -eq $rolesCount ]] || [[ $num_hosts -eq $roleCount ]]; then
+        break
+      fi
+    done
+
+    printf "Installing heads...\n"
+    for cntr in {1..2}; do
+      for m in $(printf ${hosts// /\\n} | grep -i "BCPC-Hadoop-Head" | sort); do
+        [[ "$m" =~ $REGEX ]]
+        local fqdn="${BASH_REMATCH[3]}"
+        # authenticate the node one by one
+        vaults=$(sudo ./find_resources.rb $fqdn | tail -1)
+        sudo ./node_auth.rb $vaults $fqdn
+        install_machines $m
+      done
+   done
+  fi
 
   # remove admin from the headnodes
   for h in $(printf ${hosts// /\\n} | grep -i "BCPC-Hadoop-Head" | sort); do
@@ -210,6 +184,56 @@ function hadoop_install {
   fi
   clean_up_status_file
   trap - EXIT
+}
+
+###########################################################################
+# Perform hadoop bootstrap install
+# Arguments: $* - hosts (as output from parse_cluster_txt
+# Installs BCPC-Hadoop-Head only
+#
+#
+function bootstrap_install {
+  local hosts="$*"
+  shopt -u nocasematch
+  printf "Doing bootstrap install...\n"
+  # to prevent needing to re-chef headnodes the Hadoop code base assumes
+  # all nodes and clients have been created and further that all roles
+  # have been assigned before any node Chefing begins
+  install_stub $(printf ${hosts// /\\n} | sort)
+
+  printf "Assigning roles for headnodes...\n"
+  for h in $(printf ${hosts// /\\n} | grep -i "BCPC-Hadoop-Head" | sort); do
+    [[ "$h" =~ $REGEX ]]
+    local role="role[BCPC-Hadoop-Head]"
+    local ip="${BASH_REMATCH[2]}"
+    local fqdn="${BASH_REMATCH[3]}"
+    sudo knife node run_list add $fqdn "$role" $KNIFE_ADMIN &
+  done
+
+  # set the headnodes to admin for creating data bags
+  for h in $(printf ${hosts// /\\n} | grep -i "BCPC-Hadoop-Head" | sort); do
+    [[ "$h" =~ $REGEX ]]
+    printf "/\"admin\": false\ns/false/true\nw\nq\n" | EDITOR=ed sudo -E knife client edit "${BASH_REMATCH[3]}" $KNIFE_ADMIN || /bin/true
+  done
+
+  printf "Bootstrapping heads...\n"
+  for c in {1..2}; do
+    for m in $(printf ${hosts// /\\n} | grep -i "BCPC-Hadoop-Head"| sort); do
+      [[ "$m" =~ $REGEX ]]
+      local fqdn="${BASH_REMATCH[3]}"
+      # authenticate the node one by one
+      vaults=$(sudo ./find_resources.rb $fqdn | tail -1)
+      sudo ./node_auth.rb $vaults $fqdn
+      m=`echo $m|sed 's/^[^!]*!/role\[BCPC-Hadoop-Head\]!/'`
+      install_machines $m
+    done
+  done
+
+  # remove admin from the headnodes
+  for h in $(printf ${hosts// /\\n} | grep -i "BCPC-Hadoop-Head" | sort); do
+    [[ "$h" =~ $REGEX ]]
+    printf "/\"admin\": true\ns/true/false\nw\nq\n" | EDITOR=ed sudo -E knife client edit "${BASH_REMATCH[3]}" $KNIFE_ADMIN
+  done
 }
 
 ########################################################################
@@ -299,8 +323,8 @@ INSTALL_TYPE=$2
 MATCHKEY=${3-}
 
 shopt -s nocasematch
-if [[ ! "$INSTALL_TYPE" =~ (openstack|hadoop|kafka|basic) ]]; then
-  printf "Error: Need install type of OpenStack, Hadoop, Kafka or Basic\n" > /dev/stderr
+if [[ ! "$INSTALL_TYPE" =~ (|hadoop|kafka|bootstrap|basic) ]]; then
+  printf "Error: Need install type of Hadoop, Kafka, Bootstrap or Basic\n" > /dev/stderr
   exit 1
 fi
 shopt -u nocasematch
@@ -326,8 +350,8 @@ if [[ -z "${hosts-}" ]]; then
 fi
 
 shopt -s nocasematch
-if [[ "$INSTALL_TYPE" = "OpenStack" ]]; then
-  openstack_install $hosts
+if [[ "$INSTALL_TYPE" = "Bootstrap" ]]; then
+  bootstrap_install $hosts
 elif [[ "$INSTALL_TYPE" = "Hadoop" ]]; then
   hadoop_install $hosts
 elif [[ "$INSTALL_TYPE" = "Kafka" ]]; then

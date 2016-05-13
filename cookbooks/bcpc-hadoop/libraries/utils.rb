@@ -118,8 +118,12 @@ end
 def get_namenodes()
   # Logic to get all namenodes if running in HA
   # or to get only the master namenode if not running in HA
-  if node['bcpc']['hadoop']['hdfs']['HA'] then
-    nn_hosts = get_nodes_for("namenode*")
+  if node['bcpc']['hadoop']['hdfs']['HA']
+    nnrole = search(:node, "role:BCPC-Hadoop-Head-Namenode* AND chef_environment:#{node.chef_environment}")
+    nnroles = search(:node, "roles:BCPC-Hadoop-Head-Namenode* AND chef_environment:#{node.chef_environment}")
+    puts "nnrole: #{nnrole}"
+    puts "nnroles:#{nnroles}"
+    nn_hosts = nnrole | nnroles
   else
     nn_hosts = get_nodes_for("namenode_no_HA")
   end
@@ -438,4 +442,23 @@ def update_oozie_sharelib(host)
   else
     Chef::Log.info("Sharelibupdate: Oozie server not running on #{host}")
   end
+end
+
+def get_cluster_nodes()
+
+  cluster_file = node['bcpc']['cluster']['file_path']
+
+  if !File::file?(cluster_file)
+    Chef::Log.fatal("File #{cluster_file} does not exist.")
+    raise
+  end
+
+  fileList = Array.new
+
+  File::open(cluster_file,"r").each_line do |line|
+    lines = line.split()
+    fileList.push("#{lines[0]}.#{lines[5]}")
+  end
+
+  fileList  
 end

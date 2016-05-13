@@ -185,14 +185,6 @@ url=http://127.0.0.1:1936/haproxy?stats;csv
 
 [[MemcachedCollector]]
 enabled = False 
-
-<% if @has_mysql -%>
-[[MySQLCollector]]
-enabled = False 
-hosts=<%="#{get_config('mysql-root-user')}"%>:<%="#{get_config!('password','mysql-root','os')}"%>@<%="#{node[:bcpc][:management][:ip]}"%>:3306/<%="#{node['bcpc']['nova_dbname']}"%>
-innodb = True
-<% end -%>
-
 <% end -%>
 
 ################################################################################

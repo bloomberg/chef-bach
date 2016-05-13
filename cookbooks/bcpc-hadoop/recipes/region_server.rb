@@ -42,16 +42,9 @@ template "/etc/default/hbase" do
   variables(:hbrs_jmx_port => node[:bcpc][:hadoop][:hbase_rs][:jmx][:port])
 end
 
-#link "/etc/init.d/hbase-regionserver" do
-#  to "/usr/hdp/#{node[:bcpc][:hadoop][:distribution][:release]}/hbase/etc/init.d/hbase-regionserver"
-#  notifies :run, 'bash[kill hbase-regionserver]', :immediate
-#end
-#
-#bash "kill hbase-regionserver" do
-#  code "pkill -u hbase -f regionserver"
-#  action :nothing
-#  returns [0, 1]
-#end
+configure_kerberos 'hbasers_kerb' do
+  service_name 'hbase'
+end
 
 template "/etc/init.d/hbase-regionserver" do
   source "hdp_hbase-regionserver-initd.erb"

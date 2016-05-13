@@ -1,4 +1,4 @@
-############################################
+###########################################
 #
 #  Hadoop specific configs
 #
@@ -10,21 +10,30 @@ default["bcpc"]["hadoop"]["distribution"]["key"] = 'hortonworks.key'
 default["bcpc"]["hadoop"]["distribution"]["release"] = '2.3.4.0-3485'
 default["bcpc"]["hadoop"]["distribution"]["active_release"] = node["bcpc"]["hadoop"]["distribution"]["release"]
 # disks to use for Hadoop activities (expected to be an environment or role set variable)
-default["bcpc"]["hadoop"]["disks"] = []
-default["bcpc"]["hadoop"]["oozie"]["admins"] = []
-default["bcpc"]["hadoop"]["oozie"]["memory_opts"] = "-Xmx2048m -XX:MaxPermSize=256m"
-default["bcpc"]["hadoop"]["oozie"]["sharelib_checksum"] = nil
-default["bcpc"]["hadoop"]["hdfs"]["HA"] = false
+default["bcpc"]["hadoop"]["hadoop_home_warn_suppress"] = 1
+default["bcpc"]["hadoop"]["hadoop_log_dir"] = "/var/log/hadoop-hdfs"
+default["bcpc"]["hadoop"]["hadoop_mapred_ident_string"] = "mapred"
+default["bcpc"]["hadoop"]["hadoop_mapred_log_dir"] = "/var/log/hadoop-mapreduce"
+default["bcpc"]["hadoop"]["hadoop_secure_dn_log_dir"] = "/var/log/hadoop-hdfs"
+default["bcpc"]["hadoop"]["hadoop_pid_dir"] = "/var/run/hadoop-hdfs"
+default["bcpc"]["hadoop"]["hadoop_secure_dn_pid_dir"] = "/var/run/hadoop-hdfs"
+default["bcpc"]["hadoop"]["hadoop_mapred_pid_dir"] = "/var/run/hadoop-mapreduce"
+default["bcpc"]["hadoop"]["hadoop_secure_dn_user"] = "hdfs"
+default["bcpc"]["hadoop"]["hadoop"]["bin"]["path"] = "/usr/bin/hadoop"
+default["bcpc"]["hadoop"]["hadoop"]["config"]["dir"] = "/etc/hadoop/conf"
+default["bcpc"]["hadoop"]["hdfs"]["HA"] = true
 default["bcpc"]["hadoop"]["hdfs"]["failed_volumes_tolerated"] = 1
 default["bcpc"]["hadoop"]["hdfs"]["dfs_replication_factor"] = 3
 default["bcpc"]["hadoop"]["hdfs"]["dfs_blocksize"] = "128m"
 default['bcpc']['hadoop']['hdfs_url']="hdfs://#{node.chef_environment}/"
 default["bcpc"]["hadoop"]["jmx_enabled"] = true
+default[:bcpc][:hadoop][:jute][:maxbuffer] = 6291456
 default["bcpc"]["hadoop"]["datanode"]["xmx"]["max_size"] = 4096
 default["bcpc"]["hadoop"]["datanode"]["xmx"]["max_ratio"] = 0.25
 default["bcpc"]["hadoop"]["datanode"]["max"]["xferthreads"] = 16384
 default["bcpc"]["hadoop"]["datanode"]["jmx"]["port"] = 10112
 default["bcpc"]["hadoop"]["datanode"]["gc_opts"] = "-server -XX:ParallelGCThreads=4 -XX:+UseParNewGC -XX:+UseConcMarkSweepGC -verbose:gc -XX:+PrintHeapAtGC -XX:+PrintGCDetails -XX:+PrintGCTimeStamps -XX:+PrintGCDateStamps -Xloggc:/var/log/hadoop-hdfs/gc/gc.log-datanode-$$-$(hostname)-$(date +'%Y%m%d%H%M').log -XX:+PrintTenuringDistribution -XX:+UseNUMA -XX:+PrintGCApplicationStoppedTime -XX:+UseCompressedOops -XX:+PrintClassHistogram -XX:+PrintGCApplicationConcurrentTime"
+default["bcpc"]["hadoop"]["mapreduce"]["framework"]["name"] = "yarn"
 default["bcpc"]["hadoop"]["namenode"]["handler"]["count"] = 100
 default["bcpc"]["hadoop"]["namenode"]["gc_opts"] = "-server -XX:ParallelGCThreads=14 -XX:+UseParNewGC -XX:+UseConcMarkSweepGC -verbose:gc -XX:+PrintHeapAtGC -XX:+PrintGCDetails -XX:+PrintGCTimeStamps -XX:+PrintGCDateStamps -Xloggc:/var/log/hadoop-hdfs/gc/gc.log-namenode-$$-$(hostname)-$(date +'%Y%m%d%H%M').log -XX:+PrintTenuringDistribution -XX:+UseNUMA -XX:+PrintGCApplicationStoppedTime -XX:+UseCompressedOops -XX:+PrintClassHistogram -XX:+PrintGCApplicationConcurrentTime"
 default["bcpc"]["hadoop"]["namenode"]["xmx"]["max_size"] = 16384
@@ -36,8 +45,7 @@ default["bcpc"]["hadoop"]["namenode"]["https"]["port"] = 50470
 default["bcpc"]["hadoop"]["kafka"]["jmx"]["port"] = 9995
 default["bcpc"]["hadoop"]["topology"]["script"] = "topology"
 default["bcpc"]["hadoop"]["topology"]["cookbook"] = "bcpc-hadoop"
-default["bcpc"]["hadoop"]["hive"]["hive_table_stats_db"] = "hive_table_stats"
-default["bcpc"]["hadoop"]["hive"]["hive_table_stats_db_user"] = "hive_table_stats"
+default["bcpc"]["hadoop"]["yarn"]["scheduler"]["minimum-allocation-mb"] = 256
 
 # Setting balancer bandwidth to default value as per hdfs-default.xml
 default["bcpc"]["hadoop"]["balancer"]["bandwidth"] = 1048576
@@ -114,14 +122,6 @@ default[:bcpc][:hadoop][:os][:group][:hadoop][:members]=["hdfs","yarn"]
 default[:bcpc][:hadoop][:os][:group][:hdfs][:members]=["hdfs"]
 default[:bcpc][:hadoop][:os][:group][:mapred][:members]=["yarn"]
 
-default[:bcpc][:hadoop][:hdfs][:ldap][:integration] = false
-default[:bcpc][:hadoop][:hdfs][:ldap][:user] = "" #must be LDAP DN
-default[:bcpc][:hadoop][:hdfs][:ldap][:domain] = "BCPC.EXAMPLE.COM"
-default[:bcpc][:hadoop][:hdfs][:ldap][:port] = 389
-default[:bcpc][:hadoop][:hdfs][:ldap][:password] =  nil
-default[:bcpc][:hadoop][:hdfs][:ldap][:search][:filter][:user]="(&(objectclass=user)(sAMAccountName={0}))"
-default[:bcpc][:hadoop][:hdfs][:ldap][:search][:filter][:group]="(objectClass=group)"
-
 # Override defaults for the Java cookbook
 default['java']['jdk_version'] = 7
 default['java']['install_flavor'] = "oracle"
@@ -135,3 +135,6 @@ default['java']['oracle']['jce']['8']['url'] = get_binary_server_url + "jce_poli
 
 # Set the JAVA_HOME for Hadoop components
 default['bcpc']['hadoop']['java'] = '/usr/lib/jvm/java-7-oracle-amd64'
+
+
+default['bcpc']['cluster']['file_path'] = "/home/vagrant/chef-bcpc/cluster.txt"
