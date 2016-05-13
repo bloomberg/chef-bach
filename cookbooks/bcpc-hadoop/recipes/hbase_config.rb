@@ -63,6 +63,8 @@ end
   end
 end
 
+subnet = node["bcpc"]["management"]["subnet"]
+
 generated_values = {
   'hbase.zookeeper.quorum' => 
     node[:bcpc][:hadoop][:zookeeper][:servers].map{ |s| float_host(s[:hostname])}.join(","),
@@ -74,7 +76,11 @@ generated_values = {
   'fail.fast.expired.active.master' =>
       node[:bcpc][:hadoop][:hb_hosts].length > 1 ? "true" : "false",
   'hbase.master.wait.on.regionservers.mintostart' => 
-      "#{node[:bcpc][:hadoop][:rs_hosts].length/2+1}"
+      "#{node[:bcpc][:hadoop][:rs_hosts].length/2+1}",
+  'hbase.regionserver.dns.interface' =>
+      node["bcpc"]["networks"][subnet]["floating"]["interface"],
+  'hbase.master.dns.interface' =>
+      node["bcpc"]["networks"][subnet]["floating"]["interface"]
 }
 
 if node[:bcpc][:hadoop][:kerberos][:enable] == true then

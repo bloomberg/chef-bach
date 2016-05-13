@@ -51,10 +51,6 @@ bucketcache_size = (node["bcpc"]["hadoop"]["hbase_rs"]["xmx"]["size"] * node["bc
 
 bucketcache_combinedcache_percent = bucketcache_size.to_f/(node["bcpc"]["hadoop"]["hbase_rs"]["xmx"]["size"] + node["bcpc"]["hadoop"]["hbase_rs"]["mx_dir_mem"]["size"] - node["bcpc"]["hadoop"]["hbase_rs"]["hdfs_dir_mem"]["size"])
 
-# XXX warning subnet will be unset until our second Chef run
-# after it is set from the bcpc cookbook
-subnet = node["bcpc"]["management"]["subnet"]
-
 # These will become key/value pairs in 'hbase_site.xml'
 default[:bcpc][:hadoop][:hbase][:site_xml].tap do |site_xml|
   site_xml['hbase.rootdir'] = "#{node['bcpc']['hadoop']['hbase']['root_dir']}"
@@ -69,8 +65,6 @@ default[:bcpc][:hadoop][:hbase][:site_xml].tap do |site_xml|
   #site_xml['fail.fast.expired.active.master'] = "#{@master_hosts.length > 1 ? "true" : "false"}"
   # the below value will be defined in recipe and merged in 
   #site_xml['hbase.master.wait.on.regionservers.mintostart'] = "#{@rs_hosts.length/2+1}"
-  site_xml['hbase.regionserver.dns.interface'] = "#{node["bcpc"]["networks"][subnet]["floating"]["interface"]}"
-  site_xml['hbase.master.dns.interface'] = "#{node["bcpc"]["networks"][subnet]["floating"]["interface"]}"
   site_xml['hbase.regionserver.ipc.address'] = "#{node["bcpc"]["floating"]["ip"]}"
   site_xml['hbase.master.ipc.address'] = "#{node["bcpc"]["floating"]["ip"]}"
   # the below value will be defined in recipe and merged in 

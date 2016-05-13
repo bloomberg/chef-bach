@@ -1,3 +1,5 @@
+subnet = node['bcpc']['management']['subnet']
+
 hdfs_site_values = node[:bcpc][:hadoop][:hdfs][:site_xml]
 
 hdfs_site_generated_values =
@@ -15,7 +17,10 @@ hdfs_site_generated_values =
    .map{ |d| "file:///disk/#{d}/dfs/dn" }.join(','),
 
  'dfs.journalnode.edits.dir' =>
-   File.join('/disk', node[:bcpc][:hadoop][:mounts][0].to_s, 'dfs', 'jn')   
+   File.join('/disk', node[:bcpc][:hadoop][:mounts][0].to_s, 'dfs', 'jn'),
+
+ 'dfs.client.local.interfaces' =>
+   node['bcpc']['networks'][subnet]['floating']['interface']
 }
 
 # Using 'map', a hash is built for each host.
