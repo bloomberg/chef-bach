@@ -37,7 +37,7 @@ clientPort=<%= node[:bcpc][:hadoop][:zookeeper][:port] %>
 clientPortAddress=<%= float_host(node[:hostname]) %>
 
 <% @zk_hosts.each do |s| %> 
-<%="server.#{s[:node_number]}=#{float_host(s[:hostname])}:#{node[:bcpc][:hadoop][:zookeeper][:leader_connect][:port]}:#{node[:bcpc][:hadoop][:zookeeper][:leader_elect][:port]}" %>
+<%="server.#{s[:zookeeper_myid]}=#{float_host(s[:hostname])}:#{node[:bcpc][:hadoop][:zookeeper][:leader_connect][:port]}:#{node[:bcpc][:hadoop][:zookeeper][:leader_elect][:port]}" %>
 <% end %>
 
 <% if node[:bcpc][:hadoop][:kerberos][:enable] == true then %>

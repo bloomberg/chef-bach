@@ -48,6 +48,7 @@ template "/etc/keepalived/keepalived.conf" do
     sensitive true
     notifies :restart, "service[keepalived]", :delayed
     notifies :restart, "service[keepalived]", :immediately
+    variables({ node_number: bcpc_8bit_node_number })
 end
 
 %w{if_vip if_not_vip vip_change}.each do |script|
