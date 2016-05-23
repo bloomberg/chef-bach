@@ -130,21 +130,20 @@ function hadoop_install {
   done
 
   if printf ${hosts// /\\n} | grep -q "BCPC-Hadoop-Head"; then
-    # Making sure that the run_list is updated in solr index and is available for search during chef-client run
-    num_hosts=$(printf ${hosts// /\\n} | grep -i "BCPC-Hadoop-Head" | wc -l)
+    # Making sure that the run_list has been updated in solr index and is available for search during chef-client run
+    num_hosts=$(printf ${hosts// /\\n} | grep -i "BCPC-Hadoop-Head*" | wc -l)
     while true; do
       printf "Waiting for Chef Solr to update\n"
       sleep 0.5
-      roleCount=$(sudo knife search node "role:BCPC-Hadoop-Head-Namenode*" $KNIFE_ADMIN | grep '^Node Name:' | wc -l)
-      rolesCount=$(sudo knife search node "roles:BCPC-Hadoop-Head-Namenode*" $KNIFE_ADMIN | grep '^Node Name:' | wc -l)
-      if [[ $num_hosts -eq $rolesCount ]] || [[ $num_hosts -eq $roleCount ]]; then
+      roleCount=$(sudo knife search node "role:BCPC-Hadoop-Head*" $KNIFE_ADMIN | grep '^Node Name:' | wc -l)
+      if [[ $roleCount -ge $num_hosts ]]; then
         break
       fi
     done
 
     printf "Installing heads...\n"
     for cntr in {1..2}; do
-      for m in $(printf ${hosts// /\\n} | grep -i "BCPC-Hadoop-Head" | sort); do
+      for m in $(printf ${hosts// /\\n} | grep -i "BCPC-Hadoop-Head*" | sort); do
         [[ "$m" =~ $REGEX ]]
         local fqdn="${BASH_REMATCH[3]}"
         # authenticate the node one by one
@@ -272,7 +271,7 @@ function kafka_install {
   done
  
   if printf ${hosts// /\\n} | grep -q "BCPC-Kafka-Head-Zookeeper"; then
-    # Making sure that the run_list is updated in solr index and is available for search during chef-client run 
+    # Making sure that the run_list has been updated in solr index and is available for search during chef-client run 
     num_hosts=$(printf ${hosts// /\\n} | grep -i "BCPC-Kafka-Head-Zookeeper" | wc -l)
     while true; do
       printf "Waiting for Chef Solr to update\n"
