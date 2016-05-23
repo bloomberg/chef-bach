@@ -443,6 +443,7 @@ end
 #
 if __FILE__ == $PROGRAM_NAME
   options = { :shutdown => true }
+  options = { :newmachine => false }
 
   parser = OptionParser.new do|opts|
 	opts.banner = "Usage: repxe_host.rb [options]"
@@ -450,6 +451,10 @@ if __FILE__ == $PROGRAM_NAME
 		options[:shutdown] = false;
 	end
 
+	opts.on('-n', '--newmachine', 'PXE boot a new machine') do 
+		options[:newmachine] = true;
+		options[:shutdown] = false;
+	end
 	opts.on('-m', '--machine machine', 'Machine') do |machine|
 		options[:machine] = machine
                 puts 'found an option for machine with value ' + machine
@@ -480,9 +485,12 @@ if __FILE__ == $PROGRAM_NAME
   if options[:shutdown]
   	graceful_shutdown(chef_env, vm_entry)
   end
-  delete_node_data(vm_entry)
-  rotate_vault_keys
-  cobbler_unenroll(vm_entry)
+ 
+  if !options[:newmachine]
+  	delete_node_data(vm_entry)
+  	rotate_vault_keys
+  	cobbler_unenroll(vm_entry)
+  end
   cobbler_enroll(vm_entry)
   cobbler_sync
   restart_host(vm_entry)
