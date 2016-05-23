@@ -123,13 +123,11 @@ def get_namenodes()
   if node['bcpc']['hadoop']['hdfs']['HA']
     nnrole = search(:node, "role:BCPC-Hadoop-Head-Namenode* AND chef_environment:#{node.chef_environment}")
     nnroles = search(:node, "roles:BCPC-Hadoop-Head-Namenode* AND chef_environment:#{node.chef_environment}")
-    puts "nnrole: #{nnrole}"
-    puts "nnroles:#{nnroles}"
-    nn_hosts = nnrole | nnroles
+    nn_hosts = nnrole.concat nnroles
   else
     nn_hosts = get_nodes_for("namenode_no_HA")
   end
-  return nn_hosts.sort
+  return nn_hosts.uniq{ |x| float_host(x[:hostname]) }.sort 
 end
 
 def get_nodes_for(recipe, cookbook=cookbook_name)
