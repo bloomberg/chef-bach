@@ -46,4 +46,5 @@ service "hadoop-mapreduce-historyserver" do
   subscribes :restart, "template[/etc/hadoop/conf/hadoop-env.sh]", :delayed
   subscribes :restart, "template[/etc/hadoop/conf/mapred-site.xml]", :delayed
   subscribes :restart, "template[/etc/hadoop/conf/yarn-site.xml]", :delayed
+  subscribes :restart, "template[/etc/hadoop/conf/container-executor.cfg]", :delayed
 end
