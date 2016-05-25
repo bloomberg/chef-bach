@@ -229,6 +229,7 @@ service 'generally run oozie' do
   subscribes :restart, 'template[/etc/oozie/conf/oozie-site.xml]', :delayed
   subscribes :restart, 'template[/etc/hadoop/conf/hdfs-site.xml]', :delayed
   subscribes :restart, 'template[/etc/hadoop/conf/core-site.xml]', :delayed
+  subscribes :restart, 'template[/etc/hadoop/conf/mapred-site.xml]', :delayed
   subscribes :restart, 'template[/etc/hadoop/conf/hadoop-env.sh]', :delayed
   subscribes :restart, 'bash[hdp-select oozie-server]', :delayed
 end
