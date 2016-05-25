@@ -72,13 +72,15 @@ end
 generated_values =
 {
  'javax.jdo.option.ConnectionURL' =>
+   'jdbc:mysql:loadbalance://' + 
    hive_site_vars[:mysql_hosts].join(',') +
    ':3306/metastore?loadBalanceBlacklistTimeout=5000',
  
- 'javax.jdo.option.ConnectionURL' =>
+ 'javax.jdo.option.ConnectionPassword' =>
    hive_site_vars[:hive_sql_password],
 
  'hive.metastore.uris' =>
+   'thrift://' + 
    hive_site_vars[:hive_hosts]
    .map{ |s| float_host(s[:hostname]) + ":9083" }
    .join(","),
@@ -106,7 +108,13 @@ if hive_site_vars[:kerberos_enabled]
        hive_site_vars[:metastore_keytab],
 
      'hive.metastore.kerberos.principal' =>
-       hive_site_vars[:metastore_princ]
+       hive_site_vars[:metastore_princ],
+
+     'hive.server2.authentication.kerberos.keytab' =>
+       hive_site_vars[:server_keytab],
+
+     'hive.server2.authentication.kerberos.principal' =>
+       hive_site_vars[:server_princ]
     }
   generated_values.merge!(kerberos_values)
 end

@@ -20,7 +20,7 @@ hdfs_site_generated_values =
    File.join('/disk', node[:bcpc][:hadoop][:mounts][0].to_s, 'dfs', 'jn'),
 
  'dfs.client.local.interfaces' =>
-   node['bcpc']['networks'][subnet]['floating']['interface']
+   node['bcpc']['floating']['ip'] + '/32'
 }
 
 # Using 'map', a hash is built for each host.

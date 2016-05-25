@@ -15,6 +15,10 @@ default[:bcpc][:hadoop][:mapreduce][:site_xml].tap do |site_xml|
   hdp_path =
     File.join('/usr/hdp',
               node[:bcpc][:hadoop][:distribution][:active_release])
+
+  hdp_apps_path =
+    File.join('/hdp/apps',
+              node[:bcpc][:hadoop][:distribution][:active_release])
   
   site_xml['mapreduce.admin.user.env'] =
     'LD_LIBRARY_PATH=' +
@@ -43,7 +47,7 @@ default[:bcpc][:hadoop][:mapreduce][:site_xml].tap do |site_xml|
     ].join(',')
 
   site_xml['mapreduce.application.framework.path'] =
-    File.join(hdp_path, 'mapreduce', 'mapreduce.tar.gz#mr-framework')
+    File.join(hdp_apps_path, 'mapreduce', 'mapreduce.tar.gz#mr-framework')
 
   site_xml['mapreduce.map.output.compress'] = true
 

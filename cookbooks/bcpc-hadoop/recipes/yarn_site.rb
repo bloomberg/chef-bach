@@ -5,8 +5,9 @@ yarn_site_generated_values =
 {
  'yarn.nodemanager.local-dirs' =>
    mounts.map{ |d| "/disk/#{d}/yarn/local" }.join(','),
+
  'yarn.nodemanager.log-dirs' =>
-   mounts.map{ |d| "/disk/#{d}/yarn/logs" }.join(','),
+   mounts.map{ |d| "/disk/#{d}/yarn/logs" }.join(',')
 }
 
 #
@@ -16,7 +17,7 @@ yarn_site_generated_values =
 # at run time.
 #
 rm_hosts = node[:bcpc][:hadoop][:rm_hosts]
-zk_hosts = node[:bcpc][:hadoop][:zk_hosts]
+zk_hosts = node[:bcpc][:hadoop][:zookeeper][:servers]
 
 # If we have two or more ResourceManager hosts, we need to add HA
 # properties to yarn-site.
@@ -29,13 +30,13 @@ if rm_hosts.length >= 2
      'yarn.resourcemanager.cluster-id' => node.chef_environment,
      'yarn.resourcemanager.ha.enabled' => true,
      'yarn.resourcemanager.ha.rm-ids' =>
-       rm_hosts.map{ |h| "rm#{node.chef_environment}#{s[:node_number]}" }
+       rm_hosts.map{ |h| "rm#{node.chef_environment}#{h[:node_number]}" }
        .join(","),
      'yarn.resourcemanager.recovery.enabled' => true,
      'yarn.resourcemanager.store.class' =>
        'org.apache.hadoop.yarn.server.resourcemanager.recovery.ZKRMStateStore',
      'yarn.resourcemanager.zk-address' =>
-       zk_hosts.map{ |h| float_host(s[:hostname]) +
+       zk_hosts.map{ |h| float_host(h[:hostname]) +
          ":#{node[:bcpc][:hadoop][:zookeeper][:port]}"}
        .join(',')
     }
@@ -51,7 +52,7 @@ if rm_hosts.length >= 2
      'yarn.resourcemanager.resource-tracker.address.' + rm_name =>
        rm_target + ':8031',
      'yarn.resourcemanager.address.' + rm_name =>
-       rm_target +
+       rm_target + ':' +
        node["bcpc"]["hadoop"]["yarn"]["resourcemanager"]["port"].to_s,
      'yarn.resourcemanager.scheduler.address.' + rm_name =>
        rm_target + ':8030',
