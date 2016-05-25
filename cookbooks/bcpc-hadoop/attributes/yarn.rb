@@ -90,21 +90,29 @@ default[:bcpc][:hadoop][:yarn][:site_xml].tap do |site_xml|
 
   site_xml['yarn.nodemanager.remote-app-log-dir'] = '/var/log/hadoop-yarn/apps'
   
-  avail_memory = node['bcpc']['hadoop']['yarn']['nodemanager']['avail_memory']
-  site_xml['yarn.nodemanager.resource.memory-mb'] =
-    avail_memory['size'] or
-    [1024, (node['memory']['total'].to_i * avail_memory['ratio']/1024).floor].max
+  yarn_max_memory = lambda do
+    avail_memory =
+      node['bcpc']['hadoop']['yarn']['nodemanager']['avail_memory']
 
-  avail_vcpu = node['bcpc']['hadoop']['yarn']['nodemanager']['avail_vcpu']
+    avail_memory['size'] ||
+      [1024, (node['memory']['total'].to_i * avail_memory['ratio']/1024).floor].max
+  end
+
+  site_xml['yarn.nodemanager.resource.memory-mb'] = yarn_max_memory.call
+
+  avail_vcpu = lambda do
+    node['bcpc']['hadoop']['yarn']['nodemanager']['avail_vcpu']
+  end
+
   site_xml['yarn.nodemanager.resource.cpu-vcores'] =
-    avail_vcpu['cores'] or
-    [1, (node['cpu']['total'] * avail_vcpu['ratio']).floor].max
+    (avail_vcpu.call['cores'] ||
+      [1, (node['cpu']['total'] * avail_vcpu.call['ratio']).floor].max)
 
   site_xml['yarn.nodemanager.resource.percentage-physical-cpu-limit'] =
-    if avail_vcpu['count']
-      (avail_vcpu['count'] / node['cpu']['total'])
+    if avail_vcpu.call['count']
+      (avail_vcpu.call['count'] / node['cpu']['total'])
     else
-      (avail_vcpu['ratio'] * 100).floor
+      (avail_vcpu.call['ratio'] * 100).floor
     end
 
   site_xml['yarn.nodemanager.vmem-check-enabled'] = false
@@ -119,9 +127,7 @@ default[:bcpc][:hadoop][:yarn][:site_xml].tap do |site_xml|
   
   site_xml['yarn.scheduler.minimum-allocation-mb'] = 256
   
-  site_xml['yarn.scheduler.maximum-allocation-mb'] =
-    avail_memory['size'] or
-    [1024, (node['memory']['total'].to_i * avail_memory['ratio']/1024).floor].max
+  site_xml['yarn.scheduler.maximum-allocation-mb'] = yarn_max_memory.call
 
   site_xml['yarn.timeline-service.client.max-retries'] = 0
 end
@@ -156,5 +162,3 @@ default["bcpc"]["hadoop"]["yarn"]["resourcemanager"]["nodes"]["exclude-path"] = 
 default["bcpc"]["hadoop"]["yarn"]["scheduler"]["class"] = "org.apache.hadoop.yarn.server.resourcemanager.scheduler.fair.FairScheduler"
 default["bcpc"]["hadoop"]["yarn"]["scheduler"]["fair"]["preemption"] = true
 default['bcpc']['hadoop']['yarn']['timeline-service']['client']['max-retries'] = 0
-
-### Delete these. (end) ###
