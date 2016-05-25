@@ -19,7 +19,8 @@ if node[:bcpc][:hadoop][:kerberos][:enable]
        'RULE:[2:$1@$0](' +
          va['principal'] + '@.*' + node[:bcpc][:hadoop][:kerberos][:realm] +
          ')s/.*/' + va['owner'] + '/'
-     }.join("\n"),
+     }.join("\n") + "\n" +
+     'DEFAULT',
     }
   core_site_generated_values.merge!(kerberos_properties)
 end
@@ -36,9 +37,9 @@ if node[:bcpc][:hadoop][:hdfs][:ldap][:integration]
      'hadoop.security.group.mapping.ldap.bind.user' =>
        node[:bcpc][:hadoop][:hdfs][:ldap][:user],
 
-     'hadoop.security.group.mapping.ldap.bind.url' =>
+     'hadoop.security.group.mapping.ldap.url' =>
        'ldap://' + node[:bcpc][:hadoop][:hdfs][:ldap][:domain] +
-       ':' + node[:bcpc][:hadoop][:hdfs][:ldap][:port],
+       ':' + node[:bcpc][:hadoop][:hdfs][:ldap][:port].to_s,
 
      'hadoop.security.group.mapping.ldap.base' =>
        node[:bcpc][:hadoop][:hdfs][:ldap][:domain].split('.')
