@@ -25,8 +25,7 @@ default[:bcpc][:hadoop][:hive][:site_xml].tap do |site_xml|
   # All other prefixes
   site_xml['datanucleus.autoCreateSchema'] = false
   site_xml['datanucleus.fixedDatastore'] = true
-  site_xml['javax.jdo.option.ConnectionDriverName'] = nil
-  site_xml['javax.jdo.option.ConnectionPassword'] = nil
+  site_xml['javax.jdo.option.ConnectionDriverName'] = 'com.mysql.jdbc.Driver'
   site_xml['javax.jdo.option.ConnectionUserName'] = "hive"
 end
 
@@ -37,7 +36,7 @@ default[:bcpc][:hadoop][:hive][:env_sh].tap do |env_sh|
     '/usr/hdp/current/hive-webhcat/share/hcatalog/hive-hcatalog-core.jar'
   env_sh[:JAVA_HOME] = node[:bcpc][:hadoop][:java]
   env_sh[:HADOOP_HEAPSIZE] = 1024
-  env_sh[:HADOOP_OPTS] = ' ' +
+  env_sh[:HADOOP_OPTS] = '"' +
     '-verbose:gc ' +
     '-XX:+PrintHeapAtGC ' +
     '-XX:+PrintGCDetails ' +
@@ -50,7 +49,8 @@ default[:bcpc][:hadoop][:hive][:env_sh].tap do |env_sh|
     '-XX:+PrintGCApplicationConcurrentTime ' +
     '-XX:+UseConcMarkSweepGC ' +
     '-XX:+CMSClassUnloadingEnabled ' +
-    '-XX:+UseParNewGC'
+    '-XX:+UseParNewGC' + 
+    '"'
   env_sh[:HIVE_LOG_DIR] = "/var/log/hive"
   env_sh[:HIVE_PID_DIR] = "/var/run/hive"
   env_sh[:HIVE_IDENT_STRING] = "hive"
