@@ -17,14 +17,18 @@ bash "update-zookeeper-conf-alternatives" do
   not_if "update-alternatives --query zookeeper-conf | grep #{node.chef_environment}"
 end
 
-%w{zoo.cfg
-  log4j.properties
+template "#{node[:bcpc][:hadoop][:zookeeper][:conf_dir]}/zoo.cfg" do
+  source "zk_zoo.cfg.erb"
+  mode 0644
+  variables(:zk_hosts => get_nodes_for("zookeeper_server", "bcpc-hadoop"))
+end
+
+%w{log4j.properties
   configuration.xsl
 }.each do |t|
   template "#{node[:bcpc][:hadoop][:zookeeper][:conf_dir]}/#{t}" do
     source "zk_#{t}.erb"
     mode 0644
-    variables(:zk_hosts => node[:bcpc][:hadoop][:zookeeper][:servers])
   end
 end
 
