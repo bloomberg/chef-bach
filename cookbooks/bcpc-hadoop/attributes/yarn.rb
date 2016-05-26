@@ -1,4 +1,9 @@
-default['bcpc']['hadoop']['yarn']['aux_services']['mapreduce_shuffle']['class'] = 'org.apache.hadoop.mapred.ShuffleHandler'
+default['bcpc']['hadoop']['yarn']['aux_services']['mapreduce_shuffle']['class'] = 
+  'org.apache.hadoop.mapred.ShuffleHandler'
+
+default[:bcpc][:hadoop][:yarn][:aux_services][:spark_shuffle][:class] =
+  'org.apache.spark.network.yarn.YarnShuffleService'
+
 default["bcpc"]["hadoop"]["yarn"]["fairsharepreemptiontimeout"] = 150
 default['bcpc']['hadoop']['yarn']['historyserver']['heap']["size"] = 128
 default['bcpc']['hadoop']['yarn']['historyserver']['heap']["ratio"] = 0

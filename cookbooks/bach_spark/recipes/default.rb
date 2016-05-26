@@ -1,6 +1,3 @@
-node.default[:bcpc][:hadoop][:yarn][:aux_services][:spark_shuffle][:class] =
-  'org.apache.spark.network.yarn.YarnShuffleService'
-
 spark_pkg_version = node[:spark][:package][:version]
 spark_bin_dir = node[:spark][:bin][:dir]
 
