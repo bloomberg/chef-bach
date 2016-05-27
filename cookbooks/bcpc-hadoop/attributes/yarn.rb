@@ -1,9 +1,3 @@
-default['bcpc']['hadoop']['yarn']['aux_services']['mapreduce_shuffle']['class'] = 
-  'org.apache.hadoop.mapred.ShuffleHandler'
-
-default[:bcpc][:hadoop][:yarn][:aux_services][:spark_shuffle][:class] =
-  'org.apache.spark.network.yarn.YarnShuffleService'
-
 default["bcpc"]["hadoop"]["yarn"]["fairsharepreemptiontimeout"] = 150
 default['bcpc']['hadoop']['yarn']['historyserver']['heap']["size"] = 128
 default['bcpc']['hadoop']['yarn']['historyserver']['heap']["ratio"] = 0
@@ -76,12 +70,6 @@ default[:bcpc][:hadoop][:yarn][:site_xml].tap do |site_xml|
   site_xml["#{ynla}.roll-monitoring-interval-seconds"] = 1800
   site_xml["#{ynla}.compression-type"] = 'gz'
 
-  site_xml['yarn.nodemanager.aux-services'] =
-    node[:bcpc][:hadoop][:yarn][:aux_services].keys.join(',')
-
-  node[:bcpc][:hadoop][:yarn][:aux_services].each_pair do |k, cls_v|
-    site_xml["yarn.nodemanager.aux-services.#{k}.class"] = cls_v['class']
-  end
 
   site_xml["yarn.nodemanager.container-executor.class"] =
     'org.apache.hadoop.yarn.server.nodemanager.LinuxContainerExecutor'

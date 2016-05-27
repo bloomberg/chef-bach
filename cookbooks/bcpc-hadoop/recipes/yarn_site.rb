@@ -1,5 +1,14 @@
 yarn_site_values = node[:bcpc][:hadoop][:yarn][:site_xml]
 
+node.default[:bcpc][:hadoop][:yarn][:aux_services][:mapreduce_shuffle][:class] =
+  'org.apache.hadoop.mapred.ShuffleHandler'
+
+if node.run_list.expand(node.chef_environment).recipes
+                  .include?('bach_spark::default')
+  node.default[:bcpc][:hadoop][:yarn][:aux_services][:spark_shuffle][:class] =
+    'org.apache.spark.network.yarn.YarnShuffleService'
+end
+
 mounts = node[:bcpc][:hadoop][:mounts]
 yarn_site_generated_values =
 {
@@ -7,8 +16,18 @@ yarn_site_generated_values =
    mounts.map{ |d| "/disk/#{d}/yarn/local" }.join(','),
 
  'yarn.nodemanager.log-dirs' =>
-   mounts.map{ |d| "/disk/#{d}/yarn/logs" }.join(',')
+   mounts.map{ |d| "/disk/#{d}/yarn/logs" }.join(','),
+
+ 'yarn.nodemanager.aux-services' =>
+   node[:bcpc][:hadoop][:yarn][:aux_services].keys.join(',')
+
 }
+
+yarn_aux_services = 
+  node[:bcpc][:hadoop][:yarn][:aux_services].map do |k, cls_v|
+    { "yarn.nodemanager.aux-services.#{k}.class" => cls_v['class'] }
+  end.reduce({},:merge)
+yarn_site_generated_values.merge!(yarn_aux_services)
 
 #
 # ResourceManager and Zookeeper host objects
