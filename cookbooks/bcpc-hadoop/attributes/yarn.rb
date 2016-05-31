@@ -101,13 +101,6 @@ default[:bcpc][:hadoop][:yarn][:site_xml].tap do |site_xml|
     (avail_vcpu.call['cores'] ||
       [1, (node['cpu']['total'] * avail_vcpu.call['ratio']).floor].max)
 
-  site_xml['yarn.nodemanager.resource.percentage-physical-cpu-limit'] =
-    if avail_vcpu.call['count']
-      (avail_vcpu.call['count'] / node['cpu']['total'])
-    else
-      (avail_vcpu.call['ratio'] * 100).floor
-    end
-
   site_xml['yarn.nodemanager.vmem-check-enabled'] = false
                         
   site_xml['yarn.resourcemanager.nodes.exclude-path'] =
