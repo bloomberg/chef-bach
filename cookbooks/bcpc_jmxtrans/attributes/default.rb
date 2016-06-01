@@ -1,7 +1,7 @@
 #
 # Name of jmxtrans software downloaded
 #
-default['jmxtrans']['sw']="jmxtrans-20120525-210643-4e956b1144.zip"
+default['jmxtrans']['version'] = "254"
 #
 # Add additional JMX queries following the existing queries as sample
 # Also refer to the jmxtrans community cookbook if queries of the category you are planning to add is
