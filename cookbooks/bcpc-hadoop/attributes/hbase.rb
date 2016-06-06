@@ -47,9 +47,7 @@ default["bcpc"]["hadoop"]["hbase_rs"]["PretenureSizeThreshold"] = "1m"
 default["bcpc"]["hadoop"]["phoenix"]["tracing"]["enabled"] = false
 
 
-bucketcache_size = (node["bcpc"]["hadoop"]["hbase_rs"]["xmx"]["size"] * node["bcpc"]["hadoop"]["hbase"]["blockcache"]["size"] + node["bcpc"]["hadoop"]["hbase_rs"]["mx_dir_mem"]["size"] -  node["bcpc"]["hadoop"]["hbase_rs"]["hdfs_dir_mem"]["size"]).floor 
-
-bucketcache_combinedcache_percent = bucketcache_size.to_f/(node["bcpc"]["hadoop"]["hbase_rs"]["xmx"]["size"] + node["bcpc"]["hadoop"]["hbase_rs"]["mx_dir_mem"]["size"] - node["bcpc"]["hadoop"]["hbase_rs"]["hdfs_dir_mem"]["size"])
+bucketcache_size = (node["bcpc"]["hadoop"]["hbase_rs"]["mx_dir_mem"]["size"] -  node["bcpc"]["hadoop"]["hbase_rs"]["hdfs_dir_mem"]["size"]).floor 
 
 # These will become key/value pairs in 'hbase_site.xml'
 default[:bcpc][:hadoop][:hbase][:site_xml].tap do |site_xml|
@@ -105,7 +103,7 @@ default[:bcpc][:hadoop][:hbase][:site_xml].tap do |site_xml|
     site_xml['hfile.block.cache.size'] = node["bcpc"]["hadoop"]["hbase"]["blockcache"]["size"].to_s
     site_xml['hbase.bucketcache.size'] = bucketcache_size
     site_xml['hbase.bucketcache.ioengine '] = node["bcpc"]["hadoop"]["hbase"]["bucketcache"]["ioengine"]
-    site_xml['hbase.bucketcache.percentage.in.combinedcache'] = bucketcache_combinedcache_percent
+    site_xml['hbase.bucketcache.combinedcache.enabled'] = true
   end
   if node["bcpc"]["hadoop"]["hbase"]["region"]["replication"]["enabled"] == true then
     site_xml['hbase.regionserver.storefile.refresh.period'] = node["bcpc"]["hadoop"]["hbase_rs"]["storefile"]["refresh"]["period"]
