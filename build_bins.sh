@@ -59,7 +59,12 @@ if ! [[ -f jmxtrans-20120525-210643-4e956b1144.zip ]]; then
     $CURL -O -L -k https://github.com/downloads/jmxtrans/jmxtrans/jmxtrans-20120525-210643-4e956b1144.zip
   done
 fi
-FILES="jmxtrans-20120525-210643-4e956b1144.zip $FILES"
+if ! [[ -f jmxtrans-254-dist.tar.gz ]]; then
+  while ! $(file jmxtrans-254-dist.tar.gz | grep -q 'gzip compressed data'); do
+    $CURL -O -L -k http://central.maven.org/maven2/org/jmxtrans/jmxtrans/254/jmxtrans-254-dist.tar.gz
+   done
+fi
+FILES="jmxtrans-254-dist.tar.gz $FILES"
 
 # Fetch Kafka Tar
 for version in 0.9.0.1; do
