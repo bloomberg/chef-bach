@@ -1,7 +1,14 @@
 default["bcpc"]["hadoop"]["hive"]["hive_table_stats_db"] =
-  "hive_table_stats"
+  'hive_table_stats'
 default["bcpc"]["hadoop"]["hive"]["hive_table_stats_db_user"] =
-  "hive_table_stats"
+  'hive_table_stats'
+default["bcpc"]["hadoop"]["hive"]["server2"]["authentication"] =
+  'KERBEROS'
+default["bcpc"]["hadoop"]["hive"]["server2"]["ldap_url"] =
+  'ldap://bcpc.example.com'
+default["bcpc"]["hadoop"]["hive"]["server2"]["ldap_domain"] =
+  'bcpc.example.com'
+default["bcpc"]["hadoop"]["hive"]["server2"]["port"] = '10000'
 
 # These will become key/value pairs in 'hive_site.xml'
 default[:bcpc][:hadoop][:hive][:site_xml].tap do |site_xml|

@@ -38,7 +38,10 @@ hive_site_vars = {
   :warehouse => "#{node['bcpc']['hadoop']['hdfs_url']}/user/hive/warehouse",
   :metastore_keytab => "#{node[:bcpc][:hadoop][:kerberos][:keytab][:dir]}/#{node[:bcpc][:hadoop][:kerberos][:data][:hive][:keytab]}",
   :server_keytab => "#{node[:bcpc][:hadoop][:kerberos][:keytab][:dir]}/#{node[:bcpc][:hadoop][:kerberos][:data][:hive][:keytab]}",
-  :kerberos_enabled => node[:bcpc][:hadoop][:kerberos][:enable]
+  :kerberos_enabled => node[:bcpc][:hadoop][:kerberos][:enable],
+  :hs2_auth => node["bcpc"]["hadoop"]["hive"]["server2"]["authentication"],
+  :hs2_ldap_url => node["bcpc"]["hadoop"]["hive"]["server2"]["ldap_url"],
+  :hs2_ldap_domain => node["bcpc"]["hadoop"]["hive"]["server2"]["ldap_domain"]
 }
 
 hive_site_vars[:hive_sql_password] = \
@@ -88,6 +91,16 @@ generated_values =
  'hive.zookeeper.quorum' =>
    hive_site_vars[:zk_hosts].map{ |s| float_host(s[:hostname]) }.join(","),
 
+ 'hive.server2.support.dynamic.service.discovery' => 'true',
+
+ 'hive.server2.zookeeper.namespace' => 
+   "HS2-#{node.chef_environment}-#{hive_site_vars[:hs2_auth]}",
+
+ 'hive.server2.thrift.bind.host' => "#{float_host(node[:fqdn])}",
+
+ 'hive.server2.thrift.port' => 
+    node["bcpc"]["hadoop"]["hive"]["server2"]["port"],
+
  'hive.metastore.warehouse.dir' =>
    hive_site_vars[:warehouse],
 
@@ -98,6 +111,27 @@ generated_values =
    '&user=' + hive_site_vars[:stats_user] +
    '&password=' + hive_site_vars[:stats_sql_password],
 }
+
+if hive_site_vars[:kerberos_enabled] &&
+  hive_site_vars[:hs2_auth] == 'KERBEROS'
+  hs2_auth_values = {
+    'hive.server2.authentication' => 
+      hive_site_vars[:hs2_auth]
+  }
+elsif hive_site_vars[:hs2_auth] == 'LDAP'
+  hs2_auth_values = {
+    'hive.server2.authentication' =>
+      hive_site_vars[:hs2_auth],
+
+    'hive.server2.authentication.ldap.url' =>
+      hive_site_vars[:hs2_ldap_url],
+
+    'hive.server2.authentication.ldap.domain' =>
+      hive_site_vars[:hs2_ldap_domain]
+  }
+end
+
+generated_values.merge!(hs2_auth_values)
 
 if hive_site_vars[:kerberos_enabled]
   kerberos_values =
