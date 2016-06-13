@@ -126,7 +126,7 @@ elsif hive_site_vars[:hs2_auth] == 'LDAP'
     'hive.server2.authentication.ldap.url' =>
       hive_site_vars[:hs2_ldap_url],
 
-    'hive.server2.authentication.ldap.domain' =>
+    'hive.server2.authentication.ldap.Domain' =>
       hive_site_vars[:hs2_ldap_domain]
   }
 end
