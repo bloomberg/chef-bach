@@ -7,9 +7,15 @@ long_description 'Top-level chef-bach wrapper'
 version          '1.0.0-SNAPSHOT'
 
 depends 'bach_common', '= 1.0.0-SNAPSHOT'
+depends 'bach_krb5', '= 1.0.0-SNAPSHOT'
 depends 'bach_spark', '= 1.0.0-SNAPSHOT'
 depends 'bcpc', '= 1.0.0-SNAPSHOT'
 depends 'bcpc-hadoop', '= 1.0.0-SNAPSHOT'
 depends 'bcpc_jmxtrans', '= 1.0.0-SNAPSHOT'
 depends 'hannibal', '= 1.0.0-SNAPSHOT'
 depends 'kafka-bcpc', '= 1.0.0-SNAPSHOT'
+
+# These dependencies are added only to prevent a transitive dependency on a newer cookbook version which does not support Chef 11.x.
+depends 'build-essential', '~> 3.2.0'
+depends 'ohai', '~> 3.0.1'
+depends 'windows', '~> 1.36.6'
