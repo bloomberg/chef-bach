@@ -1,19 +1,19 @@
-name             "bcpc"
-maintainer       "Bloomberg Finance L.P."
-maintainer_email "compute@bloomberg.net"
-license          "Apache License 2.0"
-description      "Installs/Configures Bloomberg Clustered Private Cloud (BCPC)"
+name             'bcpc'
+maintainer       'Bloomberg Finance L.P.'
+maintainer_email 'compute@bloomberg.net'
+license          'Apache License 2.0'
+description      'Installs/Configures Bloomberg Clustered Private Cloud (BCPC)'
 long_description IO.read(File.join(File.dirname(__FILE__), 'README.md'))
-version          "0.5.0"
+version          '1.0.0-SNAPSHOT'
 
-depends "chef-vault"
-depends "apt", ">= 1.9.2"
-depends "bfd"
-depends "ubuntu", ">= 1.1.2"
-depends "chef-client", ">= 2.2.2"
-depends "cron", ">= 1.2.2"
-depends "cobblerd", ">= 0.3.0"
-depends "ntp", ">= 1.3.2"
-depends "python"
-depends "sudo"
-depends "graphite_handler"
+depends 'chef-vault', '~> 1.3.0'
+depends 'apt', '~> 2.4.0'
+depends 'bfd'
+depends 'ubuntu', '>= 1.1.2'
+depends 'chef-client', '~> 4.2.4'
+depends 'cron', '>= 1.2.2'
+depends 'cobblerd', '>= 0.2.0'
+depends 'ntp', '>= 1.3.2'
+depends 'python'
+depends 'sudo'
+depends 'graphite_handler'
