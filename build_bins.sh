@@ -53,12 +53,7 @@ if [[ -z `gem list --local fpm | grep fpm | cut -f1 -d" "` ]]; then
   gem install fpm --no-ri --no-rdoc -v 1.3.3
 fi
 
-# Download jmxtrans zip file
-if ! [[ -f jmxtrans-20120525-210643-4e956b1144.zip ]]; then
-  while ! $(file jmxtrans-20120525-210643-4e956b1144.zip | grep -q 'Zip archive data'); do
-    $CURL -O -L -k https://github.com/downloads/jmxtrans/jmxtrans/jmxtrans-20120525-210643-4e956b1144.zip
-  done
-fi
+# Download jmxtrans tar.gz file
 if ! [[ -f jmxtrans-254-dist.tar.gz ]]; then
   while ! $(file jmxtrans-254-dist.tar.gz | grep -q 'gzip compressed data'); do
     $CURL -O -L -k http://central.maven.org/maven2/org/jmxtrans/jmxtrans/254/jmxtrans-254-dist.tar.gz
