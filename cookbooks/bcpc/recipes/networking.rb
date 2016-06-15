@@ -167,7 +167,7 @@ ifaces.each_index do |i|
       :ip => node[:bcpc][iface][:ip],
       :netmask => node[:bcpc][:networks][subnet][iface][:netmask],
       :gateway => node[:bcpc][:networks][subnet][iface][:gateway],
-      :slaves => node[:bcpc][iface].attribute?("slaves") ? node[:bcpc][iface][:slaves] : false,
+      :slaves => node[:bcpc][:networks][subnet][iface].attribute?("slaves") ? node[:bcpc][:networks][subnet][iface]["slaves"] : false, 
       :dns => resolvers,
       :mtu => node[:bcpc][:networks][subnet][iface][:mtu],
       :metric => i*100
