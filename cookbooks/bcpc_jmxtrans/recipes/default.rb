@@ -40,7 +40,7 @@ end
 # Logic to set the URL from where the jmxtrans software need to be downloaded
 #
 sw_download_url = get_binary_server_url
-node.default['jmxtrans']['url'] = "#{sw_download_url}"+"#{node['jmxtrans']['sw']}"
+node.default['jmxtrans']['url'] = "#{sw_download_url}"
 
 include_recipe 'jmxtrans'
 #
