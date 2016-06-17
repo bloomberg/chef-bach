@@ -43,7 +43,7 @@ default[:bcpc][:hadoop][:yarn][:env_sh].tap do |env_sh|
     node[:bcpc][:hadoop][:yarn][:nodemanager][:jmx][:port].to_s +
    '"'
 
-  env_sh[:YARN_NODEMANAGER_OPTS] = '"' +
+  env_sh[:YARN_RESOURCEMANAGER_OPTS] = '"' +
     '-Dcom.sun.management.jmxremote.ssl=false ' +
     '-Dcom.sun.management.jmxremote.authenticate=false ' +
     '-Dcom.sun.management.jmxremote.port=' +
