@@ -13,7 +13,7 @@
                  {
                     "type": "resourcemanager",
                     "service": "hadoop-yarn-resourcemanager",
-                    "service_cmd": "org.apache.hadoop.yarn.server.resourcemanager.ResourceManagerver.quorum.QuorumPeerMain"
+                    "service_cmd": "org.apache.hadoop.yarn.server.resourcemanager.ResourceManager"
                  }
         ]
       }
