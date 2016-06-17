@@ -48,6 +48,7 @@ class GraphiteToZabbix(object):
       response = urllib2.urlopen(req,timeout=30)
       res = response.read()
       data = json.loads(res)
+      sys.stdout.write("%s %d %d\n" % ('graphite-to-zabbix graphite-to-zabbix.QueryResultError',int(time.time()),0))
     except Exception as e:
       LOGGER.error('%s', e)
       sys.stdout.write("%s %d %d\n" % ('graphite-to-zabbix graphite-to-zabbix.QueryResultError',int(time.time()),1))
@@ -93,7 +94,8 @@ class GraphiteToZabbix(object):
     for entry in data:
       item_id = "%s %s" % self.get_zbx_keys(entry['target'])
       try:
-        output = ["%s %s %d" % (item_id, str(e[1]), int(e[0]) if e[0] else 0) for e in entry['datapoints']] 
+        output = ["%s %s %d" % (item_id, str(e[1]), int(e[0]) if e[0] else 0) for e in entry['datapoints']]
+        sys.stdout.write("%s %d %d\n" % ('graphite-to-zabbix graphite-to-zabbix.QueryResultFormatError',int(time.time()),0))
       except ValueError:
         LOGGER.warn("Error while formatting values for %s" % (item_id))
         sys.stdout.write("%s %d %d\n" % ('graphite-to-zabbix graphite-to-zabbix.QueryResultFormatError',int(time.time()),1))
@@ -107,6 +109,7 @@ class GraphiteToZabbix(object):
     data = self.query_graphite(query)
     if data:
       self.write_data(data)
+      sys.stdout.write("%s %d %d\n" % ('graphite-to-zabbix graphite-to-zabbix.QueryResultEmpty',int(time.time()),0))
     else:
       LOGGER.warn("Returned empty result for query %s" % (query))
       sys.stdout.write("%s %d %d\n" % ('graphite-to-zabbix graphite-to-zabbix.QueryResultEmpty',int(time.time()),1))
