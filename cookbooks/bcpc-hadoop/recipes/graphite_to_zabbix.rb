@@ -49,7 +49,7 @@ ruby_block "zabbix_monitor" do
     zbx = ZabbixApi.connect(
       :url => "https://#{node['bcpc']['management']['vip']}" +
         ":#{node['bcpc']['zabbix']['web_port']}/api_jsonrpc.php",
-      :user => 'admin',
+      :user => get_config!('zabbix-admin-user'),
       :password => "#{get_config!('password','zabbix-admin','os')}"
     )
     if zbx.nil?

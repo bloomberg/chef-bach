@@ -219,40 +219,6 @@ def set_hosts
 end
 
 #
-# Library function to get attributes for nodes that executes a particular recipe
-#
-def get_node_attributes(srch_keys,recipe,cookbook=cookbook_name)
-  node_objects = get_nodes_for(recipe,cookbook)
-  ret = get_req_node_attributes(node_objects,srch_keys)
-  return ret
-end
-
-#
-# Library function to retrieve required attributes from a array of node objects passed
-# Takes in an array of node objects and a search hash. Refer to comments for the constant
-# DEFAULT_NODE_ATTR_SRCH_KEYS regarding the format of the hash
-# returns a array of hash with the requested attributes
-# [ { :node_number => "val", :hostname => "nameval" }, ...]
-#
-def get_req_node_attributes(node_objects,srch_keys)
-  result = Array.new
-  node_objects.each do |obj|
-    temp = Hash.new
-    srch_keys.each do |name, key|
-      begin
-        val = key.split('.').reduce(obj) {|memo, key| memo[key]}
-      rescue NoMethodError
-        Chef::Log.fatal "Node #{obj} does not have key #{key}!"
-        raise
-      end
-      temp[name] = val
-    end
-    result.push(temp)
-  end
-  return result
-end
-
-#
 # Restarting of hadoop processes need to be controlled in a way that all the nodes
 # are not down at the sametime, the consequence of which will impact users. In order
 # to achieve this, nodes need to acquire a lock before restarting the process of interest.

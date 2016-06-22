@@ -7,22 +7,28 @@ default['bcpc']['country'] = 'US'
 default['bcpc']['state'] = 'NY'
 default['bcpc']['location'] = 'New York'
 default['bcpc']['organization'] = 'Bloomberg'
+
 # Should be kvm (or qemu if testing in VMs)
 default['bcpc']['virt_type'] = 'kvm'
+
 # Region name for this cluster
 default['bcpc']['region_name'] = node.chef_environment
+
 # Domain name that will be used for DNS
 default['bcpc']['domain_name'] = 'bcpc.example.com'
+
 # Key if Cobalt+VMS is to be used
 default['bcpc']['vms_key'] = nil
-
 default['bcpc']['encrypt_data_bag'] = false
 
-# Specify the kernel you wish to install.
-# For default, (latest LTS kernel) use "linux-server"
-default['bcpc']['bootstrap']['preseed']['kernel'] = 'linux-generic-lts-trusty'
-default['bcpc']['bootstrap']['preseed']['add_kernel_opts'] = 'console=ttyS0'
-default['bcpc']['bootstrap']['preseed']['late_command'] = 'true'
+default['bcpc']['bootstrap']['preseed'].tap do |preseed|
+  # Specify the kernel you wish to install.
+  # For default, (latest LTS kernel) use "linux-server"
+  preseed['kernel'] = 'linux-generic-lts-xenial'
+  preseed['add_kernel_opts'] = 'console=ttyS0'
+  preseed['late_command'] = 'true'
+end
+
 default['bcpc']['bootstrap']['admin_users'] = []
 
 #
@@ -106,7 +112,11 @@ default['bcpc']['repos'].tap do |repos|
     'http://s3.amazonaws.com/dev.hortonworks.com/HDP/ubuntu12/2.x/BUILDS/2.3.6.2-3'
 
   repos['hdp_utils'] =
-    'http://s3.amazonaws.com/dev.hortonworks.com/HDP-UTILS-1.1.0.20/repos/ubuntu12'
+    'http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.20/repos/ubuntu14'
+
+  repos['cobbler26'] =
+    'http://download.opensuse.org/repositories/home:/libertas-ict:' \
+    "/cobbler26/xUbuntu_#{node[:lsb][:release]}/"
 end
 
 ###########################################

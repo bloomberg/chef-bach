@@ -19,14 +19,18 @@
 
 package "apache2"
 
-template "/etc/apache2/sites-available/default" do
-    source "apache-mirror.erb"
-    owner "root"
-    group "root"
+template '/etc/apache2/sites-available/default.conf' do
+    source 'apache-mirror.erb'
+    owner 'root'
+    group 'root'
     mode 00644
-    notifies :restart, "service[apache2]", :delayed
+    notifies :restart, 'service[apache2]', :delayed
 end
 
-service "apache2" do
+service 'apache2' do
     action [ :enable, :start ]
+end
+
+link '/etc/apache2/sites-enabled/000-default.conf' do
+  to '/etc/apache2/sites-available/default.conf'
 end

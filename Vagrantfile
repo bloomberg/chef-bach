@@ -91,7 +91,11 @@ Vagrant.configure('2') do |config|
                          netmask: '255.255.255.0',
                          adapter_ip: '192.168.100.2')
 
-    bootstrap.vm.synced_folder '../', '/chef-bcpc-host'
+    if File.basename(File.expand_path('.')) == 'vbox'
+      bootstrap.vm.synced_folder '../', '/chef-bcpc-host'
+    else
+      bootstrap.vm.synced_folder './', '/chef-bcpc-host'
+    end
 
     # set up repositories
     if $bach_local_mirror
@@ -103,8 +107,8 @@ Vagrant.configure('2') do |config|
     end
   end
 
-  config.vm.box = 'precise64'
-  config.vm.box_url = 'precise-server-cloudimg-amd64-vagrant-disk1.box'
+  config.vm.box = 'trusty64'
+  config.vm.box_url = 'trusty-server-cloudimg-amd64-vagrant-disk1.box'
 
   memory = ENV['BOOTSTRAP_VM_MEM'] || '1024'
   cpus = ENV['BOOTSTRAP_VM_CPUs'] || '1'

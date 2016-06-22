@@ -20,20 +20,27 @@
 require 'pathname'
 require 'rubygems'
 
-gem_path = Pathname.new(Gem.ruby).dirname.join("gem").to_s
-chef_gemspec = "/opt/chef/embedded/lib/ruby/gems/1.9.1/specifications/chef-vault-2.2.4.gemspec"
+gem_path = Pathname.new(Gem.ruby).dirname.join('gem').to_s
 
-gem_package "chef-vault" do
+gem_package 'chef-vault' do
   gem_binary gem_path
-  version ">=0.0.0"
+  version '>=0.0.0'
   action :nothing
 end.run_action(:install)
 
-# set the gemspec permission
-file chef_gemspec do
-  owner 'root'
-  mode "644"
-  action :nothing
+#
+# BACH typically runs chef-client with an abnormal umask, which causes
+# rubygems to install specifications with bad permissions.
+#
+# This ruby block restores the permissions to root/root, rw-r--r--
+#
+ruby_block 'fix-chef-gemspec-permissions' do
+  block do
+    Dir.glob(Gem.default_dir + '/specifications/*.gemspec').each do |path|
+      File.chown(0, 0, path)
+      File.chmod(0644, path)
+    end
+  end
 end.run_action(:create)
 
 Gem.clear_paths

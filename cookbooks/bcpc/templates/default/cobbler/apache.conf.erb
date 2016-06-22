@@ -1,0 +1,37 @@
+#
+# Apache 2.4 configuration for cobbler 2.6.
+#
+# This file was created by Chef.
+# Local changes will be reverted.
+#
+
+AliasMatch ^/cblr(?!/svc/)(.*)?$ "/srv/www/cobbler$1"
+AliasMatch ^/cobbler_track(.*)?$ "/srv/www/cobbler$1"
+
+Alias /cobbler /srv/www/cobbler
+Alias /cobbler_webui_content /srv/www/cobbler_webui_content
+
+WSGIScriptAliasMatch ^/cblr/svc/([^/]*) /srv/www/cobbler/svc/services.py
+
+<Directory "/srv/www/cobbler">
+  SetEnv VIRTUALENV 
+  Options Indexes FollowSymLinks
+  Require all granted
+</Directory>
+
+ProxyRequests off
+
+ProxyPass /cobbler_api http://localhost:25151/
+ProxyPassReverse /cobbler_api http://localhost:25151/
+
+BrowserMatch "MSIE" AuthDigestEnableQueryStringHack=On
+
+<Directory "/srv/www/cobbler/web/">
+  Options Indexes FollowSymLinks
+  Order allow,deny
+  Allow from all
+</Directory>
+
+<Location /cblr>
+  Require all granted
+</Location>

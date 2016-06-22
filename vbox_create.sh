@@ -39,17 +39,16 @@ P=`python -c "import os.path; print os.path.abspath(\"${VBOX_DIR}/\")"`
 function download_VM_files {
   pushd $P
 
-  # Grab the Ubuntu 12.04 installer image
-  if [[ ! -f ubuntu-12.04-mini.iso ]]; then
-     #$CURL -o ubuntu-12.04-mini.iso http://archive.ubuntu.com/ubuntu/dists/precise/main/installer-amd64/current/images/netboot/mini.iso
-     $CURL -o ubuntu-12.04-mini.iso http://archive.ubuntu.com/ubuntu/dists/precise-updates/main/installer-amd64/current/images/raring-netboot/mini.iso
+  # Grab the Ubuntu 14.04 installer image
+  if [[ ! -f ubuntu-14.04-mini.iso ]]; then
+     $CURL -o ubuntu-14.04-mini.iso http://archive.ubuntu.com/ubuntu/dists/trusty-updates/main/installer-amd64/current/images/trusty-netboot/mini.iso
   fi
 
   # Can we create the bootstrap VM via Vagrant
   if hash vagrant ; then
     echo "Vagrant detected - downloading Vagrant box for bcpc-bootstrap VM"
-    if [[ ! -f precise-server-cloudimg-amd64-vagrant-disk1.box ]]; then
-      $CURL -o precise-server-cloudimg-amd64-vagrant-disk1.box http://cloud-images.ubuntu.com/vagrant/precise/current/precise-server-cloudimg-amd64-vagrant-disk1.box
+    if [[ ! -f trusty-server-cloudimg-amd64-vagrant-disk1.box ]]; then
+      $CURL -o trusty-server-cloudimg-amd64-vagrant-disk1.box http://cloud-images.ubuntu.com/vagrant/trusty/current/trusty-server-cloudimg-amd64-vagrant-disk1.box
     fi
   fi
 
@@ -93,12 +92,17 @@ function create_bootstrap_VM {
   if hash vagrant 2> /dev/null ; then
     echo "Vagrant detected - using Vagrant to initialize bcpc-bootstrap VM"
     cp ../Vagrantfile .
+
+    if [[ -f ../Vagrantfile.local.rb ]]; then
+	cp ../Vagrantfile.local.rb .
+    fi
+    
     if [[ ! -f insecure_private_key ]]; then
       # Ensure that the private key has been created by running vagrant at least once
       vagrant status
       cp $HOME/.vagrant.d/insecure_private_key .
     fi
-    vagrant up
+    vagrant up --provision
   else
     echo "Vagrant not detected - using raw VirtualBox for bcpc-bootstrap"
     if [[ -z "WIN" ]]; then
@@ -170,8 +174,8 @@ function create_bootstrap_VM {
           $VBM modifyvm $vm --nic2 hostonly --hostonlyadapter2 "$VBN0"
           $VBM modifyvm $vm --nic3 hostonly --hostonlyadapter3 "$VBN1"
           $VBM modifyvm $vm --nic4 hostonly --hostonlyadapter4 "$VBN2"
-          # Add the bootable mini ISO for installing Ubuntu 12.04
-          $VBM storageattach $vm --storagectl "IDE Controller" --device 0 --port 0 --type dvddrive --medium ubuntu-12.04-mini.iso
+          # Add the bootable mini ISO for installing Ubuntu 14.04
+          $VBM storageattach $vm --storagectl "IDE Controller" --device 0 --port 0 --type dvddrive --medium ubuntu-14.04-mini.iso
           $VBM modifyvm $vm --boot1 disk
           # Add serial ports
           $VBM modifyvm $vm --uart1 0x3F8 4
@@ -186,44 +190,88 @@ function create_bootstrap_VM {
 # Function to create the BCPC cluster VMs
 # 
 function create_cluster_VMs {
-  # Gather VirtualBox networks in use by bootstrap VM (Vagrant simply uses the first not in-use so have to see what was picked)
+  # Gather VirtualBox networks in use by bootstrap VM
   oifs="$IFS"
   IFS=$'\n'
-  bootstrap_interfaces=($($VBM showvminfo bcpc-bootstrap --machinereadable|egrep '^hostonlyadapter[0-9]=' |sort|sed -e 's/.*=//' -e 's/"//g'))
+  bootstrap_interfaces=($($VBM showvminfo bcpc-bootstrap --machinereadable | \
+				 egrep '^hostonlyadapter[0-9]=' | \
+				 sort | \
+				 sed -e 's/.*=//' -e 's/"//g'))
   IFS="$oifs"
   VBN0="${bootstrap_interfaces[0]}"
   VBN1="${bootstrap_interfaces[1]}"
   VBN2="${bootstrap_interfaces[2]}"
 
+  #
+  # Add the ipxe USB key to the vbox storage registry as an immutable
+  # disk, so we can share it between several VMs.
+  #
+  IPXE_DISK=$P/ipxe.vdi
+  cp files/default/ipxe.vdi $IPXE_DISK
+  $VBM modifyhd -type immutable $IPXE_DISK
+
   # Create each VM
   for vm in bcpc-vm1 bcpc-vm2 bcpc-vm3; do
       # Only if VM doesn't exist
       if ! $VBM list vms | grep "^\"${vm}\"" ; then
-          $VBM createvm --name $vm --ostype Ubuntu_64 --basefolder $P --register
+          $VBM createvm --name $vm --ostype Ubuntu_64 \
+	       --basefolder $P --register
+	  
           $VBM modifyvm $vm --memory $CLUSTER_VM_MEM
           $VBM modifyvm $vm --cpus $CLUSTER_VM_CPUs
-          $VBM storagectl $vm --name "SATA Controller" --add sata
-          # Create a number of hard disks
-          port=0
-          for disk in a b c d e; do
-              $VBM createhd --filename $P/$vm/$vm-$disk.vdi --size $CLUSTER_VM_DRIVE_SIZE
-              $VBM storageattach $vm --storagectl "SATA Controller" --device 0 --port $port --type hdd --medium $P/$vm/$vm-$disk.vdi
+
+	  # Force UEFI firmware.
+	  $VBM modifyvm $vm --firmware efi
+
+	  # Create a disk controller to hang disks off of.
+	  DISK_CONTROLLER="SATA_Controller"
+	  $VBM storagectl $vm --name $DISK_CONTROLLER --add sata
+
+	  #
+	  # Create the root disk, /dev/sda.
+	  #
+	  # (/dev/sda is hardcoded into the preseed file.)
+	  #
+	  DISK_PATH=$P/$vm/$vm-a.vdi
+	  $VBM createhd --filename $DISK_PATH \
+	       --size $CLUSTER_VM_DRIVE_SIZE
+          $VBM storageattach $vm --storagectl $DISK_CONTROLLER \
+	       --device 0 --port 0 --type hdd --medium $DISK_PATH
+
+	  # Attach the iPXE boot medium as /dev/sdb.
+          $VBM storageattach $vm --storagectl $DISK_CONTROLLER \
+	       --device 0 --port 1 --type hdd --medium $IPXE_DISK
+
+	  #
+	  # Create our data disks
+	  #
+	  # For these to be used properly, we will need to override
+	  # the attribute default[:bcpc][:hadoop][:disks] in a role or
+	  # environment.
+	  #
+          port=2
+          for disk in c d e f; do
+	      DISK_PATH=$P/$vm/$vm-$disk.vdi
+              $VBM createhd --filename $DISK_PATH \
+		   --size $CLUSTER_VM_DRIVE_SIZE
+              $VBM storageattach $vm --storagectl $DISK_CONTROLLER \
+		   --device 0 --port $port --type hdd --medium $DISK_PATH
               port=$((port+1))
           done
+	  
           # Add the network interfaces
-          $VBM modifyvm $vm --nic1 hostonly --hostonlyadapter1 "$VBN0" --nictype1 82543GC
-
-	  # This ROM was originally retrieved from rom-o-matic like so:
-	  #
-	  # $CURL -o gpxe-1.0.1-80861004.rom "http://rom-o-matic.net/gpxe/gpxe-1.0.1/contrib/rom-o-matic/build.php" -H "Origin: http://rom-o-matic.net" -H "Host: rom-o-matic.net" -H "Content-Type: application/x-www-form-urlencoded" -H "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8" -H "Referer: http://rom-o-matic.net/gpxe/gpxe-1.0.1/contrib/rom-o-matic/build.php" -H "Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.3" --data "version=1.0.1&use_flags=1&ofmt=ROM+binary+%28flashable%29+image+%28.rom%29&nic=all-drivers&pci_vendor_code=8086&pci_device_code=1004&PRODUCT_NAME=&PRODUCT_SHORT_NAME=gPXE&CONSOLE_PCBIOS=on&BANNER_TIMEOUT=20&NET_PROTO_IPV4=on&COMCONSOLE=0x3F8&COMSPEED=115200&COMDATA=8&COMPARITY=0&COMSTOP=1&DOWNLOAD_PROTO_TFTP=on&DNS_RESOLVER=on&NMB_RESOLVER=off&IMAGE_ELF=on&IMAGE_NBI=on&IMAGE_MULTIBOOT=on&IMAGE_PXE=on&IMAGE_SCRIPT=on&IMAGE_BZIMAGE=on&IMAGE_COMBOOT=on&AUTOBOOT_CMD=on&NVO_CMD=on&CONFIG_CMD=on&IFMGMT_CMD=on&IWMGMT_CMD=on&ROUTE_CMD=on&IMAGE_CMD=on&DHCP_CMD=on&SANBOOT_CMD=on&LOGIN_CMD=on&embedded_script=&A=Get+Image"
-	  #
-	  cp files/default/gpxe-1.0.1-80861004.rom $P
-          $VBM setextradata $vm VBoxInternal/Devices/pcbios/0/Config/LanBootRom $P/gpxe-1.0.1-80861004.rom
+          $VBM modifyvm $vm --nic1 hostonly --hostonlyadapter1 "$VBN0"
           $VBM modifyvm $vm --nic2 hostonly --hostonlyadapter2 "$VBN1"
           $VBM modifyvm $vm --nic3 hostonly --hostonlyadapter3 "$VBN2"
 
           # Set hardware acceleration options
-          $VBM modifyvm $vm --largepages on --vtxvpid on --hwvirtex on --nestedpaging on --ioapic on
+          $VBM modifyvm $vm \
+	       --largepages on \
+	       --vtxvpid on \
+	       --hwvirtex on \
+	       --nestedpaging on \
+	       --ioapic on
+
           # Add serial ports
           $VBM modifyvm $vm --uart1 0x3F8 4
           $VBM modifyvm $vm --uartmode1 server /tmp/serial-${vm}-ttyS0

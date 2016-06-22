@@ -13,4 +13,10 @@ NameVirtualHost <%="#{node[:bcpc][:management][:ip]}"%>:443
     SSLEngine on
     SSLCertificateFile /etc/ssl/certs/ssl-bcpc.pem
     SSLCertificateKeyFile /etc/ssl/private/ssl-bcpc.key
+
+    <IfVersion >= 2.4>
+      <Location />
+        Require all granted
+      </Location>
+    </IfVersion>
 </VirtualHost>

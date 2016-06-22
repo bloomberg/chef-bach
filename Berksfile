@@ -46,7 +46,6 @@ cookbook 'ubuntu'
 cookbook 'bfd',
   git: 'https://github.com/bloomberg/openbfdd-cookbook'
 
-
 # cobblerd forked, pending destruction of earth by moon.
 cookbook 'cobblerd', 
   git: 'https://github.com/bloomberg/cobbler-cookbook'

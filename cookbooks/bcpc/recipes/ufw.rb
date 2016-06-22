@@ -17,31 +17,35 @@
 # limitations under the License.
 #
 
-include_recipe "bcpc::default"
+include_recipe 'bcpc::default'
 
-package "ufw"
+package 'ufw'
 
-template "/etc/default/ufw" do
-    source "ufw.erb"
-    mode 00644
-    notifies :restart, "service[ufw]", :delayed
+template '/etc/default/ufw' do
+  source 'ufw.erb'
+  mode 00644
+  notifies :restart, 'service[ufw]', :delayed
 end
 
-template "/etc/ufw/sysctl.conf" do
-    source "ufw.sysctl.conf.erb"
-    mode 00644
-    notifies :restart, "service[ufw]", :delayed
+template '/etc/ufw/sysctl.conf' do
+  source 'ufw.sysctl.conf.erb'
+  mode 00644
+  notifies :restart, 'service[ufw]', :delayed
 end
 
-template "/etc/ufw/before.rules" do
-    source "ufw.before.rules.erb"
-    mode 00640
-    notifies :restart, "service[ufw]", :delayed
+template '/etc/ufw/before.rules' do
+  source 'ufw.before.rules.erb'
+  mode 00640
+  notifies :restart, 'service[ufw]', :delayed
 end
 
-bash "setup-allow-rules-ufw" do
-    user "root"
-    code <<-EOH
+pxe_if = node[:bcpc][:bootstrap][:pxe_interface]
+bootstrap_server = node[:bcpc][:bootstrap][:server]
+
+bash 'setup-allow-rules-ufw' do
+  user 'root'
+  code(
+    <<-EOH
       ufw allow 22/tcp
       ufw allow 80/tcp
       ufw allow 88/tcp
@@ -57,13 +61,18 @@ bash "setup-allow-rules-ufw" do
       ufw allow 4444/tcp
       ufw allow 443/tcp
       ufw allow 8080/tcp
-      ufw allow in on #{node[:bcpc][:bootstrap][:pxe_interface]} from any port 68 to any port 67 proto udp
-      ufw allow in on #{node[:bcpc][:bootstrap][:pxe_interface]} from any to #{node[:bcpc][:bootstrap][:server]} port tftp
+      ufw allow in on #{pxe_if} from any port 68 to any port 67 proto udp
+      ufw allow in on #{pxe_if} from any to #{bootstrap_server} port tftp
       ufw --force enable
     EOH
-    not_if "ufw status numbered | grep #{node[:bcpc][:bootstrap][:server]}"
+  )
+  not_if "ufw status numbered | grep #{bootstrap_server}"
 end
 
-service "ufw" do
-    action [ :enable, :start ]
+service 'ufw' do
+  action [:enable, :start]
+  if node[:lsb][:id] == 'Ubuntu' &&
+     Gem::Version.new(node[:lsb][:release]) >= Gem::Version.new('14.04')
+    provider Chef::Provider::Service::Upstart
+  end
 end

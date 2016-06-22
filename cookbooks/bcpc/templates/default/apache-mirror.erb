@@ -93,4 +93,5 @@
     Alias /hdp-utils /var/spool/apt-mirror/mirror/<%= hdp_utils_uri = URI(node.default["bcpc"]["repos"]["hdp_utils"]); hdp_utils_uri.host + hdp_utils_uri.path %>
     Alias /cloudera /var/spool/apt-mirror/mirror/archive.cloudera.com/cdh5/ubuntu/precise/amd64/cdh
     Alias /cloudera-gpl /var/spool/apt-mirror/mirror/archive.cloudera.com/gplextras5/ubuntu/lucid/amd64/gplextras
+    Alias /cobbler26 /var/spool/apt-mirror/mirror/<%= cobbler_uri = URI(node[:bcpc][:repos][:cobbler26]); cobbler_uri.host + cobbler_uri.path %>
 </VirtualHost>

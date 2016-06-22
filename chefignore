@@ -3,6 +3,7 @@
 .git
 .kitchen
 .vagrant
+bins
 chef
 cookbooks
 core

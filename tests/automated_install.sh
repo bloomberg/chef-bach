@@ -31,9 +31,11 @@ printf "#### Setup configuration files\n"
 # setup vagrant
 $SEDINPLACE 's/vb.gui = true/vb.gui = false/' Vagrantfile
 
-# prepare the stub environment
-mkdir -p ../cluster
-cp -r stub-environment/* ../cluster
+# Prepare the stub environment if ../cluster directory is absent.
+if [[ ! -d ../cluster ]]; then
+    mkdir -p ../cluster
+    cp -rv stub-environment/* ../cluster
+fi
 
 # setup proxy_setup.sh
 [[ -n "$PROXY" ]] && $SEDINPLACE "s/#export PROXY=.*\"/export PROXY=\"$PROXY\"/" proxy_setup.sh
@@ -50,6 +52,16 @@ source ./vbox_create.sh
 
 download_VM_files || ( echo "############## VBOX CREATE DOWNLOAD VM FILES RETURNED $? ##############" && exit 1 )
 create_bootstrap_VM || ( echo "############## VBOX CREATE BOOTSTRAP VM RETURNED $? ##############" && exit 1 )
+
+# Copy cluster mutable data to bootstrap.
+if [[ -d ../cluster ]]; then
+    tar -C .. -cf - cluster | vagrant ssh -c 'cd ~; tar -xvf -'
+elif [[ -f ./cluster.tgz ]]; then
+    gunzip -c cluster.tgz | vagrant ssh -c 'cd ~; tar -xvf -'
+else
+    ( echo "############## No cluster data found in ../cluster or ./cluster.tgz! ##############" && exit 1 )
+fi
+
 create_cluster_VMs || ( echo "############## VBOX CREATE CLUSTER VMs RETURNED $? ##############" && exit 1 )
 install_cluster || ( echo "############## VBOX CREATE INSTALL CLUSTER RETURNED $? ##############" && exit 1 )
 
