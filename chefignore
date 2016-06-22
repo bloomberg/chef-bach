@@ -1,8 +1,14 @@
+.chef
+.chef_found*
 .git
 .kitchen
 .vagrant
 chef
+cookbooks
+cluster.txt
+environments
 local-mode-cache
 provisioning
+roles
 vendor
 vbox

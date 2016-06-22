@@ -13,7 +13,7 @@ if [ -n "${PROXY-}" ]; then
   local_ips=$(ip addr list |grep 'inet '|sed -e 's/.* inet //' -e 's#/.*#,#')
   
   export http_proxy=http://${PROXY}
-  export https_proxy=https://${PROXY}
+  export https_proxy=http://${PROXY}
   export no_proxy="$(sed 's/ //g' <<< $local_ips)localhost,$(hostname),$(hostname -f),.$(domainname),10.0.100.,10.0.100.*"
   export NO_PROXY="$(sed 's/ //g' <<< $local_ips)localhost,$(hostname),$(hostname -f),.$(domainname),10.0.100.,10.0.100.*"
   
