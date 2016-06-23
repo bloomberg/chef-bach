@@ -110,6 +110,35 @@ if node[:bcpc][:hadoop][:kerberos][:enable] == true then
   generated_values['hbase.rpc.engine'] = 'org.apache.hadoop.hbase.ipc.SecureRpcEngine'
 end
 
+if node["bcpc"]["hadoop"]["hbase"]["shortcircuit"]["read"] == true then
+  generated_values['dfs.domain.socket.path'] =  '/var/run/hadoop-hdfs/dn._PORT'
+  generated_values['dfs.client.read.shortcircuit.buffer.size'] = node["bcpc"]["hadoop"]["hbase"]["dfs"]["client"]["read"]["shortcircuit"]["buffer"]["size"].to_s
+end
+
+bucketcache_size = (node["bcpc"]["hadoop"]["hbase_rs"]["mx_dir_mem"]["size"] -  node["bcpc"]["hadoop"]["hbase_rs"]["hdfs_dir_mem"]["size"]).floor
+if node["bcpc"]["hadoop"]["hbase"]["bucketcache"]["enabled"] == true then
+  generated_values['hbase.regionserver.global.memstore.upperLimit'] = node["bcpc"]["hadoop"]["hbase_rs"]["memstore"]["upperlimit"].to_s
+  generated_values['hfile.block.cache.size'] = node["bcpc"]["hadoop"]["hbase"]["blockcache"]["size"].to_s
+  generated_values['hbase.bucketcache.size'] = bucketcache_size
+  generated_values['hbase.bucketcache.ioengine '] = node["bcpc"]["hadoop"]["hbase"]["bucketcache"]["ioengine"]
+  generated_values['hbase.bucketcache.combinedcache.enabled'] = true
+end
+
+if node["bcpc"]["hadoop"]["hbase"]["region"]["replication"]["enabled"] == true then
+  generated_values['hbase.regionserver.storefile.refresh.period'] = node["bcpc"]["hadoop"]["hbase_rs"]["storefile"]["refresh"]["period"]
+  generated_values['hbase.region.replica.replication.enabled'] = node["bcpc"]["hadoop"]["hbase"]["region"]["replication"]["enabled"]
+  generated_values['hbase.master.hfilecleaner.ttl'] = node["bcpc"]["hadoop"]["hbase_master"]["hfilecleaner"]["ttl"]
+  generated_values['hbase.meta.replica.count'] = node["bcpc"]["hadoop"]["hbase"]["meta"]["replica"]["count"]
+  generated_values['hbase.regionserver.storefile.refresh.all'] = node["bcpc"]["hadoop"]["hbase_rs"]["storefile"]["refresh"]["all"]
+  generated_values['hbase.region.replica.storefile.refresh.memstore.multiplier'] = node["bcpc"]["hadoop"]["hbase"]["region"]["replica"]["storefile"]["refresh"]["memstore"]["multiplier"]
+  generated_values['hbase.region.replica.wait.for.primary.flush'] = node["bcpc"]["hadoop"]["hbase"]["region"]["replica"]["wait"]["for"]["primary"]["flush"]
+  generated_values['hbase.regionserver.global.memstore.lowerLimit'] = node["bcpc"]["hadoop"]["hbase_rs"]["memstore"]["lowerlimit"]
+  generated_values['hbase.hregion.memstore.block.multiplier'] = node["bcpc"]["hadoop"]["hbase"]["hregion"]["memstore"]["block"]["multiplier"]
+  generated_values['hbase.ipc.client.specificThreadForWriting'] = node["bcpc"]["hadoop"]["hbase"]["ipc"]["client"]["specificthreadforwriting"]
+  generated_values['hbase.client.primaryCallTimeout.get'] = node["bcpc"]["hadoop"]["hbase"]["client"]["primarycalltimeout"]["get"]
+  generated_values['hbase.client.primaryCallTimeout.multiget'] = node["bcpc"]["hadoop"]["hbase"]["client"]["primarycalltimeout"]["multiget"]
+end
+
 site_xml = node[:bcpc][:hadoop][:hbase][:site_xml]
 complete_hbase_site_hash = generated_values.merge(site_xml)
 

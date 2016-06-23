@@ -90,35 +90,10 @@ default[:bcpc][:hadoop][:hbase][:site_xml].tap do |site_xml|
   #  site_xml['hbase.rpc.engine'] = 'org.apache.hadoop.hbase.ipc.SecureRpcEngine'
   #end
   site_xml['dfs.client.read.shortcircuit'] = node["bcpc"]["hadoop"]["hbase"]["shortcircuit"]["read"].to_s
-  if node["bcpc"]["hadoop"]["hbase"]["shortcircuit"]["read"] == true then
-    site_xml['dfs.domain.socket.path'] =  i'/var/run/hadoop-hdfs/dn._PORT'
-    site_xml['dfs.client.read.shortcircuit.buffer.size'] = node["bcpc"]["hadoop"]["hbase"]["dfs"]["client"]["read"]["shortcircuit"]["buffer"]["size"].to_s
-  end
   site_xml['hbase.regionserver.handler.count'] = node["bcpc"]["hadoop"]["hbase"]["regionserver"]["handler"]["count"].to_s
   site_xml['hbase.ipc.warn.response.time'] = node["bcpc"]["hadoop"]["hbase"]["ipc"]["warn"]["response"]["time"].to_s
   site_xml['hbase.ipc.warn.response.size'] = node["bcpc"]["hadoop"]["hbase"]["ipc"]["warn"]["response"]["size"].to_s
   site_xml['hbase.ipc.server.tcpnodelay'] = 'true'
-  if node["bcpc"]["hadoop"]["hbase"]["bucketcache"]["enabled"] == true then
-    site_xml['hbase.regionserver.global.memstore.upperLimit'] = node["bcpc"]["hadoop"]["hbase_rs"]["memstore"]["upperlimit"].to_s
-    site_xml['hfile.block.cache.size'] = node["bcpc"]["hadoop"]["hbase"]["blockcache"]["size"].to_s
-    site_xml['hbase.bucketcache.size'] = bucketcache_size
-    site_xml['hbase.bucketcache.ioengine '] = node["bcpc"]["hadoop"]["hbase"]["bucketcache"]["ioengine"]
-    site_xml['hbase.bucketcache.combinedcache.enabled'] = true
-  end
-  if node["bcpc"]["hadoop"]["hbase"]["region"]["replication"]["enabled"] == true then
-    site_xml['hbase.regionserver.storefile.refresh.period'] = node["bcpc"]["hadoop"]["hbase_rs"]["storefile"]["refresh"]["period"]
-    site_xml['hbase.region.replica.replication.enabled'] = node["bcpc"]["hadoop"]["hbase"]["region"]["replication"]["enabled"]
-    site_xml['hbase.master.hfilecleaner.ttl'] = node["bcpc"]["hadoop"]["hbase_master"]["hfilecleaner"]["ttl"]
-    site_xml['hbase.meta.replica.count'] = node["bcpc"]["hadoop"]["hbase"]["meta"]["replica"]["count"]
-    site_xml['hbase.regionserver.storefile.refresh.all'] = node["bcpc"]["hadoop"]["hbase_rs"]["storefile"]["refresh"]["all"]
-    site_xml['hbase.region.replica.storefile.refresh.memstore.multiplier'] = node["bcpc"]["hadoop"]["hbase"]["region"]["replica"]["storefile"]["refresh"]["memstore"]["multiplier"]
-    site_xml['hbase.region.replica.wait.for.primary.flush'] = node["bcpc"]["hadoop"]["hbase"]["region"]["replica"]["wait"]["for"]["primary"]["flush"]
-    site_xml['hbase.regionserver.global.memstore.lowerLimit'] = node["bcpc"]["hadoop"]["hbase_rs"]["memstore"]["lowerlimit"]
-    site_xml['hbase.hregion.memstore.block.multiplier'] = node["bcpc"]["hadoop"]["hbase"]["hregion"]["memstore"]["block"]["multiplier"]
-    site_xml['hbase.ipc.client.specificThreadForWriting'] = node["bcpc"]["hadoop"]["hbase"]["ipc"]["client"]["specificthreadforwriting"]
-    site_xml['hbase.client.primaryCallTimeout.get'] = node["bcpc"]["hadoop"]["hbase"]["client"]["primarycalltimeout"]["get"]
-    site_xml['hbase.client.primaryCallTimeout.multiget'] = node["bcpc"]["hadoop"]["hbase"]["client"]["primarycalltimeout"]["multiget"]
-  end
   site_xml['hbase.replication'] = 'true'
   site_xml['hbase.coprocessor.abortonerror'] = node["bcpc"]["hadoop"]["hbase_rs"]["coprocessor"]["abortonerror"] 
 end
