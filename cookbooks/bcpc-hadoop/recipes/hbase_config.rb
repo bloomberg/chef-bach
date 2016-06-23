@@ -142,7 +142,7 @@ env_sh[:HBASE_REGIONSERVER_OPTS] =
 
 if node["bcpc"]["hadoop"]["hbase"]["bucketcache"]["enabled"] == true then
  env_sh[:HBASE_REGIONSERVER_OPTS] += 
-   " -XX:MaxDirectMemorySize='{node['bcpc']['hadoop']['hbase_rs']['mx_dir_mem']['size']}m"
+   " -XX:MaxDirectMemorySize=#{node['bcpc']['hadoop']['hbase_rs']['mx_dir_mem']['size']}m"
 end
 
 if node[:bcpc][:hadoop].attribute?(:jmx_enabled) and node[:bcpc][:hadoop][:jmx_enabled] then
