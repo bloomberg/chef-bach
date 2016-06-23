@@ -77,6 +77,8 @@ generated_values = {
       node[:bcpc][:hadoop][:hb_hosts].length > 1 ? "true" : "false",
   'hbase.master.wait.on.regionservers.mintostart' => 
       "#{node[:bcpc][:hadoop][:rs_hosts].length/2+1}",
+  'hbase.master.hostname' => float_host(node[:fqdn]),
+  'hbase.regionserver.hostname' => float_host(node[:fqdn]),
   'hbase.regionserver.dns.interface' =>
       node["bcpc"]["networks"][subnet]["floating"]["interface"],
   'hbase.master.dns.interface' =>
