@@ -134,16 +134,6 @@
       </description>
     </property>
 
-    <% if @ooz_hosts.length >= 2 %>
-    <property>
-      <name>oozie.base.url</name>
-      <value>http://<%=node[:bcpc][:management][:vip]%>:<%=node["bcpc"]["hadoop"]["oozie_port"]%>/oozie</value>
-      <description>
-        http url to access Oozie
-      </description>
-    </property>
-    <% end %>
-
     <property>
       <name>oozie.service.JPAService.jdbc.driver</name>
       <value>com.mysql.jdbc.Driver</value>
@@ -290,7 +280,7 @@
 
   <property>
     <name>oozie.authentication.kerberos.principal</name>
-    <value><%=node[:bcpc][:hadoop][:kerberos][:data][:spnego][:principal]%>/<%=node[:bcpc][:hadoop][:kerberos][:data][:spnego][:princhost]=="_HOST" ? float_host(node[:fqdn]) : node[:bcpc][:hadoop][:kerberos][:data][:spnego][:princhost]%>@<%=node[:bcpc][:hadoop][:kerberos][:realm]%></value>
+    <value>*</value>
     <description>Indicates the Kerberos principal to be used for HTTP endpoint. The principal MUST start with 'HTTP/' as per Kerberos HTTP SPNEGO specification.</description>
   </property>
 
@@ -381,6 +371,36 @@
   <property>
     <name>oozie.launcher.yarn.app.mapreduce.am.command-opts</name>
     <value><%="-Xmx#{ (0.8 * 2 * node['bcpc']['hadoop']['yarn']['scheduler']['minimum-allocation-mb']).round}m" %></value>
+  </property>
+
+  <property>
+    <name>oozie.services.ext</name>
+    <value><%= node["bcpc"]["hadoop"]["oozie"]["service"]["ext"] %></value>
+  </property>
+
+  <property>
+    <name>oozie.zookeeper.namespace</name>
+    <value>oozie-<%= node.chef_environment %></value>
+  </property>
+
+  <property>
+     <name>oozie.zookeeper.connection.string</name>
+     <value><%= @zk_hosts.map{ |s| "#{float_host(s[:hostname])}:2181"}.join(",") %></value>
+  </property>
+
+  <property>
+    <name>oozie.base.url</name>
+    <value>http://<%= float_host(node[:bcpc][:management][:viphost]) %>:11000/oozie</value>
+  </property>
+
+  <property>
+    <name>oozie.instance.id</name>
+    <value><%= float_host(node[:fqdn]) %></value>
+  </property>
+
+  <property>
+    <name>oozie.zookeeper.secure</name>
+    <value>true</value>
   </property>
 
 </configuration>
