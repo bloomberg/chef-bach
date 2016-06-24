@@ -183,12 +183,41 @@ service "generally run hadoop-hdfs-namenode" do
   subscribes :restart, "bash[hdp-select hadoop-hdfs-namenode]", :delayed
 end
 
-## We need to bootstrap the standby and journal node transaction logs
-# The -bootstrapStandby and -initializeSharedEdits don't actually work
-# when the namenode starts up, because it is in safemode and won't commit
-# a txn.
-# So we fake the formatting of the txn directories by copying over current/VERSION
-# this tricks the journalnodes and namenodes into thinking they've been formatted.
+ruby_block "create-format-UUID-File" do
+  block do
+    Dir.chdir("/disk/#{node[:bcpc][:hadoop][:mounts][0]}/dfs/") do
+      system("tar czvf #{Chef::Config[:file_cache_path]}/jn_fmt.tgz jn/#{node.chef_environment}/current/VERSION")
+    end
+  end
+  action :run
+  only_if { File.exists?("/disk/#{node[:bcpc][:hadoop][:mounts][0]}/dfs/jn/#{node.chef_environment}/current/VERSION") }
+end
+
+ruby_block "upload-format-UUID-File" do
+  block do
+    cmdStrLayVersn = "zgrep -a -i layoutVersion #{Chef::Config[:file_cache_path]}/jn_fmt.tgz|uniq|cut -d'=' -f2"
+    node_layout_version = 0
+    if node[:bcpc][:hadoop][:hdfs].key?('layoutVersion')
+      node_layout_version = node[:bcpc][:hadoop][:hdfs][:layoutVersion]
+    end
+
+    cmd = Mixlib::ShellOut.new(cmdStrLayVersn, :timeout => 10).run_command
+    cmd.error!
+    Chef::Log.debug("layoutVersion stored in node is : #{node_layout_version}")
+    Chef::Log.debug("layoutVersion stored in the file is #{cmd.stdout.to_i}")
+
+    if ( get_config("jn_txn_fmt").nil? ) || ( cmd.stdout.to_i < node_layout_version )
+      make_config!("jn_txn_fmt", Base64.encode64(IO.read("#{Chef::Config[:file_cache_path]}/jn_fmt.tgz")));
+      node.set[:bcpc][:hadoop][:hdfs][:layoutVersion] = cmd.stdout.to_i
+      node.save
+    elsif cmd.stdout.to_i > node_layout_version
+      raise("New HDFS layoutVersion is lower than old HDFS layoutVersion: #{cmd.stdout.to_i} > #{node_layout_version}")
+    end
+  end
+  action :run
+  ignore_failure true
+  only_if { File.exists?("#{Chef::Config[:file_cache_path]}/jn_fmt.tgz") }
+end
 
 bash "reload hdfs nodes" do
   code "#{hdfs_cmd} dfsadmin -refreshNodes"

@@ -3,20 +3,17 @@ include_recipe 'bcpc-hadoop::hadoop_config'
 ::Chef::Recipe.send(:include, Bcpc_Hadoop::Helper)
 ::Chef::Resource::Bash.send(:include, Bcpc_Hadoop::Helper)
 
+hdprel=node[:bcpc][:hadoop][:distribution][:active_release]
+hdppath="/usr/hdp/#{hdprel}"
+
 %w{hadoop-hdfs-namenode hadoop-hdfs-journalnode}.each do |pkg|
-  package hwx_pkg_str(pkg, node[:bcpc][:hadoop][:distribution][:release]) do
+  package hwx_pkg_str(pkg, hdprel) do
     action :install
   end
-  hdp_select(pkg, node[:bcpc][:hadoop][:distribution][:active_release])
+  hdp_select(pkg, hdprel)
 end
 
 [node[:bcpc][:hadoop][:mounts].first].each do |d|
-  # Per chef-documentation for directory resource's recursive attribute:
-  # For the owner, group, and mode attributes, the value of this attribute applies only to the leaf directory
-  # Hence, we create "/disk/#{d}/dfs/jn/" to have "jn" dir owned by hdfs and then
-  # create "/disk/#{d}/dfs/jn/#{node.chef_environment}" owned by hdfs. 
-  # This way the jn/{environment} dir tree is owned by hdfs
-  
   directory "/disk/#{d}/dfs/jn" do
     owner "hdfs"
     group "hdfs"
@@ -32,6 +29,38 @@ end
     action :create
     recursive true
   end
+
+end
+
+jndisk="/disk/#{node[:bcpc][:hadoop][:mounts][0]}"
+jnfile="/dfs/jn/#{node.chef_environment}/current/VERSION"
+jnfile2chk=jndisk + jnfile
+
+if get_config("jn_txn_fmt") then
+  file "#{Chef::Config[:file_cache_path]}/jn_fmt.tgz" do
+    user "hdfs"
+    group "hdfs"
+    user 0644
+    content Base64.decode64(get_config("jn_txn_fmt"))
+    not_if{File.exists?(jnfile2chk)}
+  end
+end
+
+bash "unpack-jn-fmt-image-to-disk-#{jndisk}" do
+  user "root"
+  cwd "#{jndisk}/dfs/"
+  code "tar xzvf #{Chef::Config[:file_cache_path]}/jn_fmt.tgz;"
+  notifies :restart, "service[hadoop-hdfs-journalnode]"
+  notifies :run, "bash[change-ownership-for-jnfile]", :immediate
+  only_if{not get_config("jn_txn_fmt").nil? and not 
+  File.exists?(jnfile2chk)}
+end
+
+bash "change-ownership-for-jnfile" do
+  user "root"
+  cwd "#{jndisk}/dfs/jn"
+  code "chown -R hdfs:hdfs #{node.chef_environment}"
+  action :nothing
 end
 
 # need to ensure hdfs user is in hadoop and hdfs
@@ -69,7 +98,7 @@ ruby_block 'create_or_manage_groups' do
 end
 
 link "/etc/init.d/hadoop-hdfs-journalnode" do
-  to "/usr/hdp/#{node[:bcpc][:hadoop][:distribution][:active_release]}/hadoop-hdfs/etc/init.d/hadoop-hdfs-journalnode"
+  to "#{hdppath}/hadoop-hdfs/etc/init.d/hadoop-hdfs-journalnode"
   notifies :run, 'bash[kill hdfs-journalnode]', :immediate
 end
 
