@@ -68,13 +68,9 @@ subnet = node["bcpc"]["management"]["subnet"]
 generated_values = {
   'hbase.zookeeper.quorum' => 
     node[:bcpc][:hadoop][:zookeeper][:servers].map{ |s| float_host(s[:hostname])}.join(","),
-  'fail.fast.expired.active.master' => 
-    node[:bcpc][:hadoop][:hb_hosts].length > 1 ? "true" : "false",
   'hbase.master.dns.nameserver' => dns_server,
   'hbase.master.dns.nameserver' => dns_server,
   'hbase.zookeeper.property.clientPort' => "#{node[:bcpc][:hadoop][:zookeeper][:port]}",
-  'fail.fast.expired.active.master' =>
-      node[:bcpc][:hadoop][:hb_hosts].length > 1 ? "true" : "false",
   'hbase.master.wait.on.regionservers.mintostart' => 
       "#{node[:bcpc][:hadoop][:rs_hosts].length/2+1}",
   'hbase.master.hostname' => float_host(node[:fqdn]),
