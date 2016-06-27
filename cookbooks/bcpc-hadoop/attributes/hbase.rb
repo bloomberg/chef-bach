@@ -89,7 +89,6 @@ default[:bcpc][:hadoop][:hbase][:site_xml].tap do |site_xml|
   #  site_xml['hbase.regionserver.keytab.file'] = "#{node[:bcpc][:hadoop][:kerberos][:keytab][:dir]}/#{node[:bcpc][:hadoop][:kerberos][:data][:hbase][:keytab]}"
   #  site_xml['hbase.rpc.engine'] = 'org.apache.hadoop.hbase.ipc.SecureRpcEngine'
   #end
-  site_xml['dfs.client.read.shortcircuit'] = node["bcpc"]["hadoop"]["hbase"]["shortcircuit"]["read"].to_s
   site_xml['hbase.regionserver.handler.count'] = node["bcpc"]["hadoop"]["hbase"]["regionserver"]["handler"]["count"].to_s
   site_xml['hbase.ipc.warn.response.time'] = node["bcpc"]["hadoop"]["hbase"]["ipc"]["warn"]["response"]["time"].to_s
   site_xml['hbase.ipc.warn.response.size'] = node["bcpc"]["hadoop"]["hbase"]["ipc"]["warn"]["response"]["size"].to_s
