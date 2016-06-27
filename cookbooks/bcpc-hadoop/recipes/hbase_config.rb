@@ -82,7 +82,8 @@ generated_values = {
   'hbase.regionserver.dns.interface' =>
       node["bcpc"]["networks"][subnet]["floating"]["interface"],
   'hbase.master.dns.interface' =>
-      node["bcpc"]["networks"][subnet]["floating"]["interface"]
+      node["bcpc"]["networks"][subnet]["floating"]["interface"],
+  'dfs.client.read.shortcircuit' => node["bcpc"]["hadoop"]["hbase"]["shortcircuit"]["read"].to_s
 }
 
 if node[:bcpc][:hadoop][:kerberos][:enable] == true then
