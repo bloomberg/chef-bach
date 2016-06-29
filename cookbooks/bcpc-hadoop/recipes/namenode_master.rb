@@ -30,6 +30,7 @@ hdfs_cmd = "/usr/hdp/#{node[:bcpc][:hadoop][:distribution][:active_release]}/had
 end
 
 hdp_select('hadoop-hdfs-namenode', node[:bcpc][:hadoop][:distribution][:active_release])
+hdp_select('hadoop-client', node[:bcpc][:hadoop][:distribution][:active_release])
 
 # need to ensure hdfs user is in hadoop and hdfs
 # groups. Packages will not add hdfs if it
