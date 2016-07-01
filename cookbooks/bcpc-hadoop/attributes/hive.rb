@@ -24,7 +24,7 @@ default[:bcpc][:hadoop][:hive][:site_xml].tap do |site_xml|
     '/tmp/${user.name}/operation_logs'
   site_xml['hive.server2.logging.operation.verbose'] = true
   site_xml['hive.stats.autogather'] = true
-  site_xml['hive.stats.dbclass'] = 'jdbc:mysql'
+  site_xml['hive.stats.dbclass'] = 'fs'
   site_xml['hive.stats.jdbcdriver'] = 'com.mysql.jdbc.Driver'
   site_xml['hive.support.concurrency'] = true
   site_xml['hive.warehouse.subdir.inherit.perms'] = true
