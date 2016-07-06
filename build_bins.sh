@@ -49,6 +49,10 @@ if [[ -z `gem list --local cabin | grep cabin | cut -f1 -d" "` ]]; then
   gem install cabin --no-ri --no-rdoc -v 0.7.2
 fi
 
+if [[ -z `gem list --local json | grep json | cut -f1 -d" "` ]]; then
+  gem install json --no-ri --no-rdoc -v 1.8.3
+fi
+
 if [[ -z `gem list --local fpm | grep fpm | cut -f1 -d" "` ]]; then
   gem install fpm --no-ri --no-rdoc -v 1.3.3
 fi
