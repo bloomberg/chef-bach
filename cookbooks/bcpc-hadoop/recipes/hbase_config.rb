@@ -150,6 +150,8 @@ env_sh = {}
 env_sh[:HBASE_PID_DIR] = '"/var/run/hbase"'
 env_sh[:HBASE_LOG_DIR] = '"/var/log/hbase"'
 env_sh[:HBASE_OPTS] = '" -Djava.net.preferIPv4Stack=true -XX:+UseConcMarkSweepGC"'
+env_sh[:HBASE_JMX_BASE] = '"-Dcom.sun.management.jmxremote.ssl=false ' +
+  '-Dcom.sun.management.jmxremote.authenticate=false"'
 
 env_sh[:HBASE_REGIONSERVER_OPTS] = 
   " -server -XX:ParallelGCThreads=#{[1, (node['cpu']['total'] * node['bcpc']['hadoop']['hbase_rs']['gc_thread']['cpu_ratio']).ceil].max} " +
@@ -172,12 +174,12 @@ if node["bcpc"]["hadoop"]["hbase"]["bucketcache"]["enabled"] == true then
 end
 
 if node[:bcpc][:hadoop].attribute?(:jmx_enabled) and node[:bcpc][:hadoop][:jmx_enabled] then
- env_sh[:HBASE_JMX_BASE] = '"-Dcom.sun.management.jmxremote.ssl=false ' +
-   '-Dcom.sun.management.jmxremote.authenticate=false"'
  env_sh[:HBASE_MASTER_OPTS] = '"$HBASE_MASTER_OPTS $HBASE_JMX_BASE ' +
    '-Dcom.sun.management.jmxremote.port=' +
    node[:bcpc][:hadoop][:hbase_master][:jmx][:port].to_s + '"'
- env_sh[:HBASE_REGIONSERVER_OPTS] += ' $HBASE_JMX_BASE' 
+ env_sh[:HBASE_REGIONSERVER_OPTS] += ' $HBASE_JMX_BASE ' +
+   '-Dcom.sun.management.jmxremote.port=' +
+   node[:bcpc][:hadoop][:hbase_rs][:jmx][:port].to_s 
 end
 
 env_sh[:HBASE_REGIONSERVER_OPTS] = '"' + env_sh[:HBASE_REGIONSERVER_OPTS] + '"'
