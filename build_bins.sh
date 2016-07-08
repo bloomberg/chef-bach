@@ -58,9 +58,9 @@ if [[ -z `gem list --local fpm | grep fpm | cut -f1 -d" "` ]]; then
 fi
 
 # Download jmxtrans tar.gz file
-if ! [[ -f jmxtrans-254-dist.tar.gz ]]; then
-  while ! $(file jmxtrans-254-dist.tar.gz | grep -q 'gzip compressed data'); do
-    $CURL -O -L -k http://central.maven.org/maven2/org/jmxtrans/jmxtrans/254/jmxtrans-254-dist.tar.gz
+if ! [[ -f jmxtrans-256-dist.tar.gz ]]; then
+  while ! $(file jmxtrans-256-dist.tar.gz | grep -q 'gzip compressed data'); do
+    $CURL -O -L -k http://central.maven.org/maven2/org/jmxtrans/jmxtrans/256/jmxtrans-256-dist.tar.gz
    done
 fi
 FILES="jmxtrans-254-dist.tar.gz $FILES"
