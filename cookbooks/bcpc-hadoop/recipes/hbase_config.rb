@@ -168,6 +168,12 @@ env_sh[:HBASE_REGIONSERVER_OPTS] =
   "-XX:+PrintGCApplicationStoppedTime -XX:+UseCompressedOops " + 
   "-XX:+PrintClassHistogram -XX:+PrintGCApplicationConcurrentTime"
 
+if node[:bcpc][:hadoop][:kerberos][:enable] == true then
+ env_sh[:HBASE_OPTS] = '"$HBASE_OPTS -Djava.security.auth.login.config=/etc/hbase/conf/hbase-client.jaas"'
+ env_sh[:HBASE_MASTER_OPTS] = '"$HBASE_MASTER_OPTS -Djava.security.auth.login.config=/etc/hbase/conf/hbase-server.jaas"'
+ env_sh[:HBASE_REGIONSERVER_OPTS] = '"$HBASE_REGIONSERVER_OPTS -Djava.security.auth.login.config=/etc/hbase/conf/regionserver.jaas"'
+end
+
 if node["bcpc"]["hadoop"]["hbase"]["bucketcache"]["enabled"] == true then
  env_sh[:HBASE_REGIONSERVER_OPTS] += 
    " -XX:MaxDirectMemorySize=#{node['bcpc']['hadoop']['hbase_rs']['mx_dir_mem']['size']}m"
