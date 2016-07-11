@@ -442,8 +442,7 @@ end
 # invoking the script from a UNIX shell.
 #
 if __FILE__ == $PROGRAM_NAME
-  options = { :shutdown => true }
-  options = { :newmachine => false }
+  options = { :shutdown => true,  :newmachine => false }
 
   parser = OptionParser.new do|opts|
 	opts.banner = "Usage: repxe_host.rb [options]"
