@@ -9,6 +9,7 @@ default["bcpc"]["hadoop"]["distribution"]["version"] = 'HDP'
 default["bcpc"]["hadoop"]["distribution"]["key"] = 'hortonworks.key'
 default["bcpc"]["hadoop"]["distribution"]["release"] = '2.3.4.0-3485'
 default["bcpc"]["hadoop"]["distribution"]["active_release"] = node["bcpc"]["hadoop"]["distribution"]["release"]
+default["bcpc"]["hadoop"]["decommission"]["hosts"] = []
 # disks to use for Hadoop activities (expected to be an environment or role set variable)
 default["bcpc"]["hadoop"]["hadoop_home_warn_suppress"] = 1
 default["bcpc"]["hadoop"]["hadoop_log_dir"] = "/var/log/hadoop-hdfs"
