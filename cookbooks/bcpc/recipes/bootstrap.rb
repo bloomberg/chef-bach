@@ -107,29 +107,12 @@ sudo 'cluster-interaction' do
   only_if { node[:bcpc][:bootstrap][:admin_users].length >= 1 }
 end
 
-bash 'create repo' do
-  user 'vagrant'
-  code 'git clone --bare /home/vagrant/chef-bcpc /home/vagrant/chef-bcpc-repo && cd /home/vagrant/chef-bcpc-repo && git config core.sharedRepository true'
-  not_if { File.exists?('/home/vagrant/chef-bcpc-repo') }
-end
-
-bash 'set repo as origin' do
-  user 'vagrant'
-  cwd '/home/vagrant/chef-bcpc/'
-  code 'git remote add local /home/vagrant/chef-bcpc-repo'
-  not_if 'git remote -v |grep -q "^local	"', :cwd => '/home/vagrant/chef-bcpc/'
-end
-
 package 'acl'
-
-bash 'Update chef-bcpc-repo rights' do
-  code 'setfacl -R -m g:vagrant:rwX /home/vagrant/chef-bcpc-repo; find /home/vagrant/chef-bcpc-repo -type d | xargs setfacl -R -m d:g:vagrant:rwX'
-end
 
 cron 'synchronize chef' do
   user  'vagrant'
   home '/home/vagrant'
-  command "cd ~/chef-bcpc; git pull local master; knife role from file roles/*.json; knife cookbook upload -a; knife environment from file environments/#{node.chef_environment}.json"
+  command "cd ~/chef-bcpc; knife role from file roles/*.json; knife cookbook upload -a; knife environment from file environments/#{node.chef_environment}.json"
 end
 
 package 'sshpass'
