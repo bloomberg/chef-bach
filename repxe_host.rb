@@ -69,10 +69,19 @@ def cluster_assign_roles(environment,type,entry=nil)
            environment, type.to_s.downcase.capitalize, entry['hostname'])
   end
   if !$?.success?
-    raise "cluster-assign-roles.sh failed!"
+    puts "cluster-assign-roles.sh failed!"
   end
 end
 
+def restart_chef_server()
+  c = Mixlib::ShellOut.new('sudo', 'chef-server-ctl' ,'restart')
+  c.run_command
+  if !c.status.success?
+    raise "Failed to restart chef-server"
+  end
+
+  puts "restarted chef-server"
+end
 def cobbler_unenroll(entry)
   c = Mixlib::ShellOut.new('sudo', 'cobbler' ,'system', 'remove',
                            '--name', entry['hostname'])
@@ -240,6 +249,15 @@ def restart_host(entry)
   STDIN.gets;
 end
 
+def refresh_vault_keys
+  # this will only do vas... need to really run:
+  # for i in `sudo knife data bag show os|grep -v _keys`; do sudo knife vault refresh os $i -M client; done 
+  c = Mixlib::ShellOut.new('sudo', 'knife',
+                           'vault', 'refresh', 'keytabs', 'vas-keytab',
+                           '-m', 'client')
+  c.run_command
+end
+
 def rotate_vault_keys
   #
   # There's no error checking here, because it will fail to rotate
@@ -276,11 +294,11 @@ def wait_for_host(entry)
   # If it takes more than half an hour for the node to respond,
   # something is really broken.
   #
-  # This will make 30 attempts with a 1 minute sleep between attempts,
-  # or timeout after 31 minutes.
+  # This will make 60 attempts with a 1 minute sleep between attempts,
+  # or timeout after 61 minutes.
   #
-  Timeout::timeout(1860) do
-    max = 30
+  Timeout::timeout(3720) do
+    max = 60
     1.upto(max) do |idx|
       if !ssh_transport.available?
         puts "Waiting for #{entry['hostname']} to respond to SSH " +
@@ -396,6 +414,17 @@ def start_chef_client(chef_env, vm_entry)
    end
 end
 
+def run_chef_client(chef_env, vm_entry)
+   puts 'Running chef-client'
+   c = Mixlib::ShellOut.new('./nodessh.sh', chef_env, vm_entry['hostname'], 'chef-client', 'sudo')
+   c.run_command
+   if !c.status.success?
+      puts 'Chef client did not run successfully: ' + c.stdout + '\n' + c.stderr
+   else
+      puts 'Chef client ran.'
+   end
+end
+
 def stop_all_services(chef_env, vm_entry)
   puts 'Stopping services.'
   ['jmxtrans',
@@ -490,12 +519,20 @@ if __FILE__ == $PROGRAM_NAME
   	rotate_vault_keys
   	cobbler_unenroll(vm_entry)
   end
+  # restart to free up memory.  Chef server 11 has a memory leak.
+  restart_chef_server()
   cobbler_enroll(vm_entry)
   cobbler_sync
   restart_host(vm_entry)
   wait_for_host(vm_entry)
   cluster_assign_roles(chef_env, :basic, vm_entry)
+  # HACK - vas cookbook has issues, so sleep and try again
+  sleep(360)
+  cluster_assign_roles(chef_env, :basic, vm_entry)
+  refresh_vault_keys
   rotate_vault_keys
   cluster_assign_roles(chef_env, :hadoop, vm_entry)
+  # HACK - sometimes rechefing seems to do the trick...
+  run_chef_client(chef_env, vm_entry)
   start_chef_client(chef_env, vm_entry)
 end
