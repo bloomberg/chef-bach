@@ -65,6 +65,9 @@ end
 
 subnet = node["bcpc"]["management"]["subnet"]
 
+#
+# Add common hbase-site.xml properties
+#
 generated_values = {
   'hbase.zookeeper.quorum' => 
     node[:bcpc][:hadoop][:zookeeper][:servers].map{ |s| float_host(s[:hostname])}.join(","),
@@ -82,6 +85,9 @@ generated_values = {
   'dfs.client.read.shortcircuit' => node["bcpc"]["hadoop"]["hbase"]["shortcircuit"]["read"].to_s
 }
 
+#
+# Any hbase-site.xml property related to Kerberos need to go here
+#
 if node[:bcpc][:hadoop][:kerberos][:enable] == true then
   generated_values['hbase.security.authorization'] = 'true'
   generated_values['hbase.superuser'] = node[:bcpc][:hadoop][:hbase][:superusers].join(',')
@@ -107,11 +113,17 @@ if node[:bcpc][:hadoop][:kerberos][:enable] == true then
   generated_values['hbase.rpc.engine'] = 'org.apache.hadoop.hbase.ipc.SecureRpcEngine'
 end
 
+#
+# If HDFS short circuit read is enabled properties in this section will be added to hbase-site.xml
+#
 if node["bcpc"]["hadoop"]["hbase"]["shortcircuit"]["read"] == true then
   generated_values['dfs.domain.socket.path'] =  '/var/run/hadoop-hdfs/dn._PORT'
   generated_values['dfs.client.read.shortcircuit.buffer.size'] = node["bcpc"]["hadoop"]["hbase"]["dfs"]["client"]["read"]["shortcircuit"]["buffer"]["size"].to_s
 end
 
+#
+# If HBASE bucket cache is enabled the properties from this section will be included in hbase-site.xml
+#
 bucketcache_size = (node["bcpc"]["hadoop"]["hbase_rs"]["mx_dir_mem"]["size"] -  node["bcpc"]["hadoop"]["hbase_rs"]["hdfs_dir_mem"]["size"]).floor
 if node["bcpc"]["hadoop"]["hbase"]["bucketcache"]["enabled"] == true then
   generated_values['hbase.regionserver.global.memstore.upperLimit'] = node["bcpc"]["hadoop"]["hbase_rs"]["memstore"]["upperlimit"].to_s
@@ -121,6 +133,9 @@ if node["bcpc"]["hadoop"]["hbase"]["bucketcache"]["enabled"] == true then
   generated_values['hbase.bucketcache.combinedcache.enabled'] = true
 end
 
+#
+# if HBASE region replication is enabled the properties in this section will be included in hbase-site.xml
+#
 if node["bcpc"]["hadoop"]["hbase"]["region"]["replication"]["enabled"] == true then
   generated_values['hbase.regionserver.storefile.refresh.period'] = node["bcpc"]["hadoop"]["hbase_rs"]["storefile"]["refresh"]["period"]
   generated_values['hbase.region.replica.replication.enabled'] = node["bcpc"]["hadoop"]["hbase"]["region"]["replication"]["enabled"]
@@ -153,6 +168,9 @@ env_sh[:HBASE_OPTS] = '" -Djava.net.preferIPv4Stack=true -XX:+UseConcMarkSweepGC
 env_sh[:HBASE_JMX_BASE] = '"-Dcom.sun.management.jmxremote.ssl=false ' +
   '-Dcom.sun.management.jmxremote.authenticate=false"'
 
+#
+# Common env.sh options relevant to HBASE region servers
+#
 env_sh[:HBASE_REGIONSERVER_OPTS] = 
   " -server -XX:ParallelGCThreads=#{[1, (node['cpu']['total'] * node['bcpc']['hadoop']['hbase_rs']['gc_thread']['cpu_ratio']).ceil].max} " +
   " -XX:+UseParNewGC -XX:CMSInitiatingOccupancyFraction=#{node['bcpc']['hadoop']['hbase_rs']['cmsinitiatingoccupancyfraction']} " + 
@@ -168,26 +186,39 @@ env_sh[:HBASE_REGIONSERVER_OPTS] =
   "-XX:+PrintGCApplicationStoppedTime -XX:+UseCompressedOops " + 
   "-XX:+PrintClassHistogram -XX:+PrintGCApplicationConcurrentTime"
 
+#
+# HBASE Master and RegionServer env.sh variables are updated with relevant JAAS file entries when Kerberos is enabled
+#
 if node[:bcpc][:hadoop][:kerberos][:enable] == true then
  env_sh[:HBASE_OPTS] = '"$HBASE_OPTS -Djava.security.auth.login.config=/etc/hbase/conf/hbase-client.jaas"'
- env_sh[:HBASE_MASTER_OPTS] = '"$HBASE_MASTER_OPTS -Djava.security.auth.login.config=/etc/hbase/conf/hbase-server.jaas"'
- env_sh[:HBASE_REGIONSERVER_OPTS] = '"$HBASE_REGIONSERVER_OPTS -Djava.security.auth.login.config=/etc/hbase/conf/regionserver.jaas"'
+ env_sh[:HBASE_MASTER_OPTS] = '$HBASE_MASTER_OPTS -Djava.security.auth.login.config=/etc/hbase/conf/hbase-server.jaas'
+ env_sh[:HBASE_REGIONSERVER_OPTS] = '$HBASE_REGIONSERVER_OPTS -Djava.security.auth.login.config=/etc/hbase/conf/regionserver.jaas'
 end
 
+#
+# HBASE RegionServer JVM direct memory size is updated if BucketCache is enabled
+#
 if node["bcpc"]["hadoop"]["hbase"]["bucketcache"]["enabled"] == true then
  env_sh[:HBASE_REGIONSERVER_OPTS] += 
    " -XX:MaxDirectMemorySize=#{node['bcpc']['hadoop']['hbase_rs']['mx_dir_mem']['size']}m"
 end
 
+#
+# HBASE Master and RegionServer env.sh variables are updated with JMX related options when JMX is enabled
+#
 if node[:bcpc][:hadoop].attribute?(:jmx_enabled) and node[:bcpc][:hadoop][:jmx_enabled] then
- env_sh[:HBASE_MASTER_OPTS] = '"$HBASE_MASTER_OPTS $HBASE_JMX_BASE ' +
+ env_sh[:HBASE_MASTER_OPTS] += ' $HBASE_JMX_BASE ' +
    '-Dcom.sun.management.jmxremote.port=' +
-   node[:bcpc][:hadoop][:hbase_master][:jmx][:port].to_s + '"'
+   node[:bcpc][:hadoop][:hbase_master][:jmx][:port].to_s
  env_sh[:HBASE_REGIONSERVER_OPTS] += ' $HBASE_JMX_BASE ' +
    '-Dcom.sun.management.jmxremote.port=' +
    node[:bcpc][:hadoop][:hbase_rs][:jmx][:port].to_s 
 end
 
+#
+# At the end sealing the MASTER_OPTS and REGIONSERVER_OPTS in quotes
+#
+env_sh[:HBASE_MASTER_OPTS] = '"' + env_sh[:HBASE_MASTER_OPTS] + '"'
 env_sh[:HBASE_REGIONSERVER_OPTS] = '"' + env_sh[:HBASE_REGIONSERVER_OPTS] + '"'
 
 
