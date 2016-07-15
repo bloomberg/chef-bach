@@ -20,14 +20,6 @@ node[:bcpc][:hadoop][:mounts].each do |i|
   end
 end
 
-["", "done", "done_intermediate"].each do |dir|
-  bash "create-hdfs-history-dir #{dir}" do
-    code "hdfs dfs -mkdir /user/history/#{dir} && hdfs dfs -chmod 1777 /user/history/#{dir} && hdfs dfs -chown yarn:mapred /user/history/#{dir}"
-    user "hdfs"
-    not_if "hdfs dfs -test -d /user/history/#{dir}", :user => "hdfs"
-  end
-end
-
 bash "create-hdfs-yarn-log" do
   code "hdfs dfs -mkdir -p /var/log/hadoop-yarn && hdfs dfs -chmod 0777 /var/log/hadoop-yarn && hdfs dfs -chown yarn:mapred /var/log/hadoop-yarn"
   user "hdfs"
