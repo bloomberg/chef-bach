@@ -34,6 +34,7 @@ end
 
 jndisk="/disk/#{node[:bcpc][:hadoop][:mounts][0]}"
 jnfile="/dfs/jn/#{node.chef_environment}/current/VERSION"
+jncurrent="/dfs/jn/#{node.chef_environment}/current"
 jnfile2chk=jndisk + jnfile
 
 if get_config("jn_txn_fmt") then
@@ -61,6 +62,14 @@ bash "change-ownership-for-jnfile" do
   cwd "#{jndisk}/dfs/jn"
   code "chown -R hdfs:hdfs #{node.chef_environment}"
   action :nothing
+end
+
+directory "#{jndisk}#{jncurrent}/paxos" do
+  owner "hdfs"
+  group "hdfs"
+  mode 0755
+  action :create
+  recursive true
 end
 
 # need to ensure hdfs user is in hadoop and hdfs
