@@ -56,7 +56,7 @@ EOF
 cd cookbooks
 
 # allow versions on cookbooks via "cookbook version"
-for cookbook in "apt 2.4.0" python "build-essential 3.2.0" ubuntu cron "chef-client 4.2.4" "chef-vault 1.3.0" "ntp 1.10.1" yum logrotate yum-epel "sysctl 0.7.5" chef_handler 7-zip seven_zip "windows 1.36.6" ark sudo ulimit pam "ohai 3.0.1" "poise 1.0.12" graphite_handler java "maven 2.1.1" "krb5 2.0.0" homebrew; do
+for cookbook in "apt 2.4.0" python "build-essential 3.2.0" ubuntu cron "chef-client 4.2.4" "chef-vault 1.3.0" "ntp 1.10.1" yum "logrotate 1.9.2" yum-epel "sysctl 0.7.5" chef_handler 7-zip seven_zip "windows 1.36.6" ark sudo ulimit pam "ohai 3.0.1" "poise 1.0.12" graphite_handler java "maven 2.1.1" "krb5 2.0.0" homebrew; do
   # unless the proxy was defined this knife config will be the same as the one generated above
   if [[ ! -d ${cookbook% *} ]]; then
     # 7-zip has been deprecated but recipies still depend on it, will force download
