@@ -46,6 +46,14 @@ configure_kerberos 'hbasers_kerb' do
   service_name 'hbase'
 end
 
+directory '/var/log/hbase/gc' do
+  owner 'hbase'
+  group 'hbase'
+  mode '0755'
+  action :create
+  notifies :restart, "service[hbase-regionserver]", :delayed
+end
+
 template "/etc/init.d/hbase-regionserver" do
   source "hdp_hbase-regionserver-initd.erb"
   mode 0655
