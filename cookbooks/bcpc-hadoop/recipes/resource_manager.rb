@@ -48,6 +48,14 @@ link "/etc/init.d/hadoop-yarn-resourcemanager" do
   notifies :run, 'bash[kill yarn-resourcemanager]', :immediate
 end
 
+file "/etc/hadoop/conf/yarn.exclude" do
+  content node["bcpc"]["hadoop"]["decommission"]["hosts"].join("\n")
+  mode 0644
+  owner 'yarn'
+  group 'hdfs'
+  only_if { !node["bcpc"]["hadoop"]["decommission"]["hosts"].nil? }
+end
+
 bash "kill yarn-resourcemanager" do
   code "pkill -u yarn -f resourcemanager"
   action :nothing
