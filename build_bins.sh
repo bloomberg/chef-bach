@@ -79,27 +79,12 @@ for version in 0.9.0.1; do
 done
 
 # Fetch Java Tar
-if ! [[ -f jdk-7u51-linux-x64.tar.gz ]]; then
-  while ! $(file jdk-7u51-linux-x64.tar.gz | grep -q 'gzip compressed data'); do
-    $CURL -O -L -C - -b "oraclelicense=accept-securebackup-cookie" http://download.oracle.com/otn-pub/java/jdk/7u51-b13/jdk-7u51-linux-x64.tar.gz   
+if ! [[ -f jdk-8u101-linux-x64.tar.gz ]]; then
+  while ! $(file jdk-8u101-linux-x64.tar.gz | grep -q 'gzip compressed data'); do
+    $CURL -O -L -C - -b "oraclelicense=accept-securebackup-cookie" http://download.oracle.com/otn-pub/java/jdk/8u101-b13/jdk-8u101-linux-x64.tar.gz
   done
 fi
-FILES="jdk-7u51-linux-x64.tar.gz $FILES"
-
-if ! [[ -f UnlimitedJCEPolicyJDK7.zip ]]; then
-  while ! $(file UnlimitedJCEPolicyJDK7.zip | grep -q 'Zip archive data'); do
-    $CURL -O -L -C - -b "oraclelicense=accept-securebackup-cookie" http://download.oracle.com/otn-pub/java/jce/7/UnlimitedJCEPolicyJDK7.zip
-  done
-fi
-FILES="UnlimitedJCEPolicyJDK7.zip $FILES"
-
-# Fetch Java Tar
-if ! [[ -f jdk-8u74-linux-x64.tar.gz ]]; then
-  while ! $(file jdk-8u74-linux-x64.tar.gz | grep -q 'gzip compressed data'); do
-    $CURL -O -L -C - -b "oraclelicense=accept-securebackup-cookie" http://download.oracle.com/otn-pub/java/jdk/8u74-b02/jdk-8u74-linux-x64.tar.gz
-  done
-fi
-FILES="jdk-8u74-linux-x64.tar.gz $FILES"
+FILES="jdk-8u101-linux-x64.tar.gz $FILES"
 
 if ! [[ -f jce_policy-8.zip ]]; then
   while ! $(file jce_policy-8.zip | grep -q 'Zip archive data'); do

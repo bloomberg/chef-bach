@@ -124,18 +124,15 @@ default[:bcpc][:hadoop][:os][:group][:hdfs][:members]=["hdfs"]
 default[:bcpc][:hadoop][:os][:group][:mapred][:members]=["yarn"]
 
 # Override defaults for the Java cookbook
-default['java']['jdk_version'] = 7
+default['java']['jdk_version'] = 8
 default['java']['install_flavor'] = "oracle"
 default['java']['accept_license_agreement'] = true
-default['java']['jdk']['7']['x86_64']['url'] = get_binary_server_url + "jdk-7u51-linux-x64.tar.gz"
-default['java']['jdk']['8']['x86_64']['url'] = get_binary_server_url + 'jdk-8u74-linux-x64.tar.gz'
-default['java']['jdk']['8']['x86_64']['checksum'] = '0bfd5d79f776d448efc64cb47075a52618ef76aabb31fde21c5c1018683cdddd'
+default['java']['jdk']['8']['x86_64']['url'] = get_binary_server_url + 'jdk-8u101-linux-x64.tar.gz'
+default['java']['jdk']['8']['x86_64']['checksum'] = '467f323ba38df2b87311a7818bcbf60fe0feb2139c455dfa0e08ba7ed8581328'
 default['java']['oracle']['jce']['enabled'] = true
-default['java']['oracle']['jce']['7']['url'] = get_binary_server_url + "UnlimitedJCEPolicyJDK7.zip"
 default['java']['oracle']['jce']['8']['url'] = get_binary_server_url + "jce_policy-8.zip"
 
 # Set the JAVA_HOME for Hadoop components
 default['bcpc']['hadoop']['java'] = '/usr/lib/jvm/default-java'
-
 
 default['bcpc']['cluster']['file_path'] = "/home/vagrant/chef-bcpc/cluster.txt"
