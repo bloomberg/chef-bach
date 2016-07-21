@@ -70,6 +70,7 @@ directory "#{jndisk}#{jncurrent}/paxos" do
   mode 0755
   action :create
   recursive true
+  only_if { File.exists?(jnfile2chk) }
 end
 
 # need to ensure hdfs user is in hadoop and hdfs
