@@ -172,7 +172,7 @@ env_sh[:HBASE_JMX_BASE] = '"-Dcom.sun.management.jmxremote.ssl=false ' +
 # Common env.sh options relevant to HBASE region servers
 #
 env_sh[:HBASE_REGIONSERVER_OPTS] = 
-  " -server -XX:ParallelGCThreads=#{[1, (node['cpu']['total'] * node['bcpc']['hadoop']['hbase_rs']['gc_thread']['cpu_ratio']).ceil].max} " +
+  " $HBASE_REGIONSERVER_OPTS -server -XX:ParallelGCThreads=#{[1, (node['cpu']['total'] * node['bcpc']['hadoop']['hbase_rs']['gc_thread']['cpu_ratio']).ceil].max} " +
   " -XX:+UseParNewGC -XX:CMSInitiatingOccupancyFraction=#{node['bcpc']['hadoop']['hbase_rs']['cmsinitiatingoccupancyfraction']} " + 
   "-XX:+UseCMSInitiatingOccupancyOnly -verbose:gc -XX:+PrintHeapAtGC " + 
   "-XX:+PrintGCDetails -XX:+PrintGCTimeStamps -XX:+PrintGCDateStamps " + 
@@ -192,7 +192,7 @@ env_sh[:HBASE_REGIONSERVER_OPTS] =
 if node[:bcpc][:hadoop][:kerberos][:enable] == true then
  env_sh[:HBASE_OPTS] = '"$HBASE_OPTS -Djava.security.auth.login.config=/etc/hbase/conf/hbase-client.jaas"'
  env_sh[:HBASE_MASTER_OPTS] = '$HBASE_MASTER_OPTS -Djava.security.auth.login.config=/etc/hbase/conf/hbase-server.jaas'
- env_sh[:HBASE_REGIONSERVER_OPTS] = '$HBASE_REGIONSERVER_OPTS -Djava.security.auth.login.config=/etc/hbase/conf/regionserver.jaas'
+ env_sh[:HBASE_REGIONSERVER_OPTS] += ' -Djava.security.auth.login.config=/etc/hbase/conf/regionserver.jaas'
 end
 
 #

@@ -76,6 +76,14 @@ template "/etc/init.d/hbase-master" do
   mode 0655
 end
 
+directory '/var/log/hbase/gc' do
+  owner 'hbase'
+  group 'hbase'
+  mode '0755'
+  action :create
+  notifies :restart, "service[hbase-master]", :delayed
+end
+
 service "hbase-master" do
   action [:enable, :start]
   supports :status => true, :restart => true, :reload => false
