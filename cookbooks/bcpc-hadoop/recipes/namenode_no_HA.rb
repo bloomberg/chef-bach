@@ -157,9 +157,3 @@ bash "create-hdfs-user" do
   user "hdfs"
   not_if "sudo -u hdfs #{hdfs_cmd} dfs -test -d /user"
 end
-
-bash "create-hdfs-history" do
-  code "#{hdfs_cmd} dfs -mkdir /user/history; #{hdfs_cmd} dfs -chmod -R 1777 /user/history; #{hdfs_cmd} dfs -chown mapred:hdfs /user/history"
-  user "hdfs"
-  not_if "sudo -u hdfs #{hdfs_cmd} dfs -test -d /user/history"
-end
