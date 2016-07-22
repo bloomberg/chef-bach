@@ -1,5 +1,14 @@
 keytab_dir = node[:bcpc][:hadoop][:kerberos][:keytab][:dir]
 realm = node[:bcpc][:hadoop][:kerberos][:realm]
+viphost = float_host(node[:bcpc][:management][:viphost])
+
+directory "#{keytab_dir}/#{viphost}" do
+  action :create
+  owner "root"
+  group "root"
+  mode 0755
+  recursive true
+end
 
 get_cluster_nodes().each do |h|
   # Create directory for the the host to store keytabs
@@ -10,7 +19,7 @@ get_cluster_nodes().each do |h|
     mode 0755
     recursive true
   end
-  
+
   # Generate all the principals
   node[:bcpc][:hadoop][:kerberos][:data].each do |ke, va|
   
@@ -43,18 +52,25 @@ get_cluster_nodes().each do |h|
   end
 end
 
-
 get_cluster_nodes().each do |h|
   node[:bcpc][:hadoop][:kerberos][:data].each do |ke, va|
     service_principal = va['principal']
     host_fqdn = float_host(h)
-    keytab_file = va['keytab']
+    keytab_file = "#{keytab_dir}/#{host_fqdn}/#{va['keytab']}"
 
+    # Service principals that will be added to a single keytab
+    ktsvprnc = "#{service_principal}/#{host_fqdn}@#{realm}"
+    kthtprnc = "HTTP/#{host_fqdn}@#{realm} HTTP/#{viphost}@#{realm}"
+    ktvpprnc = "#{service_principal}/#{viphost}@#{realm}" 
+
+    # Variable to hold all principals for a single keytab
+    keytab_princs = "#{ktsvprnc} #{kthtprnc} #{ktvpprnc}"
+    
     # Create the keytab file
     execute "creating-keytab-for-#{ke}" do
-      command "kadmin.local -q 'xst -k #{keytab_dir}/#{host_fqdn}/#{keytab_file} -norandkey #{service_principal}/#{host_fqdn}@#{realm} HTTP/#{host_fqdn}@#{realm}'"
+      command "kadmin.local -q 'xst -k #{keytab_file} -norandkey #{keytab_princs}'"
       action :run
-      not_if {File.exists?("#{keytab_dir}/#{host_fqdn}/#{keytab_file}")}
+      not_if {File.exists?(keytab_file)}
     end
   end
 end

@@ -102,12 +102,28 @@ for i in patron wmi-lite simple-graphite ruby-augeas; do
   FILES="${i}*.gem $FILES"
 done
 
+# Get sequel gem
+if ! [[ -f gems/sequel.gem ]]; then
+  gem fetch sequel -v 4.36.0
+  ln -s sequel-*.gem sequel.gem || true
+fi
+FILES="sequel*.gem $FILES"
+
+
 # Get the Rubygem for zookeeper
 if ! [[ -f gems/zookeeper.gem ]]; then
   gem fetch zookeeper -v 1.4.7
   ln -s zookeeper-*.gem zookeeper.gem || true
 fi
 FILES="zookeeper*.gem $FILES"
+
+# Get the Rubygem for mysql2
+if ! [[ -f gems/mysql2.gem ]]; then
+  gem fetch mysql2 -v 0.4.0
+  ln -s mysql2-*.gem mysql2.gem || true
+fi
+FILES="mysql2*.gem $FILES"
+
 
 # Get the Rubygem for kerberos
 if ! [[ -f gems/rake-compiler.gem ]]; then
