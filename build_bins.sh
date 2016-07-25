@@ -45,12 +45,13 @@ apt-get -y update
 # Install tools needed for packaging
 apt-get -y install git rubygems make pkg-config pbuilder python-mock python-configobj python-support cdbs python-all-dev python-stdeb libmysqlclient-dev libldap2-dev ruby-dev gcc patch rake ruby1.9.3 ruby1.9.1-dev python-pip python-setuptools dpkg-dev apt-utils haveged libtool autoconf automake autotools-dev unzip rsync autogen
 
-if [[ -z `gem list --local cabin | grep cabin | cut -f1 -d" "` ]]; then
-  gem install cabin --no-ri --no-rdoc -v 0.7.2
-fi
-
+# Install json gem first to avoid a too-new version being pulled in by other gems.
 if [[ -z `gem list --local json | grep json | cut -f1 -d" "` ]]; then
   gem install json --no-ri --no-rdoc -v 1.8.3
+fi
+
+if [[ -z `gem list --local cabin | grep cabin | cut -f1 -d" "` ]]; then
+  gem install cabin --no-ri --no-rdoc -v 0.7.2
 fi
 
 if [[ -z `gem list --local fpm | grep fpm | cut -f1 -d" "` ]]; then
@@ -147,6 +148,7 @@ FILES="cirros-0.3.0-x86_64-disk.img $FILES"
 
 # Grab the Ubuntu 12.04 installer image
 UBUNTU_IMAGE="ubuntu-12.04-mini.iso"
+
 if ! [[ -f $UBUNTU_IMAGE ]]; then
   # Download this ISO to get the latest kernel/X LTS stack installer
   #$CURL -o $UBUNTU_IMAGE http://archive.ubuntu.com/ubuntu/dists/precise-updates/main/installer-amd64/current/images/raring-netboot/mini.iso
@@ -282,7 +284,8 @@ FILES="zabbix-agent.tar.gz zabbix-server.tar.gz $FILES"
 
 # Gather the Chef packages and provide a dpkg repo
 opscode_urls="https://opscode-omnibus-packages.s3.amazonaws.com/ubuntu/12.04/x86_64/chef_11.12.8-2_amd64.deb
-https://opscode-omnibus-packages.s3.amazonaws.com/ubuntu/12.04/x86_64/chef-server_11.1.1-1_amd64.deb"
+https://opscode-omnibus-packages.s3.amazonaws.com/ubuntu/12.04/x86_64/chef-server_11.1.1-1_amd64.deb
+https://packages.chef.io/stable/ubuntu/12.04/chefdk_0.15.16-1_amd64.deb"
 for url in $opscode_urls; do
   if ! [[ -f $(basename $url) ]]; then
     $CURL -L -O $url

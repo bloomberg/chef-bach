@@ -16,7 +16,7 @@ grep -q $BINARY_SERVER_HOST /etc/apt/apt.conf || echo "Acquire::http::Proxy::$BI
 echo "deb [arch=amd64] $BINARY_SERVER_URL 0.5.0 main" > /etc/apt/sources.list.d/bcpc.list
 wget --no-proxy -O - ${BINARY_SERVER_URL}/apt_key.pub | apt-key add -
 apt-get update
-apt-get install -y chef
+apt-get install -y chef=11.12.8-2
 
 # setup OpenStack hint
 mkdir -p /etc/chef/ohai/hints/

@@ -32,7 +32,6 @@ cookbook 'kafka-bcpc', path: './cookbooks/kafka-bcpc'
 #
 cookbook 'apt'
 cookbook 'chef-client'
-cookbook 'chef-ingredient'
 cookbook 'java'
 cookbook 'maven'
 cookbook 'ntp'
@@ -40,27 +39,25 @@ cookbook 'pam'
 cookbook 'ubuntu'
 
 #
-# Cookbooks absent from the supermarket
+# Transitive dependencies that have been forked for one reason or another.
 #
 
 # bfd is not on the supermarket
 cookbook 'bfd',
   git: 'https://github.com/bloomberg/openbfdd-cookbook'
 
+
 # cobblerd forked, pending destruction of earth by moon.
-cookbook 'cobblerd',
-  git: 'https://github.com/cbaenziger/cobbler-cookbook',
-  branch: 'cobbler_profile'
+cookbook 'cobblerd', 
+  git: 'https://github.com/bloomberg/cobbler-cookbook'
 
 # jmxtrans 1.0+ isn't on the supermarket.
-cookbook 'jmxtrans',
-  git: 'https://github.com/jmxtrans/jmxtrans-cookbook',
-  revision: 'd8ee2396eca91ef8e0e558490bde075869b787de'
+cookbook 'jmxtrans', 
+  git: 'https://github.com/bijugs/jmxtrans-cookbook',
+  branch: 'ver-2.0'
 
 # 'kafka' has an entry on the supermarket, but it's the wrong cookbook.
 cookbook 'kafka',
   git: 'https://github.com/mthssdrbrg/kafka-cookbook.git',
-  revision: '0e05b5bf562c39b7c1a2e059412be91b6402703f'
-
-cookbook 'graphite_handler',
-  git: 'https://github.com/mkoni/chef-graphite_handler.git'
+  tag: 'v2.0.2'
+ 

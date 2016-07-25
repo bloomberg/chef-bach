@@ -82,7 +82,7 @@ echo "Setting up chef environment, roles, and uploading cookbooks"
 $SSH_CMD "tar -xzf /chef-bcpc-host/cluster.tgz -C /home/vagrant" || (echo '### Vagrant ssh failed to deploy cluster environment returned $? ###'; exit 1)
 $SSH_CMD "cd $BCPC_DIR && sudo knife environment from file environments/${CHEF_ENVIRONMENT}.json -u admin -k /etc/chef-server/admin.pem"
 $SSH_CMD "cd $BCPC_DIR && sudo knife role from file roles/*.json -u admin -k /etc/chef-server/admin.pem; r=\$? && sudo knife role from file roles/*.rb -u admin -k /etc/chef-server/admin.pem; r=\$((r & \$? )) && [[ \$r -lt 1 ]]"
-$SSH_CMD "cd $BCPC_DIR && sudo knife cookbook upload -a -o cookbooks -u admin -k /etc/chef-server/admin.pem"
+$SSH_CMD "cd $BCPC_DIR && sudo knife cookbook upload -a -o vendor/cookbooks -u admin -k /etc/chef-server/admin.pem"
 
 echo "Enrolling local bootstrap node into chef"
 $SSH_CMD "cd $BCPC_DIR && ./setup_chef_bootstrap_node.sh ${IP} ${CHEF_ENVIRONMENT}"
