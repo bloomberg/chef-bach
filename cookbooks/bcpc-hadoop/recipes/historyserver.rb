@@ -12,7 +12,7 @@ end
 
 ["", "done", "done_intermediate"].each do |dir|
   bash "create-hdfs-history-dir #{dir}" do
-    code "hdfs dfs -mkdir /user/history/#{dir} && hdfs dfs -chmod 0773 /user/history/#{dir} && hdfs dfs -chown yarn:mapred /user/history/#{dir}"
+    code "hdfs dfs -mkdir /user/history/#{dir} && hdfs dfs -chmod 1777 /user/history/#{dir} && hdfs dfs -chown yarn:mapred /user/history/#{dir}"
     user "hdfs"
     not_if "hdfs dfs -test -d /user/history/#{dir}", :user => "hdfs"
   end
