@@ -10,6 +10,21 @@ include_recipe 'bcpc-hadoop::hadoop_config'
   hdp_select(pkg, node[:bcpc][:hadoop][:distribution][:active_release])
 end
 
+#
+# The following resource is to fix incorrect permissions set in 
+# existing /user/history directory
+#
+bash "set-correct-user-history-dir-permission" do
+  code <<-EOH
+  hdfs dfs -chmod -R 0770 /user/history
+  hdfs dfs -chmod 1777 /user/history
+  hdfs dfs -chmod 1777 /user/history/done
+  hdfs dfs -chmod 1777 /user/history/done_intermediate
+  EOH
+  user "hdfs"
+  only_if "hdfs dfs -test -d /user/history && hdfs dfs -ls /user/history/done_intermediate|grep drwxrwxrwt", :user => "hdfs"
+end
+
 ["", "done", "done_intermediate"].each do |dir|
   bash "create-hdfs-history-dir #{dir}" do
     code "hdfs dfs -mkdir /user/history/#{dir} && hdfs dfs -chmod 1777 /user/history/#{dir} && hdfs dfs -chown yarn:mapred /user/history/#{dir}"
