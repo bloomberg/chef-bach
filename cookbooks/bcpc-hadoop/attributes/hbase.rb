@@ -94,5 +94,6 @@ default[:bcpc][:hadoop][:hbase][:site_xml].tap do |site_xml|
   site_xml['hbase.ipc.warn.response.size'] = node["bcpc"]["hadoop"]["hbase"]["ipc"]["warn"]["response"]["size"].to_s
   site_xml['hbase.ipc.server.tcpnodelay'] = 'true'
   site_xml['hbase.replication'] = 'true'
+  site_xml['dfs.client.read.shortcircuit'] = 'true'
   site_xml['hbase.coprocessor.abortonerror'] = node["bcpc"]["hadoop"]["hbase_rs"]["coprocessor"]["abortonerror"] 
 end
