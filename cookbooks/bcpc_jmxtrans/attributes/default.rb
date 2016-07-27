@@ -1,8 +1,7 @@
 #
 # Name of jmxtrans software downloaded
 #
-default['jmxtrans']['version'] = "254"
-default['jmxtrans']['sw'] = "jmxtrans-254-dist.tar.gz"
+default['jmxtrans']['version'] = "256"
 #
 # Add additional JMX queries following the existing queries as sample
 # Also refer to the jmxtrans community cookbook if queries of the category you are planning to add is
