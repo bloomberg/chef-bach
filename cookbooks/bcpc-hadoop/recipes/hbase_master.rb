@@ -96,7 +96,7 @@ service "hbase-master" do
   subscribes :restart, "bash[hdp-select hbase-master]", :delayed
   subscribes :restart, "user_ulimit[hbase]", :delayed
   subscribes :restart, "template[/etc/hadoop/conf/core-site.xml]", :delayed
-  subscribes :restart, "template[/etc/profile.d/jdk.sh]", :delayed
+  subscribes :restart, "log[jdk-version-changed]", :delayed
 end
 
 if node["bcpc"]["hadoop"]["phoenix"]["tracing"]["enabled"]

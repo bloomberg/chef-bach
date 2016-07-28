@@ -71,5 +71,5 @@ service "hbase-regionserver" do
   subscribes :restart, "template[/etc/hadoop/conf/core-site.xml]", :delayed
   subscribes :restart, "bash[hdp-select hbase-regionserver]", :delayed
   subscribes :restart, "user_ulimit[hbase]", :delayed
-  subscribes :restart, "template[/etc/profile.d/jdk.sh]", :delayed
+  subscribes :restart, "log[jdk-version-changed]", :delayed
 end
