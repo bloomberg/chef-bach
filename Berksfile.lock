@@ -1,0 +1,148 @@
+DEPENDENCIES
+  apt
+  bach_common
+    path: cookbooks/bach_common
+  bach_spark
+    path: cookbooks/bach_spark
+  bach_wrapper
+    path: .
+    metadata: true
+  bcpc
+    path: cookbooks/bcpc
+  bcpc-hadoop
+    path: cookbooks/bcpc-hadoop
+  bcpc_jmxtrans
+    path: cookbooks/bcpc_jmxtrans
+  bfd
+    git: https://github.com/bloomberg/openbfdd-cookbook
+    revision: 1a07d06680334e6c0974b438c64be2cdb6c43917
+  chef-client
+  chef-ingredient
+  cobblerd
+    git: https://github.com/cbaenziger/cobbler-cookbook
+    revision: c98bcc8ffa49e9058a811efae9620ed32e7d8936
+    branch: cobbler_profile
+  graphite_handler
+    git: https://github.com/mkoni/chef-graphite_handler.git
+    revision: e48c2cba3194efd7800310b34cecae16e0853e2b
+  hannibal
+    path: cookbooks/hannibal
+  java
+  jmxtrans
+    git: https://github.com/jmxtrans/jmxtrans-cookbook
+    revision: d8ee2396eca91ef8e0e558490bde075869b787de
+  kafka
+    git: https://github.com/mthssdrbrg/kafka-cookbook.git
+    revision: 0e05b5bf562c39b7c1a2e059412be91b6402703f
+  kafka-bcpc
+    path: cookbooks/kafka-bcpc
+  maven
+  ntp
+  pam
+  ubuntu
+
+GRAPH
+  apt (2.4.0)
+  ark (1.1.0)
+    build-essential (>= 0.0.0)
+    seven_zip (>= 0.0.0)
+    windows (>= 0.0.0)
+  bach_common (1.0.0)
+  bach_spark (1.0.0)
+    bcpc (= 1.0.0)
+    bcpc-hadoop (= 1.0.0)
+  bach_wrapper (1.0.0)
+    bach_common (= 1.0.0)
+    bach_spark (= 1.0.0)
+    bcpc (= 1.0.0)
+    bcpc-hadoop (= 1.0.0)
+    bcpc_jmxtrans (= 1.0.0)
+    hannibal (= 1.0.0)
+    kafka-bcpc (= 1.0.0)
+  bcpc (1.0.0)
+    apt (~> 2.4.0)
+    bfd (>= 0.0.0)
+    chef-client (~> 4.2.4)
+    chef-vault (~> 1.3.0)
+    cobblerd (>= 0.2.0)
+    cron (>= 1.2.2)
+    graphite_handler (>= 0.0.0)
+    ntp (>= 1.3.2)
+    python (>= 0.0.0)
+    sudo (>= 0.0.0)
+    ubuntu (>= 1.1.2)
+  bcpc-hadoop (1.0.0)
+    bcpc (= 1.0.0)
+    java (>= 1.28.0)
+    maven (~> 2.1.1)
+    pam (>= 0.0.0)
+    sysctl (>= 0.0.0)
+    ulimit (>= 0.0.0)
+  bcpc_jmxtrans (1.0.0)
+    bcpc-hadoop (>= 0.0.0)
+    jmxtrans (>= 0.0.0)
+  bfd (0.1.0)
+    apt (>= 0.0.0)
+    poise (~> 1.0)
+  build-essential (6.0.0)
+    compat_resource (>= 12.10)
+    mingw (>= 1.1)
+    seven_zip (>= 0.0.0)
+  chef-client (4.2.4)
+    cron (>= 1.2.0)
+    logrotate (>= 1.2.0)
+    windows (~> 1.11)
+  chef-ingredient (0.18.5)
+  chef-vault (1.3.3)
+  chef_handler (1.4.0)
+  cobblerd (0.3.0)
+    apt (~> 2.4)
+    poise (~> 1.0)
+    yum-epel (~> 0.3)
+  compat_resource (12.10.6)
+  cron (1.7.6)
+  graphite_handler (0.0.12)
+    chef_handler (>= 0.0.0)
+  hannibal (1.0.0)
+    ark (>= 0.0.0)
+  java (1.39.0)
+    apt (>= 0.0.0)
+  jmxtrans (1.1.0)
+    ark (>= 0.0.0)
+  kafka (0.8.0)
+  kafka-bcpc (1.0.0)
+    bcpc-hadoop (>= 0.0.0)
+    kafka (>= 0.0.0)
+    pam (>= 0.0.0)
+    sysctl (>= 0.0.0)
+    ulimit (>= 0.0.0)
+  logrotate (1.9.2)
+  maven (2.1.1)
+    ark (~> 1.0)
+    java (~> 1.38)
+    windows (>= 0.0.0)
+  mingw (1.2.0)
+    compat_resource (>= 0.0.0)
+    seven_zip (>= 0.0.0)
+  ntp (2.0.0)
+    windows (>= 1.38.0)
+  ohai (4.1.0)
+    compat_resource (>= 12.9.0)
+  pam (1.0.1)
+  poise (1.0.12)
+  python (1.4.6)
+    build-essential (>= 0.0.0)
+    yum-epel (>= 0.0.0)
+  seven_zip (2.0.1)
+    windows (>= 1.2.2)
+  sudo (2.9.0)
+  sysctl (0.7.0)
+    ohai (>= 0.0.0)
+  ubuntu (1.2.0)
+    apt (>= 0.0.0)
+  ulimit (0.4.0)
+  windows (1.43.0)
+    chef_handler (>= 0.0.0)
+  yum (3.11.0)
+  yum-epel (0.7.0)
+    yum (>= 3.6.3)
