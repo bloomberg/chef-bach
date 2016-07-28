@@ -127,6 +127,7 @@ service "hadoop-hdfs-namenode" do
   subscribes :restart, "template[/etc/hadoop/conf/topology]", :delayed
   subscribes :restart, "user_ulimit[hdfs]", :delayed
   subscribes :restart, "bash[hdp-select hadoop-hdfs-namenode]", :delayed
+  subscribes :restart, "log[jdk-version-changed]", :delayed
 end
 
 bash "reload hdfs nodes" do
