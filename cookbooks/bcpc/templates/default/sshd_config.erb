@@ -61,8 +61,13 @@ ChallengeResponseAuthentication no
 #KerberosTicketCleanup yes
 
 # GSSAPI options
+<% if node[:bcpc][:kerberos][:enable] == true %>
+GSSAPIAuthentication yes
+GSSAPICleanupCredentials yes
+<% else %>
 #GSSAPIAuthentication no
 #GSSAPICleanupCredentials yes
+<%end%>
 
 X11Forwarding yes
 X11DisplayOffset 10
