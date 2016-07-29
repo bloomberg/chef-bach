@@ -139,4 +139,5 @@ service "hadoop-hdfs-journalnode" do
   subscribes :restart, "template[/etc/hadoop/conf/hadoop-env.sh]", :delayed
   subscribes :restart, "file[#{keyTabDir}/#{jnKeytab}]", :delayed
   subscribes :restart, "file[#{keyTabDir}/#{nnKeytab}]", :delayed
+  subscribes :restart, "log[jdk-version-changed]", :delayed
 end

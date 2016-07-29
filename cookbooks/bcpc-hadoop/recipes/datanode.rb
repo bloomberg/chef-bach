@@ -292,6 +292,7 @@ ruby_block "acquire_lock_to_restart_datanode" do
   subscribes :create, "user_ulimit[root]", :immediate
   subscribes :create, "bash[hdp-select hadoop-hdfs-datanode]", :immediate
   subscribes :create, "ruby_block[handle_prev_datanode_restart_failure]", :immediate
+  subscribes :create, "log[jdk-version-changed]", :immediate
 end
 #
 # If lock to restart datanode is acquired by the node, this ruby_block executes which is primarily used to notify the datanode service to restart
@@ -337,4 +338,5 @@ service "hadoop-yarn-nodemanager" do
   subscribes :restart, "template[/etc/hadoop/conf/mapred-site.xml]", :delayed
   subscribes :restart, "bash[hdp-select hadoop-yarn-nodemanager]", :delayed
   subscribes :restart, "user_ulimit[yarn]", :delayed
+  subscribes :restart, "log[jdk-version-changed]", :delayed
 end

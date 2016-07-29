@@ -87,4 +87,5 @@ service "zookeeper-server" do
   subscribes :restart, "file[#{node[:bcpc][:hadoop][:zookeeper][:data_dir]}/myid]", :delayed
   subscribes :restart, "user_ulimit[zookeeper]", :delayed
   subscribes :restart, "bash[hdp-select zookeeper-server]", :delayed
+  subscribes :restart, "log[jdk-version-changed]", :delayed
 end

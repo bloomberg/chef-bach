@@ -170,6 +170,7 @@ service "generally run hadoop-hdfs-namenode" do
   action [:enable, :start]
   supports :status => true, :restart => true, :reload => false
   service_name "hadoop-hdfs-namenode"
+  subscribes :restart, "log[jdk-version-changed]", :delayed
   subscribes :restart, "link[/etc/init.d/hadoop-hdfs-namenode]", :immediate
   subscribes :restart, "template[/etc/hadoop/conf/hadoop-metrics2.properties]", :delayed
   subscribes :restart, "template[/etc/hadoop/conf/hdfs-site.xml]", :delayed

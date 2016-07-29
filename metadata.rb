@@ -13,6 +13,7 @@ depends 'bcpc', '= 0.1.0'
 depends 'bcpc-hadoop', '= 0.1.0'
 depends 'bcpc_jmxtrans', '= 0.1.0'
 depends 'hannibal', '= 0.1.0'
+depends 'java','>= 1.41.0'
 depends 'kafka-bcpc', '= 0.1.0'
 
 # Transitive dependencies specified to retain Chef 11.x compatibility.

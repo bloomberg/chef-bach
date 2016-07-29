@@ -92,6 +92,7 @@ service "hadoop-yarn-resourcemanager" do
   subscribes :restart, "template[/etc/hadoop/conf/core-site.xml]", :delayed
   subscribes :restart, "template[/etc/hadoop/conf/hdfs-site.xml]", :delayed
   subscribes :restart, "bash[hdp-select hadoop-yarn-resourcemanager]", :delayed
+  subscribes :restart, "log[jdk-version-changed]", :delayed
 end
 
 bash "reload mapreduce nodes" do
