@@ -70,7 +70,7 @@ directory "/var/log/hadoop-hdfs/gc/" do
   user "hdfs"
   group "hdfs"
   action :create
-  notifies :restart, "service[generally run hadoop-hdfs-namenode]", :delayed
+  notifies :restart, "service[hadoop-hdfs-namenode]", :delayed
 end
 
 user_ulimit "hdfs" do
@@ -109,7 +109,7 @@ bash "format-zk-hdfs-ha" do
   code "yes | #{hdfs_cmd} zkfc -formatZK"
   action :run
   user "hdfs"
-  notifies :restart, "service[generally run hadoop-hdfs-namenode]", :delayed
+  notifies :restart, "service[hadoop-hdfs-namenode]", :delayed
   zks = node[:bcpc][:hadoop][:zookeeper][:servers].map{|zkh| "#{float_host(zkh[:hostname])}:#{node[:bcpc][:hadoop][:zookeeper][:port]}"}.join(",")
   not_if { znode_exists?("/hadoop-ha/#{node.chef_environment}", zks) }
 end
@@ -166,7 +166,7 @@ bash "kill hdfs-namenode" do
   returns [0, 1]
 end
 
-service "generally run hadoop-hdfs-namenode" do
+service "hadoop-hdfs-namenode" do
   action [:enable, :start]
   supports :status => true, :restart => true, :reload => false
   service_name "hadoop-hdfs-namenode"

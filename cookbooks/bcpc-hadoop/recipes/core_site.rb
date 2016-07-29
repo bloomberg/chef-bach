@@ -56,6 +56,8 @@ if node[:bcpc][:hadoop][:hdfs][:ldap][:integration]
 
      'hadoop.security.group.mapping.ldap.search.attr.group.name' =>
        'cn',
+     'hadoop.security.group.mapping.ldap.search.group.hierarchy.levels' =>
+       '1',
     }
   core_site_generated_values.merge!(ldap_properties)
 end
