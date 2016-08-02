@@ -17,20 +17,6 @@
 # limitations under the License.
 #
 
-#
-# Updating node attributes to copy syslog and auth.log from all bcpc-hadoop nodes
-# to a centralized location (currently HDFS). Enable after deciding userid to use. 
-#
-node.default['bcpc']['hadoop']['copylog']['syslog'] = {
-    'logfile' => "/var/log/syslog",
-    'docopy' => false
-}
-
-node.default['bcpc']['hadoop']['copylog']['authlog'] = {
-    'logfile' => "/var/log/auth.log",
-    'docopy' => false
-}
-
 # ensure the Zookeeper Gem is available for use in later recipes
 # it seems chef_gem fails to use the embedded gem(1) binary so use gem_package
 # and a hack to use rubygems to find the current Ruby binary;

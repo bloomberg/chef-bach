@@ -16,3 +16,7 @@
 <%= @agent_name %>.sinks.hdfsSink.hdfs.rollInterval = <%= node['bcpc']['hadoop']['copylog_rollup_interval'] %>
 <%= @agent_name %>.sinks.hdfsSink.hdfs.rollSize = 0
 <%= @agent_name %>.sinks.hdfsSink.hdfs.rollCount = 0
+<% if node[:bcpc][:hadoop][:kerberos][:enable] %>
+<%= @agent_name %>.sinks.hdfsSink.hdfs.kerberosPrincipal = <%= node['bcpc']['hadoop']['kerberos']['data']['flume']['principal'] %>/<%=float_host(node[:hostname])%>@<%= node['bcpc']['hadoop']['kerberos']['realm'] %>
+<%= @agent_name %>.sinks.hdfsSink.hdfs.kerberosKeytab = <%= node['bcpc']['hadoop']['kerberos']['keytab']['dir'] %>/<%= node['bcpc']['hadoop']['kerberos']['data']['flume']['keytab'] %>
+<% end %>

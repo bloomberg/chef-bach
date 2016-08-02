@@ -121,8 +121,26 @@ default["bcpc"]["revelytix"]["port"] = 8080
 default['bcpc']['hadoop']['copylog'] = {}
 # Attribute to enable/disable the copylog feature
 default['bcpc']['hadoop']['copylog_enable'] = true
+# HDFS quotas for copylogs files
+default['bcpc']['hadoop']['copylog_quota'] = {
+  'space' => '10G',
+  'files' => '10000'
+}
 # File rollup interval in secs for log data copied into HDFS through Flume
 default['bcpc']['hadoop']['copylog_rollup_interval'] = 86400
+# Ensure copylogs can read Chef's client.log
+default['chef_client']['log_perm'] = '00644'
+
+default['bcpc']['hadoop']['copylog']['syslog'] = { 
+    'logfile' => '/var/log/syslog',
+    'docopy' => true
+}
+
+default['bcpc']['hadoop']['copylog']['authlog'] = {
+    'logfile' => '/var/log/auth.log',
+    'docopy' => true
+}
+
 
 # Ensure the following group mappings in the group database
 default[:bcpc][:hadoop][:os][:group][:hadoop][:members]=["hdfs","yarn"]
