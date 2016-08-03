@@ -43,10 +43,6 @@
         "dhcp_range" : "10.0.100.14 10.0.100.250"
       },
       "dns_servers" : [ "8.8.8.8", "8.8.4.4" ],
-      "repos" : {
-        "hortonworks": "http://public-repo-1.hortonworks.com/HDP/ubuntu12/2.x/updates/2.3.4.0",
-        "hdp_utils": "http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.20/repos/ubuntu12"
-      },
       "cluster" : {
           "profile" : ""
       },
@@ -59,12 +55,7 @@
         "hdfs" : {
           "dfs_replication_factor" : 1
         },
-        "distribution": {
-          "version": "HDP",
-          "key": "hortonworks.key",
-          "release": "2.3.4.0-3485"
-        },
-        "hbase": {
+       "hbase": {
           "bucketcache": {
             "enabled": false
           },
