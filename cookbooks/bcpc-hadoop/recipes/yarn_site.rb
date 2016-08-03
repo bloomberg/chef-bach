@@ -1,3 +1,10 @@
+if node['bcpc']['hadoop']['yarn']['yarn.log-aggregation.retain-days'] == -1
+  node.default['bcpc']['hadoop']['yarn']['site_xml']['yarn.log-aggregation.retain-seconds'] = -1
+else
+  node.default['bcpc']['hadoop']['yarn']['site_xml']['yarn.log-aggregation.retain-seconds'] =
+                                   60 * 60 * 24 * node['bcpc']['hadoop']['yarn']['yarn.log-aggregation.retain-days']
+end
+
 yarn_site_values = node[:bcpc][:hadoop][:yarn][:site_xml]
 
 node.default[:bcpc][:hadoop][:yarn][:aux_services][:mapreduce_shuffle][:class] =
