@@ -26,7 +26,7 @@ default[:bcpc][:hadoop][:yarn][:env_sh].tap do |env_sh|
 
   env_sh[:YARN_OPTS] = '"' +
     '-Dhadoop.log.dir=#{env_sh[:YARN_LOG_DIR]} ' +
-    '-Dyarn.log.dir=#{env_sh[:YARN_LOG_DIR]} " '
+    '-Dyarn.log.dir=#{env_sh[:YARN_LOG_DIR]} " ' +
     '-Dhadoop.log.file=#{env_sh[:YARN_LOGFILE]} ' +
     '-Dyarn.log.dir=#{env_sh[:YARN_LOGFILE]} ' +
     '-Dyarn.id.str=#{env_sh[:YARN_IDENT_STRING]} ' +
