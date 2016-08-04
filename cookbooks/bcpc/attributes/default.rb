@@ -103,10 +103,10 @@ default['bcpc']['repos'].tap do |repos|
     'http://ppa.launchpad.net/canonical-support/support-tools/ubuntu'
 
   repos['hortonworks'] =
-    'http://public-repo-1.hortonworks.com/HDP/ubuntu12/2.x/updates/2.3.4.0'
+    'http://s3.amazonaws.com/dev.hortonworks.com/HDP/ubuntu12/2.x/BUILDS/2.3.6.2-2'
 
   repos['hdp_utils'] =
-    'http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.20/repos/ubuntu12'
+    'http://s3.amazonaws.com/dev.hortonworks.com/HDP-UTILS-1.1.0.20/repos/ubuntu12'
 end
 
 ###########################################
