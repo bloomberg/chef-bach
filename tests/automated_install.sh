@@ -62,18 +62,24 @@ for i in 1 2 3; do
   vboxmanage showvminfo bcpc-vm$i | grep -q '^State:.*running' || VBoxManage startvm bcpc-vm$i --type headless
 done
 
-printf "Checking VMs are up: \n"
-while ! nc -w 1 10.0.100.11 22 || \
-         !  nc -w 1 10.0.100.12 22 || \
-         !  nc -w 1 10.0.100.13 22
-do
-  sleep 60
-  printf "Hosts down: "
-  for m in 11 12 13; do
-    nc -w 1 10.0.100.$m 22 > /dev/null || echo -n "10.0.100.$m "
+echo "Checking for GNU screen to watch serial consoles"
+if hash screen 2>/dev/null ; then
+  pushd $(readlink -f $(dirname $0))
+  screen -S "BACH Install" -c ./screenrc
+  popd
+else
+  while ! nc -w 1 10.0.100.11 22 || \
+           !  nc -w 1 10.0.100.12 22 || \
+           !  nc -w 1 10.0.100.13 22
+  do
+    sleep 60
+    printf "Hosts down: "
+    for m in 11 12 13; do
+      nc -w 1 10.0.100.$m 22 > /dev/null || echo -n "10.0.100.$m "
+    done
+    printf "\n"
   done
-  printf "\n"
-done
+fi
 
 printf "Snapshotting post-Cobbler\n"
 [[ "$vms_started" == "True" ]] && VBoxManage snapshot bcpc-vm1 take Post-Cobble
