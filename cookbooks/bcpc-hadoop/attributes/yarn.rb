@@ -1,6 +1,7 @@
 default["bcpc"]["hadoop"]["yarn"]["fairsharepreemptiontimeout"] = 150
 default['bcpc']['hadoop']['yarn']['historyserver']['heap']["size"] = 128
 default['bcpc']['hadoop']['yarn']['historyserver']['heap']["ratio"] = 0
+default['bcpc']['hadoop']['yarn']['yarn.log-aggregation.retain-days'] = 10
 default["bcpc"]["hadoop"]["yarn"]["nodemanager"]["avail_memory"]["ratio"] = 0.5
 default["bcpc"]["hadoop"]["yarn"]["nodemanager"]["avail_memory"]["size"] = nil
 default["bcpc"]["hadoop"]["yarn"]["nodemanager"]["avail_vcpu"]["ratio"] = 0.5
@@ -64,7 +65,6 @@ default[:bcpc][:hadoop][:yarn][:site_xml].tap do |site_xml|
     ].join(',')
 
   site_xml['yarn.log-aggregation-enable'] = true
-  site_xml['yarn.log-aggregation.retain-seconds'] = 60 * 60 * 24 * 31
 
   ynla = 'yarn.nodemanager.log-aggregation'
   site_xml["#{ynla}.roll-monitoring-interval-seconds"] = 1800
