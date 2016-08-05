@@ -187,11 +187,28 @@ env_sh[:HBASE_REGIONSERVER_OPTS] =
   "-XX:+PrintClassHistogram -XX:+PrintGCApplicationConcurrentTime"
 
 #
+# Common env.sh options relevant to HBASE master
+#
+env_sh[:HBASE_MASTER_OPTS] =
+  " $HBASE_MASTER_OPTS -server -XX:ParallelGCThreads=#{[1, (node['cpu']['total'] * node['bcpc']['hadoop']['hbase_master']['gc_thread']['cpu_ratio']).ceil].max} " +
+  " -XX:+UseParNewGC -XX:CMSInitiatingOccupancyFraction=#{node['bcpc']['hadoop']['hbase_master']['cmsinitiatingoccupancyfraction']} " +
+  "-XX:+UseCMSInitiatingOccupancyOnly -verbose:gc -XX:+PrintHeapAtGC " +
+  "-XX:+PrintGCDetails -XX:+PrintGCTimeStamps -XX:+PrintGCDateStamps " +
+  "-Xloggc:/var/log/hbase/gc/gc.log-$$-$(hostname)-$(date +'%Y%m%d%H%M').log " +
+  "-Xmn#{node['bcpc']['hadoop']['hbase_master']['xmn']['size']}m " +
+  "-Xms#{node['bcpc']['hadoop']['hbase_master']['xms']['size']}m " +
+  "-Xmx#{node['bcpc']['hadoop']['hbase_master']['xmx']['size']}m " +
+  "-XX:+ExplicitGCInvokesConcurrent " +
+  "-XX:PretenureSizeThreshold=#{node['bcpc']['hadoop']['hbase_master']['PretenureSizeThreshold']} " +
+  "-XX:+PrintTenuringDistribution -XX:+UseNUMA " +
+  "-XX:+PrintGCApplicationStoppedTime -XX:+UseCompressedOops " +
+  "-XX:+PrintClassHistogram -XX:+PrintGCApplicationConcurrentTime"
+#
 # HBASE Master and RegionServer env.sh variables are updated with relevant JAAS file entries when Kerberos is enabled
 #
 if node[:bcpc][:hadoop][:kerberos][:enable] == true then
  env_sh[:HBASE_OPTS] = '"$HBASE_OPTS -Djava.security.auth.login.config=/etc/hbase/conf/hbase-client.jaas"'
- env_sh[:HBASE_MASTER_OPTS] = '$HBASE_MASTER_OPTS -Djava.security.auth.login.config=/etc/hbase/conf/hbase-server.jaas'
+ env_sh[:HBASE_MASTER_OPTS] += ' -Djava.security.auth.login.config=/etc/hbase/conf/hbase-server.jaas'
  env_sh[:HBASE_REGIONSERVER_OPTS] += ' -Djava.security.auth.login.config=/etc/hbase/conf/regionserver.jaas'
 end
 
