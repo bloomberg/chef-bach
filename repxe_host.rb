@@ -471,22 +471,27 @@ end
 # invoking the script from a UNIX shell.
 #
 if __FILE__ == $PROGRAM_NAME
-  options = { :shutdown => true,  :newmachine => false }
+  options = { :shutdown => true,  :newmachine => false, :down => false }
 
   parser = OptionParser.new do|opts|
 	opts.banner = "Usage: repxe_host.rb [options]"
 	opts.on('-s', '--skipShutdown', 'Skip Shutdown') do 
-		options[:shutdown] = false;
+		options[:shutdown] = false
 	end
 
 	opts.on('-n', '--newmachine', 'PXE boot a new machine') do 
-		options[:newmachine] = true;
-		options[:shutdown] = false;
+		options[:newmachine] = true
+		options[:shutdown] = false
 	end
 	opts.on('-m', '--machine machine', 'Machine') do |machine|
 		options[:machine] = machine
                 puts 'found an option for machine with value ' + machine
 	end
+	opts.on('-d', '--down', 'Just bring the machine down') do 
+		options[:down] = true
+		options[:shutdown] = true
+	end
+
 
 	opts.on('-h', '--help', 'Displays Help') do
 		puts opts
@@ -512,6 +517,11 @@ if __FILE__ == $PROGRAM_NAME
   chef_env = find_chef_env
   if options[:shutdown]
   	graceful_shutdown(chef_env, vm_entry)
+  end
+ 
+  if options[:down]
+  	puts "Machine has been shut down.  Exiting."
+	exit
   end
  
   if !options[:newmachine]
