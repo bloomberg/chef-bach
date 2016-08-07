@@ -9,7 +9,7 @@
 #
 
 ### Localization
-d-i debian-installer/locale string en_US
+d-i debian-installer/locale string en_US.UTF-8
 d-i console-setup/ask_detect boolean false
 d-i keyboard-configuration/layoutcode string us
 
@@ -46,8 +46,8 @@ d-i mirror/country string manual
         URI.parse('http://' + @node[:bcpc][:bootstrap][:mirror].to_s +
 	          '/ubuntu')
       else
-        # New-style environment with complete host
-        URI.parse(@node[:bcpc][:bootstrap][:mirror_url])
+        # New-style environment with complete host URL
+        URI.parse(@node[:bcpc][:bootstrap][:preseed][:mirror_url])
       end
     rescue
       # Nothing supplied in the environment, just use public mirror.
@@ -71,10 +71,7 @@ d-i clock-setup/ntp-server string <%= @node[:ntp][:servers].first %>
 
 ### Partitioning
 d-i partman/early_command string \
-      udevadm trigger; udevadm settle --timeout=30 \
-      for d in $(ls /dev/sd[a-z]); do \
-        dd if=/dev/zero of=$d bs=4M count=16 || echo "Write to $d failed" \
-      done
+    <%= @node[:bcpc][:bootstrap][:preseed][:early_command] %>
 d-i partman-auto/disk string /dev/sda
 d-i partman-auto/method string lvm
 d-i partman-lvm/confirm boolean true
@@ -116,12 +113,8 @@ d-i apt-setup/universe boolean true
 d-i apt-setup/backports boolean true
 
 d-i apt-setup/services-select multiselect security
-<% if @node[:bcpc][:bootstrap][:mirror].nil? %>
-d-i apt-setup/security_host string security.ubuntu.com
-<% else %>
-d-i apt-setup/security_host string <%= @node[:bcpc][:bootstrap][:mirror] %>
-<% end %>
-d-i apt-setup/security_path string /ubuntu
+d-i apt-setup/security_host string <%= mirror_url.host %>
+d-i apt-setup/security_path string <%= mirror_url.path %>
 
 #d-i debian-installer/allow_unauthenticated boolean false
 

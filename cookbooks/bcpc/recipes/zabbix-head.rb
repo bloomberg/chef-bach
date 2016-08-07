@@ -219,6 +219,8 @@ end
   end
 end
 
+execute 'a2enmod version'
+
 file '/etc/php5/apache2/conf.d/zabbix.ini' do
   user 'root'
   group 'root'
@@ -240,7 +242,7 @@ template '/usr/local/share/zabbix/php/conf/zabbix.conf.php' do
   notifies :run, 'ruby_block[run_state_apache2_restart]', :immediate
 end
 
-template '/etc/apache2/sites-available/zabbix-web.conf' do
+template '/etc/apache2/sites-available/zabbix-web' do
   source 'apache-zabbix-web.conf.erb'
   owner 'root'
   group 'root'

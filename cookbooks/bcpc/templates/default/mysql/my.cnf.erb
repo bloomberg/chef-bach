@@ -9,3 +9,11 @@
 [mysqld]
 pid_file=/var/run/mysqld/mysqld.pid
 log-error=/var/log/mysql/error.log
+#
+# Override bind-address
+#
+# In some systems bind-address defaults to 127.0.0.1, and with
+# mysqldump SST it may have disastrous consequences on donor
+# node
+#
+bind-address=<%="#{node[:bcpc][:management][:ip]}"%>

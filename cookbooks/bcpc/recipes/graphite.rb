@@ -155,7 +155,7 @@ template '/opt/graphite/conf/relay-rules.conf' do
   notifies :restart, 'service[carbon-relay]', :delayed
 end
 
-template '/etc/apache2/sites-available/graphite-web.conf' do
+template '/etc/apache2/sites-available/graphite-web' do
   source 'apache-graphite-web.conf.erb'
   owner 'root'
   group 'root'
@@ -166,7 +166,7 @@ end
 bash 'apache-enable-graphite-web' do
   user 'root'
   code 'a2ensite graphite-web'
-  not_if 'test -r /etc/apache2/sites-enabled/graphite-web.conf'
+  not_if 'test -r /etc/apache2/sites-enabled/graphite-web'
   notifies :restart, 'service[apache2]', :delayed
 end
 

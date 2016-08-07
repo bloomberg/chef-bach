@@ -27,6 +27,16 @@ default['bcpc']['bootstrap']['preseed'].tap do |preseed|
   preseed['kernel'] = 'linux-generic-lts-xenial'
   preseed['add_kernel_opts'] = 'console=ttyS0'
   preseed['late_command'] = 'true'
+
+  preseed['early_command'] = <<-EOM
+      udevadm trigger; udevadm settle --timeout=30 \\
+      for d in $(ls /dev/sd[a-z]); do \\
+        dd if=/dev/zero of=$d bs=4M count=16 || echo "Write to $d failed" \\
+      done
+  EOM
+  
+  preseed['mirror_url'] =
+    'http://mirror.cc.columbia.edu/pub/linux/ubuntu/archive/'
 end
 
 default['bcpc']['bootstrap']['admin_users'] = []

@@ -41,7 +41,6 @@
         "server" : "10.0.100.3",
         "dhcp_subnet" : "10.0.100.0",
         "dhcp_range" : "10.0.100.14 10.0.100.250",
-        "preseed": { "mirror_url": "http://mirror.cc.columbia.edu/pub/linux/ubuntu/archive/" }
       },
       "dns_servers" : [ "8.8.8.8", "8.8.4.4" ],
       "cluster" : {

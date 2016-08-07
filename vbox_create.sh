@@ -29,6 +29,7 @@ export BOOTSTRAP_VM_CPUs=${BOOTSTRAP_VM_CPUs-1}
 CLUSTER_VM_MEM=${CLUSTER_VM_MEM-2048}
 CLUSTER_VM_CPUs=${CLUSTER_VM_CPUs-1}
 CLUSTER_VM_DRIVE_SIZE=${CLUSTER_VM_DRIVE_SIZE-20480}
+CLUSTER_VM_EFI=${CLUSTER_VM_EFI:-true}
 
 VBOX_DIR="`dirname ${BASH_SOURCE[0]}`/vbox"
 P=`python -c "import os.path; print os.path.abspath(\"${VBOX_DIR}/\")"`
@@ -220,8 +221,10 @@ function create_cluster_VMs {
           $VBM modifyvm $vm --memory $CLUSTER_VM_MEM
           $VBM modifyvm $vm --cpus $CLUSTER_VM_CPUs
 
-	  # Force UEFI firmware.
-	  $VBM modifyvm $vm --firmware efi
+	  if [[ $CLUSTER_VM_EFI == true ]]; then
+	      # Force UEFI firmware.
+	      $VBM modifyvm $vm --firmware efi
+	  fi
 
 	  # Create a disk controller to hang disks off of.
 	  DISK_CONTROLLER="SATA_Controller"
@@ -232,15 +235,20 @@ function create_cluster_VMs {
 	  #
 	  # (/dev/sda is hardcoded into the preseed file.)
 	  #
+	  port=0
 	  DISK_PATH=$P/$vm/$vm-a.vdi
 	  $VBM createhd --filename $DISK_PATH \
 	       --size $CLUSTER_VM_DRIVE_SIZE
           $VBM storageattach $vm --storagectl $DISK_CONTROLLER \
-	       --device 0 --port 0 --type hdd --medium $DISK_PATH
+	       --device 0 --port $port --type hdd --medium $DISK_PATH
+	  port=$((port+1))
 
-	  # Attach the iPXE boot medium as /dev/sdb.
-          $VBM storageattach $vm --storagectl $DISK_CONTROLLER \
-	       --device 0 --port 1 --type hdd --medium $IPXE_DISK
+	  if [[ $CLUSTER_VM_EFI == true ]]; then
+	      # Attach the iPXE boot medium as /dev/sdb.
+              $VBM storageattach $vm --storagectl $DISK_CONTROLLER \
+		   --device 0 --port $port --type hdd --medium $IPXE_DISK
+	      port=$((port+1))
+	  fi
 
 	  #
 	  # Create our data disks
@@ -249,7 +257,6 @@ function create_cluster_VMs {
 	  # the attribute default[:bcpc][:hadoop][:disks] in a role or
 	  # environment.
 	  #
-          port=2
           for disk in c d e f; do
 	      DISK_PATH=$P/$vm/$vm-$disk.vdi
               $VBM createhd --filename $DISK_PATH \

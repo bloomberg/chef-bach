@@ -61,6 +61,30 @@ package 'debconf-utils'
   end
 end
 
+directory '/etc/mysql' do
+  owner 'root'
+  group 'root'
+  mode 00755
+end
+
+template '/etc/mysql/my.cnf' do
+  source 'mysql/my.cnf.erb'
+  mode 00644
+  notifies :reload, 'service[mysql]', :delayed
+end
+
+template '/etc/mysql/debian.cnf' do
+  source 'mysql/my-debian.cnf.erb'
+  mode 00644
+  notifies :reload, 'service[mysql]', :delayed
+end
+
+directory '/etc/mysql/conf.d' do
+  owner 'root'
+  group 'root'
+  mode 00755
+end
+
 package 'percona-xtradb-cluster-56' do
   #
   # This is an ":install" and not an ":upgrade" to avoid momentary
@@ -141,30 +165,6 @@ mysql_database_user root_user do
   privileges ['ALL PRIVILEGES']
   grant_option true
   action :grant
-end
-
-directory '/etc/mysql' do
-  owner 'root'
-  group 'root'
-  mode 00755
-end
-
-template '/etc/mysql/my.cnf' do
-  source 'mysql/my.cnf.erb'
-  mode 00644
-  notifies :reload, 'service[mysql]', :delayed
-end
-
-template '/etc/mysql/debian.cnf' do
-  source 'mysql/my-debian.cnf.erb'
-  mode 00644
-  notifies :reload, 'service[mysql]', :delayed
-end
-
-directory '/etc/mysql/conf.d' do
-  owner 'root'
-  group 'root'
-  mode 00755
 end
 
 mysql_nodes = get_nodes_for('mysql', 'bcpc')

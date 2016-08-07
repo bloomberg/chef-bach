@@ -161,13 +161,23 @@ fi
 FILES="cirros-0.3.0-x86_64-disk.img $FILES"
 
 # Grab the Ubuntu 14.04 installer image with a 4.4 "HWE" kernel from Xenial
-UBUNTU_IMAGE="ubuntu-14.04-hwe44-mini.iso"
-if ! [[ -f $UBUNTU_IMAGE ]]; then
-    while ! $(file $UBUNTU_IMAGE | grep -qE '(x86 boot sector)|(ISO 9660 CD-ROM)'); do
-	$CURL -o $UBUNTU_IMAGE http://archive.ubuntu.com/ubuntu/dists/trusty-updates/main/installer-amd64/current/images/xenial-netboot/mini.iso
+TRUSTY_IMAGE="ubuntu-14.04-hwe44-mini.iso"
+if ! [[ -f $TRUSTY_IMAGE ]]; then
+    while ! $(file $TRUSTY_IMAGE | grep -qE '(x86 boot sector)|(ISO 9660 CD-ROM)'); do
+	$CURL -o $TRUSTY_IMAGE http://archive.ubuntu.com/ubuntu/dists/trusty-updates/main/installer-amd64/current/images/xenial-netboot/mini.iso
     done
 fi
-FILES="$UBUNTU_IMAGE $FILES"
+FILES="$TRUSTY_IMAGE $FILES"
+
+# Grab the Ubuntu 12.04 installer image with a 3.13 kernel.
+PRECISE_IMAGE="ubuntu-12.04-hwe313-mini.iso"
+if ! [[ -f $PRECISE_IMAGE ]]; then
+    while ! $(file $PRECISE_IMAGE | grep -qE '(x86 boot sector)|(ISO 9660 CD-ROM)'); do
+	$CURL -o $PRECISE_IMAGE http://archive.ubuntu.com/ubuntu/dists/precise-updates/main/installer-amd64/current/images/trusty-netboot/mini.iso
+    done
+fi
+FILES="$PRECISE_IMAGE $FILES"
+
 
 # Make the diamond package
 if ! [[ -f diamond.deb ]]; then

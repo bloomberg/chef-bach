@@ -68,17 +68,26 @@ group {
         #end if
 
         ##
-        ## 1. Detect iPXE clients, serve them an iPXE script
-	## 2. Direct non-iPXE EFI clients to chainload iPXE
-	## 3. Fall back to a legacy BIOS-enabled syslinux for non-EFI.
+	## Four categories of clients, three outcomes:
+	##
+	## 1. UEFI + iPXE => boot a kernel directly via iPXE script
+	## 2. Legacy + iPXE => chainload syslinux
+	## 3. UEFI - iPXE => chainload an iPXE UEFI application
+	## 4. Legacy - iPXE => chainload syslinux
 	##
 	## This is done based on DHCP option 93.
 	##
 	## EFI x86_64 clients will send either 00:07 (EFI bytecode) or
 	## 00:09 (EFI x86_64)
 	##
+	## Legacy BIOS iPXE clients will send option 00:00.
+	##
 	if exists user-class and option user-class = "iPXE" {
-          filename "http://$next_server/cblr/svc/op/gpxe/system/$iface.hostname";
+	  if option pxe-system-type = 00:00 {
+	    filename "/pxelinux.0";
+	  } else {
+   	    filename "http://$next_server/cblr/svc/op/gpxe/system/$iface.hostname";
+	  }
         } else if option pxe-system-type = 00:07 {
 	  filename "/ipxe-x86_64.efi";
 	} else if option pxe-system-type = 00:09 {

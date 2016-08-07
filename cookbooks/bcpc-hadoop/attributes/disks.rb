@@ -9,13 +9,19 @@ default[:bcpc][:hadoop][:disks].tap do |disks|
   # harmless to overwrite it, but it will cause graphite to fail when
   # /disk/0 fills up.)
   #
-  # We have to check DMI because Ohai doesn't understand VBox EFI.
-  #
   disks[:available_disks] =
     if node[:dmi][:system][:product_name] == 'VirtualBox'
-      node[:block_device].keys.select{ |d| d =~ /sd[a-i]?[b-z]/ } - ['sdb']
+      all_drives =
+        node[:block_device].keys.select{ |dd| dd =~ /sd[a-i]?[b-z]/ }
+      
+      # Reject all disks with fewer than a million blocks, so that we
+      # do not attempt to use the iPXE image as a data disk.
+      all_drives.reject do |dd|
+        node[:block_device][dd].nil? ||
+        node[:block_device][dd][:size].to_i < 10**6
+      end
     else
-      node[:block_device].keys.select{ |d| d =~ /sd[a-i]?[b-z]/ }
+      node[:block_device].keys.select{ |dd| dd =~ /sd[a-i]?[b-z]/ }
     end
   
   # Keep at least this many disks for the :disk_reserve_roles
