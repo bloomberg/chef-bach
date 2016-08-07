@@ -226,6 +226,11 @@ function create_cluster_VMs {
 	      $VBM modifyvm $vm --firmware efi
 	  fi
 
+          # Add the network interfaces
+          $VBM modifyvm $vm --nic1 hostonly --hostonlyadapter1 "$VBN0"
+          $VBM modifyvm $vm --nic2 hostonly --hostonlyadapter2 "$VBN1"
+          $VBM modifyvm $vm --nic3 hostonly --hostonlyadapter3 "$VBN2"
+
 	  # Create a disk controller to hang disks off of.
 	  DISK_CONTROLLER="SATA_Controller"
 	  $VBM storagectl $vm --name $DISK_CONTROLLER --add sata
@@ -248,6 +253,9 @@ function create_cluster_VMs {
               $VBM storageattach $vm --storagectl $DISK_CONTROLLER \
 		   --device 0 --port $port --type hdd --medium $IPXE_DISK
 	      port=$((port+1))
+	  else
+	      # If we're not using EFI, force the BIOS to boot net.
+	      $VBM modifyvm $vm --boot1 net
 	  fi
 
 	  #
@@ -266,11 +274,6 @@ function create_cluster_VMs {
               port=$((port+1))
           done
 	  
-          # Add the network interfaces
-          $VBM modifyvm $vm --nic1 hostonly --hostonlyadapter1 "$VBN0"
-          $VBM modifyvm $vm --nic2 hostonly --hostonlyadapter2 "$VBN1"
-          $VBM modifyvm $vm --nic3 hostonly --hostonlyadapter3 "$VBN2"
-
           # Set hardware acceleration options
           $VBM modifyvm $vm \
 	       --largepages on \

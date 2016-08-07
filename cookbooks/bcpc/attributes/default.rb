@@ -105,7 +105,31 @@ default['bcpc']['dns_servers'] = ['8.8.8.8', '8.8.4.4']
 ###########################################
 default['bcpc']['ubuntu']['version'] = 'precise'
 
-default['bcpc']['repos'].tap do |repos|
+default['bcpc']['repos_for']['precise'].tap do |repos|
+  repos['rabbitmq'] = 'http://www.rabbitmq.com/debian'
+
+  repos['mysql'] = 'http://repo.percona.com/apt'
+
+  repos['hwraid'] = 'http://hwraid.le-vert.net/ubuntu'
+
+  repos['gridcentric'] =
+    'http://downloads.gridcentric.com/packages/%s/%s/ubuntu'
+
+  repos['ubuntu-tools'] =
+    'http://ppa.launchpad.net/canonical-support/support-tools/ubuntu'
+
+  repos['hortonworks'] =
+    'http://s3.amazonaws.com/dev.hortonworks.com/HDP/ubuntu12/2.x/BUILDS/2.3.6.2-2'
+
+  repos['hdp_utils'] =
+    'http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.20/repos/ubuntu12'
+
+  repos['cobbler26'] =
+    'http://download.opensuse.org/repositories/home:/libertas-ict:' \
+    '/cobbler26/xUbuntu_12.04/'
+end
+
+default['bcpc']['repos_for']['trusty'].tap do |repos|
   repos['rabbitmq'] = 'http://www.rabbitmq.com/debian'
 
   repos['mysql'] = 'http://repo.percona.com/apt'
@@ -126,8 +150,11 @@ default['bcpc']['repos'].tap do |repos|
 
   repos['cobbler26'] =
     'http://download.opensuse.org/repositories/home:/libertas-ict:' \
-    "/cobbler26/xUbuntu_#{node[:lsb][:release]}/"
+    '/cobbler26/xUbuntu_14.04'
 end
+
+default[:bcpc][:repos] = node[:bcpc][:repos_for][node[:lsb][:codename]]
+
 
 ###########################################
 #

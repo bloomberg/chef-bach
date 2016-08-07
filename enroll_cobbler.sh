@@ -27,13 +27,14 @@ DIR=`dirname $0`/vbox
 pushd $DIR
 
 KEYFILE=bootstrap_chef.id_rsa
-s
+
 # If we're using EFI VMs, then we must use Ubuntu 14.04 "Trusty"
-vboxmanage showvminfo bcpc-vm1 --machinereadable | grep -i firmware="EFI"
-if [[ $? == 0 ]]; then
-    PROFILE=bcpc_host_trusty
+vboxmanage showvminfo bcpc-vm1 --machinereadable | grep -i 'firmware="EFI"'
+if [[ $? -eq 0 ]]
+then
+    PROFILE="bcpc_host_trusty"
 else
-    PROFILE=bcpc_host_precise
+    PROFILE="bcpc_host_precise"
 fi    
 
 subnet=10.0.100
