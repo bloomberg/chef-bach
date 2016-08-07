@@ -155,7 +155,18 @@ template '/opt/graphite/conf/relay-rules.conf' do
   notifies :restart, 'service[carbon-relay]', :delayed
 end
 
-template '/etc/apache2/sites-available/graphite-web' do
+#
+# a2ensite for httpd 2.4 (Ubuntu 14.04) expects the file to end in '.conf'
+# a2ensite for httpd 2.2 (Ubuntu 12.04) expects it NOT to end in '.conf'
+#
+graphite_web_conf_file =
+  if Gem::Version.new(node[:lsb][:release]) >= Gem::Version.new('14.04')
+    '/etc/apache2/sites-available/graphite-web.conf'
+  else
+    '/etc/apache2/sites-available/graphite-web'
+  end
+
+template graphite_web_conf_file do
   source 'apache-graphite-web.conf.erb'
   owner 'root'
   group 'root'
@@ -166,7 +177,7 @@ end
 bash 'apache-enable-graphite-web' do
   user 'root'
   code 'a2ensite graphite-web'
-  not_if 'test -r /etc/apache2/sites-enabled/graphite-web'
+  not_if 'test -r /etc/apache2/sites-enabled/graphite-web*'
   notifies :restart, 'service[apache2]', :delayed
 end
 

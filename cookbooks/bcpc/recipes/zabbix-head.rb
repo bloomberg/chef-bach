@@ -49,8 +49,10 @@ chef_vault_secret 'zabbix-admin' do
   action :nothing
 end.run_action(:create_if_missing)
 
+#
 # At this point, if we cannot retrieve the pw from the vault, the chef
 # run should be aborted.
+#
 zabbix_admin_password = get_config!('password','zabbix-admin','os')
 
 zabbix_guest_user = 'guest'
@@ -219,7 +221,13 @@ end
   end
 end
 
-execute 'a2enmod version'
+#
+# Ubuntu 14.04's Apache has mod_version baked-in.
+# Older versions of Apache have to have mod_version explicitly enabled.
+#
+if Gem::Version.new(node[:lsb][:release]) < Gem::Version.new('14.04')
+  execute 'a2enmod version'
+end
 
 file '/etc/php5/apache2/conf.d/zabbix.ini' do
   user 'root'
@@ -242,7 +250,18 @@ template '/usr/local/share/zabbix/php/conf/zabbix.conf.php' do
   notifies :run, 'ruby_block[run_state_apache2_restart]', :immediate
 end
 
-template '/etc/apache2/sites-available/zabbix-web' do
+#
+# a2ensite for httpd 2.4 (Ubuntu 14.04) expects the file to end in '.conf'
+# a2ensite for httpd 2.2 (Ubuntu 12.04) expects it NOT to end in '.conf'
+#
+zabbix_web_conf_file =
+  if Gem::Version.new(node[:lsb][:release]) >= Gem::Version.new('14.04')
+    '/etc/apache2/sites-available/zabbix-web.conf'
+  else
+    '/etc/apache2/sites-available/zabbix-web'
+  end
+
+template zabbix_web_conf_file do
   source 'apache-zabbix-web.conf.erb'
   owner 'root'
   group 'root'
@@ -253,7 +272,7 @@ end
 execute 'apache-enable-zabbix-web' do
   user 'root'
   command 'a2ensite zabbix-web'
-  not_if 'test -r /etc/apache2/sites-enabled/zabbix-web.conf'
+  not_if 'test -r /etc/apache2/sites-enabled/zabbix-web*'
   notifies :run, 'ruby_block[run_state_apache2_restart]', :immediate
 end
 
