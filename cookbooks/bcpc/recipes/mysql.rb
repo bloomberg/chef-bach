@@ -85,7 +85,7 @@ directory '/etc/mysql/conf.d' do
   mode 00755
 end
 
-package 'percona-xtradb-cluster-56' do
+apt_package 'percona-xtradb-cluster-56' do
   #
   # This is an ":install" and not an ":upgrade" to avoid momentary
   # disruptions in the event of a chef run when only a bare quorum is
@@ -95,6 +95,8 @@ package 'percona-xtradb-cluster-56' do
   # cluster members with a different subversion should be OK.
   #
   action :install
+  options '-o Dpkg::Options::="--force-confdef" ' \
+          '-o Dpkg::Options::="--force-confold"'
 end
 
 service 'mysql' do
