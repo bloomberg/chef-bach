@@ -20,6 +20,5 @@ cookbooks/*/
 !cookbooks/hannibal
 !cookbooks/kafka-bcpc
 !cookbooks/bach_krb5
-!cookbooks/bach_repository
 cookbooks/*/coverage
 cookbooks/*/vendor
