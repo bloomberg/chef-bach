@@ -95,6 +95,7 @@ apt_package 'percona-xtradb-cluster-56' do
   # cluster members with a different subversion should be OK.
   #
   action :install
+  # These dpkg options allow apt to ignore the pre-existing my.cnf file.
   options '-o Dpkg::Options::="--force-confdef" ' \
           '-o Dpkg::Options::="--force-confold"'
 end
