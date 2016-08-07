@@ -31,7 +31,7 @@ require 'ohai'
 Ohai::Config[:disabled_plugins] = [ "passwd" ]
 
 o = Ohai::System.new
-o.all_plugins(['hostname'],['ipaddress'])
+o.all_plugins(['hostname','ipaddress'])
  
 log_level                :info
 node_name                o[:fqdn]

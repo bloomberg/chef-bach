@@ -93,7 +93,7 @@ d-i partman-md/device_remove_md boolean true
 
 
 ### Base system installation
-d-i base-installer/kernel/image     string <%= @node[:bcpc][:bootstrap][:preseed][:kernel] %>
+d-i base-installer/kernel/image string linux-generic-lts-xenial
 
 ### Account setup
 d-i passwd/root-login boolean false

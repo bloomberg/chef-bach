@@ -22,9 +22,6 @@ default['bcpc']['vms_key'] = nil
 default['bcpc']['encrypt_data_bag'] = false
 
 default['bcpc']['bootstrap']['preseed'].tap do |preseed|
-  # Specify the kernel you wish to install.
-  # For default, (latest LTS kernel) use "linux-server"
-  preseed['kernel'] = 'linux-generic-lts-xenial'
   preseed['add_kernel_opts'] = 'console=ttyS0'
   preseed['late_command'] = 'true'
 
