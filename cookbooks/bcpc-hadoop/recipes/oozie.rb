@@ -276,13 +276,6 @@ execute 'ooziedb-create' do
   command "#{OOZIE_LIB_PATH}/bin/ooziedb.sh create " \
     "-sqlfile #{OOZIE_LIB_PATH}/oozie.sql " \
     '-run Validate DB Connection'
-  not_if {
-    # TODO: query oozie schema version here.
-    require 'mysql2'
-    client = Mysql2::Client.new(mysql_global_vip_connection_info)
-    client.query('SELECT TRUE')
-    false
-  }
 end
 
 link '/etc/init.d/oozie' do
