@@ -84,19 +84,21 @@ directory '/var/log/hbase/gc' do
   notifies :restart, "service[hbase-master]", :delayed
 end
 
-service "hbase-master" do
-  action [:enable, :start]
-  supports :status => true, :restart => true, :reload => false
-  subscribes :restart, "template[/etc/hbase/conf/hadoop-metrics2-hbase.properties]", :delayed
-  subscribes :restart, "template[/etc/hbase/conf/hbase-site.xml]", :delayed
-  subscribes :restart, "template[/etc/hbase/conf/hbase-policy.xml]", :delayed
-  subscribes :restart, "template[/etc/hbase/conf/hbase-env.sh]", :delayed
-  subscribes :restart, "template[/etc/hbase/conf/log4j.properties]", :delayed
-  subscribes :restart, "template[/etc/hadoop/conf/hdfs-site.xml]", :delayed
-  subscribes :restart, "bash[hdp-select hbase-master]", :delayed
-  subscribes :restart, "user_ulimit[hbase]", :delayed
-  subscribes :restart, "template[/etc/hadoop/conf/core-site.xml]", :delayed
-  subscribes :restart, "log[jdk-version-changed]", :delayed
+hbase_master_dep = ["template[/etc/hbase/conf/hadoop-metrics2-hbase.properties]",
+                    "template[/etc/hbase/conf/hbase-site.xml]",
+                    "template[/etc/hbase/conf/hbase-env.sh]",
+                    "template[/etc/hbase/conf/hbase-policy.xml]",
+                    "template[/etc/hadoop/conf/log4j.properties]",
+                    "template[/etc/hadoop/conf/hdfs-site.xml]",
+                    "template[/etc/hadoop/conf/core-site.xml]",
+                    "bash[hdp-select hbase-regionserver]",
+                    "user_ulimit[hbase]",
+                    "log[jdk-version-changed]",
+                    "bash[hdp-select hbase-master]"]
+
+hadoop_service "hbase-master" do
+  dependencies hbase_master_dep
+  process_identifier "org.apache.hadoop.hbase.master.HMaster"
 end
 
 if node["bcpc"]["hadoop"]["phoenix"]["tracing"]["enabled"]

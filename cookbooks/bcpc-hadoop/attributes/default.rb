@@ -22,6 +22,9 @@ default["bcpc"]["hadoop"]["hadoop_mapred_pid_dir"] = "/var/run/hadoop-mapreduce"
 default["bcpc"]["hadoop"]["hadoop_secure_dn_user"] = "hdfs"
 default["bcpc"]["hadoop"]["hadoop"]["bin"]["path"] = "/usr/bin/hadoop"
 default["bcpc"]["hadoop"]["hadoop"]["config"]["dir"] = "/etc/hadoop/conf"
+# Flag to control whether automatic restarts due to config changes need to be skipped 
+# for e.g. if ZK quorum is down or if the recipes need to be run in a non ZK env
+default["bcpc"]["hadoop"]["skip_restart_coordination"] = false
 default["bcpc"]["hadoop"]["hdfs"]["site_xml"]["dfs.datanode.sync.behind.writes"] = true
 default["bcpc"]["hadoop"]["hdfs"]["site_xml"]["dfs.datanode.synconclose"] = true
 default["bcpc"]["hadoop"]["hdfs"]["site_xml"]["dfs.namenode.stale.datanode.interval"] = 30000
