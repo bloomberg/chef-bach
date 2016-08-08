@@ -19,6 +19,7 @@
 
 include_recipe 'bcpc::apache2'
 include_recipe 'bcpc::mysql'
+include_recipe 'bcpc::zabbix-repo'
 
 #
 # These data bags and vault items are pre-populated at compile time by
@@ -58,19 +59,6 @@ zabbix_admin_password = get_config!('password','zabbix-admin','os')
 zabbix_guest_user = 'guest'
 make_config('zabbix-guest-user', zabbix_guest_user)
 
-remote_file '/tmp/zabbix-server.tar.gz' do
-  source "#{get_binary_server_url}/zabbix-server.tar.gz"
-  owner "root"
-  mode 0444
-  not_if { File.exists?('/usr/local/sbin/zabbix_server') }
-end
-
-bash 'install-zabbix-server' do
-  code 'tar zxf /tmp/zabbix-server.tar.gz -C /usr/local/ && ' \
-    'rm /tmp/zabbix-server.tar.gz'
-  not_if { File.exists?('/usr/local/sbin/zabbix_server') }
-end
-
 user node[:bcpc][:zabbix][:user] do
   shell '/bin/false'
   home '/var/log'
@@ -84,16 +72,28 @@ directory '/var/log/zabbix' do
   mode 0755
 end
 
-template '/etc/init/zabbix-server.conf' do
-  source 'zabbix/upstart-zabbix-server.conf.erb'
-  owner 'root'
-  group 'root'
-  mode 0644
-  notifies :restart, 'service[zabbix-server]', :delayed
+# Stop the old service if we find the old service definition
+service 'zabbix-server' do
+  action :stop
+  only_if { File.exist?('/etc/init/zabbix-server.conf') }
 end
 
-template '/usr/local/etc/zabbix_server.conf' do
-  source 'zabbix/zabbix_server.conf.erb'
+# Remove the old service definition from the source-based build.
+file '/etc/init/zabbix-server.conf' do
+  action :delete
+end
+
+[
+  'zabbix-server-mysql',
+  'zabbix-frontend-php'
+].each do |package_name|
+  package package_name do
+    action :upgrade
+  end
+end
+
+template '/etc/zabbix/zabbix_server.conf' do
+  source 'zabbix/server.conf.erb'
   owner node[:bcpc][:zabbix][:user]
   group 'root'
   mode 0600
@@ -122,7 +122,7 @@ end
 
   mysql_database_user zabbix_user do
     connection mysql_local_connection_info
-    database_name node[:bcpc][:zabbix_dbname] + '.*'
+    database_name node[:bcpc][:zabbix_dbname]
     host host_name
     privileges ['ALL PRIVILEGES']
     action :grant
@@ -140,7 +140,7 @@ end
     command "mysql -u #{root_user} " \
       "--password=#{root_password} " \
       "#{node[:bcpc][:zabbix_dbname]} " \
-      "< #{::File.join('/usr/local/share/zabbix', file_name)}"
+      "< #{::File.join('/usr/share/zabbix-server-mysql', file_name)}"
     sensitive true if respond_to?(:sensitive)
     action :nothing
   end
@@ -166,7 +166,7 @@ end
   'tuning.sql',
   'leader_election.sql'
 ].each do |file_name|
-  install_path = File.join('/usr/local/share/zabbix/', file_name)
+  install_path = File.join(Chef::Config.file_cache_path, file_name)
   resource_name = "zabbix-run-#{file_name.gsub(/\./,'-')}"
   
   template install_path do
@@ -210,8 +210,6 @@ ruby_block 'zabbix-elect-leader' do
 end
 
 service 'zabbix-server' do
-  provider Chef::Provider::Service::Upstart
-  supports :status => true, :restart => true, :reload => false
   action [:enable, :start]
 end
 
@@ -242,7 +240,12 @@ file '/etc/php5/apache2/conf.d/zabbix.ini' do
   notifies :run, 'ruby_block[run_state_apache2_restart]', :immediate
 end
 
-template '/usr/local/share/zabbix/php/conf/zabbix.conf.php' do
+directory '/etc/zabbix/web' do
+  mode 0555
+  recursive true
+end
+
+template '/etc/zabbix/web/zabbix.conf.php' do
   source 'zabbix/zabbix.conf.php.erb'
   user node[:bcpc][:zabbix][:user]
   group 'www-data'

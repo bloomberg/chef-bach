@@ -29,8 +29,7 @@ pushd $DIR
 KEYFILE=bootstrap_chef.id_rsa
 
 # If we're using EFI VMs, then we must use Ubuntu 14.04 "Trusty"
-vboxmanage showvminfo bcpc-vm1 --machinereadable | grep -i 'firmware="EFI"'
-if [[ $? -eq 0 ]]
+if vboxmanage showvminfo bcpc-vm1 --machinereadable | grep -i 'firmware="EFI"'
 then
     PROFILE="bcpc_host_trusty"
 else

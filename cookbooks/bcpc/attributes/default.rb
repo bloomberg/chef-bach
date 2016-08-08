@@ -124,6 +124,8 @@ default['bcpc']['repos_for']['precise'].tap do |repos|
   repos['cobbler26'] =
     'http://download.opensuse.org/repositories/home:/libertas-ict:' \
     '/cobbler26/xUbuntu_12.04/'
+
+  repos['zabbix'] = 'http://repo.zabbix.com/zabbix/2.4/ubuntu/'
 end
 
 default['bcpc']['repos_for']['trusty'].tap do |repos|
@@ -148,6 +150,8 @@ default['bcpc']['repos_for']['trusty'].tap do |repos|
   repos['cobbler26'] =
     'http://download.opensuse.org/repositories/home:/libertas-ict:' \
     '/cobbler26/xUbuntu_14.04'
+
+  repos['zabbix'] = 'http://repo.zabbix.com/zabbix/2.4/ubuntu/'
 end
 
 default[:bcpc][:repos] = node[:bcpc][:repos_for][node[:lsb][:codename]]

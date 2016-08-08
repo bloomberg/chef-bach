@@ -266,3 +266,37 @@ template '/etc/xinetd.d/mysqlchk' do
   notifies :restart, 'service[xinetd]', :immediately
 end
 
+#
+# Now that we have a working Percona instance, we'll install a dummy
+# metapackage to prevent any well-meaning packages from depending on
+# mysql-server and mysql-server-5.5
+#
+package 'equivs'
+
+control_file_path =
+  ::File.join(Chef::Config.file_cache_path, 'mysql-server.control')
+
+file control_file_path do
+  content <<-EOM.gsub(/^ {4}/,'')
+    Section: database
+    Priority: optional
+    Standards-Version: 3.9.2
+
+    Package: mysql-server
+    Version: 5.6
+    Maintainer: Andrew Jones <ajones291@bloomberg.net>
+    Architecture: all
+    Description: Dummy package to prevent the installation of mysql-server
+  EOM
+end
+
+deb_file_path =
+   ::File.join(Chef::Config.file_cache_path,'mysql-server_5.6_all.deb')
+
+execute 'mysql-server-build' do
+   cwd ::File.dirname(deb_file_path)
+   command "equivs-build #{control_file_path}"
+   creates deb_file_path
+end
+
+dpkg_package deb_file_path

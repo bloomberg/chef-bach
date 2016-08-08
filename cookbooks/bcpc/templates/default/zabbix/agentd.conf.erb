@@ -1,0 +1,23 @@
+#
+# /etc/zabbix/zabbix_agentd.conf
+#
+# This file was created by Chef.
+# Local changes will be reverted.
+#
+
+PidFile=/var/run/zabbix/zabbix_agentd.pid
+LogFile=/var/log/zabbix/zabbix_agentd.log
+LogFileSize=32
+SourceIP=<%="#{node[:bcpc][:management][:ip]}"%>
+EnableRemoteCommands=1
+LogRemoteCommands=1
+Server=<%="#{node[:bcpc][:management][:vip]}"%>
+ListenIP=<%="#{node[:bcpc][:management][:ip]}"%>
+StartAgents=3
+ServerActive=<%="#{node[:bcpc][:management][:vip]}"%>
+Hostname=<%="#{node[:hostname]}"%>
+UnsafeUserParameters=1
+UserParameter=mysql.status[*],echo "show global status where Variable_name='$1';" | mysql -N  -u<%="#{get_config('mysql-zabbix-user')}"%> --password=<%="#{get_config!('password','mysql-zabbix','os')}"%> | awk '{print $$2}'
+UserParameter=mysql.size[*],echo "select sum($(case "$3" in both|"") echo "data_length+index_length";; data|index) echo "$3_length";; free) echo "data_free";; esac)) from information_schema.tables$([[ "$1" = "all" || ! "$1" ]] || echo " where table_schema='$1'")$([[ "$2" = "all" || ! "$2" ]] || echo "and table_name='$2'");" | HOME=/var/lib/zabbix mysql -N -u<%="#{get_config('mysql-zabbix-user')}"%> --password=<%="#{get_config!('password','mysql-zabbix','os')}"%>
+UserParameter=mysql.ping,HOME=/var/lib/zabbix mysqladmin ping -u<%="#{get_config('mysql-zabbix-user')}"%> --password=<%="#{get_config!('password','mysql-zabbix','os')}"%> | grep -c alive
+UserParameter=mysql.version,mysql -V

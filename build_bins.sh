@@ -4,10 +4,9 @@
 set -e
 set -x
 
-# Define the version of Zabbix server and zabbixapi gem to be downloaded
+# Define the version of zabbixapi gem to be downloaded
 # Refer https://github.com/bloomberg/chef-bcpc/issues/343
 ZABBIXAPI_VERSION=2.4.5
-ZABBIX_VERSION=2.4.5
 
 # Define the appropriate version of each binary to grab/build
 VER_KIBANA=d1495fbf6e9c20c707ecd4a77444e1d486a1e7d6
@@ -268,40 +267,6 @@ if ! [[ -f python-requests-aws_0.1.5_all.deb ]]; then
   fpm --log info -s python -t deb -v 0.1.5 requests-aws
 fi
 FILES="python-requests-aws_0.1.5_all.deb $FILES"
-
-# Build the zabbix packages
-if [ ! -f zabbix-agent.tar.gz ] || [ ! -f zabbix-server.tar.gz ]; then
-    # Create a zabbix source distribution from the official git mirror.
-    rm -rf /tmp/zabbix-${ZABBIX_VERSION}
-    git clone https://github.com/zabbix/zabbix /tmp/zabbix-${ZABBIX_VERSION}
-    pushd /tmp/zabbix-${ZABBIX_VERSION}
-    git checkout tags/${ZABBIX_VERSION}
-    ./bootstrap.sh
-    ./configure
-    make dbschema
-    popd
-    tar -czf zabbix-${ZABBIX_VERSION}.tar.gz -C /tmp zabbix-${ZABBIX_VERSION}
-
-    # Actually build zabbix.
-    tar zxf zabbix-${ZABBIX_VERSION}.tar.gz
-    rm -rf /tmp/zabbix-install && mkdir -p /tmp/zabbix-install
-    cd zabbix-${ZABBIX_VERSION}
-    ./configure --prefix=/tmp/zabbix-install --enable-agent --with-ldap
-    make install
-    tar zcf zabbix-agent.tar.gz -C /tmp/zabbix-install .
-    rm -rf /tmp/zabbix-install && mkdir -p /tmp/zabbix-install
-    ./configure --prefix=/tmp/zabbix-install --enable-server --with-mysql --with-ldap
-    make install
-    cp -a frontends/php /tmp/zabbix-install/share/zabbix/
-    cp database/mysql/* /tmp/zabbix-install/share/zabbix/
-    tar zcf zabbix-server.tar.gz -C /tmp/zabbix-install .
-    rm -rf /tmp/zabbix-install
-    cd ..
-    cp zabbix-${ZABBIX_VERSION}/zabbix-agent.tar.gz .
-    cp zabbix-${ZABBIX_VERSION}/zabbix-server.tar.gz .
-    rm -rf zabbix-${ZABBIX_VERSION} zabbix-${ZABBIX_VERSION}.tar.gz
-fi
-FILES="zabbix-agent.tar.gz zabbix-server.tar.gz $FILES"
 
 # Gather the Chef packages and provide a dpkg repo
 opscode_urls="https://opscode-omnibus-packages.s3.amazonaws.com/ubuntu/12.04/x86_64/chef_11.12.8-2_amd64.deb
