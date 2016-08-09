@@ -104,6 +104,11 @@ directory "/var/run/hadoop-hdfs" do
   group "root"
 end
 
+directory "/var/log/hadoop-hdfs/gc" do
+  owner "hdfs"
+  group "hdfs"
+end
+
 directory "/sys/fs/cgroup/cpu/hadoop-yarn" do
   owner "yarn"
   group "yarn"
