@@ -59,17 +59,18 @@ template "/etc/init.d/hbase-regionserver" do
   mode 0655
 end
 
-service "hbase-regionserver" do
-  supports :status => true, :restart => true, :reload => false
-  action [:enable, :start]
-  subscribes :restart, "template[/etc/hbase/conf/hadoop-metrics2-hbase.properties]", :delayed
-  subscribes :restart, "template[/etc/hbase/conf/hbase-site.xml]", :delayed
-  subscribes :restart, "template[/etc/hbase/conf/hbase-policy.xml]", :delayed
-  subscribes :restart, "template[/etc/hbase/conf/hbase-env.sh]", :delayed
-  subscribes :restart, "template[/etc/hadoop/conf/log4j.properties]", :delayed
-  subscribes :restart, "template[/etc/hadoop/conf/hdfs-site.xml]", :delayed
-  subscribes :restart, "template[/etc/hadoop/conf/core-site.xml]", :delayed
-  subscribes :restart, "bash[hdp-select hbase-regionserver]", :delayed
-  subscribes :restart, "user_ulimit[hbase]", :delayed
-  subscribes :restart, "log[jdk-version-changed]", :delayed
+rs_service_dep = ["template[/etc/hbase/conf/hadoop-metrics2-hbase.properties]",
+                  "template[/etc/hbase/conf/hbase-site.xml]",
+                  "template[/etc/hbase/conf/hbase-env.sh]",
+                  "template[/etc/hbase/conf/hbase-policy.xml]",
+                  "template[/etc/hadoop/conf/log4j.properties]",
+                  "template[/etc/hadoop/conf/hdfs-site.xml]",
+                  "template[/etc/hadoop/conf/core-site.xml]",
+                  "bash[hdp-select hbase-regionserver]",
+                  "user_ulimit[hbase]",
+                  "log[jdk-version-changed]"]
+
+hadoop_service "hbase-regionserver" do
+  dependencies rs_service_dep
+  process_identifier "org.apache.hadoop.hbase.regionserver.HRegionServer"
 end

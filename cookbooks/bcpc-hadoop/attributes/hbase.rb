@@ -1,4 +1,12 @@
 # vim: tabstop=2:shiftwidth=2:softtabstop=2
+# Flag to set whether the HBase master restart process was successful or not
+default["bcpc"]["hadoop"]["hbase_master"]["restart_failed"] = false
+# Attribute to save the time when HBase master restart process failed
+default["bcpc"]["hadoop"]["hbase_master"]["restart_failed_time"] = ""
+# Flag to set whether the HBase region server restart process was successful or not
+default["bcpc"]["hadoop"]["hbase_regionserver"]["restart_failed"] = false
+# Attribute to save the time when HBase region server restart process failed
+default["bcpc"]["hadoop"]["hbase_regionserver"]["restart_failed_time"] = ""
 default['bcpc']['hadoop']['hbase']['root_dir'] = "#{node['bcpc']['hadoop']['hdfs_url']}/hbase"
 default['bcpc']['hadoop']['hbase']['bulkload_staging_dir'] = "/tmp/hbase"
 default["bcpc"]["hadoop"]["hbase"]["repl"]["enabled"] = false
