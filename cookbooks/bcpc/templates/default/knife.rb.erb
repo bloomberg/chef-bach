@@ -1,7 +1,10 @@
+# -*- mode: ruby -*-
 require 'rubygems'
 require 'ohai'
+
+# Restrict Ohai plugin list so that we don't run out of memory on bootstrap.
 o = Ohai::System.new
-o.all_plugins
+o.all_plugins(['fqdn','hostname','ipaddress'])
 
 log_level                :info
 log_location             STDOUT
