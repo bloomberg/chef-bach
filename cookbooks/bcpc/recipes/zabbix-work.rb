@@ -46,24 +46,12 @@ directory '/var/log/zabbix' do
     mode 0755
 end
 
-# template '/etc/zabbix/zabbix_agent.conf' do
-#     source 'zabbix/zabbix_agent.conf.erb'
-#     owner node[:bcpc][:zabbix][:user]
-#     group 'root'
-#     mode 0600
-#     notifies :restart, 'service[zabbix-agent]', :delayed
-# end
-
 template '/etc/zabbix/zabbix_agentd.conf' do
     source 'zabbix/agentd.conf.erb'
     owner node[:bcpc][:zabbix][:user]
     group 'root'
     mode 0600
     notifies :restart, 'service[zabbix-agent]', :delayed
-end
-
-service 'zabbix-agent' do
-    action [:enable, :start]
 end
 
 directory '/usr/local/bin/checks' do
@@ -79,3 +67,7 @@ directory '/usr/local/etc/checks' do
   group 'root'
   mode 0775
 end 
+
+service 'zabbix-agent' do
+    action [:enable, :start]
+end
