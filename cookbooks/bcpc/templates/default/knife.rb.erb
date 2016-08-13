@@ -15,7 +15,7 @@ validation_client_name   'chef-validator'
 validation_key           '/etc/chef-server/chef-validator.pem'
 chef_server_url          'https://<%= node[:bcpc][:bootstrap][:server] %>'
 syntax_check_cache_path  '/home/vagrant/chef-bcpc/.chef/syntax_check_cache'
-cookbook_path            '/home/vagrant/chef-bcpc/cookbooks'
+cookbook_path            '/home/vagrant/chef-bcpc/vendor/cookbooks'
 
 <% if node[:bcpc][:bootstrap][:proxy] != nil -%>
 no_proxy_array = ["localhost", o[:ipaddress], o[:hostname], o[:fqdn], "<%= node[:bcpc][:bootstrap][:server] %>", "<%= node[:bcpc][:bootstrap][:server] %>"]
