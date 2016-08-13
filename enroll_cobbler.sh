@@ -48,7 +48,7 @@ for i in bcpc-vm1 bcpc-vm2 bcpc-vm3; do
     if hash vagrant 2>/dev/null; then
 	vagrant ssh -c "sudo cobbler system remove --name=$i; sudo cobbler system add --name=$i --hostname=$i --profile=$PROFILE --interface=eth0 --ip-address=${subnet}.${node} --mac=${MAC}"
     else
-	ssh -t -i $KEYFILE ubuntu@$1 "sudo cobbler system remove --name=$i; sudo cobbler system add --name=$i --hostname=$i --profile=$PROFILE --ip-address=${subnet}.${node} --mac=${MAC}"
+	ssh -t -i $KEYFILE ubuntu@$1 "sudo cobbler system remove --name=$i; sudo cobbler system add --name=$i --hostname=$i --profile=$PROFILE --interface=eth0 --ip-address=${subnet}.${node} --mac=${MAC}"
     fi
     let node=node+1
 done
