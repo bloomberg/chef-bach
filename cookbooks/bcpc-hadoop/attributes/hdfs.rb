@@ -21,6 +21,7 @@ default[:bcpc][:hadoop][:hdfs][:ldap].tap do |ldap|
   ldap[:domain] = "BCPC.EXAMPLE.COM"
   ldap[:port] = 389
   ldap[:password] =  nil
+  ldap[:search][:depth] = 0
   ldap[:search][:filter][:user]="(&(objectclass=user)(sAMAccountName={0}))"
   ldap[:search][:filter][:group]="(objectClass=group)"
 end
