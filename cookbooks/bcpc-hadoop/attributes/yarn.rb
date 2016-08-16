@@ -25,17 +25,18 @@ default[:bcpc][:hadoop][:yarn][:env_sh].tap do |env_sh|
   env_sh[:YARN_LOGFILE] = 'yarn.log'
   env_sh[:YARN_POLICYFILE] =  'hadoop-policy.xml'
 
-  env_sh[:YARN_OPTS] = '"' +
-    '-Dhadoop.log.dir=#{env_sh[:YARN_LOG_DIR]} ' +
-    '-Dyarn.log.dir=#{env_sh[:YARN_LOG_DIR]} " ' +
-    '-Dhadoop.log.file=#{env_sh[:YARN_LOGFILE]} ' +
-    '-Dyarn.log.dir=#{env_sh[:YARN_LOGFILE]} ' +
-    '-Dyarn.id.str=#{env_sh[:YARN_IDENT_STRING]} ' +
-    '-Dhadoop.root.logger=INFO,CONSOLE ' +
-    '-Dyarn.root.logger=INFO,CONSOLE ' +
-    '-Dyarn.policy.file=#{env_sh[:YARN_POLICYFILE]} ' +
-    '-Djute.maxbuffer=#{node[:bcpc][:hadoop][:jute][:maxbuffer]}' +
-    '"'
+  env_sh[:YARN_OPTS] =
+    "-Dhadoop.log.dir=#{env_sh[:YARN_LOG_DIR]} " +
+    "-Dyarn.log.dir=#{env_sh[:YARN_LOG_DIR]}  " +
+    "-Dhadoop.log.file=#{env_sh[:YARN_LOGFILE]} " +
+    "-Dyarn.log.dir=#{env_sh[:YARN_LOGFILE]} " +
+    "-Dyarn.id.str=#{env_sh[:YARN_IDENT_STRING]} " +
+    "-Dhadoop.root.logger=INFO,CONSOLE " +
+    "-Dyarn.root.logger=INFO,CONSOLE " +
+    "-Dyarn.policy.file=#{env_sh[:YARN_POLICYFILE]} " +
+    "-Djute.maxbuffer=#{node[:bcpc][:hadoop][:jute][:maxbuffer]}"
+
+  env_sh[:YARN_OPTS] = '"' + env_sh[:YARN_OPTS] + '"'
 
   env_sh[:YARN_NODEMANAGER_OPTS] = '"' +
     '-Dcom.sun.management.jmxremote.ssl=false ' +
