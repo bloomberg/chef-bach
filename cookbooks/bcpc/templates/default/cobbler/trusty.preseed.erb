@@ -62,6 +62,7 @@ d-i mirror/http/proxy string
 d-i mirror/http/proxy string <%= @node[:bcpc][:bootstrap][:proxy] %>
 <% end %>
 d-i mirror/suite string trusty
+d-i mirror/codename string trusty
 
 ### Clock and time zone setup
 d-i clock-setup/utc boolean true

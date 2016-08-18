@@ -88,6 +88,8 @@ d-i mirror/http/proxy string
 <% else %>
 d-i mirror/http/proxy string <%= @node[:bcpc][:bootstrap][:proxy] %>
 <% end %>
+d-i mirror/codename string precise
+d-i mirror/suite string precise
 
 d-i     debian-installer/allow_unauthenticated  string false
 d-i     pkgsel/upgrade  select safe-upgrade

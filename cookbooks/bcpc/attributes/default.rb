@@ -25,10 +25,13 @@ default['bcpc']['bootstrap']['preseed'].tap do |preseed|
   preseed['add_kernel_opts'] = 'console=ttyS0'
   preseed['late_command'] = 'true'
 
-  preseed['early_command'] = <<-EOM
-      udevadm trigger; udevadm settle --timeout=30 \\
-      for d in $(ls /dev/sd[a-z]); do \\
-        dd if=/dev/zero of=$d bs=4M count=16 || echo "Write to $d failed" \\
+  # All these lines get concatenated, hence the semicolons.
+  preseed['early_command'] = <<-EOM.gsub(/^ {6}/, '')
+      udevadm trigger; udevadm settle --timeout=30 ; \\
+      for d in `ls /dev/sd[a-z]*`; do \\
+        echo Erasing first blocks on $d; \\
+        dd if=/dev/zero of=$d bs=64M count=16 \\
+          >> /tmp/early_command.out 2>&1; \\
       done
   EOM
   
