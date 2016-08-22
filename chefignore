@@ -5,6 +5,7 @@
 .vagrant
 chef
 cookbooks
+core
 cluster.txt
 environments
 local-mode-cache
