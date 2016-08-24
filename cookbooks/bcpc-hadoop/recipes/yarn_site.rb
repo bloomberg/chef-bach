@@ -26,8 +26,10 @@ yarn_site_generated_values =
    mounts.map{ |d| "/disk/#{d}/yarn/logs" }.join(','),
 
  'yarn.nodemanager.aux-services' =>
-   node[:bcpc][:hadoop][:yarn][:aux_services].keys.join(',')
+   node[:bcpc][:hadoop][:yarn][:aux_services].keys.join(','),
 
+ 'yarn.scheduler.minimum-allocation-mb' =>
+   node['bcpc']['hadoop']['yarn']['scheduler']['minimum-allocation-mb']
 }
 
 yarn_aux_services = 

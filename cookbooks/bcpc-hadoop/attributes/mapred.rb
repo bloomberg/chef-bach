@@ -59,25 +59,4 @@ default[:bcpc][:hadoop][:mapreduce][:site_xml].tap do |site_xml|
 
   site_xml['yarn.app.mapreduce.am.staging-dir'] =
     node["bcpc"]["hadoop"]["yarn"]["app"]["mapreduce"]["am"]["staging-dir"]
-
-  min_allocation =
-    node['bcpc']['hadoop']['yarn']['scheduler']['minimum-allocation-mb']
-
-  site_xml['mapreduce.map.memory.mb'] =
-    min_allocation.round
- 
-  site_xml['mapreduce.map.java.opts'] =
-    "-Xmx" + (0.8 * min_allocation).round.to_s + "m"
-
-  site_xml['mapreduce.reduce.memory.mb'] =
-    2 * min_allocation.round
-  
-  site_xml['mapreduce.reduce.java.opts'] =
-    "-Xmx" + (0.8 * 2 * min_allocation).round.to_s + "m"
-
-  site_xml['yarn.app.mapreduce.am.resource.mb'] =
-    2 * min_allocation.round
-  
-  site_xml['yarn.app.mapreduce.am.command-opts'] =
-    "-Xmx" + (0.8 * 2 * min_allocation).round.to_s + "m"
 end

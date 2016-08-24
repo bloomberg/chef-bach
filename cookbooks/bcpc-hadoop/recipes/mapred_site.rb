@@ -48,6 +48,31 @@ if node[:bcpc][:hadoop][:kerberos][:enable]
   mapred_site_generated_values.merge!(kerberos_properties)
 end
 
+min_allocation =
+    node['bcpc']['hadoop']['yarn']['scheduler']['minimum-allocation-mb']
+
+memory_config_values =
+{
+ 'mapreduce.map.memory.mb' => min_allocation.round,
+
+ 'mapreduce.map.java.opts' =>
+    "-Xmx" + (0.8 * min_allocation).round.to_s + "m",
+
+  'mapreduce.reduce.memory.mb' =>
+    2 * min_allocation.round,
+
+  'mapreduce.reduce.java.opts' =>
+    "-Xmx" + (0.8 * 2 * min_allocation).round.to_s + "m",
+
+  'yarn.app.mapreduce.am.resource.mb' =>
+    2 * min_allocation.round,
+
+  'yarn.app.mapreduce.am.command-opts' =>
+    "-Xmx" + (0.8 * 2 * min_allocation).round.to_s + "m",
+}
+
+mapred_site_generated_values.merge!(memory_config_values)
+
 complete_mapred_site_hash =
   mapred_site_generated_values.merge(mapred_site_values)
 

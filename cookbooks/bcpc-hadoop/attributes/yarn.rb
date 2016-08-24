@@ -111,8 +111,6 @@ default[:bcpc][:hadoop][:yarn][:site_xml].tap do |site_xml|
 
   site_xml['yarn.scheduler.fair.preemption'] = true
   
-  site_xml['yarn.scheduler.minimum-allocation-mb'] = 256
-  
   site_xml['yarn.scheduler.maximum-allocation-mb'] = yarn_max_memory.call
 
   site_xml['yarn.timeline-service.client.max-retries'] = 0
