@@ -235,7 +235,7 @@ file '/etc/cobbler/pxe/gpxe_system_linux.template' do
     # Local changes will be reverted.
     #
     kernel http://$server:$http_port/cobbler/images/$distro/$kernel_name
-    imgargs $kernel_name $append_line initrd=initrd.gz
+    imgargs $kernel_name $append_line initrd=initrd.gz net.ifnames=0 biosdevname=0
     initrd http://$server:$http_port/cobbler/images/$distro/$initrd_name
     boot
   EOM

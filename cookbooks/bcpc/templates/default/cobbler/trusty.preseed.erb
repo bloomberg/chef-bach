@@ -131,7 +131,7 @@ d-i grub-installer/skip boolean false
 d-i lilo-installer/skip boolean true
 d-i grub-installer/only_debian boolean true
 d-i grub-installer/with_other_os boolean true
-d-i debian-installer/add-kernel-opts string <%= @node[:bcpc][:bootstrap][:preseed][:add_kernel_opts] %>
+d-i debian-installer/add-kernel-opts string net.ifnames=0 biosdevname=0 <%= @node[:bcpc][:bootstrap][:preseed][:add_kernel_opts] %>
 
 ### Finishing up the installation
 d-i finish-install/keep-consoles boolean false
