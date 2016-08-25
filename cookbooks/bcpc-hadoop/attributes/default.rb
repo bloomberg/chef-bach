@@ -7,7 +7,7 @@
 default["bcpc"]["hadoop"] = {}
 default["bcpc"]["hadoop"]["distribution"]["version"] = 'HDP'
 default["bcpc"]["hadoop"]["distribution"]["key"] = 'hortonworks.key'
-default["bcpc"]["hadoop"]["distribution"]["release"] = '2.3.6.2-2'
+default["bcpc"]["hadoop"]["distribution"]["release"] = '2.3.6.2-3'
 default["bcpc"]["hadoop"]["distribution"]["active_release"] = node["bcpc"]["hadoop"]["distribution"]["release"]
 default["bcpc"]["hadoop"]["decommission"]["hosts"] = []
 # disks to use for Hadoop activities (expected to be an environment or role set variable)
