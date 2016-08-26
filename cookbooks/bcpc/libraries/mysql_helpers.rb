@@ -22,8 +22,12 @@
 # database cookbook's providers, using a local socket to connect.
 #
 def mysql_local_connection_info(category='root')
+  #
+  # The passwords are ALWAYS stored in a data bag. Sometimes the users
+  # are not.  If there's no data bag, use the category name.
+  #
   node.run_state["bcpc_mysql_#{category}_username"] ||=
-    get_config!("mysql-#{category}-user")
+    (get_config("mysql-#{category}-user") || category)
 
   node.run_state["bcpc_mysql_#{category}_password"] ||=
     get_config!('password', "mysql-#{category}", 'os')
