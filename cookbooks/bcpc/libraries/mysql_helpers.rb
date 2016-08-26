@@ -24,13 +24,24 @@
 def mysql_local_connection_info(category='root')
   #
   # The passwords are ALWAYS stored in a data bag. Sometimes the users
-  # are not.  If there's no data bag, use the category name.
+  # are not.  If there's no data bag item, use the category name.
   #
   node.run_state["bcpc_mysql_#{category}_username"] ||=
     (get_config("mysql-#{category}-user") || category)
 
+  #
+  # The password may be in an unencrypted data bag,
+  # configs/$ENVIRONMENT, or it may be in a chef vault.
+  #
+  # Try both.
+  #
   node.run_state["bcpc_mysql_#{category}_password"] ||=
-    get_config!('password', "mysql-#{category}", 'os')
+    (get_config("mysql-#{category}-password") ||
+      get_config('password', "mysql-#{category}", 'os'))
+
+  if node.run_state["bcpc_mysql_#{category}_password"].nil?
+    raise "Could not find MySQL password for #{category}!"
+  end
   
   {
     username: node.run_state["bcpc_mysql_#{category}_username"],
