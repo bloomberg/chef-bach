@@ -222,7 +222,7 @@ hs_hosts = node[:bcpc][:hadoop][:hs_hosts]
 if not hs_hosts.empty?
   yarn_log_server_url =    'http://' +
     float_host(hs_hosts.map{ |h| h[:hostname] }.sort.first) +
-    ':1988' + '/jobhistory/logs'
+    ':19888' + '/jobhistory/logs'
 
   yarn_site_generated_values.merge!({'yarn.log.server.url' =>
                                      yarn_log_server_url})
