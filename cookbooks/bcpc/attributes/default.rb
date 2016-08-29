@@ -26,7 +26,9 @@ default['bcpc']['bootstrap']['preseed'].tap do |preseed|
   preseed['late_command'] = 'true'
 
   # All these lines get concatenated, hence the semicolons.
-  preseed['early_command'] = <<-EOM.gsub(/^ {6}/, '')
+  preseed['early_command'] = <<-EOM.gsub(/^ {4}/, '')
+      set -- $(lvm vgscan --rows --noheadings | head -n 1); \\
+      for vg in "$@"; do lvm vgremove -f "$vg"; done; \\
       udevadm trigger; udevadm settle --timeout=30 ; \\
       for d in `ls /dev/sd[a-z]*`; do \\
         echo Erasing first blocks on $d; \\
