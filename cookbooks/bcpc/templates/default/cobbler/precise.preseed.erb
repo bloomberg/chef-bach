@@ -21,16 +21,21 @@ d-i     netcfg/get_gateway      string <%= @node[:bcpc][:management][:gateway] %
 d-i     netcfg/confirm_static   boolean true
 
 d-i     partman/early_command string \
-    <%= @node[:bcpc][:bootstrap][:preseed][:early_command] %>
+<%=
+  # The gsub calls are here to escape the early_command for use in a 
+  # Cheetah template.
+  shell_script = @node[:bcpc][:bootstrap][:preseed][:early_command]
+  shell_script.gsub(/\$/, '\$')
+%>
 d-i     partman-auto/disk string /dev/sda
 d-i     partman-auto/method string regular
 d-i     partman-auto/expert_recipe string root :: 5000 100000 10000000000 ext4 \
-          $primary{ } $bootable{ } method{ format } \
+          \$primary{ } \$bootable{ } method{ format } \
           format{ } use_filesystem{ } filesystem{ ext4 } \
           mountpoint{ / } \
         . \
         8192 8192 8192 linux-swap \
-          $primary{ } method{ swap } format{ } \
+          \$primary{ } method{ swap } format{ } \
         .
 d-i     partman-auto/choose_recipe select root
 d-i     partman-partitioning/confirm_write_new_label boolean true
@@ -108,7 +113,11 @@ d-i     debian-installer/exit/halt      boolean false
 d-i     debian-installer/exit/poweroff  boolean false
 d-i     pkgsel/include string openssh-server lldpd
 
-d-i     preseed/late_command string <%= @node[:bcpc][:bootstrap][:preseed][:late_command] %> && \
+<%
+  @computed_late_command =
+    @node[:bcpc][:bootstrap][:preseed][:late_command].gsub(/\$/, '\$')
+%>
+d-i     preseed/late_command string <%= @computed_late_command %> && \
         in-target apt-get -y install linux-crashdump kdump-tools && \
         in-target sed -i 's/USE_KDUMP=0/USE_KDUMP=1/' /etc/default/kdump-tools && \
         in-target sed -i 's/#MAKEDUMP_ARGS="-c -d 31"/MAKEDUMP_ARGS="-c -d 31"/' /etc/default/kdump-tools && \

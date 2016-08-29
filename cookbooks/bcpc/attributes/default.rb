@@ -24,14 +24,26 @@ default['bcpc']['encrypt_data_bag'] = false
 default['bcpc']['bootstrap']['preseed'].tap do |preseed|
   preseed['add_kernel_opts'] = 'console=ttyS0'
   preseed['late_command'] = 'true'
-
-  # All these lines get concatenated, hence the semicolons.
+  #
+  # All these lines get concatenated, hence the semicolons and
+  # backslashes.
+  #
   preseed['early_command'] = <<-EOM.gsub(/^ {4}/, '')
-      set -- $(lvm vgscan --rows --noheadings | head -n 1); \\
-      for vg in "$@"; do lvm vgremove -f "$vg"; done; \\
       udevadm trigger; udevadm settle --timeout=30 ; \\
+      set -- $(vgs --rows --noheadings | head -n 1); \\
+      for vg in "$@"; do \\
+        echo Removing volume group $vg \\
+          >> /tmp/early_command.out; \\
+        lvm vgremove -f "$vg" \\
+          >> /tmp/early_command.out; \\
+      done; \\
       for d in `ls /dev/sd[a-z]*`; do \\
-        echo Erasing first blocks on $d; \\
+        echo Removing LVM PVs from $d \\
+          >> /tmp/early_command.out 2>&1; \\
+        lvm pvremove -f $d \\
+          >> /tmp/early_command.out 2>&1; \\
+        echo Erasing first blocks on $d \\
+          >> /tmp/early_command.out 2>&1; \\
         dd if=/dev/zero of=$d bs=64M count=16 \\
           >> /tmp/early_command.out 2>&1; \\
       done
