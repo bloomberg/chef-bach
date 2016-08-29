@@ -164,50 +164,59 @@ end
 env_sh = {}
 env_sh[:HBASE_PID_DIR] = '"/var/run/hbase"'
 env_sh[:HBASE_LOG_DIR] = '"/var/log/hbase"'
-env_sh[:HBASE_OPTS] = '" -Djava.net.preferIPv4Stack=true -XX:+UseConcMarkSweepGC"'
+env_sh[:HBASE_OPTS] = ' -Djava.net.preferIPv4Stack=true -XX:+UseConcMarkSweepGC '
 env_sh[:HBASE_JMX_BASE] = '"-Dcom.sun.management.jmxremote.ssl=false ' +
   '-Dcom.sun.management.jmxremote.authenticate=false"'
-
 #
 # Common env.sh options relevant to HBASE region servers
 #
-env_sh[:HBASE_REGIONSERVER_OPTS] = 
-  " $HBASE_REGIONSERVER_OPTS -server -XX:ParallelGCThreads=#{[1, (node['cpu']['total'] * node['bcpc']['hadoop']['hbase_rs']['gc_thread']['cpu_ratio']).ceil].max} " +
-  " -XX:+UseParNewGC -XX:CMSInitiatingOccupancyFraction=#{node['bcpc']['hadoop']['hbase_rs']['cmsinitiatingoccupancyfraction']} " + 
-  "-XX:+UseCMSInitiatingOccupancyOnly -verbose:gc -XX:+PrintHeapAtGC " + 
-  "-XX:+PrintGCDetails -XX:+PrintGCTimeStamps -XX:+PrintGCDateStamps " + 
-  "-Xloggc:/var/log/hbase/gc/gc.log-$$-$(hostname)-$(date +'%Y%m%d%H%M').log " +
-  "-Xmn#{node['bcpc']['hadoop']['hbase_rs']['xmn']['size']}m " +
-  "-Xms#{node['bcpc']['hadoop']['hbase_rs']['xms']['size']}m " + 
-  "-Xmx#{node['bcpc']['hadoop']['hbase_rs']['xmx']['size']}m " + 
-  "-XX:+ExplicitGCInvokesConcurrent " + 
-  "-XX:PretenureSizeThreshold=#{node['bcpc']['hadoop']['hbase_rs']['PretenureSizeThreshold']} " +
-  "-XX:+PrintTenuringDistribution -XX:+UseNUMA " + 
-  "-XX:+PrintGCApplicationStoppedTime -XX:+UseCompressedOops " + 
-  "-XX:+PrintClassHistogram -XX:+PrintGCApplicationConcurrentTime"
+cpu_total = node['cpu']['total']
+cpu_ratio = node['bcpc']['hadoop']['hbase_rs']['gc_thread']['cpu_ratio']
 
+common_opts = 
+  " -server -XX:ParallelGCThreads=#{[1, (cpu_total * cpu_ratio).ceil].max}" +
+  " -XX:+UseCMSInitiatingOccupancyOnly" +
+  " -XX:+HeapDumpOnOutOfMemoryError" +
+  " -XX:+UseConcMarkSweepGC" + 
+  " -verbose:gc" +
+  " -XX:+PrintHeapAtGC" +
+  " -XX:+PrintGCDetails" + 
+  " -XX:+PrintGCTimeStamps" + 
+  " -XX:+PrintGCDateStamps" +
+  " -XX:+UseParNewGC" +
+  " -Xloggc:/var/log/hbase/gc/gc.log-$$-$(hostname)-$(date +'%Y%m%d%H%M').log" +
+  " -Xmn#{node['bcpc']['hadoop']['hbase_rs']['xmn']['size']}m" +
+  " -Xms#{node['bcpc']['hadoop']['hbase_rs']['xms']['size']}m" + 
+  " -Xmx#{node['bcpc']['hadoop']['hbase_rs']['xmx']['size']}m" + 
+  " -XX:+ExplicitGCInvokesConcurrent " + 
+  " -XX:+PrintTenuringDistribution" +
+  " -XX:+UseNUMA" + 
+  " -XX:+PrintGCApplicationStoppedTime" +
+  " -XX:+UseCompressedOops" + 
+  " -XX:+PrintClassHistogram" +
+  " -XX:+PrintGCApplicationConcurrentTime" +
+  " -XX:+ExitOnOutOfMemoryError"
+
+env_sh[:HBASE_REGIONSERVER_OPTS] = 
+  " $HBASE_REGIONSERVER_OPTS" +
+  " -XX:CMSInitiatingOccupancyFraction=#{node['bcpc']['hadoop']['hbase_rs']['cmsinitiatingoccupancyfraction']}" + 
+  " -XX:HeapDumpPath=/var/log/hbase/heap-dump-rs-$$-$(hostname)-$(date +\'%Y%m%d%H%M\').hprof" +
+  " -XX:PretenureSizeThreshold=#{node['bcpc']['hadoop']['hbase_rs']['PretenureSizeThreshold']}" +
+  " #{common_opts}"
 #
 # Common env.sh options relevant to HBASE master
 #
 env_sh[:HBASE_MASTER_OPTS] =
-  " $HBASE_MASTER_OPTS -server -XX:ParallelGCThreads=#{[1, (node['cpu']['total'] * node['bcpc']['hadoop']['hbase_master']['gc_thread']['cpu_ratio']).ceil].max} " +
-  " -XX:+UseParNewGC -XX:CMSInitiatingOccupancyFraction=#{node['bcpc']['hadoop']['hbase_master']['cmsinitiatingoccupancyfraction']} " +
-  "-XX:+UseCMSInitiatingOccupancyOnly -verbose:gc -XX:+PrintHeapAtGC " +
-  "-XX:+PrintGCDetails -XX:+PrintGCTimeStamps -XX:+PrintGCDateStamps " +
-  "-Xloggc:/var/log/hbase/gc/gc.log-$$-$(hostname)-$(date +'%Y%m%d%H%M').log " +
-  "-Xmn#{node['bcpc']['hadoop']['hbase_master']['xmn']['size']}m " +
-  "-Xms#{node['bcpc']['hadoop']['hbase_master']['xms']['size']}m " +
-  "-Xmx#{node['bcpc']['hadoop']['hbase_master']['xmx']['size']}m " +
-  "-XX:+ExplicitGCInvokesConcurrent " +
-  "-XX:PretenureSizeThreshold=#{node['bcpc']['hadoop']['hbase_master']['PretenureSizeThreshold']} " +
-  "-XX:+PrintTenuringDistribution -XX:+UseNUMA " +
-  "-XX:+PrintGCApplicationStoppedTime -XX:+UseCompressedOops " +
-  "-XX:+PrintClassHistogram -XX:+PrintGCApplicationConcurrentTime"
+  " $HBASE_MASTER_OPTS" +
+  " -XX:CMSInitiatingOccupancyFraction=#{node['bcpc']['hadoop']['hbase_master']['cmsinitiatingoccupancyfraction']}" +
+  " -XX:HeapDumpPath=/var/log/hbase/heap-dump-hm-$$-$(hostname)-$(date +\'%Y%m%d%H%M\').hprof" +
+  " -XX:PretenureSizeThreshold=#{node['bcpc']['hadoop']['hbase_master']['PretenureSizeThreshold']}" +
+  " #{common_opts}"
 #
 # HBASE Master and RegionServer env.sh variables are updated with relevant JAAS file entries when Kerberos is enabled
 #
 if node[:bcpc][:hadoop][:kerberos][:enable] == true then
- env_sh[:HBASE_OPTS] = '"$HBASE_OPTS -Djava.security.auth.login.config=/etc/hbase/conf/hbase-client.jaas"'
+ env_sh[:HBASE_OPTS] += ' -Djava.security.auth.login.config=/etc/hbase/conf/hbase-client.jaas'
  env_sh[:HBASE_MASTER_OPTS] += ' -Djava.security.auth.login.config=/etc/hbase/conf/hbase-server.jaas'
  env_sh[:HBASE_REGIONSERVER_OPTS] += ' -Djava.security.auth.login.config=/etc/hbase/conf/regionserver.jaas'
 end
@@ -237,7 +246,7 @@ end
 #
 env_sh[:HBASE_MASTER_OPTS] = '"' + env_sh[:HBASE_MASTER_OPTS] + '"'
 env_sh[:HBASE_REGIONSERVER_OPTS] = '"' + env_sh[:HBASE_REGIONSERVER_OPTS] + '"'
-
+env_sh[:HBASE_OPTS] = '"' + env_sh[:HBASE_OPTS]  + '"'
 
 env_sh[:HBASE_MANAGES_ZK] = '"false"'
 

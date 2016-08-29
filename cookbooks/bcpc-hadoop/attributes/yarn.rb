@@ -12,45 +12,65 @@ default["bcpc"]["hadoop"]["yarn"]["resourcemanager"]["port"] = 8032
 default["bcpc"]["hadoop"]["yarn"]["resourcemanager"]["jmx"]["port"] = 3131
 default["bcpc"]["hadoop"]["yarn"]["scheduler"]["fair"]["min-vcores"] = 2
 
+yarn_log_dir = '/var/log/hadoop-yarn'
+yarn_pid_dir = '/var/run/hadoop-yarn'
+yarn_user = 'yarn'
+yarn_conf_dir = '/etc/hadoop/conf'
+yarn_logfile = 'yarn-$(hostname).log'
+yarn_policyfile = 'hadoop-policy.xml'
+
 default[:bcpc][:hadoop][:yarn][:env_sh].tap do |env_sh|
-  env_sh[:YARN_LOG_DIR] = '/var/log/hadoop-yarn'
-  env_sh[:YARN_PID_DIR] = '/var/run/hadoop-yarn'
-  env_sh[:YARN_IDENT_STRING] = 'yarn'
-  env_sh[:HADOOP_YARN_USER] = 'yarn'
-  env_sh[:YARN_CONF_DIR] = '/etc/hadoop/conf'
+  env_sh[:YARN_LOG_DIR] = yarn_log_dir
+  env_sh[:YARN_PID_DIR] = yarn_pid_dir
+  env_sh[:YARN_IDENT_STRING] = yarn_user
+  env_sh[:HADOOP_YARN_USER] = yarn_user
+  env_sh[:YARN_CONF_DIR] = yarn_conf_dir
   env_sh[:JAVA_HOME] = node[:bcpc][:hadoop][:java]
   env_sh[:JAVA] = File.join(env_sh[:JAVA_HOME], 'bin', 'java')
   env_sh[:YARN_HEAPSIZE] = '1000' # megabytes
   env_sh[:JAVA_HEAP_MAX] = '1000' # megabytes
-  env_sh[:YARN_LOGFILE] = 'yarn.log'
-  env_sh[:YARN_POLICYFILE] =  'hadoop-policy.xml'
+  env_sh[:YARN_LOGFILE] = yarn_logfile
+  env_sh[:YARN_POLICYFILE] = yarn_policyfile
 
-  env_sh[:YARN_OPTS] =
-    "-Dhadoop.log.dir=#{env_sh[:YARN_LOG_DIR]} " +
-    "-Dyarn.log.dir=#{env_sh[:YARN_LOG_DIR]}  " +
-    "-Dhadoop.log.file=#{env_sh[:YARN_LOGFILE]} " +
-    "-Dyarn.log.dir=#{env_sh[:YARN_LOGFILE]} " +
-    "-Dyarn.id.str=#{env_sh[:YARN_IDENT_STRING]} " +
-    "-Dhadoop.root.logger=INFO,CONSOLE " +
-    "-Dyarn.root.logger=INFO,CONSOLE " +
-    "-Dyarn.policy.file=#{env_sh[:YARN_POLICYFILE]} " +
-    "-Djute.maxbuffer=#{node[:bcpc][:hadoop][:jute][:maxbuffer]}"
-
-  env_sh[:YARN_OPTS] = '"' + env_sh[:YARN_OPTS] + '"'
+  env_sh[:YARN_OPTS] = '"' +
+    ' -Dhadoop.log.dir=' + yarn_log_dir +
+    ' -Dyarn.log.dir=' + yarn_log_dir +
+    ' -Dhadoop.log.file=' + yarn_logfile  +
+    ' -Dyarn.log.dir=' + yarn_logfile +
+    ' -Dyarn.id.str=' + yarn_user +
+    ' -Dhadoop.root.logger=INFO,CONSOLE ' +
+    ' -Dyarn.root.logger=INFO,CONSOLE ' +
+    ' -Dyarn.policy.file=' + yarn_policyfile +
+    ' -Djute.maxbuffer=' + node[:bcpc][:hadoop][:jute][:maxbuffer].to_s +
+    '"'
 
   env_sh[:YARN_NODEMANAGER_OPTS] = '"' +
-    '-Dcom.sun.management.jmxremote.ssl=false ' +
-    '-Dcom.sun.management.jmxremote.authenticate=false ' +
-    '-Dcom.sun.management.jmxremote.port=' +
+   ' -Dcom.sun.management.jmxremote.port=' +
     node[:bcpc][:hadoop][:yarn][:nodemanager][:jmx][:port].to_s +
-   '"'
+   ' -XX:HeapDumpPath=/var/log/hadoop-yarn/heap-dump-nm-$$-$(hostname)-$(date +\'%Y%m%d%H%M\').hprof ' +
+   ' -XX:+UseCMSInitiatingOccupancyOnly' + 
+   ' -XX:CMSInitiatingOccupancyFraction=70' +
+   ' -XX:+HeapDumpOnOutOfMemoryError' + 
+   ' -XX:+ExitOnOutOfMemoryError' +
+   ' -XX:+UseParNewGC' +
+   ' -XX:+UseConcMarkSweepGC ' +
+   ' -Dcom.sun.management.jmxremote.ssl=false' +
+   ' -Dcom.sun.management.jmxremote.authenticate=false' +
+  '"'
 
   env_sh[:YARN_RESOURCEMANAGER_OPTS] = '"' +
-    '-Dcom.sun.management.jmxremote.ssl=false ' +
-    '-Dcom.sun.management.jmxremote.authenticate=false ' +
-    '-Dcom.sun.management.jmxremote.port=' +
+    ' -Dcom.sun.management.jmxremote.port=' +
     node[:bcpc][:hadoop][:yarn][:resourcemanager][:jmx][:port].to_s +
-    '"' 
+    ' -XX:HeapDumpPath=/var/log/hadoop-yarn/heap-dump-rm-$$-$(hostname)-$(date +\'%Y%m%d%H%M\').hprof' +
+    ' -XX:+UseCMSInitiatingOccupancyOnly' + 
+    ' -XX:CMSInitiatingOccupancyFraction=70' +
+    ' -XX:+HeapDumpOnOutOfMemoryError' + 
+    ' -XX:+ExitOnOutOfMemoryError' +
+    ' -XX:+UseParNewGC' +
+    ' -XX:+UseConcMarkSweepGC ' +
+    ' -Dcom.sun.management.jmxremote.ssl=false' +
+    ' -Dcom.sun.management.jmxremote.authenticate=false' +
+   '"' 
 end
 
 default[:bcpc][:hadoop][:yarn][:site_xml].tap do |site_xml|
