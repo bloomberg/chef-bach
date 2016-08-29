@@ -206,13 +206,27 @@ end
     distro distro_name
   end
 
+  #
+  # The biosdevname=0 and net.ifnames=0 kernel options are important
+  # in order to force the use of old-fashioned eth0..ethN device
+  # naming on Ubuntu 14.04.
+  #
+  # "Modern" naming schemes for network devices will break the bcpc
+  # recipes for bonding.
+  #
   execute 'set-ubuntu-kopts' do
+    full_kopts =
+      node[:bcpc][:bootstrap][:preseed][:add_kernel_opts] +
+      " biosdevname=0 net.ifnames=0"
+
     command "cobbler distro edit " \
       "--name=#{distro_name} " \
-      "--kopts=#{node[:bcpc][:bootstrap][:preseed][:add_kernel_opts]}"
+      "--kopts='#{full_kopts}'"
+
     notifies :run, 'bash[cobbler-sync]', :delayed
   end
 end
+
 #
 # When PXE booting an EFI host, the kernel will require an explicit
 # filename for the initrd. As far as I can tell, the filename is
@@ -235,7 +249,7 @@ file '/etc/cobbler/pxe/gpxe_system_linux.template' do
     # Local changes will be reverted.
     #
     kernel http://$server:$http_port/cobbler/images/$distro/$kernel_name
-    imgargs $kernel_name $append_line initrd=initrd.gz net.ifnames=0 biosdevname=0
+    imgargs $kernel_name initrd=initrd.gz $append_line
     initrd http://$server:$http_port/cobbler/images/$distro/$initrd_name
     boot
   EOM
