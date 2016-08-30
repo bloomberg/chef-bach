@@ -22,7 +22,7 @@ default[:bcpc][:hadoop][:yarn][:env_sh].tap do |env_sh|
   env_sh[:JAVA] = File.join(env_sh[:JAVA_HOME], 'bin', 'java')
   env_sh[:YARN_HEAPSIZE] = '1000' # megabytes
   env_sh[:JAVA_HEAP_MAX] = '1000' # megabytes
-  env_sh[:YARN_LOGFILE] = 'yarn.log'
+  env_sh[:YARN_LOGFILE] = 'yarn-$(hostname).log'
   env_sh[:YARN_POLICYFILE] =  'hadoop-policy.xml'
 
   env_sh[:YARN_OPTS] =
