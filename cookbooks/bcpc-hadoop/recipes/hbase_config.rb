@@ -164,7 +164,7 @@ end
 env_sh = {}
 env_sh[:HBASE_PID_DIR] = '"/var/run/hbase"'
 env_sh[:HBASE_LOG_DIR] = '"/var/log/hbase"'
-env_sh[:HBASE_OPTS] = '" -Djava.net.preferIPv4Stack=true -XX:+UseConcMarkSweepGC"'
+env_sh[:HBASE_OPTS] = '-Djava.net.preferIPv4Stack=true -XX:+UseConcMarkSweepGC '
 env_sh[:HBASE_JMX_BASE] = '"-Dcom.sun.management.jmxremote.ssl=false ' +
   '-Dcom.sun.management.jmxremote.authenticate=false"'
 
@@ -172,8 +172,9 @@ env_sh[:HBASE_JMX_BASE] = '"-Dcom.sun.management.jmxremote.ssl=false ' +
 # Common env.sh options relevant to HBASE region servers
 #
 env_sh[:HBASE_REGIONSERVER_OPTS] = 
-  " $HBASE_REGIONSERVER_OPTS -server -XX:ParallelGCThreads=#{[1, (node['cpu']['total'] * node['bcpc']['hadoop']['hbase_rs']['gc_thread']['cpu_ratio']).ceil].max} " +
-  " -XX:+UseParNewGC -XX:CMSInitiatingOccupancyFraction=#{node['bcpc']['hadoop']['hbase_rs']['cmsinitiatingoccupancyfraction']} " + 
+  "-server -XX:ParallelGCThreads=#{[1, (node['cpu']['total'] * node['bcpc']['hadoop']['hbase_rs']['gc_thread']['cpu_ratio']).ceil].max} " +
+  " -XX:+UseParNewGC  -XX:+UseConcMarkSweepGC " +
+  "-XX:CMSInitiatingOccupancyFraction=#{node['bcpc']['hadoop']['hbase_rs']['cmsinitiatingoccupancyfraction']} " + 
   "-XX:+UseCMSInitiatingOccupancyOnly -verbose:gc -XX:+PrintHeapAtGC " + 
   "-XX:+PrintGCDetails -XX:+PrintGCTimeStamps -XX:+PrintGCDateStamps " + 
   "-Xloggc:/var/log/hbase/gc/gc.log-$$-$(hostname)-$(date +'%Y%m%d%H%M').log " +
@@ -190,8 +191,9 @@ env_sh[:HBASE_REGIONSERVER_OPTS] =
 # Common env.sh options relevant to HBASE master
 #
 env_sh[:HBASE_MASTER_OPTS] =
-  " $HBASE_MASTER_OPTS -server -XX:ParallelGCThreads=#{[1, (node['cpu']['total'] * node['bcpc']['hadoop']['hbase_master']['gc_thread']['cpu_ratio']).ceil].max} " +
-  " -XX:+UseParNewGC -XX:CMSInitiatingOccupancyFraction=#{node['bcpc']['hadoop']['hbase_master']['cmsinitiatingoccupancyfraction']} " +
+  "-server -XX:ParallelGCThreads=#{[1, (node['cpu']['total'] * node['bcpc']['hadoop']['hbase_master']['gc_thread']['cpu_ratio']).ceil].max} " +
+  "-XX:+UseParNewGC -XX:+UseConcMarkSweepGC " +
+  "-XX:CMSInitiatingOccupancyFraction=#{node['bcpc']['hadoop']['hbase_master']['cmsinitiatingoccupancyfraction']} " +
   "-XX:+UseCMSInitiatingOccupancyOnly -verbose:gc -XX:+PrintHeapAtGC " +
   "-XX:+PrintGCDetails -XX:+PrintGCTimeStamps -XX:+PrintGCDateStamps " +
   "-Xloggc:/var/log/hbase/gc/gc.log-$$-$(hostname)-$(date +'%Y%m%d%H%M').log " +
@@ -207,7 +209,7 @@ env_sh[:HBASE_MASTER_OPTS] =
 # HBASE Master and RegionServer env.sh variables are updated with relevant JAAS file entries when Kerberos is enabled
 #
 if node[:bcpc][:hadoop][:kerberos][:enable] == true then
- env_sh[:HBASE_OPTS] = '"$HBASE_OPTS -Djava.security.auth.login.config=/etc/hbase/conf/hbase-client.jaas"'
+ env_sh[:HBASE_OPTS] += ' -Djava.security.auth.login.config=/etc/hbase/conf/hbase-client.jaas'
  env_sh[:HBASE_MASTER_OPTS] += ' -Djava.security.auth.login.config=/etc/hbase/conf/hbase-server.jaas'
  env_sh[:HBASE_REGIONSERVER_OPTS] += ' -Djava.security.auth.login.config=/etc/hbase/conf/regionserver.jaas'
 end
@@ -233,8 +235,9 @@ if node[:bcpc][:hadoop].attribute?(:jmx_enabled) and node[:bcpc][:hadoop][:jmx_e
 end
 
 #
-# At the end sealing the MASTER_OPTS and REGIONSERVER_OPTS in quotes
+# At the end sealing the HBASE_OPTS, MASTER_OPTS and REGIONSERVER_OPTS in quotes
 #
+env_sh[:HBASE_OPTS] = '"' + env_sh[:HBASE_OPTS] + '"'
 env_sh[:HBASE_MASTER_OPTS] = '"' + env_sh[:HBASE_MASTER_OPTS] + '"'
 env_sh[:HBASE_REGIONSERVER_OPTS] = '"' + env_sh[:HBASE_REGIONSERVER_OPTS] + '"'
 
