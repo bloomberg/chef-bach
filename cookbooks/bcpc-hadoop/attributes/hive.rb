@@ -50,13 +50,18 @@ default[:bcpc][:hadoop][:hive][:env_sh].tap do |env_sh|
     '-XX:+PrintGCTimeStamps ' +
     '-XX:+PrintGCDateStamps ' +
     '-Xloggc:/var/log/hive/gc/' +
-             'gc.log-$$-$(hostname)-$(date +\'%Y%m%d%H%M\').log ' +
+      'gc.log-$$-$(hostname)-$(date +\'%Y%m%d%H%M\').log ' +
     '-XX:+PrintTenuringDistribution ' +
     '-XX:+PrintGCApplicationStoppedTime ' +
     '-XX:+PrintGCApplicationConcurrentTime ' +
     '-XX:+UseConcMarkSweepGC ' +
+    '-XX:+UseCMSInitiatingOccupancyOnly ' +
+    '-XX:CMSInitiatingOccupancyFraction=70 ' +
+    '-XX:+HeapDumpOnOutOfMemoryError ' +
+    '-XX:HeapDumpPath=/var/log/hive/heap-dump-hive-$$-$(hostname)-$(date +\'%Y%m%d%H%M\').hprof ' +
     '-XX:+CMSClassUnloadingEnabled ' +
-    '-XX:+UseParNewGC' + 
+    '-XX:+UseParNewGC ' + 
+    '-XX:+ExitOnOutOfMemoryError' +
     '"'
   env_sh[:HIVE_LOG_DIR] = "/var/log/hive"
   env_sh[:HIVE_PID_DIR] = "/var/run/hive"

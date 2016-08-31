@@ -1,5 +1,11 @@
 default["bcpc"]["hadoop"]["oozie"]["admins"] = []
-default["bcpc"]["hadoop"]["oozie"]["memory_opts"] = "-Xmx2048m -XX:MaxPermSize=256m"
+default["bcpc"]["hadoop"]["oozie"]["memory_opts"] = 
+  "$CATALINA_OPTS" +
+  " -Xmx2048m" +
+  " -XX:MaxPermSize=256m" +
+  " -XX:+HeapDumpOnOutOfMemoryError " +
+  " -XX:HeapDumpPath=/var/log/oozie/heap-dump-oozie-$$-$(hostname)-$(date +\'%Y%m%d%H%M\').hprof" +
+  " -XX:+ExitOnOutOfMemoryError"
 default["bcpc"]["hadoop"]["oozie"]["sharelib_checksum"] = nil
 default["bcpc"]["hadoop"]["oozie_config"] = "/etc/oozie/conf"
 default["bcpc"]["hadoop"]["oozie_data"] = "/var/lib/oozie"

@@ -11,6 +11,15 @@ if(node.run_list.expand(node.chef_environment).recipes
   yarn_env_generated_values[:YARN_USER_CLASSPATH] =
     '/usr/spark/current/lib/spark-yarn-shuffle.jar'
 end
+if(node.run_list.expand(node.chef_environment).recipes
+        .include?('bcpc-hadoop::datanode'))
+  yarn_env_generated_values[:YARN_LOGFILE] = 
+    'yarn-yarn-nodemanager-$(hostname).log'
+elsif(node.run_list.expand(node.chef_environment).recipes
+        .include?('bcpc-hadoop::resource_manager'))
+  yarn_env_generated_values[:YARN_LOGFILE] = 
+    'yarn-yarn-resourcemanager-$(hostname).log'
+end
 
 complete_yarn_env_hash =
   yarn_env_generated_values.merge(yarn_env_values)

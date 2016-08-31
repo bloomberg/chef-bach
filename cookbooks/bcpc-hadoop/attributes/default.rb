@@ -39,10 +39,41 @@ default["bcpc"]["hadoop"]["datanode"]["xmx"]["max_size"] = 4096
 default["bcpc"]["hadoop"]["datanode"]["xmx"]["max_ratio"] = 0.25
 default["bcpc"]["hadoop"]["datanode"]["max"]["xferthreads"] = 16384
 default["bcpc"]["hadoop"]["datanode"]["jmx"]["port"] = 10112
-default["bcpc"]["hadoop"]["datanode"]["gc_opts"] = "-server -XX:ParallelGCThreads=4 -XX:+UseParNewGC -XX:+UseConcMarkSweepGC -verbose:gc -XX:+PrintHeapAtGC -XX:+PrintGCDetails -XX:+PrintGCTimeStamps -XX:+PrintGCDateStamps -Xloggc:/var/log/hadoop-hdfs/gc/gc.log-datanode-$$-$(hostname)-$(date +'%Y%m%d%H%M').log -XX:+PrintTenuringDistribution -XX:+UseNUMA -XX:+PrintGCApplicationStoppedTime -XX:+UseCompressedOops -XX:+PrintClassHistogram -XX:+PrintGCApplicationConcurrentTime"
+
+common_opts =
+  '-XX:+UseParNewGC ' +
+  '-XX:+UseConcMarkSweepGC ' +  
+  '-verbose:gc -XX:+PrintHeapAtGC ' +
+  '-XX:+PrintGCDetails ' +
+  '-XX:+PrintGCTimeStamps ' + 
+  '-XX:+PrintGCDateStamps ' + 
+  '-XX:+UseNUMA ' +
+  '-XX:+PrintGCApplicationStoppedTime ' +
+  '-XX:+UseCompressedOops ' +
+  '-XX:+PrintClassHistogram ' + 
+  '-XX:+PrintGCApplicationConcurrentTime ' + 
+  '-XX:+UseCMSInitiatingOccupancyOnly ' + 
+  '-XX:CMSInitiatingOccupancyFraction=70 ' + 
+  '-XX:+HeapDumpOnOutOfMemoryError ' + 
+  '-XX:+PrintTenuringDistribution ' +
+  '-XX:+ExitOnOutOfMemoryError'
+
+# GC Options for DataNode
+default["bcpc"]["hadoop"]["datanode"]["gc_opts"] =  
+  '-server -XX:ParallelGCThreads=4 ' + 
+  '-Xloggc:/var/log/hadoop-hdfs/gc/gc.log-dn-$$-$(hostname)-$(date +\'%Y%m%d%H%M\').log ' + 
+  '-XX:HeapDumpPath=/var/log/hadoop-hdfs/heap-dump-dn-$$-$(hostname)-$(date +\'%Y%m%d%H%M\').hprof ' +
+  common_opts
+
+# GC Options for NameNode
+default["bcpc"]["hadoop"]["namenode"]["gc_opts"] = 
+  '-server -XX:ParallelGCThreads=14 ' + 
+  '-Xloggc:/var/log/hadoop-hdfs/gc/gc.log-nn-$$-$(hostname)-$(date +\'%Y%m%d%H%M\').log ' + 
+  '-XX:HeapDumpPath=/var/log/hadoop-hdfs/heap-dump-nn-$$-$(hostname)-$(date +\'%Y%m%d%H%M\').hprof ' +
+  common_opts
+
 default["bcpc"]["hadoop"]["mapreduce"]["framework"]["name"] = "yarn"
 default["bcpc"]["hadoop"]["namenode"]["handler"]["count"] = 100
-default["bcpc"]["hadoop"]["namenode"]["gc_opts"] = "-server -XX:ParallelGCThreads=14 -XX:+UseParNewGC -XX:+UseConcMarkSweepGC -verbose:gc -XX:+PrintHeapAtGC -XX:+PrintGCDetails -XX:+PrintGCTimeStamps -XX:+PrintGCDateStamps -Xloggc:/var/log/hadoop-hdfs/gc/gc.log-namenode-$$-$(hostname)-$(date +'%Y%m%d%H%M').log -XX:+PrintTenuringDistribution -XX:+UseNUMA -XX:+PrintGCApplicationStoppedTime -XX:+UseCompressedOops -XX:+PrintClassHistogram -XX:+PrintGCApplicationConcurrentTime"
 default["bcpc"]["hadoop"]["namenode"]["xmx"]["max_size"] = 16384
 default["bcpc"]["hadoop"]["namenode"]["xmx"]["max_ratio"] = 0.25
 default["bcpc"]["hadoop"]["namenode"]["jmx"]["port"] = 10111
