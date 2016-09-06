@@ -284,7 +284,7 @@ file control_file_path do
 
     Package: mysql-server
     Version: 5.6
-    Maintainer: Andrew Jones <ajones291@bloomberg.net>
+    Maintainer: BACH <hadoop@bloomberg.net>
     Architecture: all
     Description: Dummy package to prevent the installation of mysql-server
   EOM
