@@ -43,7 +43,7 @@ default[:bcpc][:hadoop][:hive][:env_sh].tap do |env_sh|
     '/usr/hdp/current/hive-webhcat/share/hcatalog/hive-hcatalog-core.jar'
   env_sh[:JAVA_HOME] = node[:bcpc][:hadoop][:java]
   env_sh[:HADOOP_HEAPSIZE] = 1024
-  env_sh[:HADOOP_OPTS] = '"' +
+  env_sh[:HADOOP_OPTS] = 
     '-verbose:gc ' +
     '-XX:+PrintHeapAtGC ' +
     '-XX:+PrintGCDetails ' +
@@ -61,8 +61,8 @@ default[:bcpc][:hadoop][:hive][:env_sh].tap do |env_sh|
     '-XX:HeapDumpPath=/var/log/hive/heap-dump-hive-$$-$(hostname)-$(date +\'%Y%m%d%H%M\').hprof ' +
     '-XX:+CMSClassUnloadingEnabled ' +
     '-XX:+UseParNewGC ' + 
-    '-XX:+ExitOnOutOfMemoryError' +
-    '"'
+    '-XX:+ExitOnOutOfMemoryError' 
+
   env_sh[:HIVE_LOG_DIR] = "/var/log/hive"
   env_sh[:HIVE_PID_DIR] = "/var/run/hive"
   env_sh[:HIVE_IDENT_STRING] = "hive"
