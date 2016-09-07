@@ -160,100 +160,38 @@ template '/etc/hbase/conf/hbase-site.xml' do
   variables(:options => complete_hbase_site_hash)
 end
 
-# These will become key/value pairs in 'hbase-env.sh'
-env_sh = {}
-env_sh[:HBASE_PID_DIR] = '"/var/run/hbase"'
-env_sh[:HBASE_LOG_DIR] = '"/var/log/hbase"'
-env_sh[:HBASE_OPTS] = ' -Djava.net.preferIPv4Stack=true -XX:+UseConcMarkSweepGC '
-env_sh[:HBASE_JMX_BASE] = '"-Dcom.sun.management.jmxremote.ssl=false ' +
-  '-Dcom.sun.management.jmxremote.authenticate=false"'
-#
-# Common env.sh options relevant to HBASE region servers
-#
-cpu_total = node['cpu']['total']
-cpu_ratio = node['bcpc']['hadoop']['hbase_rs']['gc_thread']['cpu_ratio']
-
-common_opts = 
-  " -server -XX:ParallelGCThreads=#{[1, (cpu_total * cpu_ratio).ceil].max}" +
-  " -XX:+UseCMSInitiatingOccupancyOnly" +
-  " -XX:+HeapDumpOnOutOfMemoryError" +
-  " -XX:+UseConcMarkSweepGC" + 
-  " -verbose:gc" +
-  " -XX:+PrintHeapAtGC" +
-  " -XX:+PrintGCDetails" + 
-  " -XX:+PrintGCTimeStamps" + 
-  " -XX:+PrintGCDateStamps" +
-  " -XX:+UseParNewGC" +
-  " -Xloggc:/var/log/hbase/gc/gc.log-$$-$(hostname)-$(date +'%Y%m%d%H%M').log" +
-  " -Xmn#{node['bcpc']['hadoop']['hbase_rs']['xmn']['size']}m" +
-  " -Xms#{node['bcpc']['hadoop']['hbase_rs']['xms']['size']}m" + 
-  " -Xmx#{node['bcpc']['hadoop']['hbase_rs']['xmx']['size']}m" + 
-  " -XX:+ExplicitGCInvokesConcurrent " + 
-  " -XX:+PrintTenuringDistribution" +
-  " -XX:+UseNUMA" + 
-  " -XX:+PrintGCApplicationStoppedTime" +
-  " -XX:+UseCompressedOops" + 
-  " -XX:+PrintClassHistogram" +
-  " -XX:+PrintGCApplicationConcurrentTime" +
-  " -XX:+ExitOnOutOfMemoryError"
-
-env_sh[:HBASE_REGIONSERVER_OPTS] = 
-  " $HBASE_REGIONSERVER_OPTS" +
-  " -XX:CMSInitiatingOccupancyFraction=#{node['bcpc']['hadoop']['hbase_rs']['cmsinitiatingoccupancyfraction']}" + 
-  " -XX:HeapDumpPath=/var/log/hbase/heap-dump-rs-$$-$(hostname)-$(date +\'%Y%m%d%H%M\').hprof" +
-  " -XX:PretenureSizeThreshold=#{node['bcpc']['hadoop']['hbase_rs']['PretenureSizeThreshold']}" +
-  " #{common_opts}"
-#
-# Common env.sh options relevant to HBASE master
-#
-env_sh[:HBASE_MASTER_OPTS] =
-  " $HBASE_MASTER_OPTS" +
-  " -XX:CMSInitiatingOccupancyFraction=#{node['bcpc']['hadoop']['hbase_master']['cmsinitiatingoccupancyfraction']}" +
-  " -XX:HeapDumpPath=/var/log/hbase/heap-dump-hm-$$-$(hostname)-$(date +\'%Y%m%d%H%M\').hprof" +
-  " -XX:PretenureSizeThreshold=#{node['bcpc']['hadoop']['hbase_master']['PretenureSizeThreshold']}" +
-  " #{common_opts}"
-#
-# HBASE Master and RegionServer env.sh variables are updated with relevant JAAS file entries when Kerberos is enabled
-#
 if node[:bcpc][:hadoop][:kerberos][:enable] == true then
- env_sh[:HBASE_OPTS] += ' -Djava.security.auth.login.config=/etc/hbase/conf/hbase-client.jaas'
- env_sh[:HBASE_MASTER_OPTS] += ' -Djava.security.auth.login.config=/etc/hbase/conf/hbase-server.jaas'
- env_sh[:HBASE_REGIONSERVER_OPTS] += ' -Djava.security.auth.login.config=/etc/hbase/conf/regionserver.jaas'
-end
-
-#
-# HBASE RegionServer JVM direct memory size is updated if BucketCache is enabled
-#
-if node["bcpc"]["hadoop"]["hbase"]["bucketcache"]["enabled"] == true then
- env_sh[:HBASE_REGIONSERVER_OPTS] += 
-   " -XX:MaxDirectMemorySize=#{node['bcpc']['hadoop']['hbase_rs']['mx_dir_mem']['size']}m"
+    node.set['bcpc']['hadoop']['hbase']['env']['HBASE_OPTS'] = 
+      node['bcpc']['hadoop']['hbase']['env']['HBASE_OPTS'] +
+      ' -Djava.security.auth.login.config=/etc/hbase/conf/hbase-client.jaas'
+    node.set['bcpc']['hadoop']['hbase']['env']['HBASE_MASTER_OPTS'] =
+      node['bcpc']['hadoop']['hbase']['env']['HBASE_MASTER_OPTS'] + 
+      ' -Djava.security.auth.login.config=/etc/hbase/conf/hbase-server.jaas'
+    node.set['bcpc']['hadoop']['hbase']['env']['HBASE_REGIONSERVER_OPTS'] =
+      node['bcpc']['hadoop']['hbase']['env']['HBASE_REGIONSERVER_OPTS'] + 
+      ' -Djava.security.auth.login.config=/etc/hbase/conf/regionserver.jaas'
 end
 
 #
 # HBASE Master and RegionServer env.sh variables are updated with JMX related options when JMX is enabled
 #
 if node[:bcpc][:hadoop].attribute?(:jmx_enabled) and node[:bcpc][:hadoop][:jmx_enabled] then
- env_sh[:HBASE_MASTER_OPTS] += ' $HBASE_JMX_BASE ' +
-   '-Dcom.sun.management.jmxremote.port=' +
-   node[:bcpc][:hadoop][:hbase_master][:jmx][:port].to_s
- env_sh[:HBASE_REGIONSERVER_OPTS] += ' $HBASE_JMX_BASE ' +
-   '-Dcom.sun.management.jmxremote.port=' +
-   node[:bcpc][:hadoop][:hbase_rs][:jmx][:port].to_s 
+  node.set['bcpc']['hadoop']['hbase']['env']['HBASE_MASTER_OPTS'] = 
+    node['bcpc']['hadoop']['hbase']['env']['HBASE_MASTER_OPTS'] +
+    ' $HBASE_JMX_BASE ' +
+    ' -Dcom.sun.management.jmxremote.port=' +
+      node[:bcpc][:hadoop][:hbase_master][:jmx][:port].to_s
+   node.set['bcpc']['hadoop']['hbase']['env']['HBASE_REGIONSERVER_OPTS'] = 
+    node['bcpc']['hadoop']['hbase']['env']['HBASE_REGIONSERVER_OPTS'] +
+    ' $HBASE_JMX_BASE ' +
+    ' -Dcom.sun.management.jmxremote.port=' +
+      node[:bcpc][:hadoop][:hbase_rs][:jmx][:port].to_s 
 end
-
-#
-# At the end sealing the MASTER_OPTS and REGIONSERVER_OPTS in quotes
-#
-env_sh[:HBASE_MASTER_OPTS] = '"' + env_sh[:HBASE_MASTER_OPTS] + '"'
-env_sh[:HBASE_REGIONSERVER_OPTS] = '"' + env_sh[:HBASE_REGIONSERVER_OPTS] + '"'
-env_sh[:HBASE_OPTS] = '"' + env_sh[:HBASE_OPTS]  + '"'
-
-env_sh[:HBASE_MANAGES_ZK] = '"false"'
 
 template '/etc/hbase/conf/hbase-env.sh' do
   source 'generic_env.sh.erb'
   mode 0644
-  variables(:options => env_sh)
+  variables(:options => node['bcpc']['hadoop']['hbase']['env'])
 end
 
 template "/etc/hbase/conf/regionservers" do
