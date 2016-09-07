@@ -32,7 +32,7 @@ default[:bcpc][:hadoop][:yarn][:env_sh].tap do |env_sh|
   env_sh[:YARN_LOGFILE] = yarn_logfile
   env_sh[:YARN_POLICYFILE] = yarn_policyfile
 
-  env_sh[:YARN_OPTS] = '"' +
+  env_sh[:YARN_OPTS] =  
     ' -Dhadoop.log.dir=' + yarn_log_dir +
     ' -Dyarn.log.dir=' + yarn_log_dir +
     ' -Dhadoop.log.file=' + yarn_logfile  +
@@ -41,10 +41,10 @@ default[:bcpc][:hadoop][:yarn][:env_sh].tap do |env_sh|
     ' -Dhadoop.root.logger=INFO,CONSOLE ' +
     ' -Dyarn.root.logger=INFO,CONSOLE ' +
     ' -Dyarn.policy.file=' + yarn_policyfile +
-    ' -Djute.maxbuffer=' + node[:bcpc][:hadoop][:jute][:maxbuffer].to_s +
-    '"'
+    ' -Djute.maxbuffer=' + node[:bcpc][:hadoop][:jute][:maxbuffer].to_s 
+    
 
-  env_sh[:YARN_NODEMANAGER_OPTS] = '"' +
+  env_sh[:YARN_NODEMANAGER_OPTS] =  
    ' -Dcom.sun.management.jmxremote.port=' +
     node[:bcpc][:hadoop][:yarn][:nodemanager][:jmx][:port].to_s +
    ' -XX:HeapDumpPath=/var/log/hadoop-yarn/heap-dump-nm-$$-$(hostname)-$(date +\'%Y%m%d%H%M\').hprof ' +
@@ -55,10 +55,9 @@ default[:bcpc][:hadoop][:yarn][:env_sh].tap do |env_sh|
    ' -XX:+UseParNewGC' +
    ' -XX:+UseConcMarkSweepGC ' +
    ' -Dcom.sun.management.jmxremote.ssl=false' +
-   ' -Dcom.sun.management.jmxremote.authenticate=false' +
-  '"'
+   ' -Dcom.sun.management.jmxremote.authenticate=false' 
 
-  env_sh[:YARN_RESOURCEMANAGER_OPTS] = '"' +
+  env_sh[:YARN_RESOURCEMANAGER_OPTS] =  
     ' -Dcom.sun.management.jmxremote.port=' +
     node[:bcpc][:hadoop][:yarn][:resourcemanager][:jmx][:port].to_s +
     ' -XX:HeapDumpPath=/var/log/hadoop-yarn/heap-dump-rm-$$-$(hostname)-$(date +\'%Y%m%d%H%M\').hprof' +
@@ -69,8 +68,7 @@ default[:bcpc][:hadoop][:yarn][:env_sh].tap do |env_sh|
     ' -XX:+UseParNewGC' +
     ' -XX:+UseConcMarkSweepGC ' +
     ' -Dcom.sun.management.jmxremote.ssl=false' +
-    ' -Dcom.sun.management.jmxremote.authenticate=false' +
-   '"' 
+    ' -Dcom.sun.management.jmxremote.authenticate=false' 
 end
 
 default[:bcpc][:hadoop][:yarn][:site_xml].tap do |site_xml|
