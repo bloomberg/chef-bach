@@ -60,6 +60,17 @@ end
 
 hdfs_write = "echo 'test' | hdfs dfs -copyFromLocal - /user/hdfs/chef-mapred-test"
 hdfs_remove = "hdfs dfs -rm -skipTrash /user/hdfs/chef-mapred-test"
+hdfs_test = "hdfs dfs -test -f /user/hdfs/chef-mapred-test"
+
+# first, make sure the check file is not currently in hdfs, otherwise, the check for 
+# setup-mapreduce-app will fail
+bash 'remove-check-file' do
+  code <<-EOH
+  #{hdfs_remove}
+  EOH
+  user 'hdfs'
+  only_if "#{hdfs_test}", :user => 'hdfs'
+end
 
 bash "setup-mapreduce-app" do
   code <<-EOH
