@@ -129,7 +129,7 @@ d-i pkgsel/upgrade select safe-upgrade
 d-i pkgsel/language-packs multiselect
 d-i pkgsel/update-policy select none
 d-i pkgsel/updatedb boolean false
-d-i pkgsel/include string openssh-server lldpd
+d-i pkgsel/include string <%= node[:bcpc][:bootstrap][:preseed][:additional_packages].join(' ') %>
 
 ### Boot loader installation
 d-i grub-installer/skip boolean false

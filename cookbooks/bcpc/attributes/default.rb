@@ -23,6 +23,7 @@ default['bcpc']['encrypt_data_bag'] = false
 
 default['bcpc']['bootstrap']['preseed'].tap do |preseed|
   preseed['add_kernel_opts'] = 'console=ttyS0'
+  preseed['additional_packages'] = %w[openssh-server lldpd]
   preseed['late_command'] = 'true'
   #
   # All these lines get concatenated, hence the semicolons and

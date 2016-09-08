@@ -111,7 +111,7 @@ d-i     cdrom-detect/eject      boolean true
 d-i     debian-installer/add-kernel-opts string <%= @node[:bcpc][:bootstrap][:preseed][:add_kernel_opts] %> 
 d-i     debian-installer/exit/halt      boolean false
 d-i     debian-installer/exit/poweroff  boolean false
-d-i     pkgsel/include string openssh-server lldpd
+d-i     pkgsel/include string <%= node[:bcpc][:bootstrap][:preseed][:additional_packages].join(' ') %>
 
 <%
   @computed_late_command =
