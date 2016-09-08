@@ -28,8 +28,11 @@ export BOOTSTRAP_VM_CPUs=${BOOTSTRAP_VM_CPUs-1}
 # Cluster VM Defaults
 CLUSTER_VM_MEM=${CLUSTER_VM_MEM-2048}
 CLUSTER_VM_CPUs=${CLUSTER_VM_CPUs-1}
-CLUSTER_VM_DRIVE_SIZE=${CLUSTER_VM_DRIVE_SIZE-20480}
 CLUSTER_VM_EFI=${CLUSTER_VM_EFI:-true}
+CLUSTER_VM_DRIVE_SIZE=${CLUSTER_VM_DRIVE_SIZE-20480}
+
+# The root drive on cluster nodes must allow for a RAM-sized swap volume.
+CLUSTER_VM_ROOT_DRIVE_SIZE=$((CLUSTER_VM_DRIVE_SIZE + CLUSTER_VM_MEM - 2048))
 
 VBOX_DIR="`dirname ${BASH_SOURCE[0]}`/vbox"
 P=`python -c "import os.path; print os.path.abspath(\"${VBOX_DIR}/\")"`
@@ -243,7 +246,7 @@ function create_cluster_VMs {
 	  port=0
 	  DISK_PATH=$P/$vm/$vm-a.vdi
 	  $VBM createhd --filename $DISK_PATH \
-	       --size $CLUSTER_VM_DRIVE_SIZE
+	       --size $CLUSTER_VM_ROOT_DRIVE_SIZE
           $VBM storageattach $vm --storagectl $DISK_CONTROLLER \
 	       --device 0 --port $port --type hdd --medium $DISK_PATH
 	  port=$((port+1))
