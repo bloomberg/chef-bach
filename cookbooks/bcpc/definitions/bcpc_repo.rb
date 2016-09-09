@@ -1,6 +1,6 @@
 #
 # Cookbook Name:: bcpc
-# Recipe:: zabbix-repo
+# Definition:: bcpc_repo
 #
 # Copyright 2016, Bloomberg Finance L.P.
 #
@@ -17,4 +17,18 @@
 # limitations under the License.
 #
 
-bcpc_repo 'zabbix'
+#
+# The bcpc_repo definition populates an apt_repository resource with
+# environment attributes.  Any attributes passed directly to the
+# resource will override the environment.
+#
+define :bcpc_repo do
+  repo_name = params[:name]
+  attrs = node[:bcpc][:repos][repo_name].merge(params)
+
+  apt_repository repo_name do
+    attrs.each do |key, value|
+      send(key.to_sym, value)
+    end
+  end
+end

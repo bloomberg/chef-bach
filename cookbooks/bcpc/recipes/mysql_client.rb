@@ -17,12 +17,8 @@
 # limitations under the License.
 #
 
-apt_repository 'percona' do
-  uri node['bcpc']['repos']['mysql']
-  distribution node['lsb']['codename']
-  components ['main']
-  key 'percona-release.key'
-end
+# Include the percona apt repository using the 'bcpc_repo' definition.
+bcpc_repo 'percona'
 
 #
 # The modern percona packages require us to use the percona client.

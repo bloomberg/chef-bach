@@ -120,56 +120,112 @@ default['bcpc']['dns_servers'] = ['8.8.8.8', '8.8.4.4']
 ###########################################
 default['bcpc']['ubuntu']['version'] = 'precise'
 
-default['bcpc']['repos_for']['precise'].tap do |repos|
-  repos['rabbitmq'] = 'http://www.rabbitmq.com/debian'
+default['bcpc']['repos_for']['precise'].tap do |precise_repos|
+  precise_repos['percona'].tap do |repo|
+    repo[:components] = ['main']
+    repo[:distribution] = 'precise'
+    repo[:key] = 'percona-release.key'
+    repo[:uri] = 'http://repo.percona.com/apt'
+  end
 
-  repos['mysql'] = 'http://repo.percona.com/apt'
+  precise_repos['canonical-support-tools'].tap do |repo|
+    repo[:components] = ['main']
+    repo[:distribution] = 'precise'
+    repo[:key] = 'ubuntu-support-tools.key'
+    repo[:uri] =
+      'http://ppa.launchpad.net/canonical-support/support-tools/ubuntu'
+  end
 
-  repos['hwraid'] = 'http://hwraid.le-vert.net/ubuntu'
+  precise_repos['hortonworks'].tap do |repo|
+    repo[:components] = ['main']
+    repo[:distribution] = 'HDP'
+    repo[:key] = 'hortonworks.key'
+    repo[:uri] =
+      'http://s3.amazonaws.com/dev.hortonworks.com/HDP/ubuntu12/2.x/BUILDS/' \
+      '2.3.6.2-3'
+  end
 
-  repos['gridcentric'] =
-    'http://downloads.gridcentric.com/packages/%s/%s/ubuntu'
+  precise_repos['hdp-utils'].tap do |repo|
+    repo[:components] = ['main']
+    repo[:distribution] = 'HDP-UTILS'
+    repo[:key] = 'hortonworks.key'
+    repo[:uri] =
+      'http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.20/repos/ubuntu12'
+  end
 
-  repos['ubuntu-tools'] =
-    'http://ppa.launchpad.net/canonical-support/support-tools/ubuntu'
+  precise_repos['cobbler26'].tap do |repo|
+    repo[:components] = ['/']
+    repo[:distribution] = nil
+    repo[:uri] =
+      'http://download.opensuse.org/repositories/home:/libertas-ict:' \
+      '/cobbler26/xUbuntu_12.04'
+    #
+    # The public apt repository is signed with an expired key, so
+    # we're forced to use 'trusted' in order to defeat the signing.
+    #
+    repo[:trusted] = true
+  end
 
-  repos['hortonworks'] =
-    'http://s3.amazonaws.com/dev.hortonworks.com/HDP/ubuntu12/2.x/BUILDS/2.3.6.2-3'
-
-  repos['hdp_utils'] =
-    'http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.20/repos/ubuntu12'
-
-  repos['cobbler26'] =
-    'http://download.opensuse.org/repositories/home:/libertas-ict:' \
-    '/cobbler26/xUbuntu_12.04/'
-
-  repos['zabbix'] = 'http://repo.zabbix.com/zabbix/2.4/ubuntu/'
+  precise_repos['zabbix'].tap do |repo|
+    repo[:components] = ['main']
+    repo[:distribution] = 'precise'
+    repo[:key] = 'zabbix-official-repo.key'
+    repo[:uri] = 'http://repo.zabbix.com/zabbix/2.4/ubuntu/'
+  end
 end
 
-default['bcpc']['repos_for']['trusty'].tap do |repos|
-  repos['rabbitmq'] = 'http://www.rabbitmq.com/debian'
+default['bcpc']['repos_for']['trusty'].tap do |trusty_repos|
+  trusty_repos['percona'].tap do |repo|
+    repo[:components] = ['main']
+    repo[:distribution] = 'trusty'
+    repo[:key] = 'percona-release.key'
+    repo[:uri] = 'http://repo.percona.com/apt'
+  end
 
-  repos['mysql'] = 'http://repo.percona.com/apt'
+  trusty_repos['canonical-support-tools'].tap do |repo|
+    repo[:components] = ['main']
+    repo[:distribution] = 'trusty'
+    repo[:key] = 'ubuntu-support-tools.key'
+    repo[:uri] =
+      'http://ppa.launchpad.net/canonical-support/support-tools/ubuntu'
+  end
 
-  repos['hwraid'] = 'http://hwraid.le-vert.net/ubuntu'
+  trusty_repos['hortonworks'].tap do |repo|
+    repo[:components] = ['main']
+    repo[:distribution] = 'HDP'
+    repo[:key] = 'hortonworks.key'
+    repo[:uri] =
+      'http://s3.amazonaws.com/dev.hortonworks.com/HDP/ubuntu14/2.x/BUILDS/' \
+      '2.3.6.2-3'
+  end
 
-  repos['gridcentric'] =
-    'http://downloads.gridcentric.com/packages/%s/%s/ubuntu'
+  trusty_repos['hdp-utils'].tap do |repo|
+    repo[:components] = ['main']
+    repo[:distribution] = 'HDP-UTILS'
+    repo[:key] = 'hortonworks.key'
+    repo[:uri] =
+      'http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.20/repos/ubuntu14'
+  end
 
-  repos['ubuntu-tools'] =
-    'http://ppa.launchpad.net/canonical-support/support-tools/ubuntu'
+  trusty_repos['cobbler26'].tap do |repo|
+    repo[:components] = ['/']
+    repo[:distribution] = nil
+    repo[:uri] =
+      'http://download.opensuse.org/repositories/home:/libertas-ict:' \
+      '/cobbler26/xUbuntu_14.04'
+    #
+    # The public apt repository is signed with an expired key, so
+    # we're forced to use 'trusted' in order to defeat the signing.
+    #
+    repo[:trusted] = true
+  end
 
-  repos['hortonworks'] =
-    'http://s3.amazonaws.com/dev.hortonworks.com/HDP/ubuntu14/2.x/BUILDS/2.3.6.2-3'
-
-  repos['hdp_utils'] =
-    'http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.20/repos/ubuntu14'
-
-  repos['cobbler26'] =
-    'http://download.opensuse.org/repositories/home:/libertas-ict:' \
-    '/cobbler26/xUbuntu_14.04'
-
-  repos['zabbix'] = 'http://repo.zabbix.com/zabbix/2.4/ubuntu/'
+  trusty_repos['zabbix'].tap do |repo|
+    repo[:components] = ['main']
+    repo[:distribution] = 'trusty'
+    repo[:key] = 'zabbix-official-repo.key'
+    repo[:uri] = 'http://repo.zabbix.com/zabbix/2.4/ubuntu/'
+  end
 end
 
 default[:bcpc][:repos] = node[:bcpc][:repos_for][node[:lsb][:codename]]

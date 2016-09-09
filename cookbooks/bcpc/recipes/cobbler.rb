@@ -51,23 +51,7 @@ node.set[:cobbler][:web_username] =
 node.set[:cobbler][:web_password] =
   get_config('web-password', 'cobbler', 'os')
 
-# # This apt repository is signed with an expired key.
-# apt_repository 'cobbler26' do
-#   uri node[:bcpc][:repos][:cobbler26]
-#   distribution nil
-#   components [ '/' ]
-#   key 'cobbler26-release.key'
-# end
-
-# Until cobbler updates their apt repository, we'll just download and
-# install it the old-fashioned way.
-cobbler_filename = 'cobbler_2.6.11-1_all.deb'
-cobbler_deb_path = File.join(Chef::Config[:file_cache_path], cobbler_filename)
-
-remote_file cobbler_deb_path do
-  source node[:bcpc][:repos][:cobbler26] + '/all/' + cobbler_filename
-  checksum 'c881a4502bc79c318d93920206734a1ab7da2dcb07dbd5bf6d6befab5b0d79c3'
-end
+bcpc_repo 'cobbler26'
 
 [
   'python',
@@ -89,6 +73,11 @@ end
   package package_name do
     action :upgrade
   end
+end
+
+apt_package 'cobbler' do
+  action :install
+  version '2.6.11-1'
 end
 
 #
@@ -120,10 +109,6 @@ end
     # Restarting it multiple times is pretty harmless.
     notifies :restart, 'service[apache2]', :immediately
   end
-end
-
-dpkg_package cobbler_deb_path do
-  not_if 'dpkg -s cobbler && dpkg -s cobbler | grep 2.6.11-1'
 end
 
 package 'isc-dhcp-server'

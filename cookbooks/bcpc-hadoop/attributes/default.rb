@@ -5,8 +5,6 @@
 #############################################
 
 default["bcpc"]["hadoop"] = {}
-default["bcpc"]["hadoop"]["distribution"]["version"] = 'HDP'
-default["bcpc"]["hadoop"]["distribution"]["key"] = 'hortonworks.key'
 default["bcpc"]["hadoop"]["distribution"]["release"] = '2.3.6.2-3'
 default["bcpc"]["hadoop"]["distribution"]["active_release"] = node["bcpc"]["hadoop"]["distribution"]["release"]
 default["bcpc"]["hadoop"]["decommission"]["hosts"] = []
