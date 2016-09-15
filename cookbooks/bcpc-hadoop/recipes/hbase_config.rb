@@ -199,3 +199,5 @@ template "/etc/hbase/conf/regionservers" do
    mode 0644
    variables(:rs_hosts => node[:bcpc][:hadoop][:rs_hosts])
 end
+
+include_recipe 'bcpc-hadoop::hbase_env'
