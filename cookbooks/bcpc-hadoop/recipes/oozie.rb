@@ -65,6 +65,33 @@ end
   end
 end
 
+if not (node.run_list.expand(node.chef_environment).recipes
+  .include?('bcpc-hadoop::hbase_master')) then
+  package 'hbase' do
+    action :upgrade
+  end
+end
+
+if not (node.run_list.expand(node.chef_environment).recipes
+  .include?('bcpc-hadoop::hbase_master')) then
+  package 'hbase' do
+    action :upgrade
+  end
+end
+
+HBASE_CLIENT_LIB = "/usr/hdp/#{hdp_rel}/hbase/lib"
+(["hbase-common.jar", "hbase-client.jar", "hbase-server.jar",
+ "hbase-protocol.jar", "hbase-hadoop2-compat.jar"].map do |flname|
+   "#{HBASE_CLIENT_LIB}/#{flname}"
+  end +
+  Dir["/usr/hdp/#{hdp_rel}/hbase/lib/htrace-core-*"] +
+  Dir["/usr/hdp/#{hdp_rel}/hbase/lib/netty-*"]).each do |link_candidate|
+    link "link_hbase_jar_#{link_candidate}" do
+      to link_candidate
+      target_file "#{OOZIE_CLIENT_PATH}/libext/#{File.basename(link_candidate)}"
+  end
+end
+
 bash 'copy ssl configuration' do
   code <<-EOH
     cp -r /usr/hdp/#{hdp_rel}/oozie/tomcat-deployment/conf/ssl /etc/oozie/conf/
