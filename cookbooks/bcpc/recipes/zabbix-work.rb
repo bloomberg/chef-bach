@@ -31,7 +31,14 @@ file '/etc/init/zabbix-agent.conf' do
   action :delete
 end
 
-package 'zabbix-agent'
+[
+  'zabbix-agent',
+  'zabbix-sender'
+].each do |package_name|
+  package package_name do
+    action :upgrade
+  end
+end
 
 user node[:bcpc][:zabbix][:user] do
     shell '/bin/false'
