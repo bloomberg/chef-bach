@@ -20,12 +20,15 @@ NameVirtualHost <%="#{node[:bcpc][:management][:ip]}"%>:443
     WSGIApplicationGroup www-data
     WSGIImportScript /opt/graphite/conf/graphite.wsgi process-group=graphite application-group=www-data
 
-    # XXX You will need to create this file! There is a graphite.wsgi.example
-    # file in this directory that you can safely use, just copy it to graphite.wgsi
     WSGIScriptAlias / /opt/graphite/conf/graphite.wsgi
     <Directory /opt/graphite/conf/>
+      <IfVersion < 2.4>
         Order deny,allow
         Allow from all
+      </IfVersion>
+      <IfVersion >= 2.4>
+        Require all granted
+      </IfVersion>
     </Directory>
 
     Alias /static/ /opt/graphite/webapp/content/
