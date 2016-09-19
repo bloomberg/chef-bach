@@ -475,3 +475,5 @@ default['jmxtrans']['default_queries']['hbase_rs'] = [
 # Override defaults for the jmxtrans cookbook
 default['jmxtrans']['run_interval'] = "15"
 
+# Set JMXTrans logging to INFO (the cookbook otherwise was defaulting to DEBUG)
+default["jmxtrans"]["log_level"] = "INFO"
