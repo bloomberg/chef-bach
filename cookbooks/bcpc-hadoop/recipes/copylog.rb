@@ -12,6 +12,11 @@
 ::Chef::Resource::Bash.send(:include, Bcpc_Hadoop::Helper)
 ::Chef::Resource::Link.send(:include, Bcpc_Hadoop::Helper)
 
+node.default['bcpc']['hadoop']['copylog']['cheflog'] = {
+    'logfile' => "#{node['chef_client']['log_dir']}/#{node['chef_client']['log_file']}",
+    'docopy' => true
+}
+
 %w{flume flume-agent}.each do |p|
   package hwx_pkg_str(p, node[:bcpc][:hadoop][:distribution][:release]) do
     action :upgrade
@@ -44,6 +49,25 @@ bash "make_shared_logs_dir" do
   not_if "hdfs dfs -test -d #{node['bcpc']['hadoop']['hdfs_url']}/user/flume/logs/", :user => "hdfs"
 end
 
+bash "set copylogs directory quota" do
+  code <<-EOH
+  hdfs dfsadmin -setSpaceQuota \
+    #{node['bcpc']['hadoop']['copylog_quota']['space']} \
+    #{node['bcpc']['hadoop']['hdfs_url']}/user/flume/logs/ && \
+  hdfs dfsadmin -setQuota \
+    #{node['bcpc']['hadoop']['copylog_quota']['files']} \
+    #{node['bcpc']['hadoop']['hdfs_url']}/user/flume/logs/
+  EOH
+  user "hdfs"
+end
+
+template "/etc/init.d/flume-agent-multi" do
+  source "flume_flume-agent.erb"
+  owner "root"
+  group "root"
+  mode "0755"
+end
+
 template "/etc/flume/conf/flume-env.sh" do
   source "flume_flume-env.sh.erb"
   owner "root"
@@ -52,11 +76,34 @@ template "/etc/flume/conf/flume-env.sh" do
 end
 
 if node['bcpc']['hadoop']['copylog_enable']
+  # hack for log file permissions
+  # make restricted access syslog maintained logs publicly viewable if we are
+  # running copylogs -- for flume and everyone
+  %w{syslog authlog}.each do |log_type|
+    if node['bcpc']['hadoop']['copylog'][log_type]['docopy']
+      file "copylogs permission change #{node['bcpc']['hadoop']['copylog'][log_type]['logfile']}" do
+        path node['bcpc']['hadoop']['copylog'][log_type]['logfile']
+        mode '0644'
+      end
+    end
+  end
+
   service "flume-agent-multi" do
     supports :status => true, :restart => true, :reload => false
     action [:enable, :start]
+    subscribes :restart, "template[/etc/init.d/flume-agent-multi]", :delayed
     subscribes :restart, "template[/etc/flume/conf/flume-env.sh]", :delayed
+    subscribes :restart, "template[/etc/flume/conf/log4j.properties]", :delayed
   end
+
+  template '/etc/flume/conf/log4j.properties' do
+    source "flume_log4j.properties.erb"
+    mode '0644'
+    owner 'flume'
+    group 'flume'
+    action :create
+  end
+
   node['bcpc']['hadoop']['copylog'].each do |id,f|
     if f['docopy'] 
       template "/etc/flume/conf/flume-#{id}.conf" do
@@ -77,6 +124,9 @@ if node['bcpc']['hadoop']['copylog_enable']
         start_command "service flume-agent-multi start #{id}"
         restart_command "service flume-agent-multi restart #{id}"
         status_command "service flume-agent-multi status #{id}"
+        subscribes :restart, "template[/etc/init.d/flume-agent-multi]", :delayed
+        subscribes :restart, "template[/etc/flume/conf/log4j.properties]", :delayed
+        subscribes :restart, "template[/etc/flume/conf/flume-env.sh]", :delayed
       end
     else
       service "flume-agent-multi-#{id}" do
