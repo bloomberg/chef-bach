@@ -24,6 +24,15 @@
 #
 define :bcpc_repo do
   repo_name = params[:name]
+
+  # Check for a pre-2.0 attribute structure, and barf if found.
+  if node[:bcpc][:repos][repo_name].is_a?(String)
+    raise "Invalid entry in node[:bcpc][:repos] for #{repo_name}! " \
+      "Do you have pre-2.0 repo definitions in your environment?"
+  elsif node[:bcpc][:repos][repo_name].nil?
+    raise "No repo definition found for '#{repo_name}'!"
+  end
+  
   attrs = node[:bcpc][:repos][repo_name].merge(params)
 
   apt_repository repo_name do
@@ -32,3 +41,4 @@ define :bcpc_repo do
     end
   end
 end
+
