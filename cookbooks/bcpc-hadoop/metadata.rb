@@ -4,9 +4,9 @@ maintainer_email 'compute@bloomberg.net'
 license          'Apache License 2.0'
 description      'Installs/Configures Bloomberg Clustered Private Hadoop Cloud (BCPHC)'
 long_description IO.read(File.join(File.dirname(__FILE__), 'README.md'))
-version          '1.7.0'
+version          '1.7.1'
 
-depends 'bcpc', '= 1.7.0'
+depends 'bcpc', '= 1.7.1'
 depends 'java', '>= 1.28.0'
 depends 'maven', '~> 2.1.1'
 depends 'pam'
