@@ -1,4 +1,5 @@
 node.default['bcpc']['hadoop']['hbase']['env'] = {}
+
 # Chef Attributes for hbase-env.sh file
 cpu_total = node['cpu']['total']
 cpu_ratio = node['bcpc']['hadoop']['hbase_rs']['gc_thread']['cpu_ratio']
@@ -98,4 +99,3 @@ template '/etc/hbase/conf/hbase-env.sh' do
   mode 0644
   variables(:options => node['bcpc']['hadoop']['hbase']['env'])
 end
-
