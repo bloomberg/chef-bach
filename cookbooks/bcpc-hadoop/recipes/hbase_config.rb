@@ -160,40 +160,6 @@ template '/etc/hbase/conf/hbase-site.xml' do
   variables(:options => complete_hbase_site_hash)
 end
 
-if node[:bcpc][:hadoop][:kerberos][:enable] == true then
-    node.set['bcpc']['hadoop']['hbase']['env']['HBASE_OPTS'] = 
-      node['bcpc']['hadoop']['hbase']['env']['HBASE_OPTS'] +
-      ' -Djava.security.auth.login.config=/etc/hbase/conf/hbase-client.jaas'
-    node.set['bcpc']['hadoop']['hbase']['env']['HBASE_MASTER_OPTS'] =
-      node['bcpc']['hadoop']['hbase']['env']['HBASE_MASTER_OPTS'] + 
-      ' -Djava.security.auth.login.config=/etc/hbase/conf/hbase-server.jaas'
-    node.set['bcpc']['hadoop']['hbase']['env']['HBASE_REGIONSERVER_OPTS'] =
-      node['bcpc']['hadoop']['hbase']['env']['HBASE_REGIONSERVER_OPTS'] + 
-      ' -Djava.security.auth.login.config=/etc/hbase/conf/regionserver.jaas'
-end
-
-#
-# HBASE Master and RegionServer env.sh variables are updated with JMX related options when JMX is enabled
-#
-if node[:bcpc][:hadoop].attribute?(:jmx_enabled) and node[:bcpc][:hadoop][:jmx_enabled] then
-  node.set['bcpc']['hadoop']['hbase']['env']['HBASE_MASTER_OPTS'] = 
-    node['bcpc']['hadoop']['hbase']['env']['HBASE_MASTER_OPTS'] +
-    ' $HBASE_JMX_BASE ' +
-    ' -Dcom.sun.management.jmxremote.port=' +
-      node[:bcpc][:hadoop][:hbase_master][:jmx][:port].to_s
-   node.set['bcpc']['hadoop']['hbase']['env']['HBASE_REGIONSERVER_OPTS'] = 
-    node['bcpc']['hadoop']['hbase']['env']['HBASE_REGIONSERVER_OPTS'] +
-    ' $HBASE_JMX_BASE ' +
-    ' -Dcom.sun.management.jmxremote.port=' +
-      node[:bcpc][:hadoop][:hbase_rs][:jmx][:port].to_s 
-end
-
-template '/etc/hbase/conf/hbase-env.sh' do
-  source 'generic_env.sh.erb'
-  mode 0644
-  variables(:options => node['bcpc']['hadoop']['hbase']['env'])
-end
-
 template "/etc/hbase/conf/regionservers" do
    source "hb_regionservers.erb"
    mode 0644
