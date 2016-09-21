@@ -4,6 +4,6 @@ maintainer_email 'compute@bloomberg.net'
 license          'All rights reserved'
 description      'bach_common contains common recipes for the BACH cookbooks'
 long_description 'bach_common contains common recipes for the BACH cookbooks'
-version          '1.7.1'
+version          '1.7.2'
 
 supports 'ubuntu', '12.04'
