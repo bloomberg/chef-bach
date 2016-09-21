@@ -1,7 +1,7 @@
 # vim: tabstop=2:shiftwidth=2:softtabstop=2
 # Cookbook Name : bcpc-hadoop
 # Recipe Name : hbase_config
-# Description : To setup habse related configuration only
+# Description : To setup hbase related configuration only
 
 directory "/etc/hbase/conf.#{node.chef_environment}" do
   owner "root"
@@ -42,7 +42,7 @@ end
 end
 
 # thse are rendered as is
-%w{ 
+%w{
   log4j.properties
   hbase-policy.xml }.each do |t|
   template "/etc/hbase/conf/#{t}" do
@@ -69,12 +69,12 @@ subnet = node["bcpc"]["management"]["subnet"]
 # Add common hbase-site.xml properties
 #
 generated_values = {
-  'hbase.zookeeper.quorum' => 
+  'hbase.zookeeper.quorum' =>
     node[:bcpc][:hadoop][:zookeeper][:servers].map{ |s| float_host(s[:hostname])}.join(","),
   'hbase.master.dns.nameserver' => dns_server,
   'hbase.master.dns.nameserver' => dns_server,
   'hbase.zookeeper.property.clientPort' => "#{node[:bcpc][:hadoop][:zookeeper][:port]}",
-  'hbase.master.wait.on.regionservers.mintostart' => 
+  'hbase.master.wait.on.regionservers.mintostart' =>
       "#{node[:bcpc][:hadoop][:rs_hosts].length/2+1}",
   'hbase.master.hostname' => float_host(node[:fqdn]),
   'hbase.regionserver.hostname' => float_host(node[:fqdn]),
@@ -91,24 +91,24 @@ generated_values = {
 if node[:bcpc][:hadoop][:kerberos][:enable] == true then
   generated_values['hbase.security.authorization'] = 'true'
   generated_values['hbase.superuser'] = node[:bcpc][:hadoop][:hbase][:superusers].join(',')
-  generated_values['hbase.coprocessor.region.classes'] = 
+  generated_values['hbase.coprocessor.region.classes'] =
     'org.apache.hadoop.hbase.security.token.TokenProvider,' +
     'org.apache.hadoop.hbase.security.access.SecureBulkLoadEndpoint,' +
     'org.apache.hadoop.hbase.security.access.AccessController'
   generated_values['hbase.security.exec.permission.checks'] = 'true'
-  generated_values['hbase.coprocessor.regionserver.classes'] = 
+  generated_values['hbase.coprocessor.regionserver.classes'] =
     'org.apache.hadoop.hbase.security.access.AccessController'
-  generated_values['hbase.coprocessor.master.classes'] = 
+  generated_values['hbase.coprocessor.master.classes'] =
     'org.apache.hadoop.hbase.security.access.AccessController'
   generated_values['hbase.security.authentication'] = 'kerberos'
-  generated_values['hbase.master.kerberos.principal'] = 
+  generated_values['hbase.master.kerberos.principal'] =
     "#{node[:bcpc][:hadoop][:kerberos][:data][:hbase][:principal]}/" +
     "#{node[:bcpc][:hadoop][:kerberos][:data][:hbase][:princhost] == '_HOST' ? '_HOST' : node[:bcpc][:hadoop][:kerberos][:data][:hbase][:princhost]}@#{node[:bcpc][:hadoop][:kerberos][:realm]}"
-  generated_values['hbase.master.keytab.file'] = 
+  generated_values['hbase.master.keytab.file'] =
     "#{node[:bcpc][:hadoop][:kerberos][:keytab][:dir]}/#{node[:bcpc][:hadoop][:kerberos][:data][:hbase][:keytab]}"
-  generated_values['hbase.regionserver.kerberos.principal'] = 
+  generated_values['hbase.regionserver.kerberos.principal'] =
     "#{node[:bcpc][:hadoop][:kerberos][:data][:hbase][:principal]}/#{node[:bcpc][:hadoop][:kerberos][:data][:hbase][:princhost] == '_HOST' ? '_HOST' : node[:bcpc][:hadoop][:kerberos][:data][:hbase][:princhost]}@#{node[:bcpc][:hadoop][:kerberos][:realm]}"
-  generated_values['hbase.regionserver.keytab.file'] = 
+  generated_values['hbase.regionserver.keytab.file'] =
     "#{node[:bcpc][:hadoop][:kerberos][:keytab][:dir]}/#{node[:bcpc][:hadoop][:kerberos][:data][:hbase][:keytab]}"
   generated_values['hbase.rpc.engine'] = 'org.apache.hadoop.hbase.ipc.SecureRpcEngine'
 end
@@ -160,39 +160,7 @@ template '/etc/hbase/conf/hbase-site.xml' do
   variables(:options => complete_hbase_site_hash)
 end
 
-if node[:bcpc][:hadoop][:kerberos][:enable] == true then
-    node.set['bcpc']['hadoop']['hbase']['env']['HBASE_OPTS'] = 
-      node['bcpc']['hadoop']['hbase']['env']['HBASE_OPTS'] +
-      ' -Djava.security.auth.login.config=/etc/hbase/conf/hbase-client.jaas'
-    node.set['bcpc']['hadoop']['hbase']['env']['HBASE_MASTER_OPTS'] =
-      node['bcpc']['hadoop']['hbase']['env']['HBASE_MASTER_OPTS'] + 
-      ' -Djava.security.auth.login.config=/etc/hbase/conf/hbase-server.jaas'
-    node.set['bcpc']['hadoop']['hbase']['env']['HBASE_REGIONSERVER_OPTS'] =
-      node['bcpc']['hadoop']['hbase']['env']['HBASE_REGIONSERVER_OPTS'] + 
-      ' -Djava.security.auth.login.config=/etc/hbase/conf/regionserver.jaas'
-end
-
-#
-# HBASE Master and RegionServer env.sh variables are updated with JMX related options when JMX is enabled
-#
-if node[:bcpc][:hadoop].attribute?(:jmx_enabled) and node[:bcpc][:hadoop][:jmx_enabled] then
-  node.set['bcpc']['hadoop']['hbase']['env']['HBASE_MASTER_OPTS'] = 
-    node['bcpc']['hadoop']['hbase']['env']['HBASE_MASTER_OPTS'] +
-    ' $HBASE_JMX_BASE ' +
-    ' -Dcom.sun.management.jmxremote.port=' +
-      node[:bcpc][:hadoop][:hbase_master][:jmx][:port].to_s
-   node.set['bcpc']['hadoop']['hbase']['env']['HBASE_REGIONSERVER_OPTS'] = 
-    node['bcpc']['hadoop']['hbase']['env']['HBASE_REGIONSERVER_OPTS'] +
-    ' $HBASE_JMX_BASE ' +
-    ' -Dcom.sun.management.jmxremote.port=' +
-      node[:bcpc][:hadoop][:hbase_rs][:jmx][:port].to_s 
-end
-
-template '/etc/hbase/conf/hbase-env.sh' do
-  source 'generic_env.sh.erb'
-  mode 0644
-  variables(:options => node['bcpc']['hadoop']['hbase']['env'])
-end
+include_recipe 'bcpc-hadoop::hbase_env'
 
 template "/etc/hbase/conf/regionservers" do
    source "hb_regionservers.erb"
@@ -200,4 +168,3 @@ template "/etc/hbase/conf/regionservers" do
    variables(:rs_hosts => node[:bcpc][:hadoop][:rs_hosts])
 end
 
-include_recipe 'bcpc-hadoop::hbase_env'
