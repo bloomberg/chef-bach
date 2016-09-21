@@ -44,14 +44,14 @@ no_proxy_array = ["localhost", o[:ipaddress], o[:hostname], o[:fqdn], "${BOOTSTR
 no_proxy_array.insert("*#{o[:domain]}") unless o[:domain].nil?
 no_proxy_string = no_proxy_array.uniq * ","
 
-ENV['http_proxy'] = "${http_proxy}"
-ENV['https_proxy'] = "${https_proxy}"
+#ENV['http_proxy'] = "${http_proxy}"
+#ENV['https_proxy'] = "${https_proxy}"
 ENV['no_proxy'] = no_proxy_string
 http_proxy ENV['http_proxy']
 https_proxy ENV['https_proxy']
 no_proxy no_proxy_string
 ENV['GIT_SSL_NO_VERIFY'] = 'true'
-File.umask(0007)
+#File.umask(0007)
 EOF
 
 mkdir -p ./vendor

@@ -64,7 +64,7 @@ done
 
 echo "Checking for GNU screen to watch serial consoles"
 if hash screen 2>/dev/null ; then
-  pushd $(readlink -f $(dirname $0))
+  pushd $(greadlink -f $(dirname $0))
   screen -S "BACH Install" -c ./screenrc
   popd
 else
