@@ -32,6 +32,14 @@ end
     end
 end
 
+#
+# Ubuntu 14.04's Apache has mod_version baked-in.
+# Older versions of Apache have to have mod_version explicitly enabled.
+#
+if Gem::Version.new(node[:lsb][:release]) < Gem::Version.new('14.04')
+  execute 'a2enmod version'
+end
+
 %w{ssl wsgi python php5 proxy_http rewrite}.each do |mod|
     bash "apache-enable-#{mod}" do
         user "root"

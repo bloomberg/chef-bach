@@ -219,14 +219,6 @@ end
   end
 end
 
-#
-# Ubuntu 14.04's Apache has mod_version baked-in.
-# Older versions of Apache have to have mod_version explicitly enabled.
-#
-if Gem::Version.new(node[:lsb][:release]) < Gem::Version.new('14.04')
-  execute 'a2enmod version'
-end
-
 file '/etc/php5/apache2/conf.d/zabbix.ini' do
   user 'root'
   group 'root'
