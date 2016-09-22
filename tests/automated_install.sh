@@ -24,8 +24,8 @@ ENVIRONMENT=Test-Laptop
 DNS_SERVERS='"8.8.8.8", "8.8.4.4"'
 export BOOTSTRAP_VM_MEM=3096
 export BOOTSTRAP_VM_CPUs=2
-export CLUSTER_VM_MEM=3096
-export CLUSTER_VM_CPUs=2
+export CLUSTER_VM_MEM=5120
+export CLUSTER_VM_CPUs=4
 
 printf "#### Setup configuration files\n"
 # setup vagrant
