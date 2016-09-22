@@ -24,8 +24,8 @@ ENVIRONMENT=Test-Laptop
 DNS_SERVERS='"8.8.8.8", "8.8.4.4"'
 export BOOTSTRAP_VM_MEM=3096
 export BOOTSTRAP_VM_CPUs=2
-export CLUSTER_VM_MEM=5120
-export CLUSTER_VM_CPUs=4
+export CLUSTER_VM_MEM=3096
+export CLUSTER_VM_CPUs=2
 
 printf "#### Setup configuration files\n"
 # setup vagrant
@@ -64,7 +64,13 @@ done
 
 echo "Checking for GNU screen to watch serial consoles"
 if hash screen 2>/dev/null ; then
-  pushd $(greadlink -f $(dirname $0))
+  if [ "$(uname)" == "Darwin" ]; then
+   brew install coreutils  
+   pushd $(greadlink -f $(dirname $0)) 
+  else
+   pushd $(readlink -f $(dirname $0))
+  fi 
+  pushd $(readlink -f $(dirname $0))
   screen -S "BACH Install" -c ./screenrc
   popd
 else
