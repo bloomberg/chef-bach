@@ -70,7 +70,6 @@ if hash screen 2>/dev/null ; then
   else
    pushd $(readlink -f $(dirname $0))
   fi 
-  pushd $(readlink -f $(dirname $0))
   screen -S "BACH Install" -c ./screenrc
   popd
 else
