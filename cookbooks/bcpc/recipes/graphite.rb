@@ -218,7 +218,7 @@ end
 
   mysql_database_user graphite_user do
     connection mysql_local_connection_info
-    database_name node[:bcpc][:graphite_dbname] + '.*'
+    database_name node[:bcpc][:graphite_dbname]
     host host_name
     privileges ['ALL PRIVILEGES']
     action :grant
