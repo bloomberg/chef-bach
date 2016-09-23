@@ -141,78 +141,82 @@ directory '/etc/network/interfaces.d' do
   action :create
 end
 
-bash 'setup-interfaces-source' do
-  user 'root'
-  code(
-    <<-EOH
-      echo "source /etc/network/interfaces.d/*.cfg" >> /etc/network/interfaces
-    EOH
-  )
-  not_if 'grep "^source /etc/network/interfaces.d/\*.cfg" ' \
-    '/etc/network/interfaces'
+file '/etc/network/interfaces' do
+  mode 0444
+  content <<-EOM.gsub(/^ {4}/, '')
+    #
+    # This file was configured by Chef.
+    # Local changes will be reverted.
+    #
+    auto lo
+    iface lo inet loopback
+
+    source /etc/network/interfaces.d/*.cfg
+  EOM
 end
 
+#
 # set up the DNS resolvers
 # we want the VIP which will be running powerdns to be first on the list
 # but the first entry in our master list is also the only one in pdns,
 # so make that the last entry to minimize double failures when upstream dies.
+#
 resolvers = node[:bcpc][:dns_servers].dup
+
 if node[:bcpc][:management][:vip] && get_nodes_for('powerdns').any?
   resolvers.push resolvers.shift
   resolvers.unshift node[:bcpc][:management][:vip]
 end
 
-bash 'update resolvers' do
-  code(
-    <<-EOH
-      echo "#{(resolvers.map { |r| "nameserver #{r}" } + ["search #{node[:bcpc][:domain_name]}"]).join('\n')}" | resolvconf -a #{node[:bcpc][:networks][subnet][:management][:interface]}.inet
-    EOH
-  )
+ruby_block 'bcpc-update-resolvers' do
+  resolvconf_interface_name =
+    node[:bcpc][:networks][subnet][:management][:interface].to_s + '.inet'
+
+  block do
+    require 'English'
+
+    IO.popen(['resolvconf', '-a', resolvconf_interface_name], 'r+') do |resolvconf|
+      resolvers.each do |rr|
+        resolvconf.puts("nameserver #{rr}")
+      end
+      resolvconf.puts("search #{node[:bcpc][:domain_name]}")
+      resolvconf.close_write
+      Chef::Log.debug('Resolvconf output:' + resolvconf.gets.to_s)
+    end
+
+    raise 'Failed to add resolvers!' unless $CHILD_STATUS.success?
+  end
 end
 
 ifaces = %w(management storage floating)
 ifaces.each_index do |i|
   iface = ifaces[i]
   device_name = node[:bcpc][:networks][subnet][iface][:interface]
-  next if iface != 'management' &&
-    node[:bcpc][:networks][subnet][:management][:interface] == device_name
+
   template "/etc/network/interfaces.d/#{device_name}.cfg" do
     source 'network.iface.erb'
     owner 'root'
     group 'root'
     mode 00644
-    variables(
-               interface: node[:bcpc][:networks][subnet][iface][:interface],
-               ip: node[:bcpc][iface][:ip],
-               netmask: node[:bcpc][:networks][subnet][iface][:netmask],
-               gateway: node[:bcpc][:networks][subnet][iface][:gateway],
-               slaves: node[:bcpc][:networks][subnet][iface].attribute?('slaves') ?
-                 node[:bcpc][:networks][subnet][iface]['slaves'] : false, 
-               dns: resolvers,
-               mtu: node[:bcpc][:networks][subnet][iface][:mtu],
-               metric: i*100
-             )
+    variables(interface: node[:bcpc][:networks][subnet][iface][:interface],
+              ip: node[:bcpc][iface][:ip],
+              netmask: node[:bcpc][:networks][subnet][iface][:netmask],
+              gateway: node[:bcpc][:networks][subnet][iface][:gateway],
+              slaves: node[:bcpc][:networks][subnet][iface]['slaves'] || false,
+              dns: resolvers,
+              mtu: node[:bcpc][:networks][subnet][iface][:mtu],
+              metric: i * 100)
   end
 
-  bash "#{iface} up" do
-    code <<-EOH
-      ifup #{device_name} #{node[:bcpc][iface].attribute?("slaves") and node[:bcpc][iface][:slaves].join(" ")}
-    EOH
+  execute "bcpc-networking-#{iface}-up" do
+    slaves = node[:bcpc][iface][:slaves].to_a
+    command "ifup #{device_name} #{slaves.join(' ')}"
     not_if "ip link show up | grep #{device_name}"
   end
 end
 
-bash 'interface-mgmt-make-static-if-dhcp' do
-  user 'root'
-  code <<-EOH
-  sed --in-place '/\\(.*#{node[:bcpc][:networks][subnet][:management][:interface]}.*\\)/d' /etc/network/interfaces
-  resolvconf -d #{node[:bcpc][:networks][subnet][:management][:interface]}.dhclient
-  pkill -u root dhclient
-  EOH
-  only_if "cat /etc/network/interfaces | grep #{node[:bcpc][:networks][subnet][:management][:interface]} | grep dhcp"
-end
-
-if node[:bcpc][:networks][subnet][:management][:interface] != node[:bcpc][:networks][subnet][:storage][:interface]
+if node[:bcpc][:networks][subnet][:management][:interface] !=
+   node[:bcpc][:networks][subnet][:storage][:interface]
   bash 'routing-storage' do
     user 'root'
     code "echo '2 storage' >> /etc/iproute2/rt_tables"
@@ -220,8 +224,12 @@ if node[:bcpc][:networks][subnet][:management][:interface] != node[:bcpc][:netwo
   end
 end
 
-if node[:bcpc][:networks][subnet][:management][:interface] != node[:bcpc][:networks][subnet][:storage][:interface] or \
-    node[:bcpc][:networks][subnet][:management][:interface] != node[:bcpc][:networks][subnet][:floating][:interface]
+unique_interfaces =
+  node[:bcpc][:networks][subnet].values.map do |nn|
+    nn[:interface]
+  end.uniq
+
+if unique_interfaces.length > 1
   bash 'routing-management' do
     user 'root'
     code "echo '1 mgmt' >> /etc/iproute2/rt_tables"
@@ -240,8 +248,7 @@ if node[:bcpc][:networks][subnet][:management][:interface] != node[:bcpc][:netwo
   end
 end
 
-bash 'disable-noninteractive-pam-logging' do
-  user 'root'
-  code "sed --in-place 's/^\\(session\\s*required\\s*pam_unix.so\\)/#\\1/' /etc/pam.d/common-session-noninteractive"
-  only_if "grep -e '^session\\s*required\\s*pam_unix.so' /etc/pam.d/common-session-noninteractive"
+delete_lines 'disable-noninteractive-pam-logging' do
+  path '/etc/pam.d/common-session-noninteractive'
+  pattern '^session\s+required\s+pam_unix.so'
 end
