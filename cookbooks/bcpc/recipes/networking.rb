@@ -101,6 +101,10 @@ end
 subnet = node[:bcpc][:management][:subnet]
 # XXX change subnet to pod or cell!!!
 if ["floating", "storage", "management"].select{|i| node[:bcpc][:networks][subnet][i].attribute?("slaves")}.any?
+  package 'ifenslave' do
+    action :upgrade
+  end
+  
   bash "enable-bonding" do
     user "root"
     code <<-EOH
