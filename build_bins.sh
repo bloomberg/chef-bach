@@ -138,6 +138,20 @@ if ! [[ -f gems/webhdfs.gem ]]; then
 fi
 FILES="webhdfs*.gem $FILES"
 
+# Get the Rubygem for gssapi
+if ! [[ -f gems/gssapi.gem ]]; then
+  gem fetch gssapi -v 1.2.0
+  ln -s gssapi-*.gem gssapi.gem || true
+fi
+FILES="gssapi*.gem $FILES"
+
+# Get the Rubygem for ffi
+if ! [[ -f gems/ffi.gem ]]; then
+  gem fetch ffi -v 1.9.3
+  ln -s ffi-*.gem ffi.gem || true
+fi
+FILES="ffi*.gem $FILES"
+
 # Fetch the cirros image for testing
 if ! [[ -f cirros-0.3.0-x86_64-disk.img ]]; then
   while ! $(file cirros-0.3.0-x86_64-disk.img | grep -q 'QEMU QCOW Image'); do
