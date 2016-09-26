@@ -65,10 +65,10 @@ done
 echo "Checking for GNU screen to watch serial consoles"
 if hash screen 2>/dev/null ; then
   if [ "$(uname)" == "Darwin" ]; then
-   brew install coreutils  
-   pushd $(greadlink -f $(dirname $0)) 
+    brew install coreutils  
+    pushd $(greadlink -f $(dirname $0)) 
   else
-   pushd $(readlink -f $(dirname $0))
+    pushd $(readlink -f $(dirname $0))
   fi 
   screen -S "BACH Install" -c ./screenrc
   popd
