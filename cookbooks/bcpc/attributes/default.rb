@@ -21,6 +21,9 @@ default['bcpc']['domain_name'] = 'bcpc.example.com'
 default['bcpc']['vms_key'] = nil
 default['bcpc']['encrypt_data_bag'] = false
 
+# This is where you would set a proxy if one is needed at install time.
+default['bcpc']['bootstrap']['proxy'] = nil
+
 default['bcpc']['bootstrap']['preseed'].tap do |preseed|
   preseed['add_kernel_opts'] = 'console=ttyS0'
   preseed['additional_packages'] = %w[openssh-server lldpd ifenslave]
@@ -49,9 +52,6 @@ default['bcpc']['bootstrap']['preseed'].tap do |preseed|
           >> /tmp/early_command.out 2>&1; \\
       done
   EOM
-  
-  preseed['mirror_url'] =
-    'http://mirror.cc.columbia.edu/pub/linux/ubuntu/archive/'
 end
 
 default['bcpc']['bootstrap']['admin_users'] = []
@@ -230,6 +230,16 @@ end
 
 default[:bcpc][:repos] = node[:bcpc][:repos_for][node[:lsb][:codename]]
 
+###########################################
+#
+#  Overrides for the 'ubuntu' cookbook.
+#
+###########################################
+default[:ubuntu][:archive_url] =
+  'http://mirror.cc.columbia.edu/pub/linux/ubuntu/archive/'
+
+default[:ubuntu][:security_url] =
+  node[:ubuntu][:archive_url]
 
 ###########################################
 #

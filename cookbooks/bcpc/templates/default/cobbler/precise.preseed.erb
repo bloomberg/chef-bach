@@ -69,25 +69,13 @@ d-i     apt-setup/services-select       multiselect security
 d-i mirror/country string manual
 <%
   require 'uri'
-  mirror_url =
-    begin
-      if(@node[:bcpc][:bootstrap][:mirror])
-        # Old-style environment, with only a host name.
-        URI.parse('http://' + @node[:bcpc][:bootstrap][:mirror].to_s +
-	          '/ubuntu')
-      else
-        # New-style environment with complete host URL
-        URI.parse(@node[:bcpc][:bootstrap][:preseed][:mirror_url])
-      end
-    rescue
-      # Nothing supplied in the environment, just use public mirror.
-      URI.parse('http://us.archive.ubuntu.com/ubuntu')
-    end
+  archive_url = URI.parse(node[:ubuntu][:archive_url])
+  security_url = URI.parse(node[:ubuntu][:security_url])
 %>
-d-i mirror/http/directory string <%= mirror_url.path %>
-d-i mirror/http/hostname string <%= mirror_url.host %>
-d-i apt-setup/security_host <%= mirror_url.host %>
-d-i apt-setup/security_path <%= mirror_url.path %>
+d-i mirror/http/directory string <%= archive_url.path %>
+d-i mirror/http/hostname string <%= archive_url.host %>
+d-i apt-setup/security_host <%= security_url.host %>
+d-i apt-setup/security_path <%= security_url.path %>
 <% if @node[:bcpc][:bootstrap][:proxy].nil? %>
 d-i mirror/http/proxy string
 <% else %>
