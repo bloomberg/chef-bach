@@ -14,6 +14,7 @@ triggers = {
   'bcpc-bootstrap' => {
     'chef.bcpc-bootstrap.success' => {
       'query' => "chef.*.success",
+      'query_range' => "-10min",
       'trigger_val' => "max(30m)",
       'trigger_cond' => "=0",
       'trigger_name' => "bcpc-bootstrap_ChefClientNotRun",
@@ -88,6 +89,7 @@ monitored_nodes_objs.each do |node_obj|
   if triggers[host]["chef_client_success_#{host}"].nil?
     triggers[host]["chef.#{host}.success"] = {
       'query' => "chef.*.success",
+      'query_range' => "-10min",
       'trigger_val' => "max(#{node["bcpc"]["hadoop"]["zabbix"]["chef_client_check_interval"]})",
       'trigger_cond' => "=0",
       'trigger_name' => "#{host}_ChefClientNotRun",
@@ -101,6 +103,7 @@ monitored_nodes_objs.each do |node_obj|
   if triggers[host]["chef_client_fail_#{host}"].nil?
     triggers[host]["chef.#{host}.fail"] = {
       'query' => "chef.*.fail",
+      'query_range' => "-10min",
       'trigger_val' => "max(" +
         "#{node["bcpc"]["hadoop"]["zabbix"]["chef_client_check_interval"]}" +
       ")",

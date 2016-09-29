@@ -14,7 +14,9 @@ class GraphiteToZabbix(object):
 
   def __init__(self, threads=1):
     self.cn = self.__class__.__name__
-    self.graphite_url = "<%= @graphite_url %>/render?from=-<%= @metric_fetch_period %>min&format=json&target=%s"
+    #self.graphite_url = "<%= @graphite_url %>/render?from=-<%= @default_query_range %>min&format=json&target=%s"
+    self.graphite_url = "<%= @graphite_url %>/render?format=json"
+    self.default_query_range = "<%= @default_query_range %>"
     self.threads = threads
     self.re_strip_function = re.compile("^(.+\()(.+)(\))$")
     # On applying "self.re_strip_function", which index(start=1) in match.groups has the result 
@@ -34,14 +36,18 @@ class GraphiteToZabbix(object):
     handler.setFormatter(formatter)
     LOGGER.addHandler(handler)
 
-  def query_graphite(self, target):
+  def query_graphite(self, query_line):
     """
     Query graphite to retrieve monitoring data
     Time out to get a valid response from graphite URL is 30 seconds
     """
+    query_target, query_range = query_line.split()
+    query_target=query_target.strip()
+    query_range=query_range.strip()
+    query_string = self.graphite_url + "&from=" + query_range + "&target=" + query_target
 
-    target = target.strip()
-    req = urllib2.Request(self.graphite_url % target)
+    req = urllib2.Request(query_string)
+
     s_time = time.time()
     data = None
     try:
@@ -53,7 +59,7 @@ class GraphiteToZabbix(object):
       sys.stdout.write("%s %d %d\n" % ('graphite-to-zabbix graphite-to-zabbix.QueryResultError',int(time.time()),1))
     finally:
       e_time = time.time() - s_time
-      LOGGER.debug("%s took %d sec" % (target, e_time))
+      LOGGER.debug("%s took %d sec" % (query_target, e_time))
     return data
 
   def fetch_query_from_function(self, blob_query):
