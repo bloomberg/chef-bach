@@ -81,6 +81,10 @@ machine running (by default) four VirtualBox VMs. This simple install supports
 only changing DNS, proxy and VM resource settings. (This is the basis of our
 automated build tests.)
 
+Using the script [tests/automated_install.sh](./tests/automated_install.sh) on Mac OS (OS X),
+will require [`brew`](http://brew.sh) to be available/installed.
+
+
 Other Deployment Flavors
 ------------------------
 
