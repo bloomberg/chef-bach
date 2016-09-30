@@ -4,12 +4,6 @@
 #
 ################################################
 
-<% (@slaves or []).each do |slave| %>
-auto <%= slave %>
-iface <%= slave %> inet manual
-bond-master <%= @interface %>
-<% end %>
-
 auto <%= @interface %>
 iface <%= @interface %> inet static
  address <%= @ip %>
@@ -21,10 +15,7 @@ iface <%= @interface %> inet static
  dns-search <%="#{node[:bcpc][:domain_name]}"%>
  <% end %>
  <% if @slaves %>
- bond-mode 4
- bond-miimon 100
- bond-lacp-rate 1
- bond-slaves <%= @slaves.join(" ") %>
+ pre-up /usr/local/sbin/pre-up.<%= @interface %>.sh
  <% end %>
  <% if @mtu %>
  mtu <%= @mtu %>

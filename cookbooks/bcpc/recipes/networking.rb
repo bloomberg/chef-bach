@@ -91,22 +91,9 @@ bash 'set-tcp-keepalive-timeout' do
   not_if "grep -e '^net.ipv4.tcp_keepalive_time=1800' /etc/sysctl.conf"
 end
 
-bash 'enable-mellanox' do
-  user 'root'
-  code(
-    <<-EOH
-                if [ -z "`lsmod | grep mlx4_en`" ]; then
-                   modprobe mlx4_en
-                fi
-                if [ -z "`grep mlx4_en /etc/modules`" ]; then
-                   echo "mlx4_en" >> /etc/modules
-                fi
-    EOH
-  )
-  only_if 'lspci | grep Mellanox'
-end
-
 subnet = node[:bcpc][:management][:subnet]
+
+node.run_state['bcpc_networking_modules'] = %w(8021q mlx4_en)
 
 # XXX change subnet to pod or cell!!!
 if %w(floating storage management).select do |i|
@@ -114,12 +101,10 @@ if %w(floating storage management).select do |i|
   end.any?
 
   package 'ifenslave' do
-    action :upgrade
+    action :purge
   end
 
-  node.run_state['bcpc_networking_modules'] = %w(bonding 8021q)
-else
-  node.run_state['bcpc_networking_modules'] = %w(8021q)
+  node.run_state['bcpc_networking_modules'] << 'bonding'
 end
 
 node.run_state['bcpc_networking_modules'].each do |module_name|
@@ -168,14 +153,15 @@ if node[:bcpc][:management][:vip] && get_nodes_for('powerdns').any?
   resolvers.unshift node[:bcpc][:management][:vip]
 end
 
-ruby_block 'bcpc-update-resolvers' do
+ruby_block 'bcpc-add-resolvers' do
   resolvconf_interface_name =
     node[:bcpc][:networks][subnet][:management][:interface].to_s + '.inet'
 
   block do
     require 'English'
 
-    IO.popen(['resolvconf', '-a', resolvconf_interface_name], 'r+') do |resolvconf|
+    IO.popen(['resolvconf', '-a', resolvconf_interface_name],
+             'r+') do |resolvconf|
       resolvers.each do |rr|
         resolvconf.puts("nameserver #{rr}")
       end
@@ -193,27 +179,155 @@ ifaces.each_index do |i|
   iface = ifaces[i]
   device_name = node[:bcpc][:networks][subnet][iface][:interface]
 
+  network_template_variables =
+    {
+     interface: node[:bcpc][:networks][subnet][iface][:interface],
+     ip: node[:bcpc][iface][:ip],
+     netmask: node[:bcpc][:networks][subnet][iface][:netmask],
+     gateway: node[:bcpc][:networks][subnet][iface][:gateway],
+     slaves: node[:bcpc][:networks][subnet][iface]['slaves'] || false,
+     dns: resolvers,
+     mtu: node[:bcpc][:networks][subnet][iface][:mtu],
+     metric: i * 100
+    }
+
   template "/etc/network/interfaces.d/#{device_name}.cfg" do
     source 'network.iface.erb'
     owner 'root'
     group 'root'
-    mode 00644
-    variables(interface: node[:bcpc][:networks][subnet][iface][:interface],
-              ip: node[:bcpc][iface][:ip],
-              netmask: node[:bcpc][:networks][subnet][iface][:netmask],
-              gateway: node[:bcpc][:networks][subnet][iface][:gateway],
-              slaves: node[:bcpc][:networks][subnet][iface]['slaves'] || false,
-              dns: resolvers,
-              mtu: node[:bcpc][:networks][subnet][iface][:mtu],
-              metric: i * 100)
+    mode 0644
+    variables network_template_variables
   end
 
-  execute "bcpc-networking-#{iface}-up" do
-    slaves = node[:bcpc][iface][:slaves].to_a
-    command "ifup #{device_name} #{slaves.join(' ')}"
-    not_if "ip link show up | grep #{device_name}"
+  if network_template_variables[:slaves]
+    template "/usr/local/sbin/pre-up.#{device_name}.sh" do
+      source 'network-interface-pre-up.sh.erb'
+      owner 'root'
+      group 'root'
+      mode 0555
+      variables network_template_variables
+    end
   end
 end
+
+execute 'bcpc-interfaces-up' do
+  command 'ifup -a'
+end
+
+ruby_block 'bcpc-deconfigure-dhcp-interfaces' do
+  action :run
+  block do
+    # Read the DHCP lease files, then pull all the interface names out.
+    lease_interface_regex = /\s*interface\s+"(.*?)"\s*;\s*$/
+
+    lease_files = Dir.glob('/var/lib/dhcp/dhclient*.leases')
+
+    lease_interface_lines = lease_files.map do |file_name|
+      ::File.readlines(file_name).select do |line|
+        line.include?('interface') 
+      end
+    end.flatten
+
+    lease_interfaces = lease_interface_lines.map do |line|
+      lease_interface_regex.match(line)[1] rescue nil
+    end.compact.uniq
+
+    #
+    # Before we begin, verify that we have a new default route
+    # installed -- we do not want to deconfigure any interfaces if the
+    # new route and new interface are not up!
+    #
+    require 'mixlib/shellout'
+    route_command = Mixlib::ShellOut.new('ip', 'route')
+    route_command.run_command
+    route_command.error!
+
+    default_routes = route_command.stdout.lines.select do |line|
+      line.start_with?('default')
+    end
+
+    if default_routes.length < 2
+      raise 'Cannot deconfigure DHCP interfaces (' +
+        (lease_interfaces.join(' ') rescue '') + '), ' \
+        'fewer than 2 default routes are configured!'
+    end
+
+    #
+    # Look at the list of interfaces for which a default route is
+    # bound, omitting any that are slated to be deconfigured.
+    #
+    # Unless that list is non-zero, and at least one of them is up, abort!
+    #
+    route_interface_regex = /^default.*dev\s+(.*?)\s/
+
+    route_interfaces = default_routes.map do |route_line|
+      route_interface_regex.match(route_line)[1] rescue nil
+    end.compact.uniq
+
+    # Remove any soon-to-be-deconfigured interfaces from the list.
+    route_interfaces = route_interfaces - lease_interfaces
+
+    up_command = Mixlib::ShellOut.new('ip', 'link', 'show', 'up')
+    up_command.run_command
+    up_command.error!
+
+    active_route_interfaces = route_interfaces.select do |iface_name|
+      up_command.stdout.lines.select do |line|
+        /.*?:\s+#{iface_name}/.match(line)
+      end.any?
+    end
+
+    unless active_route_interfaces.any?
+      raise 'Cannot deconfigure DHCP interfaces, ' \
+        'no active interface would be configured with a default route!'
+    end
+
+    #
+    # Before we begin killing routes, wait a few seconds for the LACP
+    # link to settle.
+    #
+    settle_time = 10
+    Chef::Log.debug("Sleeping #{settle_time} seconds before " \
+                     'deconfiguring interfaces')
+    sleep(settle_time)
+
+    #
+    # Kill all dhclient instances.
+    #
+    Chef::Resource::Execute.new('bcpc-kill-dhclient',
+                                 run_context).tap do |r|
+      r.command 'pkill -u root dhclient'
+      r.run_action :run
+    end
+
+    #
+    # De-configure each interface manually.
+    #
+    # It can't be done with ifdown because we no longer have a
+    # definition in /etc/network/interfaces for our target interfaces.
+    #
+    # Commands are executed with generated resources so that each one
+    # prints out nicely in the chef-client log.
+    #
+    deliberately_configured_interfaces =
+      node[:bcpc][:networks][subnet].values.map do |nn|
+        nn[:interface]
+      end.uniq
+
+    deconfigure_targets =
+      lease_interfaces - deliberately_configured_interfaces
+
+    deconfigure_targets.each do |interface|
+      Chef::Resource::Execute.new("bcpc-deconfigure-#{interface}",
+                                  run_context).tap do |r|
+        r.command "ip addr flush dev #{interface}; ifup -a"
+        r.run_action :run
+      end
+    end
+  end
+  only_if 'pgrep dhclient'
+end
+
 
 if node[:bcpc][:networks][subnet][:management][:interface] !=
    node[:bcpc][:networks][subnet][:storage][:interface]
@@ -224,6 +338,14 @@ if node[:bcpc][:networks][subnet][:management][:interface] !=
   end
 end
 
+#
+# Routing scripts for multi-home hosts
+#
+# These scripts are primarily used in VM clusters.  They must be run
+# after deconfiguring DHCP interfaces because otherwise the
+# deconfigure block won't find the duplicate default gateway in order
+# to identify deconfigurable devices.
+#
 unique_interfaces =
   node[:bcpc][:networks][subnet].values.map do |nn|
     nn[:interface]
