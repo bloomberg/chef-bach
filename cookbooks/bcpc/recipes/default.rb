@@ -17,6 +17,25 @@
 # limitations under the License.
 #
 
+require 'uri' 
+ubuntu_archive_host = URI.parse(node[:ubuntu][:archive_url]).host
+ubuntu_archive_proxy_string = if node[:bcpc][:bootstrap][:proxy]
+                                '"' + node[:bcpc][:bootstrap][:proxy] + '"'
+                              else
+                                'DIRECT'
+                              end
+
+file '/etc/apt/apt.conf.d/99ubuntu_archive_proxy' do
+  mode 0444
+  content <<-EOM.gsub(/^ {4}/,'')
+    Acquire::http::Proxy {
+      #{ubuntu_archive_host} #{ubuntu_archive_proxy_string};
+    };
+  EOM
+end
+
+include_recipe 'ubuntu'
+
 require 'ipaddr'
 
 ifs = node[:network][:interfaces].keys

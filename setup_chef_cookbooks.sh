@@ -26,8 +26,12 @@ mkdir .chef
 cat << EOF > .chef/knife.rb
 require 'rubygems'
 require 'ohai'
+
+# Disable the Ohai password module which explodes on a Single-Sign-On-joined system
+Ohai::Config[:disabled_plugins] = [ "passwd" ]
+
 o = Ohai::System.new
-o.all_plugins
+o.all_plugins(['hostname','ipaddress'])
  
 log_level                :info
 node_name                o[:fqdn]
@@ -49,10 +53,16 @@ if [[ -n "$PROXY" ]]; then
 no_proxy_array = ["localhost", o[:ipaddress], o[:hostname], o[:fqdn], "${BOOTSTRAP_IP}", "${binary_server_host}"]
 no_proxy_array.insert("*#{o[:domain]}") unless o[:domain].nil?
 no_proxy_string = no_proxy_array.uniq * ","
-
-ENV['http_proxy'] = "${http_proxy}"
-ENV['https_proxy'] = "${https_proxy}"
 ENV['no_proxy'] = no_proxy_string
+
+http_proxy_string = "${http_proxy}"
+ENV['http_proxy'] =
+  http_proxy_string.downcase.start_with?('http') ? http_proxy_string : nil
+
+https_proxy_string = "${https_proxy}"
+ENV['https_proxy'] =
+  https_proxy_string.downcase.start_with?('http') ? https_proxy_string : nil
+
 http_proxy ENV['http_proxy']
 https_proxy ENV['https_proxy']
 no_proxy no_proxy_string
@@ -62,4 +72,3 @@ fi
 
 mkdir -p ./vendor
 /opt/chefdk/bin/berks vendor ./vendor/cookbooks
-

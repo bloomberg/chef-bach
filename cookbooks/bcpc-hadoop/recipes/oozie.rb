@@ -1,6 +1,38 @@
+#
+# Cookbook Name:: bcpc-hadoop
+# Recipe:: oozie
+#
+# Copyright 2013, Bloomberg Finance L.P.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+#
+# This recipe configures the Oozie server on head nodes.
+#
+
+include_recipe 'bcpc::mysql'
 include_recipe 'bcpc-hadoop::oozie_config'
+
 ::Chef::Recipe.send(:include, Bcpc_Hadoop::Helper)
 ::Chef::Resource::Bash.send(:include, Bcpc_Hadoop::Helper)
+
+#
+# These data bags and vault items are pre-populated at compile time by
+# the bcpc::mysql_data_bags recipe.
+#
+oozie_user = get_config('mysql-oozie-user') || 'oozie'
+oozie_password = get_config!('password', 'mysql-oozie', 'os')
 
 hdp_rel = node[:bcpc][:hadoop][:distribution][:active_release]
 oozie_conf_dir = "/etc/oozie/conf.#{node.chef_environment}"
@@ -24,10 +56,18 @@ configure_kerberos 'oozie_kerb' do
   service_name 'oozie'
 end
 
-OOZIE_LIB_PATH = "/usr/hdp/#{hdp_rel}/oozie"
-OOZIE_CLIENT_PATH = '/usr/hdp/current/oozie-client'
-OOZIE_SERVER_PATH = "/usr/hdp/#{hdp_rel}/oozie/oozie-server"
-OOZIE_SHARELIB_TARBALL_PATH = "/usr/hdp/#{hdp_rel}/oozie/oozie-sharelib.tar.gz"
+OOZIE_LIB_PATH =
+  "/usr/hdp/#{hdp_rel}/oozie".freeze
+
+OOZIE_CLIENT_PATH =
+  '/usr/hdp/current/oozie-client'.freeze
+
+OOZIE_SERVER_PATH =
+  "/usr/hdp/#{hdp_rel}/oozie/oozie-server".freeze
+
+OOZIE_SHARELIB_TARBALL_PATH =
+  "/usr/hdp/#{hdp_rel}/oozie/oozie-sharelib.tar.gz".freeze
+
 HDFS_URL = node[:bcpc][:hadoop][:hdfs_url]
 
 directory "#{OOZIE_LIB_PATH}/libext" do
@@ -46,20 +86,11 @@ directory '/var/run/oozie' do
   recursive true
 end
 
-# bash "copy hadoop libs" do
-#   src_dir="/usr/hdp/#{hdp_rel}/hadoop/lib"
-#   dst_dir="#{OOZIE_LIB_PATH}/libext/"
-#   code "for f in `ls *.jar`; do ln -s #{src_dir}/$f #{dst_dir}/$f; done"
-#   cwd src_dir
-#   user "oozie"
-#   # check if all source files are in destination directory
-#   not_if { (::Dir.entries("#{src_dir}") -
-#             ::Dir.entries("#{dst_dir}")).empty? }
-# end
-
-['/usr/share/HDP-oozie/ext-2.2.zip',
- '/usr/share/java/mysql-connector-java.jar',
- "/usr/hdp/#{hdp_rel}/hadoop/lib/hadoop-lzo-0.6.0.#{hdp_rel}.jar"].each do |dst|
+[
+  '/usr/share/HDP-oozie/ext-2.2.zip',
+  '/usr/share/java/mysql-connector-java.jar',
+  "/usr/hdp/#{hdp_rel}/hadoop/lib/hadoop-lzo-0.6.0.#{hdp_rel}.jar"
+].each do |dst|
   link "#{OOZIE_LIB_PATH}/libext/#{File.basename(dst)}" do
     to dst
   end
@@ -93,9 +124,8 @@ HBASE_CLIENT_LIB = "/usr/hdp/#{hdp_rel}/hbase/lib"
 end
 
 bash 'copy ssl configuration' do
-  code <<-EOH
-    cp -r /usr/hdp/#{hdp_rel}/oozie/tomcat-deployment/conf/ssl /etc/oozie/conf/
-  EOH
+  code("cp -r /usr/hdp/#{hdp_rel}/oozie/tomcat-deployment/conf/ssl " \
+       '/etc/oozie/conf/')
 end
 
 service 'stop oozie for war setup' do
@@ -151,19 +181,15 @@ link "#{oozie_conf_dir}/yarn-site.xml" do
 end
 
 bash 'make oozie user dir' do
-  code <<-EOH
-    hdfs dfs -mkdir -p #{HDFS_URL}/user/oozie && \
-    hdfs dfs -chown -R oozie #{HDFS_URL}/user/oozie
-  EOH
+  code("hdfs dfs -mkdir -p #{HDFS_URL}/user/oozie && " \
+       "hdfs dfs -chown -R oozie #{HDFS_URL}/user/oozie")
   user 'hdfs'
   not_if "hdfs dfs -test -d #{HDFS_URL}/user/oozie", user: 'hdfs'
 end
 
 bash 'oozie create shared libs' do
-  code <<-EOH
-    #{OOZIE_CLIENT_PATH}/bin/oozie-setup.sh sharelib create \
-      -fs #{HDFS_URL} -locallib #{OOZIE_SHARELIB_TARBALL_PATH}
-  EOH
+  code("#{OOZIE_CLIENT_PATH}/bin/oozie-setup.sh sharelib create " \
+       "-fs #{HDFS_URL} -locallib #{OOZIE_SHARELIB_TARBALL_PATH}")
   user 'oozie'
   not_if do
     require 'digest'
@@ -205,35 +231,51 @@ file "#{OOZIE_CLIENT_PATH}/oozie.sql" do
   group 'oozie'
 end
 
-ruby_block 'oozie database creation' do
-  cmd = "mysql -uroot -p#{get_config!('password', 'mysql-root', 'os')}"
-  privs = 'CREATE,INDEX,SELECT,INSERT,UPDATE,DELETE,LOCK TABLES,EXECUTE'
-  block do
-    unless system <<-EOH
-      #{cmd} <<< 'SELECT SCHEMA_NAME
-                  FROM INFORMATION_SCHEMA.SCHEMATA
-                  WHERE SCHEMA_NAME = \"oozie\"' | grep oozie
-    EOH
-      code = <<-EOF
-        CREATE DATABASE oozie;
-        GRANT #{privs} ON oozie.* TO 'oozie'@'%'
-          IDENTIFIED BY '#{get_config('mysql-oozie-password')}';
-        GRANT #{privs} ON oozie.* TO 'oozie'@'localhost'
-          IDENTIFIED BY '#{get_config('mysql-oozie-password')}';
-        FLUSH PRIVILEGES;
-      EOF
-      IO.popen("mysql -uroot -p#{get_config!('password', 'mysql-root', 'os')}",
-               'r+') do |db|
-        db.write code
-      end
-      system <<-EOH
-        sudo -u oozie /usr/hdp/#{hdp_rel}/oozie/bin/ooziedb.sh create \
-        -sqlfile /usr/hdp/#{hdp_rel}/oozie/oozie.sql \
-        -run Validate DB Connection
-      EOH
-      resolve_notification_references
-    end
+#
+# It is helpful to connect through the cluster VIP for initial
+# database configuration so that failures are caught before the schema
+# installation fails with a much less obvious error message.
+#
+mysql_database 'oozie' do
+  connection mysql_global_vip_connection_info
+  encoding 'UTF8'
+  action :create
+end
+
+[
+  '%',
+  'localhost'
+].each do |host_name|
+  #
+  # Connecting to the global VIP for user creation is safe only
+  # because the database cookbook providers use 'CREATE USER', which
+  # replicates across cluster members.
+  #
+  # Performing the same operation with 'INSERT' into system tables
+  # will fail to replicate!
+  #
+  mysql_database_user oozie_user do
+    connection mysql_global_vip_connection_info
+    host host_name
+    password oozie_password
+    action :create
   end
+
+  mysql_database_user oozie_user do
+    connection mysql_global_vip_connection_info
+    database_name 'oozie'
+    host host_name
+    privileges ['ALL PRIVILEGES']
+    action :grant
+  end
+end
+
+execute 'ooziedb-create' do
+  user 'oozie'
+  cwd '/tmp'
+  command "#{OOZIE_LIB_PATH}/bin/ooziedb.sh create " \
+    "-sqlfile #{OOZIE_LIB_PATH}/oozie.sql " \
+    '-run Validate DB Connection'
 end
 
 link '/etc/init.d/oozie' do
@@ -261,7 +303,7 @@ service 'generally run oozie' do
   subscribes :restart, 'bash[hdp-select oozie-server]', :delayed
 end
 
-ruby_block 'chek if oozie running' do
+ruby_block 'check if oozie running' do
   i = 0
   block do
     until oozie_running?(float_host(node[:fqdn]))
@@ -272,7 +314,7 @@ ruby_block 'chek if oozie running' do
       else
         Chef::Application.fatal!(
           'Oozie is reported as down for more than 5 seconds')
-        fail
+        raise
       end
     end
     Chef::Log.debug('Oozie is up')

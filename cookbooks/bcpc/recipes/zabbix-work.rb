@@ -17,72 +17,64 @@
 # limitations under the License.
 #
 
-include_recipe "bcpc::default"
+include_recipe 'bcpc::default'
+include_recipe 'bcpc::zabbix-repo'
 
-remote_file "/tmp/zabbix-agent.tar.gz" do
-    source "#{get_binary_server_url}/zabbix-agent.tar.gz"
-    owner "root"
-    mode 00444
-    not_if { File.exists?("/usr/local/sbin/zabbix_agentd") }
+# Stop the old service if we find the old service definition
+service 'zabbix-agent' do
+  action :stop
+  only_if { File.exist?('/etc/init/zabbix-agent.conf') }
 end
 
-bash "install-zabbix-agent" do
-    code "tar zxf /tmp/zabbix-agent.tar.gz -C /usr/local/ && rm /tmp/zabbix-agent.tar.gz"
-    not_if { File.exists?("/usr/local/sbin/zabbix_agentd") }
+# Remove the old service definition from the source-based build.
+file '/etc/init/zabbix-agent.conf' do
+  action :delete
+end
+
+[
+  'zabbix-agent',
+  'zabbix-sender'
+].each do |package_name|
+  package package_name do
+    action :upgrade
+  end
 end
 
 user node[:bcpc][:zabbix][:user] do
-    shell "/bin/false"
-    home "/var/log"
+    shell '/bin/false'
+    home '/var/log'
     gid node[:bcpc][:zabbix][:group]
     system true
 end
 
-directory "/var/log/zabbix" do
+directory '/var/log/zabbix' do
     user node[:bcpc][:zabbix][:user]
     group node[:bcpc][:zabbix][:group]
-    mode 00755
+    mode 0755
 end
 
-template "/etc/init/zabbix-agent.conf" do
-    source "upstart-zabbix-agent.conf.erb"
-    owner "root"
-    group "root"
-    mode 00644
-    notifies :restart, "service[zabbix-agent]", :delayed
-end
-
-template "/usr/local/etc/zabbix_agent.conf" do
-    source "zabbix_agent.conf.erb"
+template '/etc/zabbix/zabbix_agentd.conf' do
+    source 'zabbix/agentd.conf.erb'
     owner node[:bcpc][:zabbix][:user]
-    group "root"
-    mode 00600
-    notifies :restart, "service[zabbix-agent]", :delayed
+    group 'root'
+    mode 0600
+    notifies :restart, 'service[zabbix-agent]', :delayed
 end
 
-template "/usr/local/etc/zabbix_agentd.conf" do
-    source "zabbix_agentd.conf.erb"
-    owner node[:bcpc][:zabbix][:user]
-    group "root"
-    mode 00600
-    notifies :restart, "service[zabbix-agent]", :delayed
-end
-
-service "zabbix-agent" do
-    provider Chef::Provider::Service::Upstart
-    action [ :enable, :start ]
-end
-
-directory "/usr/local/bin/checks" do
+directory '/usr/local/bin/checks' do
   action :create
   owner  node[:bcpc][:zabbix][:user]
-  group "root"
-  mode 00775
+  group 'root'
+  mode 0775
 end 
 
-directory "/usr/local/etc/checks" do
+directory '/usr/local/etc/checks' do
   action  :create
   owner  node[:bcpc][:zabbix][:user]
-  group "root"
-  mode 00775
+  group 'root'
+  mode 0775
 end 
+
+service 'zabbix-agent' do
+    action [:enable, :start]
+end

@@ -83,14 +83,4 @@
             allow from all
         </IfModule>
     </Directory>
-    Alias /hwraid /var/spool/apt-mirror/mirror/hwraid.le-vert.net/ubuntu
-    Alias /percona /var/spool/apt-mirror/mirror/repo.percona.com/apt
-    Alias /ubuntu-cloud /var/spool/apt-mirror/mirror/ubuntu-cloud.archive.canonical.com/ubuntu
-    Alias /rabbitmq /var/spool/apt-mirror/mirror/www.rabbitmq.com/debian
-    Alias /ubuntu /var/spool/apt-mirror/mirror/us.archive.ubuntu.com/ubuntu
-    Alias /canonical-support /var/spool/apt-mirror/mirror/ppa.launchpad.net/canonical-support/support-tools/ubuntu
-    Alias /hdp /var/spool/apt-mirror/mirror/<%= hwx_uri = URI(node.default["bcpc"]["repos"]["hortonworks"]); hwx_uri.host + hwx_uri.path %>
-    Alias /hdp-utils /var/spool/apt-mirror/mirror/<%= hdp_utils_uri = URI(node.default["bcpc"]["repos"]["hdp_utils"]); hdp_utils_uri.host + hdp_utils_uri.path %>
-    Alias /cloudera /var/spool/apt-mirror/mirror/archive.cloudera.com/cdh5/ubuntu/precise/amd64/cdh
-    Alias /cloudera-gpl /var/spool/apt-mirror/mirror/archive.cloudera.com/gplextras5/ubuntu/lucid/amd64/gplextras
 </VirtualHost>

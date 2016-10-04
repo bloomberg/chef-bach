@@ -4,10 +4,9 @@
 set -e
 set -x
 
-# Define the version of Zabbix server and zabbixapi gem to be downloaded
+# Define the version of zabbixapi gem to be downloaded
 # Refer https://github.com/bloomberg/chef-bcpc/issues/343
 ZABBIXAPI_VERSION=2.4.5
-ZABBIX_VERSION=2.4.5
 
 # Define the appropriate version of each binary to grab/build
 VER_KIBANA=d1495fbf6e9c20c707ecd4a77444e1d486a1e7d6
@@ -43,7 +42,7 @@ mkdir -p $APT_REPO_BINS
 apt-get -y update
 
 # Install tools needed for packaging
-apt-get -y install git rubygems make pkg-config pbuilder python-mock python-configobj python-support cdbs python-all-dev python-stdeb libmysqlclient-dev libldap2-dev ruby-dev gcc patch rake ruby1.9.3 ruby1.9.1-dev python-pip python-setuptools dpkg-dev apt-utils haveged libtool autoconf automake autotools-dev unzip rsync autogen
+apt-get -y install git ruby make pkg-config pbuilder python-mock python-configobj python-support cdbs python-all-dev python-stdeb libmysqlclient-dev libldap2-dev ruby-dev gcc patch rake ruby1.9.3 ruby1.9.1-dev python-pip python-setuptools dpkg-dev apt-utils haveged libtool autoconf automake autotools-dev unzip rsync autogen
 
 # Install json gem first to avoid a too-new version being pulled in by other gems.
 if [[ -z `gem list --local json | grep json | cut -f1 -d" "` ]]; then
@@ -94,8 +93,8 @@ if ! [[ -f jce_policy-8.zip ]]; then
 fi
 FILES="jce_policy-8.zip $FILES"
 
-# Pull all the gems required for the cluster 
-for i in patron wmi-lite simple-graphite ruby-augeas; do
+# Pull all the (unversioned) gems required for the cluster 
+for i in patron wmi-lite simple-graphite ruby-augeas chef-rewind; do
   if ! [[ -f gems/${i}.gem ]]; then
     gem fetch ${i}
     ln -s ${i}-*.gem ${i}.gem || true
@@ -103,12 +102,12 @@ for i in patron wmi-lite simple-graphite ruby-augeas; do
   FILES="${i}*.gem $FILES"
 done
 
-# Get the Rubygem for zookeeper
-if ! [[ -f gems/zookeeper.gem ]]; then
-  gem fetch zookeeper -v 1.4.7
-  ln -s zookeeper-*.gem zookeeper.gem || true
+# Get the Rubygem for mysql2
+if ! [[ -f gems/mysql2.gem ]]; then
+  gem fetch mysql2 -v 0.4.4
+  ln -s mysql2-*.gem mysql2.gem || true
 fi
-FILES="zookeeper*.gem $FILES"
+FILES="mysql2*.gem $FILES"
 
 # Get the Rubygem for kerberos
 if ! [[ -f gems/rake-compiler.gem ]]; then
@@ -117,12 +116,26 @@ if ! [[ -f gems/rake-compiler.gem ]]; then
 fi
 FILES="rake-compiler*.gem $FILES"
 
-# Get the Rubygem for kerberos
+# Get the Rubygem for sequel
+if ! [[ -f gems/sequel.gem ]]; then
+  gem fetch sequel -v 4.36.0
+  ln -s sequel-*.gem sequel.gem || true
+fi
+FILES="sequel*.gem $FILES"
+
+# Get the Rubygem for rkerberos
 if ! [[ -f gems/rkerberos.gem ]]; then
   gem fetch rkerberos
   ln -s rkerberos*.gem rkerberos.gem || true
 fi
 FILES="rkerberos*.gem $FILES"
+
+# Get the Rubygem for webhdfs
+if ! [[ -f gems/webhdfs.gem ]]; then
+  gem fetch webhdfs -v 0.5.5
+  ln -s webhdfs-*.gem webhdfs.gem || true
+fi
+FILES="webhdfs*.gem $FILES"
 
 # Get Rubygem for zabbixapi
 if ! [[ -f gems/zabbixapi.gem ]]; then
@@ -131,12 +144,12 @@ if ! [[ -f gems/zabbixapi.gem ]]; then
 fi
 FILES="zabbix*.gem $FILES"
 
-# Get the Rubygem for webhdfs
-if ! [[ -f gems/webhdfs.gem ]]; then
-  gem fetch webhdfs -v 0.5.5
-  ln -s webhdfs-*.gem webhdfs.gem || true
+# Get the Rubygem for zookeeper
+if ! [[ -f gems/zookeeper.gem ]]; then
+  gem fetch zookeeper -v 1.4.7
+  ln -s zookeeper-*.gem zookeeper.gem || true
 fi
-FILES="webhdfs*.gem $FILES"
+FILES="zookeeper*.gem $FILES"
 
 # Fetch the cirros image for testing
 if ! [[ -f cirros-0.3.0-x86_64-disk.img ]]; then
@@ -146,17 +159,24 @@ if ! [[ -f cirros-0.3.0-x86_64-disk.img ]]; then
 fi
 FILES="cirros-0.3.0-x86_64-disk.img $FILES"
 
-# Grab the Ubuntu 12.04 installer image
-UBUNTU_IMAGE="ubuntu-12.04-mini.iso"
-
-if ! [[ -f $UBUNTU_IMAGE ]]; then
-  # Download this ISO to get the latest kernel/X LTS stack installer
-  #$CURL -o $UBUNTU_IMAGE http://archive.ubuntu.com/ubuntu/dists/precise-updates/main/installer-amd64/current/images/raring-netboot/mini.iso
-  while ! $(file $UBUNTU_IMAGE | grep -qE '(x86 boot sector)|(ISO 9660 CD-ROM)'); do
-    $CURL -o $UBUNTU_IMAGE http://archive.ubuntu.com/ubuntu/dists/precise-updates/main/installer-amd64/20101020ubuntu136.21/images/netboot/mini.iso
-  done
+# Grab the Ubuntu 14.04 installer image with a 4.4 "HWE" kernel from Xenial
+TRUSTY_IMAGE="ubuntu-14.04-hwe44-mini.iso"
+if ! [[ -f $TRUSTY_IMAGE ]]; then
+    while ! $(file $TRUSTY_IMAGE | grep -qE '(x86 boot sector)|(ISO 9660 CD-ROM)'); do
+	$CURL -o $TRUSTY_IMAGE http://archive.ubuntu.com/ubuntu/dists/trusty-updates/main/installer-amd64/current/images/xenial-netboot/mini.iso
+    done
 fi
-FILES="$UBUNTU_IMAGE $FILES"
+FILES="$TRUSTY_IMAGE $FILES"
+
+# Grab the Ubuntu 12.04 installer image with a 3.13 kernel.
+PRECISE_IMAGE="ubuntu-12.04-hwe313-mini.iso"
+if ! [[ -f $PRECISE_IMAGE ]]; then
+    while ! $(file $PRECISE_IMAGE | grep -qE '(x86 boot sector)|(ISO 9660 CD-ROM)'); do
+	$CURL -o $PRECISE_IMAGE http://archive.ubuntu.com/ubuntu/dists/precise-updates/main/installer-amd64/current/images/trusty-netboot/mini.iso
+    done
+fi
+FILES="$PRECISE_IMAGE $FILES"
+
 
 # Make the diamond package
 if ! [[ -f diamond.deb ]]; then
@@ -248,40 +268,6 @@ if ! [[ -f python-requests-aws_0.1.5_all.deb ]]; then
 fi
 FILES="python-requests-aws_0.1.5_all.deb $FILES"
 
-# Build the zabbix packages
-if [ ! -f zabbix-agent.tar.gz ] || [ ! -f zabbix-server.tar.gz ]; then
-    # Create a zabbix source distribution from the official git mirror.
-    rm -rf /tmp/zabbix-${ZABBIX_VERSION}
-    git clone https://github.com/zabbix/zabbix /tmp/zabbix-${ZABBIX_VERSION}
-    pushd /tmp/zabbix-${ZABBIX_VERSION}
-    git checkout tags/${ZABBIX_VERSION}
-    ./bootstrap.sh
-    ./configure
-    make dbschema
-    popd
-    tar -czf zabbix-${ZABBIX_VERSION}.tar.gz -C /tmp zabbix-${ZABBIX_VERSION}
-
-    # Actually build zabbix.
-    tar zxf zabbix-${ZABBIX_VERSION}.tar.gz
-    rm -rf /tmp/zabbix-install && mkdir -p /tmp/zabbix-install
-    cd zabbix-${ZABBIX_VERSION}
-    ./configure --prefix=/tmp/zabbix-install --enable-agent --with-ldap
-    make install
-    tar zcf zabbix-agent.tar.gz -C /tmp/zabbix-install .
-    rm -rf /tmp/zabbix-install && mkdir -p /tmp/zabbix-install
-    ./configure --prefix=/tmp/zabbix-install --enable-server --with-mysql --with-ldap
-    make install
-    cp -a frontends/php /tmp/zabbix-install/share/zabbix/
-    cp database/mysql/* /tmp/zabbix-install/share/zabbix/
-    tar zcf zabbix-server.tar.gz -C /tmp/zabbix-install .
-    rm -rf /tmp/zabbix-install
-    cd ..
-    cp zabbix-${ZABBIX_VERSION}/zabbix-agent.tar.gz .
-    cp zabbix-${ZABBIX_VERSION}/zabbix-server.tar.gz .
-    rm -rf zabbix-${ZABBIX_VERSION} zabbix-${ZABBIX_VERSION}.tar.gz
-fi
-FILES="zabbix-agent.tar.gz zabbix-server.tar.gz $FILES"
-
 # Gather the Chef packages and provide a dpkg repo
 opscode_urls="https://opscode-omnibus-packages.s3.amazonaws.com/ubuntu/12.04/x86_64/chef_11.12.8-2_amd64.deb
 https://opscode-omnibus-packages.s3.amazonaws.com/ubuntu/12.04/x86_64/chef-server_11.1.1-1_amd64.deb
@@ -329,15 +315,24 @@ chmod -R 755 .
 
 ####################
 # generate Pypi repo
-
-# Wheel installs require setuptools >= 0.8 for dist-info support.
-# can then follow http://askubuntu.com/questions/399446
-# but can't upgrade setuptools first as:
-# "/usr/bin/pip install: error: no such option: --no-use-wheel"
 if ! hash dir2pi; then
-  /usr/bin/pip install pip2pi || /bin/true
-  /usr/local/bin/pip install setuptools --no-use-wheel --upgrade
-  /usr/local/bin/pip install pip2pi
+    PIP_VERSION=`pip --version | perl -nle 'm/pip\s+([\d\.]+)/; print $1'`
+    
+    # If we have an ancient pip, upgrade it before getting pip2pi.
+    if ruby -e "exit 1 if Gem::Version.new('$PIP_VERSION') > \ 
+                          Gem::Version.new('1.5.4')"
+    then
+	# Wheel installs require setuptools >= 0.8 for dist-info support.
+	# can then follow http://askubuntu.com/questions/399446
+	# but can't upgrade setuptools first as:
+	# "/usr/bin/pip install: error: no such option: --no-use-wheel"
+	echo "Upgrading pip before pip2pi install"
+	/usr/bin/pip install pip2pi || /bin/true
+	/usr/local/bin/pip install setuptools --no-use-wheel --upgrade
+	/usr/local/bin/pip install pip2pi
+    else
+	/usr/bin/pip install pip2pi
+    fi	 
 fi
 
 dir2pi python
@@ -356,3 +351,4 @@ fi
 gem generate_index --legacy
 
 popd
+

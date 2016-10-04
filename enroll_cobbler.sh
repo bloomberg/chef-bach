@@ -28,25 +28,33 @@ pushd $DIR
 
 KEYFILE=bootstrap_chef.id_rsa
 
+# If we're using EFI VMs, then we must use Ubuntu 14.04 "Trusty"
+if vboxmanage showvminfo bcpc-vm1 --machinereadable | grep -i 'firmware="EFI"'
+then
+    PROFILE="bcpc_host_trusty"
+else
+    PROFILE="bcpc_host_precise"
+fi    
+
 subnet=10.0.100
 node=11
 for i in bcpc-vm1 bcpc-vm2 bcpc-vm3; do
-  MAC=`$VBM showvminfo --machinereadable $i | grep macaddress1 | cut -d \" -f 2 | sed 's/.\{2\}/&:/g;s/:$//'`
-  if [ -z "$MAC" ]; then 
-    echo "***ERROR: Unable to get MAC address for $i"
-    exit 1 
-  fi 
-  echo "Registering $i with $MAC for ${subnet}.${node}"
-  if hash vagrant 2>/dev/null; then
-    vagrant ssh -c "sudo cobbler system remove --name=$i; sudo cobbler system add --name=$i --hostname=$i --profile=bcpc_host --ip-address=${subnet}.${node} --mac=${MAC} --kopts=\"console=ttyS0\""
-  else
-    ssh -t -i $KEYFILE ubuntu@$1 "sudo cobbler system remove --name=$i; sudo cobbler system add --name=$i --hostname=$i --profile=bcpc_host --ip-address=${subnet}.${node} --mac=${MAC}"
-  fi
-  let node=node+1
+    MAC=`$VBM showvminfo --machinereadable $i | grep macaddress1 | cut -d \" -f 2 | sed 's/.\{2\}/&:/g;s/:$//'`
+    if [ -z "$MAC" ]; then 
+	echo "***ERROR: Unable to get MAC address for $i"
+	exit 1 
+    fi 
+    echo "Registering $i with $MAC for ${subnet}.${node}"
+    if hash vagrant 2>/dev/null; then
+	vagrant ssh -c "sudo cobbler system remove --name=$i; sudo cobbler system add --name=$i --hostname=$i --profile=$PROFILE --interface=eth0 --ip-address=${subnet}.${node} --mac=${MAC}"
+    else
+	ssh -t -i $KEYFILE ubuntu@$1 "sudo cobbler system remove --name=$i; sudo cobbler system add --name=$i --hostname=$i --profile=$PROFILE --interface=eth0 --ip-address=${subnet}.${node} --mac=${MAC}"
+    fi
+    let node=node+1
 done
 
 if hash vagrant 2>/dev/null; then
-  vagrant ssh -c "sudo cobbler sync"
+    vagrant ssh -c "sudo cobbler sync"
 else
-  ssh -t -i $KEYFILE ubuntu@$1 "sudo cobbler sync"
+    ssh -t -i $KEYFILE ubuntu@$1 "sudo cobbler sync"
 fi

@@ -1,7 +1,11 @@
 require 'rubygems'
 require 'ohai'
 o = Ohai::System.new
-o.all_plugins
+
+# Disable the Ohai password module which explodes on a Single-Sign-On-joined system
+Ohai::Config[:disabled_plugins] = [ "passwd" ]
+
+o.all_plugins(['hostname','ipaddress'])
 
 log_level                :info
 log_location             STDOUT
@@ -11,10 +15,7 @@ validation_client_name   'chef-validator'
 validation_key           '/etc/chef-server/chef-validator.pem'
 chef_server_url          'https://<%= node[:bcpc][:bootstrap][:server] %>'
 syntax_check_cache_path  '/home/vagrant/chef-bcpc/.chef/syntax_check_cache'
-cookbook_path            '/home/vagrant/chef-bcpc/cookbooks'
-
-# Disable the Ohai password module which explodes on a Single-Sign-On-joined system
-Ohai::Config[:disabled_plugins] = [ "passwd" ]
+cookbook_path            '/home/vagrant/chef-bcpc/vendor/cookbooks'
 
 <% if node[:bcpc][:bootstrap][:proxy] != nil -%>
 no_proxy_array = ["localhost", o[:ipaddress], o[:hostname], o[:fqdn], "<%= node[:bcpc][:bootstrap][:server] %>", "<%= node[:bcpc][:bootstrap][:server] %>"]

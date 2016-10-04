@@ -40,7 +40,10 @@
         "hostname" : "bcpc-bootstrap",
         "server" : "10.0.100.3",
         "dhcp_subnet" : "10.0.100.0",
-        "dhcp_range" : "10.0.100.14 10.0.100.250"
+        "dhcp_range" : "10.0.100.14 10.0.100.250",
+        "preseed": {
+	    "additional_packages": ["openssh-server","lldpd","virtualbox-guest-utils"]
+	}
       },
       "dns_servers" : [ "8.8.8.8", "8.8.4.4" ],
       "cluster" : {
@@ -55,58 +58,10 @@
         "hdfs" : {
           "dfs_replication_factor" : 1
         },
-       "hbase": {
-          "bucketcache": {
-            "enabled": false
-          },
-          "repl": {
-            "enabled": false
-          },
-          "repl": {
-            "target": ""
-          },
-          "shortcircuit": {
-            "read": false
-          },
-          "region": {
-            "replication": {
-              "enabled": false
-            }
-          },
-          "ipc": {
-            "warn": {
-              "responsetime": 300
-            }
-          }          
-        },
-        "hbase_rs": {
-          "xmn": {
-            "size": 256
-          },
-          "xms": {
-            "size": 1024
-          },
-          "xmx": {
-            "size": 1024
-          },
-          "mx_dir_mem": {
-            "size": 256
-          },
-          "hdfs_dir_mem": {
-            "size": 128
-          }
-        },
         "oozie": {
           "memory_opts": "-Xmx512m -XX:MaxPermSize=64m"
         }
       }
-    },
-    "kafka": {
-      "version": "0.8.1.1",
-      "scala_version": "2.9.2",
-      "checksum": "",
-      "md5_checksum": "",
-      "log_dir": "/disk/0"
     },
     "ntp": {
        "servers" : [ "0.pool.ntp.org", "1.pool.ntp.org", "2.pool.ntp.org", "3.pool.ntp.org" ]

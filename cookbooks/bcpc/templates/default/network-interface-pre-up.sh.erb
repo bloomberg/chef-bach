@@ -1,0 +1,28 @@
+#!/bin/bash
+# -*- mode: shell-script -*-
+#
+# Pre-up script to manually configure bonding on <%= @interface %>
+# (ifenslave is too buggy to use.)
+#
+
+MASTERS_PATH=/sys/class/net/bonding_masters
+if ! grep <%= @interface %> $MASTERS_PATH; then
+    echo +<%= @interface %> > $MASTERS_PATH
+fi
+
+MODE_PATH=/sys/class/net/<%= @interface %>/bonding/mode
+if ! grep 4 $MODE_PATH; then
+    ip link set <%= @interface %> down
+    echo 4 > $MODE_PATH
+fi
+
+SLAVE_PATH=/sys/class/net/<%= @interface %>/bonding/slaves
+<% (@slaves or []).each do |slave| %>
+if ! grep <%= slave %> $SLAVE_PATH; then
+    ip link set <%= @interface %> down
+    ip link set <%= slave %> down
+    echo +<%= slave %> > $SLAVE_PATH
+fi
+<% end %>
+
+ip link set <%= @interface %> up

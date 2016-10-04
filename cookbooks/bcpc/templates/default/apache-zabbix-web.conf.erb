@@ -9,8 +9,18 @@ NameVirtualHost <%="#{node[:bcpc][:management][:ip]}"%>:443
 
 <VirtualHost <%="#{node[:bcpc][:management][:vip]}"%>:<%="#{node[:bcpc][:zabbix][:web_port]}"%> <%="#{node[:bcpc][:management][:ip]}"%>:443>
     ServerName "zabbix.<%="#{node[:bcpc][:domain_name]}"%>"
-    DocumentRoot "/usr/local/share/zabbix/php"
+    DocumentRoot "/usr/share/zabbix"
     SSLEngine on
     SSLCertificateFile /etc/ssl/certs/ssl-bcpc.pem
     SSLCertificateKeyFile /etc/ssl/private/ssl-bcpc.key
+
+    <IfVersion >= 2.4>
+      <Location />
+        Require all granted
+      </Location>
+    </IfVersion>
+
+    # Include the Apache configuration packaged by upstream.
+    Include "/etc/zabbix/apache.conf"
 </VirtualHost>
+

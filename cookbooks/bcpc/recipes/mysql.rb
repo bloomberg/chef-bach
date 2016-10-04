@@ -17,175 +17,286 @@
 # limitations under the License.
 #
 
-include_recipe "bcpc::default"
+include_recipe 'bcpc::default'
+include_recipe 'bcpc::mysql_client'
+include_recipe 'bcpc::mysql_data_bags'
 
-bootstrap = get_all_nodes.select{|s| s.hostname.include? 'bootstrap'}[0].fqdn
+#
+# These data bags and vault items are pre-populated at compile time by
+# the bcpc::mysql_data_bags recipe.
+#
+check_user = get_config!('mysql-check-user')
+check_password = get_config!('password', 'mysql-check', 'os')
 
-nodes = get_nodes_for("mysql").map!{ |x| x['fqdn'] }.join(",")
+galera_user = get_config!('mysql-galera-user')
+galera_password = get_config!('password', 'mysql-galera', 'os')
 
-make_config('mysql-root-user', "root")
+root_user = get_config!('mysql-root-user')
+#
+# The value in the databag should ALWAYS be root.
+# If it is not, warn the user and bail out.
+#
+if root_user != 'root'
+  raise 'mysql-root-user is not "root" ! ' \
+    'This would have unpredictable effects in this version of chef-bach!'
+end
+root_password = get_config!('password', 'mysql-root', 'os')
 
-mysql_root_password = get_config("mysql-root-password")
-if mysql_root_password.nil?
-  mysql_root_password = secure_password
+#
+# Since the root password is set in debconf before the package is
+# installed, Percona XtraDB will come up with the password already
+# set for the root user.
+#
+package 'debconf-utils'
+
+[
+  'root_password',
+  'root_password_again'
+].each do |preseed_item|
+  execute "percona-preseed-#{preseed_item}" do
+    command 'echo "percona-xtradb-cluster-server-5.6 ' \
+      "percona-xtradb-cluster-server/#{preseed_item} " \
+      "password #{root_password}\" | debconf-set-selections"
+    sensitive true if respond_to?(:sensitive)
+  end
 end
 
-chef_vault_secret "mysql-root" do
-  data_bag 'os'
-  raw_data({ 'password' => mysql_root_password })
-  admins "#{ nodes },#{ bootstrap }"
-  search '*:*'
-  action :nothing
-end.run_action(:create_if_missing)
-
-make_config('mysql-galera-user', "sst")
-
-# backward compatibility
-mysql_galera_password = get_config("mysql-galera-password")
-if mysql_galera_password.nil?
-  mysql_galera_password = secure_password
-end
-
-mysql_check_password = get_config("mysql-check-password")
-if mysql_check_password.nil?
-  mysql_check_password = secure_password
-end
-
-chef_vault_secret "mysql-galera" do
-  data_bag 'os'
-  raw_data({ 'password' => mysql_galera_password })
-  admins "#{ nodes },#{ bootstrap }"
-  search '*:*'
-  action :nothing
-end.run_action(:create_if_missing)
-
-#make_config('mysql-galera-password', secure_password)
-make_config('mysql-check-user', "check")
-
-chef_vault_secret "mysql-check" do
-  data_bag 'os'
-  raw_data({ 'password' => mysql_check_password })
-  admins "#{ nodes },#{ bootstrap }"
-  search '*:*'
-  action :nothing
-end.run_action(:create_if_missing)
-
-#make_config('mysql-check-password', secure_password)
-
-apt_repository "percona" do
-  uri node['bcpc']['repos']['mysql']
-  distribution node['lsb']['codename']
-  components ["main"]
-  key "percona-release.key"
-end
-
-package "percona-xtradb-cluster-server" do
-    action :upgrade
-end
-
-bash "initial-mysql-config" do
-  code <<-EOH
-        mysql -u root -e "DROP USER ''@'localhost';
-                          GRANT USAGE ON *.* to '#{get_config('mysql-galera-user')}'@'%' IDENTIFIED BY '#{get_config!('password','mysql-galera','os')}';
-                          GRANT ALL PRIVILEGES on *.* TO '#{get_config('mysql-galera-user')}'@'%' IDENTIFIED BY '#{get_config!('password','mysql-galera','os')}';
-                          GRANT PROCESS ON *.* to '#{get_config('mysql-check-user')}'@'localhost' IDENTIFIED BY '#{get_config!('password','mysql-check','os')}';
-                          UPDATE mysql.user SET password=PASSWORD('#{get_config!('password','mysql-root','os')}') WHERE user='root'; FLUSH PRIVILEGES;
-                          UPDATE mysql.user SET host='%' WHERE user='root' and host='localhost';
-                          FLUSH PRIVILEGES;"
-        EOH
-  only_if "mysql -u root -e 'SELECT COUNT(*) FROM mysql.user'"
-end
-
-directory "/etc/mysql" do
-  owner "root"
-  group "root"
+directory '/etc/mysql' do
+  owner 'root'
+  group 'root'
   mode 00755
 end
 
-template "/etc/mysql/my.cnf" do
-  source "my.cnf.erb"
+template '/etc/mysql/my.cnf' do
+  source 'mysql/my.cnf.erb'
   mode 00644
-  notifies :reload, "service[mysql]", :delayed
+  notifies :reload, 'service[mysql]', :delayed
 end
 
-template "/etc/mysql/debian.cnf" do
-  source "my-debian.cnf.erb"
+template '/etc/mysql/debian.cnf' do
+  source 'mysql/my-debian.cnf.erb'
   mode 00644
-  notifies :reload, "service[mysql]", :delayed
+  notifies :reload, 'service[mysql]', :delayed
 end
 
-directory "/etc/mysql/conf.d" do
-  owner "root"
-  group "root"
+directory '/etc/mysql/conf.d' do
+  owner 'root'
+  group 'root'
   mode 00755
 end
 
-template "/etc/mysql/conf.d/wsrep.cnf" do
-  source "wsrep.cnf.erb"
+apt_package 'percona-xtradb-cluster-56' do
+  #
+  # This is an ":install" and not an ":upgrade" to avoid momentary
+  # disruptions in the event of a chef run when only a bare quorum is
+  # available.
+  #
+  # In theory, all 5.6.x revisions should be compatible, so adding new
+  # cluster members with a different subversion should be OK.
+  #
+  action :install
+  # These dpkg options allow apt to ignore the pre-existing my.cnf file.
+  options '-o Dpkg::Options::="--force-confdef" ' \
+          '-o Dpkg::Options::="--force-confold"'
+end
+
+service 'mysql' do
+  action [:enable, :start]
+end
+
+[
+  'localhost',
+  '%'
+].each do |host_name|
+  mysql_database_user galera_user do
+    connection mysql_local_connection_info
+    host host_name
+    password galera_password
+    action :create
+  end
+
+  mysql_database_user galera_user do
+    connection mysql_local_connection_info
+    host host_name
+    privileges ['ALL PRIVILEGES']
+    action :grant
+  end
+
+  mysql_database_user galera_user do
+    connection mysql_local_connection_info
+    host host_name
+    database_name '*.*'
+    privileges ['ALL PRIVILEGES']
+    action :grant
+  end
+end
+
+mysql_database_user check_user do
+  connection mysql_local_connection_info
+  host 'localhost'
+  password check_password
+  action :create
+end
+
+mysql_database_user check_user do
+  connection mysql_local_connection_info
+  privileges ['PROCESS']
+  action :grant
+end
+
+#
+# We re-create the root user with host '%' so that it is usable over
+# remote TCP sessions.
+#
+mysql_database_user root_user do
+  connection mysql_local_connection_info
+  host '%'
+  password root_password
+  action :create
+end
+
+mysql_database_user root_user do
+  connection mysql_local_connection_info
+  privileges ['ALL PRIVILEGES']
+  grant_option true
+  action :grant
+end
+
+mysql_database_user root_user do
+  connection mysql_local_connection_info
+  database_name '*.*'
+  privileges ['ALL PRIVILEGES']
+  grant_option true
+  action :grant
+end
+
+mysql_nodes = get_nodes_for('mysql', 'bcpc')
+all_nodes = get_all_nodes
+max_connections =
+  [
+    (mysql_nodes.length * 50 + all_nodes.length * 5),
+    200
+  ].max
+pool_size = node['bcpc']['mysql']['innodb_buffer_pool_size']
+
+template '/etc/mysql/conf.d/wsrep.cnf' do
+  source 'mysql/wsrep.cnf.erb'
   mode 00644
-  variables( :max_connections => [get_nodes_for('mysql','bcpc').length*50+get_all_nodes.length*5, 200].max,
-             :innodb_buffer_pool_size => node['bcpc']['mysql']['innodb_buffer_pool_size'],
-             :servers => get_nodes_for('mysql','bcpc') )
-  notifies :restart, "service[mysql]", :immediate
+  variables(max_connections: max_connections,
+            innodb_buffer_pool_size: pool_size,
+            servers: mysql_nodes)
+  notifies :stop, 'service[mysql]', :immediate
+  notifies :start, 'service[mysql]', :immediate
 end
 
-bash "remove-bare-gcomm" do
-  action :nothing
-  user "root"
-  code <<-EOH
-    sed --in-place 's/^\\(wsrep_urls=.*\\),gcomm:\\/\\/"/\\1"/' /etc/mysql/conf.d/wsrep.cnf
-  EOH
-end
+# #
+# # I can't tell what this code was meant to do.  The bare gcomm://
+# # will only exist as long as no other cluster members have
+# # converged, so why would I want to replace it?
+# #
+# # Additionally, wsrep_urls has been replaced in modern versions.
+# # I don't think this code has functioned for some years.
+# #
+# bash "remove-bare-gcomm" do
+#   action :nothing
+#   user "root"
+#   code <<-EOH
+#     sed --in-place 's/^\\(wsrep_urls=.*\\),gcomm:\\/\\/"/\\1"/' \
+#       /etc/mysql/conf.d/wsrep.cnf
+#   EOH
+# end
 
-service "mysql" do
-  supports :status => true, :restart => true, :reload => false
-  action [ :enable, :start ]
-end
-
-ruby_block "Check MySQL Quorum Status" do
-  status_cmd="mysql -u root -p#{get_config!('password','mysql-root','os')} -e \"SHOW STATUS LIKE 'wsrep_ready' \\G\" | grep -v 'Value: OFF'"
-  iter = 0
-  poll_time = 0.5
+ruby_block 'Check MySQL Quorum Status' do
   block do
-    status=`#{status_cmd}`
-    while $?.to_i
-      status=`#{status_cmd}`
-      if $?.to_i != 0 and iter < 10
-        sleep(poll_time)
-        iter += 1
-        Chef::Log.debug("MySQL is down #{iter*poll_time} seconds - #{status}")
-      elsif $?.to_i != 0
-        raise Chef::Application.fatal! "MySQL is not in a ready state per wsrep_ready for #{iter*poll_time} seconds!"
+    require 'mysql2'
+    require 'timeout'
+
+    # Returns 'ON' if wsrep is ready.
+    # Returns 'nil' if we time out or get an error.
+    def wsrep_ready_value(client_options)
+      Timeout.timeout(5) do
+        client = Mysql2::Client.new(client_options)
+        result = client.query("SHOW GLOBAL STATUS LIKE 'wsrep_ready'")
+        result.first['Value']
+      end
+    rescue
+      nil
+    end
+
+    mysql_status = nil
+    poll_attempts = 10
+
+    poll_attempts.times do |i|
+      mysql_status = wsrep_ready_value(mysql_local_connection_info)
+      if mysql_status == 'ON'
+        Chef::Log.info("MySQL is up after #{i} poll attempts")
+        break
       else
-        Chef::Log.debug("MySQL status is not failing - #{status}")
+        Chef::Log.debug("MySQL status is #{mysql_status.inspect}, sleeping")
+        sleep(0.5)
       end
     end
-    Chef::Log.info("MySQL is up after #{iter*poll_time} seconds - #{status}")
+
+    unless mysql_status == 'ON'
+      raise 'MySQL wsrep status still not ready after ' \
+        "#{poll_attempts} poll attempts! (got: #{mysql_status.inspect})"
+    end
   end
-  not_if "#{status_cmd}"
 end
 
-package "xinetd" do
+package 'xinetd' do
   action :upgrade
 end
 
-bash "add-mysqlchk-to-etc-services" do
-  user "root"
-  code <<-EOH
-    printf "mysqlchk\t3307/tcp\n" >> /etc/services
-    EOH
-  not_if "grep mysqlchk /etc/services"
+service 'xinetd' do
+  action [:enable, :start]
 end
 
-template "/etc/xinetd.d/mysqlchk" do
-  source "xinetd-mysqlchk.erb"
-  owner "root"
-  group "root"
+replace_or_add 'add-mysqlchk-to-etc-services' do
+  path '/etc/services'
+  pattern '^mysqlchk'
+  line "mysqlchk\t3307/tcp"
+end
+
+template '/etc/xinetd.d/mysqlchk' do
+  source 'mysql/xinetd-mysqlchk.erb'
+  owner 'root'
+  group 'root'
   mode 00440
-  notifies :reload, "service[xinetd]", :immediately
+  notifies :restart, 'service[xinetd]', :immediately
 end
 
-service "xinetd" do
-  supports :status => true, :restart => true, :reload => true
-  action [ :enable, :start ]
+#
+# Now that we have a working Percona instance, we'll install a dummy
+# metapackage to prevent any well-meaning packages from depending on
+# mysql-server and mysql-server-5.5
+#
+package 'equivs'
+
+control_file_path =
+  ::File.join(Chef::Config.file_cache_path, 'mysql-server.control')
+
+file control_file_path do
+  content <<-EOM.gsub(/^ {4}/,'')
+    Section: database
+    Priority: optional
+    Standards-Version: 3.9.2
+
+    Package: mysql-server
+    Version: 5.6
+    Maintainer: BACH <hadoop@bloomberg.net>
+    Architecture: all
+    Description: Dummy package to prevent the installation of mysql-server
+  EOM
 end
+
+deb_file_path =
+   ::File.join(Chef::Config.file_cache_path,'mysql-server_5.6_all.deb')
+
+execute 'mysql-server-build' do
+   cwd ::File.dirname(deb_file_path)
+   command "equivs-build #{control_file_path}"
+   creates deb_file_path
+end
+
+dpkg_package deb_file_path

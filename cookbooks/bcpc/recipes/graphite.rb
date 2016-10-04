@@ -18,219 +18,241 @@
 # limitations under the License.
 #
 
-include_recipe "bcpc::default"
-include_recipe "bcpc::apache2"
+include_recipe 'bcpc::default'
+include_recipe 'bcpc::apache2'
+include_recipe 'bcpc::mysql_client'
+include_recipe 'bcpc::mysql_data_bags'
 
-make_config('mysql-graphite-user', "graphite")
-# backward compatibility
-mysql_graphite_password = get_config("mysql-graphite-password")
-if mysql_graphite_password.nil?
-  mysql_graphite_password = secure_password
-end
+#
+# These data bags and vault items are pre-populated at compile time by
+# the bcpc::mysql_data_bags recipe.
+#
+root_user = get_config!('mysql-root-user')
+root_password = get_config!('password', 'mysql-root', 'os')
 
-bootstrap = get_bootstrap
-results = get_nodes_for("graphite").map!{ |x| x['fqdn'] }.join(",")
-nodes = results == "" ? node['fqdn'] : results
+graphite_user = get_config!('mysql-graphite-user')
+graphite_password = get_config!('password', 'mysql-graphite', 'os')
 
-chef_vault_secret "mysql-graphite" do
-  data_bag 'os'
-  raw_data({ 'password' => mysql_graphite_password })
-  admins "#{ nodes },#{ bootstrap }"
-  search '*:*'
-  action :nothing
-end.run_action(:create_if_missing)
-
-%w{python-pytz python-pyparsing python-mysqldb python-pip python-cairo python-django-tagging python-ldap python-twisted python-memcache python-pyparsing}.each do |pkg|
+%w{
+  python-pytz
+  python-pyparsing
+  python-mysqldb
+  python-pip
+  python-cairo
+  python-django-tagging
+  python-ldap
+  python-twisted
+  python-memcache
+  python-pyparsing
+}.each do |pkg|
   package pkg do
     action :upgrade
   end
 end
 
-package "python-django" do
+package 'python-django' do
   action :upgrade
   version node[:bcpc][:graphite][:django][:version] 
 end
 
-%w{python-whisper python-carbon python-graphite-web}.each do |pkg|
+%w{
+  python-whisper
+  python-carbon
+  python-graphite-web
+}.each do |pkg|
   package pkg do
     action :upgrade
   end
 end
 
-%w{cache relay}.each do |pkg|
+%w{
+  cache
+  relay
+}.each do |pkg|
   template "/etc/init.d/carbon-#{pkg}" do
-    source "init.d-carbon.erb"
-    owner "root"
-    group "root"
+    source 'carbon/init.erb'
+    owner 'root'
+    group 'root'
     mode 00755
     notifies :restart, "service[carbon-#{pkg}]", :delayed
     variables( :daemon => "#{pkg}" )
   end
+  
   service "carbon-#{pkg}" do
     action [ :enable, :start ]
   end
 end
 
-# #### #
-# Adding this to set the graphite ip
-# #### #
-ruby_block "graphite_ip" do
-  block do
-    if (node[:bcpc].attribute?(:graphite) \
-      and node[:bcpc][:graphite].attribute?(:ip) \
-      and node[:bcpc][:graphite][:ip]) then
-      Chef::Log.info("graphite ip = '#{node[:bcpc][:graphite][:ip]}'")
-    else
-      Chef::Log.info("node[:bcpc][:graphite][:ip] is not set")
-      if not node[:bcpc][:management][:vip] then
-        Chef::Application.fatal!("No graphite ip or management vip!", 1)
-      else
-        node.override[:bcpc][:graphite][:ip] = node[:bcpc][:management][:vip]
-      end
-    end
-  end
-end
-
-mysql_servers = get_node_attributes(MGMT_IP_GRAPHITE_WEBPORT_ATTR_SRCH_KEYS,"mysql","bcpc")
+mysql_servers =
+  get_node_attributes(MGMT_IP_GRAPHITE_WEBPORT_ATTR_SRCH_KEYS,'mysql','bcpc')
 
 # Directory resource sets owner and group only to the leaf directory.
 # All other directories will be owned by root
-directory "#{node['bcpc']['graphite']['local_storage_dir']}" do
-  owner "www-data"
-  group "www-data"
+directory node['bcpc']['graphite']['local_storage_dir'].to_s do
+  owner 'www-data'
+  group 'www-data'
   recursive true
 end
 
-directory "#{node['bcpc']['graphite']['local_log_dir']}" do
-  owner "www-data"
-  group "www-data"
+directory node['bcpc']['graphite']['local_log_dir'].to_s do
+  owner 'www-data'
+  group 'www-data'
   recursive true
 end
 
-directory "#{node['bcpc']['graphite']['local_data_dir']}" do
-  owner "www-data"
-  group "www-data"
+directory node['bcpc']['graphite']['local_data_dir'].to_s do
+  owner 'www-data'
+  group 'www-data'
   recursive true
 end
 
 directory "#{node['bcpc']['graphite']['local_log_dir']}/webapp" do
-  owner "www-data"
-  group "www-data"
+  owner 'www-data'
+  group 'www-data'
 end
 
-["info.log", "exception.log" ].each do |f|
+['info.log', 'exception.log' ].each do |f|
   file "#{node['bcpc']['graphite']['local_log_dir']}/webapp/#{f}" do
-    owner "www-data"
-    group "www-data"
+    owner 'www-data'
+    group 'www-data'
   end
 end
 
-template "/opt/graphite/conf/carbon.conf" do
-  source "carbon.conf.erb"
-  owner "root"
-  group "root"
+template '/opt/graphite/conf/carbon.conf' do
+  source 'carbon/carbon.conf.erb'
+  owner 'root'
+  group 'root'
   mode 00644
   variables(
     :servers => mysql_servers,
     :min_quorum => mysql_servers.length/2 + 1 )
-  notifies :restart, "service[carbon-cache]", :delayed
-  notifies :restart, "service[carbon-relay]", :delayed
+  notifies :restart, 'service[carbon-cache]', :delayed
+  notifies :restart, 'service[carbon-relay]', :delayed
 end
 
-template "/opt/graphite/conf/storage-schemas.conf" do
-  source "carbon-storage-schemas.conf.erb"
-  owner "root"
-  group "root"
+template '/opt/graphite/conf/storage-schemas.conf' do
+  source 'carbon/storage-schemas.conf.erb'
+  owner 'root'
+  group 'root'
   mode 00644
-  notifies :restart, "service[carbon-cache]", :delayed
+  notifies :restart, 'service[carbon-cache]', :delayed
 end
 
-template "/opt/graphite/conf/storage-aggregation.conf" do
-  source "carbon-storage-aggregation.conf.erb"
-  owner "root"
-  group "root"
+template '/opt/graphite/conf/storage-aggregation.conf' do
+  source 'carbon/storage-aggregation.conf.erb'
+  owner 'root'
+  group 'root'
   mode 00644
-  notifies :restart, "service[carbon-cache]", :delayed
+  notifies :restart, 'service[carbon-cache]', :delayed
 end
 
-template "/opt/graphite/conf/relay-rules.conf" do
-  source "carbon-relay-rules.conf.erb"
-  owner "root"
-  group "root"
+template '/opt/graphite/conf/relay-rules.conf' do
+  source 'carbon/relay-rules.conf.erb'
+  owner 'root'
+  group 'root'
   mode 00644
   variables( :servers => mysql_servers )
-  notifies :restart, "service[carbon-relay]", :delayed
+  notifies :restart, 'service[carbon-relay]', :delayed
 end
 
-template "/etc/apache2/sites-available/graphite-web" do
-  source "apache-graphite-web.conf.erb"
-  owner "root"
-  group "root"
+#
+# a2ensite for httpd 2.4 (Ubuntu 14.04) expects the file to end in '.conf'
+# a2ensite for httpd 2.2 (Ubuntu 12.04) expects it NOT to end in '.conf'
+#
+graphite_web_conf_file =
+  if Gem::Version.new(node[:lsb][:release]) >= Gem::Version.new('14.04')
+    '/etc/apache2/sites-available/graphite-web.conf'
+  else
+    '/etc/apache2/sites-available/graphite-web'
+  end
+
+template graphite_web_conf_file do
+  source 'apache-graphite-web.conf.erb'
+  owner 'root'
+  group 'root'
   mode 00644
-  notifies :restart, "service[apache2]", :delayed
+  notifies :restart, 'service[apache2]', :delayed
 end
 
-bash "apache-enable-graphite-web" do
-  user "root"
-  code "a2ensite graphite-web"
-  not_if "test -r /etc/apache2/sites-enabled/graphite-web"
-  notifies :restart, "service[apache2]", :delayed
+bash 'apache-enable-graphite-web' do
+  user 'root'
+  code 'a2ensite graphite-web'
+  not_if 'test -r /etc/apache2/sites-enabled/graphite-web*'
+  notifies :restart, 'service[apache2]', :delayed
 end
 
-template "/opt/graphite/conf/graphite.wsgi" do
-  source "graphite.wsgi.erb"
-  owner "root"
-  group "root"
+template '/opt/graphite/conf/graphite.wsgi' do
+  source 'graphite/wsgi.erb'
+  owner 'root'
+  group 'root'
   mode 00755
 end
 
-template "/opt/graphite/webapp/graphite/local_settings.py" do
-  source "graphite.local_settings.py.erb"
-  owner "root"
-  group "www-data"
+template '/opt/graphite/webapp/graphite/local_settings.py' do
+  source 'graphite/local_settings.py.erb'
+  owner 'root'
+  group 'www-data'
   mode 00440
   variables(
     :servers => mysql_servers,
     :min_quorum => mysql_servers.length/2 + 1 )
-  notifies :restart, "service[apache2]", :delayed
+  notifies :restart, 'service[apache2]', :delayed
 end
 
-ruby_block "graphite-database-creation" do
-    block do
-        mysql_root_password = get_config!('password','mysql-root','os')
-        if not system "mysql -uroot -p#{ mysql_root_password } -e 'SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = \"#{node['bcpc']['graphite_dbname']}\"'|grep \"#{node['bcpc']['graphite_dbname']}\"" then
-            %x[ mysql -uroot -p#{ mysql_root_password } -e "CREATE DATABASE #{node['bcpc']['graphite_dbname']};"
-                mysql -uroot -p#{ mysql_root_password } -e "GRANT ALL ON #{node['bcpc']['graphite_dbname']}.* TO '#{get_config('mysql-graphite-user')}'@'%' IDENTIFIED BY '#{get_config!('password','mysql-graphite','os')}';"
-                mysql -uroot -p#{ mysql_root_password } -e "GRANT ALL ON #{node['bcpc']['graphite_dbname']}.* TO '#{get_config('mysql-graphite-user')}'@'localhost' IDENTIFIED BY '#{get_config!('password','mysql-graphite','os')}';"
-                mysql -uroot -p#{ mysql_root_password } -e "FLUSH PRIVILEGES;"
-            ]
-            self.notifies :run, "bash[graphite-database-sync]", :immediately
-            self.resolve_notification_references
-        end
-    end
+mysql_database node[:bcpc][:graphite_dbname] do
+  connection mysql_local_connection_info
+  action :create
+  notifies :run, 'execute[graphite-database-sync]'
 end
 
-bash "graphite-database-sync" do
+[
+  '%',
+  'localhost'
+].each do |host_name|
+  mysql_database_user graphite_user do
+    connection mysql_local_connection_info
+    host host_name
+    password graphite_password
+    action :create
+  end
+
+  mysql_database_user graphite_user do
+    connection mysql_local_connection_info
+    database_name node[:bcpc][:graphite_dbname]
+    host host_name
+    privileges ['ALL PRIVILEGES']
+    action :grant
+  end
+end
+
+execute 'graphite-database-sync' do
   action :nothing
-  user "root"
-  code <<-EOH
+  user 'root'
+  command <<-EOH
     export PYTHONPATH='/opt/graphite/webapp'
     export DJANGO_SETTINGS_MODULE='graphite.settings'
     python /opt/graphite/bin/django-admin.py syncdb --noinput
-    python /opt/graphite/bin/django-admin.py createsuperuser --username=admin --email=#{node[:bcpc][:admin_email]} --noinput
+    python /opt/graphite/bin/django-admin.py createsuperuser \
+      --username=admin --email=#{node[:bcpc][:admin_email]} --noinput
     python /opt/graphite/bin/django-admin.py collectstatic --noinput
   EOH
-  notifies :restart, "service[apache2]", :immediately
+  notifies :restart, 'service[apache2]', :immediately
 end
 
-bash "cleanup-old-whisper-files" do
+bash 'cleanup-old-whisper-files' do
   action :run
   user "root"
-  code "find #{node['bcpc']['graphite']['local_data_dir']} -name '*.wsp' -mtime +#{node['bcpc']['graphite']['data']['retention']} -type f -exec rm {} \\;"
+  code "find #{node['bcpc']['graphite']['local_data_dir']} " \
+    "-name '*.wsp' " \
+    "-mtime +#{node['bcpc']['graphite']['data']['retention']} " \
+    '-type f -exec rm {} \\;'
 end
 
-bash "cleanup-old-logs" do
+bash 'cleanup-old-logs' do
   action :run
   user "root"
-  code "find #{node['bcpc']['graphite']['local_log_dir']} -name '*.log*' -mtime +#{node['bcpc']['graphite']['log']['retention']} -type f -exec rm {} \\;"
+  code "find #{node['bcpc']['graphite']['local_log_dir']} " \
+    "-name '*.log*' " \
+    "-mtime +#{node['bcpc']['graphite']['log']['retention']} " \
+    '-type f -exec rm {} \\;'
 end

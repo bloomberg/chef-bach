@@ -1,0 +1,29 @@
+#
+# /etc/zabbix/zabbix_server.conf
+#
+# This file was created by Chef.
+# Local changes will be reverted.
+#
+
+SourceIP=<%="#{node[:bcpc][:management][:vip]}"%>
+
+LogFile=/var/log/zabbix/zabbix_server.log
+LogFileSize=32
+PidFile=/var/run/zabbix/zabbix_server.pid
+
+DBHost=<%="#{node[:bcpc][:management][:vip]}"%>
+DBName=<%="#{node[:bcpc][:zabbix_dbname]}"%>
+DBUser=<%="#{get_config('mysql-zabbix-user')}"%>
+DBPassword=<%="#{get_config!('password','mysql-zabbix','os')}"%>
+
+DBSocket=/var/run/mysqld/mysqld.sock
+AlertScriptsPath=/usr/lib/zabbix/alertscripts
+ExternalScripts=/usr/lib/zabbix/externalscripts
+FpingLocation=/usr/bin/fping
+Fping6Location=/usr/bin/fping6
+
+HousekeepingFrequency=4
+MaxHousekeeperDelete=1000
+CacheSize=16M
+HistoryCacheSize=32M
+

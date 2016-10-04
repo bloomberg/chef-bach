@@ -191,10 +191,9 @@ def get_req_node_attributes(node_objects,srch_keys)
     temp = Hash.new
     srch_keys.each do |name, key|
       begin
-        val = key.split('.').reduce(obj) {|memo, key| memo[key]}
-      rescue NoMethodError
+        val = key.split('.').reduce(obj) {|memo, sub_key| memo[sub_key]}
+      rescue
         Chef::Log.fatal "Node #{obj} does not have key #{key}!"
-        raise
       end
       temp[name] = val
     end

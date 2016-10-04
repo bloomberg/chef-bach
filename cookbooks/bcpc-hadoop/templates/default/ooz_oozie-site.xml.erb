@@ -166,7 +166,7 @@
 
     <property>
       <name>oozie.service.JPAService.jdbc.username</name>
-      <value>oozie</value>
+      <value><%= @mysql_username %></value>
       <description>
         DB user name.
       </description>
@@ -174,7 +174,7 @@
 
     <property>
       <name>oozie.service.JPAService.jdbc.password</name>
-      <value><%=get_config("mysql-oozie-password") %></value>
+      <value><%= @mysql_password %></value>
       <description>
       </description>
     </property>
