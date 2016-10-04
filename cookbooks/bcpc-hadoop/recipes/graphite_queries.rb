@@ -31,7 +31,7 @@ triggers = {
       'trigger_name' => "graphite-to-zabbix_QueryResultEmpty",
       'enable' => true,
       'trigger_desc' => "Graphite to zabbix query got empty result",
-      'severity' => 2,
+      'severity' => 4,
       'route_to' => "admin",
       'is_graphite_query' => false
     },
@@ -53,7 +53,7 @@ triggers = {
       'trigger_name' => "graphite-to-zabbix_QueryResultFormatError",
       'enable' => true,
       'trigger_desc' => "Graphite to zabbix query result could not be formatted",
-      'severity' => 2,
+      'severity' => 4,
       'route_to' => "admin",
       'is_graphite_query' => false
     }
