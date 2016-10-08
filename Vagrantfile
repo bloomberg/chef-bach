@@ -110,7 +110,7 @@ Vagrant.configure('2') do |config|
   config.vm.box = 'trusty64'
   config.vm.box_url = 'trusty-server-cloudimg-amd64-vagrant-disk1.box'
 
-  memory = ENV['BOOTSTRAP_VM_MEM'] || '4096'
+  memory = ENV['BOOTSTRAP_VM_MEM'] || '1024'
   cpus = ENV['BOOTSTRAP_VM_CPUs'] || '1'
 
   config.vm.provider :virtualbox do |vb|

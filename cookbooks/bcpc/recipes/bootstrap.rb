@@ -23,6 +23,24 @@
   end.run_action(:install)
 end
 
+#
+# The bfd cookbook, by default, wants to keep the package in the chef
+# file cache.
+#
+# In order to make it easier to deploy bootstraps without internet
+# access, here we force bfd to save its package to the 'bins'
+# directory and install from same.
+#
+node.default[:bfd].tap do |bfd|
+  bfd[:bin_dir] = node[:bcpc][:bin_dir][:path]
+
+  bfd[:package][:source] =
+    ::File.join(node[:bfd][:bin_dir], node[:bfd][:package][:name])
+end
+include_recipe 'build-essential'
+include_recipe 'bfd::install'
+include_recipe 'bfd::default'
+
 require 'pathname'
 require 'rubygems'
 gem_path = Pathname.new(Gem.ruby).dirname.join('gem').to_s
@@ -52,7 +70,6 @@ require 'augeas'
 include_recipe "bcpc::default"
 
 if node[:bcpc][:networks].length > 1
-  include_recipe "bfd::default"
   bfd_session "Global Bootstrap VIP Connect" do
     action :connect
     remote_ip node[:bcpc][:networks][node[:bcpc][:management][:subnet]][:management][:gateway]
@@ -85,6 +102,14 @@ if node[:bcpc][:networks].length > 1
     action :up
     remote_ip node[:bcpc][:networks][node[:bcpc][:management][:subnet]][:management][:gateway]
     local_ip node[:bcpc][:management][:ip]
+  end
+else
+  service 'bfdd-beacon' do
+    action [:stop, :disable]
+  end
+
+  execute 'killall bfdd-beacon' do
+    ignore_failure true
   end
 end
 
