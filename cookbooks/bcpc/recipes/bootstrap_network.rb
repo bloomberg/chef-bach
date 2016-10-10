@@ -33,6 +33,25 @@ template "/etc/network/interfaces" do
   mode 00644
 end
 
+#
+# We assume that the bootstrap pxe interface will allow us to identify
+# the correct subnet definition in the environment.
+#
+require 'ipaddress'
+bootstrap_ip = IPAddress(node[:bcpc][:bootstrap][:server])
+#
+# The keys of the hash are subnet names, so we at the end, we grab '.keys.first'
+# The values are only useful in choosing which key to grab.
+#
+rack_name = node[:bcpc][:networks].select do |_, networks|
+  mgmt_subnet = networks[:management]
+  network_ip = IPAddress(mgmt_subnet[:gateway] + '/' + mgmt_subnet[:netmask])
+  bootstrap_ip.netmask = mgmt_subnet[:netmask]
+  network_ip.network == bootstrap_ip.network
+end.keys.first
+
+mgmt_subnet = node[:bcpc][:networks][rack_name][:management]
+
 template "/etc/network/interfaces.d/iface-#{node[:bcpc][:bootstrap][:pxe_interface]}.cfg" do
   source "network.iface.erb"
   owner "root"
@@ -41,18 +60,25 @@ template "/etc/network/interfaces.d/iface-#{node[:bcpc][:bootstrap][:pxe_interfa
   variables(
     :interface => node[:bcpc][:bootstrap][:pxe_interface],
     :ip => node[:bcpc][:bootstrap][:server],
-    :netmask => node[:bcpc][:management][:netmask],
-    :gateway => node[:bcpc][:management][:gateway],
+    :netmask => mgmt_subnet[:netmask],
+    :gateway => mgmt_subnet[:gateway],
     :metric => 100
   )
 end
 
-bash 'disable DHCP router overwriting' do
-  router = node['bcpc']['management']['gateway']
-  code "echo 'supersede routers #{router};' >> /etc/dhcp/dhclient.conf"
-  not_if "grep -q 'supersede routers #{router};' /etc/dhcp/dhclient.conf"
+replace_or_add 'disable DHCP router overwriting' do
+  router = mgmt_subnet['gateway']
+  path '/etc/dhcp/dhclient.conf'
+  pattern 'supersede routers'
+  line "supersede routers #{router};"
 end
 
-service "networking" do
-  action :restart
+execute 'interfaces up' do
+  command 'ifup -a'
+end
+
+['eth0','eth1'].each do |iface|
+  execute "restart #{iface}" do
+    command "ifdown #{iface}; ifup #{iface}"
+  end
 end
