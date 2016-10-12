@@ -72,6 +72,7 @@ end
 # its job.
 #
 node.default[:bfd][:package][:source] = nil
+include_recipe 'bcpc::cluster_local_repository'
 include_recipe 'bfd::default'
 
 if node[:bcpc][:networks].length > 1
