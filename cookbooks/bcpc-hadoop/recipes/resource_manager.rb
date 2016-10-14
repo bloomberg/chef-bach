@@ -101,6 +101,7 @@ service "hadoop-yarn-resourcemanager" do
   subscribes :restart, "template[/etc/hadoop/conf/yarn-site.xml]", :delayed
   subscribes :restart, "template[/etc/hadoop/conf/mapred-site.xml]", :delayed
   subscribes :restart, "template[/etc/hadoop/conf/core-site.xml]", :delayed
+  subscribes :restart, "file[/etc/hadoop/conf/ldap-conn-pass.txt]", :delayed
   subscribes :restart, "template[/etc/hadoop/conf/hdfs-site.xml]", :delayed
   subscribes :restart, "bash[hdp-select hadoop-yarn-resourcemanager]", :delayed
   subscribes :restart, "log[jdk-version-changed]", :delayed

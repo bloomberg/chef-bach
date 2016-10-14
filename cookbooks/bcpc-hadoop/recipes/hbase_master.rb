@@ -89,6 +89,7 @@ hbase_master_dep = ["template[/etc/hbase/conf/hadoop-metrics2-hbase.properties]"
                     "template[/etc/hbase/conf/hbase-env.sh]",
                     "template[/etc/hbase/conf/hbase-policy.xml]",
                     "template[/etc/hadoop/conf/log4j.properties]",
+                    "file[/etc/hadoop/conf/ldap-conn-pass.txt]",
                     "template[/etc/hadoop/conf/hdfs-site.xml]",
                     "template[/etc/hadoop/conf/core-site.xml]",
                     "bash[hdp-select hbase-regionserver]",
