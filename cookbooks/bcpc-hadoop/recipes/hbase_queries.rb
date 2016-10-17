@@ -1,8 +1,6 @@
 # Set hbase related zabbix triggers
 trigger_chk_period = "#{node[:bcpc][:hadoop][:zabbix][:trigger_chk_period]}m"
 
-mail_to_admin = "#{node[:bcpc][:hadoop][:zabbix][:mail_to_admin]}"
-
 node.set[:bcpc][:hadoop][:graphite][:service_queries][:hbase_master] = {
   'hbase_master.HeapMemoryUsage_committed' => {
      'query' => "minSeries(jmx.hbase_master.*.memory.HeapMemoryUsage_committed)",
@@ -13,7 +11,7 @@ node.set[:bcpc][:hadoop][:graphite][:service_queries][:hbase_master] = {
      'trigger_dep' => ["NameNodeAvailability"],
      'trigger_desc' => "HBase master seems to be down",
      'severity' => 4,
-     'route_to' => "#{mail_to_admin}"
+     'route_to' => "admin"
   },
   'hbase_master.numRegionServers' => {
      'query' => "maxSeries(jmx.hbase_master.*.hbm_server.Master.numRegionServers)",
@@ -24,7 +22,7 @@ node.set[:bcpc][:hadoop][:graphite][:service_queries][:hbase_master] = {
      'trigger_dep' => ["HBaseMasterAvailability"],
      'trigger_desc' => "HBase region server seems to be down",
      'severity' => 3,
-     'route_to' => "#{mail_to_admin}"
+     'route_to' => "admin"
   }
 }
 node.set[:bcpc][:hadoop][:graphite][:service_queries][:hbase_rs] = {
@@ -37,6 +35,6 @@ node.set[:bcpc][:hadoop][:graphite][:service_queries][:hbase_rs] = {
      'trigger_dep' => ["HBaseMasterAvailability"],
      'trigger_desc' => "HBase region server has GC longer than 60sec",
      'severity' => 2,
-     'route_to' => "#{mail_to_admin}"
+     'route_to' => "admin"
   }
 }

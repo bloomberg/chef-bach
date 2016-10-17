@@ -1,5 +1,3 @@
-mail_to_admin = "#{node[:bcpc][:hadoop][:zabbix][:mail_to_admin]}"
-
 node.set['bcpc']['hadoop']['graphite']['service_queries']['namenode'] = {
   'namenode.HeapMemoryUsage_committed' => {
      'query' => "minSeries(jmx.namenode.*.memory.HeapMemoryUsage_committed)",
@@ -10,6 +8,6 @@ node.set['bcpc']['hadoop']['graphite']['service_queries']['namenode'] = {
      'trigger_dep' => [],
      'trigger_desc' => "Namenode service seems to be down",
      'severity' => 5,
-     'route_to' => "#{mail_to_admin}"
+     'route_to' => "admin"
   }
 }
