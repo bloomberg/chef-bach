@@ -33,9 +33,7 @@ end
 
 # memrize function to bootstrap info
 def get_bootstrap
-  return $bootstrap if defined? $bootstrap
-  $bootstrap = get_all_nodes.select{|s| s.hostname.include? 'bootstrap'}[0].fqdn
-  return $bootstrap
+  node.run_state['bootstrap_host'] ||= get_all_nodes.select{|s| s.hostname.include? 'bootstrap'}[0].fqdn
 end
 
 #
