@@ -39,7 +39,6 @@ node.default[:bfd].tap do |bfd|
 end
 include_recipe 'build-essential'
 include_recipe 'bfd::install'
-include_recipe 'bfd::default'
 
 require 'pathname'
 require 'rubygems'
@@ -68,6 +67,115 @@ Gem.clear_paths
 require 'augeas'
 
 include_recipe "bcpc::default"
+
+bins_dir = '/home/vagrant/chef-bcpc/bins'
+
+directory bins_dir do
+  action :create
+  mode 0755
+  recursive true
+end
+
+#
+# If we have valid vault items for the public and private key, write
+# files based on the vault items.
+#
+# If we don't have valid vault items, generate the files by calling
+# build_bins.sh, then create vault items based on the files.
+#
+include_recipe 'bcpc::chef_vault_download'
+include_recipe 'bcpc::chef_vault_install'
+require 'base64'
+
+gpg_private_key_path = ::File.join('/home/vagrant', 'apt_key.sec')
+gpg_public_key_path = ::File.join(bins_dir, 'apt_key.pub')
+
+gpg_private_key_base64 = get_config('bootstrap-gpg-private_key_base64')
+gpg_public_key_base64 = get_config('bootstrap-gpg-public_key_base64')
+
+if gpg_private_key_base64 && gpg_public_key_base64
+  file gpg_private_key_path do
+    mode 0400
+    content Base64.decode64(gpg_private_key_base64)
+  end
+
+  file gpg_public_key_path do
+    mode 0444
+    content Base64.decode64(gpg_public_key_base64)
+  end
+else
+  log 'Running build bins to generate GPG keys' do
+    notifies :run, 'bash[build_bins]', :immediately
+  end
+
+  #
+  # The GPG public key is stored in the unencrypted "configs" data bag, so
+  # nodes can retrieve it without chef vault.
+  #
+  ruby_block 'make_data_bag' do
+    block do
+    make_config('bootstrap-gpg-public_key_base64',
+                 Base64.encode64(::File.read(gpg_public_key_path)))
+    end
+  end
+
+  chef_vault_secret 'bootstrap-gpg' do
+    data_bag 'os'
+    raw_data lazy {
+      {
+       private_key_base64: Base64.encode64(::File.read(gpg_private_key_path)),
+      }
+    }
+    admins [node[:fqdn]]
+    search '*:*'
+    action :nothing
+  end
+end
+
+#
+# Re-run build_bins if any of the index files is older than the files
+# being indexed.
+#
+# This can happen when other recipes edit the bins directory, but don't
+# run build_bins.sh themselves. (e.g. bfd::install)
+#
+bash 'build_bins' do
+  user 'root'
+  cwd '/home/vagrant/chef-bcpc'
+  code './build_bins.sh'
+  umask 0002
+  action :run
+  only_if {
+    
+    apt_index = ::File.join(bins_dir, 'dists/0.5.0/main/binary-amd64/Packages')
+    apt_glob = ::Dir.glob(::File.join(bins_dir, '*.deb'))
+
+    gem_index = ::File.join(bins_dir, 'latest_specs.4.8')
+    gem_glob = ::Dir.glob(::File.join(bins_dir,'gems/*.gem'))
+
+    gpg_index = ::File.join(bins_dir, 'apt_key.asc')
+    gpg_glob = ::Dir.glob(gpg_public_key_path)
+
+    [
+      [apt_index, apt_glob],
+      [gem_index, gem_glob],
+      [gpg_index, gpg_glob],
+    ].map do |index, glob|
+      begin
+        ::File.mtime(apt_index) < glob.map{ |pp| ::File.mtime(pp) }.max
+      rescue
+        nil
+      end
+    end.any? || Dir.glob(::File.join(bins_dir, '*.gem')).any?
+  }
+end
+
+# Do a complete apt-get update just in case build_bins updated the local repo.
+execute 'apt-get update' do
+  action :run
+end
+
+include_recipe 'bfd::default'
 
 if node[:bcpc][:networks].length > 1
   bfd_session "Global Bootstrap VIP Connect" do
@@ -109,7 +217,7 @@ else
   end
 
   execute 'killall bfdd-beacon' do
-    ignore_failure true
+    only_if 'pgrep bfdd'
   end
 end
 
@@ -137,23 +245,14 @@ package 'acl'
 cron 'synchronize chef' do
   user  'vagrant'
   home '/home/vagrant'
-  command "cd ~/chef-bcpc; knife role from file roles/*.json; knife cookbook upload -a; knife environment from file environments/#{node.chef_environment}.json"
+  command 'cd ~/chef-bcpc; ' \
+    'knife role from file roles/*.json; ' \
+    'knife cookbook upload -a; '\
+    "knife environment from file environments/#{node.chef_environment}.json"
 end
 
 package 'sshpass'
 
 link '/etc/chef/client.d/knife.rb' do
   to '/home/vagrant/chef-bcpc/.chef/knife.rb'
-end
-
-# run build_bins if any debs or gems updated
-bash 'build_bins' do
-  user 'root'
-  cwd '/home/vagrant/chef-bcpc'
-  code './build_bins.sh'
-  umask 0002
-  action :run
-  only_if { File.mtime('/home/vagrant/chef-bcpc/bins/dists/0.5.0/main/binary-amd64/Packages') < Dir.glob('/home/vagrant/chef-bcpc/bins/*.deb').map{|f| File.mtime("#{f}")}.max ||
-            File.mtime('/home/vagrant/chef-bcpc/bins/latest_specs.4.8') < Dir.glob('/home/vagrant/chef-bcpc/bins/gems/*.gem').map{|f| File.mtime("#{f}")}.max ||
-            Dir.glob('/home/vagrant/chef-bcpc/bins/*.gem').any? }
 end
