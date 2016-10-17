@@ -1,5 +1,7 @@
 include_recipe "bcpc-hadoop::zookeeper_impl"
 
+mail_to_admin = "#{node[:bcpc][:hadoop][:zabbix][:mail_to_admin]}"
+
 # Set Zookeeper related zabbix triggers
 trigger_chk_period = "#{node["bcpc"]["hadoop"]["zabbix"]["trigger_chk_period"]}m"
 node.set['bcpc']['hadoop']['graphite']['service_queries']['zookeeper'] = {
@@ -11,6 +13,6 @@ node.set['bcpc']['hadoop']['graphite']['service_queries']['zookeeper'] = {
      'enable' => true,
      'trigger_desc' => "A zookeeper node seems to be down",
      'severity' => 5,
-     'route_to' => "admin"
+     'route_to' => "#{mail_to_admin}"
   }
 }

@@ -1,6 +1,9 @@
 # Get a list of cluster nodes to monitor
 monitored_nodes_objs = get_all_nodes.select { |n| not n.hostname =~ /bootstrap/ }.compact
 
+mail_to_admin = "#{node[:bcpc][:hadoop][:zabbix][:mail_to_admin]}"
+mail_to_tenant = "#{node[:bcpc][:hadoop][:zabbix][:mail_to_tenant]}"
+
 # Graphite queries which specify property to query and alarming trigger,
 # severity(maps to zabbix's api -> trigger -> priority)and owner who the
 # trigger is routed to for resolution. Queries are structured as they appear in
@@ -20,7 +23,7 @@ triggers = {
       'enable' => true,
       'trigger_desc' => "Chef-client hasn't run in 30m",
       'severity' => 2,
-      'route_to' => "admin"
+      'route_to' => "#{mail_to_admin}"
     }
   },
   'graphite-to-zabbix' => {
@@ -32,7 +35,7 @@ triggers = {
       'enable' => true,
       'trigger_desc' => "Graphite to zabbix query got empty result",
       'severity' => 4,
-      'route_to' => "admin",
+      'route_to' => "#{mail_to_admin}",
       'is_graphite_query' => false
     },
     'graphite-to-zabbix.QueryResultError' => {
@@ -43,7 +46,7 @@ triggers = {
       'enable' => true,
       'trigger_desc' => "Graphite to zabbix query returned an error",
       'severity' => 4,
-      'route_to' => "admin",
+      'route_to' => "#{mail_to_admin}",
       'is_graphite_query' => false
     },
     'graphite-to-zabbix.QueryResultFormatError' => {
@@ -54,7 +57,7 @@ triggers = {
       'enable' => true,
       'trigger_desc' => "Graphite to zabbix query result could not be formatted",
       'severity' => 4,
-      'route_to' => "admin",
+      'route_to' => "#{mail_to_admin}",
       'is_graphite_query' => false
     }
   }
@@ -82,7 +85,7 @@ monitored_nodes_objs.each do |node_obj|
       'enable' => true,
       'trigger_desc' => "Node seems to be down",
       'severity' => 3,
-      'route_to' => "admin"
+      'route_to' => "#{mail_to_admin}"
     }
   end
   if triggers[host]["chef_client_success_#{host}"].nil?
@@ -95,7 +98,7 @@ monitored_nodes_objs.each do |node_obj|
       'enable' => true,
       'trigger_desc' => "Chef-client hasn't run in #{node["bcpc"]["hadoop"]["zabbix"]["chef_client_check_interval"]}", 
       'severity' => 1,
-      'route_to' => "admin"
+      'route_to' => "#{mail_to_admin}"
     }
   end
   if triggers[host]["chef_client_fail_#{host}"].nil?
@@ -110,7 +113,7 @@ monitored_nodes_objs.each do |node_obj|
       'enable' => true,
       'trigger_desc' => "Chef-client failed",
       'severity' => 1,
-      'route_to' => "admin"
+      'route_to' => "#{mail_to_admin}"
     }
   end
 
@@ -146,7 +149,7 @@ monitored_nodes_objs.each do |node_obj|
         'enable' => true,
         'trigger_desc' => "Disk seems to be full or down",
         'severity' => 3,
-        'route_to' => "admin"
+        'route_to' => "#{mail_to_admin}"
       }
     end
 
@@ -160,7 +163,7 @@ monitored_nodes_objs.each do |node_obj|
         'enable' => true,
         'trigger_desc' => "More than 90% of disk space used",
         'severity' => 3,
-        'route_to' => "tenant"
+        'route_to' => "#{mail_to_tenant}"
       }
     end
   end # End of "disk_size_hash.each do |disk,size|"
