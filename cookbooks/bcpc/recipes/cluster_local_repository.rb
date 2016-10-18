@@ -50,25 +50,12 @@ if apt_uri.host
   end
 end
 
-#
-# We can't use the methods from bcpc utils.rb because chef-vault may
-# not have been installed yet.
-#
-# Fortunately, the public key for the apt repository is a standard
-# data bag item.
-#
-bcpc_public_key =
-  begin
-    dbi = data_bag_item('configs', node.chef_environment)
-    dbi['bootstrap-gpg-public_key_base64']
-  rescue
-    nil
-  end
+unless node[:fqdn] == get_bootstrap
+  bcpc_public_key = get_config!('bootstrap-gpg-public_key_base64')
 
-require 'tempfile'
-bcpc_apt_key_path = Tempfile.new('bootstrap-gpg-key').path
+  require 'tempfile'
+  bcpc_apt_key_path = Tempfile.new('bootstrap-gpg-key').path
 
-if bcpc_public_key
   file bcpc_apt_key_path do
     mode 0444
     content Base64.decode64(bcpc_public_key)
@@ -82,8 +69,8 @@ if bcpc_public_key
       cc.error!
       node.run_state['bootstrap_gpg_fingerprint'] =
         cc.stdout.lines.select do |line|
-          line.include?('fingerprint =')
-        end.first.gsub(/.*fingerprint =/, '').gsub(/\s/, '').chomp
+        line.include?('fingerprint =')
+      end.first.gsub(/.*fingerprint =/, '').gsub(/\s/, '').chomp
     end
   end
 
@@ -97,15 +84,9 @@ apt_repository 'bcpc' do
   distribution '0.5.0'
   arch 'amd64'
   components ['main']
-
-  #
-  # If we have a data bag item for the public key, use it.
-  # If we don't, trust the repo blindly.
-  #
-  if bcpc_public_key
-    key node.run_state['bootstrap_gpg_fingerprint']
-    trusted false
-  else
+  if node[:fqdn] == get_bootstrap
     trusted true
+  else
+    key node.run_state['bootstrap_gpg_fingerprint']
   end
 end
