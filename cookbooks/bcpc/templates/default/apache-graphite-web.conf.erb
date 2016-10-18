@@ -31,6 +31,16 @@ NameVirtualHost <%="#{node[:bcpc][:management][:ip]}"%>:443
       </IfVersion>
     </Directory>
 
+    <Directory /opt/graphite/webapp/>
+      <IfVersion < 2.4>
+        Order deny,allow
+        Allow from all
+      </IfVersion>
+      <IfVersion >= 2.4>
+        Require all granted
+      </IfVersion>
+    </Directory>
+
     Alias /static/ /opt/graphite/webapp/content/
     <Location "/content/">
         SetHandler None
