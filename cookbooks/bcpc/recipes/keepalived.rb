@@ -64,8 +64,18 @@ service "keepalived" do
     action [ :enable, :start ]
 end
 
+#
+# In bcpc::bootstrap, the newest bfd package should have been stuffed
+# into the bootstrap's "bins" directory, which is indexed as an apt repo.
+#
+# In that case, we can set the bfd package source to nil and let apt do
+# its job.
+#
+node.default[:bfd][:package][:source] = nil
+include_recipe 'bcpc::cluster_local_repository'
+include_recipe 'bfd::default'
+
 if node[:bcpc][:networks].length > 1
-  include_recipe "bfd::default"
   bfd_session "Global Cluster Service VIP Connect" do
     subnet = node[:bcpc][:management][:subnet]
     action :connect
@@ -77,5 +87,13 @@ if node[:bcpc][:networks].length > 1
     action :up
     remote_ip node[:bcpc][:networks][subnet][:management][:gateway]
     local_ip node[:bcpc][:networks][subnet][:management][:vip]
+  end
+else
+  service 'bfdd-beacon' do
+    action [:stop, :disable]
+  end
+
+  execute 'killall bfdd-beacon' do
+    ignore_failure true
   end
 end

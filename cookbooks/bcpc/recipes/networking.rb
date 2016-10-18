@@ -328,7 +328,6 @@ ruby_block 'bcpc-deconfigure-dhcp-interfaces' do
   only_if 'pgrep dhclient'
 end
 
-
 if node[:bcpc][:networks][subnet][:management][:interface] !=
    node[:bcpc][:networks][subnet][:storage][:interface]
   bash 'routing-storage' do

@@ -100,6 +100,11 @@ apt_package 'percona-xtradb-cluster-56' do
           '-o Dpkg::Options::="--force-confold"'
 end
 
+directory '/var/run/mysql' do
+  owner 'mysql'
+  mode 0775
+end
+
 service 'mysql' do
   action [:enable, :start]
 end

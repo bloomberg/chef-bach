@@ -8,6 +8,7 @@ version          '2.0.0'
 
 depends 'apt', '~> 2.4.0'
 depends 'bfd'
+depends 'build-essential'
 depends 'chef-client', '~> 4.2.4'
 depends 'chef-vault', '~> 1.3.0'
 depends 'cobblerd', '>= 0.2.0'

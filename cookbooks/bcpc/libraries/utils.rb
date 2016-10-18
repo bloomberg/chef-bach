@@ -33,9 +33,7 @@ end
 
 # memrize function to bootstrap info
 def get_bootstrap
-  return $bootstrap if defined? $bootstrap
-  $bootstrap = get_all_nodes.select{|s| s.hostname.include? 'bootstrap'}[0].fqdn
-  return $bootstrap
+  node.run_state['bootstrap_host'] ||= get_all_nodes.select{|s| s.hostname.include? 'bootstrap'}[0].fqdn
 end
 
 #
@@ -88,25 +86,47 @@ end
 # item: chef vault item; 
 # key: the key to retrieve password in the item
 def get_config(key, item=node.chef_environment, bag="configs")
-  require 'chef-vault'
-  begin
-    entry = ChefVault::Item.load(bag, item)
-    return entry[key]
-  rescue ChefVault::Exceptions::KeysNotFound
-    if bag != "configs"
-    begin
-      entry = Chef::DataBagItem.load(bag,item)
-      return entry[key]
-    rescue Net::HTTPServerException
-      return nil
-    end
-    else
+
+  #
+  # This was the original get_config.
+  # It fetches things out of chef data bags.
+  #
+  def get_data_bag_item(key, item, bag)
+    if bag == 'configs'
       init_config if $dbi.nil?
-      Chef::Log.info  "------------ Fetching value for key \"#{key}\""
-      value = node['bcpc']['encrypt_data_bag'] ? $edbi[key] : $dbi[key]
-      return value
+      Chef::Log.info  "Fetching non-vaulted value for key \"#{key}\""
+      node['bcpc']['encrypt_data_bag'] ? $edbi[key] : $dbi[key]
+    else
+      begin
+        entry = Chef::DataBagItem.load(bag,item)
+        return entry[key]
+      rescue
+        nil
+      end
     end
   end
+
+  #
+  # This is the second iteration of get_config.
+  # Items are retrieved from chef-vault.
+  #
+  def get_vault_item(key, item, bag)
+    begin
+      require 'chef-vault'
+      ChefVault::Item.load(bag, item)[key]
+    rescue LoadError
+      Chef::Log.warn('Could not require chef-vault!')
+      nil
+    rescue ChefVault::Exceptions::KeysNotFound
+      nil
+    end
+  end
+
+  #
+  # We should always provide the vault item if possible.
+  # If that fails, fall back to the data bag.
+  #
+  get_vault_item(key, item, bag) || get_data_bag_item(key, item, bag)
 end
 
 def delete_config(key)
