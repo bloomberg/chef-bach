@@ -31,9 +31,16 @@ def create_databag(name)
   end
 end
 
-# memrize function to bootstrap info
+# memoize bootstrap fqdn
 def get_bootstrap
-  node.run_state['bootstrap_host'] ||= get_all_nodes.select{|s| s.hostname.include? 'bootstrap'}[0].fqdn
+  node.run_state['bootstrap_host'] ||=
+    begin
+      get_all_nodes.select do |obj|
+        obj[:hostname].to_s.include?('bootstrap')
+      end.first.fqdn
+    rescue
+      nil
+    end
 end
 
 #

@@ -28,7 +28,7 @@ template "/tmp/openssl.cnf" do
 end
 
 node.default[:temp][:value] = ""
-bootstrap = get_all_nodes.select{|s| s.hostname.include? 'bootstrap'}[0].fqdn
+bootstrap = get_bootstrap
 key = OpenSSL::PKey::RSA.new 2048;
 
 results = get_nodes_for("certs").map!{ |x| x['fqdn'] }.join(",")
