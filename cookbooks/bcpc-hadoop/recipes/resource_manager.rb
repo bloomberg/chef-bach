@@ -85,6 +85,20 @@ bash "setup-mapreduce-app" do
   only_if "#{hdfs_write} && #{hdfs_remove}", :user => "hdfs"
 end
 
+bash "setup-tez-app" do
+  code <<-EOH
+  hdfs dfs -mkdir -p /hdp/apps/#{node[:bcpc][:hadoop][:distribution][:release]}/tez/
+  hdfs dfs -put /usr/hdp/#{node[:bcpc][:hadoop][:distribution][:release]}/tez/tez.tar.gz \
+    /hdp/apps/#{node[:bcpc][:hadoop][:distribution][:release]}/tez/
+  hdfs dfs -chown -R hdfs:hadoop /hdp
+  hdfs dfs -chmod -R 555 /hdp/apps/#{node[:bcpc][:hadoop][:distribution][:release]}/tez
+  hdfs dfs -chmod -R 444 /hdp/apps/#{node[:bcpc][:hadoop][:distribution][:release]}/tez/tez.tar.gz
+  EOH
+  user "hdfs"
+  not_if "hdfs dfs -test -f /hdp/apps/#{node[:bcpc][:hadoop][:distribution][:release]}/tez/tez.tar.gz", :user => "hdfs" 
+  only_if "#{hdfs_write} && #{hdfs_remove}", :user => "hdfs"
+end
+
 bash "delete-temp-file" do
   code <<-EOH
   hdfs dfs -rm /user/hdfs/chef-mapred-test
