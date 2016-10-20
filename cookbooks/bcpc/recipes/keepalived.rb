@@ -91,6 +91,7 @@ if node[:bcpc][:networks].length > 1
 else
   service 'bfdd-beacon' do
     action [:stop, :disable]
+    ignore_failure true
   end
 
   execute 'killall bfdd-beacon' do
