@@ -27,7 +27,12 @@ default['bcpc']['bootstrap']['proxy'] = nil
 default['bcpc']['bootstrap']['preseed'].tap do |preseed|
   preseed['add_kernel_opts'] = 'console=ttyS0'
   preseed['additional_packages'] = %w[openssh-server lldpd]
-  preseed['late_command'] = 'true'
+
+  # Disable device renaming -- use the kernel's enumeration order.
+  preseed['late_command'] =
+    'rm /target/etc/udev/rules.d/70-persistent-net.rules; ' \
+    'touch /target/etc/udev/rules.d/75-persistent-net-generator.rules'
+
   #
   # All these lines get concatenated, hence the semicolons and
   # backslashes.

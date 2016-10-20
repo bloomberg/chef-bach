@@ -55,6 +55,26 @@ package 'powernap' do
   action :remove
 end
 
+log 'udev persistent-net.rules file found! Your NICs may have been renamed.' do
+  level :warn
+  only_if { File.exists?('/etc/udev/rules.d/70-persistent-nic.rules') }
+end
+
+#
+# Disable NIC renaming on future boots by creating an empty
+# persistent-net-generator to override the one in /lib/udev
+#
+file '/etc/udev/rules.d/75-persistent-net-generator.rules' do
+  content "# This file was created by Chef.\n" \
+          "# (It is intentionally empty.)\n"
+  mode 0444
+end
+
+# Remove existing NIC renaming rules.
+file '/etc/udev/rules.d/70-persistent-net.rules' do
+  action :delete
+end
+
 bash 'enable-ip-forwarding' do
   user 'root'
   code(
