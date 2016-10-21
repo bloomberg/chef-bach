@@ -85,6 +85,8 @@ default["bcpc"]["hadoop"]["yarn"]["scheduler"]["minimum-allocation-mb"] = 256
 
 # Setting balancer bandwidth to default value as per hdfs-default.xml
 default["bcpc"]["hadoop"]["balancer"]["bandwidth"] = 1048576
+# Setting balancer max.concurrent.moves default value as per hdfs-default.xml
+default["bcpc"]["hadoop"]["balancer"]["max_concurrent_moves"] = 5
 
 #
 # Attributes for service rolling restart process

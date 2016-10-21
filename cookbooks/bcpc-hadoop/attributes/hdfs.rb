@@ -38,6 +38,9 @@ default[:bcpc][:hadoop][:hdfs][:site_xml].tap do |site_xml|
   site_xml['dfs.datanode.balance.bandwidthPerSec'] =
     node[:bcpc][:hadoop][:balancer][:bandwidth]
 
+  site_xml['dfs.datanode.balance.max.concurrent.moves'] =
+    node[:bcpc][:hadoop][:balancer][:max_concurrent_moves]
+
   site_xml['dfs.nameservices'] = node.chef_environment
 
   site_xml['dfs.datanode.failed.volumes.tolerated'] =
