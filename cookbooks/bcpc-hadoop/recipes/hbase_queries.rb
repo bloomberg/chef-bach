@@ -1,5 +1,6 @@
 # Set hbase related zabbix triggers
 trigger_chk_period = "#{node[:bcpc][:hadoop][:zabbix][:trigger_chk_period]}m"
+
 node.set[:bcpc][:hadoop][:graphite][:service_queries][:hbase_master] = {
   'hbase_master.HeapMemoryUsage_committed' => {
      'query' => "minSeries(jmx.hbase_master.*.memory.HeapMemoryUsage_committed)",
