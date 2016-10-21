@@ -37,6 +37,18 @@ EOH
   not_if "hdfs dfs -test -d /apps/tez/", :user => "hdfs"
 end
 
+hdfs_write = "echo 'test' | hdfs dfs -copyFromLocal - /user/hdfs/chef-tez-test"
+hdfs_remove = "hdfs dfs -rm -skipTrash /user/hdfs/chef-tez-test"
+hdfs_test = "hdfs dfs -test -f /user/hdfs/chef-tez-test"
+
+bash 'tez-remove-check-file' do
+  code <<-EOH
+  #{hdfs_remove}
+  EOH
+  user 'hdfs'
+  only_if "#{hdfs_test}", :user => 'hdfs'
+end
+
 bash "make_dir_to_copy_tez_targz" do
   code <<EOH
   hdfs dfs -mkdir -p /hdp/apps/#{node[:bcpc][:hadoop][:distribution][:release]}/tez/ 
@@ -47,14 +59,5 @@ bash "make_dir_to_copy_tez_targz" do
 EOH
   user "hdfs"
   not_if "hdfs dfs -test -f /hdp/apps/#{node[:bcpc][:hadoop][:distribution][:release]}/tez/tez.tar.gz", :user => "hdfs"
-  only_if "echo 'test'| hdfs dfs -copyFromLocal - /user/hdfs/chef-tez-test", :user => "hdfs"
-  notifies :run,"bash[delete-tez-temp-file]",:immediately
-end
-
-bash "delete-tez-temp-file" do
-  code <<-EOH
-  hdfs dfs -rm /user/hdfs/chef-tez-test
-  EOH
-  user "hdfs"
-  action :nothing
+  only_if "#{hdfs_write} && #{hdfs_remove}", :user => "hdfs"
 end
