@@ -85,14 +85,6 @@ bash "setup-mapreduce-app" do
   only_if "#{hdfs_write} && #{hdfs_remove}", :user => "hdfs"
 end
 
-bash "delete-temp-file" do
-  code <<-EOH
-  hdfs dfs -rm /user/hdfs/chef-mapred-test
-  EOH
-  user "hdfs"
-  action :nothing
-end
-
 service "hadoop-yarn-resourcemanager" do
   action [:enable, :start]
   supports :status => true, :restart => true, :reload => false
