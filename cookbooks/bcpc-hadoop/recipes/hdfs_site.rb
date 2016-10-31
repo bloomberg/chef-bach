@@ -1,9 +1,25 @@
-subnet = node['bcpc']['management']['subnet']
-
+ruby_block "calculate_interface_bandwidth" do
+  block do
+    subnet = node[:bcpc][:management][:subnet]
+    interface = node[:bcpc][:networks][subnet][:floating][:interface]
+    fh = File::open("/sys/class/net/#{interface}/speed", "r")
+    node.run_state["balancer_bandwidth"] = do
+      # get if speed convert from MBps to bits
+      # convert to octets
+      if_speed =  fh.readline.chom.to_i * 1000000 / 8
+    rescue
+      node["hadoop"]["hdfs"]["balancer"]["bandwidth"]
+    end
+  end
+end
+      
 hdfs_site_values = node[:bcpc][:hadoop][:hdfs][:site_xml]
 
 hdfs_site_generated_values =
 {
+ 'dfs.datanode.balance.bandwidthPerSec' =
+   node.run_state["balancer_bandwidth"],   
+
  'dfs.namenode.name.dir' =>
    node[:bcpc][:hadoop][:mounts]
    .map{ |d| "file:///disk/#{d}/dfs/nn" }.join(','),
