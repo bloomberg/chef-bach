@@ -1,12 +1,12 @@
-# In order to set balancer bandwidth we need to discover our floating interface
-# And find its bandwidth
-# Setting balancer bandwidth to default value as per hdfs-default.xml
+# Setting balancer andwidth to default value as per hdfs-default.xml
 default["hadoop"]["hdfs"]["balancer"]["bandwidth"] = 1048576
 # Setting balancer max.concurrent.moves default value as per hdfs-default.xml
 # Apache docs recommend that the number of move threads a multiple
 # of data disks
-default["hadoop"]["hdfs"]["balancer"]["max_concurrent_moves_multiplier_constant"] = 10
-default["hadoop"]["hdfs"]["balancer"]["max_concurrent_moves"] = node[:bcpc][:hadoop][:mounts].length * default["hadoop"]["hdfs"]["balancer"]["max_concurrent_moves_multiplier_constant"]
+default["hadoop"]["hdfs"]["balancer"]["max_concurrent_moves_multiplier"] = 10
+default["hadoop"]["hdfs"]["balancer"]["max_concurrent_moves"] =
+  node[:bcpc][:hadoop][:mounts].length *
+  default["hadoop"]["hdfs"]["balancer"]["max_concurrent_moves_multiplier"]
 
 default[:bcpc][:hadoop][:hdfs][:dfs].tap do |dfs|
   dfs[:namenode][:audit][:log][:async] = true
@@ -44,9 +44,6 @@ default[:bcpc][:hadoop][:hdfs][:site_xml].tap do |site_xml|
   
   site_xml['dfs.namenode.audit.log.async'] =
     dfs[:namenode][:audit][:log][:async]
-
-  site_xml['dfs.datanode.balance.bandwidthPerSec'] =
-    node[:bcpc][:hadoop][:balancer][:bandwidth]
 
   site_xml['dfs.datanode.balance.max.concurrent.moves'] =
     node[:hadoop][:hdfs][:balancer][:max_concurrent_moves]
