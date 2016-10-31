@@ -14,7 +14,7 @@ hdfs_site_values = node[:bcpc][:hadoop][:hdfs][:site_xml]
 
 hdfs_site_generated_values =
 {
- 'dfs.datanode.balance.bandwidthPerSec' =
+ 'dfs.datanode.balance.bandwidthPerSec' =>
    node.run_state["balancer_bandwidth"],   
 
  'dfs.namenode.name.dir' =>
