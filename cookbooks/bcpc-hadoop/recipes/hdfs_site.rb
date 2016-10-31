@@ -1,18 +1,15 @@
-ruby_block "calculate_interface_bandwidth" do
-  block do
-    subnet = node[:bcpc][:management][:subnet]
-    interface = node[:bcpc][:networks][subnet][:floating][:interface]
-    fh = File::open("/sys/class/net/#{interface}/speed", "r")
-    node.run_state["balancer_bandwidth"] = do
-      # get if speed convert from MBps to bits
-      # convert to octets
-      if_speed =  fh.readline.chom.to_i * 1000000 / 8
-    rescue
-      node["hadoop"]["hdfs"]["balancer"]["bandwidth"]
-    end
-  end
+# vim: tabstop=2:shiftwidth=2:softtabstop=2 
+subnet = node[:bcpc][:management][:subnet]
+interface = node[:bcpc][:networks][subnet][:floating][:interface]
+node.run_state["balancer_bandwidth"] = begin
+  # get if speed convert from MBps to bits
+  # convert to octets
+  fh = File::open("/sys/class/net/#{interface}/speed", "r")
+  (fh.readline.chomp.to_i * 1000000 / 8).to_s
+rescue
+  node["hadoop"]["hdfs"]["balancer"]["bandwidth"]
 end
-      
+  
 hdfs_site_values = node[:bcpc][:hadoop][:hdfs][:site_xml]
 
 hdfs_site_generated_values =
