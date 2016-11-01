@@ -1,12 +1,8 @@
+# vim: tabstop=2:shiftwidth=2:softtabstop=2 
 # Setting balancer andwidth to default value as per hdfs-default.xml
 default["hadoop"]["hdfs"]["balancer"]["bandwidth"] = 1048576
-# Setting balancer max.concurrent.moves default value as per hdfs-default.xml
-# Apache docs recommend that the number of move threads a multiple
-# of data disks
+# balancer thread multiplier constant
 default["hadoop"]["hdfs"]["balancer"]["max_concurrent_moves_multiplier"] = 10
-default["hadoop"]["hdfs"]["balancer"]["max_concurrent_moves"] =
-  node[:bcpc][:hadoop][:mounts].length *
-  default["hadoop"]["hdfs"]["balancer"]["max_concurrent_moves_multiplier"]
 
 default[:bcpc][:hadoop][:hdfs][:dfs].tap do |dfs|
   dfs[:namenode][:audit][:log][:async] = true

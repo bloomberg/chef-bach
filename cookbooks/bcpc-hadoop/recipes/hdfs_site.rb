@@ -9,6 +9,11 @@ node.run_state["balancer_bandwidth"] = begin
 rescue
   node["hadoop"]["hdfs"]["balancer"]["bandwidth"]
 end
+
+default["hadoop"]["hdfs"]["balancer"]["max_concurrent_moves"] =
+  node[:bcpc][:hadoop][:mounts].length *
+  default["hadoop"]["hdfs"]["balancer"]["max_concurrent_moves_multiplier"]
+
   
 hdfs_site_values = node[:bcpc][:hadoop][:hdfs][:site_xml]
 
