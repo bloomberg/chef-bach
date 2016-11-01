@@ -41,8 +41,6 @@ default[:bcpc][:hadoop][:hdfs][:site_xml].tap do |site_xml|
   site_xml['dfs.namenode.audit.log.async'] =
     dfs[:namenode][:audit][:log][:async]
 
-  site_xml['dfs.datanode.balance.max.concurrent.moves'] =
-    node[:hadoop][:hdfs][:balancer][:max_concurrent_moves]
 
   site_xml['dfs.nameservices'] = node.chef_environment
 

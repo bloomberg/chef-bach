@@ -10,15 +10,20 @@ rescue
   node["hadoop"]["hdfs"]["balancer"]["bandwidth"]
 end
 
-default["hadoop"]["hdfs"]["balancer"]["max_concurrent_moves"] =
+# Setting balancer max.concurrent.moves default value as per hdfs-default.xml
+# Apache docs recommend that the number of move threads a multiple
+# of data disks
+node.default["hadoop"]["hdfs"]["balancer"]["max_concurrent_moves"] =
   node[:bcpc][:hadoop][:mounts].length *
-  default["hadoop"]["hdfs"]["balancer"]["max_concurrent_moves_multiplier"]
+  node["hadoop"]["hdfs"]["balancer"]["max_concurrent_moves_multiplier"]
 
-  
 hdfs_site_values = node[:bcpc][:hadoop][:hdfs][:site_xml]
 
 hdfs_site_generated_values =
 {
+ 'dfs.datanode.balance.max.concurrent.moves' =>
+    node[:hadoop][:hdfs][:balancer][:max_concurrent_moves],
+
  'dfs.datanode.balance.bandwidthPerSec' =>
    node.run_state["balancer_bandwidth"],   
 
