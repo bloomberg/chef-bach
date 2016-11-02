@@ -44,12 +44,10 @@ chef_vault_secret 'cobbler' do
   admins node[:fqdn]
   search '*:*'
   action :nothing
-end.run_action(:create_if_missing)
+end
 
-node.set[:cobbler][:web_username] =
-  get_config('cobbler-web-user')
-node.set[:cobbler][:web_password] =
-  get_config('web-password', 'cobbler', 'os')
+# The cobblerd cookbook relies on this attribute.
+node.force_default[:cobbler][:web_password] = web_password
 
 bcpc_repo 'cobbler26'
 
@@ -105,24 +103,62 @@ end
     not_if {
       File.exist?("/etc/apache2/mods-enabled/#{mod_name}.load")
     }
+    #
     # We need to restart apache2 before any cobbler commands are run.
     # Restarting it multiple times is pretty harmless.
+    #
     notifies :restart, 'service[apache2]', :immediately
   end
 end
 
 package 'isc-dhcp-server'
 
-include_recipe 'cobblerd::web'
-
+#
 # The cobblerd cookbook assumes we use the Ubuntu 'universe'
 # packages. Unlike "universe," the upstream packages include the
 # cobbler-web material in the main package, so we do not need the
-# second package resource.
-unwind 'package[cobbler-web]'
+# second package.
+#
+# chef-rewind's "unwind" is no longer reliable under chef 12.x, so
+# we're doing this the hard way with equivs.
+#
+package 'equivs'
 
+control_file_path =
+  ::File.join(Chef::Config.file_cache_path, 'cobbler-web.control')
+
+file control_file_path do
+  content <<-EOM.gsub(/^ {4}/,'')
+    Section: admin
+    Priority: optional
+    Standards-Version: 3.9.2
+
+    Package: cobbler-web
+    Version: 2.6.11-1
+    Maintainer: BACH <hadoop@bloomberg.net>
+    Architecture: all
+    Description: Dummy package to prevent the installation of cobbler-web
+  EOM
+end
+
+deb_file_path =
+   ::File.join(Chef::Config.file_cache_path,'cobbler-web_2.6.11-1_all.deb')
+
+execute 'cobbler-web-build' do
+   cwd ::File.dirname(deb_file_path)
+   command "equivs-build #{control_file_path}"
+   creates deb_file_path
+end
+
+dpkg_package deb_file_path
+
+include_recipe 'cobblerd'
+include_recipe 'cobblerd::web'
+
+#
 # The cobblerd cookbook references the wrong service name. Upstream
 # cobbler packages use 'cobblerd' instead of 'cobbler'
+#
 rewind 'service[cobbler]' do
   service_name 'cobblerd'
 end
@@ -135,8 +171,10 @@ end
 ['cobbler.conf', 'cobbler_web.conf'].each do |conf_file|
   link "/etc/apache2/conf-enabled/#{conf_file}" do
     to "/etc/apache2/conf.d/#{conf_file}"
+    #
     # We need to restart apache2 before any cobbler commands are run.
     # Restarting it multiple times is pretty harmless.
+    #
     notifies :restart, 'service[apache2]', :immediately
   end
 end
@@ -174,12 +212,14 @@ cobbler_image 'ubuntu-12.04-mini' do
   source "#{get_binary_server_url}/ubuntu-12.04-hwe313-mini.iso"
   os_version 'precise'
   os_breed 'ubuntu'
+  action :import
 end
 
 cobbler_image 'ubuntu-14.04-mini' do
   source "#{get_binary_server_url}/ubuntu-14.04-hwe44-mini.iso"
   os_version 'trusty'
   os_breed 'ubuntu'
+  action :import
 end
 
 {
@@ -189,6 +229,7 @@ end
   cobbler_profile "bcpc_host_#{version}" do
     kickstart "cobbler/#{version}.preseed"
     distro distro_name
+    action :import
   end
 
   #
@@ -262,9 +303,7 @@ file '/etc/cobbler/pxe/gpxe_system_local.template' do
   notifies :run, 'bash[cobbler-sync]', :delayed
 end
 
-#
-# The "LOCALBOOT -1" does not seem to work reliably on VirtualBox.
-#
+# The "LOCALBOOT -1" statement does not seem to work reliably on VirtualBox.
 file '/etc/cobbler/pxe/pxelocal.template' do
   content <<-EOM.gsub(/^ {4}/, '')
     DEFAULT local
@@ -279,7 +318,6 @@ file '/etc/cobbler/pxe/pxelocal.template' do
   mode 0444
   notifies :run, 'bash[cobbler-sync]', :delayed
 end
-
 
 service 'isc-dhcp-server' do
   #

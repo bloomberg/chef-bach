@@ -17,39 +17,5 @@
 # limitations under the License.
 #
 
-target_filename = node['bcpc']['chefvault']['filename']
-link_filename = "chef-vault.gem"
-package_path = "#{node['bcpc']['bin_dir']['gems']}/#{target_filename}"
-checksum = node['bcpc']['chefvault']['checksum']
+include_recipe 'bach_repository::gems'
 
-
-if !File.exists?(package_path)
-
-# download rubygem from website
-  remote_file "#{ target_filename }" do
-    source "#{ node['bcpc']['gem_source'] }/#{ target_filename }"
-    checksum checksum
-    group "root"
-    owner "root"
-    mode "755"
-    path package_path
-    action :nothing
-  end.run_action(:create_if_missing)
-  
-  link "#{node['bcpc']['bin_dir']['gems']}/#{ link_filename }" do
-    owner 'root'
-    to "#{node['bcpc']['bin_dir']['gems']}/#{ target_filename }"
-    action :nothing
-  end.run_action(:create)
-  
-  bash 'build_bins' do
-    action :nothing
-    user 'root'
-    cwd '/home/vagrant/chef-bcpc'
-    code <<-EOH
-      ./build_bins.sh
-    EOH
-    umask 0002
-  end.run_action(:run)
-
-end

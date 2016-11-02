@@ -28,5 +28,17 @@ if [[ "$admin_val" != "true" ]]; then
   echo -e "/\"admin\": false\ns/false/true\nw\nq\n" | EDITOR=ed sudo -E knife client edit `hostname -f` -c .chef/knife.rb -k /etc/chef-server/admin.pem -u admin
 fi
 
-knife node run_list add $(hostname -f) 'role[BCPC-Bootstrap]' -c .chef/knife.rb
+#
+# A lot of bcpc recipes assume the cluster local repository is already
+# set up, so our first chef run will only manage that problem.
+#
+sudo knife node run_list set $(hostname -f) \
+      'recipe[bach_repository],recipe[bcpc::apache-mirror]' \
+      -c .chef/knife.rb
+sudo chef-client -c .chef/knife.rb
+
+# Now that we have a local repo, the full bootstrap role should converge.
+sudo knife node run_list set $(hostname -f) \
+     'role[BCPC-Bootstrap]' \
+     -c .chef/knife.rb
 sudo chef-client -c .chef/knife.rb

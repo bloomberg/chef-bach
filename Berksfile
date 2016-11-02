@@ -8,6 +8,7 @@ metadata
 #
 cookbook 'bach_common', path: './cookbooks/bach_common'
 cookbook 'bach_krb5', path: './cookbooks/bach_krb5'
+cookbook 'bach_repository', path: './cookbooks/bach_repository'
 cookbook 'bach_spark', path: './cookbooks/bach_spark'
 cookbook 'bcpc', path: './cookbooks/bcpc'
 cookbook 'bcpc-hadoop', path: './cookbooks/bcpc-hadoop'

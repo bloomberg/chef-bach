@@ -45,6 +45,9 @@ cookbook_path '$(pwd)/vendor/cookbooks'
 # Disable the Ohai password module which explodes on a Single-Sign-On-joined system
 Ohai::Config[:disabled_plugins] = [ "passwd" ]
 
+ssl_verify_mode :verify_none
+verify_api_cert false
+
 File.umask(0007)
 EOF
 
