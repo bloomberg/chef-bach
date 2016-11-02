@@ -1,4 +1,5 @@
 source 'https://supermarket.chef.io'
 
 cookbook 'cobblerd', git: 'https://github.com/bloomberg/cobbler-cookbook.git'
+cookbook 'bfd', git: 'https://github.com/bloomberg/openbfdd-cookbook'
 metadata

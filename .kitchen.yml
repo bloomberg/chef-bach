@@ -38,6 +38,17 @@ suites:
   - name: zookeeper
     run_list:
       - 'recipe[kafka-bcpc::zookeeper_server]'
+  - name: yarn
+    run_list:
+      - 'recipe[bcpc::default]'
+      - 'recipe[java::default]'
+      - 'recipe[openssh::default]'
+      - 'recipe[bcpc-hadoop::hdp_repo]'
+      - 'recipe[bcpc-hadoop::configs]'
+      - 'recipe[bcpc-hadoop::hadoop_config]'
+      - 'recipe[bcpc-hadoop::namenode_no_HA]'
+      - 'recipe[bcpc-hadoop::datanode]'
+      - 'recipe[bcpc-hadoop::resource_manager]'
   - name: kafka
     attributes: {
       kafka: {

@@ -50,6 +50,12 @@ gem_package "zabbixapi" do
     action :nothing
 end.run_action(:install)
 
+gem_package "nokogiri" do
+    gem_binary gem_path
+    version ">0.0"
+    action :nothing
+end.run_action(:install)
+
 Gem.clear_paths
 require 'zookeeper'
 
