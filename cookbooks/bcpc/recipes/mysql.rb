@@ -100,13 +100,29 @@ apt_package 'percona-xtradb-cluster-56' do
           '-o Dpkg::Options::="--force-confold"'
 end
 
+# This package is needed to be a donor in the SST process.
+package 'percona-xtrabackup' do
+  action :install
+end
+
 directory '/var/run/mysql' do
   owner 'mysql'
   mode 0775
 end
 
+#
+# On Ubuntu, supports[:status] defaults to false, which causes chef to
+# use 'pgrep -f' to look for the running service.  This will always
+# succeed because java processes include MySQL in their classpaths.
+#
+# Setting it to true induces chef to check service status through the
+# 'service' command.
+#
 service 'mysql' do
   action [:enable, :start]
+  supports({restart: false,
+            reload: false,
+            status: true})
 end
 
 [
