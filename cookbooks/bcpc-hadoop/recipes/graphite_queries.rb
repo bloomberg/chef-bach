@@ -26,7 +26,7 @@ triggers = {
   'graphite-to-zabbix' => {
     'graphite-to-zabbix.QueryResultEmpty' => {
       'query' => "graphite-to-zabbix.QueryResultEmpty",
-      'trigger_val' => "max(3m)",
+      'trigger_val' => "min(3m)",
       'trigger_cond' => "=1",
       'trigger_name' => "graphite-to-zabbix_QueryResultEmpty",
       'enable' => true,
