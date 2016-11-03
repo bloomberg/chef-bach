@@ -4,7 +4,7 @@ name             'kafka-bcpc'
 maintainer       'Bloomberg Finance L.P.'
 description      'Recipes to setup prerequisites for Kafka cluster'
 long_description IO.read(File.join(File.dirname(__FILE__), 'README.md'))
-version          '2.0.1'
+version          '2.0.2'
 
 depends "kafka"
 depends "sysctl"
