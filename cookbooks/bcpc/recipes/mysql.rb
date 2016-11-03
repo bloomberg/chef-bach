@@ -56,7 +56,7 @@ package 'debconf-utils'
   execute "percona-preseed-#{preseed_item}" do
     command 'echo "percona-xtradb-cluster-server-5.6 ' \
       "percona-xtradb-cluster-server/#{preseed_item} " \
-      "password \"#{root_password}\" | debconf-set-selections"
+      "password #{root_password}\" | debconf-set-selections"
     sensitive true if respond_to?(:sensitive)
   end
 end
