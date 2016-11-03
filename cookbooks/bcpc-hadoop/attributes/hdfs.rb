@@ -1,3 +1,9 @@
+# vim: tabstop=2:shiftwidth=2:softtabstop=2 
+# Setting balancer andwidth to default value as per hdfs-default.xml
+default["hadoop"]["hdfs"]["balancer"]["bandwidth"] = 1048576
+# balancer thread multiplier constant
+default["hadoop"]["hdfs"]["balancer"]["max_concurrent_moves_multiplier"] = 10
+
 default[:bcpc][:hadoop][:hdfs][:dfs].tap do |dfs|
   dfs[:namenode][:audit][:log][:async] = true
   dfs[:webhdfs][:enabled] = true
@@ -35,8 +41,6 @@ default[:bcpc][:hadoop][:hdfs][:site_xml].tap do |site_xml|
   site_xml['dfs.namenode.audit.log.async'] =
     dfs[:namenode][:audit][:log][:async]
 
-  site_xml['dfs.datanode.balance.bandwidthPerSec'] =
-    node[:bcpc][:hadoop][:balancer][:bandwidth]
 
   site_xml['dfs.nameservices'] = node.chef_environment
 
