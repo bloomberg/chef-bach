@@ -14,6 +14,9 @@ if [[ -f ./proxy_setup.sh ]]; then
   . ./proxy_setup.sh
 fi
 
+# Clean up any left-behind chef config from prior runs.
+rm -f /tmp/build_bins_chef_config.?????????.rb
+
 #
 # It's important to install the chefdk before chef, so that
 # /usr/bin/knife and /usr/bin/chef-client are symlinks into /opt/chef
@@ -43,7 +46,7 @@ fi
 
 # Git needs to be installed for Berkshelf to be useful.
 if [ $(dpkg-query -W -f='${Status}' git 2>/dev/null | grep -c 'ok installed') -eq 0 ]; then
-    sudo apt-get -y install git
+    apt-get -y install git
 fi
 
 #
@@ -64,9 +67,24 @@ if [[ ! -z "$SUDO_USER" ]]; then
 fi
 
 #
+# We need to use the real Chef cache, even in local mode, so that ark
+# cookbook output works correctly on internet-disconnected hosts.
+#
+mkdir -p /var/chef/cache
+TMPFILE=`mktemp -t build_bins_chef_config.XXXXXXXXX.rb`
+cat <<EOF > $TMPFILE
+cache_path '/var/chef'
+EOF
+
+#
 # We change to the vendor directory so that chef local-mode finds
 # cookbooks in the default path, ./cookbooks
 #
+# Setting the cookbook path in the config file changes too many other
+# defaults.
+#
 pushd $DIR/vendor
-/opt/chefdk/bin/chef-client -z -r 'recipe[bach_repository]'
+/opt/chefdk/bin/chef-client -z -r 'recipe[bach_repository]' -c $TMPFILE
+rm $TMPFILE
 popd
+
