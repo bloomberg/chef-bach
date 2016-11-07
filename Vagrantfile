@@ -23,7 +23,9 @@ local_file =
   end
 
 if File.exist?(local_file)
-  $stderr.puts "Found #{local_file}, including"
+  if ENV['BACH_DEBUG']
+    $stderr.puts "Found #{local_file}, including"
+  end
   require local_file
 end
 
@@ -42,7 +44,9 @@ base_dir = if File.basename(File.expand_path('.')) == 'vbox'
              File.expand_path('./environments')
            end
 
-$stderr.puts "Base directory is : #{base_dir}"
+if ENV['BACH_DEBUG']
+  $stderr.puts "Base directory is : #{base_dir}"
+end
 
 json_file = Dir[File.join("#{base_dir}/../environments/", '*.json')]
 
