@@ -40,7 +40,11 @@ end
 
 execute 'get-pip.py' do
   command "#{get_pip_path} #{pip_proxy_option} #{pip_cert_option}"
-  not_if '/usr/local/bin/pip --version | grep 8.0'
+  not_if {
+    version_string =
+      `/usr/local/bin/pip show pip | grep ^Version | awk '{print $2}'`.chomp
+    Gem::Version.new(version_string) >= Gem::Version.new('8.0')
+  }
 end
 
 file '/etc/pip.conf' do
