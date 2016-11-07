@@ -24,8 +24,11 @@ require 'uri'
 gem_path = Pathname.new(Gem.ruby).dirname.join('gem').to_s
 
 gem_package 'chef-vault' do
-  clear_sources true
-  source get_binary_server_url
+  #
+  # Options MUST be specified as a string, not a hash.
+  # Using gem_binary with hash options results in undefined behavior.
+  #
+  options "--clear-sources -s #{get_binary_server_url}"
   gem_binary gem_path
   version '>=2.8.0'
   action :nothing
