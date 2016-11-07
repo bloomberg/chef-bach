@@ -1,29 +1,7 @@
 # vim: tabstop=2:shiftwidth=2:softtabstop=2:expandtabs 
 subnet = node[:bcpc][:management][:subnet]
+
 hdfs_site_values = node[:bcpc][:hadoop][:hdfs][:site_xml]
-
-ruby_block 'calculate_speed' do
-  block do
-    default_speed = node['hadoop']['hdfs']['balancer']['bandwidth']
-    maximum_nic_speed = Dir.glob('/sys/class/net/*/speed').map do |ff|
-      File.read(ff).chomp.to_i rescue 1000
-    end.compact.max
-
-    node.run_state['balancer_bandwidth'] =
-      [default_speed, maximum_nic_speed * 10**6 / 8].max
-  end
-end
-
-# Setting balancer max.concurrent.moves default value as per hdfs-default.xml
-# Apache docs recommend that the number of move threads a multiple
-# of data disks
-ruby_block "calculate max_concurrent_moves" do
-  block do
-    node.run_state['max_concurrent_moves'] =
-      node[:bcpc][:hadoop][:mounts].length *
-      node['hadoop']['hdfs']['balancer']['max_concurrent_moves_multiplier']
-  end
-end
 
 ruby_block "hdfs_site_generated_values_common" do
   block do
@@ -52,16 +30,27 @@ end
 
 ruby_block "hdfs_site_generated_values_balancer_properties" do
   block do
-    balancer_properties = {
-     'dfs.datanode.balance.max.concurrent.moves' =>
-        node[:hadoop][:hdfs][:balancer][:max_concurrent_moves],
+    # get the speed of the fastest interface and use 
+    max_concurrent_moves =
+      node[:bcpc][:hadoop][:mounts].length *
+      node['hadoop']['hdfs']['balancer']['max_concurrent_moves_multiplier']
 
-     'dfs.datanode.balance.bandwidthPerSec' =>
-       node.run_state["balancer_bandwidth"]
+    default_speed = node['hadoop']['hdfs']['balancer']['bandwidth']
+    maximum_nic_speed = Dir.glob('/sys/class/net/*/speed').map do |ff|
+      File.read(ff).chomp.to_i rescue 1000
+    end.compact.max
+    balancer_bandwidth = [default_speed, maximum_nic_speed * 10**6 / 8].max
+
+    balancer_properties = {
+     'dfs.datanode.balance.max.concurrent.moves' => max_concurrent_moves,
+
+     'dfs.datanode.balance.bandwidthPerSec' => balancer_bandwidth
     }
 
     node.run_state['hdfs_site_generated_values'].merge!(balancer_properties)
   end
+  only_if { node.run_list.expand(node.chef_environment).recipes
+              .include?('bcpc-hadoop::datanode') }
 end
 
 
