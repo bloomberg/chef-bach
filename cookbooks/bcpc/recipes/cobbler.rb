@@ -37,13 +37,19 @@ root_password = secure_password if root_password.nil?
 root_password_salted = root_password.crypt('$6$' + rand(36**8).to_s(36))
 
 chef_vault_secret 'cobbler' do
+  #
+  # For some reason, we are compelled to specify a provider.
+  # This will probably break if we ever move to chef-vault cookbook 2.x
+  #
+  provider ChefVaultCookbook::Provider::ChefVaultSecret
+
   data_bag 'os'
   raw_data('web-password' => web_password,
            'root-password' => root_password,
            'root-password-salted' => root_password_salted)
   admins node[:fqdn]
   search '*:*'
-  action :nothing
+  action :create_if_missing
 end
 
 # The cobblerd cookbook relies on this attribute.
@@ -119,8 +125,10 @@ package 'isc-dhcp-server'
 # cobbler-web material in the main package, so we do not need the
 # second package.
 #
-# chef-rewind's "unwind" is no longer reliable under chef 12.x, so
-# we're doing this the hard way with equivs.
+# The "unwind" resource is no longer reliable under Chef 12.x, but
+# the replacement for unwind is not available under Chef 11.x.  Until
+# we can consilidate all nodes on 12.x, we're stuck doing this the
+# hard way with equivs.
 #
 package 'equivs'
 

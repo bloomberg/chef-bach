@@ -29,6 +29,12 @@ results = get_nodes_for("powerdns").map!{ |x| x['fqdn'] }.join(",")
 nodes = results == "" ? node['fqdn'] : results
 
 chef_vault_secret "mysql-pdns" do
+  #
+  # For some reason, we are compelled to specify a provider.
+  # This will probably break if we ever move to chef-vault cookbook 2.x
+  #
+  provider ChefVaultCookbook::Provider::ChefVaultSecret
+
   data_bag 'os'
   raw_data({ 'password' => mysql_pdns_password })
   admins "#{ nodes },#{ bootstrap }"

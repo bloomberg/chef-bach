@@ -27,11 +27,23 @@ if haproxy_stats_password.nil?
   haproxy_stats_password = secure_password
 end
 
-bootstrap = get_all_nodes.select{|s| s.hostname.include? 'bootstrap'}[0].fqdn
+bootstrap = get_bootstrap
 
-nodes = get_nodes_for("haproxy").map!{ |x| x['fqdn'] }.join(",")
+nodes = get_nodes_for("haproxy").map do |nn|
+  begin
+    nn['fqdn']
+  rescue
+    nil
+  end
+end.compact.join(',')
 
 chef_vault_secret "haproxy-stats" do
+  #
+  # For some reason, we are compelled to specify a provider.
+  # This will probably break if we ever move to chef-vault cookbook 2.x
+  #
+  provider ChefVaultCookbook::Provider::ChefVaultSecret
+
   data_bag 'os'
   raw_data({ 'password' => haproxy_stats_password })
   admins "#{ nodes },#{ bootstrap }"

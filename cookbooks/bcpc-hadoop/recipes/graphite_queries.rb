@@ -1,5 +1,11 @@
 # Get a list of cluster nodes to monitor
-monitored_nodes_objs = get_all_nodes.select { |n| not n.hostname =~ /bootstrap/ }.compact
+monitored_nodes_objs = get_all_nodes.select do |nn|
+  begin
+    !nn['hostname'].include?('bootstrap')
+  rescue
+    nil
+  end
+end.compact
 
 # Graphite queries which specify property to query and alarming trigger,
 # severity(maps to zabbix's api -> trigger -> priority)and owner who the
