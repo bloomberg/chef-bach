@@ -43,8 +43,14 @@ include_recipe 'bfd::install'
 require 'pathname'
 require 'rubygems'
 gem_path = Pathname.new(Gem.ruby).dirname.join('gem').to_s
+local_gem_source = 'file:/' + node[:bach][:repository][:bins_dir]
 
 gem_package 'ruby-augeas' do
+    #
+    # Options MUST be specified as a string, not a hash.
+    # Using gem_binary with hash options results in undefined behavior.
+    #
+    options "--clear-sources -s #{local_gem_source}"
     gem_binary gem_path
     version ">=0.0.0"
     action :nothing
