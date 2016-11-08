@@ -3,6 +3,22 @@
 # Recipe:: tools
 #
 
+#
+# If we are executing in local mode, we may not have correct mirror
+# definitions for use by the Ubuntu cookbook.
+#
+# The hacky solution is to execute 'apt-get update' blindly, without
+# explicitly configuring any mirrors.
+#
+if Chef::Config[:local_mode]
+  execute 'apt-get update' do
+    ignore_failure true
+  end
+else
+  include_recipe 'ubuntu'
+  include_recipe 'apt'
+end
+
 include_recipe 'build-essential'
 
 #
@@ -38,31 +54,7 @@ include_recipe 'build-essential'
   'unzip',
 ].each do |pkg|
   package pkg do
-    action :upgrade
+    action :install
     timeout 3600 if respond_to?(:timeout)
   end
 end
-
-local_gem_source = 'file:/' + node[:bach][:repository][:bins_dir]
-
-#
-# This array is deliberately ordered to get the correct install order.
-# These gems are also added to the repo in bach_repository::gems
-#
-[
-  ['json','1.8.3'],
-  ['cabin', '0.7.2'],
-  ['fpm', '1.3.3'],
-  ['builder', '3.2.2']
-].each do |package_name, package_version|
-  gem_package package_name do
-    #
-    # Options MUST be specified as a string, not a hash.
-    # Using gem_binary with hash options results in undefined behavior.
-    #
-    options "--clear-sources -s #{local_gem_source}"
-    gem_binary Pathname.new(Gem.ruby).dirname.join('gem').to_s
-    version package_version
-  end
-end
-

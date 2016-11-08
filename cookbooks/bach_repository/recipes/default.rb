@@ -6,14 +6,11 @@
 ENV['http_proxy'] ||= Chef::Config.http_proxy
 ENV['https_proxy'] ||= Chef::Config.https_proxy
 
-#
-# Gems recipe has to run before tools, so that the gems are available
-# for installation.
-#
-include_recipe 'bach_repository::gems'
-
-# Mostly build tools, plus fpm and pypi.
+# Apt packages containing build tools and pre-requisites.
 include_recipe 'bach_repository::tools'
+
+# Gems recipe has to run early because it includes fpm and related gems.
+include_recipe 'bach_repository::gems'
 
 include_recipe 'bach_repository::chef'
 include_recipe 'bach_repository::diamond'

@@ -43,7 +43,7 @@ include_recipe 'bfd::install'
 require 'pathname'
 require 'rubygems'
 gem_path = Pathname.new(Gem.ruby).dirname.join('gem').to_s
-local_gem_source = 'file:/' + node[:bach][:repository][:bins_dir]
+local_gem_source = 'file:/' + node[:bach][:repository][:bins_directory]
 
 gem_package 'ruby-augeas' do
     #
