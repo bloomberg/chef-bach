@@ -3,9 +3,7 @@
 # Recipe:: tools
 #
 
-execute 'apt-get update' do
-  action :run
-end
+include_recipe 'build-essential'
 
 #
 # This long list of dev/packaging tools originally came from build_bins.sh.

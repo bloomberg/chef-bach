@@ -11,3 +11,4 @@ supports 'ubuntu', '= 14.04'
 
 depends 'ark'
 depends 'bcpc'
+depends 'build-essential'
