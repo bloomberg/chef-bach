@@ -6,15 +6,16 @@ include_recipe "bcpc-hadoop::hive_table_stat"
 ::Chef::Recipe.send(:include, Bcpc_Hadoop::Helper)
 ::Chef::Resource::Bash.send(:include, Bcpc_Hadoop::Helper)
 
-
-hwx_package = %w{hadooplzo hadooplzo-native hive-hcatalog}
-
-(hwx_package.map{|p| hwx_pkg_str(p, node[:bcpc][:hadoop][:distribution][:release])} +
-  %W{#{node['bcpc']['mysql']['connector']['package']['short_name']}
-                     }).each do |pkg|
+%w{hadooplzo hadooplzo-native hive-hcatalog}.map do |pp|
+  hwx_pkg_str(pp, node[:bcpc][:hadoop][:distribution][:release])
+end.each do |pkg|
   package pkg do
-    action :install
+    action :upgrade
   end
+end
+
+package 'mysql-connector-java' do
+  action :upgrade
 end
   
 (["hive-webhcat", "hive-metastore", "hive-server2"]).each do |pkg|

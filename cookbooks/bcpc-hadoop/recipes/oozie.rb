@@ -37,18 +37,22 @@ oozie_password = get_config!('password', 'mysql-oozie', 'os')
 hdp_rel = node[:bcpc][:hadoop][:distribution][:active_release]
 oozie_conf_dir = "/etc/oozie/conf.#{node.chef_environment}"
 
-hdp_select_pkgs = %w(oozie-server oozie-client)
-hwx_pkg_strs = hdp_select_pkgs.map do |p|
-  hwx_pkg_str(p, hdp_rel)
-end
-(%W(#{node['bcpc']['mysql']['connector']['package']['short_name']}
-    zip unzip extjs hadooplzo hadooplzo-native) + hwx_pkg_strs).each do |pkg|
+[
+  'zip',
+  'unzip',
+  'extjs',
+  'hadooplzo',
+  'hadooplzo-native',
+  'mysql-connector-java',
+  hwx_pkg_str('oozie-server', hdp_rel),
+  hwx_pkg_str('oozie-client', hdp_rel),
+].flatten.each do |pkg|
   package pkg do
     action :upgrade
   end
 end
 
-hdp_select_pkgs.each do |pkg|
+['oozie-server', 'oozie-client'].each do |pkg|
   hdp_select(pkg, node[:bcpc][:hadoop][:distribution][:active_release])
 end
 
