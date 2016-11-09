@@ -16,7 +16,7 @@ default['bcpc']['graphite']['local_log_dir'] = "/opt/graphite/storage/log"
 # new setting
 default['bcpc']['graphite']['carbon']['storage'] = { 
   "carbon" => { "pattern" => "^carbon\\.", "retentions" => "60:90d" },
-  "hbase" => { "pattern" => "^jmx\\.hbase_rs\\.*\\.hb*\\.", "retentions" => "15s:15d" },
+  "hbase" => { "pattern" => "^jmx\\.hbase_rs\\..*\\.hb_regions\\.RegionServer\\.", "retentions" => "15s:1d,1m:7d" },
   "chef" => { "pattern" => "^chef\\.", "retentions" => "60:30d" },
   "default" => { "pattern" => ".*", "retentions" => "15s:7d,1m:30d,5m:90d" }
 }
