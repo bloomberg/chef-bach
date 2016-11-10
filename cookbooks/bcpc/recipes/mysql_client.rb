@@ -33,7 +33,7 @@ end
 #
 # For Chef 11.x compatibility, it is important to use gem_package
 # instead of chef_gem.  Chef 11 does not include the 'compile_time'
-# attribute for chef_gem resources.
+# attribute for chef_gem resources, so it cannot be disabled.
 #
 # Additionally, the Chef 11.x gem_package resource will fail to
 # install unless a version is provided.  (I believe this is a bug.)
