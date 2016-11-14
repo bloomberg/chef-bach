@@ -28,13 +28,18 @@ execute 'extract_spark_tar' do
   notifies :run, 'execute[build_spark_package]', :immediately
 end
 
+#
+# We deliberately include the version number in the package name,
+# because it is possible to install multiple versions side by side.
+#
 execute 'build_spark_package' do
   cwd "#{spark_extract_dir}/#{spark_extracted_file_name}"
   user 'root'
   group 'root'
   command 'fpm -s dir -t deb ' \
     "--prefix #{spark_install_dir}/#{spark_pkg_version} " \
-    "-n #{spark_pkg_prefix} -v #{spark_pkg_version} " \
+    "-n #{spark_pkg_prefix}-#{spark_pkg_version} " \
+    "-v #{spark_pkg_version} " \
     "--description 'Spark Package with Hadoop 2.6' -p #{bins_dir} *"
   umask 0002
   action :nothing
