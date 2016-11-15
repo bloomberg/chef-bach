@@ -102,7 +102,7 @@ end
 
 # This package is needed to be a donor in the SST process.
 package 'percona-xtrabackup' do
-  action :install
+  action :upgrade
 end
 
 directory '/var/run/mysql' do
