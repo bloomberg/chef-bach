@@ -1,5 +1,5 @@
 default["bcpc"]["hadoop"]["zabbix"]["cookbook"] = nil 
-default["bcpc"]["hadoop"]["zabbix"]["mail_source"] = "zabbix.zbx_mail.sh.erb"
+default["bcpc"]["hadoop"]["zabbix"]["mail_source"] = "zabbix.zbx_logger.sh.erb"
 default["bcpc"]["hadoop"]["zabbix"]["cron_check_time"] = 240
 
 # Time (in seconds) between Steps performed in a Zabbix Action.
