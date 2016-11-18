@@ -99,7 +99,9 @@ def cobbler_enroll(entry)
                            '--hostname', fqdn(entry),
                            '--profile', entry['cobbler_profile'],
                            '--ip-address', entry['ip_address'],
+                           '--interface=eth0',
                            '--mac', corrected_mac(entry))
+
   c.run_command
   if !c.status.success?
     raise "Failed to enroll #{entry['hostname']}!"
