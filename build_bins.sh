@@ -24,23 +24,23 @@ rm -f /tmp/build_bins_chef_config.?????????.rb
 #
 DIR=`dirname $0`
 mkdir -p $DIR/bins
-pushd $DIR/bins/
+pushd $DIR/bins/ > /dev/null
 
 if [ $(dpkg-query -W -f='${Status}' chefdk 2>/dev/null | grep -c 'ok installed') -eq 0 ]; then
     wget -nc https://opscode-omnibus-packages.s3.amazonaws.com/ubuntu/14.04/x86_64/chefdk_0.12.0-1_amd64.deb
 
-    if ! sha256sum chefdk_0.12.0-1_amd64.deb | grep 6fcb4529f99c212241c45a3e1d024cc1519f5b63e53fc1194b5276f1d8695aaa; then
-	echo "Failed to download ChefDK -- wrong checksum."
+    if ! sha256sum chefdk_0.12.0-1_amd64.deb | grep -q 6fcb4529f99c212241c45a3e1d024cc1519f5b63e53fc1194b5276f1d8695aaa; then
+	echo 'Failed to download ChefDK -- wrong checksum.' 1>&2
 	exit 1
     else
 	dpkg -i chefdk_0.12.0-1_amd64.deb
     fi
 fi
 
-popd
+popd > /dev/null
 
-if pgrep 'chef-client'; then
-    echo 'Chef is already running, aborting build_bins.sh'
+if pgrep 'chef-client' > /dev/null; then
+    echo 'A chef-client run is already underway, aborting build_bins.sh' 1>&2
     exit
 fi
 
@@ -83,8 +83,8 @@ EOF
 # Setting the cookbook path in the config file changes too many other
 # defaults.
 #
-pushd $DIR/vendor
+pushd $DIR/vendor > /dev/null
 /opt/chefdk/bin/chef-client -z -r 'recipe[bach_repository]' -c $TMPFILE
 rm $TMPFILE
-popd
+popd > /dev/null
 
