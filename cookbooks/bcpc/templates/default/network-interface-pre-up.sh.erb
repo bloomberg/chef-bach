@@ -16,6 +16,12 @@ if ! grep 4 $MODE_PATH; then
     echo 4 > $MODE_PATH
 fi
 
+LACP_RATE_PATH=/sys/class/net/<%= @interface %>/bonding/lacp_rate
+if ! grep 1 $LACP_RATE_PATH; then
+    ip link set <%= @interface %> down
+    echo 1 > $LACP_RATE_PATH
+fi
+
 SLAVE_PATH=/sys/class/net/<%= @interface %>/bonding/slaves
 <% (@slaves or []).each do |slave| %>
 if ! grep <%= slave %> $SLAVE_PATH; then
