@@ -28,6 +28,12 @@ if ! grep -q 100 $MIIMON_PATH; then
     echo 100 > $MIIMON_PATH
 fi
 
+XMIT_HASH_POLICY_PATH=/sys/class/net/<%= @interface %>/bonding/xmit_hash_policy
+if ! grep -q "layer3+4" $XMIT_HASH_POLICY_PATH; then
+    ip link set <%= @interface %> down
+    echo "layer3+4" > $XMIT_HASH_POLICY_PATH
+fi
+
 SLAVE_PATH=/sys/class/net/<%= @interface %>/bonding/slaves
 <% (@slaves or []).each do |slave| %>
 if ! grep -q "<%= slave %>" $SLAVE_PATH; then
