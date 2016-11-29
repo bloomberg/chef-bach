@@ -6,34 +6,34 @@
 #
 
 MASTERS_PATH=/sys/class/net/bonding_masters
-if ! grep <%= @interface %> $MASTERS_PATH; then
-    echo +<%= @interface %> > $MASTERS_PATH
+if ! grep -q "<%= @interface %>" $MASTERS_PATH; then
+    echo "+<%= @interface %>" > $MASTERS_PATH
 fi
 
 MODE_PATH=/sys/class/net/<%= @interface %>/bonding/mode
-if ! grep 4 $MODE_PATH; then
+if ! grep -q 4 $MODE_PATH; then
     ip link set <%= @interface %> down
     echo 4 > $MODE_PATH
 fi
 
 LACP_RATE_PATH=/sys/class/net/<%= @interface %>/bonding/lacp_rate
-if ! grep 1 $LACP_RATE_PATH; then
+if ! grep -q 1 $LACP_RATE_PATH; then
     ip link set <%= @interface %> down
     echo 1 > $LACP_RATE_PATH
 fi
 
 MIIMON_PATH=/sys/class/net/<%= @interface %>/bonding/miimon
-if ! grep 100 $MIIMON_PATH; then
+if ! grep -q 100 $MIIMON_PATH; then
     ip link set <%= @interface %> down
     echo 100 > $MIIMON_PATH
 fi
 
 SLAVE_PATH=/sys/class/net/<%= @interface %>/bonding/slaves
 <% (@slaves or []).each do |slave| %>
-if ! grep <%= slave %> $SLAVE_PATH; then
+if ! grep -q "<%= slave %>" $SLAVE_PATH; then
     ip link set <%= @interface %> down
     ip link set <%= slave %> down
-    echo +<%= slave %> > $SLAVE_PATH
+    echo "+<%= slave %>" > $SLAVE_PATH
 fi
 <% end %>
 
