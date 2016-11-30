@@ -63,14 +63,19 @@ epoch = Time.now.strftime("%s")
 
   log "URL: #{package[:url]}"
 
+  deb_name = "python-#{package[:name]}_#{package[:version]}_all.deb"
+  deb_path = ::File.join(src_dir,deb_name)
+  
   ark "#{package[:name]}-#{package[:version]}" do
     url package[:url]
     path src_dir
     checksum package[:checksum]
     action :put
+    not_if {
+      File.exists?(deb_path) &&
+      `dpkg-deb -f #{deb_path} Version`.include?(package[:version])
+    }
   end
-
-  deb_name = "python-#{package[:name]}_#{package[:version]}_all.deb"
 
   fpm_command = 
     if(package[:name] == 'graphite-web')
@@ -89,6 +94,9 @@ epoch = Time.now.strftime("%s")
     command fpm_command
     cwd src_dir
     creates "#{bins_dir}/#{deb_name}"
+    not_if {
+      File.exists?(deb_path) &&
+      `dpkg-deb -f #{deb_path} Version`.include?(package[:version])
+    }
   end
-
 end
