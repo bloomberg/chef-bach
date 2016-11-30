@@ -9,7 +9,11 @@
 default[:bach][:repository][:bins_directory] = '/home/vagrant/chef-bcpc/bins'
 default[:bach][:repository][:src_directory] = '/home/vagrant/chef-bcpc/src'
 
-# What is this for?
+#
+# This was originally envisioned as a release version for the
+# repository.  It should probably be changed to reflect the chef-bach
+# release number.
+#
 default[:bach][:repository][:apt_repo_version] = '0.5.0'
 
 # Apt signing keys.
