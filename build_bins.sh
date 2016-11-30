@@ -27,7 +27,8 @@ mkdir -p $DIR/bins
 pushd $DIR/bins/ > /dev/null
 
 if [ $(dpkg-query -W -f='${Status}' chefdk 2>/dev/null | grep -c 'ok installed') -eq 0 ]; then
-    wget -nc https://opscode-omnibus-packages.s3.amazonaws.com/ubuntu/14.04/x86_64/chefdk_0.12.0-1_amd64.deb
+    # $CURL is defined in proxy_setup.sh
+    $CURL -O -J https://opscode-omnibus-packages.s3.amazonaws.com/ubuntu/14.04/x86_64/chefdk_0.12.0-1_amd64.deb
 
     if ! sha256sum chefdk_0.12.0-1_amd64.deb | grep -q 6fcb4529f99c212241c45a3e1d024cc1519f5b63e53fc1194b5276f1d8695aaa; then
 	echo 'Failed to download ChefDK -- wrong checksum.' 1>&2
