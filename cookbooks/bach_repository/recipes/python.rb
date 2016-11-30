@@ -12,6 +12,7 @@ include_recipe 'bach_repository::directory'
 bins_dir = node['bach']['repository']['bins_directory']
 src_dir = node['bach']['repository']['src_directory']
 python_dir = src_dir + '/python'
+get_pip_path = bins_dir + '/get-pip.py'
 
 directory python_dir do
   mode 0555
@@ -30,8 +31,6 @@ else
   pip_cert_option = ''
 end
 
-get_pip_path = python_dir + '/get-pip.py'
-
 remote_file get_pip_path do
   source 'https://raw.githubusercontent.com/pypa/pip/8.0.0/contrib/get-pip.py'
   checksum 'd1f66b3848abc6fd1aeda3bb7461101f6a909c3b08efa3ecc1f561712269469c'
@@ -42,7 +41,11 @@ execute 'get-pip.py' do
   command "#{get_pip_path} #{pip_proxy_option} #{pip_cert_option}"
   not_if {
     version_string =
-      `/usr/local/bin/pip show pip | grep ^Version | awk '{print $2}'`.chomp
+      if File.exists?('/usr/local/bin/pip')
+        `/usr/local/bin/pip show pip | grep ^Version | awk '{print $2}'`.chomp
+      else
+        '0.0'
+      end
     Gem::Version.new(version_string) >= Gem::Version.new('8.0')
   }
 end
@@ -61,7 +64,7 @@ execute 'new-pip-upgrade-setuptools' do
   not_if {
     get_version =
       Mixlib::ShellOut.new("pip show setuptools | grep ^Version | " +
-                          "awk '{print $2}'")
+                           "awk '{print $2}'")
     target_version = Gem::Version.new('18.0.1')
     actual_version = Gem::Version.new(get_version.run_command.stdout.chomp)
     actual_version >= target_version
@@ -74,7 +77,7 @@ execute 'new-pip-install-pip2pi' do
   not_if {
     get_version =
       Mixlib::ShellOut.new("pip show pip2pi | grep ^Version | " +
-                          "awk '{print $2}'")
+                           "awk '{print $2}'")
     target_version = Gem::Version.new('0.6.8')
     actual_version = Gem::Version.new(get_version.run_command.stdout.chomp)
     actual_version >= target_version
