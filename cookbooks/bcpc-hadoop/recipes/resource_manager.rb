@@ -32,13 +32,33 @@ bash "create-hdfs-yarn-log" do
   not_if "hdfs dfs -test -d /var/log/hadoop-yarn", :user => "hdfs"
 end
 
+bash "create-hdfs-yarn-ats-log" do
+  code <<-EOH
+  hdfs dfs -mkdir -p /var/log/ats && hdfs dfs -chmod 1777 /var/log/ats && hdfs dfs -chown yarn:mapred /var/log/ats
+  hdfs dfs -mkdir -p /var/log/ats/active && hdfs dfs -chmod 1777 /var/log/ats/active && hdfs dfs -chown yarn:mapred /var/log/ats/active
+  hdfs dfs -mkdir -p /var/log/ats/done && hdfs dfs -chmod 0700 /var/log/ats/done && hdfs dfs -chown yarn:mapred /var/log/ats/done
+  EOH
+  user "hdfs"
+  only_if { node.roles.include?("BCPC-Hadoop-Head-YarnTimeLineServer") }
+  not_if "hdfs dfs -test -d /var/log/hadoop-yarn/ats/active && hdfs dfs -test -d /var/log/hadoop-yarn/ats/done", :user => "hdfs"
+end
+
 # list hdp packages to install
-%w{hadoop-yarn-resourcemanager hadoop-client hadoop-mapreduce-historyserver}.each do |pkg|
+yarn_packages = %w{hadoop-yarn-resourcemanager hadoop-client hadoop-mapreduce-historyserver}
+if node.roles.include?("BCPC-Hadoop-Head-YarnTimeLineServer")
+  yarn_packages.push("hadoop-yarn-timelineserver")
+end
+
+yarn_packages.each do |pkg|
   package hwx_pkg_str(pkg, node[:bcpc][:hadoop][:distribution][:release]) do
     action :install
   end
-
   hdp_select(pkg, node[:bcpc][:hadoop][:distribution][:active_release])
+end
+
+package hwx_pkg_str("tez", node[:bcpc][:hadoop][:distribution][:release]) do
+  action :install
+  only_if { node.roles.include?("BCPC-Hadoop-Head-YarnTimeLineServer") }
 end
 
 link "/etc/init.d/hadoop-yarn-resourcemanager" do
@@ -47,6 +67,18 @@ link "/etc/init.d/hadoop-yarn-resourcemanager" do
 end
 
 include_recipe 'bcpc-hadoop::yarn_schedulers'
+
+link "/etc/init.d/hadoop-yarn-timelineserver" do
+  to "/usr/hdp/#{node[:bcpc][:hadoop][:distribution][:active_release]}/hadoop-yarn/etc/init.d/hadoop-yarn-timelineserver"
+  notifies :run, 'bash[kill yarn-timelineserver]', :immediate
+  only_if { node.roles.include?("BCPC-Hadoop-Head-YarnTimeLineServer") }
+end
+
+link "/etc/init.d/hadoop-yarn-timelineserver" do
+  to "/usr/hdp/#{node[:bcpc][:hadoop][:distribution][:active_release]}/hadoop-yarn/etc/init.d/hadoop-yarn-timelineserver"
+  notifies :run, 'bash[kill yarn-timelineserver]', :immediate
+  only_if { node.roles.include?("BCPC-Hadoop-Head-YarnTimeLineServer") }
+end
 
 file "/etc/hadoop/conf/yarn.exclude" do
   content node["bcpc"]["hadoop"]["decommission"]["hosts"].join("\n")
@@ -58,6 +90,12 @@ end
 
 bash "kill yarn-resourcemanager" do
   code "pkill -u yarn -f resourcemanager"
+  action :nothing
+  returns [0, 1]
+end
+
+bash "kill yarn-timelineserver" do
+  code "pkill -u yarn -f timelineservice"
   action :nothing
   returns [0, 1]
 end
@@ -94,6 +132,20 @@ bash "setup-mapreduce-app" do
 end
 
 service "hadoop-yarn-resourcemanager" do
+  action [:enable, :start]
+  supports :status => true, :restart => true, :reload => false
+  subscribes :restart, "template[/etc/hadoop/conf/hadoop-env.sh]", :delayed
+  subscribes :restart, "template[/etc/hadoop/conf/yarn-env.sh]", :delayed
+  subscribes :restart, "template[/etc/hadoop/conf/yarn-site.xml]", :delayed
+  subscribes :restart, "template[/etc/hadoop/conf/mapred-site.xml]", :delayed
+  subscribes :restart, "template[/etc/hadoop/conf/core-site.xml]", :delayed
+  subscribes :restart, "file[/etc/hadoop/conf/ldap-conn-pass.txt]", :delayed
+  subscribes :restart, "template[/etc/hadoop/conf/hdfs-site.xml]", :delayed
+  subscribes :restart, "bash[hdp-select hadoop-yarn-resourcemanager]", :delayed
+  subscribes :restart, "log[jdk-version-changed]", :delayed
+end
+
+service "hadoop-yarn-timelineserver" do
   action [:enable, :start]
   supports :status => true, :restart => true, :reload => false
   subscribes :restart, "template[/etc/hadoop/conf/hadoop-env.sh]", :delayed

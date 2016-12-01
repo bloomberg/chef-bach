@@ -202,6 +202,48 @@ if node[:bcpc][:hadoop][:kerberos][:enable]
   node.run_state[:yarn_site_generated_values].merge!(kerberos_properties)
 end
 
+# configure yarn timeline server
+if node.roles.include?("BCPC-Hadoop-Head-YarnTimeLineServer")
+  if kerberos_data[:resourcemanager][:princhost] == '_HOST'
+    kerberos_host = '_HOST'
+  else
+    kerberos_host = kerberos_data[:resourcemanager][:princhost]
+  end
+
+  rm_kerberos_principal =
+    kerberos_data[:resourcemanager][:principal] + '/' + kerberos_host + '@' +
+    node[:bcpc][:hadoop][:kerberos][:realm]
+
+  yts_properties = 
+    {
+      'yarn.timeline-service.version' => 1.5,
+      'yarn.timeline-service.store-class' => 'org.apache.hadoop.yarn.server.timeline.EntityGroupFSTimelineStore',
+      'yarn.timeline-service.entity-group-fs-store.active-dir' => "/var/log/ats/active",
+      'yarn.timeline-service.entity-group-fs-store.done-dir' => "/var/log/ats/done",
+      'yarn.timeline-service.entity-group-fs-store.group-id-plugin-classes' => "org.apache.tez.dag.history.logging.ats.TimelineCachePluginImpl",
+      'yarn.timeline-service.entity-group-fs-store.summary-store' => "org.apache.hadoop.yarn.server.timeline.RollingLevelDBTimelineStore", 
+      'yarn.timeline-service.hostname' => "#{float_host(node.fqdn)}",
+      'yarn.timeline-service.address' => "#{float_host(node.fqdn)}:10200",
+      'yarn.timeline-service.webapp.address' =>  "#{float_host(node.fqdn)}:8188",
+      'yarn.timeline-service.bind-host' => "#{float_host(node.fqdn)}",
+      'yarn.timeline-service.handler-thread-count' => 10,
+      'yarn.resourcemanager.system-metrics-publisher.enabled' => true,
+      'yarn.timeline-service.generic-application-history.enabled' => true,
+      'yarn.timeline-service.enabled' => true,
+      'yarn.timeline-service.ttl-enable' => true,
+      'yarn.timeline-service.principal' => rm_kerberos_principal,
+      'yarn.timeline-service.keytab' =>
+        node[:bcpc][:hadoop][:kerberos][:keytab][:dir] + '/' +
+        node[:bcpc][:hadoop][:kerberos][:data][:resourcemanager][:keytab], 
+      'yarn.timeline-service.http-authentication.type' => "kerberos",
+      'yarn.timeline-service.http-authentication.kerberos.principal' => "HTTP/#{float_host(node.fqdn)}@#{node["bcpc"]["hadoop"]["kerberos"]["realm"] }",
+      'yarn.timeline-service.http-authentication.kerberos.keytab' => 
+        node[:bcpc][:hadoop][:kerberos][:keytab][:dir] + '/' +
+        node[:bcpc][:hadoop][:kerberos][:data][:resourcemanager][:keytab],
+   } 
+  yarn_site_generated_values.merge!(yts_properties)
+end
+
 # This is another set of cached node searches.
 hs_hosts = node[:bcpc][:hadoop][:hs_hosts]
 if not hs_hosts.empty?

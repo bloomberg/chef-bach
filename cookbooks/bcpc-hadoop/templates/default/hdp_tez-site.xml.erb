@@ -20,4 +20,8 @@
     <name>tez.task.launch.cluster-default.cmd-opts</name>
     <value>-server -Djava.net.preferIPv4Stack=true -Dhdp.version=<%= node[:bcpc][:hadoop][:distribution][:active_release] %></value>
   </property>
+  <property>
+    <name>tez.history.logging.service.class</name>
+    <value>org.apache.tez.dag.history.logging.ats.ATSV15HistoryLoggingService</value>
+  </property>
 </configuration>

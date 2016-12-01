@@ -1,0 +1,13 @@
+{
+  "name": "BCPC-Hadoop-Head-YarnTimeLineServer",
+  "json_class": "Chef::Role",
+  "run_list": [
+    "role[Basic]"
+  ],
+  "description": "A role to indicate YARN Application TimeLine Server Installation",
+  "chef_type": "role",
+  "default_attributes": {
+  },
+  "override_attributes": {
+  }
+}
