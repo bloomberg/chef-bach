@@ -8,6 +8,7 @@ version          '0.1.0'
 
 depends 'bach_common', '= 0.1.0'
 depends 'bach_krb5', '= 0.1.0'
+depends 'bach_repository', '= 0.1.0'
 depends 'bach_spark', '= 0.1.0'
 depends 'bcpc', '= 0.1.0'
 depends 'bcpc-hadoop', '= 0.1.0'
@@ -16,11 +17,14 @@ depends 'hannibal', '= 0.1.0'
 depends 'java','>= 1.41.0'
 depends 'kafka-bcpc', '= 0.1.0'
 
+#
 # Transitive dependencies specified to retain Chef 11.x compatibility.
+# We should remove these as soon as a Chef 12.x migration is complete.
+#
 depends 'apt', '= 2.4.0'
 depends 'build-essential', '= 3.2.0'
 depends 'chef-client', '= 4.2.4'
-depends 'chef-vault', '= 1.3.0'
+depends 'chef-vault', '= 1.3.3'
 depends 'database'
 depends 'krb5', '= 2.0.0'
 depends 'line'

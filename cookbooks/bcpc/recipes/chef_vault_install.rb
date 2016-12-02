@@ -19,14 +19,20 @@
 
 require 'pathname'
 require 'rubygems'
+require 'uri'
 
 gem_path = Pathname.new(Gem.ruby).dirname.join('gem').to_s
 
 gem_package 'chef-vault' do
+  #
+  # Options MUST be specified as a string, not a hash.
+  # Using gem_binary with hash options results in undefined behavior.
+  #
+  options "--clear-sources -s #{get_binary_server_url}"
   gem_binary gem_path
-  version '>=0.0.0'
+  version '>=2.8.0'
   action :nothing
-end.run_action(:install)
+end.run_action(:upgrade)
 
 #
 # BACH typically runs chef-client with an abnormal umask, which causes

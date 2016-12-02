@@ -41,6 +41,12 @@ vault_admins =
     get_config("mysql-#{category}-password") || secure_password
 
   chef_vault_secret "mysql-#{category}" do
+    #
+    # For some reason, we are compelled to specify a provider.
+    # This will probably break if we ever move to chef-vault cookbook 2.x
+    #
+    provider ChefVaultCookbook::Provider::ChefVaultSecret
+    
     data_bag 'os'
     raw_data({ 'password' => category_password })
     admins vault_admins

@@ -5,6 +5,11 @@ require 'shellwords'
 gem_path = Pathname.new(Gem.ruby).dirname.join('gem').to_s
 
 gem_package 'rake-compiler' do
+  #
+  # Options MUST be specified as a string, not a hash.
+  # Using gem_binary with hash options results in undefined behavior.
+  #
+  options "--clear-sources -s #{get_binary_server_url}"
   gem_binary gem_path
   version '>=0.0.0'
   action :nothing
@@ -17,6 +22,11 @@ node['krb5']['devel']['packages'].each do |pkg|
 end
 
 gem_package 'rkerberos' do
+  #
+  # Options MUST be specified as a string, not a hash.
+  # Using gem_binary with hash options results in undefined behavior.
+  #
+  options "--clear-sources -s #{get_binary_server_url}"
   gem_binary gem_path
   version '>=0.0.0'
   action :nothing

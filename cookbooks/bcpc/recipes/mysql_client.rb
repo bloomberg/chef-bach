@@ -33,19 +33,24 @@ end
 #
 # For Chef 11.x compatibility, it is important to use gem_package
 # instead of chef_gem.  Chef 11 does not include the 'compile_time'
-# attribute for chef_gem resources.
+# attribute for chef_gem resources, so it cannot be disabled.
 #
 # Additionally, the Chef 11.x gem_package resource will fail to
 # install unless a version is provided.  (I believe this is a bug.)
 #
 # As a result, these hardcoded versions will need to match the
-# hardcoded versions found in build_bins.sh
+# hardcoded versions found in bach_repository::gems
 #
 {
   mysql2: '0.4.4',
   sequel: '4.36.0'
 }.each do |gem_name, gem_version|
   gem_package gem_name.to_s do
+    #
+    # Options MUST be specified as a string, not a hash.
+    # Using gem_binary with hash options results in undefined behavior.
+    #
+    options "--clear-sources -s #{get_binary_server_url}"
     gem_binary File.join(Chef::Config.embedded_dir,'bin','gem')
     version gem_version
   end

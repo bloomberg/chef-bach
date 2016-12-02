@@ -283,20 +283,3 @@ default['bcpc']['bin_dir']['gems'] = "#{node['bcpc']['bin_dir']['path']}/gems"
 
 # rubygems download website URL
 default['bcpc']['gem_source'] = 'https://rubygems.org/downloads'
-
-# mysql connector attributes
-default['bcpc']['mysql']['connector'].tap do |connector|
-  connector['version'] = '5.1.37'
-
-  connector['tarball_md5sum'] = '9ef584d3328735db51bd5dde3f602c22'
-
-  connector['url'] =
-    'http://dev.mysql.com/get/Downloads/Connector-J/mysql-connector-java-' +
-    node['bcpc']['mysql']['connector']['version'] + '.tar.gz'
-
-  connector['package']['short_name'] = 'mysql-connector-java'
-
-  connector['package']['name'] =
-    node['bcpc']['mysql']['connector']['package']['short_name'] + '_' +
-    node['bcpc']['mysql']['connector']['version'] + '_all.deb'
-end

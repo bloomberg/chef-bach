@@ -52,6 +52,12 @@ if ssh_private_key.nil?
 end
 
 chef_vault_secret "ssh" do
+  #
+  # For some reason, we are compelled to specify a provider.
+  # This will probably break if we ever move to chef-vault cookbook 2.x
+  #
+  provider ChefVaultCookbook::Provider::ChefVaultSecret
+
   data_bag 'os'
   raw_data({ "private-key" => key.to_pem })
   admins "#{ nodes },#{ bootstrap }"
@@ -75,6 +81,12 @@ ruby_block "chef_vault_secret" do
 end
 
 chef_vault_secret "ssl" do
+  #
+  # For some reason, we are compelled to specify a provider.
+  # This will probably break if we ever move to chef-vault cookbook 2.x
+  #
+  provider ChefVaultCookbook::Provider::ChefVaultSecret
+
   if node[:temp][:value] != ""
     ssl_certificate = %x[echo "#{node[:temp][:value]}" | openssl x509]
     ssl_private_key = %x[echo "#{node[:temp][:value]}" | openssl rsa -passin pass:temp_passwd -out /dev/stdout]

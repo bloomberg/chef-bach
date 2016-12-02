@@ -1,0 +1,11 @@
+# -*- mode: enh-ruby -*-
+source "https://supermarket.chef.io"
+
+metadata
+
+group :integration do
+  instance_eval(File.read('../../Berksfile.common'))
+
+  cookbook 'bach_common', path: '../bach_common'
+  cookbook 'bcpc', path: '../bcpc'
+end

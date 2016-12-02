@@ -32,22 +32,29 @@ gem_path = Pathname.new(Gem.ruby).dirname.join("gem").to_s
   end.run_action(:install)
 end
 
-gem_package "zookeeper" do
-    gem_binary gem_path
-    version ">0.0"
-    action :nothing
+gem_package 'zookeeper' do
+  #
+  # Options MUST be specified as a string, not a hash.
+  # Using gem_binary with hash options results in undefined behavior.
+  #
+  options "--clear-sources -s #{get_binary_server_url}"
+  gem_binary gem_path
+  version '>0.0'
+  action :nothing
 end.run_action(:install)
 
-gem_package "webhdfs" do
-    gem_binary gem_path
-    version ">=0.0.0"
-    action :nothing
+gem_package 'webhdfs' do
+  options "--clear-sources -s #{get_binary_server_url}"
+  gem_binary gem_path
+  version '>=0.0.0'
+  action :nothing
 end.run_action(:install)
 
-gem_package "zabbixapi" do
-    gem_binary gem_path
-    version ">=2.4"
-    action :nothing
+gem_package 'zabbixapi' do
+  options "--clear-sources -s #{get_binary_server_url}"
+  gem_binary gem_path
+  version '>=2.4'
+  action :nothing
 end.run_action(:install)
 
 gem_package "nokogiri" do

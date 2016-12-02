@@ -12,5 +12,6 @@ environments
 local-mode-cache
 provisioning
 roles
+src
 vendor
 vbox
