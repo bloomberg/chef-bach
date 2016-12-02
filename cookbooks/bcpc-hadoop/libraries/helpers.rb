@@ -34,7 +34,9 @@ module Bcpc_Hadoop
       bash "hdp-select #{package}" do
         code "hdp-select set #{package} #{version}"
         subscribes :run, "package[#{hwx_pkg_str(package, version)}]", :immediate
-        not_if { ::File.readlink("/usr/hdp/current/#{package}").start_with?("/usr/hdp/#{version}/") }
+        not_if { ::File.exist?("/usr/hdp/current/#{package}") &&
+                 ::File.readlink("/usr/hdp/current/#{package}")\
+                   .start_with?("/usr/hdp/#{version}/") }
       end
     end
 
