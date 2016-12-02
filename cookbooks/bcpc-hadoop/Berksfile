@@ -3,4 +3,5 @@ source 'https://supermarket.chef.io'
 
 cookbook 'bcpc', path: File.expand_path('../../bcpc', __FILE__)
 cookbook 'cobblerd', git: 'https://github.com/bloomberg/cobbler-cookbook.git'
+cookbook 'smartsense-chef', git: 'https://github.com/dbist/smartsense-chef.git'
 metadata
