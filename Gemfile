@@ -13,4 +13,5 @@ gem 'ohai', '= 7.4.1' # For ruby 1.9 compatibility
 gem 'parallel'
 gem 'pry'
 gem 'ruby-progressbar'
-
+gem 'rake'
+gem 'poise'

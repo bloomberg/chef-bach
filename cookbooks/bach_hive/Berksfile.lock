@@ -1,0 +1,9 @@
+DEPENDENCIES
+  bach_hive
+    path: .
+    metadata: true
+
+GRAPH
+  bach_hive (0.1.0)
+    poise (= 1.0.12)
+  poise (1.0.12)
