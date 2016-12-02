@@ -1,13 +1,12 @@
+# -*- mode: ruby -*-
 source 'https://supermarket.chef.io'
 
-cookbook 'bcpc', path: File.expand_path('../../bcpc', __FILE__)
-group :integration do
-  cookbook 'bcpc_hadoop_test', path: 'test/cookbooks/bcpc_hadoop_test'
-
-  # pull in all other BACH cookbook dependencies -- disgusting hack
-  Dir.glob(File.join(__dir__, '..', 'bcpc', 'Berksfile')) do |berksfile|
-    eval(IO.read(berksfile).each_line.select{ |l| l.start_with?('cookbook') }.join("\n"), binding)
-  end
-end
-
 metadata
+
+group :integration do
+  instance_eval(File.read('../../Berksfile.common'))
+
+  cookbook 'bcpc_hadoop_test', path: 'test/cookbooks/bcpc_hadoop_test'
+  cookbook 'bcpc', path: File.expand_path('../bcpc')
+  cookbook 'bach_repository', path: File.expand_path('../bach_repository')
+end
