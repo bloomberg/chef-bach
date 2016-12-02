@@ -42,7 +42,10 @@ execute 'get-pip.py' do
   not_if {
     version_string =
       if File.exists?('/usr/local/bin/pip')
-        `/usr/local/bin/pip show pip | grep ^Version | awk '{print $2}'`.chomp
+        cmd =
+          Mixlib::Shellout.new('/usr/local/bin/pip show pip | ' \
+                               "grep ^Version | awk '{print $2}'")
+        cmd.run_command.stdout.chomp
       else
         '0.0'
       end
