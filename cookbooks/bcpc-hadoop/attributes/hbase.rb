@@ -81,12 +81,5 @@ default[:bcpc][:hadoop][:hbase][:site_xml].tap do |site_xml|
   site_xml['hbase.ipc.server.tcpnodelay'] = 'true'
   site_xml['hbase.replication'] = 'true'
   site_xml['hbase.coprocessor.abortonerror'] = node["bcpc"]["hadoop"]["hbase_rs"]["coprocessor"]["abortonerror"] 
-  site_xml['hbase.regionserver.storefile.refresh.period'] = 30000
-  site_xml['hbase.region.replica.replication.enabled'] = true
-  site_xml['hbase.master.hfilecleaner.ttl'] = 3600000
-  site_xml['hbase.master.loadbalancer.class'] = 'org.apache.hadoop.hbase.master.balancer.StochasticLoadBalancer'
-  site_xml['hbase.meta.replica.count'] = 3
-  site_xml['hbase.regionserver.meta.storefile.refresh.period'] = 30000
-  site_xml['hbase.region.replica.wait.for.primary.flush'] = true
 end
 
