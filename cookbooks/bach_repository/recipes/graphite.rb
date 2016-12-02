@@ -61,8 +61,6 @@ epoch = Time.now.strftime("%s")
  },
 ].each do |package|
 
-  log "URL: #{package[:url]}"
-
   deb_name = "python-#{package[:name]}_#{package[:version]}_all.deb"
   deb_path = ::File.join(src_dir,deb_name)
   
@@ -72,8 +70,7 @@ epoch = Time.now.strftime("%s")
     checksum package[:checksum]
     action :put
     not_if {
-      File.exists?(deb_path) &&
-      `dpkg-deb -f #{deb_path} Version`.include?(package[:version])
+      File.exists?(deb_path)
     }
   end
 
@@ -95,8 +92,7 @@ epoch = Time.now.strftime("%s")
     cwd src_dir
     creates "#{bins_dir}/#{deb_name}"
     not_if {
-      File.exists?(deb_path) &&
-      `dpkg-deb -f #{deb_path} Version`.include?(package[:version])
+      File.exists?(deb_path)
     }
   end
 end
