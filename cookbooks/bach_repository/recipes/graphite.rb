@@ -62,7 +62,9 @@ epoch = Time.now.strftime("%s")
 ].each do |package|
 
   deb_name = "python-#{package[:name]}_#{package[:version]}_all.deb"
-  deb_path = ::File.join(src_dir,deb_name)
+  deb_path = ::File.join(bins_dir,deb_name)
+
+  log "URL: #{package[:url]}, target deb path: #{deb_path}"
   
   ark "#{package[:name]}-#{package[:version]}" do
     url package[:url]
@@ -78,21 +80,18 @@ epoch = Time.now.strftime("%s")
     if(package[:name] == 'graphite-web')
       "fpm --python-install-lib /opt/graphite/webapp " +
         "--epoch #{epoch} " +
-        "-p #{bins_dir}/#{deb_name} " +
+        "-p #{deb_path} " +
         "-s python -t deb #{package[:name]}-#{package[:version]}/setup.py"
     else
       "fpm --python-install-bin /opt/graphite/bin " +
         "--epoch #{epoch} " +
-        "-p #{bins_dir}/#{deb_name} " +
+        "-p #{deb_path} " +
         "-s python -t deb #{package[:name]}-#{package[:version]}/setup.py"
     end
 
   execute "fpm-#{package[:name]}" do
     command fpm_command
     cwd src_dir
-    creates "#{bins_dir}/#{deb_name}"
-    not_if {
-      File.exists?(deb_path)
-    }
+    creates deb_path
   end
 end

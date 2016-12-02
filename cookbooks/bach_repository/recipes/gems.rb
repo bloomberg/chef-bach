@@ -78,6 +78,7 @@ bootstrap_gems.each do |package_name, package_version|
   execute "gem-install-#{package_name}" do
     command "#{gem_binary} install --local #{local_gem_path}"
     cwd gems_dir
+    not_if "#{gem_binary} list -i #{package_name} -v #{package_version}"
   end
 
 end
