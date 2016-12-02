@@ -40,6 +40,8 @@ link "/etc/init.d/hadoop-yarn-resourcemanager" do
   notifies :run, 'bash[kill yarn-resourcemanager]', :immediate
 end
 
+include_recipe 'bcpc-hadoop::yarn_schedulers'
+
 file "/etc/hadoop/conf/yarn.exclude" do
   content node["bcpc"]["hadoop"]["decommission"]["hosts"].join("\n")
   mode 0644

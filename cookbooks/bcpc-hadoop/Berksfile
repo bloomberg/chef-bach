@@ -1,6 +1,13 @@
-#ENV['BERKSHELF_PATH'] = "#{File.expand_path('../',__FILE__)}:#{File.expand_path('../../../vendor', __FILE__)}"
 source 'https://supermarket.chef.io'
 
 cookbook 'bcpc', path: File.expand_path('../../bcpc', __FILE__)
-cookbook 'cobblerd', git: 'https://github.com/bloomberg/cobbler-cookbook.git'
+group :integration do
+  cookbook 'bcpc_hadoop_test', path: 'test/cookbooks/bcpc_hadoop_test'
+
+  # pull in all other BACH cookbook dependencies -- disgusting hack
+  Dir.glob(File.join(__dir__, '..', 'bcpc', 'Berksfile')) do |berksfile|
+    eval(IO.read(berksfile).each_line.select{ |l| l.start_with?('cookbook') }.join("\n"), binding)
+  end
+end
+
 metadata

@@ -165,3 +165,18 @@ default["bcpc"]["hadoop"]["yarn"]["resourcemanager"]["nodes"]["exclude-path"] = 
 default["bcpc"]["hadoop"]["yarn"]["scheduler"]["class"] = "org.apache.hadoop.yarn.server.resourcemanager.scheduler.fair.FairScheduler"
 default["bcpc"]["hadoop"]["yarn"]["scheduler"]["fair"]["preemption"] = true
 default['bcpc']['hadoop']['yarn']['timeline-service']['client']['max-retries'] = 0
+
+default[:bcpc][:hadoop][:yarn][:fairSchedulerOpts] = {
+  'defaultFairSharePreemptionTimeout' => 120,
+  'defaultMinSharePreemptionTimeout' => 10,
+  'queueMaxAMShareDefault' => 0.5,
+  'defaultQueueSchedulingPolicy' => 'DRF'
+}
+
+default[:bcpc][:hadoop][:yarn][:queuePlacementPolicy] = [
+  {'nestedUserQueue' =>
+    {'secondaryGroupExistingQueue' => {'create' => 'false'}}},
+  {'nestedUserQueue' =>
+    {'default' => {'queue' => 'default'}}},
+  {'reject' => nil}
+]
