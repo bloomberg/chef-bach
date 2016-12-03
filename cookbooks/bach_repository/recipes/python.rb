@@ -43,7 +43,7 @@ execute 'get-pip.py' do
     version_string =
       if File.exists?('/usr/local/bin/pip')
         cmd =
-          Mixlib::Shellout.new('/usr/local/bin/pip show pip | ' \
+          Mixlib::ShellOut.new('/usr/local/bin/pip show pip | ' \
                                "grep ^Version | awk '{print $2}'")
         cmd.run_command.stdout.chomp
       else
