@@ -16,7 +16,7 @@ end
 # (It was this or chef-rewind.)
 #
 chef_gem 'simple-graphite' do
-  options "--clear-sources --source #{get_binary_server_url}"
+  options "--clear-sources --source #{get_binary_server_url} --no-http-proxy"
   version '>=2.1'
   compile_time true if respond_to?(:compile_time)
 end
