@@ -57,10 +57,26 @@ gem_package 'zabbixapi' do
   action :nothing
 end.run_action(:install)
 
-gem_package "nokogiri" do
-    gem_binary gem_path
-    version ">0.0"
-    action :nothing
+['libxslt1-dev', 'libxml2-dev', 'pkg-config'].each do |pkg_name|
+  package pkg_name do
+    action :upgrade
+  end.run_action(:install)
+end
+
+#
+# By default, nokogiri will attempt to install libxml2, libxslt, and
+# zlib from the internet.
+#
+# The "--use-system-libraries" switch is intended to force nokogiri
+# extconf.rb to compile against system libraries.
+#
+gem_package 'nokogiri' do
+  options "--clear-sources -s #{get_binary_server_url} " \
+    '-- --use-system-libraries'
+  gem_binary gem_path
+  version '>=1.6.2'
+  action :nothing
+  timeout 1800
 end.run_action(:install)
 
 Gem.clear_paths
