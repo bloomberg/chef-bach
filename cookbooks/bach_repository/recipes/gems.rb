@@ -30,7 +30,9 @@ bootstrap_gems = [
 worker_gems = [
                 ['chef-rewind', '0.0.9'],
                 ['chef-vault', '2.9.0'],
+                ['mini_portile2', '2.1.0'],
                 ['mysql2', '0.4.4'],
+                ['nokogiri', '1.6.8.1'],
                 ['patron', '0.8.0'],
                 ['rake-compiler', '1.0.1'],
                 ['rkerberos', '0.1.5'],
