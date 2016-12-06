@@ -68,7 +68,7 @@ else
 fi
 
 create_cluster_VMs || ( echo "############## VBOX CREATE CLUSTER VMs RETURNED $? ##############" && exit 1 )
-install_cluster || ( echo "############## VBOX CREATE INSTALL CLUSTER RETURNED $? ##############" && exit 1 )
+install_cluster $ENVIRONMENT || ( echo "############## VBOX CREATE INSTALL CLUSTER RETURNED $? ##############" && exit 1 )
 
 printf "#### Install ruby gems\n"
 vagrant ssh -c 'cd chef-bcpc; PATH=/opt/chefdk/embedded/bin:/usr/bin:/bin bundle install --path vendor/bundle'
@@ -115,19 +115,20 @@ if hash screen; then
 fi
 
 vagrant ssh -c "cd chef-bcpc; ./wait-for-hosts.sh ${VM_LIST[*]}"
-
 printf "Snapshotting post-Cobbler\n"
 for vm in ${VM_LIST[*]} bcpc-bootstrap; do
-    [[ "$vms_started" == "True" ]] && VBoxManage snapshot $vm take Post-Cobble --live
+    [[ "$vms_started" == "True" ]] && VBoxManage snapshot $vm take Post-Cobble --live &
 done
+wait && printf "Done Snapshotting\n"
 
 printf "#### Chef the nodes with Basic role\n"
 vagrant ssh -c "cd chef-bcpc; ./cluster-assign-roles.sh $ENVIRONMENT Basic"
 
 printf "Snapshotting post-Basic\n"
 for vm in ${VM_LIST[*]} bcpc-bootstrap; do
-    VBoxManage snapshot $vm take Basic --live
+    VBoxManage snapshot $vm take Basic --live &
 done
+wait && printf "Done Snapshotting\n"
 
 printf "#### Chef the nodes with complete roles\n"
 printf "Cluster type: $CLUSTER_TYPE\n"
@@ -143,5 +144,8 @@ vagrant ssh -c "cd chef-bcpc; ./cluster-assign-roles.sh $ENVIRONMENT $CLUSTER_TY
 
 printf "Taking final snapshot\n"
 for vm in ${VM_LIST[*]} bcpc-bootstrap; do
-    VBoxManage snapshot $vm take Full-Shoes --live
+    VBoxManage snapshot $vm take Full-Shoes --live &
 done
+wait && printf "Done Snapshotting\n"
+
+printf '#### Install Completed!\n'
