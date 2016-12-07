@@ -10,7 +10,7 @@ include_recipe 'bcpc-hadoop::zookeeper_config'
 hdp_select('zookeeper-server', node[:bcpc][:hadoop][:distribution][:active_release])
 
 user_ulimit "zookeeper" do
-  filehandle_limit 32769
+  filehandle_limit 65536
 end
 
 configure_kerberos 'zookeeper_kerb' do

@@ -68,7 +68,7 @@ directory "/var/log/hadoop-hdfs/gc/" do
 end
 
 user_ulimit "hdfs" do
-  filehandle_limit 32769
+  filehandle_limit 65536
   process_limit 65536
 end
 
