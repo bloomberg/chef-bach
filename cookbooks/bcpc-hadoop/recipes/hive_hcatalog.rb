@@ -23,7 +23,7 @@ end
 end
 
 user_ulimit "hive" do
-  filehandle_limit 32769
+  filehandle_limit 65536
   process_limit 65536
 end
 

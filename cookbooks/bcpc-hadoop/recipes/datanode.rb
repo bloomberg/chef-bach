@@ -34,22 +34,22 @@ end
 end
 
 user_ulimit "root" do
-  filehandle_limit 32769
+  filehandle_limit 65536
   process_limit 65536
 end
 
 user_ulimit "hdfs" do
-  filehandle_limit 32769
+  filehandle_limit 65536
   process_limit 65536
 end
 
 user_ulimit "mapred" do
-  filehandle_limit 32769
+  filehandle_limit 65536
   process_limit 65536
 end
 
 user_ulimit "yarn" do
-  filehandle_limit 32769
+  filehandle_limit 65536
   process_limit 65536
 end
 

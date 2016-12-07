@@ -36,7 +36,7 @@ configure_kerberos 'hbase_kerb' do
 end
 
 user_ulimit "hbase" do
-  filehandle_limit 32769
+  filehandle_limit 65536
 end
 
 service "hbase-thrift" do
