@@ -143,21 +143,43 @@ Xceivers: 12
 Last contact: Fri Aug 14 21:08:23 EDT 2015
 ```
 
+Chef-BACH Philosophies
+----------------------
+The philosophy behind BACH cluster operation is that no single machine is
+special and all services are multi-master or have sufficiently fast failover
+to prevent failure in application data paths and availability. Commits to
+the codebase should be deployable without requiring path dependence from the
+previous repository state. For example, a machine should be able to be
+PXE-booted fresh into a particular version of the code, while an existing
+machine should be able to simply run Chef to upgrade into a particular
+Chef-BACH version. Unhealthy machines should always be able to be torn down and
+reinstalled from scratch without disruption. Any Chef-BACH version which
+requires manual interaction is considered BREAKING (as a GitHub tag) and
+should be avoided as much as possible; our mantra is that all operations are
+handled automatically. All services should be secured and kerberized as
+appropriate.  Yet, testing should be done both with a kerberized VM cluster
+as well as a non-kerberized cluster (or Test-Kitchen VM) to ensure both workflows
+run-through. The non-kerberized path is useful to ensure others can more
+easily integrate starting in a non-secure environment before going fully
+secure.
+
 BACH Services
 -------------
 
 BACH currently relies upon a number of open-source packages:
 
  - [Apache Bigtop](http://bigtop.apache.org/)
+ - [Apache Flume](http://flume.apache.org/)
  - [Apache Hadoop](http://hadoop.apache.org/)
- - [Apache Spark](http://spark.apache.org/)
  - [Apache HBase](http://hbase.apache.org/)
  - [Apache Hive](http://hive.apache.org/)
  - [Apache HTTP Server](http://httpd.apache.org/)
+ - [Apache Kafka](http://kafka.apache.org/)
  - [Apache Mahout](http://mahout.apache.org/)
  - [Apache Oozie](http://oozie.apache.org/)
- - [Apache Pig](http://pig.apache.org/)
  - [Apache Phoenix](http://phoenix.apache.org)
+ - [Apache Pig](http://pig.apache.org/)
+ - [Apache Spark](http://spark.apache.org/)
  - [Apache Sqoop](http://sqoop.apache.org/)
  - [Apache Tez](http://tez.apache.org)
  - [Apache Zookeeper](http://zookeeper.apache.org)
