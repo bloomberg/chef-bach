@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Parameters : 
+# Parameters :
 # $1 is the IP address of the bootstrap node
 # $2 is the Chef environment name, default "Test-Laptop"
 
@@ -29,16 +29,22 @@ if [[ "$admin_val" != "true" ]]; then
 fi
 
 #
-# A lot of bcpc recipes assume the cluster local repository is already
-# set up, so our first chef run will only manage that problem.
+# build_bins.sh has already built the BCPC local repository, but we
+# still need to configure Apache and chef-vault before doing a
+# complete Chef run.
 #
-sudo knife node run_list set $(hostname -f) \
-      'recipe[bach_repository],recipe[bcpc::apache-mirror]' \
-      -c .chef/knife.rb
-sudo chef-client -c .chef/knife.rb
+sudo chef-client \
+     -c .chef/knife.rb \
+     -o 'recipe[bcpc::apache-mirror]'
 
-# Now that we have a local repo, the full bootstrap role should converge.
-sudo knife node run_list set $(hostname -f) \
-     'role[BCPC-Bootstrap]' \
-     -c .chef/knife.rb
-sudo chef-client -c .chef/knife.rb
+sudo chef-client \
+     -c .chef/knife.rb \
+     -o 'recipe[bcpc::chef_vault_install]'
+
+#
+# With chef-vault installed and the repo configured, it's safe to save
+# and converge the complete runlist.
+#
+sudo chef-client \
+     -c .chef/knife.rb \
+     -r 'role[BCPC-Bootstrap]'
