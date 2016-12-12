@@ -3,6 +3,7 @@
 # Recipe:: gems
 #
 include_recipe 'bach_repository::directory'
+include_recipe 'bach_repository::tools'
 bins_dir = node['bach']['repository']['bins_directory']
 gems_dir = "#{bins_dir}/gems"
 
