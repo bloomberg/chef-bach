@@ -81,7 +81,7 @@ else
       action :delete
     end
   end
-  
+
   execute 'generate-local-bach-keys' do
     command "cat #{gpg_conf_path} | gpg --batch --gen-key"
     creates gpg_private_key_path
@@ -91,7 +91,7 @@ else
   file gpg_private_key_path do
     mode 0400
   end
-  
+
   ruby_block 'make_data_bag' do
     block do
       make_config('bootstrap-gpg-public_key_base64',
@@ -106,6 +106,7 @@ else
         id = 'bootstrap-gpg'
         vault_item = ChefVault::Item.new('os', id)
         vault_item.admins(node[:fqdn])
+        vault_item.search('*:*')
         vault_item['id'] = id
         vault_item['private_key_base64'] =
           Base64.encode64(::File.read(gpg_private_key_path)),
