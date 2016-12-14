@@ -28,10 +28,20 @@ apt_bins_path = apt_directory + '/main/binary-amd64'
 apt_repo_version = node['bach']['repository']['apt_repo_version']
 
 gpg_private_key_path = node['bach']['repository']['private_key_path']
-gpg_private_key_base64 = get_config('bootstrap-gpg-private_key_base64')
-
 gpg_public_key_path = node['bach']['repository']['public_key_path']
-gpg_public_key_base64 = get_config('bootstrap-gpg-public_key_base64')
+
+#
+# The get_config invocations are different for the public and
+# private keys because we expect to find the public key in the
+# plaintext data bag.  The private key should be in a chef-vault item
+# under os/bootstrap-gpg.
+#
+# TODO: make the get_config API sane.
+#
+gpg_private_key_base64 =
+  get_config('private_key_base64', 'bootstrap-gpg', 'os')
+gpg_public_key_base64 =
+  get_config('bootstrap-gpg-public_key_base64')
 
 gpg_conf_path = Chef::Config[:file_cache_path] + '/bach_repository-gpg.conf'
 
@@ -84,7 +94,6 @@ else
 
   execute 'generate-local-bach-keys' do
     command "cat #{gpg_conf_path} | gpg --batch --gen-key"
-    creates gpg_private_key_path
   end
 
   # Set perms.
@@ -92,10 +101,14 @@ else
     mode 0400
   end
 
-  ruby_block 'make_data_bag' do
+  ruby_block 'bootstrap-gpg-public_key_base64' do
     block do
-      make_config('bootstrap-gpg-public_key_base64',
-                   Base64.encode64(::File.read(gpg_public_key_path)))
+      dbi =
+        Chef::DataBagItem.load('configs', node.chef_environment) ||
+        Chef::DataBagItem.new('configs', node.chef_environment)
+      dbi['bootstrap-gpg-public_key_base64'] =
+        Base64.encode64(::File.read(gpg_public_key_path))
+      dbi.save
     end
   end
 
@@ -109,8 +122,8 @@ else
         vault_item.search('*:*')
         vault_item['id'] = id
         vault_item['private_key_base64'] =
-          Base64.encode64(::File.read(gpg_private_key_path)),
-          vault_item.save
+          Base64.encode64(::File.read(gpg_private_key_path))
+        vault_item.save
       end
     end
   else
@@ -169,6 +182,7 @@ end
 execute 'sign-release-file' do
   command <<-EOM
   gpg --no-tty -abs \
+      --no-default-keyring \
       --keyring #{gpg_public_key_path} \
       --secret-keyring #{gpg_private_key_path} \
       --batch --yes \
