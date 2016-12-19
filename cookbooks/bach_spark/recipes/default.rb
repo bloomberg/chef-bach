@@ -29,8 +29,8 @@ template "#{spark_bin_dir}/conf/spark-defaults.conf" do
   helpers(Spark::Configuration)
 end
 
-link "/#{spark_bin_dir}/lib/spark-yarn-shuffle.jar" do
-  to "#{spark_bin_dir}/lib/spark-#{spark_pkg_version}-yarn-shuffle.jar"
+link "/#{spark_bin_dir}/yarn/spark-yarn-shuffle.jar" do
+  to "#{spark_bin_dir}/yarn/spark-#{spark_pkg_version}-yarn-shuffle.jar"
 end
 
 link '/usr/spark/current' do
