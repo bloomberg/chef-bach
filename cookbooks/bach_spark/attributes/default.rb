@@ -1,11 +1,11 @@
 default[:spark][:download][:url] = 'http://d3kbcqa49mib13.cloudfront.net'
-default[:spark][:download][:file][:name] = 'spark-1.6.0-bin-hadoop2.6'
+default[:spark][:download][:file][:name] = 'spark-2.0.2-bin-hadoop2.7'
 default[:spark][:download][:file][:type] = 'tgz'
 default[:spark][:download][:dir] = '/home/vagrant/chef-bcpc/bins'
 default[:spark][:package][:install_meta] = false
 default[:spark][:package][:base] = '/usr/spark'
 default[:spark][:package][:prefix] = 'spark'
-default[:spark][:package][:version] = '1.6.0'
+default[:spark][:package][:version] = '2.0.2'
 default[:spark][:hdfs_url] = node['bcpc']['hadoop']['hdfs_url']
 default[:spark][:bin][:dir] = "#{node[:spark][:package][:base]}/#{node[:spark][:package][:version]}"
 
@@ -22,7 +22,7 @@ default.bach_spark.config.spark.eventLog.enabled = true
 default.bach_spark.config.spark.logConf = true
 default.bach_spark.config.spark.dynamicAllocation.enabled = true
 default.bach_spark.config.spark.shuffle.service.enabled = true
-default.bach_spark.config.spark.yarn.jar = "#{node['spark']['hdfs_url']}/apps/spark/#{node[:spark][:package][:version]}/spark-assembly.jar" 
+default.bach_spark.config.spark.yarn.archive = "#{node['spark']['hdfs_url']}/apps/spark/#{node[:spark][:package][:version]}/spark_jars.tgz"  
 default.bach_spark.config.spark.master = "yarn-client"
 
 # Spark environment configuration
