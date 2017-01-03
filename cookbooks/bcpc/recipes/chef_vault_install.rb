@@ -28,10 +28,15 @@ gem_package 'chef-vault' do
   # Options MUST be specified as a string, not a hash.
   # Using gem_binary with hash options results in undefined behavior.
   #
-  options "--clear-sources -s #{get_binary_server_url}"
+  options "--clear-sources -s #{get_binary_server_url} -v '>=2.8.0'"
   gem_binary gem_path
-  version '>=2.8.0'
   action :nothing
+  #
+  # Before executing 'gem,' the Chef client will attempt to inspect
+  # available gems using native ruby libraries, and time out.  By
+  # specifying a 'source' attribute, we can avoid the lengthy timeout.
+  #
+  source get_binary_server_url
 end.run_action(:upgrade)
 
 #
