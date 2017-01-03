@@ -7,13 +7,11 @@ require 'tmpdir'
 include_recipe 'bach_repository::directory'
 bins_dir = node['bach']['repository']['bins_directory']
 spark_extract_dir = Dir.mktmpdir
-spark_install_dir = "/usr/spark"
-spark_pkg_prefix = "spark"
-spark_pkg_version = "2.0.2"
+spark_install_dir = '/usr/spark'
+spark_pkg_prefix = 'spark'
+spark_pkg_version = '2.0.2'
 spark_tar_file = "spark-#{spark_pkg_version}-bin-hadoop2.7.tgz"
 spark_extracted_file_name = "spark-#{spark_pkg_version}-bin-hadoop2.7"
-spark_deb_path =
-  "#{bins_dir}/#{spark_pkg_prefix}_#{spark_pkg_version}_amd64.deb"
 
 remote_file "#{bins_dir}/#{spark_tar_file}" do
   source "http://d3kbcqa49mib13.cloudfront.net/#{spark_tar_file}"
