@@ -2,8 +2,8 @@
 # Set up zookeeper configs
 #
 directory "#{node[:bcpc][:hadoop][:zookeeper][:conf_dir]}.#{node.chef_environment}" do
-  owner node[:bcpc][:hadoop][:zookeeper][:owner] 
-  group node[:bcpc][:hadoop][:zookeeper][:group] 
+  owner node[:bcpc][:hadoop][:zookeeper][:owner]
+  group node[:bcpc][:hadoop][:zookeeper][:group]
   mode 00755
   action :create
   recursive true
@@ -17,10 +17,16 @@ bash "update-zookeeper-conf-alternatives" do
   not_if "update-alternatives --query zookeeper-conf | grep #{node.chef_environment}"
 end
 
+
+
 template "#{node[:bcpc][:hadoop][:zookeeper][:conf_dir]}/zoo.cfg" do
   source "zk_zoo.cfg.erb"
   mode 0644
-  variables(:zk_hosts => get_nodes_for("zookeeper_server", "bcpc-hadoop"))
+  #
+  # All role:BCPC-Hadoop-Head or role:BCPC-Kafka-Head-Zookeeper nodes
+  # currently run ZK, so this should be a safe value for zk_hosts.
+  #
+  variables(:zk_hosts => get_head_nodes)
 end
 
 %w{log4j.properties

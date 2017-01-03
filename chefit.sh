@@ -23,10 +23,10 @@ for f in install-chef.sh; do
   $SCPCMD $f ubuntu@$IP:/home/ubuntu || (echo "copying $f failed" > /dev/stderr; exit 1)
 done
 
-if [[ -n "$(source proxy_setup.sh >/dev/null; echo ${PROXY-})" ]]; then
-  PROXY=$(source proxy_setup.sh >/dev/null; echo $PROXY)
-  echo "setting up .wgetrc's to $PROXY"
-  $SSHCMD "echo \"http_proxy = http://$PROXY\" > .wgetrc"
+if [[ -n "$(source proxy_setup.sh >/dev/null; echo ${http_proxy-})" ]]; then
+  PROXY=$(source proxy_setup.sh >/dev/null; echo $http_proxy)
+  echo "setting up .wgetrc's to $http_proxy"
+  $SSHCMD "echo \"http_proxy = $http_proxy\" > .wgetrc"
 fi
 
 # remove deb-src lines (we do not mirror them and should not need them)

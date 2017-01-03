@@ -27,15 +27,7 @@ if haproxy_stats_password.nil?
   haproxy_stats_password = secure_password
 end
 
-bootstrap = get_bootstrap
-
-nodes = get_nodes_for("haproxy").map do |nn|
-  begin
-    nn['fqdn']
-  rescue
-    nil
-  end
-end.compact.join(',')
+haproxy_admins = (get_head_node_names + [get_bootstrap]).join(',')
 
 chef_vault_secret "haproxy-stats" do
   #
@@ -46,7 +38,7 @@ chef_vault_secret "haproxy-stats" do
 
   data_bag 'os'
   raw_data({ 'password' => haproxy_stats_password })
-  admins "#{ nodes },#{ bootstrap }"
+  admins haproxy_admins
   search '*:*'
   action :nothing
 end.run_action(:create_if_missing)

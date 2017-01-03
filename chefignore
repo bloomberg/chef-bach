@@ -15,3 +15,10 @@ roles
 src
 vendor
 vbox
+
+#
+# Ignore ruby scripts, or else Chef Server 11 tries to syntax check
+# them with ruby 1.9, which always fails.
+#
+cluster_assign_roles.rb
+repxe_host.rb

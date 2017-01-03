@@ -17,5 +17,13 @@
 # limitations under the License.
 #
 
+# This recipe should probably be removed entirely.
+log 'vault-download-noop' do
+  message 'This recipe should always be a no-op, because the vault gem ' \
+          'was downloaded by the bach_repository::gems recipe in a chef ' \
+          'local-mode session before the first chef run.'
+  level :info
+end
+
 include_recipe 'bach_repository::gems'
 

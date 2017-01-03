@@ -25,11 +25,15 @@ export BOOTSTRAP_VM_CPUs=${BOOTSTRAP_VM_CPUs-1}
 # -- Vagrant VMs do not use this size --
 #BOOTSTRAP_VM_DRIVE_SIZE=120480
 
+# Is this a Hadoop or Kafka cluster?
+# (Kafka clusters, being 6 nodes, will require more RAM.)
+export CLUSTER_TYPE=${CLUSTER_TYPE:-Hadoop}
+
 # Cluster VM Defaults
-CLUSTER_VM_MEM=${CLUSTER_VM_MEM-2048}
-CLUSTER_VM_CPUs=${CLUSTER_VM_CPUs-1}
-CLUSTER_VM_EFI=${CLUSTER_VM_EFI:-true}
-CLUSTER_VM_DRIVE_SIZE=${CLUSTER_VM_DRIVE_SIZE-20480}
+export CLUSTER_VM_MEM=${CLUSTER_VM_MEM-2048}
+export CLUSTER_VM_CPUs=${CLUSTER_VM_CPUs-1}
+export CLUSTER_VM_EFI=${CLUSTER_VM_EFI:-true}
+export CLUSTER_VM_DRIVE_SIZE=${CLUSTER_VM_DRIVE_SIZE-20480}
 
 # The root drive on cluster nodes must allow for a RAM-sized swap volume.
 CLUSTER_VM_ROOT_DRIVE_SIZE=$((CLUSTER_VM_DRIVE_SIZE + CLUSTER_VM_MEM - 2048))
@@ -37,9 +41,15 @@ CLUSTER_VM_ROOT_DRIVE_SIZE=$((CLUSTER_VM_DRIVE_SIZE + CLUSTER_VM_MEM - 2048))
 VBOX_DIR="`dirname ${BASH_SOURCE[0]}`/vbox"
 P=`python -c "import os.path; print os.path.abspath(\"${VBOX_DIR}/\")"`
 
+if [ "$CLUSTER_TYPE" == "Kafka" ]; then
+  VM_LIST=(bcpc-vm1 bcpc-vm2 bcpc-vm3 bcpc-vm4 bcpc-vm5 bcpc-vm6)
+else
+  VM_LIST=(bcpc-vm1 bcpc-vm2 bcpc-vm3)
+fi
+
 ######################################################
 # Function to download files necessary for VM stand-up
-# 
+#
 function download_VM_files {
   pushd $P
 
@@ -65,7 +75,7 @@ function download_VM_files {
 # (expecting if a remove fails the function should bail)
 # If a network is provided, removes that network's DHCP server
 # (or passes the vboxmanage error and return code up to the caller)
-# 
+#
 function remove_DHCPservers {
   local network_name=${1-}
   if [[ -z "$network_name" ]]; then
@@ -87,7 +97,7 @@ function remove_DHCPservers {
 ###################################################################
 # Function to create the bootstrap VM
 # uses Vagrant or stands-up the VM in VirtualBox for manual install
-# 
+#
 function create_bootstrap_VM {
   pushd $P
 
@@ -100,7 +110,7 @@ function create_bootstrap_VM {
     if [[ -f ../Vagrantfile.local.rb ]]; then
 	cp ../Vagrantfile.local.rb .
     fi
-    
+
     if [[ ! -f insecure_private_key ]]; then
       # Ensure that the private key has been created by running vagrant at least once
       vagrant status
@@ -131,11 +141,11 @@ function create_bootstrap_VM {
         fi
       done
     fi
-  
+
     $VBM hostonlyif create
     $VBM hostonlyif create
     $VBM hostonlyif create
-  
+
     if [[ -z "$WIN" ]]; then
       remove_DHCPservers vboxnet0 || true
       remove_DHCPservers vboxnet1 || true
@@ -156,7 +166,7 @@ function create_bootstrap_VM {
     $VBM hostonlyif ipconfig "$VBN0" --ip 10.0.100.2    --netmask 255.255.255.0
     $VBM hostonlyif ipconfig "$VBN1" --ip 172.16.100.2  --netmask 255.255.255.0
     $VBM hostonlyif ipconfig "$VBN2" --ip 192.168.100.2 --netmask 255.255.255.0
-   
+
     # Create bootstrap VM
     for vm in bcpc-bootstrap; do
       # Only if VM doesn't exist
@@ -192,7 +202,7 @@ function create_bootstrap_VM {
 
 ###################################################################
 # Function to create the BCPC cluster VMs
-# 
+#
 function create_cluster_VMs {
   # Gather VirtualBox networks in use by bootstrap VM
   oifs="$IFS"
@@ -215,12 +225,12 @@ function create_cluster_VMs {
   $VBM modifyhd -type immutable $IPXE_DISK
 
   # Create each VM
-  for vm in bcpc-vm1 bcpc-vm2 bcpc-vm3; do
+  for vm in ${VM_LIST[*]}; do
       # Only if VM doesn't exist
       if ! $VBM list vms | grep "^\"${vm}\"" ; then
           $VBM createvm --name $vm --ostype Ubuntu_64 \
 	       --basefolder $P --register
-	  
+
           $VBM modifyvm $vm --memory $CLUSTER_VM_MEM
           $VBM modifyvm $vm --cpus $CLUSTER_VM_CPUs
 
@@ -276,7 +286,7 @@ function create_cluster_VMs {
 		   --device 0 --port $port --type hdd --medium $DISK_PATH
               port=$((port+1))
           done
-	  
+
           # Set hardware acceleration options
           $VBM modifyvm $vm \
 	       --largepages on \

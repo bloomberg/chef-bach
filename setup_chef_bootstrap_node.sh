@@ -33,11 +33,11 @@ fi
 # still need to configure Apache and chef-vault before doing a
 # complete Chef run.
 #
-sudo chef-client \
+sudo -E chef-client \
      -c .chef/knife.rb \
      -o 'recipe[bcpc::apache-mirror]'
 
-sudo chef-client \
+sudo -E chef-client \
      -c .chef/knife.rb \
      -o 'recipe[bcpc::chef_vault_install]'
 
@@ -45,6 +45,15 @@ sudo chef-client \
 # With chef-vault installed and the repo configured, it's safe to save
 # and converge the complete runlist.
 #
-sudo chef-client \
+sudo -E chef-client \
      -c .chef/knife.rb \
      -r 'role[BCPC-Bootstrap]'
+
+#
+# TODO: This chef run should not be necessary.  This is definitely a
+# bug in the bach_repository::apt recipe.  The bootstrap fails to save
+# its GPG public/private keys even after it should be able to do so.
+#
+sudo -E chef-client \
+     -c .chef/knife.rb \
+     -o 'recipe[bach_repository::apt]'

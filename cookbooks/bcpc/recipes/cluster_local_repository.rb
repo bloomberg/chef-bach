@@ -51,14 +51,12 @@ if apt_uri.host
 end
 
 unless node[:fqdn] == get_bootstrap
-  bcpc_public_key = get_config!('bootstrap-gpg-public_key_base64')
-
   require 'tempfile'
   bcpc_apt_key_path = Tempfile.new('bootstrap-gpg-key').path
 
   file bcpc_apt_key_path do
     mode 0444
-    content Base64.decode64(bcpc_public_key)
+    content Base64.decode64(get_config!('bootstrap-gpg-public_key_base64'))
   end
 
   ruby_block 'get-bootstrap-gpg-fingerprint' do

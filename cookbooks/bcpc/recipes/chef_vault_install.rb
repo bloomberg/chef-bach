@@ -24,6 +24,7 @@ require 'uri'
 gem_path = Pathname.new(Gem.ruby).dirname.join('gem').to_s
 
 chefvault_version = '>=2.8.0'
+
 # Move to installing chef-vault via execute block to work around
 # issue where version string is empty when combining gem_binary,
 # version and options in the gem_package resource
