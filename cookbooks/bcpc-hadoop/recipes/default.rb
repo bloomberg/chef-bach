@@ -70,14 +70,15 @@ end
 # The "--use-system-libraries" switch is intended to force nokogiri
 # extconf.rb to compile against system libraries.
 #
-gem_package 'nokogiri' do
-  options "--clear-sources -s #{get_binary_server_url} " \
-    '-- --use-system-libraries'
-  gem_binary gem_path
-  version '>=1.6.2'
-  action :nothing
-  timeout 1800
-end.run_action(:install)
+nokogiri_geminstall = Timeout::timeout(1800) {
+  gem_package 'nokogiri' do
+    options "--clear-sources -s #{get_binary_server_url} " \
+      '-- --use-system-libraries'
+    gem_binary gem_path
+    version '>=1.6.2'
+    action :nothing
+  end.run_action(:install)
+}
 
 Gem.clear_paths
 require 'zookeeper'
