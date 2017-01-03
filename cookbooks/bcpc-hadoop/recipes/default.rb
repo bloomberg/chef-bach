@@ -76,7 +76,6 @@ gem_package 'nokogiri' do
   gem_binary gem_path
   version '>=1.6.2'
   action :nothing
-  timeout 1800
 end.run_action(:install)
 
 Gem.clear_paths
