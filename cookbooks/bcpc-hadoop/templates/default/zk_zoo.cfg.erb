@@ -36,7 +36,7 @@ dataLogDir=<%= node[:bcpc][:hadoop][:zookeeper][:data_log_dir] %>
 clientPort=<%= node[:bcpc][:hadoop][:zookeeper][:port] %>
 clientPortAddress=<%= float_host(node[:hostname]) %>
 
-<% @zk_hosts.each do |s| %> 
+<% @zk_hosts.sort{ |a,b| a[:fqdn] <=> b[:fqdn] }.each do |s| %> 
 <%="server.#{bcpc_8bit_node_number(s)}=#{float_host(s[:fqdn])}:#{node[:bcpc][:hadoop][:zookeeper][:leader_connect][:port]}:#{node[:bcpc][:hadoop][:zookeeper][:leader_elect][:port]}" %>
 <% end %>
 
