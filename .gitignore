@@ -21,6 +21,7 @@ cookbooks/*/
 !cookbooks/hannibal
 !cookbooks/bcpc_kafka
 !cookbooks/bach_krb5
+!cookbooks/smoke-tests
 cookbooks/*/coverage
 cookbooks/*/vendor
 cookbooks/bcpc/attributes/repos.rb
