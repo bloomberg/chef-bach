@@ -26,15 +26,22 @@ def get_name_server
   end.first.chomp.gsub(/^\s*nameserver\s*/,'')
 
   if ns == '127.0.0.1'
-    # Look to see if we have dhclient running
-    leases =
-      Dir.glob('/var/lib/dhcp/dhclient*.lease').map do |f|
-        [File.mtime(f), f]
-      end.flatten.to_h
-    latest = leases.keys.sort.last or return nil
-    ns = File.readlines(leases[latest]).select do |ll|
+    # Find the newest DHCP client lease file
+    latest_lease = Dir.glob('/var/lib/dhcp/dhclient*.lease*').sort do |a, b|
+      File.mtime(a) <=> File.mtime(b)
+    end.last
+
+    # Look for a DNS option in the lease
+    dns_option = File.readlines(latest_lease).select do |ll|
       ll.include?('option domain-name-servers')
-    end.first.chomp.gsub(/^\s*option domain-name-servers\s*([^,]*),.*/,'\1')
+    end.first
+
+    # If we found a DNS option, extract a name server.
+    if dns_option
+      dns_option.chomp.gsub(/^\s*option domain-name-servers\s*([^,]*),.*/,'\1')
+    else
+      raise 'No DNS server provided, and none found in local DHCP leases'
+    end
   else
     ns
   end
@@ -48,6 +55,9 @@ proxy_uri = if ENV['http_proxy']
               nil
             end
 
+#
+# This file is in the 'tests' subdir, so __FILE__/.. is our repo dir.
+#
 repo_dir = File.expand_path(File.join(File.dirname(__FILE__), '..'))
 
 #
