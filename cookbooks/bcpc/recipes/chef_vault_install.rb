@@ -23,16 +23,16 @@ require 'uri'
 
 gem_path = Pathname.new(Gem.ruby).dirname.join('gem').to_s
 
-gem_package 'chef-vault' do
-  #
-  # Options MUST be specified as a string, not a hash.
-  # Using gem_binary with hash options results in undefined behavior.
-  #
-  options "--clear-sources -s #{get_binary_server_url}"
-  gem_binary gem_path
-  version '>=2.8.0'
+chefvault_version = '>=2.8.0'
+# Move to installing chef-vault via execute block to work around
+# issue where version string is empty when combining gem_binary,
+# version and options in the gem_package resource
+execute 'gem_install_chef-vault' do
+  command gem_path + ' install chef-vault -q --no-rdoc --no-ri -v "' \
+    + chefvault_version + "\" --clear-sources -s #{get_binary_server_url}"
+  not_if gem_path + ' list chef-vault -i -v "' + chefvault_version + '"'
   action :nothing
-end.run_action(:upgrade)
+end.run_action(:run)
 
 #
 # BACH typically runs chef-client with an abnormal umask, which causes
