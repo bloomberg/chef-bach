@@ -4,7 +4,7 @@ maintainer_email 'compute@bloomberg.net'
 license          'Apache License 2.0'
 description      'Installs/Configures Bloomberg Clustered Private Cloud (BCPC)'
 long_description IO.read(File.join(File.dirname(__FILE__), 'README.md'))
-version          '2.1.1'
+version          '2.1.2'
 
 depends 'apt', '>= 2.4.0'
 depends 'bfd'
