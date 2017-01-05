@@ -32,6 +32,7 @@ execute 'gem_install_chef-vault' do
     + chefvault_version + "\" --clear-sources -s #{get_binary_server_url}"
   not_if gem_path + ' list chef-vault -i -v "' + chefvault_version + '"'
   action :nothing
+  environment ({ 'no_proxy' => URI.parse(get_binary_server_url).host })
 end.run_action(:run)
 
 #
