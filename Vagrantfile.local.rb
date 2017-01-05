@@ -1,3 +1,17 @@
+#
+# This file is intended to be included in another Vagrantfile.  It
+# copies local SSL CAs from the host to the new guest VM, and injects
+# any HTTP proxy settings from the enclosing environments into the
+# /etc/environment file.
+#
+# The canonical path for locally installed CAs on Linux is
+# /usr/local/share/ca-certificates.  This path is shared from the host
+# to the guest using the vboxsf driver, then the guest updates its CAs
+# using the host's local certificates.
+#
+# If $http_proxy or $https_proxy is set when Vagrant is invoked, this
+# file's provisioners will copy those settings into /etc/environment.
+#
 Vagrant.configure('2') do |config|
   config.vm.synced_folder '/usr/local/share/ca-certificates',
     '/usr/local/share/ca-certificates',
