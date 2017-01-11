@@ -17,9 +17,9 @@ chef_packages_hash =
    ],
    chef:
    [
-    'https://opscode-omnibus-packages.s3.amazonaws.com/ubuntu/' \
-      '10.04/x86_64/chef_11.18.12-1_amd64.deb',
-    '2a59c3cd6818f28ba1d946b390d97ce8400b46e7f5c6362cd6202b5e961b5987'
+     'https://packages.chef.io/files/current/chef/12.18.24/ubuntu/' \
+       '14.04/chef_12.18.24-1_amd64.deb',
+    'ff57e8206dbe23862f2beac3a741e715d4f9838512736f15c6293f80e5139342'
    ],
    chef_server:
    [

@@ -7,6 +7,7 @@ gem 'ipaddress'
 gem 'highline'
 gem 'mixlib-shellout'
 gem 'parallel'
+gem 'poise'
 gem 'pry'
 gem 'rb-readline' # used by irb
 gem 'ruby-progressbar'

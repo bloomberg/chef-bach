@@ -16,6 +16,7 @@ depends 'bcpc_jmxtrans', '= 0.1.0'
 depends 'hannibal', '= 0.1.0'
 depends 'java','>= 1.41.0'
 depends 'bcpc_kafka', '= 0.1.0'
+depends 'locking_resource', '= 0.1.0'
 
 #
 # Transitive dependencies specified to retain Chef 11.x compatibility.
@@ -36,7 +37,7 @@ depends 'nscd', '~> 1.0.1'
 depends 'ntp', '= 1.10.1'
 depends 'ohai', '= 3.0.1'
 depends 'openssl', '= 5.0.1'
-depends 'poise', '= 1.0.12'
+depends 'poise'
 depends 'postgresql', '= 5.2.0'
 depends 'sysctl', '= 0.7.5'
 depends 'windows', '= 1.36.6'

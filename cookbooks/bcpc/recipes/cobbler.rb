@@ -174,7 +174,7 @@ end
 
 dpkg_package deb_file_path
 
-include_recipe 'cobblerd'
+include_recipe 'cobblerd::default'
 include_recipe 'cobblerd::web'
 
 #

@@ -26,12 +26,17 @@ require 'rubygems'
 gem_path = Pathname.new(Gem.ruby).dirname.join("gem").to_s
 
 # build requirements for zookeeper
-%w{make patch gcc}.each do |pkg|
+%w{ruby-dev make patch gcc}.each do |pkg|
   package pkg do
     action :nothing
   end.run_action(:install)
 end
 
+gem_package 'json' do
+  gem_binary gem_path
+  version '~>1.6'
+  action :nothing
+end.run_action(:install)
 gem_package 'zookeeper' do
   #
   # Options MUST be specified as a string, not a hash.
