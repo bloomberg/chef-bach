@@ -21,6 +21,7 @@ default.bach_spark.config.spark.eventLog.dir = "#{node['spark']['hdfs_url']}/spa
 default.bach_spark.config.spark.eventLog.enabled = true
 default.bach_spark.config.spark.logConf = true
 default.bach_spark.config.spark.dynamicAllocation.enabled = true
+default.bach_spark.config.spark.dynamicAllocation.maxExecutors = 2
 default.bach_spark.config.spark.shuffle.service.enabled = true
 default.bach_spark.config.spark.yarn.jar = "#{node['spark']['hdfs_url']}/apps/spark/#{node[:spark][:package][:version]}/spark-assembly.jar" 
 default.bach_spark.config.spark.master = "yarn-client"
