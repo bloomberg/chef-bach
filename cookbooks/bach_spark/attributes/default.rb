@@ -34,6 +34,7 @@ default.bach_spark.config.spark.eventLog.dir =
 default.bach_spark.config.spark.eventLog.enabled = true
 default.bach_spark.config.spark.logConf = true
 default.bach_spark.config.spark.dynamicAllocation.enabled = true
+default.bach_spark.config.spark.dynamicAllocation.maxExecutors = 2
 default.bach_spark.config.spark.shuffle.service.enabled = true
 default.bach_spark.config.spark.yarn.archive = "#{node['spark']['hdfs_url']}"\
     "/apps/spark/#{node[:spark][:package][:version]}/spark_jars.tgz"
