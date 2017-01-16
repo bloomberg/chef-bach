@@ -11,6 +11,7 @@ default["bcpc"]["hadoop"]["yarn"]["nodemanager"]["jmx"]["port"] = 3131
 default["bcpc"]["hadoop"]["yarn"]["resourcemanager"]["port"] = 8032
 default["bcpc"]["hadoop"]["yarn"]["resourcemanager"]["jmx"]["port"] = 3131
 default["bcpc"]["hadoop"]["yarn"]["scheduler"]["fair"]["min-vcores"] = 2
+default["bcpc"]["hadoop"]["yarn"]["min-free-space-per-disk-mb"] = 100
 
 yarn_log_dir = '/var/log/hadoop-yarn'
 yarn_pid_dir = '/var/run/hadoop-yarn'
@@ -133,6 +134,7 @@ default[:bcpc][:hadoop][:yarn][:site_xml].tap do |site_xml|
   site_xml['yarn.scheduler.maximum-allocation-mb'] = yarn_max_memory.call
 
   site_xml['yarn.timeline-service.client.max-retries'] = 0
+  site_xml['yarn.nodemanager.disk-health-checker.min-free-space-per-disk-mb'] = node["bcpc"]["hadoop"]["yarn"]["min-free-space-per-disk-mb"]
 end
 
 ### Delete these. (start) ###
