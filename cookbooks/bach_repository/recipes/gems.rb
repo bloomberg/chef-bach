@@ -5,85 +5,45 @@
 include_recipe 'bach_repository::directory'
 include_recipe 'bach_repository::tools'
 bins_dir = node['bach']['repository']['bins_directory']
-gems_dir = "#{bins_dir}/gems"
+gems_dir = node['bach']['repository']['gems_directory']
 
 directory gems_dir do
   mode 0555
 end
 
-#
-# This array is deliberately ordered to get the correct install order.
-# TODO: replace with bundler
-#
-bootstrap_gems = [
-                   ['json','1.8.3'],
-                   ['cabin', '0.7.2'],
-                   ['arr-pm', '0.0.9'],
-                   ['backports', '2.6.2'],
-                   ['clamp', '0.6.5'],
-                   ['childprocess', '0.5.9'],
-                   ['ffi', '1.9.14'],
-                   ['fpm', '1.3.3'],
-                   ['builder', '3.2.2']
-                 ]
-
-# This array is just alphabetically sorted.
-worker_gems = [
-                ['chef-rewind', '0.0.9'],
-                ['chef-vault', '2.9.0'],
-                ['mini_portile2', '2.1.0'],
-                ['mysql2', '0.4.4'],
-                ['nokogiri', '1.6.8.1'],
-                ['patron', '0.8.0'],
-                ['rake-compiler', '1.0.1'],
-                ['rkerberos', '0.1.5'],
-                ['ruby-augeas', '0.5.0'],
-                ['sequel', '4.36.0'],
-                ['simple-graphite', '2.1.0'],
-                ['webhdfs', '0.5.5'],
-                ['wmi-lite', '1.0.0'],
-                ['zabbixapi', '2.4.5'],
-                ['zookeeper', '1.4.7'],
-              ]
+package 'libaugeas-dev'
+package 'libkrb5-dev'
 
 # Fetch gems for all nodes
-(bootstrap_gems + worker_gems).each do |gem_name, gem_version|
-  execute "gem_fetch[#{gem_name}]" do
-    cwd gems_dir
-    command "/usr/bin/gem fetch #{gem_name} -v #{gem_version}"
-    creates "#{gems_dir}/#{gem_name}-#{gem_version}.gem"
-    notifies :run, 'execute[gem-generate-index]'
-  end
+execute "bundler package" do
+  cwd node['bach']['repository']['repo_directory']
+  command "/opt/chefdk/embedded/bin/bundler package"
+end
 
-  link "#{gems_dir}/#{gem_name}.gem" do
-    to "#{gems_dir}/#{gem_name}-#{gem_version}.gem"
-    notifies :run, 'execute[gem-generate-index]'
-  end
+link "#{bins_dir}/gems" do
+#XXX  to "#{gems_dir}/#{gem_name}-#{gem_version}.gem"
+  to "#{gems_dir}"
 end
 
 #
 # Install gems on the bootstrap, in the correct order.
 # TODO: replace with bundler
 #
-bootstrap_gems.each do |package_name, package_version|
-
-  local_gem_path =
-    gems_dir + '/' + package_name + '-' + package_version + '.gem'
-
-  gem_binary = '/usr/bin/gem'
+%w{builder fpm json}.each do |local_gem|
+  local_gem_path = ::Dir.glob(::File.join(gems_dir, "#{local_gem}*.gem")).first
+  gem_binary = '/opt/chef/embedded/bin/gem'
 
   #
   # We are using an execute resource because gem_package does not
   # support --local.  We must use --local because without having
   # 'builder' already installed, it is not possible to generate the
-  # gem index.
+  # gem index. (Rerunning gem install seems very harmless looking at strace
+  # output and doesn't pin us to a version if we later upgrade)
   #
-  execute "gem-install-#{package_name}" do
+  execute "gem-install-#{local_gem}" do
     command "#{gem_binary} install --local #{local_gem_path} --no-ri --no-rdoc"
     cwd gems_dir
-    not_if "#{gem_binary} list -i #{package_name} -v #{package_version}"
   end
-
 end
 
 execute 'gem-generate-index' do

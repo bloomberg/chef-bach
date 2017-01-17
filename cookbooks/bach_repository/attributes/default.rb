@@ -6,8 +6,13 @@
 # was made by the old build_bins.sh.  For now, we are just replicating
 # the behavior of the old script.
 #
-default[:bach][:repository][:bins_directory] = '/home/vagrant/chef-bcpc/bins'
-default[:bach][:repository][:src_directory] = '/home/vagrant/chef-bcpc/src'
+default[:bach][:repository][:repo_directory] = '/home/vagrant/chef-bcpc'
+default[:bach][:repository][:bins_directory] = \
+  ::File.join(node[:bach][:repository][:repo_directory], 'bins')
+default[:bach][:repository][:gems_directory] = \
+  ::File.join(node[:bach][:repository][:repo_directory], 'vendor/cache')
+default[:bach][:repository][:src_directory] = \
+  ::File.join(node[:bach][:repository][:repo_directory], 'src')
 
 #
 # This was originally envisioned as a release version for the
