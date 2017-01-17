@@ -36,10 +36,10 @@ apt-get -o Dir::Etc::SourceList=/etc/apt/sources.list.d/bcpc.list \
 	-o APT::Get::List-Cleanup="0" \
 	update
 
-apt-get -y install chef=11.18.12-1
+apt-get -y install chef=12.18.24-1
 
 if dpkg -s chef-server 2>/dev/null | grep -q ^Status.*installed && \
-   dpkg -s chef 2>/dev/null | grep -q ^Version.*11; then
+   dpkg -s chef 2>/dev/null | grep -q ^Version.*12; then
   echo chef-server is installed
 else
   apt-get -y install chef-server
