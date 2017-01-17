@@ -32,35 +32,36 @@ gem_path = Pathname.new(Gem.ruby).dirname.join("gem").to_s
   end.run_action(:install)
 end
 
-gem_package 'json' do
-  gem_binary gem_path
+chef_gem 'poise' do
+  version '~>2.0'
+  options "--clear-sources -s #{get_binary_server_url}"
+  compile_time true
+end
+
+chef_gem 'json' do
+  # Due to Zabbixapi #64 otherwise could use 2.0+
   version '~>1.6'
-  action :nothing
-end.run_action(:install)
-gem_package 'zookeeper' do
-  #
-  # Options MUST be specified as a string, not a hash.
-  # Using gem_binary with hash options results in undefined behavior.
-  #
   options "--clear-sources -s #{get_binary_server_url}"
-  gem_binary gem_path
+  compile_time true
+end
+
+chef_gem 'zookeeper' do
   version '>0.0'
-  action :nothing
-end.run_action(:install)
-
-gem_package 'webhdfs' do
   options "--clear-sources -s #{get_binary_server_url}"
-  gem_binary gem_path
+  compile_time true
+end
+
+chef_gem 'webhdfs' do
+  options "--clear-sources -s #{get_binary_server_url}"
   version '>=0.0.0'
-  action :nothing
-end.run_action(:install)
+  compile_time true
+end
 
-gem_package 'zabbixapi' do
+chef_gem 'zabbixapi' do
   options "--clear-sources -s #{get_binary_server_url}"
-  gem_binary gem_path
   version '>=2.4'
-  action :nothing
-end.run_action(:install)
+  compile_time true
+end
 
 ['libxslt1-dev', 'libxml2-dev', 'pkg-config'].each do |pkg_name|
   package pkg_name do
@@ -75,13 +76,12 @@ end
 # The "--use-system-libraries" switch is intended to force nokogiri
 # extconf.rb to compile against system libraries.
 #
-gem_package 'nokogiri' do
+chef_gem 'nokogiri' do
   options "--clear-sources -s #{get_binary_server_url} " \
     '-- --use-system-libraries'
-  gem_binary gem_path
   version '>=1.6.2'
-  action :nothing
-end.run_action(:install)
+  compile_time true
+end
 
 Gem.clear_paths
 require 'zookeeper'
