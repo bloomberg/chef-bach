@@ -1,5 +1,20 @@
-# Cookbook Name:: kafka-bcpc 
+#
+# Cookbook Name:: kafka-bcpc
 # Recipe:: default
+#
+# Kafka-bcpc is essentially a role cookbook. It sets a few attributes
+# and includes other recipes.
+#
+# The 'default' recipe includes the common material shared between
+# Zookeeper and Kafka servers in a standalone Kafka cluster.
+#
+
+include_recipe 'bcpc::chef_vault_install'
+include_recipe 'bcpc::default'
+include_recipe 'bcpc::networking'
+include_recipe 'bcpc-hadoop::disks'
+include_recipe 'bcpc::ubuntu_tools_repo'
+include_recipe 'bcpc-hadoop::default'
 
 # ensure we use /etc/security/limits.d to allow ulimit over-riding
 if not node.has_key?('pam_d') or not node['pam_d'].has_key?('services') or not node['pam_d']['services'].has_key?('common-session')

@@ -1,6 +1,24 @@
 #
-# Cookbook Name:: kafka-bcpc 
+# Cookbook Name:: kafka-bcpc
 # Recipe: Kafka
+#
+
+#
+# We need node search to set a reasonable value for num.partitions, so
+# the value from the attributes file must be overriden.
+#
+# The value is saved in the node object so that the default partition count
+# can only go up, not down.
+#
+node.normal[:kafka][:broker][:num][:partitions] =
+  [
+   node[:kafka][:broker][:num][:partitions],
+   search(:node, 'role:BCPC-Kafka-Head-Server').count,
+   3
+  ].max
+
+include_recipe 'kafka-bcpc::default'
+include_recipe 'kafka::default'
 
 user_ulimit "kafka" do
   filehandle_limit 32768
@@ -21,7 +39,7 @@ ruby_block "kafkaup" do
         sleep(sleep_time)
         i += 1
         Chef::Log.info("Kafka server having znode #{brokerpath} is down.")
-      elsif !kafka_in_zk and i >= 19 
+      elsif !kafka_in_zk and i >= 19
         Chef::Application.fatal! "Kafka is reported down for more than #{i * sleep_time} seconds"
       else
         Chef::Log.info("Broker #{brokerpath} existance : #{znode_exists?(brokerpath, zk_host)}")
@@ -31,3 +49,6 @@ ruby_block "kafkaup" do
   end
   action :run
 end
+
+include_recipe 'bcpc::diamond'
+include_recipe 'bcpc_jmxtrans'

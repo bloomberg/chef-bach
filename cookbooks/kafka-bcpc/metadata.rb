@@ -8,6 +8,7 @@ version          '0.1.0'
 
 depends 'bcpc'
 depends 'bcpc-hadoop'
+depends 'bcpc_jmxtrans'
 depends 'kafka'
 depends 'pam'
 depends 'sysctl'
