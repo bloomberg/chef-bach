@@ -21,16 +21,15 @@ execute "bundler package" do
 end
 
 link "#{bins_dir}/gems" do
-#XXX  to "#{gems_dir}/#{gem_name}-#{gem_version}.gem"
   to "#{gems_dir}"
 end
 
 #
 # Install gems on the bootstrap, in the correct order.
-# TODO: replace with bundler
+# XXX: replace with bundler (Uh, Andrew not sure how/why;
+#      gem seems to cover dependencies happily?)
 #
 %w{builder fpm json}.each do |local_gem|
-  local_gem_path = ::Dir.glob(::File.join(gems_dir, "#{local_gem}*.gem")).first
   gem_binary = '/opt/chef/embedded/bin/gem'
 
   #
@@ -41,7 +40,14 @@ end
   # output and doesn't pin us to a version if we later upgrade)
   #
   execute "gem-install-#{local_gem}" do
-    command "#{gem_binary} install --local #{local_gem_path} --no-ri --no-rdoc"
+    gem_file = Proc.new do |gem|
+      local_gem_path = ::Dir.glob(::File.join(gems_dir, "#{gem}*.gem"))
+      if local_gem_path.length != 1
+        raise "Can not find just one Gem for #{gem}! Got:\n#{local_gem_path.join('\n')}"
+      end
+      local_gem_path = local_gem_path.first
+    end
+    command lazy { "#{gem_binary} install --local #{gem_file.call(local_gem)} --no-ri --no-rdoc" }
     cwd gems_dir
   end
 end
