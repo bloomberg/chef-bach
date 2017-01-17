@@ -1,7 +1,10 @@
 # -*- mode: enh-ruby -*-
-source 'https://rubygems.org'
+source 'https://rubygems.org' do
 
-gem 'berkshelf', '~> 4'
-gem 'kitchen-vagrant'
-gem 'serverspec', '~> 2'
-gem 'test-kitchen'
+  gem 'berkshelf'
+  gem 'kitchen-vagrant'
+  gem 'serverspec'
+  gem 'test-kitchen'
+  gem 'builder'
+  gem 'fpm'
+end
