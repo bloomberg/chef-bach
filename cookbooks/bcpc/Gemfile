@@ -6,7 +6,7 @@ source 'https://rubygems.org' do
   gem 'ruby-augeas'
   gem 'sequel'
   gem 'simple-graphite'
-  gem 'zabbixapi'
+  gem 'zabbixapi', '>=2.4'
   gem 'rspec', :require => false, :group => :test
   gem 'simplecov', :require => false, :group => :test
   gem 'simplecov-json', :require => false, :group => :test
