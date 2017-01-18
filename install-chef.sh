@@ -21,3 +21,8 @@ apt-get install -y chef=12.18.24-1
 # remove rubygems and install only our gemserver
 /opt/chef/embedded/bin/gem sources --add ${BINARY_SERVER_URL}
 /opt/chef/embedded/bin/gem sources --remove http://rubygems.org/
+/opt/chef/embedded/bin/gem sources --remove https://rubygems.org/
+
+# terrible hack due to Zabbixapi #64 (doesn't seem to break things...)
+/opt/chef/embedded/bin/gem uninstall json
+/opt/chef/embedded/bin/gem install json
