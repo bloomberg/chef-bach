@@ -12,7 +12,7 @@ default[:spark][:bin][:dir] = "#{node[:spark][:package][:base]}/"\
 
 ## Spark Configuration
 default.bach_spark.config.spark.driver.extraLibraryPath = '/usr/hdp/current'\
-    'hadoop-client/lib/native:/usr/hdp/current'\
+    '/hadoop-client/lib/native:/usr/hdp/current'\
     '/hadoop-client/lib/native/Linux-amd64-64'
 default.bach_spark.config.spark.executor.extraLibraryPath = '/usr/hdp/current'\
     '/hadoop-client/lib/native:/usr/hdp/current/hadoop-client/lib'\
