@@ -21,7 +21,7 @@ require 'rubygems'
 require 'ohai'
 
 # Disable the Ohai password module which explodes on a Single-Sign-On-joined system
-Ohai::Config[:disabled_plugins] = [ "passwd" ]
+ohai.disabled_plugins = [ "passwd" ]
 
 o = Ohai::System.new
 o.all_plugins(['hostname','ipaddress'])
