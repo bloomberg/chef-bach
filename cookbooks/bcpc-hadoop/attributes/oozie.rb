@@ -29,3 +29,4 @@ default["bcpc"]["hadoop"]["oozie"]["db"]["schema"]["name"] = "oozie"
 default["bcpc"]["hadoop"]["oozie"]["service"]["JPAService"]["create"]["db"]["schema"] = false
 default["bcpc"]["hadoop"]["oozie"]["service"]["JPAService"]["pool"]["max"]["active"]["conn"] = 100
 default["bcpc"]["hadoop"]["oozie"]["authentication"]["token"]["validity"] = 36000
+default["bcpc"]["hadoop"]["oozie"]["service"]["ext"] = "org.apache.oozie.service.ZKLocksService,org.apache.oozie.service.ZKXLogStreamingService,org.apache.oozie.service.ZKJobsConcurrencyService,org.apache.oozie.service.ZKUUIDService"

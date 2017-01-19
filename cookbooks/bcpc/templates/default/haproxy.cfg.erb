@@ -16,7 +16,6 @@ defaults
   maxconn  8000
   source <%="#{node[:bcpc][:management][:vip]}"%>
   mode  http
-  option httpclose
   option abortonclose
   option tcplog
   option dontlognull
@@ -29,11 +28,6 @@ defaults
   timeout  check 10s
   timeout  client 30m
   timeout  server 30m
-
-listen stats 127.0.0.1:1936
-  mode http
-  stats enable
-  stats uri /
 
 listen stats <%="#{node[:bcpc][:management][:ip]}"%>:1936
   mode http
@@ -63,5 +57,20 @@ option tcpka
   option httpchk
 <% @mysql_servers.each do |server| -%>
   <%= "server #{server['hostname']} #{server['bcpc']['management']['ip']}:3306 check port 3307 inter 1s rise 1 fall 1 observe layer4 backup" %>
+<% end -%>
+<% end -%>
+
+<% if @oozie_servers.length > 0 -%>
+frontend oozie
+  bind <%="#{node[:bcpc][:floating][:vip]}"%>:11010
+  mode http
+  default_backend backend_oozie
+
+backend backend_oozie
+  balance roundrobin
+  mode http
+  source <%= node[:bcpc][:floating][:ip] %>
+<% @oozie_servers.each do |server| -%>
+  <%= "server #{float_host(server[:fqdn])} #{server['bcpc']['floating']['ip']}:11000 check" %>
 <% end -%>
 <% end -%>

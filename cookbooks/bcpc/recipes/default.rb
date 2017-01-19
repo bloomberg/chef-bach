@@ -88,5 +88,6 @@ flot_hostaddr = IPAddr.new(node['bcpc']['management']['ip'])<<flot_bitlen>>flot_
 
 node.set['bcpc']['storage']['ip'] = ((IPAddr.new(node['bcpc']['networks'][subnet]['storage']['cidr'])>>(32-stor_bitlen)<<(32-stor_bitlen))|stor_hostaddr).to_s
 node.set['bcpc']['floating']['ip'] = ((IPAddr.new(node['bcpc']['networks'][subnet]['floating']['cidr'])>>(32-flot_bitlen)<<(32-flot_bitlen))|flot_hostaddr).to_s
+node.set['bcpc']['floating']['cidr'] = node['bcpc']['networks'][subnet]['floating']['cidr']
 
 node.save rescue nil

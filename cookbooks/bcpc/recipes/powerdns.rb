@@ -2,7 +2,7 @@
 # Cookbook Name:: bcpc
 # Recipe:: powerdns
 #
-# Copyright 2016, Bloomberg Finance L.P.
+# Copyright 2013, Bloomberg Finance L.P.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -26,13 +26,12 @@ end
 
 pdns_admins = (get_head_node_names + [get_bootstrap]).join(',')
 
-chef_vault_secret 'mysql-pdns' do
-  #
-  # For some reason, we are compelled to specify a provider.
-  # This will probably break if we ever move to chef-vault cookbook 2.x
-  #
+#
+# For some reason, we are compelled to specify a provider.
+# This will probably break if we ever move to chef-vault cookbook 2.x
+#
+chef_vault_secret "mysql-pdns" do
   provider ChefVaultCookbook::Provider::ChefVaultSecret
-
   data_bag 'os'
   raw_data({ 'password' => mysql_pdns_password })
   admins pdns_admins
@@ -43,259 +42,208 @@ end.run_action(:create_if_missing)
 subnet = node[:bcpc][:management][:subnet]
 raise "Did not get a subnet" if not subnet
 
-%w{pdns-server pdns-backend-mysql}.each do |pkg|
-    package pkg do
-        action :upgrade
-    end
+if node[:bcpc][:management][:vip] and get_nodes_for("mysql").length() > 0
+
+  allnodes = Array.new
+  get_all_nodes.each do |nodeobj| 
+    tempHash = Hash.new 
+    tempHash['hostname'] = nodeobj.hostname 
+    tempHash['management_ip'] = nodeobj.bcpc.management.ip 
+    tempHash['storage_ip'] = nodeobj.bcpc.storage.ip
+    tempHash['floating_ip'] = nodeobj.bcpc.floating.ip
+    allnodes.push(tempHash)
+  end
+  
+  if !node[:bcpc][:management][:viphost].nil?
+    tempHash = Hash.new
+    tempHash['hostname'] = node[:bcpc][:management][:viphost].split('.')[0]
+    tempHash['management_ip'] = node[:bcpc][:management][:vip]
+    tempHash['floating_ip'] =  node[:bcpc][:floating][:vip]
+    tempHash['storage_ip'] =  node[:bcpc][:management][:vip]
+    allnodes.push(tempHash)
+  end
+
+  node.set['pdns']['authoritative']['package']['backends'] = ['gmysql']
+  node.set['pdns']['authoritative']['config']['disable_axfr'] = false
+  node.set['pdns']['authoritative']['config']['launch'] = 'gmysql'
+
+  node.set['pdns']['authoritative']['gmysql'].tap do |config|
+    config['gmysql-host'] = node[:bcpc][:management][:vip]
+    config['gmysql-port'] = 3306
+    config['gmysql-user'] = get_config!('mysql-pdns-user')
+    config['gmysql-password'] = get_config!('mysql-pdns-password')
+    config['gmysql-dbname'] = node['bcpc']['pdns_dbname']
+    config['gmysql-dnssec'] = 'no'
+  end
+
+  package 'libmysqlclient-dev'
+
+  gem_package 'mysql2' do
+    action :install
+    version '0.4.4'
+    gem_binary File.join(Gem::bindir,"gem")
+  end
+
+  mysql_connection_info = lambda do
+    {
+     :host => node['pdns']['authoritative']['gmysql']['gmysql-host'],
+     :port => node['pdns']['authoritative']['gmysql']['gmysql-port'],
+     :username => 'root',
+     :password => get_config!('password','mysql-root','os')
+    }
+  end
+
+  mysql_database node['bcpc']['pdns_dbname'] do
+    connection lazy { mysql_connection_info.call }
+    notifies :run, 'execute[install-pdns-schema]', :immediately
+  end
+
+  mysql_database_user get_config!('mysql-pdns-user') do
+    connection lazy { mysql_connection_info.call }
+    password get_config!('mysql-pdns-password')
+    action :create
+    notifies :reload, 'service[pdns]'
+  end
+
+  mysql_database_user get_config!('mysql-pdns-user') do
+    connection lazy { mysql_connection_info.call }
+    database_name node['bcpc']['pdns_dbname']
+    host '%'
+    privileges [:all]
+    action :grant
+    notifies :reload, 'service[pdns]'
+  end
+
+  include_recipe 'pdns::authoritative_package'
+
+  #
+  # This schema file works great when installed via the mysql CLI, but
+  # it fails when Ruby reads it and feeds via a query resource.  This
+  # smells like an escaping problem.
+  #
+  # For now, the query resource has been replaced with an 'execute'
+  # resource that invokes the mysql CLI.
+  #
+  schema_path = '/usr/share/dbconfig-common/data/pdns-backend-mysql/install/mysql'
+
+  mysql_command_string = lambda do
+    "/usr/bin/mysql -u root " + 
+      "--host=#{node['pdns']['authoritative']['config']['gmysql-host']} " +
+      "--password='#{get_config!('password','mysql-root','os')}' pdns"
+  end
+
+  execute 'install-pdns-schema' do
+    command lazy {
+      "cat #{schema_path} | " +
+      "perl -nle 's/type=Inno/engine=Inno/g; print' | " +
+      mysql_command_string.call
+    }
+    not_if {
+      c = Mixlib::ShellOut.new('echo "select id from domains limit 1;" | ' +
+                               mysql_command_string.call)
+      c.run_command
+      c.status.success?
+    }
+    sensitive true if respond_to?(:sensitive)
+    notifies :reload, 'service[pdns]'
+  end
+
 end
 
-template "/etc/powerdns/pdns.conf" do
-    source "pdns.conf.erb"
-    owner "root"
-    group "root"
-    mode 00600
-    notifies :restart, "service[pdns]", :delayed
+node.set['pdns']['authoritative']['config']['recursor'] =
+  node[:bcpc][:dns_servers][0]
+
+# mkoni need to set local_address to mgmt and floating VIPs
+node.set['pdns']['authoritative']['config']['local_address'] = [ node[:bcpc][:floating][:vip] , node[:bcpc][:management][:vip] ]
+
+include_recipe 'pdns::authoritative_package'
+
+reverse_dns_zone = node['bcpc']['networks'][subnet]['floating']['reverse_dns_zone'] || calc_reverse_dns_zone(node['bcpc']['networks'][subnet]['floating']['cidr'])
+
+Chef::Log.info("Reverse DNS zone: #{reverse_dns_zone}")
+
+pdns_domain node[:bcpc][:domain_name] do
+  soa_ip node[:bcpc][:floating][:vip]
 end
 
-ruby_block "powerdns-database-creation" do
+pdns_domain reverse_dns_zone  do
+  soa_ip node[:bcpc][:floating][:vip]
+end
+
+domain_name = node[:bcpc][:domain_name]
+allnodes.each do |server|
+  management_ip = server['management_ip']
+  floating_ip = server['floating_ip']
+  storage_ip = server['storage_ip']
+  hostname = server['hostname']
+
+  ruby_block "create-dns-entry-#{hostname}" do
     block do
-        mysql_root_password = get_config!('password','mysql-root','os')
-        system "mysql -uroot -p#{ mysql_root_password } -e 'SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = \"#{node[:bcpc][:pdns_dbname]}\"' | grep -q \"#{node[:bcpc][:pdns_dbname]}\""
-        if not $?.success? then
-            %x[ mysql -uroot -p#{ mysql_root_password } -e "CREATE DATABASE #{node[:bcpc][:pdns_dbname]} CHARACTER SET utf8 COLLATE utf8_general_ci;"
-                mysql -uroot -p#{ mysql_root_password } -e "GRANT ALL ON #{node[:bcpc][:pdns_dbname]}.* TO '#{get_config('mysql-pdns-user')}'@'%' IDENTIFIED BY '#{get_config!('password','mysql-pdns','os')}';"
-                mysql -uroot -p#{ mysql_root_password } -e "GRANT ALL ON #{node[:bcpc][:pdns_dbname]}.* TO '#{get_config('mysql-pdns-user')}'@'localhost' IDENTIFIED BY '#{get_config!('password','mysql-pdns','os')}';"
-                mysql -uroot -p#{ mysql_root_password } -e "FLUSH PRIVILEGES;"
-            ]
-            self.notifies :restart, "service[pdns]", :delayed
-            self.resolve_notification_references
-        end
+      # check if we have a float address
+      if management_ip != floating_ip then
+        float_name = float_host(hostname) + '.' + domain_name
+
+        fwdR = Chef::Resource::PdnsRecord.new(float_name, run_context)
+        fwdR.domain(domain_name)
+        fwdR.content(floating_ip)
+        fwdR.type('A')
+        fwdR.ttl(300)
+        fwdR.run_action(:create)
+
+        # Create reverse record
+        revR = Chef::Resource::PdnsRecord.new(calc_reverse_ip_address(floating_ip),
+                                           run_context)
+        revR.domain(reverse_dns_zone)
+        revR.content(float_name)
+        revR.type('PTR')
+        revR.ttl(300)
+        revR.run_action(:create)
+      end
+
+      # check if we have a storage address
+      if management_ip != storage_ip then
+        storage_name =
+          storage_host(hostname) + '.' + domain_name
+
+        fwdR = Chef::Resource::PdnsRecord.new(storage_name, run_context)
+
+        fwdR.domain(domain_name)
+        fwdR.content(storage_ip)
+        fwdR.type('A')
+        fwdR.ttl(300)
+        fwdR.run_action(:create)
+
+        # Create reverse record
+        revR = Chef::Resource::PdnsRecord.new(calc_reverse_ip_address(storage_ip),
+                                           run_context)
+        revR.domain(reverse_dns_zone)
+        revR.content(storage_name)
+        revR.type('PTR')
+        revR.ttl(300)
+        revR.run_action(:create)
+      end
+
+      if management_ip
+        # add a record for the management IP
+        management_name = hostname + '.' + domain_name
+        fwdR = Chef::Resource::PdnsRecord.new(management_name, run_context)
+        fwdR.domain(domain_name)
+        fwdR.content(management_ip)
+        fwdR.type('A')
+        fwdR.ttl(300)
+        fwdR.run_action(:create)
+
+        # Create reverse record
+        revR = Chef::Resource::PdnsRecord.new(calc_reverse_ip_address(management_ip),
+                                           run_context)
+        revR.domain(reverse_dns_zone)
+        revR.content(management_name)
+        revR.type('PTR')
+        revR.ttl(300)
+        revR.run_action(:create)
+      else
+        Chef::Log.warn("No IP address found for host #{hostname}!")
+      end
     end
-end
-
-ruby_block "powerdns-table-domains" do
-    block do
-        mysql_root_password = get_config!('password','mysql-root','os')
-
-        reverse_dns_zone = node['bcpc']['networks'][subnet]['floating']['reverse_dns_zone'] || calc_reverse_dns_zone(node['bcpc']['networks'][subnet]['floating']['cidr'])
-
-        system "mysql -uroot -p#{ mysql_root_password } -e 'SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = \"#{node[:bcpc][:pdns_dbname]}\" AND TABLE_NAME=\"domains_static\"' | grep -q \"domains_static\""
-        if not $?.success? then
-            %x[ mysql -uroot -p#{ mysql_root_password } #{node[:bcpc][:pdns_dbname]} <<-EOH
-                CREATE TABLE IF NOT EXISTS domains_static (
-                    id INT auto_increment,
-                    name VARCHAR(255) NOT NULL,
-                    master VARCHAR(128) DEFAULT NULL,
-                    last_check INT DEFAULT NULL,
-                    type VARCHAR(6) NOT NULL,
-                    notified_serial INT DEFAULT NULL,
-                    account VARCHAR(40) DEFAULT NULL,
-                    primary key (id)
-                );
-                INSERT INTO domains_static (name, type) values ('#{node[:bcpc][:domain_name]}', 'NATIVE');
-                INSERT INTO domains_static (name, type) values ('#{reverse_dns_zone}', 'NATIVE');
-                CREATE UNIQUE INDEX dom_name_index ON domains_static(name);
-            ]
-            self.notifies :restart, "service[pdns]", :delayed
-            self.resolve_notification_references
-        end
-    end
-end
-
-ruby_block "powerdns-table-records" do
-    block do
-        mysql_root_password = get_config!('password','mysql-root','os')
-
-        reverse_dns_zone = node['bcpc']['networks'][subnet]['floating']['reverse_dns_zone'] || calc_reverse_dns_zone(node['bcpc']['networks'][subnet]['floating']['cidr'])
-
-        system "mysql -uroot -p#{ mysql_root_password } -e 'SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = \"#{node[:bcpc][:pdns_dbname]}\" AND TABLE_NAME=\"records_static\"' | grep -q \"records_static\""
-        if not $?.success? then
-            %x[ mysql -uroot -p#{ mysql_root_password } #{node[:bcpc][:pdns_dbname]} <<-EOH
-                    CREATE TABLE IF NOT EXISTS records_static (
-                        id INT auto_increment,
-                        domain_id INT DEFAULT NULL,
-                        name VARCHAR(255) DEFAULT NULL,
-                        type VARCHAR(6) DEFAULT NULL,
-                        content VARCHAR(255) DEFAULT NULL,
-                        ttl INT DEFAULT NULL,
-                        prio INT DEFAULT NULL,
-                        change_date INT DEFAULT NULL,
-                        primary key(id)
-                    );
-                    INSERT INTO records_static (domain_id, name, content, type, ttl, prio) VALUES ((SELECT id FROM domains_static WHERE name='#{node[:bcpc][:domain_name]}'),'#{node[:bcpc][:domain_name]}','localhost root@#{node[:bcpc][:domain_name]} 1','SOA',300,NULL);
-                    INSERT INTO records_static (domain_id, name, content, type, ttl, prio) VALUES ((SELECT id FROM domains_static WHERE name='#{node[:bcpc][:domain_name]}'),'#{node[:bcpc][:domain_name]}','#{node[:bcpc]['networks'][subnet][:management][:vip]}','NS',300,NULL);
-                    INSERT INTO records_static (domain_id, name, content, type, ttl, prio) VALUES ((SELECT id FROM domains_static WHERE name='#{node[:bcpc][:domain_name]}'),'#{node[:bcpc][:domain_name]}','#{node[:bcpc]['networks'][subnet][:management][:vip]}','A',300,NULL);
-
-                    INSERT INTO records_static (domain_id, name, content, type, ttl, prio) VALUES ((SELECT id FROM domains_static WHERE name='#{reverse_dns_zone}'),'#{reverse_dns_zone}', '#{reverse_dns_zone} root@#{node[:bcpc][:domain_name]} 1','SOA',300,NULL);
-                    INSERT INTO records_static (domain_id, name, content, type, ttl, prio) VALUES ((SELECT id FROM domains_static WHERE name='#{reverse_dns_zone}'),'#{reverse_dns_zone}','#{node[:bcpc]['networks'][subnet][:management][:vip]}','NS',300,NULL);
-
-                    CREATE INDEX rec_name_index ON records_static(name);
-                    CREATE INDEX nametype_index ON records_static(name,type);
-                    CREATE INDEX domain_id ON records_static(domain_id);
-            ]
-            self.notifies :restart, "service[pdns]", :delayed
-            self.resolve_notification_references
-        end
-    end
-end
-
-ruby_block "powerdns-function-ip4_to_ptr_name" do
-    block do
-        mysql_root_password = get_config!('password','mysql-root','os')
-        system "mysql -uroot -p#{ mysql_root_password } -e 'SELECT name FROM mysql.proc WHERE name = \"ip4_to_ptr_name\" AND db = \"#{node[:bcpc][:pdns_dbname]}\";' \"#{node[:bcpc][:pdns_dbname]}\" | grep -q \"ip4_to_ptr_name\""
-        if not $?.success? then
-            %x[ mysql -uroot -p#{ mysql_root_password } #{node[:bcpc][:pdns_dbname]} <<-EOH
-                delimiter //
-                CREATE FUNCTION ip4_to_ptr_name(ip4 VARCHAR(64) CHARACTER SET latin1) RETURNS VARCHAR(64)
-                COMMENT 'Returns the reversed IP with .in-addr.arpa appended, suitable for use in the name column of PTR records.'
-                DETERMINISTIC
-                BEGIN
-
-                return concat_ws( '.',  SUBSTRING_INDEX( SUBSTRING_INDEX(ip4, '.', 4), '.', -1),
-                                        SUBSTRING_INDEX( SUBSTRING_INDEX(ip4, '.', 3), '.', -1),
-                                        SUBSTRING_INDEX( SUBSTRING_INDEX(ip4, '.', 2), '.', -1),
-                                        SUBSTRING_INDEX( SUBSTRING_INDEX(ip4, '.', 1), '.', -1), 'in-addr.arpa');
-
-                END//
-            ]
-            self.notifies :restart, "service[pdns]", :delayed
-            self.resolve_notification_references
-        end
-    end
-end
-
-ruby_block "powerdns-table-domains-view" do
-    block do
-        mysql_root_password = get_config!('password','mysql-root','os')
-        system "mysql -uroot -p#{ mysql_root_password } -e 'SELECT TABLE_NAME FROM INFORMATION_SCHEMA.VIEWS WHERE TABLE_SCHEMA = \"#{node[:bcpc][:pdns_dbname]}\" AND TABLE_NAME=\"domains\"' | grep -q \"domains\""
-        if not $?.success? then
-            %x[ mysql -uroot -p#{ mysql_root_password } #{node[:bcpc][:pdns_dbname]} <<-EOH
-                CREATE OR REPLACE VIEW domains AS
-                    SELECT id,name,master,last_check,type,notified_serial,account FROM domains_static;
-            ]
-            self.notifies :restart, "service[pdns]", :delayed
-            self.resolve_notification_references
-        end
-    end
-end
-
-ruby_block "powerdns-table-records_forward-view" do
-    block do
-        mysql_root_password = get_config!('password','mysql-root','os')
-        system "mysql -uroot -p#{ mysql_root_password } -e 'SELECT TABLE_NAME FROM INFORMATION_SCHEMA.VIEWS WHERE TABLE_SCHEMA = \"#{node[:bcpc][:pdns_dbname]}\" AND TABLE_NAME=\"records_forward\"' | grep -q \"records_forward\""
-        if not $?.success? then
-            %x[ mysql -uroot -p#{ mysql_root_password } #{node[:bcpc][:pdns_dbname]} <<-EOH
-                CREATE OR REPLACE VIEW records_forward AS
-                    SELECT id,domain_id,name,type,content,ttl,prio,change_date FROM records_static;
-            ]
-            self.notifies :restart, "service[pdns]", :delayed
-            self.resolve_notification_references
-        end
-    end
-end
-
-ruby_block "powerdns-table-records_reverse-view" do
-    block do
-        mysql_root_password = get_config!('password','mysql-root','os')
-
-        reverse_dns_zone = node['bcpc']['networks'][subnet]['floating']['reverse_dns_zone'] || calc_reverse_dns_zone(node['bcpc']['networks'][subnet]['floating']['cidr'])
-
-        system "mysql -uroot -p#{ mysql_root_password } -e 'SELECT TABLE_NAME FROM INFORMATION_SCHEMA.VIEWS WHERE TABLE_SCHEMA = \"#{node[:bcpc][:pdns_dbname]}\" AND TABLE_NAME=\"records_reverse\"' | grep -q \"records_reverse\""
-        if not $?.success? then
-
-            %x[ mysql -uroot -p#{ mysql_root_password } #{node[:bcpc][:pdns_dbname]} <<-EOH
-                create or replace view records_reverse as
-                select r.id * -1 as id, d.id as domain_id,
-                      ip4_to_ptr_name(r.content) as name,
-                      'PTR' as type, r.name as content, r.ttl, r.prio, r.change_date
-                from records_forward r, domains d
-                where r.type='A'
-                  and d.name = '#{reverse_dns_zone}'
-                  and ip4_to_ptr_name(r.content) like '%.#{reverse_dns_zone}';
-
-            ]
-            self.notifies :restart, "service[pdns]", :delayed
-            self.resolve_notification_references
-
-        end
-    end
-end
-
-
-ruby_block "powerdns-table-records-view" do
-
-    block do
-        mysql_root_password = get_config!('password','mysql-root','os')
-        system "mysql -uroot -p#{ mysql_root_password } -e 'SELECT TABLE_NAME FROM INFORMATION_SCHEMA.VIEWS WHERE TABLE_SCHEMA = \"#{node[:bcpc][:pdns_dbname]}\" AND TABLE_NAME=\"records\"' | grep -q \"records\""
-        if not $?.success? then
-
-            %x[ mysql -uroot -p#{ mysql_root_password } #{node[:bcpc][:pdns_dbname]} <<-EOH
-              create or replace view records as
-                select id, domain_id, name, type, content, ttl, prio, change_date from records_forward
-                union all
-                select id, domain_id, name, type, content, ttl, prio, change_date from records_reverse;
-            ]
-
-            self.notifies :restart, "service[pdns]", :delayed
-            self.resolve_notification_references
-        end
-
-    end
-
-end
-
-get_all_nodes.each do |server|
-    ruby_block "create-dns-entry-#{server['hostname']}" do
-        block do
-            mysql_root_password = get_config!('password','mysql-root','os')
-            # check if we have a float address
-            float_host_A_record=""
-            if server['bcpc']['management']['ip'] != server['bcpc']['floating']['ip'] then
-                float_host_A_record="INSERT INTO records_static (domain_id, name, content, type, ttl, prio) VALUES ((SELECT id FROM domains WHERE name='#{node[:bcpc][:domain_name]}'),'#{float_host(server['hostname'])}.#{node[:bcpc][:domain_name]}','#{server['bcpc']['floating']['ip']}','A',300,NULL);"
-            end
-
-            # check if we have a storage address
-            storage_host_A_record=""
-            if server['bcpc']['management']['ip'] != server['bcpc']['storage']['ip'] then
-                storage_host_A_record="INSERT INTO records_static (domain_id, name, content, type, ttl, prio) VALUES ((SELECT id FROM domains WHERE name='#{node[:bcpc][:domain_name]}'),'#{storage_host(server['hostname'])}.#{node[:bcpc][:domain_name]}','#{server['bcpc']['storage']['ip']}','A',300,NULL);"
-            end
-
-            system "mysql -uroot -p#{ mysql_root_password } #{node[:bcpc][:pdns_dbname]} -e 'SELECT name FROM records_static' | grep -q \"#{server['hostname']}.#{node[:bcpc][:domain_name]}\""
-            if not $?.success? then
-                %x[ mysql -uroot -p#{ mysql_root_password } #{node[:bcpc][:pdns_dbname]} <<-EOH
-                        INSERT INTO records_static (domain_id, name, content, type, ttl, prio) VALUES ((SELECT id FROM domains WHERE name='#{node[:bcpc][:domain_name]}'),'#{server['hostname']}.#{node[:bcpc][:domain_name]}','#{server['bcpc']['management']['ip']}','A',300,NULL);
-                        #{storage_host_A_record}
-                        #{float_host_A_record}
-                ]
-            end
-        end
-    end if server.has_key?('hostname')
-end
-
-%w{graphite zabbix}.each do |static|
-    ruby_block "create-management-dns-entry-#{static}" do
-        block do
-            mysql_root_password = get_config!('password','mysql-root','os')
-            if get_nodes_for(static).length >= 1 then
-                system "mysql -uroot -p#{ mysql_root_password } #{node[:bcpc][:pdns_dbname]} -e 'SELECT name FROM records_static' | grep -q \"#{static}.#{node[:bcpc][:domain_name]}\""
-                if not $?.success? then
-                    %x[ mysql -uroot -p#{ mysql_root_password } #{node[:bcpc][:pdns_dbname]} <<-EOH
-                            INSERT INTO records_static (domain_id, name, content, type, ttl, prio) VALUES ((SELECT id FROM domains WHERE name='#{node[:bcpc][:domain_name]}'),'#{static}.#{node[:bcpc][:domain_name]}','#{node[:bcpc]['networks'][subnet][:management][:vip]}','A',300,NULL);
-                    ]
-                end
-            end
-        end
-    end
-end
-
-template "/etc/powerdns/pdns.d/pdns.local.gmysql" do
-    source "pdns.local.gmysql.erb"
-    owner "pdns"
-    group "root"
-    mode 00640
-    notifies :restart, "service[pdns]", :immediately
-end
-
-service "pdns" do
-    action [ :enable, :start ]
+  end
 end

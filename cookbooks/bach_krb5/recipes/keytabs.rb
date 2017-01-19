@@ -1,5 +1,6 @@
 keytab_dir = node[:bcpc][:hadoop][:kerberos][:keytab][:dir]
 realm = node[:bcpc][:hadoop][:kerberos][:realm]
+viphost = float_host(node[:bcpc][:management][:viphost])
 
 get_cluster_nodes().each do |h|
   include_recipe 'bach_krb5::keytab_directory'
@@ -36,7 +37,6 @@ get_cluster_nodes().each do |h|
   end
 end
 
-
 get_cluster_nodes().each do |h|
   host_fqdn = float_host(h)
 
@@ -55,16 +55,20 @@ get_cluster_nodes().each do |h|
     keytab_path = ::File.join(keytab_dir, host_fqdn, keytab_file)
     regular_principal = "#{service_principal}/#{host_fqdn}@#{realm}"
     http_principal = "HTTP/#{host_fqdn}@#{realm}"
+    vip_principal = "#{service_principal}/#{viphost}@#{realm}"
 
+    # Variable to hold all principals for a single keytab
+    keytab_principals = "#{regular_principal} #{http_principal} #{vip_principal}"
+    
     # Create the keytab file
     execute "creating-keytab-for-#{ke}" do
       command "kadmin.local -q 'xst -k #{keytab_path} " \
-        "-norandkey #{regular_principal} #{http_principal}'"
+        "-norandkey #{keytab_principals}'"
       action :run
       not_if {
         # Don't run if all principals are found in an existing keytab file.
         require 'mixlib/shellout'
-        [regular_principal, http_principal].map do |princ|
+        [regular_principal, http_principal, vip_principal].map do |princ|
           cc = Mixlib::ShellOut.new("klist -k #{keytab_path} | grep #{princ}")
           cc.run_command
           cc.status.success?
@@ -73,7 +77,7 @@ get_cluster_nodes().each do |h|
     end
 
     # Verify the keytab file, because kadmin.local does not return errors.
-    [regular_principal, http_principal].each do |princ|
+    [regular_principal, http_principal, vip_principal].each do |princ|
       execute "verifying-#{princ}-keytab" do
         command "klist -k #{keytab_path} | grep #{princ}"
       end

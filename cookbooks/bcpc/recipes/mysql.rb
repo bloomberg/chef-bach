@@ -197,7 +197,7 @@ all_nodes = get_all_nodes
 max_connections =
   [
     (mysql_nodes.length * 50 + all_nodes.length * 5),
-    200
+    300
   ].max
 pool_size = node['bcpc']['mysql']['innodb_buffer_pool_size']
 

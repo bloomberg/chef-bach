@@ -312,7 +312,13 @@ def calc_reverse_dns_zone(cidr)
 
 end
 
-# Internal: Check if the given host is the Zabbix leader
+# 10.0.100.123 => "123.100.0.10.in-addr.arpa"
+def calc_reverse_ip_address(ip)
+  ipAddr = IPAddr.new(ip)
+  reverse_ip = ipAddr.reverse
+end
+
+# Internal: Check if the given host is the Zabbix leader 
 #
 # host - host id (eg: hostname)
 #

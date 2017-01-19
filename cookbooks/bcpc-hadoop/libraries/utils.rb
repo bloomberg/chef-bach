@@ -469,12 +469,16 @@ def get_cluster_nodes()
     raise
   end
 
-  fileList = Array.new
+  nodeList = Array.new
 
   File::open(cluster_file,"r").each_line do |line|
     lines = line.split()
-    fileList.push("#{lines[0]}.#{lines[5]}")
+    nodeList.push("#{lines[0]}.#{lines[5]}")
   end
 
-  fileList
+  if ! node[:bcpc][:management][:viphost].nil?
+    nodeList.push(node[:bcpc][:management][:viphost])
+  end
+
+  nodeList  
 end
