@@ -32,13 +32,20 @@ default[:kafka][:broker].tap do |broker|
   broker[:controlled][:shutdown][:max][:retries] = 3
   broker[:controlled][:shutdown][:retry][:backoff][:ms] = 5000
   broker[:unclean][:leader][:election][:enable] = false
+  broker[:compression][:type] = 'lz4'
+  broker[:auto][:create][:topics][:enable] = false
+  broker[:num][:insync][:replicas] = 2
+  broker[:max][:connections][:per][:ip] = 500
 
   # Migrate any 0.8.x nodes/topics to use Kafka-based offset storage.
   broker[:dual][:commit][:enabled] = false
   broker[:offsets][:storage] = 'kafka'
 
+  # Use 0.9.x protocol to enable cluster upgrade to 0.10.x
+  broker[:inter][:broker][:protocol][:version] = '0.9.0'
+  broker[:log][:message][:format][:version] = '0.9.0'
+
   # Defaults for new topics
-  broker[:compression][:type] = 'lz4'
   broker[:num][:partitions] = 3
   broker[:default][:replication][:factor] = 3
 
@@ -48,13 +55,14 @@ default[:kafka][:broker].tap do |broker|
   # many?
   #
   broker[:num][:replica][:fetchers] = 8
-  broker[:auto][:create][:topics][:enable] = false
-  broker[:num][:insync][:replicas] = 2
-  broker[:max][:connections][:per][:ip] = 500
 
-  # Use 0.9.x protocol to enable cluster upgrade to 0.10.x
-  broker[:inter][:broker][:protocol][:version] = '0.9.0.1'
-  broker[:log][:message][:format][:version] = '0.9.0.1'
+  #
+  # This is a list of paths for the kafka logs, i.e. the actual data.
+  #
+  # The path for human-readable logs of what kafka is doing are in
+  # node[:kafka][:log_dir]
+  #
+  broker[:log][:dirs] = '/disk/1/kafka'
 end
 
 #
@@ -68,3 +76,6 @@ default[:kafka][:checksum] =
 
 default[:kafka][:md5_checksum] = ''
 default[:kafka][:log_dir] = '/var/log/kafka'
+
+# This is the path to human-readable log files, not kafka log data.
+default[:kafka][:log_dir] = '/disk/0/kafka'

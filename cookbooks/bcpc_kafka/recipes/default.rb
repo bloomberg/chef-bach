@@ -16,6 +16,13 @@ include_recipe 'bcpc-hadoop::disks'
 include_recipe 'bcpc::ubuntu_tools_repo'
 include_recipe 'bcpc-hadoop::default'
 
+#
+# All of the important Java cookbook attributes are overridden in
+# bcpc-hadoop, so we need not set them again.
+#
+include_recipe 'java'
+include_recipe 'java::oracle_jce'
+
 # ensure we use /etc/security/limits.d to allow ulimit over-riding
 if not node.has_key?('pam_d') or not node['pam_d'].has_key?('services') or not node['pam_d']['services'].has_key?('common-session')
   node.default['pam_d']['services'] = {
