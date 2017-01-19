@@ -56,4 +56,5 @@ default.bach_spark.environment.LD_LIBRARY_PATH = '/usr/hdp/current'\
     '/hadoop-client/lib/native:/usr/hdp/current'\
     '/hadoop-client/lib/native/Linux-amd64-64:$LD_LIBRARY_PATH'
 default.bach_spark.environment.HADOOP_CONF = '/usr/hadoop/conf'
-default.bach_spark.environment.HADOOP_HOME = "/usr/hdp/#{node[:bcpc][:hadoop][:distribution][:release}]/hadoop”
+default.bach_spark.environment.HADOOP_HOME = '/usr/hdp'\
+    "/#{node[:bcpc][:hadoop][:distribution][:release}]/hadoop”
