@@ -1,9 +1,9 @@
 #
-# Cookbook Name:: kafka-bcpc
+# Cookbook Name:: bcpc_kafka
 # Recipe: zookeeper_server
 #
 
-include_recipe 'kafka-bcpc::default'
+include_recipe 'bcpc_kafka::default'
 
 node.default[:bcpc][:hadoop][:kerberos][:enable] = false
 include_recipe 'bcpc-hadoop::zookeeper_server'

@@ -1,5 +1,5 @@
 #
-# Cookbook Name:: kafka-bcpc
+# Cookbook Name:: bcpc_kafka
 # Recipe: Kafka
 #
 
@@ -17,7 +17,7 @@ node.normal[:kafka][:broker][:num][:partitions] =
    3
   ].max
 
-include_recipe 'kafka-bcpc::default'
+include_recipe 'bcpc_kafka::default'
 include_recipe 'kafka::default'
 
 user_ulimit "kafka" do

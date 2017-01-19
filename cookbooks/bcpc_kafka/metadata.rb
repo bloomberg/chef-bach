@@ -1,6 +1,6 @@
 # encoding: utf-8
 
-name             'kafka-bcpc'
+name             'bcpc_kafka'
 maintainer       'Bloomberg Finance L.P.'
 description      'Recipes to setup prerequisites for Kafka cluster'
 long_description IO.read(File.join(File.dirname(__FILE__), 'README.md'))

@@ -1,5 +1,5 @@
 #
-# Cookbook Name:: kafka-bcpc
+# Cookbook Name:: bcpc_kafka
 # Recipe:: default
 #
 # Kafka-bcpc is essentially a role cookbook. It sets a few attributes

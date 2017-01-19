@@ -37,7 +37,7 @@ suites:
           path: "/tmp/"
   - name: zookeeper
     run_list:
-      - 'recipe[kafka-bcpc::zookeeper_server]'
+      - 'recipe[bcpc_kafka::zookeeper_server]'
   - name: yarn
     run_list:
       - 'recipe[bcpc::default]'
@@ -59,7 +59,7 @@ suites:
       }
     }
     run_list:
-      - 'recipe[kafka-bcpc::default]' 
-      - 'recipe[kafka-bcpc::setattr]'
+      - 'recipe[bcpc_kafka::default]' 
+      - 'recipe[bcpc_kafka::setattr]'
       - 'recipe[kafka::default]'
-      - 'recipe[kafka-bcpc::kafka]'
+      - 'recipe[bcpc_kafka::kafka]'

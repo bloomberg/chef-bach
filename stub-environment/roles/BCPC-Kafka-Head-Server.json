@@ -3,7 +3,7 @@
   "json_class": "Chef::Role",
   "run_list": [
     "role[Basic]",
-    "recipe[bcpc-kafka::kafka]"
+    "recipe[bcpc_kafka::kafka]"
   ],
   "description": "Role to setup Kafka Server",
   "chef_type": "role",
