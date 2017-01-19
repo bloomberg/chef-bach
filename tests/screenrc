@@ -6,19 +6,11 @@ echo '=================== Chef-BACH Ubuntu Install Progress ==================='
 echo 'Chef-BACH is PXE booting your VMs and using the netinstaller'
 echo 'to setup your machines. This is a GNU screen session with the'
 echo 'serial console open to monitor progress of each VM (windows 1'
-echo 'through 3 connect to bcpc-vm1 - bcpc-vm3) and a while loop '
-echo 'seeing if ssh has come alive on all three VMs. This session'
-echo 'will exit when all three VMs are running ssh.'
+echo 'through 3 connect to bcpc-vm1 - bcpc-vm3)
+echo
 echo 'Hitting: ^A h will get you the screen help'
-echo 'Hitting: return right now will skip this 120 second pause'
 echo '========================================================================='
 echo ''
 echo ''
 echo ''
 echo ''
-sleep 120
-
-screen -t "bcpc-vm1 serial console" 1 ./virtualbox_serial_console.sh bcpc-vm1
-screen -t "bcpc-vm2 serial console" 2 ./virtualbox_serial_console.sh bcpc-vm2
-screen -t "bcpc-vm3 serial console" 3 ./virtualbox_serial_console.sh bcpc-vm3
-screen -t "Checking Hosts Are Up" 0 bash -c 'echo "Checking if hosts respond to ssh:"; while ! nc -w 1 10.0.100.11 22 || !  nc -w 1 10.0.100.12 22 || !  nc -w 1 10.0.100.13 22; do sleep 60; printf "Hosts down: "; for m in 11 12 13; do nc -w 1 10.0.100.$m 22 > /dev/null || echo -n "10.0.100.$m "; done; printf "\n"; done; echo "===== All Hosts Are Up! Killing this screen session. ====="; sleep 1; kill $(ps -o ppid= $$)'

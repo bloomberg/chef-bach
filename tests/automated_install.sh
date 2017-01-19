@@ -89,45 +89,32 @@ for vm in ${VM_LIST[*]} bcpc-bootstrap; do
   vboxmanage showvminfo $vm | grep -q '^State:.*running' || VBoxManage startvm $vm --type headless
 done
 
-
-echo "Checking for GNU screen to watch serial consoles"
-if hash screen && [ "$CLUSTER_TYPE" == "Hadoop" ] ; then
+if hash screen; then
     if [ "$(uname)" == "Darwin" ]; then
 	brew install coreutils
-	pushd $(greadlink -f $(dirname $0))
+	pushd $(greadlink -f $(dirname $0)) > /dev/null
     else
-	pushd $(readlink -f $(dirname $0))
+	pushd $(readlink -f $(dirname $0)) > /dev/null
     fi
-    screen -S "BACH Install" -c ./screenrc
-    popd
-else
-    while ! nc -w 1 10.0.100.11 22 || \
-            ! nc -w 1 10.0.100.12 22 || \
-            ! nc -w 1 10.0.100.13 22
-    do
-	sleep 60
-	printf "Hosts down: "
-	for m in 11 12 13; do
-	    nc -w 1 10.0.100.$m 22 > /dev/null || echo -n "10.0.100.$m "
-	done
-	printf "\n"
-    done
 
-    # HACK: this is a real nice copy/paste.
-    if [ "$CLUSTER_TYPE" == "Kafka" ]; then
-	while ! nc -w 1 10.0.100.14 22 || \
-		! nc -w 1 10.0.100.15 22 || \
-		! nc -w 1 10.0.100.16 22
-	do
-	    sleep 60
-	    printf "Hosts down: "
-	    for m in 14 15 16; do
-		nc -w 1 10.0.100.$m 22 > /dev/null || echo -n "10.0.100.$m "
-	    done
-	    printf "\n"
-	done
-    fi
+    # Create a new screenrc with our VM list in it
+    cp ./screenrc ../../cluster/screenrc
+
+    echo "cd `pwd`; cd .." >> ../../cluster/screenrc
+
+    ii=1
+    for vm in ${VM_LIST[*]}; do
+      echo "screen -t \"$vm serial console\" $ii" \
+	   "./tests/virtualbox_serial_console.sh $vm" >> ../../cluster/screenrc
+      ((ii++))
+    done
+    popd > /dev/null
+    echo "Enter this command to view VM serial consoles:"
+    echo "  screen -S 'BACH serial consoles' `readlink -f ../cluster/screenrc`"
+    echo
 fi
+
+vagrant ssh -c "cd chef-bcpc; ./wait-for-hosts.sh ${VM_LIST[*]}"
 
 printf "Snapshotting post-Cobbler\n"
 for vm in ${VM_LIST[*]} bcpc-bootstrap; do
