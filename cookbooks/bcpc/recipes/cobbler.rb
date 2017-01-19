@@ -67,7 +67,7 @@ chef_vault_secret 'cobbler' do
 end
 
 # The cobblerd cookbook relies on this attribute.
-node.force_default[:cobbler][:web_password] = web_password
+node.force_default[:cobblerd][:web_password] = web_password
 
 bcpc_repo 'cobbler26'
 
@@ -342,12 +342,7 @@ file '/etc/cobbler/pxe/pxelocal.template' do
 end
 
 service 'isc-dhcp-server' do
-  #
-  # We :enable instead of :start because Ubuntu 14.04 upstart returns
-  # '1' when a service is already running, which aborts the chef run.
-  #
-  # 'cobbler sync' will start/restart the service in any case.
-  #
-  action [:enable]
+  supports :status => true, :restart => true
+  action [:enable,:start]
   notifies :run, 'bash[cobbler-sync]', :delayed
 end
