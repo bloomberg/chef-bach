@@ -17,6 +17,24 @@ node.normal[:kafka][:broker][:num][:partitions] =
    3
   ].max
 
+package 'netcat-openbsd'
+
+zookeeper_port =
+  node[:bcpc][:hadoop][:zookeeper][:leader_connect][:port] rescue 2181
+
+#
+# In a standalone Kafka cluster, get_head_nodes will return the
+# Zookeeper servers.
+#
+# In a mixed Hadoop/Kafka cluster, the regular Hadoop head nodes will
+# be running Zookeeper.
+#
+# See cookbooks/bcpc/libraries/utils.rb for details.
+#
+node.default[:kafka][:broker][:zookeeper][:connect] = get_head_nodes.map do |nn|
+  float_host(nn[:fqdn])
+end
+
 include_recipe 'bcpc_kafka::default'
 include_recipe 'kafka::default'
 
