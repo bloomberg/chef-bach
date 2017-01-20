@@ -29,7 +29,7 @@ end
   remote_file "#{versioned_dir}/#{file_name}" do
     source "https://archive.apache.org/dist/kafka/#{hash[:kafka_version]}" +
       "/#{file_name}"
-    checksum checksum
+    checksum hash[:checksum]
     mode 0444
   end
 end
