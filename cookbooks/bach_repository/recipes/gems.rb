@@ -30,7 +30,7 @@ end
 #      gem seems to cover dependencies happily?)
 #
 %w{builder fpm json}.each do |local_gem|
-  gem_binary = '/opt/chef/embedded/bin/gem'
+  gem_binary = '/opt/chefdk/embedded/bin/gem'
 
   #
   # We are using an execute resource because gem_package does not
