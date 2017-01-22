@@ -40,7 +40,10 @@ default.bach_spark.config.spark.master = 'yarn-client'
 # Spark environment configuration
 default.bach_spark.environment.SPARK_LOCAL_IP = node[:bcpc][:floating][:ip]
 default.bach_spark.environment.SPARK_PUBLIC_DNS = float_host(node['fqdn'])
+default.bach_spark.environment.SPARK_LOCAL_DIRS = "${HOME}/.spark_logs"
 default.bach_spark.environment.HADOOP_CONF_DIR = '/etc/hadoop/conf'
+default.bach_spark.environment.HADOOP_HOME = '/usr/hdp'\
+    "/#{node['bcpc']['hadoop']['distribution']['release']}/hadoop"
 default.bach_spark.environment.HIVE_CONF_DIR = '/etc/hive/conf'
 default.bach_spark.environment.SPARK_DIST_CLASSPATH =
     "${HIVE_CONF_DIR}:${SPARK_LIBRARY_PATH}:$(for i in $(export IFS=\":\"; "\
@@ -50,11 +53,6 @@ default.bach_spark.environment.SPARK_DIST_CLASSPATH =
     "do echo -n \"${i}:\"; done | sed 's/:$//')"
 default.bach_spark.environment.SPARK_CLASSPATH =
     '$SPARK_DIST_CLASSPATH:$SPARK_CLASSPATH'
-default.bach_spark.environment.SPARK_LOCAL_DIRS = 
-    '${HOME}/.spark_logs'
 default.bach_spark.environment.LD_LIBRARY_PATH = '/usr/hdp/current'\
     '/hadoop-client/lib/native:/usr/hdp/current'\
     '/hadoop-client/lib/native/Linux-amd64-64:$LD_LIBRARY_PATH'
-default.bach_spark.environment.HADOOP_CONF = '/usr/hadoop/conf'
-default.bach_spark.environment.HADOOP_HOME = '/usr/hdp'\
-    "/#{node['bcpc']['hadoop']['distribution']['release']}/hadoop"
