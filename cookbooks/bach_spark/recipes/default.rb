@@ -13,7 +13,7 @@ end
 
 template "#{spark_bin_dir}/conf/spark-env.sh" do
   source 'spark-env.sh.erb'
-  mode 0755
+  mode 0o0755
   helper :config do
     node.bach_spark.environment.sort_by(&:first)
   end
@@ -22,19 +22,19 @@ end
 
 template "#{spark_bin_dir}/conf/spark-defaults.conf" do
   source 'spark-defaults.conf.erb'
-  mode 0755
+  mode 0o0755
   helper :config do
     node.bach_spark.config.sort_by(&:first)
   end
   helpers(Spark::Configuration)
 end
 
-link "/#{spark_bin_dir}/lib/spark-yarn-shuffle.jar" do
-  to "#{spark_bin_dir}/lib/spark-#{spark_pkg_version}-yarn-shuffle.jar"
+link "/#{spark_bin_dir}/yarn/spark-yarn-shuffle.jar" do
+  to "#{spark_bin_dir}/yarn/spark-#{spark_pkg_version}-yarn-shuffle.jar"
 end
 
 link '/usr/spark/current' do
-  to "#{spark_bin_dir}"
+  to spark_bin_dir
 end
 
 # install fortran libs needed by some jobs
