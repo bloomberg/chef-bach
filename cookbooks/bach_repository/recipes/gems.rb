@@ -6,6 +6,7 @@ include_recipe 'bach_repository::directory'
 include_recipe 'bach_repository::tools'
 bins_dir = node['bach']['repository']['bins_directory']
 gems_dir = node['bach']['repository']['gems_directory']
+gem_binary = '/opt/chefdk/embedded/bin/gem'
 
 directory gems_dir do
   mode 0555
@@ -14,10 +15,26 @@ end
 package 'libaugeas-dev'
 package 'libkrb5-dev'
 
-# Fetch gems for all nodes
+directory "#{node['bach']['repository']['repo_directory']}/vendor" do
+  owner 'vagrant'
+  mode 0755
+end
+
+directory "#{node['bach']['repository']['repo_directory']}/vendor/cache" do
+  owner 'vagrant'
+  mode 0755
+end
+
 execute "bundler package" do
   cwd node['bach']['repository']['repo_directory']
-  command "/opt/chefdk/embedded/bin/bundler package"
+  command "/opt/chefdk/embedded/bin/bundle package --path vendor/"
+  # restore system PKG_CONFIG_PATH so mkmf::pkg_config()
+  # can find system libraries
+  environment 'PKG_CONFIG_PATH' => '/usr/lib/pkgconfig:' + \
+    '/usr/lib/x86_64-linux-gnu/pkgconfig:/usr/share/pkgconfig',
+    'PATH' => '/opt/chefdk/embedded/bin/:/usr/local/sbin:/usr/local/bin:' + \
+    '/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games'
+  user 'vagrant'
 end
 
 link "#{bins_dir}/gems" do
@@ -30,7 +47,6 @@ end
 #      gem seems to cover dependencies happily?)
 #
 %w{builder fpm json}.each do |local_gem|
-  gem_binary = '/opt/chefdk/embedded/bin/gem'
 
   #
   # We are using an execute resource because gem_package does not
@@ -53,7 +69,7 @@ end
 end
 
 execute 'gem-generate-index' do
-  command 'gem generate_index --legacy'
+  command "#{gem_binary} generate_index"
   cwd bins_dir
   only_if {
     index_path = "#{bins_dir}/specs.4.8.gz"
