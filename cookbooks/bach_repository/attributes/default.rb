@@ -9,8 +9,10 @@
 default[:bach][:repository][:repo_directory] = '/home/vagrant/chef-bcpc'
 default[:bach][:repository][:bins_directory] = \
   ::File.join(node[:bach][:repository][:repo_directory], 'bins')
+default[:bach][:repository][:bundle_directory] = \
+  ::File.join(node[:bach][:repository][:repo_directory], 'vendor')
 default[:bach][:repository][:gems_directory] = \
-  ::File.join(node[:bach][:repository][:repo_directory], 'vendor/cache')
+  ::File.join(node[:bach][:repository][:bundle_directory], 'cache')
 default[:bach][:repository][:src_directory] = \
   ::File.join(node[:bach][:repository][:repo_directory], 'src')
 
