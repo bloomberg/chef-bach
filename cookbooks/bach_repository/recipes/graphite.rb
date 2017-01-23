@@ -11,6 +11,7 @@
 include_recipe 'bach_repository::directory'
 bins_dir = node['bach']['repository']['bins_directory']
 src_dir = node['bach']['repository']['src_directory']
+fpm_path = "#{node[:bach][:repository][:bundle_directory]}/ruby/2.3.0/bin/fpm"
 
 #
 # When a shell script built these packages, it assigned an epoch using
@@ -78,12 +79,12 @@ epoch = Time.now.strftime("%s")
 
   fpm_command = 
     if(package[:name] == 'graphite-web')
-      "fpm --python-install-lib /opt/graphite/webapp " +
+      "#{fpm_path} --python-install-lib /opt/graphite/webapp " +
         "--epoch #{epoch} " +
         "-p #{deb_path} " +
         "-s python -t deb #{package[:name]}-#{package[:version]}/setup.py"
     else
-      "fpm --python-install-bin /opt/graphite/bin " +
+      "#{fpm_path} --python-install-bin /opt/graphite/bin " +
         "--epoch #{epoch} " +
         "-p #{deb_path} " +
         "-s python -t deb #{package[:name]}-#{package[:version]}/setup.py"
@@ -92,6 +93,7 @@ epoch = Time.now.strftime("%s")
   execute "fpm-#{package[:name]}" do
     command fpm_command
     cwd src_dir
+    environment 'PATH' => "/opt/chefdk/embedded/bin:#{ENV['PATH']}"
     creates deb_path
   end
 end
