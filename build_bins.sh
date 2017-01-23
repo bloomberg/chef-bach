@@ -26,16 +26,22 @@ DIR=`dirname $0`
 mkdir -p $DIR/bins
 pushd $DIR/bins/ > /dev/null
 
-if [ $(dpkg-query -W -f='${Status}' chefdk 2>/dev/null | grep -c 'ok installed') -eq 0 ]; then
+chefdk_vers='1.1.16'
+chefdk_dpkg="chefdk_${chefdk_vers}-1_amd64.deb"
+chefdk_sha256='7a1bed7f6eae3ae26694f9d3f47ce76d5e0cbbaba72dafcbc175e89ba0ac6dd9'
+if [ ! -f ${chefdk_dpkg} ] || ! sha256sum ${chefdk_dpkg} | grep -q ${chefdk_sha256}; then
+    rm -f ${chefdk_dpkg}
     # $CURL is defined in proxy_setup.sh
-    $CURL -O -J https://opscode-omnibus-packages.s3.amazonaws.com/ubuntu/14.04/x86_64/chefdk_0.12.0-1_amd64.deb
+    $CURL -O -J https://packages.chef.io/files/stable/chefdk/${chefdk_vers}/ubuntu/14.04/${chefdk_dpkg}
 
-    if ! sha256sum chefdk_0.12.0-1_amd64.deb | grep -q 6fcb4529f99c212241c45a3e1d024cc1519f5b63e53fc1194b5276f1d8695aaa; then
+    if ! sha256sum ${chefdk_dpkg} | grep -q ${chefdk_sha256}; then
 	echo 'Failed to download ChefDK -- wrong checksum.' 1>&2
 	exit 1
-    else
-	dpkg -i chefdk_0.12.0-1_amd64.deb
     fi
+fi
+
+if [ $(dpkg-query -W -f='${Status}' chefdk 2>/dev/null | grep -c 'ok installed') -eq 0 ]; then
+    dpkg -i ${chefdk_dpkg}
 fi
 
 popd > /dev/null
