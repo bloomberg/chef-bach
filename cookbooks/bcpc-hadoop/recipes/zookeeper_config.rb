@@ -17,8 +17,6 @@ bash "update-zookeeper-conf-alternatives" do
   not_if "update-alternatives --query zookeeper-conf | grep #{node.chef_environment}"
 end
 
-
-
 template "#{node[:bcpc][:hadoop][:zookeeper][:conf_dir]}/zoo.cfg" do
   source "zk_zoo.cfg.erb"
   mode 0644
