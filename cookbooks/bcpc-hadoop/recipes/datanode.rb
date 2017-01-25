@@ -90,8 +90,8 @@ node[:bcpc][:hadoop][:os][:group].keys.each do |group_name|
     action :nothing
   end
 end
-  
-# Take action on each group resource based on its existence 
+
+# Take action on each group resource based on its existence
 ruby_block 'create_or_manage_groups' do
   block do
     node[:bcpc][:hadoop][:os][:group].keys.each do |group_name|
@@ -140,7 +140,7 @@ template "/etc/hadoop/conf/container-executor.cfg" do
   owner "root"
   group "yarn"
   mode "0400"
-  variables(:mounts => node[:bcpc][:hadoop][:mounts])
+  variables lazy{{mounts: node.run_state[:bcpc_hadoop_disks][:mounts]}}
   action :create
   notifies :run, "bash[verify-container-executor]", :immediate
 end
@@ -162,7 +162,7 @@ end
 
 # Install Hive Bits
 # workaround for hcatalog dpkg not creating the hcat user it requires
-user "hcat" do 
+user "hcat" do
   username "hcat"
   system true
   shell "/bin/bash"
@@ -186,8 +186,18 @@ link "/usr/hdp/current/hive-server2/lib/mysql-connector-java.jar" do
 end
 
 # Setup datanode and nodemanager bits
-if node[:bcpc][:hadoop][:mounts].length <= node[:bcpc][:hadoop][:hdfs][:failed_volumes_tolerated]
-  Chef::Application.fatal!("You have fewer #{node[:bcpc][:hadoop][:disks]} than #{node[:bcpc][:hadoop][:hdfs][:failed_volumes_tolerated]}! See comments of HDFS-4442.")
+ruby_block 'count-mounts' do
+  block do
+    mount_count =
+      node.run_state[:bcpc_hadoop_disks][:mounts].length rescue 0
+    tolerated_failures =
+      node[:bcpc][:hadoop][:hdfs][:failed_volumes_tolerated]
+    if mount_count <= tolerated_failures
+      Chef::Application.fatal!("You have fewer available hadoop disks than " \
+                               "hdfs tolerated failures (#{tolerated_failures})! " \
+                               "See comments of HDFS-4442.")
+    end
+  end
 end
 
 link "/etc/init.d/hadoop-yarn-nodemanager" do
@@ -202,38 +212,46 @@ bash "kill yarn-yarn-nodemanager" do
 end
 
 # Build nodes for HDFS storage
-node[:bcpc][:hadoop][:mounts].each do |i|
-  directory "/disk/#{i}/dfs" do
-    owner "hdfs"
-    group "hdfs"
-    mode 0700
-    action :create
-  end
-  directory "/disk/#{i}/dfs/dn" do
-    owner "hdfs"
-    group "hdfs"
-    mode 0700
-    action :create
-  end
-end
+ruby_block 'create-hdfs-directories' do
+  block do
+    node.run_state[:bcpc_hadoop_disks][:mounts].each do |i|
+      Chef::Resource::Directory.new("/disk/#{i}/dfs",
+                                    node.run_context).tap do |dd|
+        dd.owner 'hdfs'
+        dd.group 'hdfs'
+        dd.mode 0700
+        dd.run_action :create
+      end
 
-# Build nodes for YARN log storage
-node[:bcpc][:hadoop][:mounts].each do |i|
-  directory "/disk/#{i}/yarn/" do
-    owner "yarn"
-    group "yarn"
-    mode 0755
-    action :create
-  end
-  %w{mapred-local local logs}.each do |d|
-    directory "/disk/#{i}/yarn/#{d}" do
-      owner "yarn"
-      group "hadoop"
-      mode 0755
-      action :create
+      Chef::Resource::Directory.new("/disk/#{i}/dfs",
+                                    node.run_context).tap do |dd|
+        dd.owner 'hdfs'
+        dd.group 'hdfs'
+        dd.mode 0700
+        dd.run_action :create
+      end
+
+      Chef::Resource::Directory.new("/disk/#{i}/yarn/",
+                                    node.run_context).tap do |dd|
+        dd.owner 'yarn'
+        dd.group 'yarn'
+        dd.mode 0755
+        dd.run_action :create
+      end
+
+      %w{mapred-local local logs}.each do |d|
+        Chef::Resource::Directory.new("/disk/#{i}/yarn/#{d}",
+                                      node.run_context).tap do |dd|
+          dd.owner 'yarn'
+          dd.group 'hadoop'
+          dd.mode 0755
+          dd.run_action :create
+        end
+      end
     end
   end
 end
+
 
 #
 # When there is a need to restart datanode, a lock need to be taken so that the restart is sequenced preventing all DNs being down at the sametime
@@ -255,7 +273,7 @@ end
 zk_hosts = (get_node_attributes(HOSTNAME_ATTR_SRCH_KEYS,"zookeeper_server","bcpc-hadoop").map{|zkhost| "#{float_host(zkhost['hostname'])}:#{node[:bcpc][:hadoop][:zookeeper][:port]}"}).join(",")
 #
 # znode is used as the locking mechnism to control restart of services. The following code is to build the path
-# to create the znode before initiating the restart of HDFS datanode service 
+# to create the znode before initiating the restart of HDFS datanode service
 #
 if (! node[:bcpc][:hadoop][:restart_lock].attribute?(:root) or  node[:bcpc][:hadoop][:restart_lock][:root].nil?)
   lock_znode_path = "/hadoop-hdfs-datanode"
@@ -272,7 +290,7 @@ ruby_block "acquire_lock_to_restart_datanode" do
   block do
     tries = 0
     Chef::Log.info("#{node[:hostname]}: Acquring lock at #{lock_znode_path}")
-    while true 
+    while true
       lock = acquire_restart_lock(lock_znode_path, zk_hosts, node[:fqdn])
       if lock
         break
@@ -319,7 +337,7 @@ service "hadoop-hdfs-datanode" do
 end
 
 #
-# Once the datanode service restart is complete, the following block releases the lock if the node executing is the one which holds the lock 
+# Once the datanode service restart is complete, the following block releases the lock if the node executing is the one which holds the lock
 #
 ruby_block "release_datanode_restart_lock" do
   block do

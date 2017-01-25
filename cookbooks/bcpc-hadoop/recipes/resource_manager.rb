@@ -2,21 +2,27 @@ include_recipe 'bcpc-hadoop::hadoop_config'
 ::Chef::Recipe.send(:include, Bcpc_Hadoop::Helper)
 ::Chef::Resource::Bash.send(:include, Bcpc_Hadoop::Helper)
 
-node[:bcpc][:hadoop][:mounts].each do |i|
-  directory "/disk/#{i}/yarn/local" do
-    owner "yarn"
-    group "yarn"
-    mode 0755
-    action :create
-    recursive true
-  end
+ruby_block 'create-yarn-directories' do
+  block do
+    node.run_state[:bcpc_hadoop_disks][:mounts].each do |disk_number|
+      Chef::Resource::Directory.new("/disk/#{disk_number}/yarn/local",
+                                    node.run_context).tap do |dd|
+        dd.owner 'yarn'
+        dd.group 'yarn'
+        dd.mode 0755
+        dd.recursive true
+        dd.run_action :create
+      end
 
-  directory "/disk/#{i}/yarn/logs" do
-    owner "yarn"
-    group "yarn"
-    mode 0755
-    action :create
-    recursive true
+      Chef::Resource::Directory.new("/disk/#{disk_number}/yarn/logs",
+                                    node.run_context).tap do |dd|
+        dd.owner 'yarn'
+        dd.group 'yarn'
+        dd.mode 0755
+        dd.recursive true
+        dd.run_action :create
+      end
+    end
   end
 end
 
@@ -64,7 +70,7 @@ hdfs_write = "echo 'test' | hdfs dfs -copyFromLocal - /user/hdfs/chef-mapred-tes
 hdfs_remove = "hdfs dfs -rm -skipTrash /user/hdfs/chef-mapred-test"
 hdfs_test = "hdfs dfs -test -f /user/hdfs/chef-mapred-test"
 
-# first, make sure the check file is not currently in hdfs, otherwise, the check for 
+# first, make sure the check file is not currently in hdfs, otherwise, the check for
 # setup-mapreduce-app will fail
 bash 'remove-check-file' do
   code <<-EOH
@@ -83,7 +89,7 @@ bash "setup-mapreduce-app" do
   hdfs dfs -chmod -R 444 /hdp/apps/#{node[:bcpc][:hadoop][:distribution][:release]}/mapreduce/mapreduce.tar.gz
   EOH
   user "hdfs"
-  not_if "hdfs dfs -test -f /hdp/apps/#{node[:bcpc][:hadoop][:distribution][:release]}/mapreduce/mapreduce.tar.gz", :user => "hdfs" 
+  not_if "hdfs dfs -test -f /hdp/apps/#{node[:bcpc][:hadoop][:distribution][:release]}/mapreduce/mapreduce.tar.gz", :user => "hdfs"
   only_if "#{hdfs_write} && #{hdfs_remove}", :user => "hdfs"
 end
 

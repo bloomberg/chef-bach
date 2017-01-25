@@ -1,6 +1,8 @@
 require 'base64'
 ::Chef::Recipe.send(:include, Bcpc_Hadoop::Helper)
 
+include_recipe 'bcpc-hadoop::default'
+
 # disable IPv6 (e.g. for HADOOP-8568)
 case node["platform_family"]
   when "debian"
@@ -36,7 +38,7 @@ if not node.has_key?('pam_d') or not node['pam_d'].has_key?('services') or not n
       'includes' => []
     }
   }
-   
+
 end
 
 # set vm.swapiness to 0 (to lessen swapping)
@@ -70,13 +72,4 @@ include_recipe "java::oracle_jce"
   package hwx_pkg_str(pkg, node[:bcpc][:hadoop][:distribution][:release]) do
     action :upgrade
   end
-end
-
-# Create directory to store keytab files
-directory node[:bcpc][:hadoop][:kerberos][:keytab][:dir] do
-  owner "root"
-  group "root"
-  recursive true
-  mode 0755
-  only_if { node[:bcpc][:hadoop][:kerberos][:enable] }
 end
