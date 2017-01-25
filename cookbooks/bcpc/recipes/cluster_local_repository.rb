@@ -88,3 +88,7 @@ apt_repository 'bcpc' do
     key node.run_state['bootstrap_gpg_fingerprint']
   end
 end
+
+execute 'apt-get update' do
+  action :run
+end
