@@ -55,8 +55,8 @@ node[:bcpc][:hadoop][:os][:group].keys.each do |group_name|
     action :nothing
   end
 end
-  
-# Take action on each group resource based on its existence 
+
+# Take action on each group resource based on its existence
 ruby_block 'create_or_manage_groups' do
   block do
     node[:bcpc][:hadoop][:os][:group].keys.each do |group_name|
@@ -78,18 +78,26 @@ user_ulimit "hdfs" do
   process_limit 65536
 end
 
-node[:bcpc][:hadoop][:mounts].each do |d|
-  directory "/disk/#{d}/dfs/nn" do
-    owner "hdfs"
-    group "hdfs"
-    mode 0755
-    action :create
-    recursive true
-  end
+ruby_block 'create-nn-directories' do
+  block do
+    node.run_state[:bcpc_hadoop_disks][:mounts].each do |disk_number|
+      Chef::Resource::Directory.new("/disk/#{disk_number}/dfs/nn",
+                                    node.run_context).tap do |dd|
+        dd.owner 'hdfs'
+        dd.group 'hdfs'
+        dd.mode 0755
+        dd.recursive true
+        dd.run_action :create
+      end
 
-  execute "fixup nn owner" do
-    command "chown -Rf hdfs:hdfs /disk/#{d}/dfs"
-    only_if { Etc.getpwuid(File.stat("/disk/#{d}/dfs/").uid).name != "hdfs" }
+      if Etc.getpwuid(File.stat("/disk/#{disk_number}/dfs/").uid).name != 'hdfs'
+        Chef::Resource::Execute.new('fixup nn owner',
+                                    node.run_context).tap do |ee|
+          ee.command "chown -Rf hdfs:hdfs /disk/#{disk_number}/dfs"
+          ee.run_action(:run)
+        end
+      end
+    end
   end
 end
 
@@ -101,8 +109,8 @@ bash "format namenode" do
   code "#{hdfs_cmd} namenode -format -nonInteractive -force"
   user "hdfs"
   action :run
-  creates "/disk/#{node[:bcpc][:hadoop][:mounts][0]}/dfs/nn/current/VERSION"
-  not_if { node[:bcpc][:hadoop][:mounts].any? { |d| File.exists?("/disk/#{d}/dfs/nn/current/VERSION") } }
+  creates lazy { "/disk/#{node.run_state[:bcpc_hadoop_disks][:mounts][0]}/dfs/nn/current/VERSION" }
+  not_if { node.run_state[:bcpc_hadoop_disks][:mounts].any? { |d| File.exists?("/disk/#{d}/dfs/nn/current/VERSION") } }
 end
 
 bash "format-zk-hdfs-ha" do
@@ -146,7 +154,7 @@ service "bring hadoop-hdfs-namenode down for shared edits and HA transition" do
   action :stop
   supports :status => true
   notifies :run, "bash[initialize shared edits]", :immediately
-  only_if { node[:bcpc][:hadoop][:mounts].all? { |d| not File.exists?("/disk/#{d}/dfs/jn/#{node.chef_environment}/current/VERSION") } }
+  only_if { node.run_state[:bcpc_hadoop_disks][:mounts].all? { |d| not File.exists?("/disk/#{d}/dfs/jn/#{node.chef_environment}/current/VERSION") } }
 end
 
 bash "initialize shared edits" do
@@ -187,12 +195,12 @@ end
 
 ruby_block "create-format-UUID-File" do
   block do
-    Dir.chdir("/disk/#{node[:bcpc][:hadoop][:mounts][0]}/dfs/") do
+    Dir.chdir("/disk/#{node.run_state[:bcpc_hadoop_disks][:mounts][0]}/dfs/") do
       system("tar czvf #{Chef::Config[:file_cache_path]}/jn_fmt.tgz jn/#{node.chef_environment}/current/VERSION")
     end
   end
   action :run
-  only_if { File.exists?("/disk/#{node[:bcpc][:hadoop][:mounts][0]}/dfs/jn/#{node.chef_environment}/current/VERSION") }
+  only_if { File.exists?("/disk/#{node.run_state[:bcpc_hadoop_disks][:mounts][0]}/dfs/jn/#{node.chef_environment}/current/VERSION") }
 end
 
 ruby_block "upload-format-UUID-File" do

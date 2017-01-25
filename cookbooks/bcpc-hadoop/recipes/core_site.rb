@@ -1,13 +1,5 @@
 core_site_values = node[:bcpc][:hadoop][:core][:site_xml]
-
-mounts = node[:bcpc][:hadoop][:mounts]
-core_site_generated_values =
-{
- 'mapreduce.cluster.local.dir' =>
-   mounts.map{ |d| "file:///disk/#{d}/yarn/mapred-local" }.join(','),
- 'yarn.nodemanager.log-dirs' =>
-   mounts.map{ |d| "file:///disk/#{d}/yarn/logs" }.join(','),
-}
+node.run_state[:core_site_generated_values] = {}
 
 if node[:bcpc][:hadoop][:kerberos][:enable]
   kerberos_properties =
@@ -22,7 +14,7 @@ if node[:bcpc][:hadoop][:kerberos][:enable]
      }.join("\n") + "\n" +
      'DEFAULT',
     }
-  core_site_generated_values.merge!(kerberos_properties)
+  node.run_state[:core_site_generated_values].merge!(kerberos_properties)
 end
 
 if node[:bcpc][:hadoop][:hdfs][:ldap][:integration]
@@ -30,7 +22,7 @@ if node[:bcpc][:hadoop][:hdfs][:ldap][:integration]
     {
      'hadoop.security.group.mapping' =>
        'org.apache.hadoop.security.LdapGroupsMapping',
-     
+
      'hadoop.security.group.mapping.ldap.bind.password.file' =>
        '/etc/hadoop/conf/ldap-conn-pass.txt',
 
@@ -56,17 +48,30 @@ if node[:bcpc][:hadoop][:hdfs][:ldap][:integration]
 
      'hadoop.security.group.mapping.ldap.search.attr.group.name' =>
        'cn',
-     
-     'hadoop.security.group.mapping.ldap.search.group.hierarchy.levels' => 
+
+     'hadoop.security.group.mapping.ldap.search.group.hierarchy.levels' =>
        node[:bcpc][:hadoop][:hdfs][:ldap][:search][:depth],
     }
-  core_site_generated_values.merge!(ldap_properties)
+  node.run_state[:core_site_generated_values].merge!(ldap_properties)
 end
 
-complete_core_site_hash = core_site_generated_values.merge(core_site_values)
+ruby_block 'node.run_state[:core_site_generated_values]' do
+  block do
+    mounts = node.run_state[:bcpc_hadoop_disks][:mounts]
+    directory_values =
+      {
+       'mapreduce.cluster.local.dir' =>
+         mounts.map{ |d| "file:///disk/#{d}/yarn/mapred-local" }.join(','),
+       'yarn.nodemanager.log-dirs' =>
+         mounts.map{ |d| "file:///disk/#{d}/yarn/logs" }.join(','),
+      }
+    node.run_state[:core_site_generated_values].merge!(directory_values)
+    node.run_state[:core_site_generated_values].merge!(core_site_values)
+  end
+end
 
-template "/etc/hadoop/conf/core-site.xml" do
-  source "generic_site.xml.erb"
+template '/etc/hadoop/conf/core-site.xml' do
+  source 'generic_site.xml.erb'
   mode 0644
-  variables(:options => complete_core_site_hash)
+  variables lazy {{ options: node.run_state[:core_site_generated_values] }}
 end
