@@ -126,35 +126,28 @@ wait && printf "Done Snapshotting\n"
 
 printf "#### Chef the nodes with Basic role\n"
 vagrant ssh -c "cd chef-bcpc; ./cluster-assign-roles.sh $ENVIRONMENT Basic"
-
-printf "Snapshotting post-Basic\n"
-for vm in ${VM_LIST[*]} bcpc-bootstrap; do
-  [[ ! $(vboxmanage snapshot $vm list --machinereadable | grep -q 'Basic') ]] && \
-    VBoxManage snapshot $vm take Basic --live &
+printf "Snapshotting Post-Basic\n"
+for i in bootstrap vm1 vm2 vm3; do
+  [[ $(vboxmanage snapshot bcpc-$i list --machinereadable | grep -q 'Post-Basic') ]] && \
+    VBoxManage snapshot bcpc-$i take Post-Basic &
 done
 wait && printf "Done Snapshotting\n"
 
-printf "#### Chef the nodes with complete roles\n"
-printf "Cluster type: $CLUSTER_TYPE\n"
+printf "#### Chef machine bcpc-vms with Bootstrap\n"
+vagrant ssh -c "cd chef-bcpc; ./cluster-assign-roles.sh $ENVIRONMENT Bootstrap"
+printf "Snapshotting Post-Bootstrap\n"
+for i in bootstrap vm1 vm2 vm3; do
+  [[ $(vboxmanage snapshot bcpc-$i list --machinereadable | grep -q 'Post-Bootstrap') ]] && \
+    VBoxManage snapshot bcpc-$i take Post-Bootstrap &
+done
+wait && printf "Done Snapshotting\n"
 
-
-if [ "$CLUSTER_TYPE" == "Hadoop" ]; then
-  printf "Running C-A-R 'bootstrap' before final C-A-R"
-  vagrant ssh -c "cd chef-bcpc; ./cluster-assign-roles.sh $ENVIRONMENT Bootstrap"
-  for vm in ${VM_LIST[*]} bcpc-bootstrap; do
-    [[ ! $(vboxmanage snapshot $vm list --machinereadable | grep -q 'Post-Bootstrap') ]] && \
-      VBoxManage snapshot $vm take Post-Bootstrap --live &
-  done
-  wait && printf "Done Snapshotting\n"
-  printf "Running final C-A-R"
-fi
-
-vagrant ssh -c "cd chef-bcpc; ./cluster-assign-roles.sh $ENVIRONMENT $CLUSTER_TYPE"
-
-printf "Taking final snapshot\n"
-for vm in ${VM_LIST[*]} bcpc-bootstrap; do
-  [[ ! $(vboxmanage snapshot $vm list --machinereadable | grep -q 'Full-Shoes') ]] && \
-    VBoxManage snapshot $vm take Full-Shoes --live &
+printf "#### Chef machine bcpc-vms with Hadoop\n"
+vagrant ssh -c "cd chef-bcpc; ./cluster-assign-roles.sh $ENVIRONMENT Hadoop"
+printf "Snapshotting Post-Install\n"
+for i in bootstrap vm1 vm2 vm3; do
+  [[ $(vboxmanage snapshot bcpc-$i list --machinereadable | grep -q 'Post-Install') ]] && \
+    VBoxManage snapshot bcpc-$i take Post-Install &
 done
 wait && printf "Done Snapshotting\n"
 
