@@ -372,7 +372,7 @@ def process_start_time(process_identifier)
       return nil
     else
       target_process_pid_arr = Array.new()
-      target_process_pid_arr = target_process_pid.split("\n").map{|pid| (`ps --no-header -o start_time #{pid}`).strip}
+      target_process_pid_arr = target_process_pid.split("\n").map{|pid| (`ps --no-header -o lstart #{pid}`).strip}
       start_time_arr = Array.new()
       target_process_pid_arr.each do |t|
         if t != ""
