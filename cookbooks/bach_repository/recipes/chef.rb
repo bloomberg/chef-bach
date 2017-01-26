@@ -12,13 +12,13 @@ chef_packages_hash =
    chefdk:
    [
     'https://opscode-omnibus-packages.s3.amazonaws.com/ubuntu/' \
-      '14.04/x86_64/chefdk_0.12.0-1_amd64.deb',
-    '6fcb4529f99c212241c45a3e1d024cc1519f5b63e53fc1194b5276f1d8695aaa'
+      '14.04/x86_64/chefdk_1.1.16-1_amd64.deb',
+    '7a1bed7f6eae3ae26694f9d3f47ce76d5e0cbbaba72dafcbc175e89ba0ac6dd9'
    ],
    chef:
    [
-     'https://packages.chef.io/files/current/chef/12.18.24/ubuntu/' \
-       '14.04/chef_12.18.24-1_amd64.deb',
+    'https://packages.chef.io/files/current/chef/12.18.24/ubuntu/' \
+      '14.04/chef_12.18.24-1_amd64.deb',
     'ff57e8206dbe23862f2beac3a741e715d4f9838512736f15c6293f80e5139342'
    ],
    chef_server:
