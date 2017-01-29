@@ -75,6 +75,10 @@ unless node[:fqdn] == get_bootstrap
   execute 'install-bootstrap-gpg' do
     command "apt-key add '#{bcpc_apt_key_path}'"
   end
+
+  file bcpc_apt_key_path do
+    action :delete
+  end
 end
 
 apt_repository 'bcpc' do
