@@ -407,16 +407,24 @@ class ClusterAssignRoles
 
     target_nodes = if optional_thing.nil?
                      parse_cluster_txt
-                   elsif(optional_thing.start_with?('role[') ||
-                         optional_thing.start_with?('recipe['))
-                     parse_cluster_txt.select do |entry|
-                       entry[:runlist].downcase.include?(optional_thing.downcase)
-                     end
                    else
-                     parse_cluster_txt.select do |entry|
+                     node_matches = parse_cluster_txt.select do |entry|
                        entry[:ip_address].include?(optional_thing) ||
                        entry[:fqdn].include?(optional_thing.downcase)
                      end
+
+                     if node_matches.empty?
+                       node_matches = parse_cluster_txt.select do |entry|
+                         entry[:runlist]
+                           .downcase
+                           .include?(optional_thing.downcase)
+                       end
+                     end
+
+                     puts "Search '#{optional_thing}' matched:\n  " +
+                       node_matches.map { |ee| ee[:hostname] }.join("\n  ")
+
+                     node_matches
                    end
 
     if target_nodes.any?
