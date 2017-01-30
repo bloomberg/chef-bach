@@ -103,9 +103,11 @@ else
 
   ruby_block 'bootstrap-gpg-public_key_base64' do
     block do
-      dbi =
-        Chef::DataBagItem.load('configs', node.chef_environment) ||
-        Chef::DataBagItem.new('configs', node.chef_environment)
+      dbi = begin
+              Chef::DataBagItem.load('configs', node.chef_environment)
+            rescue Net::HTTPServerException
+              Chef::DataBagItem.new('configs', node.chef_environment)
+            end
       dbi['bootstrap-gpg-public_key_base64'] =
         Base64.encode64(::File.read(gpg_public_key_path))
       dbi.save
@@ -190,6 +192,15 @@ execute 'sign-release-file' do
       #{release_file_path}
   EOM
   umask 0222
+end
+
+[
+  node[:bach][:repository][:ascii_key_path],
+  node[:bach][:repository][:public_key_path],
+].each do |path|
+  file path do
+    mode 0444
+  end
 end
 
 execute 'apt-fix-repository-perms' do

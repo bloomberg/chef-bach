@@ -30,9 +30,9 @@ root_password = get_config!('password', 'mysql-root', 'os')
 
 zabbix_user = get_config!('mysql-zabbix-user')
 zabbix_password = get_config!('password', 'mysql-zabbix', 'os')
-  
+
 bootstrap = get_bootstrap
-admins_list = get_nodes_for('zabbix-head').map{ |x| x[:fqdn] }.compact
+admins_list = get_head_node_names
 admins_list.push(node[:fqdn]) unless admins_list.include?(node[:fqdn])
 admins_list.push(bootstrap) unless bootstrap.nil?
 
@@ -174,7 +174,7 @@ end
 ].each do |file_name|
   install_path = File.join(Chef::Config.file_cache_path, file_name)
   resource_name = "zabbix-run-#{file_name.gsub(/\./,'-')}"
-  
+
   template install_path do
     source "zabbix/#{file_name}.erb"
     variables(
@@ -209,7 +209,7 @@ ruby_block 'zabbix-elect-leader' do
 
     client =
       Mysql2::Client.new(client_options)
-    
+
     results = client.query("CALL elect_leader('#{node[:hostname]}')")
     Chef::Log.info('Zabbix leader election results: ' + results.inspect)
   end
@@ -284,14 +284,14 @@ directory '/usr/local/bin/checks' do
   owner node[:bcpc][:zabbix][:user]
   group 'root'
   mode 00775
-end 
+end
 
 directory '/usr/local/etc/checks' do
   action :create
   owner node[:bcpc][:zabbix][:user]
   group 'root'
   mode 00775
-end 
+end
 
 cookbook_file '/usr/local/bin/check' do
   source 'checks/check'

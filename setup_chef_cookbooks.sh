@@ -32,7 +32,7 @@ Ohai::Config[:disabled_plugins] = [ "passwd" ]
 
 o = Ohai::System.new
 o.all_plugins(['hostname','ipaddress'])
- 
+
 log_level                :info
 node_name                o[:fqdn]
 client_key               "$(pwd)/.chef/#{o[:fqdn]}.pem"
@@ -41,7 +41,7 @@ validation_key           '/etc/chef-server/chef-validator.pem'
 chef_server_url          'https://${BOOTSTRAP_IP}'
 syntax_check_cache_path  '$(pwd)/.chef/syntax_check_cache'
 cookbook_path '$(pwd)/vendor/cookbooks'
- 
+
 # Disable the Ohai password module which explodes on a Single-Sign-On-joined system
 Ohai::Config[:disabled_plugins] = [ "passwd" ]
 
@@ -51,7 +51,7 @@ verify_api_cert false
 File.umask(0007)
 EOF
 
-if [[ -n "$PROXY" ]]; then
+if [[ -n "$http_proxy" ]]; then
   cat << EOF >> .chef/knife.rb
 no_proxy_array = ["localhost", o[:ipaddress], o[:hostname], o[:fqdn], "${BOOTSTRAP_IP}", "${binary_server_host}"]
 no_proxy_array.insert("*#{o[:domain]}") unless o[:domain].nil?

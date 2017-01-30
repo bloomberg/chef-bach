@@ -89,8 +89,8 @@ def make_config(key, value)
 end
 
 # get value for data bag/chef-vault item with key
-# bag: databag name of chef vault item; 
-# item: chef vault item; 
+# bag: databag name of chef vault item;
+# item: chef vault item;
 # key: the key to retrieve password in the item
 def get_config(key, item=node.chef_environment, bag="configs")
 
@@ -139,7 +139,7 @@ end
 def delete_config(key)
   if !$dbi.nil? && $dbi.has_key?(key)
     Chef::Log.info "++++++++++++ Found key #{key}. Deleting it now.... +++++++++++++++++++++++"
-    $dbi.delete(key) 
+    $dbi.delete(key)
     $dbi.save
   else
     Chef::Log.info "++++++++++++ Couldn't find key #{key} for deletion +++++++++++++++++++++++"
@@ -165,26 +165,33 @@ end
 
 def get_cached_head_node_names
   headnodes = []
-  begin 
-    File.open("/etc/headnodes", "r") do |infile|    
+  begin
+    File.open("/etc/headnodes", "r") do |infile|
       while (line = infile.gets)
         line.strip!
         if line.length>0 and not line.start_with?("#")
           headnodes << line.strip
         end
-      end    
+      end
     end
   rescue Errno::ENOENT
-    # assume first run   
+    # assume first run
   end
   return headnodes.sort
 end
 
 def get_head_nodes
-  results = search(:node, "role:BCPC-Headnode AND chef_environment:#{node.chef_environment}")
-  # this returns the node object for the current host before it has been set in Postgress
-  results.map!{ |x| x.hostname == node.hostname ? node : x }
-  return (results.empty?) ? [node] : results.sort
+  #
+  # Zookeeper nodes are the de facto heads for a Kafka cluster, since
+  # they run Zabbix, Graphite, MySQL et al.
+  #
+  search(:node, 'role:BCPC-Hadoop-Head OR role:BCPC-Kafka-Head-Zookeeper')
+end
+
+def get_head_node_names
+  get_head_nodes.map do |nn|
+    nn[:fqdn]
+  end.compact.sort
 end
 
 def get_nodes_for(recipe, cookbook=cookbook_name)
@@ -281,7 +288,7 @@ def storage_host(*args)
   end
 end
 
-# requires cidr in form '1.2.3.0/24', where 1.2.3.0 is a dotted quad ip4 address 
+# requires cidr in form '1.2.3.0/24', where 1.2.3.0 is a dotted quad ip4 address
 # and 24 is a number of netmask bits (e.g. 8, 16, 24)
 def calc_reverse_dns_zone(cidr)
 
@@ -297,7 +304,7 @@ def calc_reverse_dns_zone(cidr)
   # Netmask:   8  => 192.in-addr.arpa         (3 quads removed)
   #           16  => 168.192.in-addr.arpa     (2 quads removed)
   #           24  => 100.168.192.in-addr.arpa (1 quad removed)
-  
+
   reverse_ip = cidr_ip.reverse   # adds .in-addr.arpa automatically
   (4 - (netmask.to_i/8)).times{ reverse_ip = reverse_ip.split('.')[1..-1].join('.')  }  # drop off element 0 each time through
 
@@ -305,16 +312,16 @@ def calc_reverse_dns_zone(cidr)
 
 end
 
-# Internal: Check if the given host is the Zabbix leader 
+# Internal: Check if the given host is the Zabbix leader
 #
-# host - host id (eg: hostname) 
+# host - host id (eg: hostname)
 #
 # Examples
 #
 #   is_zabbix_leader?("bcpc-vm1")
 #   # => true
 #
-# Returns true if given host is the Zabbix leader, false otherwise 
+# Returns true if given host is the Zabbix leader, false otherwise
 def is_zabbix_leader?(host)
   leader_check = "mysql -u#{get_config('mysql-zabbix-user')} -p#{get_config!('password','mysql-zabbix','os')} #{node['bcpc']['zabbix_dbname']} --raw --batch -e 'select host_id from leader_election where id=1' "
   cmd = Mixlib::ShellOut.new(

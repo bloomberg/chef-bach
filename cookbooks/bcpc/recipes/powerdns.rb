@@ -24,11 +24,9 @@ if mysql_pdns_password.nil?
   mysql_pdns_password = secure_password
 end
 
-bootstrap = get_bootstrap
-results = get_nodes_for("powerdns").map!{ |x| x['fqdn'] }.join(",")
-nodes = results == "" ? node['fqdn'] : results
+pdns_admins = (get_head_node_names + [get_bootstrap]).join(',')
 
-chef_vault_secret "mysql-pdns" do
+chef_vault_secret 'mysql-pdns' do
   #
   # For some reason, we are compelled to specify a provider.
   # This will probably break if we ever move to chef-vault cookbook 2.x
@@ -37,7 +35,7 @@ chef_vault_secret "mysql-pdns" do
 
   data_bag 'os'
   raw_data({ 'password' => mysql_pdns_password })
-  admins "#{ nodes },#{ bootstrap }"
+  admins pdns_admins
   search '*:*'
   action :nothing
 end.run_action(:create_if_missing)
@@ -127,10 +125,10 @@ ruby_block "powerdns-table-records" do
                     INSERT INTO records_static (domain_id, name, content, type, ttl, prio) VALUES ((SELECT id FROM domains_static WHERE name='#{node[:bcpc][:domain_name]}'),'#{node[:bcpc][:domain_name]}','localhost root@#{node[:bcpc][:domain_name]} 1','SOA',300,NULL);
                     INSERT INTO records_static (domain_id, name, content, type, ttl, prio) VALUES ((SELECT id FROM domains_static WHERE name='#{node[:bcpc][:domain_name]}'),'#{node[:bcpc][:domain_name]}','#{node[:bcpc]['networks'][subnet][:management][:vip]}','NS',300,NULL);
                     INSERT INTO records_static (domain_id, name, content, type, ttl, prio) VALUES ((SELECT id FROM domains_static WHERE name='#{node[:bcpc][:domain_name]}'),'#{node[:bcpc][:domain_name]}','#{node[:bcpc]['networks'][subnet][:management][:vip]}','A',300,NULL);
-                    
+
                     INSERT INTO records_static (domain_id, name, content, type, ttl, prio) VALUES ((SELECT id FROM domains_static WHERE name='#{reverse_dns_zone}'),'#{reverse_dns_zone}', '#{reverse_dns_zone} root@#{node[:bcpc][:domain_name]} 1','SOA',300,NULL);
                     INSERT INTO records_static (domain_id, name, content, type, ttl, prio) VALUES ((SELECT id FROM domains_static WHERE name='#{reverse_dns_zone}'),'#{reverse_dns_zone}','#{node[:bcpc]['networks'][subnet][:management][:vip]}','NS',300,NULL);
-                    
+
                     CREATE INDEX rec_name_index ON records_static(name);
                     CREATE INDEX nametype_index ON records_static(name,type);
                     CREATE INDEX domain_id ON records_static(domain_id);
@@ -211,7 +209,7 @@ ruby_block "powerdns-table-records_reverse-view" do
                       ip4_to_ptr_name(r.content) as name,
                       'PTR' as type, r.name as content, r.ttl, r.prio, r.change_date
                 from records_forward r, domains d
-                where r.type='A' 
+                where r.type='A'
                   and d.name = '#{reverse_dns_zone}'
                   and ip4_to_ptr_name(r.content) like '%.#{reverse_dns_zone}';
 

@@ -2,7 +2,7 @@
 # Cookbook Name:: bach_repository
 # Recipe:: python
 #
-# This is done with exec because the python cookbook doesn't support the 
+# This is done with exec because the python cookbook doesn't support the
 # needed --cert option.
 #
 require 'mixlib/shellout'
@@ -31,6 +31,14 @@ else
   pip_cert_option = ''
 end
 
+if node[:bach][:repository][:pypi_mirror]
+  require 'uri'
+  uri = URI.parse(node[:bach][:repository][:pypi_mirror])
+  pip_cheese_shop_option = "-i #{uri.to_s} --trusted-host #{uri.host}"
+else
+  pip_cheese_shop_option = ''
+end
+
 remote_file get_pip_path do
   source 'https://raw.githubusercontent.com/pypa/pip/8.0.0/contrib/get-pip.py'
   checksum 'd1f66b3848abc6fd1aeda3bb7461101f6a909c3b08efa3ecc1f561712269469c'
@@ -38,7 +46,8 @@ remote_file get_pip_path do
 end
 
 execute 'get-pip.py' do
-  command "#{get_pip_path} #{pip_proxy_option} #{pip_cert_option}"
+  command "#{get_pip_path} " \
+    "#{pip_proxy_option} #{pip_cert_option} #{pip_cheese_shop_option}"
   not_if {
     version_string =
       if File.exists?('/usr/local/bin/pip')
@@ -61,33 +70,34 @@ file '/etc/pip.conf' do
   EOM
 end
 
-execute 'new-pip-upgrade-setuptools' do
-  command "/usr/local/bin/pip #{pip_proxy_option} #{pip_cert_option} " +
-    "install setuptools --no-use-wheel --upgrade"
-  not_if {
-    get_version =
-      Mixlib::ShellOut.new("pip show setuptools | grep ^Version | " +
-                           "awk '{print $2}'")
-    target_version = Gem::Version.new('18.0.1')
-    actual_version = Gem::Version.new(get_version.run_command.stdout.chomp)
-    actual_version >= target_version
-  }
+#
+# These are minimum versions, not specific targets. They seem to work
+# now, but they could fail in the future.
+#
+# We should probably set up virtualenv to make this easier to distribute.
+#
+[
+ ['packaging', '16.8'],
+ ['appdirs', '1.4'],
+ ['setuptools', '34.0'],
+ ['pip2pi', '0.6.8']
+].each do |package_name, min_version|
+  execute "new-pip-upgrade-#{package_name}" do
+    command '/usr/local/bin/pip ' \
+      "install #{package_name} --no-use-wheel --upgrade " \
+      "#{pip_proxy_option} #{pip_cert_option} #{pip_cheese_shop_option}"
+    not_if {
+      get_version =
+        Mixlib::ShellOut.new("/usr/local/bin/pip show #{package_name} | " \
+                             "grep ^Version | awk '{print $2}'")
+      min_version = Gem::Version.new(min_version)
+      actual_version = Gem::Version.new(get_version.run_command.stdout.chomp)
+      actual_version >= min_version
+    }
+  end
 end
 
-execute 'new-pip-install-pip2pi' do
-  command "/usr/local/bin/pip #{pip_proxy_option} #{pip_cert_option} " +
-   "install pip2pi"
-  not_if {
-    get_version =
-      Mixlib::ShellOut.new("pip show pip2pi | grep ^Version | " +
-                           "awk '{print $2}'")
-    target_version = Gem::Version.new('0.6.8')
-    actual_version = Gem::Version.new(get_version.run_command.stdout.chomp)
-    actual_version >= target_version
-  }
-end
-
-execute "dir2pi" do
+execute 'dir2pi' do
   cwd bins_dir
   command 'dir2pi python'
 end

@@ -26,9 +26,7 @@ if keepalived_password.nil?
   keepalived_password = secure_password
 end
 
-bootstrap = get_bootstrap
-results = get_nodes_for("keepalived").map!{ |x| x['fqdn'] }.join(",")
-nodes = results == "" ? node['fqdn'] : results
+keepalived_admins = (get_head_node_names + [get_bootstrap]).join(',')
 
 chef_vault_secret "keepalived" do
   #
@@ -36,10 +34,10 @@ chef_vault_secret "keepalived" do
   # This will probably break if we ever move to chef-vault cookbook 2.x
   #
   provider ChefVaultCookbook::Provider::ChefVaultSecret
-  
+
   data_bag 'os'
   raw_data({ 'password' => keepalived_password })
-  admins "#{ nodes },#{ bootstrap }"
+  admins keepalived_admins
   search '*:*'
   action :nothing
 end.run_action(:create_if_missing)

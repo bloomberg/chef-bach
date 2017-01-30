@@ -13,23 +13,23 @@ end
 
 [
  {
-  kafka_version: '0.9.0.1',
+  kafka_version: '0.10.1.1',
   scala_version: '2.11',
-  checksum: 'db28f4d5a9327711013c26632baed8e905ce2f304df89a345f25a6dfca966c7a'
+  checksum: '1540800779429d8f0a08be7b300e4cb6500056961440a01c8dbb281db76f0929'
  }
 ].each do |hash|
   versioned_dir = File.join(kafka_bins_dir,hash[:kafka_version])
-  
+
   directory versioned_dir do
     mode 0555
   end
 
   file_name = "kafka_#{hash[:scala_version]}-#{hash[:kafka_version]}.tgz"
-  
+
   remote_file "#{versioned_dir}/#{file_name}" do
     source "https://archive.apache.org/dist/kafka/#{hash[:kafka_version]}" +
       "/#{file_name}"
-    checksum checksum    
+    checksum hash[:checksum]
     mode 0444
   end
 end

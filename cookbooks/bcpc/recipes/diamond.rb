@@ -60,7 +60,7 @@ template "/etc/diamond/diamond.conf" do
     owner "diamond"
     group "root"
     mode 00600
-    variables( :servers => get_head_nodes, :has_mysql => has_mysql )
+    variables( :servers => get_head_node_names, :has_mysql => has_mysql )
     notifies :restart, "service[diamond]", :delayed
 end
 

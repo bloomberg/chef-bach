@@ -1,0 +1,6 @@
+bcpc-vm1 08:00:27:56:A2:28 10.0.100.11 - bcpc_host_trusty bcpc.example.com role[Basic],role[BCPC-Kafka-Head-Zookeeper]
+bcpc-vm2 08:00:27:E5:3A:00 10.0.100.12 - bcpc_host_trusty bcpc.example.com role[Basic],role[BCPC-Kafka-Head-Zookeeper]
+bcpc-vm3 08:00:27:AD:1D:EA 10.0.100.13 - bcpc_host_trusty bcpc.example.com role[Basic],role[BCPC-Kafka-Head-Zookeeper]
+bcpc-vm4 08:00:27:AD:1D:EB 10.0.100.14 - bcpc_host_trusty bcpc.example.com role[Basic],role[BCPC-Kafka-Head-Server]
+bcpc-vm5 08:00:27:AD:1D:EC 10.0.100.15 - bcpc_host_trusty bcpc.example.com role[Basic],role[BCPC-Kafka-Head-Server]
+bcpc-vm6 08:00:27:AD:1D:ED 10.0.100.16 - bcpc_host_trusty bcpc.example.com role[Basic],role[BCPC-Kafka-Head-Server]

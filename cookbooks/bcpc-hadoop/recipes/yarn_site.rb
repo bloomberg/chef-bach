@@ -2,41 +2,26 @@ if node['bcpc']['hadoop']['yarn']['yarn.log-aggregation.retain-days'] == -1
   node.default['bcpc']['hadoop']['yarn']['site_xml']['yarn.log-aggregation.retain-seconds'] = -1
 else
   node.default['bcpc']['hadoop']['yarn']['site_xml']['yarn.log-aggregation.retain-seconds'] =
-                                   60 * 60 * 24 * node['bcpc']['hadoop']['yarn']['yarn.log-aggregation.retain-days']
+    60 * 60 * 24 * node['bcpc']['hadoop']['yarn']['yarn.log-aggregation.retain-days']
 end
 
 yarn_site_values = node[:bcpc][:hadoop][:yarn][:site_xml]
+node.run_state[:yarn_site_generated_values] = {}
 
 node.default[:bcpc][:hadoop][:yarn][:aux_services][:mapreduce_shuffle][:class] =
   'org.apache.hadoop.mapred.ShuffleHandler'
 
 if node.run_list.expand(node.chef_environment).recipes
-                  .include?('bach_spark::default')
+    .include?('bach_spark::default')
   node.default[:bcpc][:hadoop][:yarn][:aux_services][:spark_shuffle][:class] =
     'org.apache.spark.network.yarn.YarnShuffleService'
 end
 
-mounts = node[:bcpc][:hadoop][:mounts]
-yarn_site_generated_values =
-{
- 'yarn.nodemanager.local-dirs' =>
-   mounts.map{ |d| "/disk/#{d}/yarn/local" }.join(','),
-
- 'yarn.nodemanager.log-dirs' =>
-   mounts.map{ |d| "/disk/#{d}/yarn/logs" }.join(','),
-
- 'yarn.nodemanager.aux-services' =>
-   node[:bcpc][:hadoop][:yarn][:aux_services].keys.join(','),
-
- 'yarn.scheduler.minimum-allocation-mb' =>
-   node['bcpc']['hadoop']['yarn']['scheduler']['minimum-allocation-mb']
-}
-
-yarn_aux_services = 
+yarn_aux_services =
   node[:bcpc][:hadoop][:yarn][:aux_services].map do |k, cls_v|
-    { "yarn.nodemanager.aux-services.#{k}.class" => cls_v['class'] }
-  end.reduce({},:merge)
-yarn_site_generated_values.merge!(yarn_aux_services)
+  { "yarn.nodemanager.aux-services.#{k}.class" => cls_v['class'] }
+end.reduce({},:merge)
+node.run_state[:yarn_site_generated_values].merge!(yarn_aux_services)
 
 #
 # ResourceManager and Zookeeper host objects
@@ -75,31 +60,31 @@ if rm_hosts.length >= 2
     rm_name = "rm#{node.chef_environment}#{h[:node_number]}"
     rm_target = float_host(h[:hostname])
     {
-     'yarn.resourcemanager.hostname.' + rm_name =>
-       rm_target,
-     'yarn.resourcemanager.resource-tracker.address.' + rm_name =>
-       rm_target + ':8031',
-     'yarn.resourcemanager.address.' + rm_name =>
-       rm_target + ':' +
-       node["bcpc"]["hadoop"]["yarn"]["resourcemanager"]["port"].to_s,
-     'yarn.resourcemanager.scheduler.address.' + rm_name =>
-       rm_target + ':8030',
-     'yarn.resourcemanager.admin.address.' + rm_name =>
-       rm_target + ':8033',
-     'yarn.resourcemanager.webapp.address.' + rm_name =>
-       rm_target + ':8088',
-     'yarn.resourcemanager.webapp.https.address.' + rm_name =>
-       rm_target + ':8090',
+      'yarn.resourcemanager.hostname.' + rm_name =>
+        rm_target,
+        'yarn.resourcemanager.resource-tracker.address.' + rm_name =>
+        rm_target + ':8031',
+        'yarn.resourcemanager.address.' + rm_name =>
+        rm_target + ':' +
+        node["bcpc"]["hadoop"]["yarn"]["resourcemanager"]["port"].to_s,
+        'yarn.resourcemanager.scheduler.address.' + rm_name =>
+        rm_target + ':8030',
+        'yarn.resourcemanager.admin.address.' + rm_name =>
+        rm_target + ':8033',
+        'yarn.resourcemanager.webapp.address.' + rm_name =>
+        rm_target + ':8088',
+        'yarn.resourcemanager.webapp.https.address.' + rm_name =>
+        rm_target + ':8090',
     }
   }.reduce({},:merge)
-  # Finally, the single hash is merged into rm_properties.  
+  # Finally, the single hash is merged into rm_properties.
   rm_properties.merge!(rm_nodes)
 
-  yarn_site_generated_values.merge!(rm_properties)
-  
-# If the node search found no ResourceManagers at all, insert no values.
+  node.run_state[:yarn_site_generated_values].merge!(rm_properties)
+
+  # If the node search found no ResourceManagers at all, insert no values.
 elsif rm_hosts.empty?
-  rm_properties = 
+  rm_properties =
     {
      'yarn.resourcemanager.address' => '',
      'yarn.resourcemanager.admin.address' => '',
@@ -108,9 +93,9 @@ elsif rm_hosts.empty?
      'yarn.resourcemanager.webapp.address' => '',
      'yarn.resourcemanager.webapp.https.address' => '',
     }
-  yarn_site_generated_values.merge!(rm_properties)
+  node.run_state[:yarn_site_generated_values].merge!(rm_properties)
 
-# If we have fewer than two RMs, but more than none, insert non-HA properties.
+  # If we have fewer than two RMs, but more than none, insert non-HA properties.
 else
   rm_target = float_host(rm_hosts.first[:hostname])
   rm_properties =
@@ -129,16 +114,16 @@ else
      'yarn.resourcemanager.webapp.https.address' =>
        "#{rm_target}:8090",
     }
-  yarn_site_generated_values.merge!(rm_properties)
+  node.run_state[:yarn_site_generated_values].merge!(rm_properties)
 end
 
 if node.run_list.expand(node.chef_environment).recipes
     .include?('bcpc-hadoop::datanode')
-  
+
   nm_properties =
     {
      'yarn.nodemanager.recovery.enabled' => true,
-     
+
      'yarn.nodemanager.address' =>
        float_host(node[:hostname]) + ':' +
        node["bcpc"]["hadoop"]["yarn"]["nodemanager"]["port"].to_s,
@@ -149,21 +134,21 @@ if node.run_list.expand(node.chef_environment).recipes
      'yarn.nodemanager.hostname' =>
        float_host(node[:hostname]),
     }
-  
 
-  yarn_site_generated_values.merge!(nm_properties)
+
+  node.run_state[:yarn_site_generated_values].merge!(nm_properties)
 end
 
 if node.run_list.expand(node.chef_environment).recipes
     .include?('bcpc-hadoop::resource_manager')
-  
+
   rm_properties =
     {
      'yarn.resourcemanager.bind-host' =>
        node[:bcpc][:floating][:ip],
     }
-  
-  yarn_site_generated_values.merge!(rm_properties)
+
+  node.run_state[:yarn_site_generated_values].merge!(rm_properties)
 end
 
 if node[:bcpc][:hadoop][:kerberos][:enable]
@@ -185,7 +170,7 @@ if node[:bcpc][:hadoop][:kerberos][:enable]
 
   if kerberos_data[:nodemanager][:princhost] == '_HOST'
     kerberos_host = if node.run_list.expand(node.chef_environment).recipes
-                      .include?('bcpc-hadoop::datanode')
+                        .include?('bcpc-hadoop::datanode')
                       float_host(node[:fqdn])
                     else
                       '_HOST'
@@ -201,20 +186,20 @@ if node[:bcpc][:hadoop][:kerberos][:enable]
   if kerberos_data[:resourcemanager][:princhost] == '_HOST'
     kerberos_host = '_HOST'
   else
-    kerberos_host = kerberos_data[:resourcemanager][:princhost] 
+    kerberos_host = kerberos_data[:resourcemanager][:princhost]
   end
 
   rm_kerberos_principal =
     kerberos_data[:resourcemanager][:principal] + '/' + kerberos_host + '@' +
-    node[:bcpc][:hadoop][:kerberos][:realm] 
+    node[:bcpc][:hadoop][:kerberos][:realm]
 
-  yarn_site_generated_values.merge!({'yarn.nodemanager.principal' =>
-                                     nm_kerberos_principal})
+  node.run_state[:yarn_site_generated_values].merge!({'yarn.nodemanager.principal' =>
+                                                      nm_kerberos_principal})
 
-  yarn_site_generated_values.merge!({'yarn.resourcemanager.principal' =>
-                                     rm_kerberos_principal})
-  
-  yarn_site_generated_values.merge!(kerberos_properties)
+  node.run_state[:yarn_site_generated_values].merge!({'yarn.resourcemanager.principal' =>
+                                                      rm_kerberos_principal})
+
+  node.run_state[:yarn_site_generated_values].merge!(kerberos_properties)
 end
 
 # This is another set of cached node searches.
@@ -224,15 +209,36 @@ if not hs_hosts.empty?
     float_host(hs_hosts.map{ |h| h[:hostname] }.sort.first) +
     ':19888' + '/jobhistory/logs'
 
-  yarn_site_generated_values.merge!({'yarn.log.server.url' =>
-                                     yarn_log_server_url})
+  node.run_state[:yarn_site_generated_values].merge!({'yarn.log.server.url' =>
+                                                      yarn_log_server_url})
 end
 
-complete_yarn_site_hash =
-  yarn_site_generated_values.merge(yarn_site_values)
+ruby_block 'yarn_site_generated_values' do
+  block do
+    mounts = node.run_state[:bcpc_hadoop_disks][:mounts]
+    directory_values =
+    {
+     'yarn.nodemanager.local-dirs' =>
+       mounts.map{ |d| "/disk/#{d}/yarn/local" }.join(','),
 
-template "/etc/hadoop/conf/yarn-site.xml" do
-  source "generic_site.xml.erb"
+     'yarn.nodemanager.log-dirs' =>
+       mounts.map{ |d| "/disk/#{d}/yarn/logs" }.join(','),
+
+     'yarn.nodemanager.aux-services' =>
+       node[:bcpc][:hadoop][:yarn][:aux_services].keys.join(','),
+
+     'yarn.scheduler.minimum-allocation-mb' =>
+       node['bcpc']['hadoop']['yarn']['scheduler']['minimum-allocation-mb']
+    }
+    node.run_state[:yarn_site_generated_values].merge!(directory_values)
+
+    # At this point, the complete set of values is in this run_state var.
+    node.run_state[:yarn_site_generated_values].merge!(yarn_site_values)
+  end
+end
+
+template '/etc/hadoop/conf/yarn-site.xml' do
+  source 'generic_site.xml.erb'
   mode 0644
-  variables(:options => complete_yarn_site_hash)
+  variables lazy{{ options: node.run_state[:yarn_site_generated_values]}}
 end

@@ -19,7 +19,7 @@ cookbooks/*/
 !cookbooks/bcpc-hadoop
 !cookbooks/bcpc_jmxtrans
 !cookbooks/hannibal
-!cookbooks/kafka-bcpc
+!cookbooks/bcpc_kafka
 !cookbooks/bach_krb5
 cookbooks/*/coverage
 cookbooks/*/vendor

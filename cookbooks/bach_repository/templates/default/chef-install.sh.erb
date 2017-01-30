@@ -7,10 +7,15 @@
 # The script is generated from a Chef template, which inserts the
 # bootstrap host URL.
 #
-
 set -e
 
 DEB_FILE=`mktemp -t chef-install-XXXXX.deb`
 wget -O "$DEB_FILE" "<%= @download_url %>" 2> /tmp/wget.err
-dpkg -i "$DEB_FILE"
-rm "$DEB_FILE"
+
+if sha256sum "$DEB_FILE" | grep -q <%= @sha256sum %>; then
+    dpkg -i "$DEB_FILE"
+    rm "$DEB_FILE"
+else
+    echo 'Checksum did not match for <%= @download_url %>!'
+    exit 1
+fi

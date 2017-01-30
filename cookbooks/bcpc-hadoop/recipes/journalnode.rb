@@ -13,64 +13,76 @@ hdppath="/usr/hdp/#{hdprel}"
   hdp_select(pkg, hdprel)
 end
 
-[node[:bcpc][:hadoop][:mounts].first].each do |d|
-  directory "/disk/#{d}/dfs/jn" do
-    owner "hdfs"
-    group "hdfs"
-    mode 0755
-    action :create
-    recursive true
+ruby_block 'setup-jn-data' do
+  block do
+    jndisk="/disk/#{node.run_state[:bcpc_hadoop_disks][:mounts][0]}"
+    jnfile="/dfs/jn/#{node.chef_environment}/current/VERSION"
+    jncurrent="/dfs/jn/#{node.chef_environment}/current"
+    jnfile2chk=jndisk + jnfile
+
+    Chef::Resource::Directory.new("#{jndisk}/dfs/jn/",
+                                  node.run_context).tap do |dd|
+      dd.owner 'hdfs'
+      dd.group 'hdfs'
+      dd.mode 0755
+      dd.recursive true
+      dd.run_action :create
+    end
+
+    Chef::Resource::Directory.new("#{jndisk}/dfs/jn/#{node.chef_environment}",
+                                  node.run_context).tap do |dd|
+      dd.owner 'hdfs'
+      dd.group 'hdfs'
+      dd.mode 0755
+      dd.recursive true
+      dd.run_action :create
+    end
+
+    if get_config('jn_txn_fmt') && !File.exists?(jnfile2chk) then
+      Chef::Resource::File.new("#{Chef::Config[:file_cache_path]}/jn_fmt.tgz",
+                               node.run_context).tap do |ff|
+        ff.user 'hdfs'
+        ff.group 'hdfs'
+        ff.mode 0644
+        ff.content Base64.decode64(get_config('jn_txn_fmt'))
+        ff.run_action(:create)
+      end
+
+
+      bash "unpack-jn-fmt-image-to-disk-#{jndisk}" do
+        user "root"
+        cwd "#{jndisk}/dfs/"
+        code "tar xzvf #{Chef::Config[:file_cache_path]}/jn_fmt.tgz;"
+      end
+
+      #
+      # Our dynamic resources don't exist in the resource collection, so
+      # we have to have the ruby_block resource itself handle
+      # notifications.
+      #
+      self.notifies :restart, 'service[hadoop-hdfs-journalnode]'
+      self.resolve_notification_resources
+
+      Chef::Resource::Bash.new('change-ownership-for-jnfile',
+                               node.run_context).tap do |bb|
+        bb.user 'root'
+        bb.cwd "#{jndisk}/dfs/jn"
+        bb.code "chown -R hdfs:hdfs #{node.chef_environment}"
+        bb.run_action :run
+      end
+    end
+
+    if File.exists?(jnfile2chk)
+      Chef::Resource::Directory.new("#{jndisk}#{jncurrent}/paxos",
+                                    node.run_context).tap do |dd|
+        dd.owner 'hdfs'
+        dd.group 'hdfs'
+        dd.mode 0755
+        dd.recursive true
+        dd.run_action :create
+      end
+    end
   end
-
-  directory "/disk/#{d}/dfs/jn/#{node.chef_environment}" do
-    owner "hdfs"
-    group "hdfs"
-    mode 0755
-    action :create
-    recursive true
-  end
-
-end
-
-jndisk="/disk/#{node[:bcpc][:hadoop][:mounts][0]}"
-jnfile="/dfs/jn/#{node.chef_environment}/current/VERSION"
-jncurrent="/dfs/jn/#{node.chef_environment}/current"
-jnfile2chk=jndisk + jnfile
-
-if get_config("jn_txn_fmt") then
-  file "#{Chef::Config[:file_cache_path]}/jn_fmt.tgz" do
-    user "hdfs"
-    group "hdfs"
-    user 0644
-    content Base64.decode64(get_config("jn_txn_fmt"))
-    not_if{File.exists?(jnfile2chk)}
-  end
-end
-
-bash "unpack-jn-fmt-image-to-disk-#{jndisk}" do
-  user "root"
-  cwd "#{jndisk}/dfs/"
-  code "tar xzvf #{Chef::Config[:file_cache_path]}/jn_fmt.tgz;"
-  notifies :restart, "service[hadoop-hdfs-journalnode]"
-  notifies :run, "bash[change-ownership-for-jnfile]", :immediate
-  only_if{not get_config("jn_txn_fmt").nil? and not 
-  File.exists?(jnfile2chk)}
-end
-
-bash "change-ownership-for-jnfile" do
-  user "root"
-  cwd "#{jndisk}/dfs/jn"
-  code "chown -R hdfs:hdfs #{node.chef_environment}"
-  action :nothing
-end
-
-directory "#{jndisk}#{jncurrent}/paxos" do
-  owner "hdfs"
-  group "hdfs"
-  mode 0755
-  action :create
-  recursive true
-  only_if { File.exists?(jnfile2chk) }
 end
 
 # need to ensure hdfs user is in hadoop and hdfs
@@ -96,8 +108,8 @@ node[:bcpc][:hadoop][:os][:group].keys.each do |group_name|
     action :nothing
   end
 end
-  
-# Take action on each group resource based on its existence 
+
+# Take action on each group resource based on its existence
 ruby_block 'create_or_manage_groups' do
   block do
     node[:bcpc][:hadoop][:os][:group].keys.each do |group_name|

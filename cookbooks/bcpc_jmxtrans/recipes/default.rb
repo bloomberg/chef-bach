@@ -4,8 +4,22 @@
 #
 # Copyright 2014, Bloomberg L.P
 #
-# All rights reserved 
+# All rights reserved
 #
+gem_path = Pathname.new(Gem.ruby).dirname.join('gem').to_s
+
+gem_package 'chef-rewind' do
+  #
+  # Options MUST be specified as a string, not a hash.
+  # Using gem_binary with hash options results in undefined behavior.
+  #
+  options "--clear-sources -s #{get_binary_server_url}"
+  gem_binary gem_path
+  version '>0.0'
+  action :nothing
+end.run_action(:install)
+
+require 'chef/rewind'
 
 #
 # Logic to include the node ip so that the JMXTrans JSON file can be genereated correctly
@@ -43,6 +57,15 @@ sw_download_url = get_binary_server_url
 node.default['jmxtrans']['url'] = "#{sw_download_url}"
 
 include_recipe 'jmxtrans'
+
+#
+# The jmxtrans cookbook v2.0 omits a checksum on its ark
+# resource, so we rewind it to re-add it.
+#
+rewind 'ark[jmxtrans]' do
+  checksum node['jmxtrans']['checksum']
+end
+
 #
 # Get an array of hosts which are garphite heads
 #
@@ -66,7 +89,7 @@ graphite_hosts.each do |host|
   end
 end
 #
-# Add services of processes on this node from which jmx data are collected by jmxtrans 
+# Add services of processes on this node from which jmx data are collected by jmxtrans
 #
 node['jmxtrans']['servers'].each do |server|
   jmx_services.push(server['service'])
@@ -81,9 +104,9 @@ service "restart jmxtrans on dependent service" do
   supports :restart => true, :status => true, :reload => true
   action   :restart
   #
-  # Using the services array generate chef service resources to restart when the monitored services are restarted 
+  # Using the services array generate chef service resources to restart when the monitored services are restarted
   #
-  jmx_services.each do |jmx_dep_service| 
+  jmx_services.each do |jmx_dep_service|
     subscribes :restart, "service[#{jmx_dep_service}]", :delayed
   end
   # Run if we see a service was restarted (either manually or from a service restart subscribed above)
