@@ -97,8 +97,4 @@ else
     action [:stop, :disable]
     ignore_failure true
   end
-
-  execute 'killall bfdd-beacon' do
-    ignore_failure true
-  end
 end
