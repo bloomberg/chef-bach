@@ -35,6 +35,29 @@ node.default[:kafka][:broker][:zookeeper][:connect] = get_head_nodes.map do |nn|
   float_host(nn[:fqdn])
 end
 
+#
+# This is a list of paths for the kafka logs (actual topic data)
+#
+# The path for human-readable logs (information about what kafka is
+# doing) is found in node[:kafka][:log_dir]
+#
+# Unfortunately this cannot be a lazy block (Chef::DelayedEvaluator)
+# because the upstream kafka cookbook expects to examine log directory
+# values at compile time.
+#
+# As a result, the first chef run will configure Kafka to use only one
+# data volume, the fallback path of /disk/0.
+#
+data_volumes = Dir.glob('/disk/*').select{ |pp| ::File.directory?(pp) }
+
+if data_volumes.empty?
+  data_volumes << '/disk/0'
+end
+
+node.default[:kafka][:broker][:log][:dirs] = data_volumes.map do |dd|
+  File.join(dd, 'kafka', 'data')
+end
+
 include_recipe 'bcpc_kafka::default'
 include_recipe 'kafka::default'
 

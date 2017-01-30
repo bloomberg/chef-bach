@@ -55,14 +55,6 @@ default[:kafka][:broker].tap do |broker|
   # many?
   #
   broker[:num][:replica][:fetchers] = 8
-
-  #
-  # This is a list of paths for the kafka logs, i.e. the actual data.
-  #
-  # The path for human-readable logs of what kafka is doing are in
-  # node[:kafka][:log_dir]
-  #
-  broker[:log][:dirs] = '/disk/1/kafka'
 end
 
 #
@@ -75,7 +67,9 @@ default[:kafka][:checksum] =
   '1540800779429d8f0a08be7b300e4cb6500056961440a01c8dbb281db76f0929'
 
 default[:kafka][:md5_checksum] = ''
-default[:kafka][:log_dir] = '/var/log/kafka'
 
+#
 # This is the path to human-readable log files, not kafka log data.
-default[:kafka][:log_dir] = '/disk/0/kafka'
+# (/disk/0 is a mount point created by the bcpc-hadoop::disks recipe)
+#
+default[:kafka][:log_dir] = '/disk/0/kafka/logs'
