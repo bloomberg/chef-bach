@@ -15,3 +15,4 @@ roles
 src
 vendor
 vbox
+precise-server-cloudimg-amd64-vagrant-disk1.box
