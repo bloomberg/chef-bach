@@ -99,7 +99,7 @@ configure_kerberos 'namenode_kerb' do
   service_name 'namenode'
 end
 
-if @node['bcpc']['hadoop']['hdfs']['HA'] == true then
+if node['bcpc']['hadoop']['hdfs']['HA'] == true then
   bash "#{hdfs_cmd} namenode -bootstrapStandby -force -nonInteractive" do
     code "#{hdfs_cmd} namenode -bootstrapStandby -force -nonInteractive"
     user "hdfs"
