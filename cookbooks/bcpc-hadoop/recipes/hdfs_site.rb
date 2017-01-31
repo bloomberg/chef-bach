@@ -12,8 +12,9 @@ ruby_block "hdfs_site_generated_values_common" do
        .map{ |d| "file:///disk/#{d}/dfs/nn" }.join(','),
 
      "dfs.ha.namenodes.#{node.chef_environment}" =>
-       node[:bcpc][:hadoop][:nn_hosts]
-       .map{ |s| "namenode#{s[:node_number]}" }.join(','),
+       get_namenodes
+       .select{ |nn| nn[:bcpc][:node_number] }
+       .map{ |nn| "namenode#{nn[:bcpc][:node_number]}" }.join(','),
 
      'dfs.datanode.data.dir' =>
        node.run_state[:bcpc_hadoop_disks][:mounts]
@@ -58,21 +59,21 @@ ruby_block "hdfs_site_generated_values_nn_properties" do
   block do
     # Using 'map', a hash is built for each host.
     # Using 'reduce', all host hashes are consolidated into a single hash.
-    namenode_properties = node[:bcpc][:hadoop][:nn_hosts].map do |host|
+    namenode_properties = get_namenodes.map do |host|
       {
        'dfs.namenode.rpc-address.' + node.chef_environment +
-         '.namenode' + host[:node_number].to_s =>
-         float_host(host[:hostname]) + ':' +
+         '.namenode' + host[:bcpc][:node_number].to_s =>
+         float_host(host[:fqdn]) + ':' +
          node[:bcpc][:hadoop][:namenode][:rpc][:port].to_s,
 
        'dfs.namenode.http-address.' + node.chef_environment +
-         '.namenode' + host[:node_number].to_s =>
-         float_host(host[:hostname]) + ':' +
+         '.namenode' + host[:bcpc][:node_number].to_s =>
+         float_host(host[:fqdn]) + ':' +
          node[:bcpc][:hadoop][:namenode][:http][:port].to_s,
 
        'dfs.namenode.https-address.' + node.chef_environment +
-         '.namenode' + host[:node_number].to_s =>
-         float_host(host[:hostname]) + ':' +
+         '.namenode' + host[:bcpc][:node_number].to_s =>
+         float_host(host[:fqdn]) + ':' +
          node[:bcpc][:hadoop][:namenode][:https][:port].to_s,
       }
     end.reduce({},:merge)

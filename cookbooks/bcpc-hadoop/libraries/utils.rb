@@ -186,19 +186,9 @@ def znode_exists?(znode_path, zk_host="localhost:2181")
 end
 
 #
-# Library function to get attributes from all namenode node object
-#
-def get_namenode_attr
-  all_node_attr = get_namenodes()
-  ret = get_req_node_attributes(all_node_attr,HOSTNAME_NODENO_ATTR_SRCH_KEYS)
-  return ret
-end
-
-#
 # Function to retrieve commonly used node attributes so that the call to chef server is minimized
 #
 def set_hosts
-  node.default[:bcpc][:hadoop][:nn_hosts] = get_namenode_attr()
   node.default[:bcpc][:hadoop][:zookeeper][:servers] = get_node_attributes(HOSTNAME_NODENO_ATTR_SRCH_KEYS,"zookeeper_server","bcpc-hadoop")
   node.default[:bcpc][:hadoop][:jn_hosts] = get_node_attributes(HOSTNAME_ATTR_SRCH_KEYS,"journalnode","bcpc-hadoop")
   node.default[:bcpc][:hadoop][:rm_hosts] = get_node_attributes(HOSTNAME_NODENO_ATTR_SRCH_KEYS,"resource_manager","bcpc-hadoop")

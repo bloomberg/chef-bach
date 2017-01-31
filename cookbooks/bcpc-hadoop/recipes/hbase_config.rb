@@ -24,22 +24,9 @@ else
  dns_server = node[:bcpc][:dns_servers][0]
 end
 
-%w{hadoop-metrics2-hbase.properties}.each do |t|
-   template "/etc/hbase/conf/#{t}" do
-     source "hb_#{t}.erb"
-     mode 0644
-     variables lazy{{:nn_hosts => node[:bcpc][:hadoop][:nn_hosts],
-                     :zk_hosts => node[:bcpc][:hadoop][:zookeeper][:servers],
-                     :jn_hosts => node[:bcpc][:hadoop][:jn_hosts],
-                     :rs_hosts => node[:bcpc][:hadoop][:rs_hosts],
-                     :master_hosts => node[:bcpc][:hadoop][:hb_hosts],
-                     :mounts => node.run_state[:bcpc_hadoop_disks][:mounts],
-                     :hbm_jmx_port =>
-                       node[:bcpc][:hadoop][:hbase_master][:jmx][:port],
-                     :hbrs_jmx_port =>
-                       node[:bcpc][:hadoop][:hbase_rs][:jmx][:port],
-                     :dns_server => dns_server}}
-  end
+template '/etc/hbase/conf/hadoop-metrics2-hbase.properties' do
+  source 'hb_hadoop-metrics2-hbase.properties.erb'
+  mode 0644
 end
 
 # thse are rendered as is
