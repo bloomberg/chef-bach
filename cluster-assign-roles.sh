@@ -102,7 +102,7 @@ function install_stub {
 # * Installs stubs (create chef nodes and setup networking) for all machines in parallel
 # * Set all headnode to admins
 # * Assigns roles for headnodes
-# * Installs headnodes sorted by role
+# * Installs headnodes
 # * Unsets all headnode from being admins
 # * Installs worknodes in parallel
 function hadoop_install {
@@ -112,10 +112,10 @@ function hadoop_install {
   # to prevent needing to re-chef headnodes the Hadoop code base assumes
   # all nodes and clients have been created and further that all roles
   # have been assigned before any node Chefing begins
-  install_stub $(printf ${hosts// /\\n} | sort)
+  install_stub $(printf ${hosts// /\\n})
 
   printf "Assigning roles for headnodes...\n"
-  for h in $(printf ${hosts// /\\n} | grep -i "BCPC-Hadoop-Head" | sort); do
+  for h in $(printf ${hosts// /\\n} | grep -i "BCPC-Hadoop-Head"); do
     [[ "$h" =~ $REGEX ]]
     local role="${BASH_REMATCH[1]}"
     local ip="${BASH_REMATCH[2]}"
@@ -124,7 +124,7 @@ function hadoop_install {
   done
 
   # set the headnodes to admin for creating data bags
-  for h in $(printf ${hosts// /\\n} | grep -i "BCPC-Hadoop-Head" | sort); do
+  for h in $(printf ${hosts// /\\n} | grep -i "BCPC-Hadoop-Head"); do
     [[ "$h" =~ $REGEX ]]
     printf "/\"admin\": false\ns/false/true\nw\nq\n" | EDITOR=ed sudo -E knife client edit "${BASH_REMATCH[3]}" $KNIFE_ADMIN || /bin/true
   done
@@ -143,7 +143,7 @@ function hadoop_install {
 
     printf "Installing heads...\n"
     for cntr in {1..2}; do
-      for m in $(printf ${hosts// /\\n} | grep -i "BCPC-Hadoop-Head*" | sort); do
+      for m in $(printf ${hosts// /\\n} | grep -i "BCPC-Hadoop-Head*"); do
         [[ "$m" =~ $REGEX ]]
         local fqdn="${BASH_REMATCH[3]}"
         # authenticate the node one by one
@@ -155,7 +155,7 @@ function hadoop_install {
   fi
 
   # remove admin from the headnodes
-  for h in $(printf ${hosts// /\\n} | grep -i "BCPC-Hadoop-Head" | sort); do
+  for h in $(printf ${hosts// /\\n} | grep -i "BCPC-Hadoop-Head"); do
     [[ "$h" =~ $REGEX ]]
     printf "/\"admin\": true\ns/true/false\nw\nq\n" | EDITOR=ed sudo -E knife client edit "${BASH_REMATCH[3]}" $KNIFE_ADMIN 
   done
@@ -166,7 +166,7 @@ function hadoop_install {
     rm -f $status_file
   }
   trap clean_up_status_file EXIT
-  for m in $(printf ${hosts// /\\n} | grep -i "BCPC-Hadoop-Worker" | sort); do
+  for m in $(printf ${hosts// /\\n} | grep -i "BCPC-Hadoop-Worker"); do
     [[ "$m" =~ $REGEX ]]
     local fqdn="${BASH_REMATCH[3]}"
     # authenticate the node one by one
@@ -198,10 +198,10 @@ function bootstrap_install {
   # to prevent needing to re-chef headnodes the Hadoop code base assumes
   # all nodes and clients have been created and further that all roles
   # have been assigned before any node Chefing begins
-  install_stub $(printf ${hosts// /\\n} | sort)
+  install_stub $(printf ${hosts// /\\n})
 
   printf "Assigning roles for headnodes...\n"
-  for h in $(printf ${hosts// /\\n} | grep -i "BCPC-Hadoop-Head" | sort); do
+  for h in $(printf ${hosts// /\\n} | grep -i "BCPC-Hadoop-Head"); do
     [[ "$h" =~ $REGEX ]]
     local role="role[BCPC-Hadoop-Head]"
     local ip="${BASH_REMATCH[2]}"
@@ -210,14 +210,14 @@ function bootstrap_install {
   done
 
   # set the headnodes to admin for creating data bags
-  for h in $(printf ${hosts// /\\n} | grep -i "BCPC-Hadoop-Head" | sort); do
+  for h in $(printf ${hosts// /\\n} | grep -i "BCPC-Hadoop-Head"); do
     [[ "$h" =~ $REGEX ]]
     printf "/\"admin\": false\ns/false/true\nw\nq\n" | EDITOR=ed sudo -E knife client edit "${BASH_REMATCH[3]}" $KNIFE_ADMIN || /bin/true
   done
 
   printf "Bootstrapping heads...\n"
   for c in {1..2}; do
-    for m in $(printf ${hosts// /\\n} | grep -i "BCPC-Hadoop-Head"| sort); do
+    for m in $(printf ${hosts// /\\n} | grep -i "BCPC-Hadoop-Head"); do
       [[ "$m" =~ $REGEX ]]
       local fqdn="${BASH_REMATCH[3]}"
       # authenticate the node one by one
@@ -229,7 +229,7 @@ function bootstrap_install {
   done
 
   # remove admin from the headnodes
-  for h in $(printf ${hosts// /\\n} | grep -i "BCPC-Hadoop-Head" | sort); do
+  for h in $(printf ${hosts// /\\n} | grep -i "BCPC-Hadoop-Head"); do
     [[ "$h" =~ $REGEX ]]
     printf "/\"admin\": true\ns/true/false\nw\nq\n" | EDITOR=ed sudo -E knife client edit "${BASH_REMATCH[3]}" $KNIFE_ADMIN
   done
@@ -243,18 +243,18 @@ function bootstrap_install {
 # * Set all kafka headnode to admins
 # * Assigns kafka roles for headnodes
 # * Waits for solr index to get updated run list for search
-# * Installs kafka zookeepeer headnodes sorted by role
-# * Installs kafka server headnodes sorted by role
+# * Installs kafka zookeepeer headnodes 
+# * Installs kafka server headnodes
 # * Unsets all headnode from being admins
 function kafka_install {
   local hosts="$*"
   shopt -u nocasematch
   printf "Doing Kafka install...\n"
 
-  install_stub $(printf ${hosts// /\\n} | sort)
+  install_stub $(printf ${hosts// /\\n})
 
   # set the headnodes to admin for creating data bags
-  for h in $(printf ${hosts// /\\n} | grep -i "BCPC-Kafka-Head" | sort); do
+  for h in $(printf ${hosts// /\\n} | grep -i "BCPC-Kafka-Head"); do
     [[ "$h" =~ $REGEX ]]
     printf "/\"admin\": false\ns/false/true\nw\nq\n" | EDITOR=ed sudo -E knife client edit "${BASH_REMATCH[3]}" $KNIFE_ADMIN || /bin/true
   done
@@ -262,7 +262,7 @@ function kafka_install {
   # Setting run list for Kafka-Zookeeper and Kafka-Server head nodes that allows Solr to get updated
   # before chef-client runs and searches for nodes
   printf "Assigning roles for Kafka head nodes...\n"
-  for h in $(printf ${hosts// /\\n} | grep -i "BCPC-Kafka-Head" | sort); do
+  for h in $(printf ${hosts// /\\n} | grep -i "BCPC-Kafka-Head"); do
     [[ "$h" =~ $REGEX ]]
     local role="${BASH_REMATCH[1]}"
     local ip="${BASH_REMATCH[2]}"
@@ -280,7 +280,7 @@ function kafka_install {
     done
 
     printf "Installing kafka zookeeper heads...\n"
-    for m in $(printf ${hosts// /\\n} | grep -i "BCPC-Kafka-Head-Zookeeper" | sort); do
+    for m in $(printf ${hosts// /\\n} | grep -i "BCPC-Kafka-Head-Zookeeper"); do
       [[ "$m" =~ $REGEX ]]
       local fqdn="${BASH_REMATCH[3]}"
       # authenticate the node one by one
@@ -291,7 +291,7 @@ function kafka_install {
   fi
 
   printf "Installing kafka server heads...\n"
-  for m in $(printf ${hosts// /\\n} | grep -i "BCPC-Kafka-Head-Server" | sort); do
+  for m in $(printf ${hosts// /\\n} | grep -i "BCPC-Kafka-Head-Server"); do
     [[ "$m" =~ $REGEX ]]
     local fqdn="${BASH_REMATCH[3]}"
     # authenticate the node one by one
@@ -302,7 +302,7 @@ function kafka_install {
 
 
   # remove admin from the headnodes
-  for h in $(printf ${hosts// /\\n} | grep -i "BCPC-Kafka-Head" | sort); do
+  for h in $(printf ${hosts// /\\n} | grep -i "BCPC-Kafka-Head"); do
     [[ "$h" =~ $REGEX ]]
     printf "/\"admin\": true\ns/true/false\nw\nq\n" | EDITOR=ed sudo -E knife client edit "${BASH_REMATCH[3]}" $KNIFE_ADMIN
   done
@@ -341,7 +341,7 @@ for h in $hosts; do
   ip="${BASH_REMATCH[2]}"
   fqdn="${BASH_REMATCH[3]}"
   printf "%s\t-\t%s\n" $role $fqdn
-done | sort 
+done 
 
 if [[ -z "${hosts-}" ]]; then
   printf "Warning: No nodes found\n" > /dev/stderr
@@ -356,7 +356,7 @@ elif [[ "$INSTALL_TYPE" = "Hadoop" ]]; then
 elif [[ "$INSTALL_TYPE" = "Kafka" ]]; then
   kafka_install $hosts
 elif [[ "$INSTALL_TYPE" = "Basic" ]]; then
-  install_stub $(printf ${hosts// /\\n} | sort)
+  install_stub $(printf ${hosts// /\\n})
 fi
 
 printf "#### Install finished\n"
