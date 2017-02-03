@@ -239,9 +239,15 @@ ruby_block 'bcpc-deconfigure-dhcp-interfaces' do
       end
     end.flatten
 
+    # This is a list of all interfaces mentioned in DHCP lease files.
     lease_interfaces = lease_interface_lines.map do |line|
       lease_interface_regex.match(line)[1] rescue nil
     end.compact.uniq
+
+    # This is a list of all interfaces we may use in our bond.
+    bonded_interfaces = node[:bcpc][:networks][subnet].values.map do |vv|
+      vv['slaves']
+    end.compact.flatten.uniq
 
     #
     # Before we begin, verify that we have a new default route
@@ -257,10 +263,18 @@ ruby_block 'bcpc-deconfigure-dhcp-interfaces' do
       line.start_with?('default')
     end
 
-    if default_routes.length < 2
-      raise 'Cannot deconfigure DHCP interfaces (' +
-        (lease_interfaces.join(' ') rescue '') + '), ' \
-        'fewer than 2 default routes are configured!'
+    # If the list of DHCP-configured interfaces and bond slaves overlaps...
+    if (bonded_interfaces & lease_interfaces).any?
+      Chef::Log.warn('DANGER: since the boot/DHCP interface is a member of ' \
+                     'the LACP bond, we may lose network connectivity ' \
+                     'while trying to configure the bond!')
+    else
+      # If they do NOT overlap, we should have no fewer than two routes.
+      if default_routes.length < 2
+        raise 'Cannot deconfigure DHCP interfaces (' +
+          (lease_interfaces.join(' ') rescue '') + '), ' \
+          'fewer than 2 default routes are configured!'
+      end
     end
 
     #
