@@ -106,6 +106,9 @@ printf "Snapshotting post-Cobbler\n"
 printf "#### Chef all the nodes\n"
 vagrant ssh -c "sudo apt-get install -y sshpass"
 
+printf "#### Run Chef one time on the bootstrap node to force convergence\n"
+vagrant ssh -c "sudo chef-client --once"
+
 printf "#### Chef machine bcpc-vms\n"
 vagrant ssh -c "cd chef-bcpc; ./cluster-assign-roles.sh $ENVIRONMENT Basic"
 vagrant ssh -c "cd chef-bcpc; ./cluster-assign-roles.sh $ENVIRONMENT Bootstrap"
