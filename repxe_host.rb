@@ -372,12 +372,13 @@ def start_chef_client(chef_env, vm_entry)
   end
 end
 
-def run_chef_client(chef_env, vm_entry)
+def run_chef_client(chef_env, vm_entry, params = ' ')
   puts 'Running chef-client'
   c = Mixlib::ShellOut.new('./nodessh.sh',
                            chef_env,
                            vm_entry[:hostname],
                            'chef-client',
+                           params,
                            'sudo')
   c.run_command
   if c.status.success?
@@ -516,8 +517,10 @@ if __FILE__ == $PROGRAM_NAME
   # HACK: vas cookbook has issues, so sleep and try again
   sleep(360)
   cluster_assign_roles(chef_env, :basic, vm_entry)
-  refresh_vault_keys
   rotate_vault_keys
+  refresh_vault_keys
+  # HACK: Forces convergence of certain ohai attributes
+  run_chef_client(chef_env, vm_entry, '-r \'bach_hadoop_wrapper,bcpc::chef_vault_install\'')
   cluster_assign_roles(chef_env, :hadoop, vm_entry)
   # HACK: sometimes rechefing seems to do the trick...
   run_chef_client(chef_env, vm_entry)
