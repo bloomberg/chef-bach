@@ -24,25 +24,13 @@ else
  dns_server = node[:bcpc][:dns_servers][0]
 end
 
-%w{hadoop-metrics2-hbase.properties}.each do |t|
-   template "/etc/hbase/conf/#{t}" do
-     source "hb_#{t}.erb"
-     mode 0644
-     variables(:nn_hosts => node[:bcpc][:hadoop][:nn_hosts],
-               :zk_hosts => node[:bcpc][:hadoop][:zookeeper][:servers],
-               :jn_hosts => node[:bcpc][:hadoop][:jn_hosts],
-               :rs_hosts => node[:bcpc][:hadoop][:rs_hosts],
-               :master_hosts => node[:bcpc][:hadoop][:hb_hosts],
-               :mounts => node[:bcpc][:hadoop][:mounts],
-               :hbm_jmx_port => node[:bcpc][:hadoop][:hbase_master][:jmx][:port],
-               :hbrs_jmx_port => node[:bcpc][:hadoop][:hbase_rs][:jmx][:port],
-               :dns_server => dns_server
-     )
-  end
+template '/etc/hbase/conf/hadoop-metrics2-hbase.properties' do
+  source 'hb_hadoop-metrics2-hbase.properties.erb'
+  mode 0644
 end
 
 # thse are rendered as is
-%w{ 
+%w{
   log4j.properties
   hbase-policy.xml }.each do |t|
   template "/etc/hbase/conf/#{t}" do
@@ -69,12 +57,12 @@ subnet = node["bcpc"]["management"]["subnet"]
 # Add common hbase-site.xml properties
 #
 generated_values = {
-  'hbase.zookeeper.quorum' => 
+  'hbase.zookeeper.quorum' =>
     node[:bcpc][:hadoop][:zookeeper][:servers].map{ |s| float_host(s[:hostname])}.join(","),
   'hbase.master.dns.nameserver' => dns_server,
   'hbase.master.dns.nameserver' => dns_server,
   'hbase.zookeeper.property.clientPort' => "#{node[:bcpc][:hadoop][:zookeeper][:port]}",
-  'hbase.master.wait.on.regionservers.mintostart' => 
+  'hbase.master.wait.on.regionservers.mintostart' =>
       "#{node[:bcpc][:hadoop][:rs_hosts].length/2+1}",
   'hbase.master.hostname' => float_host(node[:fqdn]),
   'hbase.regionserver.hostname' => float_host(node[:fqdn]),
@@ -91,24 +79,24 @@ generated_values = {
 if node[:bcpc][:hadoop][:kerberos][:enable] == true then
   generated_values['hbase.security.authorization'] = 'true'
   generated_values['hbase.superuser'] = node[:bcpc][:hadoop][:hbase][:superusers].join(',')
-  generated_values['hbase.coprocessor.region.classes'] = 
+  generated_values['hbase.coprocessor.region.classes'] =
     'org.apache.hadoop.hbase.security.token.TokenProvider,' +
     'org.apache.hadoop.hbase.security.access.SecureBulkLoadEndpoint,' +
     'org.apache.hadoop.hbase.security.access.AccessController'
   generated_values['hbase.security.exec.permission.checks'] = 'true'
-  generated_values['hbase.coprocessor.regionserver.classes'] = 
+  generated_values['hbase.coprocessor.regionserver.classes'] =
     'org.apache.hadoop.hbase.security.access.AccessController'
-  generated_values['hbase.coprocessor.master.classes'] = 
+  generated_values['hbase.coprocessor.master.classes'] =
     'org.apache.hadoop.hbase.security.access.AccessController'
   generated_values['hbase.security.authentication'] = 'kerberos'
-  generated_values['hbase.master.kerberos.principal'] = 
+  generated_values['hbase.master.kerberos.principal'] =
     "#{node[:bcpc][:hadoop][:kerberos][:data][:hbase][:principal]}/" +
     "#{node[:bcpc][:hadoop][:kerberos][:data][:hbase][:princhost] == '_HOST' ? '_HOST' : node[:bcpc][:hadoop][:kerberos][:data][:hbase][:princhost]}@#{node[:bcpc][:hadoop][:kerberos][:realm]}"
-  generated_values['hbase.master.keytab.file'] = 
+  generated_values['hbase.master.keytab.file'] =
     "#{node[:bcpc][:hadoop][:kerberos][:keytab][:dir]}/#{node[:bcpc][:hadoop][:kerberos][:data][:hbase][:keytab]}"
-  generated_values['hbase.regionserver.kerberos.principal'] = 
+  generated_values['hbase.regionserver.kerberos.principal'] =
     "#{node[:bcpc][:hadoop][:kerberos][:data][:hbase][:principal]}/#{node[:bcpc][:hadoop][:kerberos][:data][:hbase][:princhost] == '_HOST' ? '_HOST' : node[:bcpc][:hadoop][:kerberos][:data][:hbase][:princhost]}@#{node[:bcpc][:hadoop][:kerberos][:realm]}"
-  generated_values['hbase.regionserver.keytab.file'] = 
+  generated_values['hbase.regionserver.keytab.file'] =
     "#{node[:bcpc][:hadoop][:kerberos][:keytab][:dir]}/#{node[:bcpc][:hadoop][:kerberos][:data][:hbase][:keytab]}"
   generated_values['hbase.rpc.engine'] = 'org.apache.hadoop.hbase.ipc.SecureRpcEngine'
 end

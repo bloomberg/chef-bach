@@ -50,8 +50,8 @@ node[:bcpc][:hadoop][:os][:group].keys.each do |group_name|
     action :nothing
   end
 end
-  
-# Take action on each group resource based on its existence 
+
+# Take action on each group resource based on its existence
 ruby_block 'create_or_manage_groups' do
   block do
     node[:bcpc][:hadoop][:os][:group].keys.each do |group_name|
@@ -61,29 +61,37 @@ ruby_block 'create_or_manage_groups' do
   end
 end
 
-directory "/var/log/hadoop-hdfs/gc/" do
-  user "hdfs"
-  group "hdfs"
+directory '/var/log/hadoop-hdfs/gc/' do
+  user 'hdfs'
+  group 'hdfs'
   action :create
 end
 
-user_ulimit "hdfs" do
+user_ulimit 'hdfs' do
   filehandle_limit 65536
   process_limit 65536
 end
 
-node[:bcpc][:hadoop][:mounts].each do |d|
-  directory "/disk/#{d}/dfs/nn" do
-    owner "hdfs"
-    group "hdfs"
-    mode 0755
-    action :create
-    recursive true
-  end
+ruby_block 'create-namenode-directories' do
+  block do
+    node.run_state[:bcpc_hadoop_disks][:mounts].each do |d|
+      Chef::Resource::Directory.new("/disk/#{d}/dfs/nn",
+                                    node.run_context).tap do |dd|
+        dd.owner "hdfs"
+        dd.group "hdfs"
+        dd.mode 0755
+        dd.recursive true
+        dd.run_action :create
+      end
 
-  execute "fixup nn owner" do
-    command "chown -Rf hdfs:hdfs /disk/#{d}/dfs/"
-    only_if { Etc.getpwuid(File.stat("/disk/#{d}/dfs/").uid).name != "hdfs" }
+      if Etc.getpwuid(File.stat("/disk/#{d}/dfs/").uid).name != 'hdfs'
+        Chef::Resource::Execute.new('fixup nn owner',
+                                    node.run_context).tap do |ee|
+          ee.command "chown -Rf hdfs:hdfs /disk/#{d}/dfs/"
+          ee.run_action(:run)
+        end
+      end
+    end
   end
 end
 
@@ -97,8 +105,8 @@ if @node['bcpc']['hadoop']['hdfs']['HA'] == true then
     user "hdfs"
     cwd  "/var/lib/hadoop-hdfs"
     action :run
-    not_if { node[:bcpc][:hadoop][:mounts].all? { |d| Dir.entries("/disk/#{d}/dfs/nn/").include?("current") } }
-  end  
+    not_if { Dir.glob('/disk/*/dfs/nn/current').any? }
+  end
 
   # Work around Hortonworks Case #00071808
   link "/usr/hdp/current/hadoop-hdfs-zkfc" do

@@ -1,4 +1,5 @@
-include_recipe "bcpc-hadoop::zookeeper_impl"
+include_recipe 'bcpc-hadoop::zookeeper_config'
+include_recipe 'bcpc-hadoop::zookeeper_impl'
 
 # Set Zookeeper related zabbix triggers
 trigger_chk_period = "#{node["bcpc"]["hadoop"]["zabbix"]["trigger_chk_period"]}m"

@@ -178,13 +178,13 @@ enabled = True
 [[NtpdCollector]]
 enabled = True
 
-<% if @servers.include?(node) -%>
+<% if @servers.include?(node[:fqdn]) -%>
 [[HAProxyCollector]]
 enabled = True
 url=http://127.0.0.1:1936/haproxy?stats;csv
 
 [[MemcachedCollector]]
-enabled = False 
+enabled = False
 <% end -%>
 
 ################################################################################
@@ -223,4 +223,3 @@ args = ('/var/log/diamond/diamond.log', 'midnight', 1, 7)
 
 format = [%(asctime)s] [%(threadName)s] %(message)s
 datefmt =
-

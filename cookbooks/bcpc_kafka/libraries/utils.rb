@@ -1,5 +1,5 @@
 #
-# Cookbook Name:: kafka-bcpc
+# Cookbook Name:: bcpc_kafka
 # Library:: utils
 #
 # Copyright 2013, Bloomberg Finance L.P.

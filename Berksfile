@@ -14,7 +14,7 @@ cookbook 'bcpc', path: './cookbooks/bcpc'
 cookbook 'bcpc-hadoop', path: './cookbooks/bcpc-hadoop'
 cookbook 'bcpc_jmxtrans', path: './cookbooks/bcpc_jmxtrans'
 cookbook 'hannibal', path: './cookbooks/hannibal'
-cookbook 'kafka-bcpc', path: './cookbooks/kafka-bcpc'
+cookbook 'bcpc_kafka', path: './cookbooks/bcpc_kafka'
 
 #
 # Top-level requirements and transitive dependencies outside the

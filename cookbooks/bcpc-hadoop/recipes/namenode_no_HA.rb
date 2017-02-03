@@ -9,12 +9,12 @@ include_recipe 'bcpc-hadoop::namenode_queries'
 # Updating node attribuetes to copy namenode log files to centralized location (HDFS)
 #
 node.default['bcpc']['hadoop']['copylog']['namenode'] = {
-    'logfile' => "/var/log/hadoop-hdfs/hadoop-hdfs-namenode-#{node.hostname}.log", 
+    'logfile' => "/var/log/hadoop-hdfs/hadoop-hdfs-namenode-#{node.hostname}.log",
     'docopy' => true
 }
 
 node.default['bcpc']['hadoop']['copylog']['namenode_out'] = {
-    'logfile' => "/var/log/hadoop-hdfs/hadoop-hdfs-namenode-#{node.hostname}.out", 
+    'logfile' => "/var/log/hadoop-hdfs/hadoop-hdfs-namenode-#{node.hostname}.out",
     'docopy' => true
 }
 
@@ -53,8 +53,8 @@ node[:bcpc][:hadoop][:os][:group].keys.each do |group_name|
     action :nothing
   end
 end
-  
-# Take action on each group resource based on its existence 
+
+# Take action on each group resource based on its existence
 ruby_block 'create_or_manage_groups' do
   block do
     node[:bcpc][:hadoop][:os][:group].keys.each do |group_name|
@@ -76,18 +76,26 @@ user_ulimit "hdfs" do
   process_limit 65536
 end
 
-node[:bcpc][:hadoop][:mounts].each do |d|
-  directory "/disk/#{d}/dfs/nn" do
-    owner "hdfs"
-    group "hdfs"
-    mode 0755
-    action :create
-    recursive true
-  end
+ruby_block 'create-nn-directories' do
+  block do
+    node.run_state[:bcpc_hadoop_disks][:mounts].each do |disk_number|
+      Chef::Resource::Directory.new("/disk/#{disk_number}/dfs/nn",
+                                    node.run_context).tap do |dd|
+        dd.owner 'hdfs'
+        dd.group 'hdfs'
+        dd.mode 0755
+        dd.recursive true
+        dd.run_action :create
+      end
 
-  execute "fixup nn owner" do
-    command "chown -Rf hdfs:hdfs /disk/#{d}/dfs"
-    only_if { Etc.getpwuid(File.stat("/disk/#{d}/dfs/").uid).name != "hdfs" }
+      if Etc.getpwuid(File.stat("/disk/#{disk_number}/dfs/").uid).name != 'hdfs'
+        Chef::Resource::Execute.new('fixup nn owner',
+                                    node.run_context).tap do |ee|
+          ee.command "chown -Rf hdfs:hdfs /disk/#{disk_number}/dfs"
+          ee.run_action(:run)
+        end
+      end
+    end
   end
 end
 
@@ -99,8 +107,8 @@ bash "format namenode" do
   code "#{hdfs_cmd} namenode -format -nonInteractive -force"
   user "hdfs"
   action :run
-  creates "/disk/#{node[:bcpc][:hadoop][:mounts][0]}/dfs/nn/current/VERSION"
-  not_if { node[:bcpc][:hadoop][:mounts].any? { |d| File.exists?("/disk/#{d}/dfs/nn/current/VERSION") } }
+  creates lazy { "/disk/#{node.run_state[:bcpc_hadoop_disks][:mounts][0]}/dfs/nn/current/VERSION" }
+  not_if { node.run_state[:bcpc_hadoop_disks][:mounts].any? { |d| File.exists?("/disk/#{d}/dfs/nn/current/VERSION") } }
 end
 
 link "/etc/init.d/hadoop-hdfs-namenode" do

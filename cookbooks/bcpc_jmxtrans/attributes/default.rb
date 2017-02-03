@@ -1,7 +1,13 @@
+# The filename is derived from the version number.
+default['jmxtrans']['version'] = '256'
+
 #
-# Name of jmxtrans software downloaded
+# Since we rely on the bootstrap VM to host the jmxtrans distribution,
+# this checksum needs to match the checksum found in
+# bach_repository::jmxtrans.
 #
-default['jmxtrans']['version'] = "256"
+default['jmxtrans']['checksum'] =
+  '3219cc40954f62cc9fba4fddb1ff70a3ffce1eac63f1d37ec6cb72b90a48999f'
 #
 # Add additional JMX queries following the existing queries as sample
 # Also refer to the jmxtrans community cookbook if queries of the category you are planning to add is

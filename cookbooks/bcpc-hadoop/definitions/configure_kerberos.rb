@@ -6,6 +6,15 @@ define :configure_kerberos do
     srvc=service_name
     keytab_file = srvdat['keytab']
     config_host = srvdat['princhost'] == "_HOST" ?  float_host(node[:hostname]) : srvdat['princhost'].split('.')[0]
+
+    # Create directory to store keytab files
+    directory keytab_dir do
+      owner "root"
+      group "root"
+      recursive true
+      mode 0755
+    end
+
     # Delete existing keytab if keytab is being re-created
     file "#{keytab_dir}/#{keytab_file}" do
       action :delete

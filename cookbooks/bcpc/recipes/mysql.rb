@@ -76,6 +76,7 @@ end
 template '/etc/mysql/debian.cnf' do
   source 'mysql/my-debian.cnf.erb'
   mode 00644
+  sensitive true if respond_to?(:sensitive)
   notifies :reload, 'service[mysql]', :delayed
 end
 
@@ -206,6 +207,7 @@ template '/etc/mysql/conf.d/wsrep.cnf' do
   variables(max_connections: max_connections,
             innodb_buffer_pool_size: pool_size,
             servers: mysql_nodes)
+  sensitive true if respond_to?(:sensitive)
   notifies :stop, 'service[mysql]', :immediate
   notifies :start, 'service[mysql]', :immediate
 end
@@ -284,6 +286,7 @@ template '/etc/xinetd.d/mysqlchk' do
   owner 'root'
   group 'root'
   mode 00440
+  sensitive true if respond_to?(:sensitive)
   notifies :restart, 'service[xinetd]', :immediately
 end
 

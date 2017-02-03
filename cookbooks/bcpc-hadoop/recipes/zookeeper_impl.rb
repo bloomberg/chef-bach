@@ -1,11 +1,12 @@
 ::Chef::Recipe.send(:include, Bcpc_Hadoop::Helper)
 ::Chef::Resource::Bash.send(:include, Bcpc_Hadoop::Helper)
 
+include_recipe 'bcpc-hadoop::hdp_repo'
+include_recipe 'bach_krb5::keytab_directory'
+
 package  hwx_pkg_str('zookeeper-server', node[:bcpc][:hadoop][:distribution][:release]) do
   action :install
 end
-
-include_recipe 'bcpc-hadoop::zookeeper_config'
 
 hdp_select('zookeeper-server', node[:bcpc][:hadoop][:distribution][:active_release])
 
@@ -16,8 +17,8 @@ end
 configure_kerberos 'zookeeper_kerb' do
   service_name 'zookeeper'
 end
-   
-directory "/var/run/zookeeper" do 
+
+directory "/var/run/zookeeper" do
   owner "zookeeper"
   group "zookeeper"
   mode "0755"
@@ -59,11 +60,11 @@ end
 bash 'init-zookeeper' do
   code "service zookeeper-server init " +
     "--myid=#{bcpc_8bit_node_number}"
-  
+
   not_if do
     ::File.exists?("#{node[:bcpc][:hadoop][:zookeeper][:data_dir]}/myid")
   end
-  
+
   # race immediate run of restarting ZK on initial stand-up
   subscribes :run, "link[/etc/init.d/zookeeper-server]", :immediate
 end

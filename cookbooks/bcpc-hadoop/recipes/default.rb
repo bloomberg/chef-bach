@@ -87,4 +87,3 @@ execute "correct-gem-permissions" do
   user "root"
    action :nothing
 end.run_action(:run)
-

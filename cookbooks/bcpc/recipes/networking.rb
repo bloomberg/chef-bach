@@ -19,21 +19,12 @@
 
 include_recipe 'bcpc::default'
 include_recipe 'bcpc::certs'
+include_recipe 'bcpc::ssh'
 
 template '/etc/hosts' do
   source 'hosts.erb'
   mode 00644
   variables(servers: get_all_nodes)
-end
-
-template '/etc/ssh/sshd_config' do
-  source 'sshd_config.erb'
-  mode 00644
-  notifies :restart, 'service[ssh]', :immediately
-end
-
-service 'ssh' do
-  action [:enable, :start]
 end
 
 service 'cron' do
@@ -244,7 +235,7 @@ ruby_block 'bcpc-deconfigure-dhcp-interfaces' do
 
     lease_interface_lines = lease_files.map do |file_name|
       ::File.readlines(file_name).select do |line|
-        line.include?('interface') 
+        line.include?('interface')
       end
     end.flatten
 
