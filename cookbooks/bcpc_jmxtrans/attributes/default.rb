@@ -316,6 +316,16 @@ default['jmxtrans']['default_queries']['hbase_master'] = [
         "numDeadRegionServers",
         "numRegionServers"
       ]
+  },
+  {
+    'obj' => "Hadoop:name=Master,service=HBase,sub=AssignmentManger",
+    'result_alias' => "hbm_am",
+    'attr' => 
+      [
+        "ritOldestAge",
+        "ritCountOverThreshold",
+        "ritCount"
+      ]
   }
 ]
 default['jmxtrans']['default_queries']['hbase_rs'] = [
