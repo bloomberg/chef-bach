@@ -252,12 +252,34 @@ def restart_host(entry)
 end
 
 def refresh_vault_keys
-  # this will only do vas... need to really run:
-  # for i in `sudo knife data bag show os|grep -v _keys`; do sudo knife vault refresh os $i -M client; done 
-  c = Mixlib::ShellOut.new('sudo', 'knife',
-                           'vault', 'refresh', 'keytabs', 'vas-keytab',
-                           '-m', 'client')
-  c.run_command
+  require 'mixlib/shellout'
+  dbags = []
+  list_dbags = Mixlib::ShellOut.new('sudo', 'knife',
+                                    'data', 'bag', 'list')
+  list_dbags.run_command
+  list_dbags.stdout.split("\n").each do |line|
+    dbags << line
+  end
+
+  dbags.each do |dbag|
+    items = []
+    show_dbag_items = Mixlib::ShellOut.new('sudo', 'knife',
+                                           'data', 'bag', 'show', dbag)
+    show_dbag_items.run_command
+    show_dbag_items.stdout.split("\n").each do |line|
+      items << line
+    end
+
+    items.delete_if { |i| !i.to_s.end_with?('_keys') }
+
+    items.each do |item|
+      refresh_vault_item = Mixlib::ShellOut.new('sudo', 'knife',
+                                                'vault', 'refresh', dbag,
+                                                item.chomp('_keys'),
+                                                '-m', 'client')
+      refresh_vault_item.run_command
+    end
+  end
 end
 
 def rotate_vault_keys
@@ -416,9 +438,9 @@ def start_chef_client(chef_env, vm_entry)
    end
 end
 
-def run_chef_client(chef_env, vm_entry)
+def run_chef_client(chef_env, vm_entry, params = '')
    puts 'Running chef-client'
-   c = Mixlib::ShellOut.new('./nodessh.sh', chef_env, vm_entry['hostname'], 'chef-client', 'sudo')
+   c = Mixlib::ShellOut.new('./nodessh.sh', chef_env, vm_entry['hostname'], "chef-client #{params}", 'sudo')
    c.run_command
    if !c.status.success?
       puts 'Chef client did not run successfully: ' + c.stdout + '\n' + c.stderr
@@ -541,8 +563,9 @@ if __FILE__ == $PROGRAM_NAME
   # HACK - vas cookbook has issues, so sleep and try again
   sleep(360)
   cluster_assign_roles(chef_env, :basic, vm_entry)
-  refresh_vault_keys
   rotate_vault_keys
+  refresh_vault_keys
+  run_chef_client(chef_env, vm_entry, '-r \'bach_hadoop_wrapper,bcpc::chef_vault_install\'')
   cluster_assign_roles(chef_env, :hadoop, vm_entry)
   # HACK - sometimes rechefing seems to do the trick...
   run_chef_client(chef_env, vm_entry)
