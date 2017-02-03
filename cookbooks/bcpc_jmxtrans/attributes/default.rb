@@ -344,7 +344,7 @@ default['jmxtrans']['default_queries']['hbase_rs'] = [
      ]
   },
   {   
-    "obj"=> "Hadoop:name=IPC,service=HBase,sub=IPC",
+    "obj"=> "Hadoop:name=RegionServer,service=HBase,sub=IPC",
     "result_alias"=> "hb_ipc",
     "attr" => 
     [
