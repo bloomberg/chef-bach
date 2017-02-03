@@ -3,7 +3,7 @@
 ruby_block 'graphite-directory-structure' do
   block do
     reservation_requests =
-      node.run_state[:bcpc_hadoop_disks][:reservation_requests]
+      node[:bcpc][:hadoop][:disks][:reservation_requests]
 
     if reservation_requests.include?("graphite_disk") then
       disk_index = reservation_requests.index("graphite_disk")

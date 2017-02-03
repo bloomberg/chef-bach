@@ -33,6 +33,14 @@ ruby_block 'enumerate-disks' do
       oh.run_action :reload
     end
 
+    #
+    # node.run_state[:bcpc_hadoop_disks] is for values we generate at
+    # runtime, by inspecting the state of the system.  These cannot be
+    # overridden without changing the code.
+    #
+    # node[:bcpc][:hadoop][:disks] is for static attributes that we
+    # know in advance.  These are easily overridden in an environment.
+    #
     node.run_state[:bcpc_hadoop_disks] = {}
     node.run_state[:bcpc_hadoop_disks].tap do |disks|
       #
@@ -61,15 +69,6 @@ ruby_block 'enumerate-disks' do
         else
           all_drives
         end
-
-      # Keep at least this many disks for the :disk_reserve_roles
-      disks[:role_min_disk] = 2
-
-      # We are reserving disks for the following
-      disks[:reservation_requests] = ['graphite_disk']
-
-      # Reservations will be saved here
-      disks[:disk_reserve_roles] = ['BCPC-Hadoop-Head']
     end
   end
 end
@@ -84,13 +83,13 @@ end
 ruby_block 'format-disks' do
   block do
     reservation_requests =
-      node.run_state[:bcpc_hadoop_disks][:reservation_requests]
+      node[:bcpc][:hadoop][:disks][:reservation_requests]
 
     available_disks =
-      node.run_state[:bcpc_hadoop_disks][:available_disks]
+      node[:bcpc][:hadoop][:disks][:available_disks]
 
     role_min_disk =
-      node.run_state[:bcpc_hadoop_disks][:role_min_disk]
+      node[:bcpc][:hadoop][:disks][:role_min_disk]
 
     if available_disks.any?
       available_disks.each_index do |i|
@@ -166,7 +165,7 @@ ruby_block 'format-disks' do
       end
 
       # is our role included in the list
-      if (node.run_state[:bcpc_hadoop_disks][:disk_reserve_roles] &
+      if (node[:bcpc][:hadoop][:disks][:disk_reserve_roles] &
           node.roles).any?
 
         # make sure we have enough disks to fulfill reservations and
