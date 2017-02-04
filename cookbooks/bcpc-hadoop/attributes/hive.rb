@@ -9,6 +9,10 @@ default["bcpc"]["hadoop"]["hive"]["server2"]["ldap_url"] =
 default["bcpc"]["hadoop"]["hive"]["server2"]["ldap_domain"] =
   'bcpc.example.com'
 default["bcpc"]["hadoop"]["hive"]["server2"]["port"] = '10000'
+default["bcpc"]["hadoop"]["hive"]["warehouse"]["dir"] = \
+  ::File.join(node[:bcpc][:hadoop][:hdfs_url], '/user/hive/warehouse')
+default["bcpc"]["hadoop"]["hive"]["scratch"]["dir"] = \
+  ::File.join(node[:bcpc][:hadoop][:hdfs_url], '/tmp/hive-scratch/')
 
 # These will become key/value pairs in 'hive_site.xml'
 default[:bcpc][:hadoop][:hive][:site_xml].tap do |site_xml|
@@ -16,8 +20,8 @@ default[:bcpc][:hadoop][:hive][:site_xml].tap do |site_xml|
   site_xml['hive.aux.jars.path'] =
     'file:///usr/share/java/mysql-connector-java.jar,' + 
     'file:///usr/hdp/current/hive-webhcat/share/hcatalog/hive-hcatalog-core.jar'
-  site_xml['hive.exec.scratchdir'] =
-    '/tmp/hive-${user.name}'
+  site_xml['hive.exec.scratchdir'] = \
+    ::File.join(node[:bcpc][:hadoop][:hive][:scratch][:dir], '${user.name}')
   site_xml['hive.metastore.client.socket.timeout'] = 3600
   site_xml['hive.metastore.execute.setugi'] = true
   site_xml['hive.server2.logging.operation.enabled'] = true
