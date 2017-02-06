@@ -332,6 +332,11 @@ default['jmxtrans']['default_queries']['hbase_master'] = [
         "ritCountOverThreshold",
         "ritCount"
       ]
+  },
+  {
+    'obj' => "Hadoop:name=Master,service=HBase,sub=IPC",
+    'result_alias' => "hbm_ipc",
+    'attr' => []
   }
 ]
 default['jmxtrans']['default_queries']['hbase_rs'] = [
