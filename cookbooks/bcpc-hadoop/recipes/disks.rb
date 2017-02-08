@@ -82,14 +82,21 @@ end
 
 ruby_block 'format-disks' do
   block do
+    #
+    # Reservation requests and role_min_disks are set statically, in
+    # Chef's "compile" pass.
+    #
     reservation_requests =
       node[:bcpc][:hadoop][:disks][:reservation_requests]
 
-    available_disks =
-      node[:bcpc][:hadoop][:disks][:available_disks]
-
     role_min_disk =
       node[:bcpc][:hadoop][:disks][:role_min_disk]
+
+    #
+    # The available disks list is generated dynamically, at converge time.
+    #
+    available_disks =
+      node.run_state[:bcpc_hadoop_disks][:available_disks]
 
     if available_disks.any?
       available_disks.each_index do |i|
