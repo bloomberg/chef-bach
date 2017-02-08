@@ -421,11 +421,24 @@ class ClusterAssignRoles
                        end
                      end
 
-                     puts "Search '#{optional_thing}' matched:\n  " +
-                       node_matches.map { |ee| ee[:hostname] }.join("\n  ")
-
                      node_matches
                    end
+
+    # Nodes with a runlist matching "SKIP" will never be valid targets.
+    target_nodes.reject! do |entry|
+      entry[:runlist].include?('SKIP')
+    end
+
+    # If an optional_thing was specified, print the search results.
+    unless optional_thing.nil?
+      hostnames = if target_nodes.empty?
+                    '(nothing)'
+                  else
+                    target_nodes.map { |ee| ee[:hostname] }.join("\n  ")
+                  end
+
+      puts "Search '#{optional_thing}' matched:\n  #{hostnames}"
+    end
 
     if target_nodes.any?
       send("install_#{install_type}".to_sym, target_nodes)
