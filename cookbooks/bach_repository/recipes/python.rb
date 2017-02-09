@@ -18,13 +18,6 @@ directory python_dir do
   mode 0555
 end
 
-if node['bach']['http_proxy']
-  pip_proxy_option =
-    "--proxy #{node['bach']['http_proxy'].gsub(/^http:../,'')}"
-else
-  pip_proxy_option = ''
-end
-
 if node['bach']['https_proxy'] && node['bach']['ssl_ca_file_install_path']
   pip_cert_option = "--cert #{node['bach']['ssl_ca_file_install_path']}"
 else
@@ -39,6 +32,13 @@ else
   pip_cheese_shop_option = ''
 end
 
+pip_environment = {
+                   http_proxy: node['bach']['http_proxy'],
+                   https_proxy: node['bach']['https_proxy'],
+                   no_proxy: ENV['no_proxy']
+                  }
+
+
 remote_file get_pip_path do
   source 'https://raw.githubusercontent.com/pypa/pip/8.0.0/contrib/get-pip.py'
   checksum 'd1f66b3848abc6fd1aeda3bb7461101f6a909c3b08efa3ecc1f561712269469c'
@@ -47,7 +47,8 @@ end
 
 execute 'get-pip.py' do
   command "#{get_pip_path} " \
-    "#{pip_proxy_option} #{pip_cert_option} #{pip_cheese_shop_option}"
+    "#{pip_cert_option} #{pip_cheese_shop_option}"
+  environment pip_environment
   not_if {
     version_string =
       if File.exists?('/usr/local/bin/pip')
@@ -85,7 +86,8 @@ end
   execute "new-pip-upgrade-#{package_name}" do
     command '/usr/local/bin/pip ' \
       "install #{package_name} --no-use-wheel --upgrade " \
-      "#{pip_proxy_option} #{pip_cert_option} #{pip_cheese_shop_option}"
+      "#{pip_cert_option} #{pip_cheese_shop_option}"
+    environment pip_environment
     not_if {
       get_version =
         Mixlib::ShellOut.new("/usr/local/bin/pip show #{package_name} | " \

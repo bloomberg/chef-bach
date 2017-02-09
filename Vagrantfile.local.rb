@@ -56,8 +56,13 @@ Vagrant.configure('2') do |config|
         /etc/environment
     fi
 
+    if [ -n "#{ENV['no_proxy']}" ]; then
+      echo "no_proxy='#{ENV['no_proxy']}'" >> \
+        /etc/environment
+    fi
+
     umask 0277
-    echo 'Defaults env_keep += "http_proxy https_proxy"' > \
+    echo 'Defaults env_keep += "http_proxy https_proxy no_proxy"' > \
       /etc/sudoers.d/proxy
     echo 'Defaults env_keep += "SSL_CERT_FILE"' > \
       /etc/sudoers.d/ssl
