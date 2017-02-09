@@ -55,6 +55,17 @@ if [[ ! -f "environments/${CHEF_ENVIRONMENT}.json" ]]; then
     exit
 fi
 
+#
+# Clear stale cookbooks in case we are re-running the
+# tests/automated_install.sh script.
+#
+# This isn't entirely safe, but this script already assumes it can use
+# rsync to overwrite anything in the vendor directory. Realistically,
+# it should only be run on VM clusters.
+#
+$SSH_CMD "sudo chown -R vagrant $BCPC_DIR; \
+	  sudo rm -rf /var/chef/cache/cookbooks; \
+          sudo rm -rf $BCPC_DIR/vendor/cookbooks"
 
 if [[ -z $VAGRANT ]]; then
   if [[ ! -f $KEYFILE ]]; then
