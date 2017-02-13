@@ -17,9 +17,9 @@
 # limitations under the License.
 #
 
-make_config('mysql-pdns-user', "pdns")
+make_config('mysql-pdns-user', 'pdns')
 
-mysql_pdns_password = get_config("mysql-pdns-password")
+mysql_pdns_password = get_config('password', 'mysql-pdns', 'os')
 if mysql_pdns_password.nil?
   mysql_pdns_password = secure_password
 end
@@ -71,7 +71,7 @@ if node[:bcpc][:management][:vip] and get_nodes_for("mysql").length() > 0
     config['gmysql-host'] = node[:bcpc][:management][:vip]
     config['gmysql-port'] = 3306
     config['gmysql-user'] = get_config!('mysql-pdns-user')
-    config['gmysql-password'] = get_config!('mysql-pdns-password')
+    config['gmysql-password'] = get_config!('password', 'mysql-pdns', 'os')
     config['gmysql-dbname'] = node['bcpc']['pdns_dbname']
     config['gmysql-dnssec'] = 'no'
   end
@@ -100,7 +100,7 @@ if node[:bcpc][:management][:vip] and get_nodes_for("mysql").length() > 0
 
   mysql_database_user get_config!('mysql-pdns-user') do
     connection lazy { mysql_connection_info.call }
-    password get_config!('mysql-pdns-password')
+    password get_config!('password', 'mysql-pdns', 'os')
     action :create
     notifies :reload, 'service[pdns]'
   end
