@@ -205,6 +205,10 @@ Static Code Analysis:
 
 Otherwise generally follow [bbatsov/ruby-style-guide](https://github.com/bbatsov/ruby-style-guide)
 
+For shell scripts:
+* Do not write shell scripts
+* If you must, please try to follow [Google's Shell Style Guide](https://google.github.io/styleguide/shell.xml)
+
 The GitHub workflow we follow is captured below:
 ![Flow Chart of GitHub Workflow from Issue or PR created to PR in progress and Code Review to Issue or PR resolved][gh_workflow]
 
