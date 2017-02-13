@@ -2,7 +2,7 @@
 # Cookbook Name:: bcpc
 # Recipe:: powerdns
 #
-# Copyright 2013, Bloomberg Finance L.P.
+# Copyright 2016, Bloomberg Finance L.P.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -153,7 +153,6 @@ end
 node.set['pdns']['authoritative']['config']['recursor'] =
   node[:bcpc][:dns_servers][0]
 
-# mkoni need to set local_address to mgmt and floating VIPs
 node.set['pdns']['authoritative']['config']['local_address'] = [ node[:bcpc][:floating][:vip] , node[:bcpc][:management][:vip] ]
 
 include_recipe 'pdns::authoritative_package'
