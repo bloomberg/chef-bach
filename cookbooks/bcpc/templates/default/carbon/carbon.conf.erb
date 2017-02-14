@@ -25,10 +25,13 @@ USE_FLOW_CONTROL = True
 LOG_UPDATES = False
 LOG_CACHE_HITS = False
 LOG_CACHE_QUEUE_SORTS = False
+LOG_LISTENER_CONN_SUCCESS = False
+LOG_CREATES = False
 CACHE_WRITE_STRATEGY = max 
 WHISPER_AUTOFLUSH = False
 
 [relay]
+LOG_LISTENER_CONN_SUCCESS = False
 LINE_RECEIVER_INTERFACE = <%="#{node[:bcpc][:graphite][:ip]}"%>
 LINE_RECEIVER_PORT = 2013
 PICKLE_RECEIVER_INTERFACE = <%="#{node[:bcpc][:graphite][:ip]}"%>
@@ -48,6 +51,7 @@ MIN_RESET_INTERVAL=121
 METRIC_CLIENT_IDLE_TIMEOUT = <%="#{node[:bcpc][:graphite][:carbon][:relay][:idle_timeout]}"%> 
 
 [aggregator]
+LOG_LISTENER_CONN_SUCCESS = False
 LINE_RECEIVER_INTERFACE = <%="#{node[:bcpc][:management][:ip]}"%>
 LINE_RECEIVER_PORT = 2023
 PICKLE_RECEIVER_INTERFACE = <%="#{node[:bcpc][:management][:ip]}"%>
@@ -59,3 +63,4 @@ USE_FLOW_CONTROL = True
 MAX_DATAPOINTS_PER_MESSAGE = 500
 MAX_AGGREGATION_INTERVALS = 5
 FORWARD_ALL = True
+LOG_AGGREGATOR_MISSES = False
