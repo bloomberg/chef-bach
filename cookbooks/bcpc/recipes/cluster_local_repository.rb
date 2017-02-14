@@ -51,18 +51,26 @@ if apt_uri.host
 end
 
 unless node[:fqdn] == get_bootstrap
-  require 'tempfile'
-  bcpc_apt_key_path = Tempfile.new('bootstrap-gpg-key').path
+  ruby_block 'bcpc-apt-key-create' do
+    block do
+      require 'tempfile'
+      node.run_state['bcpc_apt_key_path'] =
+        Tempfile.new('bootstrap-gpg-key').path
+    end
+  end
 
-  file bcpc_apt_key_path do
+  file node.run_state['bcpc_apt_key_path'] do
     mode 0444
     content Base64.decode64(get_config!('bootstrap-gpg-public_key_base64'))
   end
 
   ruby_block 'get-bootstrap-gpg-fingerprint' do
     block do
+
       require 'mixlib/shellout'
-      cc = Mixlib::ShellOut.new('gpg', '--with-fingerprint', bcpc_apt_key_path)
+      cc = Mixlib::ShellOut.new('gpg',
+                                '--with-fingerprint',
+                                node.run_state['bcpc_apt_key_path'])
       cc.run_command
       cc.error!
       node.run_state['bootstrap_gpg_fingerprint'] =
@@ -73,10 +81,11 @@ unless node[:fqdn] == get_bootstrap
   end
 
   execute 'install-bootstrap-gpg' do
-    command "apt-key add '#{bcpc_apt_key_path}'"
+    command lazy { "apt-key add '#{node.run_state['bcpc_apt_key_path']}'" }
   end
 
-  file bcpc_apt_key_path do
+  file 'bcpc-apt-key-delete' do
+    path lazy { node.run_state['bcpc_apt_key_path'] }
     action :delete
   end
 end
