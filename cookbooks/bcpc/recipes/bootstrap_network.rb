@@ -73,6 +73,12 @@ replace_or_add 'disable DHCP router overwriting' do
   line "supersede routers #{router};"
 end
 
+replace_or_add 'append search domain' do
+  path '/etc/dhcp/dhclient.conf'
+  pattern 'supersede domain-name'
+  line "supersede domain-name \"#{node['bcpc']['domain_name']}\";"
+end
+
 execute 'interfaces up' do
   command 'ifup -a'
 end
