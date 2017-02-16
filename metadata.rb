@@ -38,4 +38,6 @@ depends 'poise', '= 1.0.12'
 depends 'postgresql', '= 5.2.0'
 depends 'sysctl', '= 0.7.5'
 depends 'windows', '= 1.36.6'
+depends 'yum', '= 3.13.0'
 depends 'yum-epel', '= 0.7.1'
+
