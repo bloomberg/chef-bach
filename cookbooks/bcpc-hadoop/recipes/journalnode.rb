@@ -38,6 +38,13 @@ ruby_block 'setup-jn-data' do
       dd.run_action :create
     end
 
+    Chef::Resource::Log.new('jn_txn_fmt_path',
+                            run_context).tap do |ll|
+      ll.message("JN txn fmt file checked: #{jnfile2chk}")
+      ll.level(:info)
+      ll.run_action(:write)
+    end
+
     if get_config('jn_txn_fmt') && !File.exists?(jnfile2chk) then
       Chef::Resource::File.new("#{Chef::Config[:file_cache_path]}/jn_fmt.tgz",
                                node.run_context).tap do |ff|
@@ -48,11 +55,12 @@ ruby_block 'setup-jn-data' do
         ff.run_action(:create)
       end
 
-
-      bash "unpack-jn-fmt-image-to-disk-#{jndisk}" do
-        user "root"
-        cwd "#{jndisk}/dfs/"
-        code "tar xzvf #{Chef::Config[:file_cache_path]}/jn_fmt.tgz;"
+      Chef::Resource::Bash.new("unpack-jn-fmt-image-to-disk-#{jndisk}",
+                               run_context) do |bb|
+        bb.user "root"
+        bb.cwd "#{jndisk}/dfs/"
+        bb.code "tar xzvf #{Chef::Config[:file_cache_path]}/jn_fmt.tgz;"
+        bb.run_action(:run)
       end
 
       #
@@ -61,7 +69,7 @@ ruby_block 'setup-jn-data' do
       # notifications.
       #
       self.notifies :restart, 'service[hadoop-hdfs-journalnode]'
-      self.resolve_notification_resources
+      self.resolve_notification_references
 
       Chef::Resource::Bash.new('change-ownership-for-jnfile',
                                node.run_context).tap do |bb|
