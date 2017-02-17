@@ -129,6 +129,8 @@ elsif hive_site_vars[:hs2_auth] == 'LDAP'
     'hive.server2.authentication.ldap.Domain' =>
       hive_site_vars[:hs2_ldap_domain]
   }
+else
+  hs2_auth_values = {}
 end
 
 generated_values.merge!(hs2_auth_values)
