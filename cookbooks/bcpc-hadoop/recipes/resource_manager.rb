@@ -157,6 +157,7 @@ service "hadoop-yarn-timelineserver" do
   subscribes :restart, "template[/etc/hadoop/conf/hdfs-site.xml]", :delayed
   subscribes :restart, "bash[hdp-select hadoop-yarn-resourcemanager]", :delayed
   subscribes :restart, "log[jdk-version-changed]", :delayed
+  only_if { node.roles.include?("BCPC-Hadoop-Head-YarnTimeLineServer") }
 end
 
 bash "reload mapreduce nodes" do
