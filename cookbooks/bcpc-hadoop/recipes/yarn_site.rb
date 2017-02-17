@@ -241,7 +241,7 @@ if node.roles.include?("BCPC-Hadoop-Head-YarnTimeLineServer")
         node[:bcpc][:hadoop][:kerberos][:keytab][:dir] + '/' +
         node[:bcpc][:hadoop][:kerberos][:data][:resourcemanager][:keytab],
    } 
-  node.runs_state[:yarn_site_generated_values].merge!(yts_properties)
+  node.run_state[:yarn_site_generated_values].merge!(yts_properties)
 end
 
 # This is another set of cached node searches.
