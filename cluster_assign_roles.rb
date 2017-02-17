@@ -39,13 +39,13 @@ class ClusterAssignRoles
         raise "Could not find node object for #{node[:fqdn]}"
       end
 
-      if runlist.nil?
-        runlist = node[:runlist].split(',')
+      target_runlist = if runlist.nil?
+        node[:runlist].split(',')
       elsif runlist.is_a?(String)
-        runlist = runlist.split(',')
+        runlist.split(',')
       end
 
-      chef_node_object.run_list = runlist
+      chef_node_object.run_list = target_runlist
       chef_node_object.save
     end
 
