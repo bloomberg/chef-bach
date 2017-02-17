@@ -166,11 +166,10 @@ end
 
 ruby_block 'bcpc-add-resolvers' do
   resolvconf_interface_name =
-    node[:bcpc][:networks][subnet][:management][:interface].to_s + '.inet'
+    node[:bcpc][:networks][subnet][:management][:interface].to_s 
 
   block do
     require 'English'
-
     IO.popen(['resolvconf', '-a', resolvconf_interface_name],
              'r+') do |resolvconf|
       resolvers.each do |rr|

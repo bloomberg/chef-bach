@@ -59,7 +59,7 @@ subnet = node[:bcpc][:networks].keys.map do |env_net|
 end.select{|n| n}.first
 
 raise "Could not find subnet!" if subnet.nil?
-node.set['bcpc']['management']['subnet'] = subnet
+node.default['bcpc']['management']['subnet'] = subnet
 
 mgmt_cidr = IPAddr.new(node['bcpc']['networks'][subnet]['management']['cidr'])
 mgmt_vip = IPAddr.new(node['bcpc']['networks'][subnet]['management']['vip'])
@@ -71,7 +71,7 @@ if not plausible_ips or plausible_ips.length < 1
   raise "Unable to find any plausible IPs for node['bcpc']['management']['ip']\nPossible IPs: #{ips}\nCan not match #{mgmt_vip} and must be in network #{subnet} -- #{mgmt_cidr.to_range}"
 end
 
-node.set['bcpc']['management']['ip'] = ips.select {|ip,v| v['family'] == "inet" and
+node.default['bcpc']['management']['ip'] = ips.select {|ip,v| v['family'] == "inet" and
                                                    ip != mgmt_vip and mgmt_cidr===ip}.first[0]
 
 mgmt_bitlen = (node['bcpc']['networks'][subnet]['management']['cidr'].match /\d+\.\d+\.\d+\.\d+\/(\d+)/)[1].to_i
@@ -86,7 +86,8 @@ flot_bitlen = (node['bcpc']['networks'][subnet]['floating']['cidr'].match /\d+\.
 flot_bitlen = 24 if flot_bitlen == 16
 flot_hostaddr = IPAddr.new(node['bcpc']['management']['ip'])<<flot_bitlen>>flot_bitlen
 
-node.set['bcpc']['storage']['ip'] = ((IPAddr.new(node['bcpc']['networks'][subnet]['storage']['cidr'])>>(32-stor_bitlen)<<(32-stor_bitlen))|stor_hostaddr).to_s
-node.set['bcpc']['floating']['ip'] = ((IPAddr.new(node['bcpc']['networks'][subnet]['floating']['cidr'])>>(32-flot_bitlen)<<(32-flot_bitlen))|flot_hostaddr).to_s
+node.default['bcpc']['storage']['ip'] = ((IPAddr.new(node['bcpc']['networks'][subnet]['storage']['cidr'])>>(32-stor_bitlen)<<(32-stor_bitlen))|stor_hostaddr).to_s
+node.default['bcpc']['floating']['ip'] = ((IPAddr.new(node['bcpc']['networks'][subnet]['floating']['cidr'])>>(32-flot_bitlen)<<(32-flot_bitlen))|flot_hostaddr).to_s
+node.default['bcpc']['floating']['cidr'] = node['bcpc']['networks'][subnet]['floating']['cidr']
 
 node.save rescue nil

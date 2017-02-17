@@ -26,6 +26,11 @@ cookbook 'maven'
 cookbook 'ntp'
 cookbook 'pam'
 cookbook 'ubuntu'
+cookbook 'chef-sugar'
+cookbook 'openssl'
+cookbook 'postgresql' 
+cookbook 'resolvconf'
+cookbook 'database'
 
 #
 # Transitive dependencies that have been forked for one reason or another.
@@ -49,3 +54,5 @@ cookbook 'kafka',
   git: 'https://github.com/mthssdrbrg/kafka-cookbook.git',
   tag: 'v2.0.2'
  
+cookbook 'pdns',
+  git: 'https://github.com/http-418/pdns'

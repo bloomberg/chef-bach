@@ -4,7 +4,8 @@
     "bcpc": {
       "domain_name" : "bcpc.example.com",
       "management": {
-        "vip" : "10.0.100.5"
+        "vip" : "10.0.100.5",
+        "viphost": "test-laptop.bcpc.example.com"
       },
       "floating": {
         "vip" : "192.168.100.5"
