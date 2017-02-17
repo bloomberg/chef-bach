@@ -4,8 +4,7 @@
     "bcpc": {
       "domain_name" : "bcpc.example.com",
       "management": {
-        "vip" : "10.0.100.5",
-        "viphost": "test-laptop.bcpc.example.com"
+        "vip" : "10.0.100.5"
       },
       "floating": {
         "vip" : "192.168.100.5"
@@ -43,8 +42,8 @@
         "dhcp_subnet" : "10.0.100.0",
         "dhcp_range" : "10.0.100.14 10.0.100.250",
         "preseed": {
-	    "additional_packages": ["openssh-server","lldpd","virtualbox-guest-utils"]
-	}
+          "additional_packages": ["openssh-server","lldpd","virtualbox-guest-utils"]
+        }
       },
       "dns_servers" : [ "8.8.8.8", "8.8.4.4" ],
       "cluster" : {
