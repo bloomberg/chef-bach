@@ -63,11 +63,11 @@ if node[:bcpc][:management][:vip] and get_nodes_for("mysql").length() > 0
     allnodes.push(tempHash)
   end
 
-  node.set['pdns']['authoritative']['package']['backends'] = ['gmysql']
-  node.set['pdns']['authoritative']['config']['disable_axfr'] = false
-  node.set['pdns']['authoritative']['config']['launch'] = 'gmysql'
+  node.default['pdns']['authoritative']['package']['backends'] = ['gmysql']
+  node.default['pdns']['authoritative']['config']['disable_axfr'] = false
+  node.default['pdns']['authoritative']['config']['launch'] = 'gmysql'
 
-  node.set['pdns']['authoritative']['gmysql'].tap do |config|
+  node.default['pdns']['authoritative']['gmysql'].tap do |config|
     config['gmysql-host'] = node[:bcpc][:management][:vip]
     config['gmysql-port'] = 3306
     config['gmysql-user'] = get_config!('mysql-pdns-user')
@@ -150,10 +150,10 @@ if node[:bcpc][:management][:vip] and get_nodes_for("mysql").length() > 0
 
 end
 
-node.set['pdns']['authoritative']['config']['recursor'] =
+node.default['pdns']['authoritative']['config']['recursor'] =
   node[:bcpc][:dns_servers][0]
 
-node.set['pdns']['authoritative']['config']['local_address'] = [ node[:bcpc][:floating][:vip] , node[:bcpc][:management][:vip] ]
+node.default['pdns']['authoritative']['config']['local_address'] = [ node[:bcpc][:floating][:vip] , node[:bcpc][:management][:vip] ]
 
 include_recipe 'pdns::authoritative_package'
 
