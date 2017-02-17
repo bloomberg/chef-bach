@@ -36,6 +36,9 @@ default["bcpc"]["hadoop"]["hbase"]["client"]["primarycalltimeout"]["multiget"] =
 default["bcpc"]["hadoop"]["hbase"]["meta"]["replica"]["count"] = 3
 default["bcpc"]["hadoop"]["hbase"]["ipc"]["warn"]["response"]["time"] = 250
 default["bcpc"]["hadoop"]["hbase"]["ipc"]["warn"]["response"]["size"] = 1048576
+default["bcpc"]["hadoop"]["hbase"]["ipc"]["server_call_queue_handler_factor"] = 0.1
+default["bcpc"]["hadoop"]["hbase"]["ipc"]["server_call_queue_read_ratio"] = 0
+default["bcpc"]["hadoop"]["hbase"]["ipc"]["server_call_queue_scan_ratio"] = 0
 default["bcpc"]["hadoop"]["hbase_master"]["hfilecleaner"]["ttl"] = 3600000
 default["bcpc"]["hadoop"]["hbase_master"]["jmx"]["port"] = 10101
 default["bcpc"]["hadoop"]["hbase_master"]["gc_thread"]["cpu_ratio"] = 0.2
@@ -79,6 +82,9 @@ default[:bcpc][:hadoop][:hbase][:site_xml].tap do |site_xml|
   site_xml['hbase.ipc.warn.response.time'] = node["bcpc"]["hadoop"]["hbase"]["ipc"]["warn"]["response"]["time"].to_s
   site_xml['hbase.ipc.warn.response.size'] = node["bcpc"]["hadoop"]["hbase"]["ipc"]["warn"]["response"]["size"].to_s
   site_xml['hbase.ipc.server.tcpnodelay'] = 'true'
+  site_xml['hbase.ipc.server.callqueue.handler.factor'] = node["bcpc"]["hadoop"]["hbase"]["ipc"]["server_call_queue_handler_factor"]
+  site_xml['hbase.ipc.server.callqueue.read.ratio'] = node["bcpc"]["hadoop"]["hbase"]["ipc"]["server_call_queue_read_ratio"]
+  site_xml['hbase.ipc.server.callqueue.scan.ratio'] = node["bcpc"]["hadoop"]["hbase"]["ipc"]["server_call_queue_scan_ratio"]
   site_xml['hbase.replication'] = 'true'
   site_xml['hbase.coprocessor.abortonerror'] = node["bcpc"]["hadoop"]["hbase_rs"]["coprocessor"]["abortonerror"] 
 end
