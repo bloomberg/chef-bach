@@ -15,14 +15,7 @@ ENVIRONMENT="${3-Test-Laptop}"
 # load binary_server_url and binary_server_host (usually the bootstrap)
 load_binary_server_info "$ENVIRONMENT"
 
-# make sure we do not have a previous .chef directory in place to allow re-runs
-if [[ -f .chef/knife.rb ]]; then
-  sudo knife node delete `hostname -f` -y -k /etc/chef-server/admin.pem -u admin || true
-  sudo knife client delete `hostname -f` -y -k /etc/chef-server/admin.pem -u admin || true
-  mv .chef/ ".chef_found_$(date +"%m-%d-%Y %H:%M:%S")"
-fi
-
-mkdir .chef
+mkdir -p .chef
 cat << EOF > .chef/knife.rb
 require 'rubygems'
 require 'ohai'
