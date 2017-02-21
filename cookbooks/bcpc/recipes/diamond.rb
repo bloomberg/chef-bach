@@ -29,15 +29,6 @@ package "diamond" do
     action :install
 end
 
-if node[:bcpc][:virt_type] == "kvm"
-    package "ipmitool" do
-        action :upgrade
-    end
-    package "smartmontools" do
-        action :upgrade
-    end
-end
-
 python_pip "pyrabbit" do
     options "--index #{get_binary_server_url}/python/simple"
     action :install
