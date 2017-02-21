@@ -31,6 +31,13 @@ class ClusterAssignRoles
   include BACH::ClusterData
 
   # If no runlist is provided, the runlist in cluster.txt will be used.
+  # arguments: 
+  #   nodes   -  a list of node objects (e.g. from parse_cluster_txt())
+  #   runlist -- a string for a Chef run_list
+  # returns: 
+  #   nothing
+  # side-affect:
+  #   updates Chef-server with runlists for nodes passed in
   def assign_roles(nodes:, runlist: nil)
     nodes.each do |node|
       chef_node_object = ridley.node.find(node[:fqdn])
@@ -43,6 +50,8 @@ class ClusterAssignRoles
         node[:runlist].split(',')
       elsif runlist.is_a?(String)
         runlist.split(',')
+      else
+        raise "No runlist for node #{node[:fqdn]}"
       end
 
       chef_node_object.run_list = target_runlist
@@ -167,7 +176,7 @@ class ClusterAssignRoles
 
     target_head_nodes = target_nodes & all_head_nodes
 
-    partial_runlist = ['role[BCPC-Hadoop-Head]']
+    partial_runlist = 'role[BCPC-Hadoop-Head]'
 
     # See comments in install_hadoop
     assign_roles(nodes: all_head_nodes, runlist: partial_runlist)
