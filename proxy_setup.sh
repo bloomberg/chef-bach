@@ -11,9 +11,21 @@ if [ -n "$http_proxy" ]; then
   # Set https_proxy to http_proxy if not otherwise defined.
   export https_proxy=${https_proxy:-$http_proxy}
 
+  if [ -n "$no_proxy" ]; then
+    export no_proxy="localhost"
+  else
+    export no_proxy="$no_proxy,localhost"
+  fi
+
+  if domainname | grep '(none)'; then
+    DOMAIN="$(domainname),"
+  else
+    DOMAIN=""
+  fi
+
   local_ips=$(ip addr list |grep 'inet '|sed -e 's/.* inet //' -e 's#/.*#,#')
-  export no_proxy="$(sed 's/ //g' <<< $local_ips)localhost,$(hostname),$(hostname -f),.$(domainname),10.0.100.,10.0.100.*"
-  export NO_PROXY="$(sed 's/ //g' <<< $local_ips)localhost,$(hostname),$(hostname -f),.$(domainname),10.0.100.,10.0.100.*"
+  export no_proxy="$(sed 's/ //g' <<< $local_ips)$(hostname),$(hostname -f),$DOMAIN10.0.100.,10.0.100.*,$no_proxy"
+  export NO_PROXY="$no_proxy"
 fi
 
 #################################################

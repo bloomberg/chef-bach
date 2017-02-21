@@ -51,8 +51,8 @@ if apt_uri.host
 end
 
 unless node[:fqdn] == get_bootstrap
-  require 'tempfile'
-  bcpc_apt_key_path = Tempfile.new('bootstrap-gpg-key').path
+  bcpc_apt_key_path = File.join(Chef::Config[:file_cache_path],
+                                'bcpc-cluster-local-repo.gpg')
 
   file bcpc_apt_key_path do
     mode 0444
@@ -62,7 +62,9 @@ unless node[:fqdn] == get_bootstrap
   ruby_block 'get-bootstrap-gpg-fingerprint' do
     block do
       require 'mixlib/shellout'
-      cc = Mixlib::ShellOut.new('gpg', '--with-fingerprint', bcpc_apt_key_path)
+      cc = Mixlib::ShellOut.new('gpg',
+                                '--with-fingerprint',
+                                bcpc_apt_key_path)
       cc.run_command
       cc.error!
       node.run_state['bootstrap_gpg_fingerprint'] =
@@ -73,11 +75,7 @@ unless node[:fqdn] == get_bootstrap
   end
 
   execute 'install-bootstrap-gpg' do
-    command "apt-key add '#{bcpc_apt_key_path}'"
-  end
-
-  file bcpc_apt_key_path do
-    action :delete
+    command lazy { "apt-key add '#{bcpc_apt_key_path}'" }
   end
 end
 
