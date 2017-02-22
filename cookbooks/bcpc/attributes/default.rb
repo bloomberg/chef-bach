@@ -21,7 +21,7 @@ default['bcpc']['bootstrap']['proxy'] = nil
 
 default['bcpc']['bootstrap']['preseed'].tap do |preseed|
   preseed['add_kernel_opts'] = 'console=ttyS0'
-  preseed['additional_packages'] = %w[openssh-server lldpd]
+  preseed['additional_packages'] = %w(openssh-server lldpd)
 
   # Disable device renaming -- use the kernel's enumeration order.
   preseed['late_command'] =
@@ -76,8 +76,8 @@ unless node['bcpc']['node_number']
   end
 
   unless all_macs.count > 0
-    fail 'Could not find MAC addresses for ' +
-      'node[:network][:default_interface] ' +
+    fail 'Could not find MAC addresses for ' \
+      'node[:network][:default_interface] ' \
       "(#{node[:network][:default_interface]}) !"
   end
 
@@ -249,10 +249,7 @@ default[:ubuntu][:security_url] =
 default['bcpc']['pdns_dbname'] = 'pdns'
 default['bcpc']['zabbix_dbname'] = 'zabbix'
 
-default['bcpc']['admin_tenant'] = 'AdminTenant'
-default['bcpc']['admin_role'] = 'Admin'
-default['bcpc']['member_role'] = 'Member'
-default['bcpc']['admin_email'] = 'admin@localhost.com'
+default['bcpc']['admin_email'] = 'admin@example.com'
 
 # Memory where InnoDB caches table and index data (in MB). Default is 128M.
 default['bcpc']['mysql']['innodb_buffer_pool_size'] =
