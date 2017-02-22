@@ -110,7 +110,6 @@ default['bcpc']['management']['viphost'] = "#{node.chef_environment.downcase}"\
                                            ".#{node['bcpc']['domain_name']}"
 default['bcpc']['management']['ip'] = '1.2.3.4'
 
-default['bcpc']['ntp_servers'] = ['pool.ntp.org']
 default['bcpc']['dns_servers'] = ['8.8.8.8', '8.8.4.4']
 
 ###########################################
@@ -118,8 +117,6 @@ default['bcpc']['dns_servers'] = ['8.8.8.8', '8.8.4.4']
 #  Repos for things we rely on
 #
 ###########################################
-default['bcpc']['ubuntu']['version'] = 'precise'
-
 default['bcpc']['repos_for']['precise'].tap do |precise_repos|
   precise_repos['percona'].tap do |repo|
     repo[:components] = ['main']
