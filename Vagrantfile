@@ -69,7 +69,7 @@ bootstrap_hostname =
   chef_env['override_attributes']['bcpc']['bootstrap']['hostname']
 
 bootstrap_domain =
-  chef_env['override_attributes']['bcpc']['domain_name']
+  chef_env['override_attributes']['bcpc']['domain_name'] || 'bcpc.example.com'
 
 # We rely on global variables to deal with Vagrantfile scoping rules.
 # rubocop:disable Style/GlobalVars

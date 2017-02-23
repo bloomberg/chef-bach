@@ -2,7 +2,6 @@
   "name": "Test-Laptop",
   "override_attributes": {
     "bcpc": {
-      "domain_name" : "bcpc.example.com",
       "management": {
         "vip" : "10.0.100.5"
       },
@@ -42,12 +41,10 @@
         "dhcp_subnet" : "10.0.100.0",
         "dhcp_range" : "10.0.100.14 10.0.100.250",
         "preseed": {
-          "additional_packages": ["openssh-server","lldpd","virtualbox-guest-utils"]
+          "additional_packages": [ "openssh-server",
+                                   "lldpd",
+                                   "virtualbox-guest-utils" ]
         }
-      },
-      "dns_servers" : [ "8.8.8.8", "8.8.4.4" ],
-      "cluster" : {
-          "profile" : ""
       },
       "hadoop" : {
         "yarn" : {
@@ -64,7 +61,10 @@
       }
     },
     "ntp": {
-       "servers" : [ "0.pool.ntp.org", "1.pool.ntp.org", "2.pool.ntp.org", "3.pool.ntp.org" ]
+       "servers" : [ "0.pool.ntp.org",
+                     "1.pool.ntp.org",
+                     "2.pool.ntp.org",
+                     "3.pool.ntp.org" ]
     },
     "chef_client": {
       "server_url": "http://10.0.100.3:4000",

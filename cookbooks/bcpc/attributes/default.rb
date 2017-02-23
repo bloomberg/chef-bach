@@ -8,17 +8,12 @@ default['bcpc']['state'] = 'NY'
 default['bcpc']['location'] = 'New York'
 default['bcpc']['organization'] = 'Bloomberg'
 
-# Should be kvm (or qemu if testing in VMs)
-default['bcpc']['virt_type'] = 'kvm'
-
 # Region name for this cluster
 default['bcpc']['region_name'] = node.chef_environment
 
 # Domain name that will be used for DNS
 default['bcpc']['domain_name'] = 'bcpc.example.com'
 
-# Key if Cobalt+VMS is to be used
-default['bcpc']['vms_key'] = nil
 default['bcpc']['encrypt_data_bag'] = false
 
 # This is where you would set a proxy if one is needed at install time.
@@ -26,7 +21,7 @@ default['bcpc']['bootstrap']['proxy'] = nil
 
 default['bcpc']['bootstrap']['preseed'].tap do |preseed|
   preseed['add_kernel_opts'] = 'console=ttyS0'
-  preseed['additional_packages'] = %w[openssh-server lldpd]
+  preseed['additional_packages'] = %w(openssh-server lldpd)
 
   # Disable device renaming -- use the kernel's enumeration order.
   preseed['late_command'] =
@@ -81,8 +76,8 @@ unless node['bcpc']['node_number']
   end
 
   unless all_macs.count > 0
-    fail 'Could not find MAC addresses for ' +
-      'node[:network][:default_interface] ' +
+    fail 'Could not find MAC addresses for ' \
+      'node[:network][:default_interface] ' \
       "(#{node[:network][:default_interface]}) !"
   end
 
@@ -115,9 +110,6 @@ default['bcpc']['management']['viphost'] = "#{node.chef_environment.downcase}"\
                                            ".#{node['bcpc']['domain_name']}"
 default['bcpc']['management']['ip'] = '1.2.3.4'
 
-default['bcpc']['metadata']['ip'] = '169.254.169.254'
-
-default['bcpc']['ntp_servers'] = ['pool.ntp.org']
 default['bcpc']['dns_servers'] = ['8.8.8.8', '8.8.4.4']
 
 ###########################################
@@ -125,8 +117,6 @@ default['bcpc']['dns_servers'] = ['8.8.8.8', '8.8.4.4']
 #  Repos for things we rely on
 #
 ###########################################
-default['bcpc']['ubuntu']['version'] = 'precise'
-
 default['bcpc']['repos_for']['precise'].tap do |precise_repos|
   precise_repos['percona'].tap do |repo|
     repo[:components] = ['main']
@@ -256,15 +246,7 @@ default[:ubuntu][:security_url] =
 default['bcpc']['pdns_dbname'] = 'pdns'
 default['bcpc']['zabbix_dbname'] = 'zabbix'
 
-default['bcpc']['admin_tenant'] = 'AdminTenant'
-default['bcpc']['admin_role'] = 'Admin'
-default['bcpc']['member_role'] = 'Member'
-default['bcpc']['admin_email'] = 'admin@localhost.com'
-
-default[:bcpc][:ports][:apache][:radosgw] = 8080
-default[:bcpc][:ports][:apache][:radosgw_https] = 8443
-default[:bcpc][:ports][:haproxy][:radosgw] = 80
-default[:bcpc][:ports][:haproxy][:radosgw_https] = 443
+default['bcpc']['admin_email'] = 'admin@example.com'
 
 # Memory where InnoDB caches table and index data (in MB). Default is 128M.
 default['bcpc']['mysql']['innodb_buffer_pool_size'] =

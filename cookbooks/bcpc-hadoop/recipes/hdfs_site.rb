@@ -235,6 +235,9 @@ ruby_block "hdfs_site_generated_values_dn_properties" do
 
       dn_properties =
         {
+         'dfs.datanode.ipc.address' =>
+           node[:bcpc][:floating][:ip].to_s + ':50020',
+
          'dfs.datanode.address' =>
            node[:bcpc][:floating][:ip] + ':1004',
 

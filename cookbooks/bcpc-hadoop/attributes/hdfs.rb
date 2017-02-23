@@ -76,9 +76,6 @@ default[:bcpc][:hadoop][:hdfs][:site_xml].tap do |site_xml|
   site_xml['dfs.namenode.datanode.registration.ip-hostname-check'] =
     dfs[:namenode][:datanode][:registration]['ip-hostname-check']
 
-  site_xml['dfs.datanode.ipc.address'] =
-    node[:bcpc][:floating][:ip].to_s + ':50020'
-
   site_xml['dfs.namenode.avoid.read.stale.datanode'] =
     dfs[:namenode][:avoid][:read][:stale][:datanode]
 
