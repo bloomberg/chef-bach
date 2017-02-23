@@ -20,9 +20,9 @@ if [[ "$(pwd)" != "$(git rev-parse --show-toplevel)" ]]; then
 fi
 
 ENVIRONMENT=Test-Laptop
-export BOOTSTRAP_VM_MEM=${BOOTSTRAP_VM_MEM:-3096}
+export BOOTSTRAP_VM_MEM=${BOOTSTRAP_VM_MEM:-5096}
 export BOOTSTRAP_VM_CPUs=${BOOTSTRAP_VM_CPUS:-2}
-export CLUSTER_VM_MEM=${CLUSTER_VM_MEM:-5120}
+export CLUSTER_VM_MEM=${CLUSTER_VM_MEM:-7120}
 export CLUSTER_VM_CPUs=${CLUSTER_VM_CPUs:-4}
 export CLUSTER_TYPE=${CLUSTER_TYPE:-Hadoop}
 
