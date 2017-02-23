@@ -35,11 +35,9 @@ end
 package 'vlan'
 
 # Useful system tools
-package 'fio'
-package 'bc'
-package 'htop'
-package 'sysstat'
-package 'iperf'
+%w(bc ethtool fio htop iotop iperf pcp powertop sysstat).each do |p|
+  package p
+end
 
 # Remove spurious logging failures from this package
 package 'powernap' do
