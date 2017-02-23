@@ -43,9 +43,10 @@ user_ulimit "hdfs" do
   process_limit 65536
 end
 
+# Intentionally hobble jmxtrans to ensure it doesn't destroy the system
 user_ulimit "jmxtrans" do
-  filehandle_limit 65536
-  process_limit 65536
+  filehandle_limit 1024
+  process_limit 1024
 end
 
 user_ulimit "mapred" do
