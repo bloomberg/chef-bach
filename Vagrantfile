@@ -65,8 +65,11 @@ chef_env = JSON.parse(File.read(json_file.join(',')))
 
 cluster_environment = chef_env['name']
 
+cname = chef_env['override_attributes']['bcpc'].has_key?('cluster_name') && \
+  chef_env['override_attributes']['bcpc']['cluster_name'] || ''
+
 bootstrap_hostname =
-  chef_env['override_attributes']['bcpc']['bootstrap']['hostname']
+  cname + chef_env['override_attributes']['bcpc']['bootstrap']['hostname']
 
 bootstrap_domain =
   chef_env['override_attributes']['bcpc']['domain_name'] || 'bcpc.example.com'
@@ -77,8 +80,8 @@ $bach_local_environment = cluster_environment
 $bach_local_mirror = nil
 
 Vagrant.configure('2') do |config|
-  config.vm.define :bootstrap do |bootstrap|
-    bootstrap.vm.hostname = "#{bootstrap_hostname}.#{bootstrap_domain}"
+  config.vm.define "#{cname}bootstrap".to_sym do |bootstrap|
+    bootstrap.vm.hostname = "#{cname}#{bootstrap_hostname}.#{bootstrap_domain}"
 
     bootstrap.vm.network(:private_network,
                          ip: '10.0.100.3',

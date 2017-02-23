@@ -84,6 +84,12 @@ automated build tests.)
 Using the script [tests/automated_install.sh](./tests/automated_install.sh) on Mac OS (OS X),
 will require [`brew`](http://brew.sh) to be available/installed.
 
+Note: To run more than one test cluster at a time with VirtualBox, one may
+      set in their environment file a bcpc/cluster_name override_attribute.
+      This will namespace the cluster's virtual machines to not collide on the
+      hypervisor. Note: one needs to have each cluster's repository in a
+      different parent directory (to avoid the `cluster` directory from
+      colliding).
 
 Other Deployment Flavors
 ------------------------

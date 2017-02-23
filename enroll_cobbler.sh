@@ -4,6 +4,7 @@ set -e
 
 # bash imports
 source ./virtualbox_env.sh
+source ./vbox_create.sh
 
 if ! hash vagrant 2>/dev/null; then
     if [[ -z "$1" ]]; then
@@ -28,14 +29,10 @@ pushd $DIR
 
 KEYFILE=bootstrap_chef.id_rsa
 
-# If we're using EFI VMs, then we must use Ubuntu 14.04 "Trusty" or above.
-PROFILE="bcpc_host_trusty"
+# Variables from vbox_create.sh
+echo "Using CLUSTER_NAME=${CLUSTER_NAME} and VM_LIST=${VM_LIST}"
 
-if [ ${CLUSTER_TYPE,,} == "kafka" ];then
-    VM_LIST=(bcpc-vm1 bcpc-vm2 bcpc-vm3 bcpc-vm4 bcpc-vm5 bcpc-vm6)
-else
-    VM_LIST=(bcpc-vm1 bcpc-vm2 bcpc-vm3)
-fi
+PROFILE="bcpc_host_trusty"
 
 subnet=10.0.100
 node=11
