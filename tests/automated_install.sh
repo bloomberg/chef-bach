@@ -85,7 +85,7 @@ fi
 vms_started="False"
 for vm in ${VM_LIST[*]} bcpc-bootstrap; do
   vboxmanage showvminfo $vm | grep -q '^State:.*running' || vms_started="True"
-  if [[ $(vboxmanage snapshot $vm list --machinereadable | grep -q 'Shoe-less') ]]; then
+  if [[ ! $(vboxmanage snapshot $vm list --machinereadable | grep -q 'Shoe-less') ]]; then
     vboxmanage showvminfo $vm | grep -q '^State:.*running' || VBoxManage snapshot $vm take Shoe-less
   fi
   vboxmanage showvminfo $vm | grep -q '^State:.*running' || VBoxManage startvm $vm --type headless
@@ -119,7 +119,7 @@ fi
 vagrant ssh -c "cd chef-bcpc; source proxy_setup.sh; ./wait-for-hosts.sh ${VM_LIST[*]}"
 printf "Snapshotting post-Cobbler\n"
 for vm in ${VM_LIST[*]} bcpc-bootstrap; do
-  [[ $(vboxmanage snapshot $vm list --machinereadable | grep -q 'Post-Cobble') ]] && \
+  [[ ! $(vboxmanage snapshot $vm list --machinereadable | grep -q 'Post-Cobble') ]] && \
     [[ "$vms_started" == "True" ]] && VBoxManage snapshot $vm take Post-Cobble --live &
 done
 wait && printf "Done Snapshotting\n"
@@ -129,7 +129,7 @@ vagrant ssh -c "cd chef-bcpc; ./cluster-assign-roles.sh $ENVIRONMENT Basic"
 
 printf "Snapshotting post-Basic\n"
 for vm in ${VM_LIST[*]} bcpc-bootstrap; do
-  [[ $(vboxmanage snapshot $vm list --machinereadable | grep -q 'Basic') ]] && \
+  [[ ! $(vboxmanage snapshot $vm list --machinereadable | grep -q 'Basic') ]] && \
     VBoxManage snapshot $vm take Basic --live &
 done
 wait && printf "Done Snapshotting\n"
@@ -142,7 +142,7 @@ if [ "$CLUSTER_TYPE" == "Hadoop" ]; then
   printf "Running C-A-R 'bootstrap' before final C-A-R"
   vagrant ssh -c "cd chef-bcpc; ./cluster-assign-roles.sh $ENVIRONMENT Bootstrap"
   for vm in ${VM_LIST[*]} bcpc-bootstrap; do
-    [[ $(vboxmanage snapshot $vm list --machinereadable | grep -q 'Post-Bootstrap') ]] && \
+    [[ ! $(vboxmanage snapshot $vm list --machinereadable | grep -q 'Post-Bootstrap') ]] && \
       VBoxManage snapshot $vm take Post-Bootstrap --live &
   done
   wait && printf "Done Snapshotting\n"
@@ -153,7 +153,7 @@ vagrant ssh -c "cd chef-bcpc; ./cluster-assign-roles.sh $ENVIRONMENT $CLUSTER_TY
 
 printf "Taking final snapshot\n"
 for vm in ${VM_LIST[*]} bcpc-bootstrap; do
-  [[ $(vboxmanage snapshot $vm list --machinereadable | grep -q 'Full-Shoes') ]] && \
+  [[ ! $(vboxmanage snapshot $vm list --machinereadable | grep -q 'Full-Shoes') ]] && \
     VBoxManage snapshot $vm take Full-Shoes --live &
 done
 wait && printf "Done Snapshotting\n"
