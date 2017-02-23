@@ -43,6 +43,11 @@ user_ulimit "hdfs" do
   process_limit 65536
 end
 
+user_ulimit "jmxtrans" do
+  filehandle_limit 65536
+  process_limit 65536
+end
+
 user_ulimit "mapred" do
   filehandle_limit 65536
   process_limit 65536

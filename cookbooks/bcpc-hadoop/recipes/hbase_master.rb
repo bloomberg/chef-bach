@@ -37,6 +37,7 @@ end
 
 user_ulimit "hbase" do
   filehandle_limit 65536
+  process_limit 65536
 end
 
 service "hbase-thrift" do
