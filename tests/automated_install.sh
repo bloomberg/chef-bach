@@ -71,7 +71,7 @@ create_cluster_VMs || ( echo "############## VBOX CREATE CLUSTER VMs RETURNED $?
 install_cluster $ENVIRONMENT || ( echo "############## VBOX CREATE INSTALL CLUSTER RETURNED $? ##############" && exit 1 )
 
 printf "#### Install ruby gems\n"
-vagrant ssh -c 'cd chef-bcpc; PATH=/opt/chefdk/embedded/bin:/usr/bin:/bin bundle install --path vendor/bundle'
+vagrant ssh -c 'cd chef-bcpc; source proxy_setup.sh; PATH=/opt/chefdk/embedded/bin:/usr/bin:/bin bundle install --path vendor/bundle'
 
 printf "#### Cobbler Boot\n"
 printf "Snapshotting pre-Cobbler and booting (unless already running)\n"
@@ -116,7 +116,7 @@ if hash screen; then
   echo
 fi
 
-vagrant ssh -c "cd chef-bcpc; ./wait-for-hosts.sh ${VM_LIST[*]}"
+vagrant ssh -c "cd chef-bcpc; source proxy_setup.sh; ./wait-for-hosts.sh ${VM_LIST[*]}"
 printf "Snapshotting post-Cobbler\n"
 for vm in ${VM_LIST[*]} bcpc-bootstrap; do
   [[ $(vboxmanage snapshot $vm list --machinereadable | grep -q 'Post-Cobble') ]] && \
