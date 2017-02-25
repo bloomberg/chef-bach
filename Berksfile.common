@@ -38,13 +38,11 @@ cookbook 'database'
 
 # bfd is not on the supermarket
 cookbook 'bfd',
-  git: 'https://github.com/cbaenziger/openbfdd-cookbook',
-  branch: 'chef_12'
+  git: 'https://github.com/bloomberg/openbfdd-cookbook'
 
 # cobblerd upstream, pending submitting update to supermarket
 cookbook 'cobblerd', 
-  git: 'https://github.com/cbaenziger/cobbler-cookbook',
-  branch: 'chef_12'
+  git: 'https://github.com/bloomberg/cobbler-cookbook'
 
 # jmxtrans 1.0+ isn't on the supermarket.
 cookbook 'jmxtrans', 
