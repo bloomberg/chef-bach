@@ -17,9 +17,9 @@ chef_packages_hash =
    ],
    chef:
    [
-    'https://packages.chef.io/files/current/chef/12.18.24/ubuntu/' \
-      '14.04/chef_12.18.24-1_amd64.deb',
-    'ff57e8206dbe23862f2beac3a741e715d4f9838512736f15c6293f80e5139342'
+    'https://packages.chef.io/repos/apt/stable/ubuntu/' \
+      '14.04/chef_12.19.36-1_amd64.deb',
+    'fbf44670ab5b76e4f1a1f5357885dafcc79e543ccbbe3264afd40c15d604b6dc'
    ],
    chef_server:
    [
