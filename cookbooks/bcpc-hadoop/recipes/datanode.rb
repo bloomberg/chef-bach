@@ -271,18 +271,19 @@ locking_resource "hadoop-hdfs-datanode-restart" do
   perform :restart
   action :serialize_process
   subscribes :serialize, 'link[/etc/init.d/hadoop-hdfs-datanode]', :delayed
-  subscribes :serialize, 'template[/etc/hadoop/conf/hdfs-site.xml]', :immediate
-  subscribes :serialize, 'template[/etc/hadoop/conf/hadoop-metrics2.properties]', :immediate
-  subscribes :serialize, 'template[/etc/hadoop/conf/hadoop-env.sh]', :immediate
-  subscribes :serialize, 'template[/etc/hadoop/conf/topology]', :immediate
-  subscribes :serialize, 'user_ulimit[hdfs]', :immediate
-  subscribes :serialize, 'user_ulimit[root]', :immediate
-  subscribes :serialize, 'bash[hdp-select hadoop-hdfs-datanode]', :immediate
-  subscribes :serialize, 'log[jdk-version-changed]', :immediate
+  subscribes :serialize, 'template[/etc/hadoop/conf/hdfs-site.xml]', :delayed
+  subscribes :serialize,
+    "template[/etc/hadoop/conf/hadoop-metrics2.properties]", :delayed
+  subscribes :serialize, 'template[/etc/hadoop/conf/hadoop-env.sh]', :delayed
+  subscribes :serialize, 'template[/etc/hadoop/conf/topology]', :delayed
+  subscribes :serialize, 'user_ulimit[hdfs]', :delayed
+  subscribes :serialize, 'user_ulimit[root]', :delayed
+  subscribes :serialize, 'bash[hdp-select hadoop-hdfs-datanode]', :delayed
+  subscribes :serialize, 'log[jdk-version-changed]', :delayed
 end
 
-service 'hadoop-yarn-nodemanager' do
-  supports status: true, restart: true, reload: false
+service "hadoop-yarn-nodemanager" do
+  supports :status => true, :restart => true, :reload => false
   action [:enable, :start]
 end
 
