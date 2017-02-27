@@ -61,7 +61,6 @@ https_proxy ENV['https_proxy']
 no_proxy no_proxy_string
 ENV['GIT_SSL_NO_VERIFY'] = 'true'
 EOF
-  fi
 fi # end of [[ ! -f .chef/knife.rb ]]
 
 mkdir -p ./vendor
