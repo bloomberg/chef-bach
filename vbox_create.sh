@@ -324,7 +324,12 @@ ip=${2-10.0.100.3}
     popd
     echo "Bootstrap complete - setting up Chef server"
     echo "N.B. This may take approximately 30-45 minutes to complete."
+    vagrant ssh -c 'sudo rm -f /var/chef/cache/chef-stacktrace.out'
     ./bootstrap_chef.sh --vagrant-remote $ip $environment
+    if vagrant ssh -c 'test -e /var/chef/cache/chef-stacktrace.out'; then
+      echo '========= Failed to Chef!' >&2
+      exit 1
+    fi
     ./enroll_cobbler.sh
   fi
 }
