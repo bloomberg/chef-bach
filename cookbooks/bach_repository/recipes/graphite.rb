@@ -11,7 +11,7 @@
 include_recipe 'bach_repository::directory'
 bins_dir = node['bach']['repository']['bins_directory']
 src_dir = node['bach']['repository']['src_directory']
-fpm_path = "#{node[:bach][:repository][:bundle_directory]}/ruby/2.3.0/bin/fpm"
+fpm_path = node['bach']['repository']['fpm_bin']
 
 #
 # When a shell script built these packages, it assigned an epoch using
@@ -93,7 +93,9 @@ epoch = Time.now.strftime("%s")
   execute "fpm-#{package[:name]}" do
     command fpm_command
     cwd src_dir
-    environment 'PATH' => "/opt/chefdk/embedded/bin:#{ENV['PATH']}"
+    environment 'PATH' => "/opt/chefdk/embedded/bin:#{ENV['PATH']}",
+                'BUNDLE_GEMFILE' =>
+                  "#{node[:bach][:repository][:repo_directory]}/Gemfile"
     creates deb_path
   end
 end

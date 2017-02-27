@@ -23,6 +23,9 @@ default[:bach][:repository][:src_directory] = \
 #
 default[:bach][:repository][:apt_repo_version] = '0.5.0'
 
+default['bach']['repository']['fpm_bin'] = \
+  '/opt/chefdk/embedded/bin/bundle exec fpm'
+
 # Apt signing keys.
 default[:bach][:repository][:private_key_path] = '/home/vagrant/apt_key.sec'
 default[:bach][:repository][:public_key_path] = 

@@ -3,7 +3,7 @@
 # Recipe:: spark
 #
 require 'tmpdir'
-fpm_path = "#{node[:bach][:repository][:bundle_directory]}/ruby/2.3.0/bin/fpm"
+fpm_path = node['bach']['repository']['fpm_bin']
 
 include_recipe 'bach_repository::directory'
 bins_dir = node['bach']['repository']['bins_directory']
@@ -40,7 +40,9 @@ execute 'build_spark_package' do
     "-n #{spark_pkg_prefix}-#{spark_pkg_version} " \
     "-v #{spark_pkg_version} " \
     "--description 'Spark Package with Hadoop 2.7' -p #{bins_dir} *"
-  environment 'PATH' => "/opt/chefdk/embedded/bin:#{ENV['PATH']}"
+  environment 'PATH' => "/opt/chefdk/embedded/bin:#{ENV['PATH']}",
+              'BUNDLE_GEMFILE' =>
+                "#{node[:bach][:repository][:repo_directory]}/Gemfile"
   umask 0002
   action :nothing
 end

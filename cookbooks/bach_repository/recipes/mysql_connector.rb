@@ -9,7 +9,7 @@
 #
 
 include_recipe 'bach_repository::tools'
-fpm_path = "#{node[:bach][:repository][:bundle_directory]}/ruby/2.3.0/bin/fpm"
+fpm_path = node['bach']['repository']['fpm_bin']
 
 puts node.debug_value('bach','repository').to_s
 
@@ -131,7 +131,9 @@ bash 'build_mysql_connector_package' do
         -C #{mysql_package_dir} \
         *
   })
-  environment 'PATH' => "/opt/chefdk/embedded/bin:#{ENV['PATH']}"
+  environment 'PATH' => "/opt/chefdk/embedded/bin:#{ENV['PATH']}",
+              'BUNDLE_GEMFILE' =>
+                "#{node[:bach][:repository][:repo_directory]}/Gemfile"
   umask 0002
   not_if { File.exist?(target_filepath) }
 end
