@@ -319,6 +319,8 @@ class ClusterAssignRoles
                            '--bootstrap-url', bootstrap_url,
                            '--sudo',
                            '--use-sudo-password',
+                           '--node-ssl-verify-mode', 'none',
+                           '--no-node-verify-api-cert',
                            '--no-host-key-verify',
                            '-N', node[:fqdn],
                            '--bootstrap-vault-json', vault_json,
