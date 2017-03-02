@@ -17,7 +17,7 @@
 # limitations under the License.
 #
 
-require 'uri' 
+require 'uri'
 ubuntu_archive_host = URI.parse(node[:ubuntu][:archive_url]).host
 ubuntu_archive_proxy_string = if node[:bcpc][:bootstrap][:proxy]
                                 '"' + node[:bcpc][:bootstrap][:proxy] + '"'
@@ -34,6 +34,7 @@ file '/etc/apt/apt.conf.d/99ubuntu_archive_proxy' do
   EOM
 end
 
+include_recipe 'bcpc::nscd'
 include_recipe 'ubuntu'
 include_recipe 'bcpc::cluster_local_repository'
 
