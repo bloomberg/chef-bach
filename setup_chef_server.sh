@@ -34,7 +34,8 @@ apt-get -y install chef=12.19.36-1
 
 if dpkg -s chef-server 2>/dev/null | grep -q ^Status.*installed && \
    dpkg -s chef 2>/dev/null | grep -q ^Version.*12; then
-  echo chef-server is installed
+  chef-server-ctl restart
+  echo 'chef-server and client are installed and the server has been restarted'
 else
   apt-get -y install chef-server
   mkdir -p /etc/chef-server
