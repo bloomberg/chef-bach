@@ -70,9 +70,6 @@ fi
 create_cluster_VMs || ( echo "############## VBOX CREATE CLUSTER VMs RETURNED $? ##############" && exit 1 )
 install_cluster $ENVIRONMENT || ( echo "############## VBOX CREATE INSTALL CLUSTER RETURNED $? ##############" && exit 1 )
 
-printf "#### Install ruby gems\n"
-vagrant ssh -c 'cd chef-bcpc; source proxy_setup.sh; export PATH=/opt/chefdk/embedded/bin:/usr/bin:/bin; export PKG_CONFIG_PATH=/usr/lib/pkgconfig:/usr/lib/x86_64-linux-gnu/pkgconfig:/usr/share/pkgconfig; bundle install --path vendor/bundle'
-
 printf "#### Cobbler Boot\n"
 printf "Snapshotting pre-Cobbler and booting (unless already running)\n"
 
