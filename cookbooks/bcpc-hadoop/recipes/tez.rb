@@ -29,12 +29,11 @@ template "/etc/tez/conf/tez-site.xml" do
   mode 0655
 end
 
-bash "make_apps_tez_dir" do
+bash 'make_apps_tez_dir' do
   code <<EOH
-  hdfs dfs -mkdir -p /apps/tez
-EOH
-  user "hdfs"
-  not_if "hdfs dfs -test -d /apps/tez/", :user => "hdfs"
+    hdfs dfs -mkdir -p /apps/tez
+  EOH
+  user 'hdfs'
 end
 
 hdfs_testfile = "/user/hdfs/chef-tez-test-#{node['hostname']}"
