@@ -28,6 +28,10 @@ default[:bcpc][:hadoop][:hive][:site_xml].tap do |site_xml|
   site_xml['hive.stats.jdbcdriver'] = 'com.mysql.jdbc.Driver'
   site_xml['hive.support.concurrency'] = true
   site_xml['hive.warehouse.subdir.inherit.perms'] = true
+  site_xml['hive.cluster.delegation.token.store.class'] =
+    'org.apache.hadoop.hive.thrift.ZooKeeperTokenStore'
+  site_xml['hive.cluster.delegation.token.store.zookeeper.connectString'] =
+    '${hive.zookeeper.quorum}'
 
   # All other prefixes
   site_xml['datanucleus.autoCreateSchema'] = false
