@@ -80,7 +80,6 @@ if node[:bcpc][:management][:vip] and get_nodes_for("mysql").length() > 0
 
   gem_package 'mysql2' do
     action :install
-    version '0.4.4'
     gem_binary File.join(Gem::bindir,"gem")
   end
 
