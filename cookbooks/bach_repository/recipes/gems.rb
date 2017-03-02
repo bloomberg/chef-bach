@@ -34,7 +34,7 @@ end
 
 execute "bundler install" do
   cwd node['bach']['repository']['repo_directory']
-  command "#{node['bach']['repository']['bundler_bin']} install --path vendor/"
+  command "#{node['bach']['repository']['bundler_bin']} install"
   # restore system PKG_CONFIG_PATH so mkmf::pkg_config()
   # can find system libraries
   environment 'PKG_CONFIG_PATH' => '/usr/lib/pkgconfig:' + \
@@ -47,7 +47,7 @@ end
 
 execute "bundler package" do
   cwd node['bach']['repository']['repo_directory']
-  command "#{node['bach']['repository']['bundler_bin']} package --path vendor/"
+  command "#{node['bach']['repository']['bundler_bin']} package"
   # restore system PKG_CONFIG_PATH so mkmf::pkg_config()
   # can find system libraries
   environment 'PKG_CONFIG_PATH' => '/usr/lib/pkgconfig:' + \
