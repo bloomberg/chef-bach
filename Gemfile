@@ -10,11 +10,11 @@ if File.exist?('/opt/chefdk/Gemfile')
 else
   source 'https://rubygems.org' do
     gem 'parallel'
-    gem 'chef-vault', '2.9.0' # same as the cluster uses
+    gem 'chef-vault'
     gem 'ipaddress'
     gem 'highline'
     gem 'mixlib-shellout'
-    gem 'chef-provisioning', '1.2.1'
+    gem 'chef-provisioning'
     gem 'rack'
     gem 'buff-extensions'
     gem 'buff-ruby_engine'
