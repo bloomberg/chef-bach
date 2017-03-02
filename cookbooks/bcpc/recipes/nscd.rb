@@ -36,6 +36,7 @@ end
 # Create an nscd user and home directory if none exist.
 group node['nscd']['server_user'] do
   action :create
+  system true
   not_if "getent group #{node['nscd']['server_user']}"
 end
 
@@ -43,6 +44,7 @@ user node['nscd']['server_user'] do
   action :create
   group node['nscd']['server_user']
   home '/var/run/nscd'
+  system true
   not_if "getent passwd #{node['nscd']['server_user']}"
 end
 
