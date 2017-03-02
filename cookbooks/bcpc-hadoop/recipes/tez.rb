@@ -37,9 +37,10 @@ EOH
   not_if "hdfs dfs -test -d /apps/tez/", :user => "hdfs"
 end
 
-hdfs_write = "echo 'test' | hdfs dfs -copyFromLocal - /user/hdfs/chef-tez-test"
-hdfs_remove = "hdfs dfs -rm -skipTrash /user/hdfs/chef-tez-test"
-hdfs_test = "hdfs dfs -test -f /user/hdfs/chef-tez-test"
+hdfs_testfile = "/user/hdfs/chef-tez-test-#{node['hostname']}"
+hdfs_write = "echo 'test' | hdfs dfs -copyFromLocal - #{hdfs_testfile}"
+hdfs_remove = "hdfs dfs -rm -skipTrash #{hdfs_testfile}"
+hdfs_test = "hdfs dfs -test -f #{hdfs_testfile}"
 
 bash 'tez-remove-check-file' do
   code <<-EOH
