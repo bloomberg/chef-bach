@@ -22,4 +22,12 @@ suites:
       - recipe[apt]
       - recipe[bach_repository_test::default]
       - recipe[bach_repository]
-    attributes:
+    attributes: {
+      bach: {
+        repository: {
+          repo_directory: "/tmp/my_repo_dir",
+          bundler_bin: "/opt/chef/embedded/bin/bundle",
+          gem_bin: "/opt/chef/embedded/bin/gem"
+        }
+      }
+    }

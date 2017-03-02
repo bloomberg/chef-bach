@@ -6,11 +6,7 @@ include_recipe 'bach_repository::directory'
 include_recipe 'bach_repository::tools'
 bins_dir = node['bach']['repository']['bins_directory']
 gems_dir = node['bach']['repository']['gems_directory']
-gem_binary = '/opt/chefdk/embedded/bin/gem'
-
-directory gems_dir do
-  mode 0555
-end
+gem_binary = node['bach']['repository']['gem_bin']
 
 package 'libaugeas-dev'
 package 'libkrb5-dev'
@@ -18,11 +14,7 @@ package 'libkrb5-dev'
 directory "#{node['bach']['repository']['repo_directory']}/vendor" do
   owner 'vagrant'
   mode 0755
-end
-
-directory "#{node['bach']['repository']['repo_directory']}/vendor/cache" do
-  owner 'vagrant'
-  mode 0755
+  recursive true
 end
 
 directory "#{node['bach']['repository']['repo_directory']}/.bundle" do
@@ -40,16 +32,37 @@ EOF
   action :create
 end
 
-execute "bundler package" do
+execute "bundler install" do
   cwd node['bach']['repository']['repo_directory']
-  command "/opt/chefdk/embedded/bin/bundle package --path vendor/"
+  command "#{node['bach']['repository']['bundler_bin']} install --path vendor/"
   # restore system PKG_CONFIG_PATH so mkmf::pkg_config()
   # can find system libraries
   environment 'PKG_CONFIG_PATH' => '/usr/lib/pkgconfig:' + \
     '/usr/lib/x86_64-linux-gnu/pkgconfig:/usr/share/pkgconfig',
-    'PATH' => '/opt/chefdk/embedded/bin/:/usr/local/sbin:/usr/local/bin:' + \
+    'PATH' => ::File.dirname(node['bach']['repository']['bundler_bin']) + \
+    ':/usr/local/sbin:/usr/local/bin:' + \
     '/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games'
   user 'vagrant'
+end
+
+execute "bundler package" do
+  cwd node['bach']['repository']['repo_directory']
+  command "#{node['bach']['repository']['bundler_bin']} package --path vendor/"
+  # restore system PKG_CONFIG_PATH so mkmf::pkg_config()
+  # can find system libraries
+  environment 'PKG_CONFIG_PATH' => '/usr/lib/pkgconfig:' + \
+    '/usr/lib/x86_64-linux-gnu/pkgconfig:/usr/share/pkgconfig',
+    'PATH' => ::File.dirname(node['bach']['repository']['bundler_bin']) + \
+    ':/usr/local/sbin:/usr/local/bin:' + \
+    '/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games'
+  user 'vagrant'
+end
+
+# if we make the cache directory before running bundle we get an error
+# that we can't open a (non-existant) gem in the directory
+directory gems_dir do
+  owner 'vagrant'
+  mode 0555
 end
 
 link "#{bins_dir}/gems" do
