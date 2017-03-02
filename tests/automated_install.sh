@@ -37,7 +37,7 @@ else
   printf "WARN: no ruby found -- proceeding without editing environment!\n"
 fi
 
-if [ "$CLUSTER_TYPE" == "Kafka" ]; then
+if [ "${CLUSTER_TYPE,,}" == "kafka" ]; then
   printf "Using kafka_cluster.txt\n"
   cp stub-environment/kafka_cluster.txt ../cluster/cluster.txt
 else
@@ -71,12 +71,12 @@ create_cluster_VMs || ( echo "############## VBOX CREATE CLUSTER VMs RETURNED $?
 install_cluster $ENVIRONMENT || ( echo "############## VBOX CREATE INSTALL CLUSTER RETURNED $? ##############" && exit 1 )
 
 printf "#### Install ruby gems\n"
-vagrant ssh -c 'cd chef-bcpc; source proxy_setup.sh; PATH=/opt/chefdk/embedded/bin:/usr/bin:/bin bundle install --path vendor/bundle'
+vagrant ssh -c 'cd chef-bcpc; source proxy_setup.sh; export PATH=/opt/chefdk/embedded/bin:/usr/bin:/bin; export PKG_CONFIG_PATH=/usr/lib/pkgconfig:/usr/lib/x86_64-linux-gnu/pkgconfig:/usr/share/pkgconfig; bundle install --path vendor/bundle'
 
 printf "#### Cobbler Boot\n"
 printf "Snapshotting pre-Cobbler and booting (unless already running)\n"
 
-if [ "$CLUSTER_TYPE" == "Kafka" ]; then
+if [ "${CLUSTER_TYPE,,}" == "kafka" ]; then
   VM_LIST=(bcpc-vm1 bcpc-vm2 bcpc-vm3 bcpc-vm4 bcpc-vm5 bcpc-vm6)
 else
   VM_LIST=(bcpc-vm1 bcpc-vm2 bcpc-vm3)
@@ -142,8 +142,13 @@ for i in bootstrap vm1 vm2 vm3; do
 done
 wait && printf "Done Snapshotting\n"
 
-printf "#### Chef machine bcpc-vms with Hadoop\n"
-vagrant ssh -c "cd chef-bcpc; ./cluster-assign-roles.sh $ENVIRONMENT Hadoop"
+printf "#### Chef machine bcpc-vms with $CLUSTER_TYPE\n"
+vagrant ssh -c "cd chef-bcpc; ./cluster-assign-roles.sh $ENVIRONMENT $CLUSTER_TYPE"
+# for Hadoop installs we need to re-run the headnodes once HDFS is up to ensure
+# we deploy various JARs. Run a second time once a datanode is up.
+if [[ "${CLUSTER_TYPE,,}" == "hadoop" ]]; then
+  vagrant ssh -c "cd chef-bcpc; ./cluster-assign-roles.sh $ENVIRONMENT $CLUSTER_TYPE BCPC-Hadoop-Head"
+if
 printf "Snapshotting Post-Install\n"
 for i in bootstrap vm1 vm2 vm3; do
   [[ $(vboxmanage snapshot bcpc-$i list --machinereadable | grep -q 'Post-Install') ]] && \
