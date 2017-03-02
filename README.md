@@ -204,35 +204,4 @@ Thanks to all of these communities for producing this software!
 Contributing
 ------------
 
-To propose changes to Chef-BACH, please fork the [GitHub repo](https://github.com/bloomberg/chef-bach)
-and issue a pull request with your proposed change. We are endeavoring to
-follow the following standards:
-
-Libraries:
-* [Chef Library Recommendations](https://www.chef.io/blog/2014/03/12/writing-libraries-in-chef-cookbooks/)
-
-All Chef Code:
-* [TomDoc](http://tomdoc.org/)
-
-Static Code Analysis:
-* Warnings not increased:
-  * [RuboCop](http://batsov.com/rubocop/)
-  * [Foodcritic](http://acrmp.github.io/foodcritic/)
-    * [Etsy rules](https://github.com/etsy/foodcritic-rules)
-    * [CustomInk rules](https://github.com/customink-webops/foodcritic-rules)
-* Markup Verified With:
-  * JSON: `python -m json.tool <json files>`
-  * XML: `xmllint --format <xml files>`
-  * ERB: `erb -P -x -T '-' <erb file> | ruby -c`
-
-Otherwise generally follow [bbatsov/ruby-style-guide](https://github.com/bbatsov/ruby-style-guide)
-
-For shell scripts:
-* Do not write shell scripts
-* If you must, please try to follow [Google's Shell Style Guide](https://google.github.io/styleguide/shell.xml)
-
-The GitHub workflow we follow is captured below:
-![Flow Chart of GitHub Workflow from Issue or PR created to PR in progress and Code Review to Issue or PR resolved][gh_workflow]
-
-[gh_workflow]: https://github.com/bloomberg/chef-bach/blob/pages/readme-images/GitHub%20Workflow.png "GitHub process captured in yWorks yEd flow-chart"
-[bach_deployments]: https://github.com/bloomberg/chef-bach/blob/pages/readme-images/BACH%20Deployment%20Types.png "BACH deployment options in yWorks yEd diagram"
+See our [contributing](./CONTRIBUTING.md) document for more.
