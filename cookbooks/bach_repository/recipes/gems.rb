@@ -33,7 +33,7 @@ end
 file "#{node['bach']['repository']['repo_directory']}/.bundle/config" do
   content <<-EOF
 ---
-BUNDLE_PATH: '#{node['bach']['repository']['repo_directory']}/vendor'
+BUNDLE_PATH: '#{node['bach']['repository']['repo_directory']}/vendor/bundle'
 BUNDLE_DISABLE_SHARED_GEMS: 'true'
 EOF
   owner 'vagrant'
