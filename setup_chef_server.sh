@@ -20,12 +20,6 @@ if [[ -z "$CURL" ]]; then
   exit
 fi
 
-#
-# build_bins.sh will run chef in local mode in order to create the
-# BCPC local repo.
-#
-./build_bins.sh
-
 # Make the bootstrap a client of its own BCPC local repo
 echo "deb [trusted=yes arch=amd64] file://$(pwd)/bins/ 0.5.0 main" > \
      /etc/apt/sources.list.d/bcpc.list
