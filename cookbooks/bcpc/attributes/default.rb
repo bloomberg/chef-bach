@@ -260,6 +260,3 @@ default['bcpc']['chefvault']['checksum'] =
 # bcpc binary server pathnames
 default['bcpc']['bin_dir']['path'] = '/home/vagrant/chef-bcpc/bins/'
 default['bcpc']['bin_dir']['gems'] = "#{node['bcpc']['bin_dir']['path']}/gems"
-
-# rubygems download website URL
-default['bcpc']['gem_source'] = 'https://rubygems.org/downloads'
