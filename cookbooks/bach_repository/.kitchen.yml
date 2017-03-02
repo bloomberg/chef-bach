@@ -20,5 +20,6 @@ suites:
   - name: bach_repository
     run_list:
       - recipe[apt]
+      - recipe[bach_repository_test::default]
       - recipe[bach_repository]
     attributes:

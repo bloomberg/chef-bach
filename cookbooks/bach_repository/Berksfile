@@ -8,4 +8,5 @@ group :integration do
 
   cookbook 'bach_common', path: '../bach_common'
   cookbook 'bcpc', path: '../bcpc'
+  cookbook 'bach_repository_test', path: 'test/cookbooks/bach_repository_test'
 end
