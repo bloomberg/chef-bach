@@ -7,6 +7,7 @@ include_recipe 'bach_repository::tools'
 bins_dir = node['bach']['repository']['bins_directory']
 gems_dir = node['bach']['repository']['gems_directory']
 gem_binary = node['bach']['repository']['gem_bin']
+bundler_bin = node['bach']['repository']['bundler_bin']
 
 package 'libaugeas-dev'
 package 'libkrb5-dev'
@@ -32,29 +33,29 @@ EOF
   action :create
 end
 
-execute "bundler install" do
+execute 'bundler install' do
   cwd node['bach']['repository']['repo_directory']
-  command "#{node['bach']['repository']['bundler_bin']} install"
+  command "#{bundler_bin} install"
   # restore system PKG_CONFIG_PATH so mkmf::pkg_config()
   # can find system libraries
-  environment 'PKG_CONFIG_PATH' => '/usr/lib/pkgconfig:' + \
-    '/usr/lib/x86_64-linux-gnu/pkgconfig:/usr/share/pkgconfig',
-    'PATH' => ::File.dirname(node['bach']['repository']['bundler_bin']) + \
-    ':/usr/local/sbin:/usr/local/bin:' + \
-    '/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games'
+  environment \
+    'PKG_CONFIG_PATH' => %w(/usr/lib/pkgconfig
+                            /usr/lib/x86_64-linux-gnu/pkgconfig
+                            /usr/share/pkgconfig).join(':'),
+    'PATH' => [::File.dirname(bundler_bin), ENV['PATH']].join(':')
   user 'vagrant'
 end
 
-execute "bundler package" do
+execute 'bundler package' do
   cwd node['bach']['repository']['repo_directory']
-  command "#{node['bach']['repository']['bundler_bin']} package"
+  command "#{bundler_bin} package"
   # restore system PKG_CONFIG_PATH so mkmf::pkg_config()
   # can find system libraries
-  environment 'PKG_CONFIG_PATH' => '/usr/lib/pkgconfig:' + \
-    '/usr/lib/x86_64-linux-gnu/pkgconfig:/usr/share/pkgconfig',
-    'PATH' => ::File.dirname(node['bach']['repository']['bundler_bin']) + \
-    ':/usr/local/sbin:/usr/local/bin:' + \
-    '/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games'
+  environment \
+    'PKG_CONFIG_PATH' => %w(/usr/lib/pkgconfig
+                            /usr/lib/x86_64-linux-gnu/pkgconfig
+                            /usr/share/pkgconfig).join(':'),
+    'PATH' => [::File.dirname(bundler_bin), ENV['PATH']].join(':')
   user 'vagrant'
 end
 
@@ -72,12 +73,12 @@ end
 execute 'gem-generate-index' do
   command "#{gem_binary} generate_index"
   cwd bins_dir
-  only_if {
+  only_if do
     index_path = "#{bins_dir}/specs.4.8.gz"
 
     # If the index is missing, regenerate.
     # If any gems are newer than the index, regenerate.
-    if !File.exists?(index_path)
+    if !File.exist?(index_path)
       true
     else
       gem_mtimes = Dir.glob("#{gems_dir}/*.gem").map do |ff|
@@ -86,5 +87,5 @@ execute 'gem-generate-index' do
 
       gem_mtimes.max > File.mtime(index_path)
     end
-  }
+  end
 end

@@ -40,9 +40,9 @@ execute 'build_spark_package' do
     "-n #{spark_pkg_prefix}-#{spark_pkg_version} " \
     "-v #{spark_pkg_version} " \
     "--description 'Spark Package with Hadoop 2.7' -p #{bins_dir} *"
-  environment 'PATH' => "/opt/chefdk/embedded/bin:#{ENV['PATH']}",
-              'BUNDLE_GEMFILE' =>
-                "#{node[:bach][:repository][:repo_directory]}/Gemfile"
+  environment \
+    'PATH' => [::File.dirname(fpm_path), ENV['PATH']].join(':'),
+    'BUNDLE_GEMFILE' => "#{node[:bach][:repository][:repo_directory]}/Gemfile"
   umask 0002
   action :nothing
 end
