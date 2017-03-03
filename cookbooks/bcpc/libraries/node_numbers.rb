@@ -1,6 +1,6 @@
 #
 # bcpc_8bit_node_number returns 8 bits out of the 31 bit number for a
-# node.
+# head node.  (Values for worker nodes are not expected to be valid!)
 #
 # It takes a node object as an argument.  If no argument is provided,
 # the current node is used.
@@ -19,12 +19,14 @@ def bcpc_8bit_node_number(target_node = node)
   my_8bit_value = target_node[:bcpc][:node_number].to_i % 255
 
   # If we are generating an 8bit number for the current node, check for overlap.
-  if target_node == node    
-    node.run_state['other_node_numbers'] ||=
-      search(:node, "chef_environment:#{node.chef_environment}")
-      .reject { |n| n['hostname'] == node['hostname'] }
-      .map { |n| (n['bcpc'] && n['bcpc']['node_number']) || nil }
-      .compact
+  if target_node == node
+    other_nns = get_head_nodes.reject do |nn|
+      nn['hostname'] == node['hostname']
+    end.map do |nn|
+      (nn['bcpc'] && nn['bcpc']['node_number']) || nil
+    end.compact
+
+    node.run_state['other_node_numbers'] ||= other_nns
 
     other_8bit_node_numbers =
       node.run_state['other_node_numbers'].map { |n| n.to_i % 255 }
