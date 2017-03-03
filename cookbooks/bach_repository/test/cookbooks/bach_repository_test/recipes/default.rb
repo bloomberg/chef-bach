@@ -2,7 +2,8 @@ package 'git'
 
 git 'chef-bach' do
   destination node['bach']['repository']['repo_directory']
-  repository 'https://github.com/bloomberg/chef-bach'
+  repository node['bach']['repository_test']['chef-bach']['uri'] 
+  branch node['bach']['repository_test']['chef-bach']['branch'] 
   depth 1
   action :checkout
 end

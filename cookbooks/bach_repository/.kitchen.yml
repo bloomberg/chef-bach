@@ -26,10 +26,11 @@ suites:
       - recipe[apt]
       - recipe[bach_repository_test::default]
       - recipe[bach_repository]
+      - recipe[export-node::default]
     attributes: {
       bach: {
         repository: {
-          repo_directory: "/tmp/my_repo_dir",
+          repo_directory: "/test/repo_dir",
           bundler_bin: "/opt/chef/embedded/bin/bundle",
           gem_bin: "/opt/chef/embedded/bin/gem"
         }
