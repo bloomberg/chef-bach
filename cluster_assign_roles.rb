@@ -17,6 +17,7 @@
 # - if a chef object is provided, e.g. role[ROLE-NAME] or
 #   recipe[RECIPE-NAME], only nodes marked for that action are attempted
 #
+
 require 'json'
 require 'mixlib/shellout'
 require 'net/ssh'
@@ -24,8 +25,6 @@ require 'parallel'
 require 'pry'
 require 'uri'
 require_relative 'lib/cluster_data'
-
-Ridley::Logging.logger.level = Logger.const_get 'ERROR'
 
 class ClusterAssignRoles
   include BACH::ClusterData

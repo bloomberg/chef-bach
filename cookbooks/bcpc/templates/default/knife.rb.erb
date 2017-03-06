@@ -1,10 +1,30 @@
+# -*- mode: ruby -*-
+
 require 'rubygems'
 require 'ohai'
+
+#
+#
+# Workaround for older versions of ChefDK.
+#
+# https://github.com/berkshelf/berkshelf/pull/1668/
+# https://github.com/intridea/hashie/issues/394
+#
+require 'hashie'
+require 'hashie/logger'
+Hashie.logger = Logger.new(nil)
+
+#
+# Disable the Ohai password module which explodes on a
+# Single-Sign-On-joined system
+#
+begin
+  ohai.disabled_plugins = ['passwd']
+rescue
+  Ohai::Config[:disabled_plugins] = ['passwd']
+end
+
 o = Ohai::System.new
-
-# Disable the Ohai password module which explodes on a Single-Sign-On-joined system
-Ohai::Config[:disabled_plugins] = [ "passwd" ]
-
 o.all_plugins(['hostname','ipaddress'])
 
 log_level                :info
@@ -16,6 +36,9 @@ validation_key           '/etc/chef-server/chef-validator.pem'
 chef_server_url          'https://<%= node[:bcpc][:bootstrap][:server] %>'
 syntax_check_cache_path  '/home/vagrant/chef-bcpc/.chef/syntax_check_cache'
 cookbook_path            '/home/vagrant/chef-bcpc/vendor/cookbooks'
+
+ssl_verify_mode :verify_none
+client_name o[:hostname]
 
 <% if node[:bcpc][:bootstrap][:proxy] != nil -%>
 no_proxy_array = ["localhost", o[:ipaddress], o[:hostname], o[:fqdn], "<%= node[:bcpc][:bootstrap][:server] %>", "<%= node[:bcpc][:bootstrap][:server] %>"]

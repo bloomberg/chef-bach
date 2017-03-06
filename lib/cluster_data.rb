@@ -11,7 +11,20 @@ require 'chef-vault'
 require 'json'
 require 'ohai'
 require 'pry'
+
+#
+#
+# Workaround log spam in older versions of ChefDK.
+#
+# https://github.com/berkshelf/berkshelf/pull/1668/
+# https://github.com/intridea/hashie/issues/394
+#
+require 'hashie'
+require 'hashie/logger'
+Hashie.logger = Logger.new(nil)
+
 require 'ridley'
+Ridley::Logging.logger.level = Logger.const_get 'ERROR'
 
 module BACH
   module ClusterData
