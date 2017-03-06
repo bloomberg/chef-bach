@@ -56,11 +56,19 @@ ruby_block 'setup-jn-data' do
       end
 
       Chef::Resource::Bash.new("unpack-jn-fmt-image-to-disk-#{jndisk}",
-                               run_context) do |bb|
+                               node.run_context).tap do |bb|
         bb.user "root"
         bb.cwd "#{jndisk}/dfs/"
-        bb.code "tar xzvf #{Chef::Config[:file_cache_path]}/jn_fmt.tgz;"
+        bb.code "tar xzvf #{Chef::Config[:file_cache_path]}/jn_fmt.tgz"
         bb.run_action(:run)
+      end
+
+      Chef::Resource::Bash.new('change-ownership-for-jnfile',
+                               node.run_context).tap do |bb|
+        bb.user 'root'
+        bb.cwd "#{jndisk}/dfs/jn"
+        bb.code "chown -R hdfs:hdfs #{node.chef_environment}"
+        bb.run_action :run
       end
 
       #
@@ -70,14 +78,6 @@ ruby_block 'setup-jn-data' do
       #
       self.notifies :restart, 'service[hadoop-hdfs-journalnode]'
       self.resolve_notification_references
-
-      Chef::Resource::Bash.new('change-ownership-for-jnfile',
-                               node.run_context).tap do |bb|
-        bb.user 'root'
-        bb.cwd "#{jndisk}/dfs/jn"
-        bb.code "chown -R hdfs:hdfs #{node.chef_environment}"
-        bb.run_action :run
-      end
     end
 
     if File.exists?(jnfile2chk)
