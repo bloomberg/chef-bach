@@ -35,6 +35,7 @@ file '/etc/apt/apt.conf.d/99ubuntu_archive_proxy' do
 end
 
 include_recipe 'bcpc::nscd'
+include_recipe 'bcpc::packages'
 include_recipe 'ubuntu'
 include_recipe 'bcpc::cluster_local_repository'
 

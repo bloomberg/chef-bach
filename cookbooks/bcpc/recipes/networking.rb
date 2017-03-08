@@ -34,9 +34,21 @@ end
 # Core networking package
 package 'vlan'
 
-# Useful system tools
-%w(bc ethtool fio htop iotop iperf pcp powertop sysstat).each do |p|
-  package p
+# Useful networking tools
+%w(
+  ethtool
+  iperf
+  mtr-tiny
+  iptraf
+  ethstatus
+  iftop
+  nmap
+  ngrep
+  ntop
+).each do |p|
+  package p do
+    action :upgrade
+  end
 end
 
 # Remove spurious logging failures from this package
