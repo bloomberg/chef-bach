@@ -26,7 +26,7 @@ default['bcpc']['domain_name'] = 'bcpc.example.com'
 default['bcpc']['encrypt_data_bag'] = false
 
 default['bcpc']['bootstrap']['preseed'].tap do |preseed|
-  preseed['add_kernel_opts'] = ''
+  preseed['add_kernel_opts'] = 'console=ttyS0,115200n8r console=ttyS1,115200n8r console=tty1'
   preseed['additional_packages'] = %w(openssh-server lldpd)
 
   # Disable device renaming -- use the kernel's enumeration order.
