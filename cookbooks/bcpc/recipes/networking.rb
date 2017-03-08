@@ -46,7 +46,9 @@ package 'vlan'
   ngrep
   ntop
 ).each do |p|
-  package p
+  package p do
+    action :upgrade
+  end
 end
 
 # Remove spurious logging failures from this package
