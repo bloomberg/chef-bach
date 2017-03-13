@@ -14,7 +14,7 @@ case node["platform_family"]
       end
     end
   else
-   Chef::Log.warn "============ Unable to disable IPv6 for non-Debian systems"
+  Chef::Log.warn "============ Unable to disable IPv6 for non-Debian systems"
 end
 
 # ensure we use /etc/security/limits.d to allow ulimit overriding
@@ -38,7 +38,6 @@ if not node.has_key?('pam_d') or not node['pam_d'].has_key?('services') or not n
       'includes' => []
     }
   }
-
 end
 
 # set vm.swapiness to 0 (to lessen swapping)
@@ -49,6 +48,10 @@ end
 
 # Populate node attributes for all kind of hosts
 set_hosts
+node.override['locking_resource']['zookeeper_servers'] = \
+  node[:bcpc][:hadoop][:zookeeper][:servers].map do |server|
+    [float_host(server['hostname']), node[:bcpc][:hadoop][:zookeeper][:port]].join(':')
+  end
 
 package "bigtop-jsvc"
 

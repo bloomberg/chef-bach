@@ -258,31 +258,31 @@ ruby_block 'create-hdfs-directories' do
   end
 end
 
-service "hadoop-hdfs-datanode" do
+service 'hadoop-hdfs-datanode' do
   supports :status => true, :restart => true, :reload => false
   action [:enable, :start]
 end
 
-locking_resource "hadoop-hdfs-datanode-restart" do
-  resource "service[hadoop-hdfs-datanode]"
+locking_resource 'hadoop-hdfs-datanode-restart' do
+  resource 'service[hadoop-hdfs-datanode]'
   process_pattern {command_string 'datanode'
                    user 'hdfs'
                    full_cmd true}
   perform :restart
   action :serialize_process
-  subscribes :serialize, 'link[/etc/init.d/hadoop-hdfs-datanode]', :delayed
   subscribes :serialize, 'template[/etc/hadoop/conf/hdfs-site.xml]', :delayed
   subscribes :serialize,
-    "template[/etc/hadoop/conf/hadoop-metrics2.properties]", :delayed
+    'template[/etc/hadoop/conf/hadoop-metrics2.properties]', :delayed
   subscribes :serialize, 'template[/etc/hadoop/conf/hadoop-env.sh]', :delayed
   subscribes :serialize, 'template[/etc/hadoop/conf/topology]', :delayed
   subscribes :serialize, 'user_ulimit[hdfs]', :delayed
   subscribes :serialize, 'user_ulimit[root]', :delayed
   subscribes :serialize, 'bash[hdp-select hadoop-hdfs-datanode]', :delayed
   subscribes :serialize, 'log[jdk-version-changed]', :delayed
+  subscribes :serialize, 'link[/etc/init.d/hadoop-hdfs-datanode]', :delayed
 end
 
-service "hadoop-yarn-nodemanager" do
+service 'hadoop-yarn-nodemanager' do
   supports :status => true, :restart => true, :reload => false
   action [:enable, :start]
 end
