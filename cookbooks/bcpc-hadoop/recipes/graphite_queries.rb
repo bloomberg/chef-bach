@@ -25,7 +25,7 @@ triggers = {
       'trigger_cond' => "=0",
       'trigger_name' => "bcpc-bootstrap_ChefClientNotRun",
       'enable' => true,
-      'trigger_desc' => "Chef-client hasn't run in 30m",
+      'trigger_desc' => "Chef-client has not run in 30m",
       'severity' => 2,
       'route_to' => "admin"
     }
@@ -101,7 +101,7 @@ monitored_nodes_objs.each do |node_obj|
       'trigger_name' => "#{host}_ChefClientNotRun",
       'trigger_dep' => ["#{host}_NodeAvailability"],
       'enable' => true,
-      'trigger_desc' => "Chef-client hasn't run in #{node["bcpc"]["hadoop"]["zabbix"]["chef_client_check_interval"]}", 
+      'trigger_desc' => "Chef-client has not run in #{node["bcpc"]["hadoop"]["zabbix"]["chef_client_check_interval"]}",
       'severity' => 1,
       'route_to' => "admin"
     }
