@@ -7,9 +7,7 @@ host=$5
 recipient=$6
 
 subject_str="$trigger_name issue on $cluster_name:$host (severity $severity)"
-message_str="@$recipient: Please attend to severity $severity issue with " \
-            "$trigger_name on $cluster_name:$host; " \
-            "problem description=$description"
+message_str="@$recipient: Please attend to severity $severity issue with $trigger_name on $cluster_name:$host. $description"
 
 if [ ${recipient} = 'admin' ]; then
   recipient_email=<%= node[:bcpc][:hadoop][:zabbix][:mail_to_admin] %>
@@ -19,4 +17,6 @@ fi
 
 sendemail -f <%= node['bcpc']['hadoop']['zabbix']['mail_sender'] %> \
           -s <%= node['bcpc']['hadoop']['zabbix']['mail_smtp_server_port'] %> \
-          -t $recipient_email -u $subject_str -m $message_str 
+          -t ${recipient_email} \
+          -u ${subject_str} \
+          -m ${message_str}
