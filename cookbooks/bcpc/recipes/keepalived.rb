@@ -16,6 +16,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+::Chef::Resource::Template.send(:include, BCPC::Utils)
 
 include_recipe "bcpc::default"
 

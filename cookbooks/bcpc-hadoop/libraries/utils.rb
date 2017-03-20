@@ -82,7 +82,7 @@ def make_config!(key, value)
 end
 
 def get_hadoop_heads
-  results = search(:node, "role:BCPC-Hadoop-Head AND chef_environment:#{node.chef_environment}")
+  results = Chef::Search::Query.new.search(:node, "role:BCPC-Hadoop-Head AND chef_environment:#{node.chef_environment}")
   if results.any?{|x| x['hostname'] == node[:hostname]}
     results.map!{|x| x['hostname'] == node[:hostname] ? node : x}
   else
@@ -92,7 +92,7 @@ def get_hadoop_heads
 end
 
 def get_quorum_hosts
-  results = search(:node, "(roles:BCPC-Hadoop-Quorumnode or role:BCPC-Hadoop-Head) AND chef_environment:#{node.chef_environment}")
+  results = Chef::Search::Query.new.search(:node, "(roles:BCPC-Hadoop-Quorumnode or role:BCPC-Hadoop-Head) AND chef_environment:#{node.chef_environment}")
   if results.any?{|x| x['hostname'] == node[:hostname]}
     results.map!{|x| x['hostname'] == node[:hostname] ? node : x}
   else
@@ -102,7 +102,7 @@ def get_quorum_hosts
 end
 
 def get_hadoop_workers
-  results = search(:node, "role:BCPC-Hadoop-Worker AND chef_environment:#{node.chef_environment}")
+  results = Chef::Search::Query.new.search(:node, "role:BCPC-Hadoop-Worker AND chef_environment:#{node.chef_environment}")
   if results.any?{|x| x['hostname'] == node[:hostname]}
     results.map!{|x| x['hostname'] == node[:hostname] ? node : x}
   else
@@ -115,8 +115,8 @@ def get_namenodes()
   # Logic to get all namenodes if running in HA
   # or to get only the master namenode if not running in HA
   if node['bcpc']['hadoop']['hdfs']['HA']
-    nnrole = search(:node, "role:BCPC-Hadoop-Head-Namenode* AND chef_environment:#{node.chef_environment}")
-    nnroles = search(:node, "roles:BCPC-Hadoop-Head-Namenode* AND chef_environment:#{node.chef_environment}")
+    nnrole = Chef::Search::Query.new.search(:node, "role:BCPC-Hadoop-Head-Namenode* AND chef_environment:#{node.chef_environment}")
+    nnroles = Chef::Search::Query.new.search(:node, "roles:BCPC-Hadoop-Head-Namenode* AND chef_environment:#{node.chef_environment}")
     nn_hosts = nnrole.concat nnroles
   else
     nn_hosts = get_nodes_for("namenode_no_HA")
@@ -125,7 +125,7 @@ def get_namenodes()
 end
 
 def get_nodes_for(recipe, cookbook=cookbook_name)
-  results = search(:node, "recipes:#{cookbook}\\:\\:#{recipe} AND chef_environment:#{node.chef_environment}")
+  results = Chef::Search::Query.new.search(:node, "recipes:#{cookbook}\\:\\:#{recipe} AND chef_environment:#{node.chef_environment}")
   results.map!{ |x| x['hostname'] == node[:hostname] ? node : x }
   if node.run_list.expand(node.chef_environment).recipes.include?("#{cookbook}::#{recipe}") and not results.include?(node)
     results.push(node)

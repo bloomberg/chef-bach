@@ -154,7 +154,8 @@ end
 
 # Get all nodes for this Chef environment
 def get_all_nodes
-  results = Chef::Search::Query.search(:node, "chef_environment:#{node.chef_environment}")
+  results = Chef::Search::Query.new.search(:node, "chef_environment:#{node.chef_environment}")
+  puts "XXX #{results}"
   if results.any?{|x| x['hostname'] == node['hostname']}
     results.map!{|x| x['hostname'] == node['hostname'] ? node : x}
   else
@@ -169,7 +170,7 @@ def get_cached_head_node_names
     File.open("/etc/headnodes", "r") do |infile|
       while (line = infile.gets)
         line.strip!
-        if line.length>0 and not line.start_with?("#")
+        if line.length > 0 and not line.start_with?("#")
           headnodes << line.strip
         end
       end
@@ -185,7 +186,7 @@ def get_head_nodes
   # Zookeeper nodes are the de facto heads for a Kafka cluster, since
   # they run Zabbix, Graphite, MySQL et al.
   #
-  Chef::Search::Query.search(:node, 'role:BCPC-Hadoop-Head OR role:BCPC-Kafka-Head-Zookeeper')
+  Chef::Search::Query.new.search(:node, 'role:BCPC-Hadoop-Head OR role:BCPC-Kafka-Head-Zookeeper')
 end
 
 def get_head_node_names
@@ -195,7 +196,7 @@ def get_head_node_names
 end
 
 def get_nodes_for(recipe, cookbook=cookbook_name)
-  results = Chef::Search::Query.search(:node, "recipes:#{cookbook}\\:\\:#{recipe} AND chef_environment:#{node.chef_environment}")
+  results = Chef::Search::Query.new.search(:node, "recipes:#{cookbook}\\:\\:#{recipe} AND chef_environment:#{node.chef_environment}")
   results.map!{ |x| x['hostname'] == node[:hostname] ? node : x }
   if node.run_list.expand(node.chef_environment).recipes.include?("#{cookbook}::#{recipe}") and not results.include?(node)
     results.push(node)

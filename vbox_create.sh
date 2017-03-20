@@ -39,6 +39,7 @@ export CLUSTER_VM_DRIVE_SIZE=${CLUSTER_VM_DRIVE_SIZE-20480}
 CLUSTER_VM_ROOT_DRIVE_SIZE=$((CLUSTER_VM_DRIVE_SIZE + CLUSTER_VM_MEM - 2048))
 
 VBOX_DIR="`dirname ${BASH_SOURCE[0]}`/vbox"
+[[ -d $VBOX_DIR ]] || mkdir $VBOX_DIR
 P=`python -c "import os.path; print os.path.abspath(\"${VBOX_DIR}/\")"`
 
 if [ "$CLUSTER_TYPE" == "Kafka" ]; then

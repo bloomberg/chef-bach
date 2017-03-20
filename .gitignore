@@ -9,7 +9,7 @@ bootstrap_chef.id_rsa*
 .chef_found*/
 python_server.log
 .chef/
-vbox/
+vbox/**
 bins/
 cookbooks/*/
 !cookbooks/bach_common

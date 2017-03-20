@@ -25,6 +25,7 @@ template "#{node[:bcpc][:hadoop][:zookeeper][:conf_dir]}/zoo.cfg" do
   # currently run ZK, so this should be a safe value for zk_hosts.
   #
   variables(:zk_hosts => get_head_nodes)
+  helpers(BCPC::Utils)
 end
 
 %w{log4j.properties
