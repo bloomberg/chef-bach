@@ -32,7 +32,7 @@ end
 
 hive_site_vars = {
   is_hive_serverzzzz: node.run_list.expand(node.chef_environment).recipes.include?('bcpc-hadoop::hive_hcatalog'),
-  mysql_hosts: node['bcpc']['hadoop']['mysql_hosts'].map { |m| m['hostname'] },
+  mysql_hosts: node['bcpc']['hadoop']['mysql_hosts'].map { |m| m['hostname'] + ':3306' },
   zk_hosts: node['bcpc']['hadoop']['zookeeper']['servers'],
   hive_hosts: node['bcpc']['hadoop']['hive_hosts'],
   stats_user: stats_user,
@@ -78,7 +78,7 @@ generated_values =
     'javax.jdo.option.ConnectionURL' =>
       'jdbc:mysql:loadbalance://' +
       hive_site_vars['mysql_hosts'].join(',') +
-      ':3306/metastore?loadBalanceBlacklistTimeout=5000',
+      '/metastore?loadBalanceBlacklistTimeout=5000',
 
     'javax.jdo.option.ConnectionPassword' =>
       hive_site_vars['hive_sql_password'],
@@ -106,7 +106,7 @@ generated_values =
 
     'hive.stats.dbconnectionstring' =>
       'jdbc:mysql:loadbalance://' + hive_site_vars['mysql_hosts'].join(',') +
-      ':3306/hive_table_stats?useUnicode=true' \
+      '/hive_table_stats?useUnicode=true' \
       '&characterEncoding=UTF-8' \
       '&user=' + hive_site_vars['stats_user'] +
       '&password=' + hive_site_vars['stats_sql_password']
