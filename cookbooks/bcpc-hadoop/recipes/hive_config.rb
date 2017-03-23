@@ -82,10 +82,9 @@ generated_values = {
   'javax.jdo.option.ConnectionPassword' =>
     hive_site_vars[:hive_sql_password],
   'hive.metastore.uris' =>
-    'thrift://' + 
-    hive_site_vars[:hive_hosts]
-      .map{ |s| float_host(s[:hostname]) + ":9083" }
-      .join(","),
+    hive_site_vars['hive_hosts']
+    .map { |s| 'thrift://' + float_host(s[:hostname]) + ':9083' }
+    .join(','),
   'hive.zookeeper.quorum' =>
     hive_site_vars[:zk_hosts].map{ |s| float_host(s[:hostname]) }.join(","),
   'hive.server2.support.dynamic.service.discovery' => 'true',
