@@ -4,12 +4,12 @@
 # Description : To setup hive configuration only. No hive package will be installed through this Recipe
 #
 
-#Create hive password
+# Create hive password
 hive_password = make_config('mysql-hive-password', secure_password)
 
 # Hive table stats user
 stats_user = make_config('mysql-hive-table-stats-user',
-                         node["bcpc"]["hadoop"]["hive"]["hive_table_stats_db_user"])
+                         node['bcpc']['hadoop']['hive']['hive_table_stats_db_user'])
 stats_password = make_config('mysql-hive-table-stats-password', secure_password)
 
 %w{hive webhcat hcat hive-hcatalog}.each do |w|
@@ -83,10 +83,9 @@ generated_values =
    hive_site_vars[:hive_sql_password],
 
  'hive.metastore.uris' =>
-   'thrift://' + 
-   hive_site_vars[:hive_hosts]
-   .map{ |s| float_host(s[:hostname]) + ":9083" }
-   .join(","),
+   hive_site_vars['hive_hosts']
+   .map { |s| 'thrift://' + float_host(s[:hostname]) + ':9083' }
+   .join(','),
 
  'hive.zookeeper.quorum' =>
    hive_site_vars[:zk_hosts].map{ |s| float_host(s[:hostname]) }.join(","),
