@@ -67,7 +67,7 @@ class Chef
 
     def get_namenodes( string )
       results = []
-      Chef::Search::Query.new.searcharch(:node, string) { |o| results << o }
+      Chef::Search::Query.new.search(:node, string) { |o| results << o }
       results.map! { |node| float_host(node.hostname) }
       Chef::Log.debug "Chef metadata search returned #{results}"
       return results
