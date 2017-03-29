@@ -25,6 +25,7 @@ rm -f /tmp/build_bins_chef_config.?????????.rb
 DIR=`dirname $0`
 mkdir -p $DIR/bins
 pushd $DIR/bins/ > /dev/null
+apt-get update
 
 chefdk_vers='1.1.16'
 chefdk_dpkg="chefdk_${chefdk_vers}-1_amd64.deb"
