@@ -47,6 +47,7 @@ fi
 
 # Git needs to be installed for Berkshelf to be useful.
 if [ $(dpkg-query -W -f='${Status}' git 2>/dev/null | grep -c 'ok installed') -eq 0 ]; then
+    apt-get update
     apt-get -y install git
 fi
 
