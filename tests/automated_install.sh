@@ -145,7 +145,7 @@ vagrant ssh -c "cd chef-bcpc; ./cluster-assign-roles.sh $ENVIRONMENT $CLUSTER_TY
 # we deploy various JARs. Run a second time once a datanode is up.
 if [[ "${CLUSTER_TYPE,,}" == "hadoop" ]]; then
   vagrant ssh -c "cd chef-bcpc; ./cluster-assign-roles.sh $ENVIRONMENT $CLUSTER_TYPE BCPC-Hadoop-Head"
-if
+fi
 printf "Snapshotting Post-Install\n"
 for i in bootstrap vm1 vm2 vm3; do
   [[ $(vboxmanage snapshot bcpc-$i list --machinereadable | grep -q 'Post-Install') ]] && \
