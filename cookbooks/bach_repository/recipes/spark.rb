@@ -7,17 +7,15 @@ require 'tmpdir'
 include_recipe 'bach_repository::directory'
 bins_dir = node['bach']['repository']['bins_directory']
 spark_extract_dir = Dir.mktmpdir
-spark_install_dir = "/usr/spark"
-spark_pkg_prefix = "spark"
-spark_pkg_version = "1.6.0"
-spark_tar_file = "spark-#{spark_pkg_version}-bin-hadoop2.6.tgz"
-spark_extracted_file_name = "spark-#{spark_pkg_version}-bin-hadoop2.6"
-spark_deb_path =
-  "#{bins_dir}/#{spark_pkg_prefix}_#{spark_pkg_version}_amd64.deb"
+spark_install_dir = '/usr/spark'
+spark_pkg_prefix = 'spark'
+spark_pkg_version = '2.1.0'
+spark_tar_file = "spark-#{spark_pkg_version}-bin-hadoop2.7.tgz"
+spark_extracted_file_name = "spark-#{spark_pkg_version}-bin-hadoop2.7"
 
 remote_file "#{bins_dir}/#{spark_tar_file}" do
   source "http://d3kbcqa49mib13.cloudfront.net/#{spark_tar_file}"
-  checksum '439fe7793e0725492d3d36448adcd1db38f438dd1392bffd556b58bb9a3a2601'
+  checksum '0834c775f38473f67cb122e0ec21074f800ced50c1ff1b9e37e222a0069dc5c7'
   notifies :run, 'execute[extract_spark_tar]', :immediately
 end
 
@@ -40,7 +38,7 @@ execute 'build_spark_package' do
     "--prefix #{spark_install_dir}/#{spark_pkg_version} " \
     "-n #{spark_pkg_prefix}-#{spark_pkg_version} " \
     "-v #{spark_pkg_version} " \
-    "--description 'Spark Package with Hadoop 2.6' -p #{bins_dir} *"
+    "--description 'Spark Package with Hadoop 2.7' -p #{bins_dir} *"
   umask 0002
   action :nothing
 end
