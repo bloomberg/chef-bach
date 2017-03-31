@@ -63,8 +63,20 @@ echo "Using CLUSTER_NAME=${CLUSTER_NAME} VM_LIST=${VM_LIST}"
 download_VM_files || ( echo "############## VBOX CREATE DOWNLOAD VM FILES RETURNED $? ##############" && exit 1 )
 create_bootstrap_VM || ( echo "############## VBOX CREATE BOOTSTRAP VM RETURNED $? ##############" && exit 1 )
 
+# Copy cluster mutable data to bootstrap.
+if [[ -d ../cluster ]]; then
+  tar -C .. -cf - cluster | vagrant ssh -c 'cd ~; tar -xvf -'
+elif [[ -f ./cluster.tgz ]]; then
+  gunzip -c cluster.tgz | vagrant ssh -c 'cd ~; tar -xvf -'
+else
+  ( echo "############## No cluster data found in ../cluster or ./cluster.tgz! ##############" && exit 1 )
+fi
+
+python_to_find_bootstrap_ip="import json; j = json.load(file('${environments[0]}')); print j['override_attributes']['bcpc']['bootstrap']['server']"
+BOOTSTRAP_IP=$(python -c "$python_to_find_bootstrap_ip")
+
 create_cluster_VMs || ( echo "############## VBOX CREATE CLUSTER VMs RETURNED $? ##############" && exit 1 )
-install_cluster $ENVIRONMENT || ( echo "############## VBOX CREATE INSTALL CLUSTER RETURNED $? ##############" && exit 1 )
+install_cluster $ENVIRONMENT $BOOTSTRAP_IP || ( echo "############## VBOX CREATE INSTALL CLUSTER RETURNED $? ##############" && exit 1 )
 
 printf "#### Cobbler Boot\n"
 printf "Snapshotting pre-Cobbler and booting (unless already running)\n"
