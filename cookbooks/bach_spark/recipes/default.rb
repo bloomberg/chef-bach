@@ -37,11 +37,16 @@ link '/usr/spark/current' do
   to spark_bin_dir
 end
 
+# Spark 2.x expects to dynamically link LZO.
+package 'liblzo2-2' do
+  action :upgrade
+end
+
 # install fortran libs needed by some jobs
 package 'libatlas3gf-base' do
-  action :install
+  action :upgrade
 end
 
 package 'libopenblas-base' do
-  action :install
+  action :upgrade
 end
