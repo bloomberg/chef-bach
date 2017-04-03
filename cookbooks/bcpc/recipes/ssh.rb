@@ -35,8 +35,8 @@ package 'openssh-server' do
 end
 
 service 'ssh' do
-  ignore_failure true
   action :enable
+  ignore_failure true
 end
 
 #
@@ -46,7 +46,10 @@ end
 #
 execute '/etc/init.d/ssh start' do
   action :run
-  ignore_failure true
+
+  if node[:lsb][:codename] == 'trusty'
+    ignore_failure true
+  end
 end
 
 template '/etc/ssh/sshd_config' do
