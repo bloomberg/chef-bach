@@ -2,4 +2,4 @@ yarn.nodemanager.local-dirs=<%=@mounts.map{ |d| "file:///disk/#{d}/yarn/local" }
 yarn.nodemanager.linux-container-executor.group=yarn
 yarn.nodemanager.log-dirs=<%=@mounts.map{ |d| "file:///disk/#{d}/yarn/logs" }.join(",")%>
 banned.users=hdfs,yarn,mapred,bin      
-min.user.id=1000
+min.user.id=<%= node['bcpc']['hadoop']['yarn']['min_user_id'] %>
