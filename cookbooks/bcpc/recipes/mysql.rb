@@ -194,17 +194,12 @@ end
 
 mysql_nodes = get_nodes_for('mysql', 'bcpc')
 all_nodes = get_all_nodes
-max_connections =
-  [
-    (mysql_nodes.length * 50 + all_nodes.length * 5),
-    300
-  ].max
 pool_size = node['bcpc']['mysql']['innodb_buffer_pool_size']
 
 template '/etc/mysql/conf.d/wsrep.cnf' do
   source 'mysql/wsrep.cnf.erb'
   mode 00644
-  variables(max_connections: max_connections,
+  variables(max_connections: node['bcpc']['mysql']['max_connections'],
             innodb_buffer_pool_size: pool_size,
             servers: mysql_nodes)
   sensitive true if respond_to?(:sensitive)
