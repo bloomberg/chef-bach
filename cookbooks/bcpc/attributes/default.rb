@@ -248,10 +248,6 @@ default['bcpc']['zabbix_dbname'] = 'zabbix'
 
 default['bcpc']['admin_email'] = 'admin@example.com'
 
-# Memory where InnoDB caches table and index data (in MB). Default is 128M.
-default['bcpc']['mysql']['innodb_buffer_pool_size'] =
-  ([(node[:memory][:total].to_i / 1024 * 0.02).floor, 128].max)
-
 #################################################
 #  attributes for chef vault download and install
 #################################################

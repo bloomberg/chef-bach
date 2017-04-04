@@ -358,16 +358,17 @@ ruby_block "release_datanode_restart_lock" do
   only_if { my_restart_lock?(lock_znode_path, zk_hosts, node[:fqdn]) }
 end
 
-service "hadoop-yarn-nodemanager" do
-  supports :status => true, :restart => true, :reload => false
+service 'hadoop-yarn-nodemanager' do
+  supports status: true, restart: true, reload: false
   action [:enable, :start]
-  subscribes :restart, "link[/etc/init.d/hadoop-yarn-nodemanager]", :delayed
-  subscribes :restart, "template[/etc/hadoop/conf/hadoop-env.sh]", :delayed
-  subscribes :restart, "template[/etc/hadoop/conf/yarn-env.sh]", :delayed
-  subscribes :restart, "template[/etc/hadoop/conf/yarn-site.xml]", :delayed
-  subscribes :restart, "template[/etc/hadoop/conf/hdfs-site.xml]", :delayed
-  subscribes :restart, "template[/etc/hadoop/conf/mapred-site.xml]", :delayed
-  subscribes :restart, "bash[hdp-select hadoop-yarn-nodemanager]", :delayed
-  subscribes :restart, "user_ulimit[yarn]", :delayed
-  subscribes :restart, "log[jdk-version-changed]", :delayed
+  subscribes :restart, 'link[/etc/init.d/hadoop-yarn-nodemanager]'
+  subscribes :restart, 'template[/etc/hadoop/conf/hadoop-env.sh]'
+  subscribes :restart, 'template[/etc/hadoop/conf/yarn-env.sh]'
+  subscribes :restart, 'template[/etc/hadoop/conf/yarn-site.xml]'
+  subscribes :restart, 'template[/etc/hadoop/conf/hdfs-site.xml]'
+  subscribes :restart, 'template[/etc/hadoop/conf/mapred-site.xml]'
+  subscribes :restart, 'template[/etc/hadoop/conf/container-executor.cfg]'
+  subscribes :restart, 'bash[hdp-select hadoop-yarn-nodemanager]'
+  subscribes :restart, 'user_ulimit[yarn]'
+  subscribes :restart, 'log[jdk-version-changed]'
 end

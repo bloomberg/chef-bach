@@ -29,11 +29,43 @@ require_relative 'lib/cluster_data'
 class ClusterAssignRoles
   include BACH::ClusterData
 
+  #
+  # Takes no arguments.
+  #
+  # Returns a list of cluster.txt entries for head nodes.
+  #
+  def all_hadoop_head_nodes
+    # All head nodes should have this specific role.
+    confirmed_head_nodes = parse_cluster_txt.select do |nn|
+      nn[:runlist].include?('role[BCPC-Hadoop-Head]')
+    end
+
+    # Any nodes that have something matching "Head"
+    possible_head_nodes = parse_cluster_txt.select do |nn|
+      nn[:runlist].include?('Head')
+    end
+
+    #
+    # Nodes with runlists matching "Head," but no BCPC-Hadoop-Head,
+    # are a potentially dangerous circumstance.  Abort run if found!
+    #
+    nodes_with_incomplete_runlist =
+      possible_head_nodes - confirmed_head_nodes
+
+    if nodes_with_incomplete_runlist.any?
+      raise "Aborting cluster assign roles. " \
+        "Found potential head nodes lacking role[BCPC-Hadoop-Head]: " +
+        nodes_with_incomplete_runlist.map { |nn| nn[:hostname] || 'null' }.join
+    end
+
+    confirmed_head_nodes
+  end
+
   # If no runlist is provided, the runlist in cluster.txt will be used.
-  # arguments: 
+  # arguments:
   #   nodes   -  a list of node objects (e.g. from parse_cluster_txt())
   #   runlist -- a string for a Chef run_list
-  # returns: 
+  # returns:
   #   nothing
   # side-affect:
   #   updates Chef-server with runlists for nodes passed in
@@ -169,18 +201,14 @@ class ClusterAssignRoles
   #
   def install_bootstrap(target_nodes)
     # Head nodes must be installed before workers.
-    all_head_nodes = parse_cluster_txt.select do |node|
-      node[:runlist].include?('role[BCPC-Hadoop-Head]')
-    end
-
-    target_head_nodes = target_nodes & all_head_nodes
+    target_head_nodes = target_nodes & all_hadoop_head_nodes
 
     partial_runlist = 'role[BCPC-Hadoop-Head]'
 
     # See comments in install_hadoop
-    assign_roles(nodes: all_head_nodes, runlist: partial_runlist)
+    assign_roles(nodes: all_hadoop_head_nodes, runlist: partial_runlist)
 
-    wait_for_indexed_roles(nodes: all_head_nodes,
+    wait_for_indexed_roles(nodes: all_hadoop_head_nodes,
                            search: 'role:BCPC-Hadoop-Head')
 
     target_head_nodes.each do |node|
@@ -191,12 +219,8 @@ class ClusterAssignRoles
 
   def install_hadoop(target_nodes)
     # Head nodes must be installed before workers.
-    all_head_nodes = parse_cluster_txt.select do |node|
-      node[:runlist].include?('role[BCPC-Hadoop-Head]')
-    end
-
-    target_head_nodes = target_nodes & all_head_nodes
-    target_worker_nodes = target_nodes - all_head_nodes
+    target_head_nodes = target_nodes & all_hadoop_head_nodes
+    target_worker_nodes = target_nodes - all_hadoop_head_nodes
 
     #
     # Many bcpc recipes expect to be able to search for nodes based on
@@ -207,9 +231,9 @@ class ClusterAssignRoles
     # list.  After that, we wait for the new nodes to appear in the
     # results of a Chef search.
     #
-    assign_roles(nodes: all_head_nodes)
+    assign_roles(nodes: all_hadoop_head_nodes)
 
-    wait_for_indexed_roles(nodes: all_head_nodes,
+    wait_for_indexed_roles(nodes: all_hadoop_head_nodes,
                            search: 'role:BCPC-Hadoop-Head*')
 
     target_head_nodes.each do |node|

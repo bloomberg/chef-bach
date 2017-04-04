@@ -12,6 +12,7 @@ default["bcpc"]["hadoop"]["yarn"]["resourcemanager"]["port"] = 8032
 default["bcpc"]["hadoop"]["yarn"]["resourcemanager"]["jmx"]["port"] = 3131
 default["bcpc"]["hadoop"]["yarn"]["scheduler"]["fair"]["min-vcores"] = 2
 default["bcpc"]["hadoop"]["yarn"]["min-free-space-per-disk-mb"] = 100
+default['bcpc']['hadoop']['yarn']['min_user_id'] = 1000
 
 yarn_log_dir = '/var/log/hadoop-yarn'
 yarn_pid_dir = '/var/run/hadoop-yarn'
@@ -33,7 +34,7 @@ default[:bcpc][:hadoop][:yarn][:env_sh].tap do |env_sh|
   env_sh[:YARN_LOGFILE] = yarn_logfile
   env_sh[:YARN_POLICYFILE] = yarn_policyfile
 
-  env_sh[:YARN_OPTS] =  
+  env_sh[:YARN_OPTS] =
     ' -Dhadoop.log.dir=' + yarn_log_dir +
     ' -Dyarn.log.dir=' + yarn_log_dir +
     ' -Dhadoop.log.file=' + yarn_logfile  +
@@ -42,34 +43,34 @@ default[:bcpc][:hadoop][:yarn][:env_sh].tap do |env_sh|
     ' -Dhadoop.root.logger=INFO,CONSOLE ' +
     ' -Dyarn.root.logger=INFO,CONSOLE ' +
     ' -Dyarn.policy.file=' + yarn_policyfile +
-    ' -Djute.maxbuffer=' + node[:bcpc][:hadoop][:jute][:maxbuffer].to_s 
-    
+    ' -Djute.maxbuffer=' + node[:bcpc][:hadoop][:jute][:maxbuffer].to_s
 
-  env_sh[:YARN_NODEMANAGER_OPTS] =  
+
+  env_sh[:YARN_NODEMANAGER_OPTS] =
    ' -Dcom.sun.management.jmxremote.port=' +
     node[:bcpc][:hadoop][:yarn][:nodemanager][:jmx][:port].to_s +
    ' -XX:HeapDumpPath=/var/log/hadoop-yarn/heap-dump-nm-$$-$(hostname)-$(date +\'%Y%m%d%H%M\').hprof ' +
-   ' -XX:+UseCMSInitiatingOccupancyOnly' + 
+   ' -XX:+UseCMSInitiatingOccupancyOnly' +
    ' -XX:CMSInitiatingOccupancyFraction=70' +
-   ' -XX:+HeapDumpOnOutOfMemoryError' + 
+   ' -XX:+HeapDumpOnOutOfMemoryError' +
    ' -XX:+ExitOnOutOfMemoryError' +
    ' -XX:+UseParNewGC' +
    ' -XX:+UseConcMarkSweepGC ' +
    ' -Dcom.sun.management.jmxremote.ssl=false' +
-   ' -Dcom.sun.management.jmxremote.authenticate=false' 
+   ' -Dcom.sun.management.jmxremote.authenticate=false'
 
-  env_sh[:YARN_RESOURCEMANAGER_OPTS] =  
+  env_sh[:YARN_RESOURCEMANAGER_OPTS] =
     ' -Dcom.sun.management.jmxremote.port=' +
     node[:bcpc][:hadoop][:yarn][:resourcemanager][:jmx][:port].to_s +
     ' -XX:HeapDumpPath=/var/log/hadoop-yarn/heap-dump-rm-$$-$(hostname)-$(date +\'%Y%m%d%H%M\').hprof' +
-    ' -XX:+UseCMSInitiatingOccupancyOnly' + 
+    ' -XX:+UseCMSInitiatingOccupancyOnly' +
     ' -XX:CMSInitiatingOccupancyFraction=70' +
-    ' -XX:+HeapDumpOnOutOfMemoryError' + 
+    ' -XX:+HeapDumpOnOutOfMemoryError' +
     ' -XX:+ExitOnOutOfMemoryError' +
     ' -XX:+UseParNewGC' +
     ' -XX:+UseConcMarkSweepGC ' +
     ' -Dcom.sun.management.jmxremote.ssl=false' +
-    ' -Dcom.sun.management.jmxremote.authenticate=false' 
+    ' -Dcom.sun.management.jmxremote.authenticate=false'
 end
 
 default[:bcpc][:hadoop][:yarn][:site_xml].tap do |site_xml|
@@ -102,7 +103,7 @@ default[:bcpc][:hadoop][:yarn][:site_xml].tap do |site_xml|
   site_xml["#{lce}.cgroups.mount-path"] = '/sys/fs/cgroup/'
 
   site_xml['yarn.nodemanager.remote-app-log-dir'] = '/var/log/hadoop-yarn/apps'
-  
+
   yarn_max_memory = lambda do
     avail_memory =
       node['bcpc']['hadoop']['yarn']['nodemanager']['avail_memory']
@@ -122,15 +123,15 @@ default[:bcpc][:hadoop][:yarn][:site_xml].tap do |site_xml|
       [1, (node['cpu']['total'] * avail_vcpu.call['ratio']).floor].max)
 
   site_xml['yarn.nodemanager.vmem-check-enabled'] = false
-                        
+
   site_xml['yarn.resourcemanager.nodes.exclude-path'] =
     '/etc/hadoop/conf/yarn.exclude'
 
-  site_xml['yarn.resourcemanager.scheduler.class'] =  
+  site_xml['yarn.resourcemanager.scheduler.class'] =
     'org.apache.hadoop.yarn.server.resourcemanager.scheduler.fair.FairScheduler'
 
   site_xml['yarn.scheduler.fair.preemption'] = true
-  
+
   site_xml['yarn.scheduler.maximum-allocation-mb'] = yarn_max_memory.call
 
   site_xml['yarn.timeline-service.client.max-retries'] = 0
