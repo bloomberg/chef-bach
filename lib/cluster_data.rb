@@ -38,7 +38,7 @@ module BACH
     end
 
     def chef_environment_name
-      File.basename(chef_environment_path).gsub(%r{.json$}, '')
+      File.basename(chef_environment_path).gsub(/.json$/, '')
     end
 
     #
@@ -61,7 +61,7 @@ module BACH
     def empirical_mac(entry)
       ping = Mixlib::ShellOut.new('ping', entry[:ip_address], '-c', '1')
       ping.run_command
-      if !ping.status.success?
+      unless ping.status.success?
         puts "Ping to #{entry[:hostname]} (#{entry[:ip_address]}) failed, " \
           'checking ARP anyway.'
       end
@@ -69,9 +69,9 @@ module BACH
       arp = Mixlib::ShellOut.new('arp', '-an')
       arp.run_command
       arp_entry = arp.stdout.split("\n")
-        .map{|l| l.chomp}
-        .select{ |l| l.include?(entry[:ip_address]) }
-        .first
+                     .map(&:chomp)
+                     .select { |l| l.include?(entry[:ip_address]) }
+                     .first
       match_data =
         /(\w\w:\w\w:\w\w:\w\w:\w\w:\w\w) .ether./.match(arp_entry.to_s)
       if !match_data.nil? && match_data.captures.count == 1
@@ -79,7 +79,7 @@ module BACH
         puts "Found #{mac} for #{entry[:hostname]} (#{entry[:ip_address]})"
         mac
       else
-        raise 'Could not find ARP entry for ' +
+        raise 'Could not find ARP entry for ' \
           "#{entry[:hostname]} (#{entry[:ip_address]})!"
       end
     end
@@ -90,7 +90,7 @@ module BACH
     def corrected_mac(entry)
       # If it's a virtualbox VM, cluster.txt is wrong, and we need to
       # find the real MAC.
-      if is_virtualbox_vm?(entry) 
+      if virtualbox_vm?(entry)
         empirical_mac(entry)
       else
         # Otherwise, assume cluster.txt is correct.
@@ -103,21 +103,22 @@ module BACH
     # VM Name (or UUID) as a string
     #
     def virtualbox_mac(vm_id)
-      vm_lookup = Mixlib::ShellOut.new('/usr/bin/vboxmanage', 'showvminfo', '--machinereadable', vm_id)
+      vm_lookup = Mixlib::ShellOut.new('/usr/bin/vboxmanage', 'showvminfo',
+                                       '--machinereadable', vm_id)
       vm_lookup.run_command
-      if !vm_lookup.status.success?
+      unless vm_lookup.status.success?
         puts "VM lookup for #{vm_id} failed: #{vm_lookup.stderr}"
       end
 
       vm_lookup = vm_lookup.stdout.split("\n").select \
         { |line| line.start_with?('macaddress1="') }
 
-      mac_address = vm_lookup.first.gsub(/^macaddress1="/, '').gsub(/"$/,'') \
+      vm_lookup.first.gsub(/^macaddress1="/, '').gsub(/"$/, '') \
         unless vm_lookup.empty?
     end
 
     def fqdn(entry)
-      if(entry[:dns_domain])
+      if entry[:dns_domain]
         entry[:hostname] + '.' + entry[:dns_domain]
       else
         entry[:hostname]
@@ -130,8 +131,8 @@ module BACH
       end.first
     end
 
-    def is_virtualbox_vm?(entry)
-      %r{^08:00:27}.match(entry[:mac_address])
+    def virtualbox_vm?(entry)
+      /^08:00:27/.match(entry[:mac_address])
     end
 
     # Return the default cluster.txt data
@@ -143,23 +144,23 @@ module BACH
 
     def parse_cluster_txt(entries)
       fields = [
-                :hostname,
-                :mac_address,
-                :ip_address,
-                :ilo_address,
-                :cobbler_profile,
-                :dns_domain,
-                :runlist
-               ]
+        :hostname,
+        :mac_address,
+        :ip_address,
+        :ilo_address,
+        :cobbler_profile,
+        :dns_domain,
+        :runlist
+      ]
 
       entries.map do |line|
         # This is really gross because Ruby 1.9 lacks Array#to_h.
         entry = Hash[*fields.zip(line.split(' ')).flatten(1)]
-        entry.merge({fqdn: fqdn(entry)})
+        entry.merge(fqdn: fqdn(entry))
       end
     end
 
-    def refresh_vault_keys(entry=nil)
+    def refresh_vault_keys(entry = nil)
       reindex_and_wait(entry) if entry
 
       #
@@ -171,18 +172,10 @@ module BACH
       #
       vault_list = ridley.data_bag.all.map do |db|
         vault_items = db.item.all.map do |dbi|
-          if dbi.chef_id.end_with?('_keys')
-            dbi.chef_id.gsub(%r{_keys$}, '')
-          else
-            nil
-          end
+          dbi.chef_id.gsub(/_keys$/, '') if dbi.chef_id.end_with?('_keys')
         end.compact
 
-        if vault_items.any?
-          { db.name => vault_items }
-        else
-          nil
-        end
+        { db.name => vault_items } if vault_items.any?
       end.compact.reduce({}, :merge)
 
       vault_list.each do |vault, item_list|
@@ -210,7 +203,7 @@ module BACH
       180.times do |i|
         if ridley.search(:node, "name:#{entry[:fqdn]}").any?
           puts "Found #{entry[:fqdn]} in search index"
-          return
+          break
         else
           reindex_chef_server if i == 0
 
