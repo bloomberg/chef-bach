@@ -2,7 +2,7 @@
 # Cookbook Name:: bcpc
 # Recipe:: cobbler
 #
-# Copyright 2013, Bloomberg Finance L.P.
+# Copyright 2017, Bloomberg Finance L.P.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,7 +17,21 @@
 # limitations under the License.
 #
 
-chef_gem 'chef-rewind'
+gem_path = Pathname.new(Gem.ruby).dirname.join('gem').to_s
+rewind_version = '0.0.9'
+
+#
+# Move to installing chef-rewind via execute block to work around
+# issue where version string is empty when combining gem_binary,
+# version and options in the gem_package resource
+#
+execute 'gem_install_chef-rewind' do
+  command gem_path + ' install chef-rewind -q --no-rdoc --no-ri -v "' \
+    + rewind_version + "\" --clear-sources -s #{get_binary_server_url}"
+  not_if gem_path + ' list chef-rewind -i -v "' + rewind_version + '"'
+  action :nothing
+  environment ({ 'no_proxy' => URI.parse(get_binary_server_url).host })
+end.run_action(:run)
 
 require 'digest/sha2'
 require 'chef/rewind'
