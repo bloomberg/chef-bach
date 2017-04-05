@@ -28,6 +28,7 @@ require_relative 'lib/cluster_data'
 
 class ClusterAssignRoles
   include BACH::ClusterData
+  include BACH::ClusterData::ChefNode
 
   #
   # Takes no arguments.

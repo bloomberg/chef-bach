@@ -21,9 +21,17 @@ require 'ridley'
 Ridley::Logging.logger.level = Logger.const_get 'ERROR'
 
 module BACH
+  #
+  # Methods to get data about a BACH cluster
+  #
   module ClusterData
-    def chef_environment
-      ridley.environment.find(chef_environment_name)
+    def repo_dir
+      # This file is in the 'lib' subdirectory, so the repo dir is its parent.
+      File.expand_path('..', File.dirname(__FILE__))
+    end
+
+    def chef_environment_name
+      File.basename(chef_environment_path).gsub(/.json$/, '')
     end
 
     def chef_environment_path
@@ -35,24 +43,6 @@ module BACH
       end
 
       env_files.first
-    end
-
-    def chef_environment_name
-      File.basename(chef_environment_path).gsub(/.json$/, '')
-    end
-
-    #
-    # Returns the password for the 'ubuntu' account in plaintext.
-    # The method name comes from the confusing name of the data bag item.
-    #
-    def cobbler_root_password
-      # Among other things, Ridley will set up Chef::Config for ChefVault.
-      unless ridley.data_bag.find('os/cobbler_keys')
-        raise('No os/cobbler_keys data bag item found. ' \
-              'Is this cluster using chef-vault?')
-      end
-
-      ChefVault::Item.load('os', 'cobbler')['root-password']
     end
 
     #
@@ -98,25 +88,6 @@ module BACH
       end
     end
 
-    #
-    # Return the first MAC address for a VirtualBox VM given the
-    # VM Name (or UUID) as a string
-    #
-    def virtualbox_mac(vm_id)
-      vm_lookup = Mixlib::ShellOut.new('/usr/bin/vboxmanage', 'showvminfo',
-                                       '--machinereadable', vm_id)
-      vm_lookup.run_command
-      unless vm_lookup.status.success?
-        puts "VM lookup for #{vm_id} failed: #{vm_lookup.stderr}"
-      end
-
-      vm_lookup = vm_lookup.stdout.split("\n").select \
-        { |line| line.start_with?('macaddress1="') }
-
-      vm_lookup.first.gsub(/^macaddress1="/, '').gsub(/"$/, '') \
-        unless vm_lookup.empty?
-    end
-
     def fqdn(entry)
       if entry[:dns_domain]
         entry[:hostname] + '.' + entry[:dns_domain]
@@ -153,77 +124,123 @@ module BACH
         :runlist
       ]
 
-      entries.map do |line|
+      parsed = entries.map do |line|
         # This is really gross because Ruby 1.9 lacks Array#to_h.
         entry = Hash[*fields.zip(line.split(' ')).flatten(1)]
         entry.merge(fqdn: fqdn(entry))
       end
+      raise "Malformed cluster.txt:\n#{parsed}" \
+        if parsed.any? { |e| e.value?(nil) }
+      parsed
     end
 
-    def refresh_vault_keys(entry = nil)
-      reindex_and_wait(entry) if entry
-
+    #
+    # Methods which only run on the hypervisor host
+    #
+    module HypervisorNode
       #
-      # Vault data bags can be identified by distinctively named data
-      # bag items ending in "_keys".
+      # Return the first MAC address for a VirtualBox VM given the
+      # VM Name (or UUID) as a string
       #
-      # Here we build a list of all the vaults by looking for "_keys"
-      # and ignoring any data bags that contain no vault-items.
-      #
-      vault_list = ridley.data_bag.all.map do |db|
-        vault_items = db.item.all.map do |dbi|
-          dbi.chef_id.gsub(/_keys$/, '') if dbi.chef_id.end_with?('_keys')
-        end.compact
-
-        { db.name => vault_items } if vault_items.any?
-      end.compact.reduce({}, :merge)
-
-      vault_list.each do |vault, item_list|
-        item_list.each do |item|
-          begin
-            vv = ChefVault::Item.load(vault, item)
-            vv.refresh
-            vv.save
-            puts "Refreshed chef-vault item #{vault}/#{item}"
-          rescue
-            $stderr.puts "Failed to refresh chef-vault item #{vault}/#{item}!"
-          end
+      def virtualbox_mac(vm_id)
+        vm_lookup = Mixlib::ShellOut.new('/usr/bin/vboxmanage', 'showvminfo',
+                                         '--machinereadable', vm_id)
+        vm_lookup.run_command
+        unless vm_lookup.status.success?
+          raise "VM lookup for #{vm_id} failed: #{vm_lookup.stderr}"
         end
+
+        vm_lookup = vm_lookup.stdout.split("\n").select \
+          { |line| line.start_with?('macaddress1="') }
+
+        vm_lookup.first.gsub(/^macaddress1="/, '').gsub(/"$/, '') \
+          unless vm_lookup.empty?
       end
     end
 
-    def reindex_chef_server
-      cc = Mixlib::ShellOut.new('sudo', 'chef-server-ctl', 'reindex')
-      result = cc.run_command
-      cc.error!
-      result
-    end
+    #
+    # Methods which only run on machines with Chef credentials
+    # or on the Chef Server
+    #
+    module ChefNode
+      def chef_environment
+        ridley.environment.find(chef_environment_name)
+      end
 
-    def reindex_and_wait(entry)
-      180.times do |i|
-        if ridley.search(:node, "name:#{entry[:fqdn]}").any?
-          puts "Found #{entry[:fqdn]} in search index"
-          break
-        else
-          reindex_chef_server if i == 0
+      #
+      # Returns the password for the 'ubuntu' account in plaintext.
+      # The method name comes from the confusing name of the data bag item.
+      #
+      def cobbler_root_password
+        # Among other things, Ridley will set up Chef::Config for ChefVault.
+        unless ridley.data_bag.find('os/cobbler_keys')
+          raise('No os/cobbler_keys data bag item found. ' \
+                'Is this cluster using chef-vault?')
+        end
 
-          if i % 60 == 0
-            puts "Waiting for #{entry[:fqdn]} to appear in Chef index..."
+        ChefVault::Item.load('os', 'cobbler')['root-password']
+      end
+
+      def refresh_vault_keys(entry = nil)
+        reindex_and_wait(entry) if entry
+
+        #
+        # Vault data bags can be identified by distinctively named data
+        # bag items ending in "_keys".
+        #
+        # Here we build a list of all the vaults by looking for "_keys"
+        # and ignoring any data bags that contain no vault-items.
+        #
+        vault_list = ridley.data_bag.all.map do |db|
+          vault_items = db.item.all.map do |dbi|
+            dbi.chef_id.gsub(/_keys$/, '') if dbi.chef_id.end_with?('_keys')
+          end.compact
+
+          { db.name => vault_items } if vault_items.any?
+        end.compact.reduce({}, :merge)
+
+        vault_list.each do |vault, item_list|
+          item_list.each do |item|
+            begin
+              vv = ChefVault::Item.load(vault, item)
+              vv.refresh
+              vv.save
+              puts "Refreshed chef-vault item #{vault}/#{item}"
+            rescue
+              $stderr.puts "Failed to refresh chef-vault item #{vault}/#{item}!"
+            end
           end
-          sleep 1
         end
       end
 
-      raise "Did not find #{entry[:fqdn]} in Chef index after 180 seconds!"
-    end
+      def reindex_chef_server
+        cc = Mixlib::ShellOut.new('sudo', 'chef-server-ctl', 'reindex')
+        result = cc.run_command
+        cc.error!
+        result
+      end
 
-    def repo_dir
-      # This file is in the 'lib' subdirectory, so the repo dir is its parent.
-      File.expand_path('..', File.dirname(__FILE__))
-    end
+      def reindex_and_wait(entry)
+        180.times do |i|
+          if ridley.search(:node, "name:#{entry[:fqdn]}").any?
+            puts "Found #{entry[:fqdn]} in search index"
+            break
+          else
+            reindex_chef_server if i == 0
 
-    def ridley
-      @ridley ||= Dir.chdir(repo_dir) { Ridley.from_chef_config }
+            if i % 60 == 0
+              puts "Waiting for #{entry[:fqdn]} to appear in Chef index..."
+            end
+            sleep 1
+          end
+        end
+
+        raise "Did not find #{entry[:fqdn]} in Chef index after 180 seconds!"
+      end
+
+      def ridley
+        @ridley ||= Dir.chdir(repo_dir) { Ridley.from_chef_config }
+      end
     end
   end
 end

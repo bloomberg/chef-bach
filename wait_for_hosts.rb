@@ -8,6 +8,7 @@ require 'socket'
 
 require_relative 'lib/cluster_data'
 include BACH::ClusterData
+include BACH::ClusterData::ChefNode
 
 def raw_apache_log
   cc = Mixlib::ShellOut.new('sudo cat /var/log/apache2/access.log')

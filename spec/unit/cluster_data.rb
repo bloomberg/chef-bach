@@ -7,14 +7,14 @@ describe File.expand_path("lib/cluster_data.rb") do
     raise("Failed to load: #{ex}")
   end
 
-  before(:each) do
-    @dummy_class = \
-      Class.new do
-        include BACH::ClusterData
-      end
-  end
-
   context 'finds VM MAC address using vbox' do
+    before(:each) do
+      @hypervisor_class = \
+        Class.new do
+          include BACH::ClusterData::HypervisorNode
+        end
+    end
+
     let(:vbm_showvminfo_good) do
       output = <<-EOF
         name="vmwhee"
@@ -91,9 +91,10 @@ describe File.expand_path("lib/cluster_data.rb") do
     let(:vmname_bad) { 'vmaww_shucks' }
 
     let(:shellout_bad) do
-      double(run_command: double(exitstatus: 1,
-             status: double(success?: true),
-             stdout: vbm_showvminfo_notfound) )
+      double(run_command: nil,
+             exitstatus: 1,
+             status: double(success?: false),
+             stderr: vbm_showvminfo_notfound)
     end
 
     describe '#virtualbox_mac' do
@@ -106,7 +107,7 @@ describe File.expand_path("lib/cluster_data.rb") do
 
           shellout_good
         end
-        expect(@dummy_class.new.virtualbox_mac(vmname_good)).\
+        expect(@hypervisor_class.new.virtualbox_mac(vmname_good)).\
           to eq('08002769DF20')
       end
 
@@ -114,8 +115,7 @@ describe File.expand_path("lib/cluster_data.rb") do
         expect(Mixlib::ShellOut).to receive(:new) do
           shellout_no_macaddr1
         end
-        puts shellout_no_macaddr1.stdout
-        expect(@dummy_class.new.virtualbox_mac(vmname_good)).\
+        expect(@hypervisor_class.new.virtualbox_mac(vmname_good)).\
           to eq(nil)
       end
 
@@ -124,12 +124,21 @@ describe File.expand_path("lib/cluster_data.rb") do
           shellout_bad
         end
 
-        expect {@dummy_class.new.virtualbox_mac(vmname_bad)}.to raise_error
+        expect {@hypervisor_class.new.virtualbox_mac(vmname_bad)}
+          .to raise_error(StandardError,
+                          /VM lookup for #{vmname_bad} failed:.*/)
       end
     end
   end
 
   context 'parses cluster.txt' do
+    before(:each) do
+      @cluster_data_class = \
+        Class.new do
+          include BACH::ClusterData
+        end
+    end
+
     let(:valid_cluster_txt) do
       cluster_txt = <<-EOF
       vm1 08:00:27:56:A2:28 10.0.101.11 - bach_host_trusty bach.example.com role[BACH-Hadoop-Head]
@@ -169,17 +178,20 @@ describe File.expand_path("lib/cluster_data.rb") do
     end
 
     let(:cluster_txt_w_o_ip_and_ilo) do
-      valid_cluster_txt.tr(/10.0.*[0-9] -/,'')
+      valid_cluster_txt.gsub(/10.0.*[0-9] -/,'')
     end
 
     describe '#parse_cluster_txt' do
       it 'it returns reasonable hash' do
-        expect(@dummy_class.new.parse_cluster_txt(valid_cluster_txt.split("\n"))).\
-          to eq(parsed_cluster_txt)
+        expect(@cluster_data_class.new
+          .parse_cluster_txt(valid_cluster_txt.split("\n")))
+          .to eq(parsed_cluster_txt)
       end
 
       it 'raises if cluster.txt malformed ' do
-        expect {@dummy_class.new.parse_cluster_txt(cluster_txt_w_o_ip_and_ilo.split("\n"))}.to raise_error
+        expect {@cluster_data_class.new
+          .parse_cluster_txt(cluster_txt_w_o_ip_and_ilo.split("\n"))}
+          .to raise_error(StandardError, /Malformed/)
       end
     end
   end
