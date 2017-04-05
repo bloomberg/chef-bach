@@ -55,37 +55,65 @@ module BACH
       ChefVault::Item.load('os', 'cobbler')['root-password']
     end
 
-    def corrected_mac(entry)
-      if is_virtualbox_vm?(entry)
-        # If it's a virtualbox VM, cluster.txt is wrong, and we need to
-        # find the real MAC.
-        ping = Mixlib::ShellOut.new('ping', entry[:ip_address], '-c', '1')
-        ping.run_command
-        if !ping.status.success?
-          puts "Ping to #{entry[:hostname]} (#{entry[:ip_address]}) failed, " \
-            'checking ARP anyway.'
-        end
+    #
+    # Return the MAC address for a host empirically trying to talk to the host
+    #
+    def empirical_mac(entry)
+      ping = Mixlib::ShellOut.new('ping', entry[:ip_address], '-c', '1')
+      ping.run_command
+      if !ping.status.success?
+        puts "Ping to #{entry[:hostname]} (#{entry[:ip_address]}) failed, " \
+          'checking ARP anyway.'
+      end
 
-        arp = Mixlib::ShellOut.new('arp', '-an')
-        arp.run_command
-        arp_entry = arp.stdout.split("\n")
-          .map{|l| l.chomp}
-          .select{ |l| l.include?(entry[:ip_address]) }
-          .first
-        match_data =
-          /(\w\w:\w\w:\w\w:\w\w:\w\w:\w\w) .ether./.match(arp_entry.to_s)
-        if !match_data.nil? && match_data.captures.count == 1
-          mac = match_data[1]
-          puts "Found #{mac} for #{entry[:hostname]} (#{entry[:ip_address]})"
-          mac
-        else
-          raise 'Could not find ARP entry for ' +
-            "#{entry[:hostname]} (#{entry[:ip_address]})!"
-        end
+      arp = Mixlib::ShellOut.new('arp', '-an')
+      arp.run_command
+      arp_entry = arp.stdout.split("\n")
+        .map{|l| l.chomp}
+        .select{ |l| l.include?(entry[:ip_address]) }
+        .first
+      match_data =
+        /(\w\w:\w\w:\w\w:\w\w:\w\w:\w\w) .ether./.match(arp_entry.to_s)
+      if !match_data.nil? && match_data.captures.count == 1
+        mac = match_data[1]
+        puts "Found #{mac} for #{entry[:hostname]} (#{entry[:ip_address]})"
+        mac
+      else
+        raise 'Could not find ARP entry for ' +
+          "#{entry[:hostname]} (#{entry[:ip_address]})!"
+      end
+    end
+
+    #
+    # Corrected MAC address
+    #
+    def corrected_mac(entry)
+      # If it's a virtualbox VM, cluster.txt is wrong, and we need to
+      # find the real MAC.
+      if is_virtualbox_vm?(entry) 
+        empirical_mac(entry)
       else
         # Otherwise, assume cluster.txt is correct.
         entry[:mac_address]
       end
+    end
+
+    #
+    # Return the first MAC address for a VirtualBox VM given the
+    # VM Name (or UUID) as a string
+    #
+    def virtualbox_mac(vm_id)
+      vm_lookup = Mixlib::ShellOut.new('/usr/bin/vboxmanage', 'showvminfo', '--machinereadable', vm_id)
+      vm_lookup.run_command
+      if !vm_lookup.status.success?
+        puts "VM lookup for #{vm_id} failed: #{vm_lookup.stderr}"
+      end
+
+      vm_lookup = vm_lookup.stdout.split("\n").select \
+        { |line| line.start_with?('macaddress1="') }
+
+      mac_address = vm_lookup.first.gsub(/^macaddress1="/, '').gsub(/"$/,'') \
+        unless vm_lookup.empty?
     end
 
     def fqdn(entry)
@@ -97,7 +125,7 @@ module BACH
     end
 
     def get_entry(name)
-      parse_cluster_txt.select do |ee|
+      parse_cluster_txt(cluster_txt).select do |ee|
         ee[:hostname] == name || fqdn(ee) == name
       end.first
     end
@@ -106,7 +134,14 @@ module BACH
       %r{^08:00:27}.match(entry[:mac_address])
     end
 
-    def parse_cluster_txt
+    # Return the default cluster.txt data
+    # Returns: Array of cluster.txt lines
+    # Raise: if the file is not found
+    def cluster_txt
+      File.readlines(File.join(repo_dir, 'cluster.txt'))
+    end
+
+    def parse_cluster_txt(entries)
       fields = [
                 :hostname,
                 :mac_address,
@@ -117,8 +152,8 @@ module BACH
                 :runlist
                ]
 
-      # This is really gross because Ruby 1.9 lacks Array#to_h.
-      File.readlines(File.join(repo_dir, 'cluster.txt')).map do |line|
+      entries.map do |line|
+        # This is really gross because Ruby 1.9 lacks Array#to_h.
         entry = Hash[*fields.zip(line.split(' ')).flatten(1)]
         entry.merge({fqdn: fqdn(entry)})
       end
