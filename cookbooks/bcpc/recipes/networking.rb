@@ -176,7 +176,7 @@ end
 
 ruby_block 'bcpc-add-resolvers' do
   resolvconf_interface_name =
-    node[:bcpc][:networks][subnet][:management][:interface].to_s 
+    node[:bcpc][:networks][subnet][:management][:interface].to_s
 
   block do
     require 'English'
@@ -272,8 +272,18 @@ ruby_block 'bcpc-deconfigure-dhcp-interfaces' do
       line.start_with?('default')
     end
 
-    # If the list of DHCP-configured interfaces and bond slaves overlaps...
-    if (bonded_interfaces & lease_interfaces).any?
+    #
+    # If the list of DHCP-configured interfaces and bond slaves
+    # overlaps, or if we have only a single NIC, warn the hapless
+    # reader of the log.  (If anything goes wrong, we will stop
+    # talking to the user!)
+    #
+    if bonded_interfaces.none?
+      Chef::Log.info('This host is not using a bonded configuration, ' \
+                     'so interfaces will not be flushed and restarted. ' \
+                     'If something goes wrong, you may not notice until ' \
+                     'reboot!')
+    elsif (bonded_interfaces & lease_interfaces).any?
       Chef::Log.warn('DANGER: since the boot/DHCP interface is a member of ' \
                      'the LACP bond, we may lose network connectivity ' \
                      'while trying to configure the bond!')
@@ -311,7 +321,12 @@ ruby_block 'bcpc-deconfigure-dhcp-interfaces' do
       end.any?
     end
 
-    unless active_route_interfaces.any?
+    #
+    # If there are no bond slaves, this shouldn't matter, because we
+    # won't be deconfiguring anything (no ip addr flush), only killing
+    # the dhclient process and installing a static configuration.
+    #
+    if bonded_interfaces.any? && active_route_interfaces.none?
       raise 'Cannot deconfigure DHCP interfaces, ' \
         'no active interface would be configured with a default route!'
     end
