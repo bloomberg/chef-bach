@@ -32,12 +32,12 @@ else
   pip_cheese_shop_option = ''
 end
 
-pip_environment = {}
-pip_environment.update({http_proxy: node['bach']['http_proxy']}) if \
-  node['bach']['http_proxy']
-pip_environment.update({https_proxy: node['bach']['https_proxy']}) if \
-  node['bach']['https_proxy']
-pip_environment.update({no_proxy: ENV['no_proxy']}) if ENV['no_proxy']
+pip_environment = {
+                   http_proxy: node['bach']['http_proxy'],
+                   https_proxy: node['bach']['https_proxy'],
+                   no_proxy: ENV['no_proxy']
+                  }
+
 
 remote_file get_pip_path do
   source 'https://raw.githubusercontent.com/pypa/pip/8.0.0/contrib/get-pip.py'
