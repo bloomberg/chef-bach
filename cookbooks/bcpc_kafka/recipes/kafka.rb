@@ -12,15 +12,14 @@
 #
 node.normal[:kafka][:broker][:num][:partitions] =
   [
-   node[:kafka][:broker][:num][:partitions],
-   search(:node, 'role:BCPC-Kafka-Head-Server').count,
-   3
+    node[:kafka][:broker][:num][:partitions],
+    search(:node, 'role:BCPC-Kafka-Head-Server').count,
+    3
   ].max
 
-package 'netcat-openbsd'
-
-zookeeper_port =
-  node[:bcpc][:hadoop][:zookeeper][:leader_connect][:port] rescue 2181
+package 'netcat-openbsd' do
+  action :upgrade
+end
 
 #
 # In a standalone Kafka cluster, get_head_nodes will return the
@@ -48,11 +47,8 @@ end
 # As a result, the first chef run will configure Kafka to use only one
 # data volume, the fallback path of /disk/0.
 #
-data_volumes = Dir.glob('/disk/*').select{ |pp| ::File.directory?(pp) }
-
-if data_volumes.empty?
-  data_volumes << '/disk/0'
-end
+data_volumes = Dir.glob('/disk/*').select { |pp| ::File.directory?(pp) }
+data_volumes << '/disk/0' if data_volumes.empty?
 
 node.default[:kafka][:broker][:log][:dirs] = data_volumes.map do |dd|
   File.join(dd, 'kafka', 'data')
@@ -61,9 +57,9 @@ end
 include_recipe 'bcpc_kafka::default'
 include_recipe 'kafka::default'
 
-user_ulimit "kafka" do
-  filehandle_limit 32768
-  notifies :restart, "service[kafka-broker]", :immediately
+user_ulimit 'kafka' do
+  filehandle_limit 32_768
+  notifies :restart, 'service[kafka-broker]', :immediately
 end
 
 ruby_block 'kafkaup' do
@@ -75,7 +71,7 @@ ruby_block 'kafkaup' do
       node[:kafka][:broker][:zookeeper][:connect]
 
     zk_connection_string =
-      zk_hosts.map{|zkh| "#{zkh}:2181"}.join(',')
+      zk_hosts.map { |zkh| "#{zkh}:2181" }.join(',')
 
     Chef::Log.info("Zookeeper hosts are #{zk_connection_string}")
 
@@ -83,13 +79,17 @@ ruby_block 'kafkaup' do
     max_time.times do |ii|
       if znode_exists?(zk_path, zk_connection_string)
         Chef::Log.info("Kafka broker at znode #{zk_path} is marked up.")
-        return
+        break
       else
-        Chef::Log.info("Kafka broker at znode #{zk_path} is marked down.")
-        sleep(1)
+        Chef::Log.info("Kafka broker at znode #{zk_path} is marked " \
+                       "down. (#{ii})")
       end
+      sleep(1)
     end
-    raise "Kafka is reported down for more than #{max_time} seconds"
+
+    unless znode_exists?(zk_path, zk_connection_string)
+      raise "Kafka is reported down for more than #{max_time} seconds"
+    end
   end
 end
 
