@@ -66,29 +66,31 @@ user_ulimit "kafka" do
   notifies :restart, "service[kafka-broker]", :immediately
 end
 
-ruby_block "kafkaup" do
-  i = 0
+ruby_block 'kafkaup' do
   block do
-    brokerpath="/brokers/ids/#{node[:kafka][:broker][:broker_id]}"
-    zk_host = node[:kafka][:broker][:zookeeper][:connect].map{|zkh| "#{zkh}:2181"}.join(",")
-    Chef::Log.info("Zookeeper hosts are #{zk_host}")
-    sleep_time = 0.5
-    kafka_in_zk = znode_exists?(brokerpath, zk_host)
-    while !kafka_in_zk
-      kafka_in_zk = znode_exists?(brokerpath, zk_host)
-      if !kafka_in_zk and i < 20
-        sleep(sleep_time)
-        i += 1
-        Chef::Log.info("Kafka server having znode #{brokerpath} is down.")
-      elsif !kafka_in_zk and i >= 19
-        Chef::Application.fatal! "Kafka is reported down for more than #{i * sleep_time} seconds"
+    zk_path =
+      "/brokers/ids/#{node[:kafka][:broker][:broker_id]}"
+
+    zk_hosts =
+      node[:kafka][:broker][:zookeeper][:connect]
+
+    zk_connection_string =
+      zk_hosts.map{|zkh| "#{zkh}:2181"}.join(',')
+
+    Chef::Log.info("Zookeeper hosts are #{zk_connection_string}")
+
+    max_time = 19
+    max_time.times do |ii|
+      if znode_exists?(zk_path, zk_connection_string)
+        Chef::Log.info("Kafka broker at znode #{zk_path} is marked up.")
+        return
       else
-        Chef::Log.info("Broker #{brokerpath} existance : #{znode_exists?(brokerpath, zk_host)}")
+        Chef::Log.info("Kafka broker at znode #{zk_path} is marked down.")
+        sleep(1)
       end
     end
-    Chef::Log.info("Kafka with znode #{brokerpath} is up and running.")
+    raise "Kafka is reported down for more than #{max_time} seconds"
   end
-  action :run
 end
 
 include_recipe 'bcpc::diamond'
