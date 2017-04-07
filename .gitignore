@@ -23,3 +23,4 @@ cookbooks/*/
 !cookbooks/bach_krb5
 cookbooks/*/coverage
 cookbooks/*/vendor
+cookbooks/bcpc/attributes/repos.rb
