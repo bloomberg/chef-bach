@@ -46,7 +46,7 @@ EOF
 
 if [[ -n "$http_proxy" ]]; then
   cat << EOF >> .chef/knife.rb
-no_proxy_array = ["localhost", o[:ipaddress], o[:hostname], o[:fqdn], "${BOOTSTRAP_IP}", "${binary_server_host}"]
+no_proxy_array = ["localhost", o[:ipaddress], o[:hostname], o[:fqdn], "${BOOTSTRAP_IP}", "${binary_server_host}", ENV['no_proxy']].compact
 no_proxy_array.insert("*#{o[:domain]}") unless o[:domain].nil?
 no_proxy_string = no_proxy_array.uniq * ","
 ENV['no_proxy'] = no_proxy_string
