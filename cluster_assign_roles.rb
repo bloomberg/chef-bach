@@ -25,6 +25,7 @@ require 'parallel'
 require 'pry'
 require 'uri'
 require_relative 'lib/cluster_data'
+require_relative 'lib/chef_node'
 
 class ClusterAssignRoles
   include BACH::ClusterData

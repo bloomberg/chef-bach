@@ -9,6 +9,12 @@
 
 require 'json'
 require 'ipaddr'
+prefix = File.basename(File.expand_path('.')) == 'vbox' ? '../' : ''
+require_relative "#{prefix}lib/cluster_data"
+require_relative "#{prefix}lib/hypervisor_node"
+
+include BACH::ClusterData
+include BACH::ClusterData::HypervisorNode
 
 #
 # You can override parts of the vagrant config by creating a
@@ -35,34 +41,11 @@ end
 # ~/chef-bcpc/vbox directory, finding correct location for environment
 # file is important.
 #
-# To set the base_dir correct we check if we are inside "vbox"
-# directory or not and act accordingly
-#
-
-base_dir = if File.basename(File.expand_path('.')) == 'vbox'
-             File.expand_path('../environments')
-           else
-             File.expand_path('./environments')
-           end
-
 if ENV['BACH_DEBUG']
-  $stderr.puts "Base directory is : #{base_dir}"
+  $stderr.puts "Base directory is : #{repo_dir}"
 end
 
-json_file = Dir[File.join("#{base_dir}/../environments/", '*.json')]
-
-if json_file.empty?
-  $stderr.puts 'No environment file found to parse. ' \
-    'Please make sure at least one environment file exists.'
-  exit
-end
-
-if json_file.length > 1
-  $stderr.puts 'More than one environment file found.'
-  exit
-end
-
-chef_env = JSON.parse(File.read(json_file.join(',')))
+chef_env = JSON.parse(File.read(chef_environment_path))
 
 cluster_environment = chef_env['name']
 

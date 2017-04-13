@@ -7,6 +7,7 @@ require 'pry'
 require 'socket'
 
 require_relative 'lib/cluster_data'
+require_relative 'lib/chef_node'
 include BACH::ClusterData
 include BACH::ClusterData::ChefNode
 
