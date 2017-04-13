@@ -14,7 +14,6 @@ class GraphiteToZabbix(object):
 
   def __init__(self, threads=1):
     self.cn = self.__class__.__name__
-    #self.graphite_url = "<%= @graphite_url %>/render?from=-<%= @default_query_range %>min&format=json&target=%s"
     self.graphite_url = "<%= @graphite_url %>/render?format=json"
     self.default_query_range = "<%= @default_query_range %>"
     self.threads = threads

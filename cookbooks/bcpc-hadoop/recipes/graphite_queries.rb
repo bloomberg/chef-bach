@@ -21,7 +21,7 @@ triggers = {
     'chef.bcpc-bootstrap.success' => {
       'query' => "chef.*.success",
       'query_range' => "-10min",
-      'trigger_val' => "max(30m)",
+      'trigger_val' => "max(#{node["bcpc"]["hadoop"]["zabbix"]["chef_client_check_interval"]})",
       'trigger_cond' => "=0",
       'trigger_name' => "bcpc-bootstrap_ChefClientNotRun",
       'enable' => true,
@@ -33,7 +33,7 @@ triggers = {
   'graphite-to-zabbix' => {
     'graphite-to-zabbix.QueryResultEmpty' => {
       'query' => "graphite-to-zabbix.QueryResultEmpty",
-      'trigger_val' => "min(3m)",
+      'trigger_val' => "max(#{triggers_sensitivity})",
       'trigger_cond' => "=1",
       'trigger_name' => "graphite-to-zabbix_QueryResultEmpty",
       'enable' => true,
@@ -44,7 +44,7 @@ triggers = {
     },
     'graphite-to-zabbix.QueryResultError' => {
       'query' => "graphite-to-zabbix.QueryResultError",
-      'trigger_val' => "max(3m)",
+      'trigger_val' => "max(#{triggers_sensitivity})",
       'trigger_cond' => "=1",
       'trigger_name' => "graphite-to-zabbix_QueryResultError",
       'enable' => true,
@@ -55,7 +55,7 @@ triggers = {
     },
     'graphite-to-zabbix.QueryResultFormatError' => {
       'query' => "graphite-to-zabbix.QueryResultFormatError",
-      'trigger_val' => "max(3m)",
+      'trigger_val' => "max(#{triggers_sensitivity})",
       'trigger_cond' => "=1",
       'trigger_name' => "graphite-to-zabbix_QueryResultFormatError",
       'enable' => true,
@@ -67,7 +67,9 @@ triggers = {
   }
 }
 
-trigger_chk_period = "#{node["bcpc"]["hadoop"]["zabbix"]["trigger_chk_period"]}m"
+graphite_query_time = "#{node["bcpc"]["hadoop"]["zabbix"]["graphite_query_time"]}m"
+triggers_sensitivity = "#{node["bcpc"]["hadoop"]["zabbix"]["triggers_sensitivity"]}m"
+
 monitored_nodes_objs.each do |node_obj|
   host = node_obj.hostname
   # Copy overrrides
@@ -83,7 +85,7 @@ monitored_nodes_objs.each do |node_obj|
   if triggers[host]["memory_active_#{host}"].nil?
     triggers[host]["#{host}.memory.Active"] = {
       'query' => "servers.*.memory.Active",
-      'trigger_val' => "max(#{trigger_chk_period})",
+      'trigger_val' => "max(#{triggers_sensitivity})",
       'trigger_cond' => "=0",
       'trigger_name' => "#{host}_NodeAvailability",
       'enable' => true,
@@ -110,9 +112,7 @@ monitored_nodes_objs.each do |node_obj|
     triggers[host]["chef.#{host}.fail"] = {
       'query' => "chef.*.fail",
       'query_range' => "-10min",
-      'trigger_val' => "max(" +
-        "#{node["bcpc"]["hadoop"]["zabbix"]["chef_client_check_interval"]}" +
-      ")",
+      'trigger_val' => "max(#{node["bcpc"]["hadoop"]["zabbix"]["chef_client_check_interval"]})",
       'trigger_cond' => "=1",
       'trigger_name' => "#{host}_ChefClientFailure",
       'trigger_dep' => ["#{host}_NodeAvailability"],
@@ -148,7 +148,7 @@ monitored_nodes_objs.each do |node_obj|
     if triggers[host]["#{host}.diskspace.#{disk}.byte_avail"].nil?
       triggers[host]["#{host}.diskspace.#{disk}.byte_avail"] = {
         'query' => "servers.*.diskspace.*.byte_avail",
-        'trigger_val' => "max(#{trigger_chk_period})",
+        'trigger_val' => "max(#{triggers_sensitivity})",
         'trigger_cond' => "=0",
         'trigger_name' => "#{host}_#{disk}_Availability",
         'trigger_dep' => ["#{host}_NodeAvailability"],
@@ -162,7 +162,7 @@ monitored_nodes_objs.each do |node_obj|
     if triggers[host]["#{host}.diskspace.#{disk}.byte_used"].nil?
       triggers[host]["#{host}.diskspace.#{disk}.byte_used"] = {
         'query' => "servers.*.diskspace.*.byte_used",
-        'trigger_val' => "max(#{trigger_chk_period})",
+        'trigger_val' => "max(#{triggers_sensitivity})",
         'trigger_cond' => ">#{(size * 0.90).ceil}G",
         'trigger_name' => "#{host}_#{disk}_SpaceUsed",
         'trigger_dep' => ["#{host}_NodeAvailability"],
