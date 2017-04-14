@@ -2,9 +2,7 @@
 # This module holds utility methods shared between repxe_host.rb and
 # cluster_assign_roles.rb.
 #
-# Most of the methods pertain to cluster.txt and its contents.  A few
-# will attempt to contact the chef server.  These should probably be
-# separated from each other.
+# Most of the methods use the Chef Client or talk to the Chef Server
 #
 require 'json'
 

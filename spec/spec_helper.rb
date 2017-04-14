@@ -19,15 +19,6 @@ end
 SimpleCov.formatters = formatters
 SimpleCov.start
 
-# Require all our libraries
-Dir["#{__dir__}/../bin/*.rb", "#{__dir__}/../lib/*.rb"].each do |f|
-  begin
-    require File.expand_path(f)
-  rescue NameError => ex
-    STDERR.write("Failed to load: #{ex}")
-  end
-end
-
 RSpec.configure do |config|
   config.color = true
   config.alias_example_group_to :describe_recipe, type: :recipe

@@ -1,10 +1,8 @@
 #
-# This module holds utility methods shared between repxe_host.rb and
-# cluster_assign_roles.rb.
+# This module holds utility methods used by vm_to_cluster.rb and Vagrantfile
+# NOTE: Testing should be done with ChefDK and Vagrant rubys
 #
-# Most of the methods pertain to cluster.txt and its contents.  A few
-# will attempt to contact the chef server.  These should probably be
-# separated from each other.
+# Most of the methods use VirtualBox or are run on the VirtualBox hypervisor
 #
 require 'json'
 
@@ -38,6 +36,36 @@ module BACH
     # Methods which only run on the hypervisor host
     #
     module HypervisorNode
+
+      #
+      # Return a hash of VM names to UUIDs for VirtualBox VMs
+      #
+      def virtualbox_vms()
+        vm_list = Mixlib::ShellOut.new('/usr/bin/vboxmanage', 'list',
+                                         'vms')
+        vm_list.run_command
+        unless vm_list.status.success?
+          raise "VM list failed: #{vm_list.stderr}"
+        end
+
+        # parse '"vm name" {UUID}' line format and return two groups:
+        # 1: the vm name; 2: the VM UUID
+        line_parser = Regexp.new('^"([^"]*)" {([a-f0-9-]*)}$')
+
+        vms = vm_list.stdout.split("\n").map do |vm_line|
+          (line, vm, uuid) = line_parser.match(vm_line).to_a
+          # only return vm and uuid if they parsed or
+          # return original line if it failed to parse
+          vm && uuid ? [vm, uuid] : [nil, vm_line]
+        end
+
+        raise "Could not parse lines: \n" +
+          vms.select{ |a| a.any?(&:nil?) }.map{ |k, line| line }.join("\n") \
+          if vms.any?{ |a| a.any?(&:nil?) }
+
+
+        vms.to_h
+      end
 
       #
       # Return the first MAC address for a VirtualBox VM given the
