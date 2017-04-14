@@ -88,9 +88,11 @@ Note: To run more than one test cluster at a time with VirtualBox, one may
       set in their environment file a bcpc/cluster_name override_attribute.
       This will namespace the cluster's virtual machines to not collide on the
       hypervisor. One also needs to ensure their management, float and storage
-      network ranges are exclusive as well. Further, one needs to have each 
-      cluster's repository in a different parent directory (to avoid the
-      `cluster` directory from colliding).
+      network ranges are exclusive and bootstrap hostname 
+      (`node['bcpc']['bootstrap']['hostname'] in environment file) has been
+      updated to be unique as well. Further, one needs to have each cluster's
+      repository in a different parent directory (to avoid the `cluster`
+      directory from colliding).
 
 Other Deployment Flavors
 ------------------------
