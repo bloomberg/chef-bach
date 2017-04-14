@@ -34,7 +34,9 @@ $SEDINPLACE 's/vb.gui = true/vb.gui = false/' Vagrantfile
 if hash ruby; then
   ruby ./tests/edit_environment.rb
 else
-  printf "WARN: no ruby found -- proceeding without editing environment!\n"
+  printf "#### WARNING: no ruby found -- proceeding without editing environment!\n" > /dev/stderr
+  mkdir -p ../cluster
+  cp -rv stub-environment/* ../cluster
 fi
 
 if [ "${CLUSTER_TYPE,,}" == "kafka" ]; then
@@ -49,23 +51,11 @@ fi
 rm -f ../cluster/kafka_cluster.txt
 rm -f ../cluster/hadoop_cluster.txt
 
-# pull back the modified environment so that it can be copied to remote host
-tar -czf cluster.tgz ../cluster
-
 printf "#### Setup VB's and Bootstrap\n"
 source ./vbox_create.sh
 
 download_VM_files || ( echo "############## VBOX CREATE DOWNLOAD VM FILES RETURNED $? ##############" && exit 1 )
 create_bootstrap_VM || ( echo "############## VBOX CREATE BOOTSTRAP VM RETURNED $? ##############" && exit 1 )
-
-# Copy cluster mutable data to bootstrap.
-if [[ -d ../cluster ]]; then
-  tar -C .. -cf - cluster | vagrant ssh -c 'cd ~; tar -xvf -'
-elif [[ -f ./cluster.tgz ]]; then
-  gunzip -c cluster.tgz | vagrant ssh -c 'cd ~; tar -xvf -'
-else
-  ( echo "############## No cluster data found in ../cluster or ./cluster.tgz! ##############" && exit 1 )
-fi
 
 create_cluster_VMs || ( echo "############## VBOX CREATE CLUSTER VMs RETURNED $? ##############" && exit 1 )
 install_cluster $ENVIRONMENT || ( echo "############## VBOX CREATE INSTALL CLUSTER RETURNED $? ##############" && exit 1 )

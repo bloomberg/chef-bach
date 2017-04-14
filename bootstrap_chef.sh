@@ -67,18 +67,20 @@ $SSH_CMD "sudo chown -R vagrant $BCPC_DIR; \
 	  sudo rm -rf /var/chef/cache/cookbooks; \
           sudo rm -rf $BCPC_DIR/vendor/cookbooks"
 
-if [[ -z $VAGRANT ]]; then
-  if [[ ! -f $KEYFILE ]]; then
-    ssh-keygen -N "" -f $KEYFILE
-  fi
-  echo "Running rsync of non-Vagrant install"
-  rsync  $RSYNCEXTRA -avP -e "ssh -i $KEYFILE" --exclude vbox --exclude $KEYFILE --exclude .chef . ${SSH_USER}@$IP:chef-bcpc 
-  $SSH_CMD "cd $BCPC_DIR && ./setup_ssh_keys.sh ${KEYFILE}.pub"
+# pull back the modified environment so that it can be copied to remote host
+tar -czf cluster.tgz ../cluster
+
+# Copy cluster mutable data to bootstrap.
+if [[ -d ../cluster ]]; then
+  tar -C .. -cf - cluster | vagrant ssh -c 'cd ~; tar -xvf -'
+elif [[ -f ./cluster.tgz ]]; then
+  gunzip -c cluster.tgz | vagrant ssh -c 'cd ~; tar -xvf -'
 else
-  echo "Running rsync of Vagrant install"
-  $SSH_CMD "rsync $RSYNCEXTRA -avP --exclude vbox --exclude .chef /chef-bcpc-host/ /home/vagrant/chef-bcpc/"
+  ( echo "############## No cluster data found in ../cluster or ./cluster.tgz! ##############" && exit 1 )
 fi
 
+echo "Running rsync of Vagrant install"
+$SSH_CMD "rsync $RSYNCEXTRA -avP --exclude vbox --exclude vendor --exclude .chef /chef-bcpc-host/ /home/vagrant/chef-bcpc/"
 
 # cluster external environment will go here
 #$SSH_CMD "mkdir -p cluster"
