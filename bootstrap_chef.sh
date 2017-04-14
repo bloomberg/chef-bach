@@ -67,11 +67,10 @@ $SSH_CMD "sudo chown -R vagrant $BCPC_DIR; \
 	  sudo rm -rf /var/chef/cache/cookbooks; \
           sudo rm -rf $BCPC_DIR/vendor/cookbooks"
 
-# pull back the modified environment so that it can be copied to remote host
-tar -czf cluster.tgz ../cluster
-
 # Copy cluster mutable data to bootstrap.
 if [[ -d ../cluster ]]; then
+  # pull back the modified environment so that it can be copied to remote host
+  tar -czf cluster.tgz ../cluster
   tar -C .. -cf - cluster | vagrant ssh -c 'cd ~; tar -xvf -'
 elif [[ -f ./cluster.tgz ]]; then
   gunzip -c cluster.tgz | vagrant ssh -c 'cd ~; tar -xvf -'
