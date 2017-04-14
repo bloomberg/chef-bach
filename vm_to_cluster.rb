@@ -45,4 +45,6 @@ cluster_lines = entries.map do |e|
   [e[:hostname], mac, ip, e[:ilo_address], e[:cobbler_profile], e[:dns_domain], e[:runlist]].join(' ')
 end
 
-puts cluster_lines.join("\n")
+f = File.open('cluster.txt', 'w')
+f.write(cluster_lines.join("\n"))
+f.close
