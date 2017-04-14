@@ -86,21 +86,21 @@ Vagrant.configure('2') do |config|
                             Socket::AF_INET).to_s
 
     bootstrap.vm.network(:private_network,
-                         ip: management_net.succ.succ.to_s,
+                         ip: management_net.succ.succ.succ.to_s,
                          netmask: mgmt_mask,
-                         adapter_ip: management_net.succ.to_s,
+                         adapter_ip: management_net.succ.succ.to_s,
                          type:     :static)
 
     bootstrap.vm.network(:private_network,
-                         ip: storage_net.succ.succ.to_s,
+                         ip: storage_net.succ.succ.succ.to_s,
                          netmask: storage_mask,
-                         adapter_ip: storage_net.succ.to_s,
+                         adapter_ip: storage_net.succ.succ.to_s,
                          type:     :static)
 
     bootstrap.vm.network(:private_network,
-                         ip: float_net.succ.succ.to_s,
+                         ip: float_net.succ.succ.succ.to_s,
                          netmask: float_mask,
-                         adapter_ip: float_net.succ.to_s,
+                         adapter_ip: float_net.succ.succ.to_s,
                          type:     :static)
 
     if File.basename(File.expand_path('.')) == 'vbox'
