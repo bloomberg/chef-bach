@@ -86,7 +86,8 @@ default[:bcpc][:hadoop][:hbase][:site_xml].tap do |site_xml|
   site_xml['hbase.ipc.server.callqueue.read.ratio'] = node["bcpc"]["hadoop"]["hbase"]["ipc"]["server_call_queue_read_ratio"]
   site_xml['hbase.ipc.server.callqueue.scan.ratio'] = node["bcpc"]["hadoop"]["hbase"]["ipc"]["server_call_queue_scan_ratio"]
   site_xml['hbase.replication'] = 'true'
-  site_xml['hbase.master.loadbalance.bytable'] = true
   site_xml['hbase.coprocessor.abortonerror'] = node["bcpc"]["hadoop"]["hbase_rs"]["coprocessor"]["abortonerror"] 
+  site_xml['hbase.master.balancer.stochastic.tableSkewCost']=3000
+  site_xml['hbase.master.balancer.stochastic.localityCost']=1000
 end
 
