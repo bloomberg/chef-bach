@@ -7,6 +7,9 @@ monitored_nodes_objs = get_all_nodes.select do |nn|
   end
 end.compact
 
+graphite_query_time = "#{node["bcpc"]["hadoop"]["zabbix"]["graphite_query_time"]}m"
+triggers_sensitivity = "#{node["bcpc"]["hadoop"]["zabbix"]["triggers_sensitivity"]}m"
+
 # Graphite queries which specify property to query and alarming trigger,
 # severity(maps to zabbix's api -> trigger -> priority)and owner who the
 # trigger is routed to for resolution. Queries are structured as they appear in
@@ -66,9 +69,6 @@ triggers = {
     }
   }
 }
-
-graphite_query_time = "#{node["bcpc"]["hadoop"]["zabbix"]["graphite_query_time"]}m"
-triggers_sensitivity = "#{node["bcpc"]["hadoop"]["zabbix"]["triggers_sensitivity"]}m"
 
 monitored_nodes_objs.each do |node_obj|
   host = node_obj.hostname
