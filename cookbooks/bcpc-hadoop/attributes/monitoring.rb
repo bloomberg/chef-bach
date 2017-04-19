@@ -23,14 +23,14 @@ default["bcpc"]["hadoop"]["zabbix"]["chef_client_check_interval"] =
 # problem state but no alarms will be generated. One can still see the System State on Zabbix UI)
 default["bcpc"]["hadoop"]["zabbix"]["enable_alarming"] = true
 
-# Amount of metric data to be fetched from graphite and sent to zabbix
-default["bcpc"]["hadoop"]["graphite"]["default_query_range"] = "-2min"
-
 # Number of workers to process graphite-to-zabbix queries
 default["bcpc"]["hadoop"]["graphite"]["worker_count"] = [node['cpu']['total'] / 2, 3].max 
 
-# Amount of metric data to check (in minutes) to determine if an item is in problem state
-default["bcpc"]["hadoop"]["zabbix"]["trigger_chk_period"] = 2
+# Amount of metric data to be fetched from graphite and sent to zabbix
+default["bcpc"]["hadoop"]["graphite"]["default_query_range"] = "-2min"
+
+# The sensitivity of the triggers in zabbix (in minute)
+default["bcpc"]["hadoop"]["zabbix"]["triggers_sensitivity"] = 15
 
 # Override Graphite/Zabbix queries/triggers here
 default["bcpc"]["hadoop"]["graphite"]["basic_queries"] = {} # Basic OS/Node Queries
