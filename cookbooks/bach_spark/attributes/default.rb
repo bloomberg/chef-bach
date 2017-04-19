@@ -38,8 +38,8 @@ default.bach_spark.config.spark.yarn.archive = "#{node['spark']['hdfs_url']}"\
 default.bach_spark.config.spark.master = 'yarn-client'
 
 # Spark environment configuration
-default.bach_spark.environment.SPARK_LOCAL_IP = node[:bcpc][:floating][:ip]
-default.bach_spark.environment.SPARK_PUBLIC_DNS = float_host(node['fqdn'])
+default.bach_spark.environment.SPARK_LOCAL_IP = node[:ipaddress]
+default.bach_spark.environment.SPARK_PUBLIC_DNS = node[:fqdn]
 default.bach_spark.environment.SPARK_LOCAL_DIRS = "${HOME}/.spark_logs"
 default.bach_spark.environment.HADOOP_CONF_DIR = '/etc/hadoop/conf'
 default.bach_spark.environment.HADOOP_HOME = '/usr/hdp'\

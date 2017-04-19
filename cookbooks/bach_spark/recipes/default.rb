@@ -49,7 +49,7 @@ template "#{spark_bin_dir}/conf/spark-defaults.conf" do
   source 'spark-defaults.conf.erb'
   mode 0o0755
   helper :config do
-    node.bach_spark.config.sort_by(&:first)
+    node[:bach_spark][:config].sort_by(&:first)
   end
   helpers(Spark::Configuration)
 end
