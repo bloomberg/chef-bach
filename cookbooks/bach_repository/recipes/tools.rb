@@ -3,22 +3,8 @@
 # Recipe:: tools
 #
 
-#
-# If we are executing in local mode, we may not have correct mirror
-# definitions for use by the Ubuntu cookbook.
-#
-# The hacky solution is to execute 'apt-get update' blindly, without
-# explicitly configuring any mirrors.
-#
-if Chef::Config[:local_mode]
-  execute 'apt-get update' do
-    ignore_failure true
-  end
-else
-  include_recipe 'ubuntu'
-  include_recipe 'apt'
-end
-
+include_recipe 'ubuntu'
+include_recipe 'apt'
 include_recipe 'build-essential'
 
 #

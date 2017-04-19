@@ -4,3 +4,4 @@ chef
 cookbooks
 data
 vendor
+attributes/repos.rb

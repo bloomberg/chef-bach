@@ -2,6 +2,20 @@
 # Cookbook Name:: bcpc_kafka
 # Recipe: Kafka
 #
+# Copyright 2017, Bloomberg Finance L.P.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
 
 #
 # We need node search to set a reasonable value for num.partitions, so
@@ -12,15 +26,14 @@
 #
 node.normal[:kafka][:broker][:num][:partitions] =
   [
-   node[:kafka][:broker][:num][:partitions],
-   search(:node, 'role:BCPC-Kafka-Head-Server').count,
-   3
+    node[:kafka][:broker][:num][:partitions],
+    search(:node, 'role:BCPC-Kafka-Head-Server').count,
+    3
   ].max
 
-package 'netcat-openbsd'
-
-zookeeper_port =
-  node[:bcpc][:hadoop][:zookeeper][:leader_connect][:port] rescue 2181
+package 'netcat-openbsd' do
+  action :upgrade
+end
 
 #
 # In a standalone Kafka cluster, get_head_nodes will return the
@@ -33,7 +46,7 @@ zookeeper_port =
 #
 node.default[:kafka][:broker][:zookeeper][:connect] = get_head_nodes.map do |nn|
   float_host(nn[:fqdn])
-end
+end.sort
 
 #
 # This is a list of paths for the kafka logs (actual topic data)
@@ -48,11 +61,8 @@ end
 # As a result, the first chef run will configure Kafka to use only one
 # data volume, the fallback path of /disk/0.
 #
-data_volumes = Dir.glob('/disk/*').select{ |pp| ::File.directory?(pp) }
-
-if data_volumes.empty?
-  data_volumes << '/disk/0'
-end
+data_volumes = Dir.glob('/disk/*').select { |pp| ::File.directory?(pp) }
+data_volumes << '/disk/0' if data_volumes.empty?
 
 node.default[:kafka][:broker][:log][:dirs] = data_volumes.map do |dd|
   File.join(dd, 'kafka', 'data')
@@ -61,34 +71,40 @@ end
 include_recipe 'bcpc_kafka::default'
 include_recipe 'kafka::default'
 
-user_ulimit "kafka" do
-  filehandle_limit 32768
-  notifies :restart, "service[kafka-broker]", :immediately
+user_ulimit 'kafka' do
+  filehandle_limit 32_768
+  notifies :restart, 'service[kafka-broker]', :immediately
 end
 
-ruby_block "kafkaup" do
-  i = 0
+ruby_block 'kafkaup' do
   block do
-    brokerpath="/brokers/ids/#{node[:kafka][:broker][:broker_id]}"
-    zk_host = node[:kafka][:broker][:zookeeper][:connect].map{|zkh| "#{zkh}:2181"}.join(",")
-    Chef::Log.info("Zookeeper hosts are #{zk_host}")
-    sleep_time = 0.5
-    kafka_in_zk = znode_exists?(brokerpath, zk_host)
-    while !kafka_in_zk
-      kafka_in_zk = znode_exists?(brokerpath, zk_host)
-      if !kafka_in_zk and i < 20
-        sleep(sleep_time)
-        i += 1
-        Chef::Log.info("Kafka server having znode #{brokerpath} is down.")
-      elsif !kafka_in_zk and i >= 19
-        Chef::Application.fatal! "Kafka is reported down for more than #{i * sleep_time} seconds"
+    zk_path =
+      "/brokers/ids/#{node[:kafka][:broker][:broker_id]}"
+
+    zk_hosts =
+      node[:kafka][:broker][:zookeeper][:connect]
+
+    zk_connection_string =
+      zk_hosts.map { |zkh| "#{zkh}:2181" }.join(',')
+
+    Chef::Log.info("Zookeeper hosts are #{zk_connection_string}")
+
+    max_time = 19
+    max_time.times do |ii|
+      if znode_exists?(zk_path, zk_connection_string)
+        Chef::Log.info("Kafka broker at znode #{zk_path} is marked up.")
+        break
       else
-        Chef::Log.info("Broker #{brokerpath} existance : #{znode_exists?(brokerpath, zk_host)}")
+        Chef::Log.info("Kafka broker at znode #{zk_path} is marked " \
+                       "down. (#{ii})")
       end
+      sleep(1)
     end
-    Chef::Log.info("Kafka with znode #{brokerpath} is up and running.")
+
+    unless znode_exists?(zk_path, zk_connection_string)
+      raise "Kafka is reported down for more than #{max_time} seconds"
+    end
   end
-  action :run
 end
 
 include_recipe 'bcpc::diamond'

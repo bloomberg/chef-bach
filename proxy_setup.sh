@@ -11,7 +11,7 @@ if [ -n "$http_proxy" ]; then
   # Set https_proxy to http_proxy if not otherwise defined.
   export https_proxy=${https_proxy:-$http_proxy}
 
-  if [ -n "$no_proxy" ]; then
+  if [ -z "$no_proxy" ]; then
     export no_proxy="localhost"
   else
     export no_proxy="$no_proxy,localhost"

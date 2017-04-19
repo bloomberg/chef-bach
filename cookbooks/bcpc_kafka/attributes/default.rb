@@ -22,8 +22,8 @@ default[:kafka][:base_url] = get_binary_server_url + 'kafka'
 # Kafka broker settings
 #
 default[:kafka][:broker].tap do |broker|
-  broker[:host_name] = float_host(node[:fqdn])
-  broker[:advertised_host_name] = float_host(node[:fqdn])
+  broker[:host_name] = node[:fqdn]
+  broker[:advertised_host_name] = node[:fqdn]
   broker[:port] = 6667
   broker[:advertised_port] = 6667
   broker[:broker_id] = node[:bcpc][:node_number]
