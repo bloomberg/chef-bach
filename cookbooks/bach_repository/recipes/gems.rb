@@ -42,7 +42,7 @@ worker_gems = [
                 ['simple-graphite', '2.1.0'],
                 ['webhdfs', '0.5.5'],
                 ['wmi-lite', '1.0.0'],
-                ['zabbixapi', '2.4.5'],
+                ['zabbixapi', '2.4.9'],
                 ['zookeeper', '1.4.7'],
               ]
 
