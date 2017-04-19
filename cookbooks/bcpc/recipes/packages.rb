@@ -28,6 +28,7 @@
   sysstat
   vim-nox
   xclip
+  git
 ).each do |pkg|
   package pkg do
     action :upgrade
