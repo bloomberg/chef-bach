@@ -14,7 +14,8 @@ default["bcpc"]["hadoop"]["hive"]["server2"]["port"] = '10000'
 default[:bcpc][:hadoop][:hive][:site_xml].tap do |site_xml|
   # hive.* options
   site_xml['hive.aux.jars.path'] =
-    'file:///usr/share/java/mysql-connector-java.jar'
+    'file:///usr/share/java/mysql-connector-java.jar,' + 
+    'file:///usr/hdp/current/hive-webhcat/share/hcatalog/hive-hcatalog-core.jar'
   site_xml['hive.exec.scratchdir'] =
     '/tmp/hive-${user.name}'
   site_xml['hive.metastore.client.socket.timeout'] = 3600
@@ -43,8 +44,6 @@ end
 # These will become key/value pairs in 'hive-env.sh'
 default[:bcpc][:hadoop][:hive][:env_sh].tap do |env_sh|
   env_sh[:HIVE_CONF_DIR] = '/etc/hive/conf.' + node.chef_environment
-  env_sh[:HIVE_AUX_JARS_PATH] =
-    '/usr/hdp/current/hive-webhcat/share/hcatalog/hive-hcatalog-core.jar'
   env_sh[:JAVA_HOME] = node[:bcpc][:hadoop][:java]
   env_sh[:HADOOP_HEAPSIZE] = 1024
   env_sh[:HADOOP_OPTS] = 
