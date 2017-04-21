@@ -19,7 +19,8 @@ if [[ "$(pwd)" != "$(git rev-parse --show-toplevel)" ]]; then
   printf '#### WARNING: This should be run in the git top level directory! ####\n' > /dev/stderr
 fi
 
-ENVIRONMENT=Test-Laptop
+export BACH_ENVIRONMENT='Test-Laptop'
+export BACH_CLUSTER_PREFIX='foo'
 export BOOTSTRAP_VM_MEM=${BOOTSTRAP_VM_MEM:-5096}
 export BOOTSTRAP_VM_CPUs=${BOOTSTRAP_VM_CPUS:-2}
 export CLUSTER_VM_MEM=${CLUSTER_VM_MEM:-7120}
@@ -58,7 +59,7 @@ printf "#### Setup VB's and Bootstrap\n"
 source ./vbox_create.sh
 
 # Ensure we got VM_LIST from vbox_create.sh
-echo "Using CLUSTER_NAME=${CLUSTER_NAME} VM_LIST=${VM_LIST}"
+echo "Using CLUSTER_PREFIX=${BACH_CLUSTER_PREFIX} VM_LIST=${VM_LIST}"
 
 download_VM_files || ( echo "############## VBOX CREATE DOWNLOAD VM FILES RETURNED $? ##############" && exit 1 )
 create_bootstrap_VM || ( echo "############## VBOX CREATE BOOTSTRAP VM RETURNED $? ##############" && exit 1 )
@@ -67,13 +68,13 @@ python_to_find_bootstrap_ip="import json; j = json.load(file('${environments[0]}
 BOOTSTRAP_IP=$(python -c "$python_to_find_bootstrap_ip")
 
 create_cluster_VMs || ( echo "############## VBOX CREATE CLUSTER VMs RETURNED $? ##############" && exit 1 )
-install_cluster $ENVIRONMENT $BOOTSTRAP_IP || ( echo "############## VBOX CREATE INSTALL CLUSTER RETURNED $? ##############" && exit 1 )
+install_cluster $BACH_ENVIRONMENT $BOOTSTRAP_IP || ( echo "############## VBOX CREATE INSTALL CLUSTER RETURNED $? ##############" && exit 1 )
 
 printf "#### Cobbler Boot\n"
 printf "Snapshotting pre-Cobbler and booting (unless already running)\n"
 
 vms_started="False"
-for vm in ${VM_LIST[*]} ${CLUSTER_NAME}bcpc-bootstrap; do
+for vm in ${VM_LIST[*]} ${BACH_CLUSTER_PREFIX}bcpc-bootstrap; do
   vboxmanage showvminfo $vm | grep -q '^State:.*running' || vms_started="True"
   if [[ ! $(vboxmanage snapshot $vm list --machinereadable | grep -q 'Shoe-less') ]]; then
     vboxmanage showvminfo $vm | grep -q '^State:.*running' || VBoxManage snapshot $vm take Shoe-less
@@ -108,17 +109,17 @@ fi
 
 vagrant ssh -c "cd chef-bcpc; source proxy_setup.sh; ./wait-for-hosts.sh ${VM_LIST[*]}"
 printf "Snapshotting post-Cobbler\n"
-for vm in ${VM_LIST[*]} ${CLUSTER_NAME}bcpc-bootstrap; do
+for vm in ${VM_LIST[*]} ${BACH_CLUSTER_PREFIX}bcpc-bootstrap; do
   [[ $(vboxmanage snapshot $vm list --machinereadable | grep -q 'Post-Cobble') ]] || \
     [[ "$vms_started" == "True" ]] && VBoxManage snapshot $vm take Post-Cobble --live &
 done
 wait && printf "Done Snapshotting\n"
 
 printf "#### Chef the nodes with Basic role\n"
-vagrant ssh -c "cd chef-bcpc; ./cluster-assign-roles.sh $ENVIRONMENT Basic"
+vagrant ssh -c "cd chef-bcpc; ./cluster-assign-roles.sh $BACH_ENVIRONMENT Basic"
 
 printf "Snapshotting Post-Basic\n"
-for vm in ${VM_LIST[*]} ${CLUSTER_NAME}bcpc-bootstrap; do
+for vm in ${VM_LIST[*]} ${BACH_CLUSTER_PREFIX}bcpc-bootstrap; do
   [[ $(vboxmanage snapshot $vm list --machinereadable | grep -q 'Post-Basic') ]] || \
     VBoxManage snapshot $vm take Basic --live &
 done
@@ -134,11 +135,11 @@ if [ "${CLUSTER_TYPE,,}" == "hadoop" ]; then
   # https://github.com/bloomberg/chef-bach/issues/847
   # We know the first run might fail set +e
   set +e
-  vagrant ssh -c "cd chef-bcpc; ./cluster-assign-roles.sh $ENVIRONMENT Bootstrap"
+  vagrant ssh -c "cd chef-bcpc; ./cluster-assign-roles.sh $BACH_ENVIRONMENT Bootstrap"
   # if we still fail here we have some other issue
   set -e
-  vagrant ssh -c "cd chef-bcpc; ./cluster-assign-roles.sh $ENVIRONMENT Bootstrap"
-  for vm in ${VM_LIST[*]} ${CLUSTER_NAME}bcpc-bootstrap; do
+  vagrant ssh -c "cd chef-bcpc; ./cluster-assign-roles.sh $BACH_ENVIRONMENT Bootstrap"
+  for vm in ${VM_LIST[*]} ${BACH_CLUSTER_PREFIX}bcpc-bootstrap; do
     [[ $(vboxmanage snapshot $vm list --machinereadable | grep -q 'Post-Bootstrap') ]] || \
       VBoxManage snapshot $vm take Post-Bootstrap --live &
   done
@@ -147,16 +148,16 @@ if [ "${CLUSTER_TYPE,,}" == "hadoop" ]; then
 fi
 
 printf "#### Chef machine bcpc-vms with $CLUSTER_TYPE\n"
-vagrant ssh -c "cd chef-bcpc; ./cluster-assign-roles.sh $ENVIRONMENT $CLUSTER_TYPE"
+vagrant ssh -c "cd chef-bcpc; ./cluster-assign-roles.sh $BACH_ENVIRONMENT $CLUSTER_TYPE"
 
 # for Hadoop installs we need to re-run the headnodes once HDFS is up to ensure
 # we deploy various JARs. Run a second time once a datanode is up.
 if [[ "${CLUSTER_TYPE,,}" == "hadoop" ]]; then
-  vagrant ssh -c "cd chef-bcpc; ./cluster-assign-roles.sh $ENVIRONMENT $CLUSTER_TYPE BCPC-Hadoop-Head"
+  vagrant ssh -c "cd chef-bcpc; ./cluster-assign-roles.sh $BACH_ENVIRONMENT $CLUSTER_TYPE BCPC-Hadoop-Head"
 fi
 
 printf "Snapshotting Post-Install\n"
-for vm in ${VM_LIST[*]} ${CLUSTER_NAME}bcpc-bootstrap; do
+for vm in ${VM_LIST[*]} ${BACH_CLUSTER_PREFIX}bcpc-bootstrap; do
   [[ $(vboxmanage snapshot $vm list --machinereadable | grep -q 'Post-Install') ]] || \
     VBoxManage snapshot $vm take Post-Install --live &
 done
