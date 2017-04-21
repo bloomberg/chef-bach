@@ -60,9 +60,15 @@ VBOX_DIR="`dirname ${BASH_SOURCE[0]}`/vbox"
 [[ -d $VBOX_DIR ]] || mkdir $VBOX_DIR
 P=`python -c "import os.path; print os.path.abspath(\"${VBOX_DIR}/\")"`
 
+# ensure cluster.txt has CLUSTER_NAME prepended before VM names
+# NOTE: somewhat crude we see if any line does not start with the
+# cluster name and if so all lines have it prepended
+if [[ -n "$(grep -v "^${CLUSTER_NAME}" ./cluster.txt)" ]]; then
+  sed -i "s/^/${CLUSTER_NAME}-/" cluster.txt
+fi
+
 # Populate the VM list array from cluster.txt
-export VM_LIST=( $(cut -f1 -d' ' ./cluster.txt | \
-                   sed "s/^/${CLUSTER_NAME}/") )
+export VM_LIST=( $(cut -f1 -d' ' ./cluster.txt) )
 
 ######################################################
 # Function to download files necessary for VM stand-up

@@ -234,7 +234,7 @@ describe BACH::ClusterData::HypervisorNode do
           shellout_good
         end
         expect(virtualbox_mac(vmname_good)).\
-          to eq('08002769DF20')
+          to eq('08:00:27:69:DF:20')
       end
 
       it 'returns nil if macaddr1 not found' do

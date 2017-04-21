@@ -11,5 +11,5 @@ REPO_DIR="`dirname ${BASH_SOURCE[0]}`"
 cd $REPO_DIR
 bundle config --local PATH vendor/bundle
 bundle config --local DISABLE_SHARED_GEMS true
-bundle package --path vendor/bundle
+bundle package --path vendor/bundle > /dev/null
 bundle exec --keep-file-descriptors ./vm_to_cluster.rb $*

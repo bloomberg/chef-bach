@@ -68,6 +68,25 @@ module BACH
       end
 
       #
+      # Return if VM is EFI or legacy BIOS boot
+      #
+      def virtualbox_bios(vm_id)
+        vm_lookup = Mixlib::ShellOut.new('/usr/bin/vboxmanage', 'showvminfo',
+                                         '--machinereadable', vm_id)
+        vm_lookup.run_command
+        unless vm_lookup.status.success?
+          raise "VM lookup for #{vm_id} failed: #{vm_lookup.stderr}"
+        end
+
+        vm_lookup = vm_lookup.stdout.split("\n").select \
+          { |line| line.start_with?('firmware="') }
+
+        # strip leading 'firmware="' and trailing '"'
+        bios = vm_lookup.first.gsub(/^firmware="/, '').gsub(/"$/, '') \
+          unless vm_lookup.empty?
+      end
+
+      #
       # Return the first MAC address for a VirtualBox VM given the
       # VM Name (or UUID) as a string
       #
@@ -82,8 +101,11 @@ module BACH
         vm_lookup = vm_lookup.stdout.split("\n").select \
           { |line| line.start_with?('macaddress1="') }
 
-        vm_lookup.first.gsub(/^macaddress1="/, '').gsub(/"$/, '') \
-          unless vm_lookup.empty?
+        # strip leading 'macaddress1="' and trailing '"'
+        unless vm_lookup.empty?
+          mac = vm_lookup.first.gsub(/^macaddress1="/, '').gsub(/"$/, '')
+          mac = (0..mac.length/2 - 1).map { |x| mac.slice(x * 2, 2) }.join(':')
+        end
       end
     end
   end

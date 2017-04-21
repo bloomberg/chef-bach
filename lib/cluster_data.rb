@@ -31,6 +31,11 @@ module BACH
   # Methods to get data about a BACH cluster
   #
   module ClusterData
+    # bogus VirtualBox MAC (keep the vendor OUI set to VirtualBox's)
+    BOGUS_VB_MAC = '08:00:27:C0:FF:EE'
+    LEGACY_COBBLER_PROFILE = 'bcpc_host_precise'
+    EFI_COBBLER_PROFILE = 'bcpc_host_trusty'
+
     def repo_dir
       # This file is in the 'lib' subdirectory, so the repo dir is its parent.
       File.expand_path('..', File.dirname(__FILE__))

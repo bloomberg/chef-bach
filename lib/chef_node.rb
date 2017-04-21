@@ -106,7 +106,7 @@ module BACH
         180.times do |i|
           if ridley.search(:node, "name:#{entry[:fqdn]}").any?
             puts "Found #{entry[:fqdn]} in search index"
-            break
+            return
           else
             reindex_chef_server if i == 0
 
