@@ -49,11 +49,8 @@ chef_env = JSON.parse(File.read(chef_environment_path))
 
 cluster_environment = chef_env['name']
 
-cname = chef_env['override_attributes']['bcpc'].has_key?('cluster_name') && \
-  chef_env['override_attributes']['bcpc']['cluster_name'] || ''
-
 bootstrap_hostname =
-  cname + chef_env['override_attributes']['bcpc']['bootstrap']['hostname']
+  chef_env['override_attributes']['bcpc']['bootstrap']['hostname']
 
 bootstrap_domain =
   chef_env['override_attributes']['bcpc']['domain_name'] || 'bcpc.example.com'
@@ -74,8 +71,8 @@ $bach_local_environment = cluster_environment
 $bach_local_mirror = nil
 
 Vagrant.configure('2') do |config|
-  config.vm.define "#{cname}bootstrap".to_sym do |bootstrap|
-    bootstrap.vm.hostname = "#{cname}#{bootstrap_hostname}.#{bootstrap_domain}"
+  config.vm.define 'bootstrap'.to_sym do |bootstrap|
+    bootstrap.vm.hostname = "#{bootstrap_hostname}.#{bootstrap_domain}"
 
     # Awaiting https://github.com/ruby/ruby/pull/1269 to properly retrieve mask
     mgmt_mask = IPAddr.new(management_net.instance_variable_get('@mask_addr'),
