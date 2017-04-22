@@ -135,7 +135,8 @@ environment_data['override_attributes'].tap do |attrs|
   if cluster_name
     attrs['bcpc']['cluster_name'] = cluster_name
     attrs['bcpc']['bootstrap']['hostname'] = \
-      cluster_name + attrs['bcpc']['bootstrap']['hostname']
+      cluster_name + attrs['bcpc']['bootstrap']['hostname'] unless \
+      attrs['bcpc']['bootstrap']['hostname'].start_with?(cluster_name)
   end
 
   if proxy_uri
