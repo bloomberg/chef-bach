@@ -17,10 +17,10 @@ if [ -n "$http_proxy" ]; then
     export no_proxy="$no_proxy,localhost"
   fi
 
-  if domainname | grep '(none)'; then
-    DOMAIN="$(domainname),"
-  else
+  if domainname | grep -q '(none)'; then
     DOMAIN=""
+  else
+    DOMAIN="$(domainname),"
   fi
 
   local_ips=$(ip addr list |grep 'inet '|sed -e 's/.* inet //' -e 's#/.*#,#')
