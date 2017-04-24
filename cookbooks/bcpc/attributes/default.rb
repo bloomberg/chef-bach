@@ -233,7 +233,7 @@ default[:bcpc][:repos] = node[:bcpc][:repos_for][node[:lsb][:codename]]
 #
 ###########################################
 default[:ubuntu][:archive_url] =
-  'http://mirror.cc.columbia.edu/pub/linux/ubuntu/archive/'
+  'http://mirror.math.princeton.edu/pub/ubuntu'
 
 default[:ubuntu][:security_url] =
   node[:ubuntu][:archive_url]
