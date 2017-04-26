@@ -23,7 +23,6 @@
 # assume gem is in the same dir (valid for Chef 10, Chef 11 dpkg and Chef 11 Omnibus)
 require 'pathname'
 require 'rubygems'
-gem_path = Pathname.new(Gem.ruby).dirname.join("gem").to_s
 
 # build requirements for zookeeper
 %w{ruby-dev make patch gcc}.each do |pkg|
@@ -32,33 +31,28 @@ gem_path = Pathname.new(Gem.ruby).dirname.join("gem").to_s
   end.run_action(:install)
 end
 
-chef_gem 'poise' do
+bcpc_chef_gem 'poise' do
   version '~>2.0'
-  options "--clear-sources -s #{get_binary_server_url}"
   compile_time true
 end
 
-chef_gem 'json' do
+bcpc_chef_gem 'json' do
   # Due to Zabbixapi #64 otherwise could use 2.0+
   version '~>1.6'
-  options "--clear-sources -s #{get_binary_server_url}"
   compile_time true
 end
 
-chef_gem 'zookeeper' do
+bcpc_chef_gem 'zookeeper' do
   version '>0.0'
-  options "--clear-sources -s #{get_binary_server_url}"
   compile_time true
 end
 
-chef_gem 'webhdfs' do
-  options "--clear-sources -s #{get_binary_server_url}"
+bcpc_chef_gem 'webhdfs' do
   version '>=0.0.0'
   compile_time true
 end
 
-chef_gem 'zabbixapi' do
-  options "--clear-sources -s #{get_binary_server_url}"
+bcpc_chef_gem 'zabbixapi' do
   version '>=2.4'
   compile_time true
 end
@@ -76,19 +70,10 @@ end
 # The "--use-system-libraries" switch is intended to force nokogiri
 # extconf.rb to compile against system libraries.
 #
-chef_gem 'nokogiri' do
-  options "--clear-sources -s #{get_binary_server_url} " \
-    '-- --use-system-libraries'
+bcpc_chef_gem 'nokogiri' do
+  options  '-- --use-system-libraries'
   version '>=1.6.2'
   compile_time true
 end
 
-Gem.clear_paths
 require 'zookeeper'
-
-execute "correct-gem-permissions" do
-  command 'find /opt/chef/embedded/lib/ruby/gems -type f -exec chmod a+r {} \; && ' +
-          'find /opt/chef/embedded/lib/ruby/gems -type d -exec chmod a+rx {} \;'
-  user "root"
-   action :nothing
-end.run_action(:run)

@@ -1,6 +1,6 @@
 #
-# Cookbook Name:: bach_reposity
-# Recipe:: poise install
+# Cookbook Name:: bcpc
+# Recipe:: chef_poise_install
 #
 # Copyright 2017, Bloomberg Finance L.P.
 #
@@ -17,25 +17,7 @@
 # limitations under the License.
 #
 
-chef_gem 'poise' do
+bcpc_chef_gem 'poise' do
   version '~>2.0'
-  options "--clear-sources -s #{get_binary_server_url}"
   compile_time true
 end
-
-#
-# BACH typically runs chef-client with an abnormal umask, which causes
-# rubygems to install specifications with bad permissions.
-#
-# This ruby block restores the permissions to root/root, rw-r--r--
-#
-ruby_block 'fix-chef-gemspec-permissions' do
-  block do
-    Dir.glob(Gem.default_dir + '/specifications/*.gemspec').each do |path|
-      File.chown(0, 0, path)
-      File.chmod(0644, path)
-    end
-  end
-end.run_action(:create)
-
-Gem.clear_paths
