@@ -1,6 +1,6 @@
 name             'bach_common'
 maintainer       'Bloomberg LP'
-maintainer_email 'compute@bloomberg.net'
+maintainer_email 'hadoop@bloomberg.net'
 license          'All rights reserved'
 description      'bach_common contains common recipes for the BACH cookbooks'
 long_description 'bach_common contains common recipes for the BACH cookbooks'

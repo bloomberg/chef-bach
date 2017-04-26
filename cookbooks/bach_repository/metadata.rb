@@ -1,6 +1,6 @@
 name             'bach_repository'
 maintainer       'Bloomberg LP'
-maintainer_email 'compute@bloomberg.net'
+maintainer_email 'hadoop@bloomberg.net'
 license          'All rights reserved'
 description      'bach_repository builds a repo for use by BACH nodes'
 long_description 'bach_repository builds a repo for use by BACH nodes. ' \

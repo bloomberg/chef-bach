@@ -1,6 +1,6 @@
 name             'bcpc'
 maintainer       'Bloomberg Finance L.P.'
-maintainer_email 'compute@bloomberg.net'
+maintainer_email 'hadoop@bloomberg.net'
 license          'Apache License 2.0'
 description      'Installs/Configures Bloomberg Clustered Private Cloud (BCPC)'
 long_description IO.read(File.join(File.dirname(__FILE__), 'README.md'))

@@ -1,6 +1,6 @@
 name             'bach_wrapper'
 maintainer       'Bloomberg LP'
-maintainer_email 'compute@bloomberg.net'
+maintainer_email 'hadoop@bloomberg.net'
 license          'All rights reserved'
 description      'Top-level chef-bach wrapper'
 long_description 'Top-level chef-bach wrapper'
