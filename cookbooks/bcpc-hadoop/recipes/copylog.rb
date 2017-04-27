@@ -34,7 +34,7 @@ configure_kerberob  'flume_spnego' do
   service_name 'spnego'
 end
 
-flume_kerb' do
+configure_kerberos 'flume_kerb' do
   service_name 'flume'
 end
 
