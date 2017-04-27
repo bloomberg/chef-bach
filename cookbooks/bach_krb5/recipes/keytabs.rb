@@ -54,11 +54,10 @@ get_cluster_nodes().each do |h|
     keytab_file = va['keytab']
     keytab_path = ::File.join(keytab_dir, host_fqdn, keytab_file)
     regular_principal = "#{service_principal}/#{host_fqdn}@#{realm}"
-    http_principal = "HTTP/#{host_fqdn}@#{realm}"
     vip_principal = "#{service_principal}/#{viphost}@#{realm}"
 
     # Variable to hold all principals for a single keytab
-    keytab_principals = "#{regular_principal} #{http_principal} #{vip_principal}"
+    keytab_principals = "#{regular_principal} #{vip_principal}"
     
     # Create the keytab file
     execute "creating-keytab-for-#{ke}" do
@@ -68,7 +67,7 @@ get_cluster_nodes().each do |h|
       not_if {
         # Don't run if all principals are found in an existing keytab file.
         require 'mixlib/shellout'
-        [regular_principal, http_principal, vip_principal].map do |princ|
+        [regular_principal, vip_principal].map do |princ|
           cc = Mixlib::ShellOut.new("klist -k #{keytab_path} | grep #{princ}")
           cc.run_command
           cc.status.success?
@@ -77,7 +76,7 @@ get_cluster_nodes().each do |h|
     end
 
     # Verify the keytab file, because kadmin.local does not return errors.
-    [regular_principal, http_principal, vip_principal].each do |princ|
+    [regular_principal, vip_principal].each do |princ|
       execute "verifying-#{princ}-keytab" do
         command "klist -k #{keytab_path} | grep #{princ}"
       end
