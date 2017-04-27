@@ -100,6 +100,10 @@ bash "kill yarn-timelineserver" do
   returns [0, 1]
 end
 
+configure_kerberos 'rm_spnego' do
+  service_name 'spnego'
+end
+
 configure_kerberos 'rm_kerb' do
   service_name 'resourcemanager'
 end

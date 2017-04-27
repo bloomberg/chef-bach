@@ -56,6 +56,10 @@ end
   hdp_select(pkg, node[:bcpc][:hadoop][:distribution][:active_release])
 end
 
+configure_kerberos 'oozie_spnego' do
+  service_name 'spnego'
+end
+
 configure_kerberos 'oozie_kerb' do
   service_name 'oozie'
 end

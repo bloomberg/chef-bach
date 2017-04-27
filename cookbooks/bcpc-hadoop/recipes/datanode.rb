@@ -59,12 +59,24 @@ user_ulimit "yarn" do
   process_limit 65536
 end
 
+configure_kerberos 'datanode_spnego' do
+  service_name 'spnego'
+end
+
 configure_kerberos 'datanode_kerb' do
   service_name 'datanode'
 end
 
+configure_kerberos 'nodemanager_spnego' do
+  service_name 'spnego'
+end
+
 configure_kerberos 'nodemanager_kerb' do
   service_name 'nodemanager'
+end
+
+configure_kerberos 'mapred_spnego' do
+  service_name 'spnego'
 end
 
 configure_kerberos 'mapred_kerb' do

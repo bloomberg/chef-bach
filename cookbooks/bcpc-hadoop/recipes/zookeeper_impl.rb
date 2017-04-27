@@ -14,6 +14,10 @@ user_ulimit "zookeeper" do
   filehandle_limit 65536
 end
 
+configure_kerberos 'zookeeper_spnego' do
+  service_name 'spnego'
+end
+
 configure_kerberos 'zookeeper_kerb' do
   service_name 'zookeeper'
 end
