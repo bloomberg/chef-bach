@@ -27,7 +27,7 @@ define :configure_kerberos do
     # Create the keytab file
     file "#{keytab_dir}/#{keytab_file}" do
       owner "#{srvdat['owner']}"
-      group "root"
+      group "#{srvdat['group']}"
       mode "#{srvdat['perms']}"
       action :create_if_missing
       content lazy { Base64.decode64(get_config!("#{config_host}-#{srvc}")) }
