@@ -33,7 +33,7 @@ default['bcpc']['hadoop']['kerberos']['data'] = {
     principal: 'yarn',
     keytab: 'yarn.service.keytab',
     owner: 'yarn',
-    group: 'hadoop',
+    group: 'yarn',
     princhost: '_HOST',
     perms: '0440',
     spnego_keytab: 'spnego.service.keytab'
@@ -42,7 +42,7 @@ default['bcpc']['hadoop']['kerberos']['data'] = {
     principal: 'yarn',
     keytab: 'yarn.service.keytab',
     owner: 'yarn',
-    group: 'hadoop',
+    group: 'yarn',
     princhost: '_HOST',
     perms: '0440',
     spnego_keytab: 'spnego.service.keytab'
@@ -69,7 +69,7 @@ default['bcpc']['hadoop']['kerberos']['data'] = {
     principal: 'zookeeper',
     keytab: 'zookeeper.service.keytab',
     owner: 'zookeeper',
-    group: 'hadoop',
+    group: 'zookeeper',
     princhost: '_HOST',
     perms: '0440',
     spnego_keytab: 'spnego.service.keytab'
@@ -78,7 +78,7 @@ default['bcpc']['hadoop']['kerberos']['data'] = {
     principal: 'hbase',
     keytab: 'hbase.service.keytab',
     owner: 'hbase',
-    group: 'hadoop',
+    group: 'hbase',
     princhost: '_HOST',
     perms: '0440',
     spnego_keytab: 'spnego.service.keytab'
@@ -96,7 +96,7 @@ default['bcpc']['hadoop']['kerberos']['data'] = {
     principal: 'hive',
     keytab: 'hive.service.keytab',
     owner: 'hive',
-    group: 'hadoop',
+    group: 'hive',
     princhost: '_HOST',
     perms: '0440',
     spnego_keytab: 'spnego.service.keytab'
@@ -105,7 +105,7 @@ default['bcpc']['hadoop']['kerberos']['data'] = {
     principal: 'oozie',
     keytab: 'oozie.service.keytab',
     owner: 'oozie',
-    group: 'hadoop',
+    group: 'oozie',
     princhost: '_HOST',
     perms: '0440',
     spnego_keytab: 'spnego.service.keytab'
@@ -114,7 +114,7 @@ default['bcpc']['hadoop']['kerberos']['data'] = {
     principal: 'flume',
     keytab: 'flume.service.keytab',
     owner: 'flume',
-    group: 'hadoop',
+    group: 'flume',
     princhost: '_HOST',
     perms: '0440',
     spnego_keytab: 'spnego.service.keytab'
