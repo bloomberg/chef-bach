@@ -30,7 +30,7 @@ link "/etc/init.d/flume-agent-multi" do
   notifies :run, "bash[kill flume-java]", :immediate
 end
 
-configure_kerberob  'flume_spnego' do
+configure_kerberos  'flume_spnego' do
   service_name 'spnego'
 end
 
