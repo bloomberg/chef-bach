@@ -384,4 +384,10 @@
     <value><%="-Xmx#{ (0.8 * 2 * node['bcpc']['hadoop']['yarn']['scheduler']['minimum-allocation-mb']).round}m" %></value>
   </property>
 
+  <property>
+    <name>oozie.service.ActionCheckerService.action.check.delay</name>
+    <value><%= node['bcpc']['hadoop']['oozie']['check_action_delay'] %></value>
+  </property>
+
+
 </configuration>
