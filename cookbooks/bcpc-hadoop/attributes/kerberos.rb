@@ -9,7 +9,7 @@ default['bcpc']['hadoop']['kerberos']['data'] = {
     group: 'hadoop',
     princhost: '_HOST',
     perms: '0440',
-    spnego_keytab: 'hdfs.service.keytab'
+    spnego_keytab: 'spnego.service.keytab'
   },
   datanode: {
     principal: 'hdfs',
@@ -18,7 +18,7 @@ default['bcpc']['hadoop']['kerberos']['data'] = {
     group: 'hadoop',
     princhost: '_HOST',
     perms: '0440',
-    spnego_keytab: 'hdfs.service.keytab'
+    spnego_keytab: 'spnego.service.keytab'
   },
   journalnode: {
     principal: 'hdfs',
@@ -27,7 +27,7 @@ default['bcpc']['hadoop']['kerberos']['data'] = {
     group: 'hadoop',
     princhost: '_HOST',
     perms: '0440',
-    spnego_keytab: 'hdfs.service.keytab'
+    spnego_keytab: 'spnego.service.keytab'
   },
   resourcemanager: {
     principal: 'yarn',
@@ -36,7 +36,7 @@ default['bcpc']['hadoop']['kerberos']['data'] = {
     group: 'hadoop',
     princhost: '_HOST',
     perms: '0440',
-    spnego_keytab: 'yarn.service.keytab'
+    spnego_keytab: 'spnego.service.keytab'
   },
   nodemanager: {
     principal: 'yarn',
@@ -45,7 +45,7 @@ default['bcpc']['hadoop']['kerberos']['data'] = {
     group: 'hadoop',
     princhost: '_HOST',
     perms: '0440',
-    spnego_keytab: 'yarn.service.keytab'
+    spnego_keytab: 'spnego.service.keytab'
   },
   historyserver: {
     principal: 'mapred',
@@ -54,7 +54,7 @@ default['bcpc']['hadoop']['kerberos']['data'] = {
     group: 'hadoop',
     princhost: '_HOST',
     perms: '0440',
-    spnego_keytab: 'mapred.service.keytab'
+    spnego_keytab: 'spnego.service.keytab'
   },
   spnego: {
     principal: 'HTTP',
@@ -72,7 +72,7 @@ default['bcpc']['hadoop']['kerberos']['data'] = {
     group: 'hadoop',
     princhost: '_HOST',
     perms: '0440',
-    spnego_keytab: 'zookeeper.service.keytab'
+    spnego_keytab: 'spnego.service.keytab'
   },
   hbase: {
     principal: 'hbase',
@@ -81,7 +81,7 @@ default['bcpc']['hadoop']['kerberos']['data'] = {
     group: 'hadoop',
     princhost: '_HOST',
     perms: '0440',
-    spnego_keytab: 'hbase.service.keytab'
+    spnego_keytab: 'spnego.service.keytab'
   },
   httpfs: {
     principal: 'httpfs',
@@ -90,7 +90,7 @@ default['bcpc']['hadoop']['kerberos']['data'] = {
     group: 'hadoop',
     princhost: '_HOST',
     perms: '0440',
-    spnego_keytab: 'httpfs.service.keytab'
+    spnego_keytab: 'spnego.service.keytab'
   },
   hive: {
     principal: 'hive',
@@ -99,7 +99,7 @@ default['bcpc']['hadoop']['kerberos']['data'] = {
     group: 'hadoop',
     princhost: '_HOST',
     perms: '0440',
-    spnego_keytab: 'hive.service.keytab'
+    spnego_keytab: 'spnego.service.keytab'
   },
   oozie: {
     principal: 'oozie',
@@ -108,7 +108,7 @@ default['bcpc']['hadoop']['kerberos']['data'] = {
     group: 'hadoop',
     princhost: '_HOST',
     perms: '0440',
-    spnego_keytab: 'oozie.service.keytab'
+    spnego_keytab: 'spnego.service.keytab'
   },
   flume: {
     principal: 'flume',
@@ -117,7 +117,7 @@ default['bcpc']['hadoop']['kerberos']['data'] = {
     group: 'hadoop',
     princhost: '_HOST',
     perms: '0440',
-    spnego_keytab: 'flume.service.keytab'
+    spnego_keytab: 'spnego.service.keytab'
   }
 }
 default[:bcpc][:hadoop][:kerberos][:keytab][:dir] = "/etc/security/keytabs"
