@@ -38,6 +38,11 @@ default["bcpc"]["hadoop"]["datanode"]["xmx"]["max_ratio"] = 0.25
 default["bcpc"]["hadoop"]["datanode"]["max"]["xferthreads"] = 16384
 default["bcpc"]["hadoop"]["datanode"]["jmx"]["port"] = 10112
 
+# Zabbix server
+default[:bcpc][:hadoop][:zabbix][:server][:addr] = node[:bcpc][:management][:vip]
+default[:bcpc][:hadoop][:zabbix][:server][:port] = node[:bcpc][:zabbix][:web_port]
+
+
 common_opts =
   '-XX:+UseParNewGC ' +
   '-XX:+UseConcMarkSweepGC ' +  

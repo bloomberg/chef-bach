@@ -53,7 +53,7 @@ end.run_action(:install)
 gem_package 'zabbixapi' do
   options "--clear-sources -s #{get_binary_server_url}"
   gem_binary gem_path
-  version '>=2.4'
+  version '>=2.4.9'
   action :nothing
 end.run_action(:install)
 
