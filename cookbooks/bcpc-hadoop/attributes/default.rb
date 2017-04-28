@@ -169,7 +169,16 @@ default['bcpc']['hadoop']['copylog']['authlog'] = {
 
 
 # Ensure the following group mappings in the group database
-default[:bcpc][:hadoop][:os][:group][:hadoop][:members]=["hdfs","yarn"]
+default[:bcpc][:hadoop][:os][:group][:hadoop][:members] = [
+ "hdfs",
+ "yarn",
+ "hbase",
+ "oozie",
+ "hive",
+ "zookeeper",
+ "mapred",
+ "httpfs"
+]
 default[:bcpc][:hadoop][:os][:group][:hdfs][:members]=["hdfs"]
 default[:bcpc][:hadoop][:os][:group][:mapred][:members]=["yarn"]
 
