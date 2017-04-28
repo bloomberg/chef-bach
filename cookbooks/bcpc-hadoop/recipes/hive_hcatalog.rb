@@ -27,6 +27,10 @@ user_ulimit "hive" do
   process_limit 65536
 end
 
+configure_kerberos 'hive_spnego' do
+  service_name 'spnego'
+end
+
 configure_kerberos 'hive_kerb' do
   service_name 'hive'
 end

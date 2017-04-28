@@ -132,6 +132,10 @@ link "/etc/init.d/hadoop-hdfs-journalnode" do
   notifies :run, 'bash[kill hdfs-journalnode]', :immediate
 end
 
+configure_kerberos 'journalnode_spnego' do
+  service_name 'spnego'
+end
+
 configure_kerberos 'namenode_kerb' do
   service_name 'namenode'
 end

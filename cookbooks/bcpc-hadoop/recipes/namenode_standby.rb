@@ -95,6 +95,10 @@ ruby_block 'create-namenode-directories' do
   end
 end
 
+configure_kerberos 'namenode_spnego' do
+  service_name 'spnego'
+end
+
 configure_kerberos 'namenode_kerb' do
   service_name 'namenode'
 end

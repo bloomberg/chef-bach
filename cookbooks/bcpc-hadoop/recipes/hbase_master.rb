@@ -31,6 +31,10 @@ phoenix-client
   hdp_select(p, node[:bcpc][:hadoop][:distribution][:active_release])
 end
 
+configure_kerberos 'hbase_spnego' do
+  service_name 'spnego'
+end
+
 configure_kerberos 'hbase_kerb' do
   service_name 'hbase'
 end

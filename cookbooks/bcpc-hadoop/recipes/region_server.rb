@@ -42,6 +42,10 @@ template "/etc/default/hbase" do
   variables(:hbrs_jmx_port => node[:bcpc][:hadoop][:hbase_rs][:jmx][:port])
 end
 
+configure_kerberos 'region_server_spnego' do
+  service_name 'spnego'
+end
+
 configure_kerberos 'hbasers_kerb' do
   service_name 'hbase'
 end
