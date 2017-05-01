@@ -1,19 +1,9 @@
-require 'pathname'
-require 'rubygems'
 require 'shellwords'
 
-gem_path = Pathname.new(Gem.ruby).dirname.join('gem').to_s
-
-gem_package 'rake-compiler' do
-  #
-  # Options MUST be specified as a string, not a hash.
-  # Using gem_binary with hash options results in undefined behavior.
-  #
+chef_gem 'rake-compiler' do
   options "--clear-sources -s #{get_binary_server_url}"
-  gem_binary gem_path
-  version '>=0.0.0'
-  action :nothing
-end.run_action(:install)
+  compile_time true
+end
 
 node['krb5']['devel']['packages'].each do |pkg|
   package pkg do
@@ -21,16 +11,10 @@ node['krb5']['devel']['packages'].each do |pkg|
   end.run_action(:install)
 end
 
-gem_package 'rkerberos' do
-  #
-  # Options MUST be specified as a string, not a hash.
-  # Using gem_binary with hash options results in undefined behavior.
-  #
+chef_gem 'rkerberos' do
   options "--clear-sources -s #{get_binary_server_url}"
-  gem_binary gem_path
-  version '>=0.0.0'
-  action :nothing
-end.run_action(:install)
+  compile_time true
+end
 
 #
 # BACH typically runs chef-client with an abnormal umask, which causes

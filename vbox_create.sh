@@ -39,6 +39,7 @@ export CLUSTER_VM_DRIVE_SIZE=${CLUSTER_VM_DRIVE_SIZE-20480}
 CLUSTER_VM_ROOT_DRIVE_SIZE=$((CLUSTER_VM_DRIVE_SIZE + CLUSTER_VM_MEM - 2048))
 
 VBOX_DIR="`dirname ${BASH_SOURCE[0]}`/vbox"
+[[ -d $VBOX_DIR ]] || mkdir $VBOX_DIR
 P=`python -c "import os.path; print os.path.abspath(\"${VBOX_DIR}/\")"`
 
 if [ "$CLUSTER_TYPE" == "Kafka" ]; then
@@ -324,7 +325,13 @@ ip=${2-10.0.100.3}
     popd
     echo "Bootstrap complete - setting up Chef server"
     echo "N.B. This may take approximately 30-45 minutes to complete."
+    vagrant ssh -c 'sudo rm -f /var/chef/cache/chef-stacktrace.out'
     ./bootstrap_chef.sh --vagrant-remote $ip $environment
+    if vagrant ssh -c 'test -e /var/chef/cache/chef-stacktrace.out' || \
+        ! vagrant ssh -c 'test -d /etc/chef-server'; then
+      echo '========= Failed to Chef!' >&2
+      exit 1
+    fi
     ./enroll_cobbler.sh
   fi
 }

@@ -3,6 +3,7 @@
 # Recipe:: spark
 #
 require 'tmpdir'
+fpm_path = node['bach']['repository']['fpm_bin']
 
 include_recipe 'bach_repository::directory'
 bins_dir = node['bach']['repository']['bins_directory']
@@ -34,11 +35,14 @@ execute 'build_spark_package' do
   cwd "#{spark_extract_dir}/#{spark_extracted_file_name}"
   user 'root'
   group 'root'
-  command 'fpm -s dir -t deb ' \
+  command "#{fpm_path} -s dir -t deb " \
     "--prefix #{spark_install_dir}/#{spark_pkg_version} " \
     "-n #{spark_pkg_prefix}-#{spark_pkg_version} " \
     "-v #{spark_pkg_version} " \
     "--description 'Spark Package with Hadoop 2.7' -p #{bins_dir} *"
+  environment \
+    'PATH' => [::File.dirname(fpm_path), ENV['PATH']].join(':'),
+    'BUNDLE_GEMFILE' => "#{node[:bach][:repository][:repo_directory]}/Gemfile"
   umask 0002
   action :nothing
 end

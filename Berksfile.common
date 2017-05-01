@@ -40,7 +40,7 @@ cookbook 'database'
 cookbook 'bfd',
   git: 'https://github.com/bloomberg/openbfdd-cookbook'
 
-# cobblerd forked, pending destruction of earth by moon.
+# cobblerd upstream, pending submitting update to supermarket
 cookbook 'cobblerd', 
   git: 'https://github.com/bloomberg/cobbler-cookbook'
 
@@ -56,3 +56,7 @@ cookbook 'kafka',
  
 cookbook 'pdns',
   git: 'https://github.com/http-418/pdns'
+
+# locking_resource is not on the supermarket
+cookbook 'locking_resource',
+  git: 'https://github.com/cbaenziger/locking_resource-cookbook'

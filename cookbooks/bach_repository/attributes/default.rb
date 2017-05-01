@@ -6,8 +6,15 @@
 # was made by the old build_bins.sh.  For now, we are just replicating
 # the behavior of the old script.
 #
-default[:bach][:repository][:bins_directory] = '/home/vagrant/chef-bcpc/bins'
-default[:bach][:repository][:src_directory] = '/home/vagrant/chef-bcpc/src'
+default[:bach][:repository][:repo_directory] = '/home/vagrant/chef-bcpc'
+default[:bach][:repository][:bins_directory] = \
+  ::File.join(node[:bach][:repository][:repo_directory], 'bins')
+default[:bach][:repository][:bundle_directory] = \
+  ::File.join(node[:bach][:repository][:repo_directory], 'vendor')
+default[:bach][:repository][:gems_directory] = \
+  ::File.join(node[:bach][:repository][:bundle_directory], 'cache')
+default[:bach][:repository][:src_directory] = \
+  ::File.join(node[:bach][:repository][:repo_directory], 'src')
 
 #
 # This was originally envisioned as a release version for the
@@ -15,6 +22,11 @@ default[:bach][:repository][:src_directory] = '/home/vagrant/chef-bcpc/src'
 # release number.
 #
 default[:bach][:repository][:apt_repo_version] = '0.5.0'
+
+default['bach']['repository']['bundler_bin'] = '/opt/chefdk/embedded/bin/bundle'
+default['bach']['repository']['gem_bin'] = '/opt/chefdk/embedded/bin/gem'
+default['bach']['repository']['fpm_bin'] = \
+  "#{node['bach']['repository']['bundler_bin']} exec fpm"
 
 # Apt signing keys.
 default[:bach][:repository][:private_key_path] = '/home/vagrant/apt_key.sec'

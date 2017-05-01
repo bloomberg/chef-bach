@@ -11,21 +11,18 @@ chef_packages_hash =
   {
    chefdk:
    [
-    'https://opscode-omnibus-packages.s3.amazonaws.com/ubuntu/' \
-      '14.04/x86_64/chefdk_0.12.0-1_amd64.deb',
-    '6fcb4529f99c212241c45a3e1d024cc1519f5b63e53fc1194b5276f1d8695aaa'
+     node['bach']['repository']['chefdk']['url'],
+     node['bach']['repository']['chefdk']['sha256']
    ],
    chef:
    [
-    'https://opscode-omnibus-packages.s3.amazonaws.com/ubuntu/' \
-      '10.04/x86_64/chef_11.18.12-1_amd64.deb',
-    '2a59c3cd6818f28ba1d946b390d97ce8400b46e7f5c6362cd6202b5e961b5987'
+     node['bach']['repository']['chef']['url'],
+     node['bach']['repository']['chef']['sha256']
    ],
    chef_server:
    [
-    'https://opscode-omnibus-packages.s3.amazonaws.com/ubuntu/' \
-      '12.04/x86_64/chef-server_11.1.1-1_amd64.deb',
-    'b6c354178cc83ec94bea40a018cef697704415575c7797c4abdf47ab996eb258'
+     node['bach']['repository']['chef_server']['url'],
+     node['bach']['repository']['chef_server']['sha256']
    ]
   }
 

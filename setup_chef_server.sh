@@ -20,12 +20,6 @@ if [[ -z "$CURL" ]]; then
   exit
 fi
 
-#
-# build_bins.sh will run chef in local mode in order to create the
-# BCPC local repo.
-#
-./build_bins.sh
-
 # Make the bootstrap a client of its own BCPC local repo
 echo "deb [trusted=yes arch=amd64] file://$(pwd)/bins/ 0.5.0 main" > \
      /etc/apt/sources.list.d/bcpc.list
@@ -36,11 +30,12 @@ apt-get -o Dir::Etc::SourceList=/etc/apt/sources.list.d/bcpc.list \
 	-o APT::Get::List-Cleanup="0" \
 	update
 
-apt-get -y install chef=11.18.12-1
+apt-get -y install chef=12.19.36-1
 
 if dpkg -s chef-server 2>/dev/null | grep -q ^Status.*installed && \
-   dpkg -s chef 2>/dev/null | grep -q ^Version.*11; then
-  echo chef-server is installed
+   dpkg -s chef 2>/dev/null | grep -q ^Version.*12; then
+  chef-server-ctl restart
+  echo 'chef-server and client are installed and the server has been restarted'
 else
   apt-get -y install chef-server
   mkdir -p /etc/chef-server

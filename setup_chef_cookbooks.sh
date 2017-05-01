@@ -21,7 +21,7 @@ require 'rubygems'
 require 'ohai'
 
 # Disable the Ohai password module which explodes on a Single-Sign-On-joined system
-Ohai::Config[:disabled_plugins] = [ "passwd" ]
+ohai.disabled_plugins = [ "passwd" ]
 
 o = Ohai::System.new
 o.all_plugins(['hostname','ipaddress'])
@@ -34,9 +34,6 @@ validation_key           '/etc/chef-server/chef-validator.pem'
 chef_server_url          'https://${BOOTSTRAP_IP}'
 syntax_check_cache_path  '$(pwd)/.chef/syntax_check_cache'
 cookbook_path '$(pwd)/vendor/cookbooks'
-
-# Disable the Ohai password module which explodes on a Single-Sign-On-joined system
-Ohai::Config[:disabled_plugins] = [ "passwd" ]
 
 ssl_verify_mode :verify_none
 verify_api_cert false
@@ -64,7 +61,7 @@ https_proxy ENV['https_proxy']
 no_proxy no_proxy_string
 ENV['GIT_SSL_NO_VERIFY'] = 'true'
 EOF
-fi
+fi # end of [[ ! -f .chef/knife.rb ]]
 
 mkdir -p ./vendor
 /opt/chefdk/bin/berks vendor ./vendor/cookbooks

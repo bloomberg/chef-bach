@@ -1,25 +1,46 @@
 # -*- mode: enh-ruby -*-
-source 'https://rubygems.org'
+ruby RUBY_VERSION
+# These versions are pinned to match ChefDK
+if File.exist?('/opt/chefdk/Gemfile')
+  # overload the path so we do not re-cache these gems
+    opscode_gem_data = IO.read("/opt/chefdk/Gemfile")
+    # strip off a Gem from a Git repo as it seems to confuse things
+    opscode_gem_data.gsub!(/^gem.*opscode-pushy-client.*\n/,'')
+    instance_eval(opscode_gem_data, "/opt/chefdk/Gemfile")
+else
+  source 'https://rubygems.org' do
+    gem 'parallel'
+    gem 'chef-vault'
+    gem 'ipaddress'
+    gem 'highline'
+    gem 'mixlib-shellout'
+    gem 'chef-provisioning'
+    gem 'rack'
+    gem 'buff-extensions'
+    gem 'buff-ruby_engine'
+    gem 'chef'
+    gem 'fauxhai'
+    gem 'nio4r'
+    gem 'json'
+  end
+end
 
-gem 'chef-vault', '2.9.0' # same as the cluster uses
-gem 'faker'
-gem 'ipaddress'
-gem 'highline'
-gem 'mixlib-shellout'
-gem 'parallel'
-gem 'pry'
-gem 'rb-readline' # used by irb
-gem 'ruby-progressbar'
+gem 'fpm', :git => 'https://github.com/cbaenziger/fpm' # workaround fpm #1197
 
-# We rely on chef-provisioning to monitor hosts on SSH.
-gem 'chef-provisioning', '1.2.1'
-gem 'chef-provisioning-ssh'
+source 'https://rubygems.org' do
+  gem 'faker'
+  gem 'poise'
 
-# These versions are pinned to match ChefDK 0.12.0
-gem 'rack', '1.6.4'
-gem 'chef', '12.8.1'
-gem 'buff-ruby_engine', '0.1.0'
-gem 'buff-extensions', '1.0.0'
-gem 'fauxhai', '3.1.0'
-gem 'nio4r', '1.2.1'
-gem 'ridley', '4.5.0'
+  # We rely on chef-provisioning to monitor hosts on SSH.
+  gem 'chef-provisioning-ssh'
+  gem 'ridley'
+  gem 'hashie'
+  gem 'pry'
+  gem 'ruby-progressbar'
+end
+
+# Pull in the other Gemfiles from our cookbooks
+Dir.glob(File.join(File.dirname(__FILE__), 'cookbooks',
+    '**', "Gemfile")) do |gemfile|
+  eval(IO.read(gemfile), binding)
+end

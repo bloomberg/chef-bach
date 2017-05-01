@@ -11,13 +11,14 @@
 include_recipe 'bach_repository::directory'
 bins_dir = node['bach']['repository']['bins_directory']
 src_dir = node['bach']['repository']['src_directory']
+fpm_path = node['bach']['repository']['fpm_bin']
 
 #
 # When a shell script built these packages, it assigned an epoch using
 # the UNIX epoch.  Now we're stuck with this convention in order to
 # allow newer versions to overwrite older ones.
 #
-epoch = Time.now.strftime("%s")
+epoch = Time.now.strftime('%s')
 
 [
  {
@@ -28,7 +29,7 @@ epoch = Time.now.strftime("%s")
  },
  {
   name: 'django',
-  version: '1.5.4', 
+  version: '1.5.4',
   url: 'https://pypi.python.org/packages/source/D/Django/Django-1.5.4.tar.gz',
   checksum: '428defe3fd515dfc8613039bb0a80622a13fb4b988c5be48db07ec098ea1704e'
  },
@@ -58,40 +59,42 @@ epoch = Time.now.strftime("%s")
   url: 'https://github.com/graphite-project/graphite-web/archive/' \
     '8b142c8d9130857b6d47981e0e92930984a250e1.zip',
   checksum: 'ed6134ce114f243db47ca3006ac5a2df7fa6d3d231ab072a82d0707220e08af2'
- },
+ }
 ].each do |package|
 
   deb_name = "python-#{package[:name]}_#{package[:version]}_all.deb"
-  deb_path = ::File.join(bins_dir,deb_name)
+  deb_path = ::File.join(bins_dir, deb_name)
 
   log "URL: #{package[:url]}, target deb path: #{deb_path}"
-  
+
   ark "#{package[:name]}-#{package[:version]}" do
     url package[:url]
     path src_dir
     checksum package[:checksum]
     action :put
-    not_if {
-      File.exists?(deb_path)
-    }
+    not_if { File.exist?(deb_path) }
   end
 
-  fpm_command = 
-    if(package[:name] == 'graphite-web')
-      "fpm --python-install-lib /opt/graphite/webapp " +
-        "--epoch #{epoch} " +
-        "-p #{deb_path} " +
+  fpm_command =
+    if (package[:name] == 'graphite-web')
+      "#{fpm_path} --python-install-lib /opt/graphite/webapp " \
+        "--epoch #{epoch} " \
+        "-p #{deb_path} " \
         "-s python -t deb #{package[:name]}-#{package[:version]}/setup.py"
     else
-      "fpm --python-install-bin /opt/graphite/bin " +
-        "--epoch #{epoch} " +
-        "-p #{deb_path} " +
+      "#{fpm_path} --python-install-bin /opt/graphite/bin " \
+        "--epoch #{epoch} " \
+        "-p #{deb_path} " \
         "-s python -t deb #{package[:name]}-#{package[:version]}/setup.py"
     end
 
   execute "fpm-#{package[:name]}" do
     command fpm_command
     cwd src_dir
+    environment \
+      'PATH' => [::File.dirname(fpm_path), ENV['PATH']].join(':'),
+      'BUNDLE_GEMFILE' =>
+        "#{node[:bach][:repository][:repo_directory]}/Gemfile"
     creates deb_path
   end
 end

@@ -1,16 +1,19 @@
-source 'https://rubygems.org'
 ruby RUBY_VERSION
+source 'https://rubygems.org' do
 
-gem 'rack', '1.6.4'
-gem 'chef', '12.2.1'
-gem 'buff-ruby_engine', '0.1.0'
-gem 'buff-extensions', '1.0.0'
-gem 'berkshelf'
-gem 'chefspec'
-gem 'fauxhai', '3.6.0'
-gem 'poise', '2.0.0', :require => true
-gem 'nokogiri', :require => false, :group => :test
-gem 'equivalent-xml', :require => false, :group => :test
-gem 'simplecov', :require => false, :group => :test
-gem 'simplecov-json', :require => false, :group => :test
-gem 'simplecov-rcov', :require => false, :group => :test
+  gem 'rack'
+  gem 'chef'
+  gem 'buff-ruby_engine'
+  gem 'buff-extensions'
+  gem 'berkshelf'
+  gem 'chefspec'
+  gem 'fauxhai'
+  gem 'poise'
+  gem 'nokogiri'
+  gem 'webhdfs'
+  gem 'zookeeper'
+  gem 'equivalent-xml', :require => false, :group => :test
+  gem 'simplecov', :require => false, :group => :test
+  gem 'simplecov-json', :require => false, :group => :test
+  gem 'simplecov-rcov', :require => false, :group => :test
+end

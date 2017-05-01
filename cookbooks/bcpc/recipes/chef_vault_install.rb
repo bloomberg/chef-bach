@@ -17,26 +17,11 @@
 # limitations under the License.
 #
 
-require 'pathname'
-require 'rubygems'
-require 'uri'
-
-gem_path = Pathname.new(Gem.ruby).dirname.join('gem').to_s
-
-chefvault_version = '>=2.8.0'
-
-#
-# Move to installing chef-vault via execute block to work around
-# issue where version string is empty when combining gem_binary,
-# version and options in the gem_package resource
-#
-execute 'gem_install_chef-vault' do
-  command gem_path + ' install chef-vault -q --no-rdoc --no-ri -v "' \
-    + chefvault_version + "\" --clear-sources -s #{get_binary_server_url}"
-  not_if gem_path + ' list chef-vault -i -v "' + chefvault_version + '"'
-  action :nothing
-  environment ({ 'no_proxy' => URI.parse(get_binary_server_url).host })
-end.run_action(:run)
+chef_gem 'chef-vault' do
+  version '>=2.8.0'
+  options "--clear-sources -s #{get_binary_server_url}"
+  compile_time true
+end
 
 #
 # BACH typically runs chef-client with an abnormal umask, which causes

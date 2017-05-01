@@ -16,6 +16,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+::Chef::Resource::Template.send(:include, BCPC::Utils)
 
 include_recipe "bcpc::default"
 
@@ -95,10 +96,6 @@ if node[:bcpc][:networks].length > 1
 else
   service 'bfdd-beacon' do
     action [:stop, :disable]
-    ignore_failure true
-  end
-
-  execute 'killall bfdd-beacon' do
     ignore_failure true
   end
 end

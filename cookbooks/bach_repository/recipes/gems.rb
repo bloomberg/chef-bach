@@ -5,96 +5,80 @@
 include_recipe 'bach_repository::directory'
 include_recipe 'bach_repository::tools'
 bins_dir = node['bach']['repository']['bins_directory']
-gems_dir = "#{bins_dir}/gems"
+gems_dir = node['bach']['repository']['gems_directory']
+gem_binary = node['bach']['repository']['gem_bin']
+bundler_bin = node['bach']['repository']['bundler_bin']
 
+package 'libaugeas-dev'
+package 'libkrb5-dev'
+
+directory "#{node['bach']['repository']['repo_directory']}/vendor" do
+  owner 'vagrant'
+  mode 0755
+  recursive true
+end
+
+directory "#{node['bach']['repository']['repo_directory']}/.bundle" do
+  owner 'vagrant'
+  mode 0755
+end
+
+file "#{node['bach']['repository']['repo_directory']}/.bundle/config" do
+  content <<-EOF
+---
+BUNDLE_PATH: '#{node['bach']['repository']['repo_directory']}/vendor/bundle'
+BUNDLE_DISABLE_SHARED_GEMS: 'true'
+EOF
+  owner 'vagrant'
+  action :create
+end
+
+execute 'bundler install' do
+  cwd node['bach']['repository']['repo_directory']
+  command "#{bundler_bin} install"
+  # restore system PKG_CONFIG_PATH so mkmf::pkg_config()
+  # can find system libraries
+  environment \
+    'PKG_CONFIG_PATH' => %w(/usr/lib/pkgconfig
+                            /usr/lib/x86_64-linux-gnu/pkgconfig
+                            /usr/share/pkgconfig).join(':'),
+    'PATH' => [::File.dirname(bundler_bin), ENV['PATH']].join(':')
+  user 'vagrant'
+end
+
+execute 'bundler package' do
+  cwd node['bach']['repository']['repo_directory']
+  command "#{bundler_bin} package"
+  # restore system PKG_CONFIG_PATH so mkmf::pkg_config()
+  # can find system libraries
+  environment \
+    'PKG_CONFIG_PATH' => %w(/usr/lib/pkgconfig
+                            /usr/lib/x86_64-linux-gnu/pkgconfig
+                            /usr/share/pkgconfig).join(':'),
+    'PATH' => [::File.dirname(bundler_bin), ENV['PATH']].join(':')
+  user 'vagrant'
+end
+
+# if we make the cache directory before running bundle we get an error
+# that we can't open a (non-existant) gem in the directory
 directory gems_dir do
+  owner 'vagrant'
   mode 0555
 end
 
-#
-# This array is deliberately ordered to get the correct install order.
-# TODO: replace with bundler
-#
-bootstrap_gems = [
-                   ['json','1.8.3'],
-                   ['cabin', '0.7.2'],
-                   ['arr-pm', '0.0.9'],
-                   ['backports', '2.6.2'],
-                   ['clamp', '0.6.5'],
-                   ['childprocess', '0.5.9'],
-                   ['ffi', '1.9.14'],
-                   ['fpm', '1.3.3'],
-                   ['builder', '3.2.2']
-                 ]
-
-# This array is just alphabetically sorted.
-worker_gems = [
-                ['chef-rewind', '0.0.9'],
-                ['chef-vault', '2.9.0'],
-                ['mini_portile2', '2.1.0'],
-                ['mysql2', '0.4.4'],
-                ['nokogiri', '1.6.8.1'],
-                ['patron', '0.8.0'],
-                ['rake-compiler', '1.0.1'],
-                ['rkerberos', '0.1.5'],
-                ['ruby-augeas', '0.5.0'],
-                ['sequel', '4.36.0'],
-                ['simple-graphite', '2.1.0'],
-                ['webhdfs', '0.5.5'],
-                ['wmi-lite', '1.0.0'],
-                ['zabbixapi', '2.4.5'],
-                ['zookeeper', '1.4.7'],
-              ]
-
-# Fetch gems for all nodes
-(bootstrap_gems + worker_gems).each do |gem_name, gem_version|
-  execute "gem_fetch[#{gem_name}]" do
-    cwd gems_dir
-    command "/usr/bin/gem fetch #{gem_name} -v #{gem_version}"
-    creates "#{gems_dir}/#{gem_name}-#{gem_version}.gem"
-    notifies :run, 'execute[gem-generate-index]'
-  end
-
-  link "#{gems_dir}/#{gem_name}.gem" do
-    to "#{gems_dir}/#{gem_name}-#{gem_version}.gem"
-    notifies :run, 'execute[gem-generate-index]'
-  end
-end
-
-#
-# Install gems on the bootstrap, in the correct order.
-# TODO: replace with bundler
-#
-bootstrap_gems.each do |package_name, package_version|
-
-  local_gem_path =
-    gems_dir + '/' + package_name + '-' + package_version + '.gem'
-
-  gem_binary = '/usr/bin/gem'
-
-  #
-  # We are using an execute resource because gem_package does not
-  # support --local.  We must use --local because without having
-  # 'builder' already installed, it is not possible to generate the
-  # gem index.
-  #
-  execute "gem-install-#{package_name}" do
-    command "#{gem_binary} install --local #{local_gem_path} --no-ri --no-rdoc"
-    cwd gems_dir
-    not_if "#{gem_binary} list -i #{package_name} -v #{package_version}"
-  end
-
+link "#{bins_dir}/gems" do
+  to "#{gems_dir}"
 end
 
 execute 'gem-generate-index' do
-  command 'gem generate_index --legacy'
+  command "#{gem_binary} generate_index"
   cwd bins_dir
-  only_if {
+  only_if do
     index_path = "#{bins_dir}/specs.4.8.gz"
 
     # If the index is missing, regenerate.
     # If any gems are newer than the index, regenerate.
-    if !File.exists?(index_path)
+    if !File.exist?(index_path)
       true
     else
       gem_mtimes = Dir.glob("#{gems_dir}/*.gem").map do |ff|
@@ -103,5 +87,5 @@ execute 'gem-generate-index' do
 
       gem_mtimes.max > File.mtime(index_path)
     end
-  }
+  end
 end

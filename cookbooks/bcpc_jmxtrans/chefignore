@@ -1,0 +1,6 @@
+.git
+.kitchen
+chef
+cookbooks
+data
+vendor

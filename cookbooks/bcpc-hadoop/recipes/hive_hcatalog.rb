@@ -41,34 +41,25 @@ bash "create-hive-user-home" do
   hdfs dfs -chmod 1777 /user/hive
   hdfs dfs -chown hive:hdfs /user/hive
   EOH
-  user "hdfs"
+  user 'hdfs'
 end
 
-bash "create-hive-warehouse" do
+bash 'create-hive-warehouse' do
   code <<-EOH
-  hdfs dfs -mkdir -p /apps/hive/warehousehadoop
-  hdfs dfs -chmod -R 775 /apps/hive
-  hdfs dfs -chown -R hive:hdfs /apps/hive
+  hdfs dfs -mkdir -p #{node['bcpc']['hadoop']['hive']['warehouse']['dir']}
+  hdfs dfs -chmod -R 775 #{node['bcpc']['hadoop']['hive']['warehouse']['dir']}
+  hdfs dfs -chown -R hive:hdfs #{node['bcpc']['hadoop']['hive']['warehouse']['dir']}
   EOH
-  user "hdfs"
+  user 'hdfs'
 end
 
-bash "create-hive-scratch" do
+bash 'create-hive-scratch' do
   code <<-EOH
-  hdfs dfs -mkdir -p /tmp/scratch
-  hdfs dfs -chmod -R 1777 /tmp/scratch
-  hdfs dfs -chown -R hive:hdfs /tmp/scratch
+  hdfs dfs -mkdir -p #{node['bcpc']['hadoop']['hive']['scratch']['dir']}
+  hdfs dfs -chmod -R 1777 #{node['bcpc']['hadoop']['hive']['scratch']['dir']}
+  hdfs dfs -chown -R hive:hdfs #{node['bcpc']['hadoop']['hive']['scratch']['dir']}
   EOH
-  user "hdfs"
-end
-
-bash "create-beeline-scratchroot" do
-  code <<-EOH
-  hadoop fs -mkdir -p /tmp/hive-hive
-  hadoop fs -chmod 1777 /tmp/hive-hive
-  hadoop fs -chown hive /tmp/hive-hive
-  EOH
-  user "hdfs"
+  user 'hdfs'
 end
 
 ruby_block "hive-metastore-database-creation" do

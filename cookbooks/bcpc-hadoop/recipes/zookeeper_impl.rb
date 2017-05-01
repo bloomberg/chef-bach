@@ -1,5 +1,7 @@
 ::Chef::Recipe.send(:include, Bcpc_Hadoop::Helper)
 ::Chef::Resource::Bash.send(:include, Bcpc_Hadoop::Helper)
+::Chef::Resource::Bash.send(:include, BCPC::Utils)
+::Chef::Resource::File.send(:include, BCPC::Utils)
 
 include_recipe 'bcpc-hadoop::hdp_repo'
 include_recipe 'bach_krb5::keytab_directory'

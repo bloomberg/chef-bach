@@ -41,6 +41,10 @@ sudo -E chef-client \
      -c .chef/knife.rb \
      -o 'recipe[bcpc::chef_vault_install]'
 
+sudo chef-client \
+     -c .chef/knife.rb \
+     -o 'recipe[bcpc::chef_poise_install]'
+
 #
 # With chef-vault installed and the repo configured, it's safe to save
 # and converge the complete runlist.
