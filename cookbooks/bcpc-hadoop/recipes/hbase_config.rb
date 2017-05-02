@@ -72,7 +72,7 @@ generated_values = {
 
 # this configuration parameter only belongs in master
 if node.roles.include? 'BCPC-Hadoop-Head-HBase' then
-  generated_values['hbase.master.wait.on.regionservers.mintostart'] =>
+  generated_values['hbase.master.wait.on.regionservers.mintostart'] =
       "#{node[:bcpc][:hadoop][:rs_hosts].length/2+1}"
 end
 
