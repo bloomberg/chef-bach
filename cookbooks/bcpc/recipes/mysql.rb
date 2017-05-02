@@ -282,7 +282,18 @@ template '/etc/xinetd.d/mysqlchk' do
   group 'root'
   mode 00440
   sensitive true if respond_to?(:sensitive)
-  notifies :restart, 'service[xinetd]', :immediately
+
+  #
+  # xinetd restart is unreliable under upstart and systemd. Instead,
+  # reload the configuration in the running daemon.
+  #
+  signal = if node[:lsb][:release].to_f >= 14.04
+             :reload
+           else
+             :restart
+           end
+
+  notifies signal, 'service[xinetd]', :immediately
 end
 
 #

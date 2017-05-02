@@ -5,20 +5,23 @@
 # This recipe should be the first recipe in the run list for all the
 # nodes to collect chef-client stats and store into Graphite
 #
+simple_graphite_version = '>=2.1'
+
 node.default['chef_client']['handler']['graphite'].tap do |graphite|
   graphite['host'] = node['bcpc']['management']['vip']
   graphite['port'] = node['bcpc']['graphite']['relay_port']
   graphite['prefix'] = "chef.#{node['hostname']}"
 end
 
-#
+node.default['chef_client']['handler']['gem'].tap do |gem|
+  gem['location'] = get_binary_server_url
+  gem['version'] = simple_graphite_version
+end
+
 # Pre-emptively install the correct gem with 'compile_time true'
-# (It was this or chef-rewind.)
-#
-chef_gem 'simple-graphite' do
-  options "--clear-sources --source #{get_binary_server_url}"
-  version '>=2.1'
-  compile_time true if respond_to?(:compile_time)
+bcpc_chef_gem 'simple-graphite' do
+  version simple_graphite_version
+  compile_time true
 end
 
 include_recipe 'graphite_handler::default'

@@ -45,15 +45,15 @@ raise "Did not get a subnet" if not subnet
 if node[:bcpc][:management][:vip] and get_nodes_for("mysql").length() > 0
 
   allnodes = Array.new
-  get_all_nodes.each do |nodeobj| 
-    tempHash = Hash.new 
-    tempHash['hostname'] = nodeobj.hostname 
-    tempHash['management_ip'] = nodeobj.bcpc.management.ip 
+  get_all_nodes.each do |nodeobj|
+    tempHash = Hash.new
+    tempHash['hostname'] = nodeobj.hostname
+    tempHash['management_ip'] = nodeobj.bcpc.management.ip
     tempHash['storage_ip'] = nodeobj.bcpc.storage.ip
     tempHash['floating_ip'] = nodeobj.bcpc.floating.ip
     allnodes.push(tempHash)
   end
-  
+
   if !node[:bcpc][:management][:viphost].nil?
     tempHash = Hash.new
     tempHash['hostname'] = node[:bcpc][:management][:viphost].split('.')[0]
@@ -76,12 +76,7 @@ if node[:bcpc][:management][:vip] and get_nodes_for("mysql").length() > 0
     config['gmysql-dnssec'] = 'no'
   end
 
-  package 'libmysqlclient-dev'
-
-  gem_package 'mysql2' do
-    action :install
-    gem_binary File.join(Gem::bindir,"gem")
-  end
+  include_recipe 'bcpc::mysql_client'
 
   mysql_connection_info = lambda do
     {
@@ -114,6 +109,8 @@ if node[:bcpc][:management][:vip] and get_nodes_for("mysql").length() > 0
   end
 
   include_recipe 'pdns::authoritative_package'
+  delete_resource(:gem_package, 'mysql2')
+  delete_resource(:gem_package, 'sequel')
 
   #
   # This schema file works great when installed via the mysql CLI, but
@@ -126,7 +123,7 @@ if node[:bcpc][:management][:vip] and get_nodes_for("mysql").length() > 0
   schema_path = '/usr/share/dbconfig-common/data/pdns-backend-mysql/install/mysql'
 
   mysql_command_string = lambda do
-    "/usr/bin/mysql -u root " + 
+    "/usr/bin/mysql -u root " +
       "--host=#{node['pdns']['authoritative']['config']['gmysql-host']} " +
       "--password='#{get_config!('password','mysql-root','os')}' pdns"
   end

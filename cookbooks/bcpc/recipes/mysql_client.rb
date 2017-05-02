@@ -31,8 +31,7 @@ package 'libperconaserverclient18-dev' do
 end
 
 %w{mysql2 sequel}.each do |gem_name|
-  chef_gem gem_name.to_s do
-    options "--clear-sources -s #{get_binary_server_url}"
+  bcpc_chef_gem gem_name.to_s do
     compile_time false
   end
 end

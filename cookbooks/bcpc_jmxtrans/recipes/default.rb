@@ -6,18 +6,11 @@
 #
 # All rights reserved
 #
-gem_path = Pathname.new(Gem.ruby).dirname.join('gem').to_s
 
-gem_package 'chef-rewind' do
-  #
-  # Options MUST be specified as a string, not a hash.
-  # Using gem_binary with hash options results in undefined behavior.
-  #
-  options "--clear-sources -s #{get_binary_server_url}"
-  gem_binary gem_path
+bcpc_chef_gem 'chef-rewind' do
   version '>0.0'
-  action :nothing
-end.run_action(:install)
+  compile_time true
+end
 
 require 'chef/rewind'
 
