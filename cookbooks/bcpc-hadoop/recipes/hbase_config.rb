@@ -62,8 +62,6 @@ generated_values = {
   'hbase.master.dns.nameserver' => dns_server,
   'hbase.master.dns.nameserver' => dns_server,
   'hbase.zookeeper.property.clientPort' => "#{node[:bcpc][:hadoop][:zookeeper][:port]}",
-  'hbase.master.wait.on.regionservers.mintostart' =>
-      "#{node[:bcpc][:hadoop][:rs_hosts].length/2+1}",
   'hbase.master.hostname' => float_host(node[:fqdn]),
   'hbase.regionserver.hostname' => float_host(node[:fqdn]),
   'hbase.regionserver.dns.interface' =>
@@ -72,6 +70,12 @@ generated_values = {
       node["bcpc"]["networks"][subnet]["floating"]["interface"],
   'dfs.client.read.shortcircuit' => node["bcpc"]["hadoop"]["hbase"]["shortcircuit"]["read"].to_s
 }
+
+# this configuration parameter only belongs in master
+if node.roles.include? 'BCPC-Hadoop-Head-HBase' then
+  generated_values['hbase.master.wait.on.regionservers.mintostart'] =>
+      "#{node[:bcpc][:hadoop][:rs_hosts].length/2+1}"
+end
 
 #
 # Any hbase-site.xml property related to Kerberos need to go here
