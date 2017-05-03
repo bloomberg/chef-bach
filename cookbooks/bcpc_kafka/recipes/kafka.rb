@@ -71,8 +71,10 @@ end
 include_recipe 'bcpc_kafka::default'
 include_recipe 'kafka::default'
 
+node.force_default[:kafka][:ulimit_file] = 32_768
+
 user_ulimit 'kafka' do
-  filehandle_limit 32_768
+  filehandle_limit node[:kafka][:ulimit_file]
   notifies :restart, 'service[kafka-broker]', :immediately
 end
 
@@ -106,6 +108,3 @@ ruby_block 'kafkaup' do
     end
   end
 end
-
-include_recipe 'bcpc::diamond'
-include_recipe 'bcpc_jmxtrans'
