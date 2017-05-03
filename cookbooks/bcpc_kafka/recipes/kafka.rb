@@ -108,6 +108,3 @@ ruby_block 'kafkaup' do
     end
   end
 end
-
-include_recipe 'bcpc::diamond'
-include_recipe 'bcpc_jmxtrans'
