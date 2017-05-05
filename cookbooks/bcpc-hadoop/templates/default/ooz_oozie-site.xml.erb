@@ -291,7 +291,11 @@
 
   <property>
     <name>oozie.authentication.kerberos.principal</name>
-    <value><%=node[:bcpc][:hadoop][:kerberos][:data][:spnego][:principal]%>/<%=node[:bcpc][:hadoop][:kerberos][:data][:spnego][:princhost]=="_HOST" ? float_host(node[:fqdn]) : node[:bcpc][:hadoop][:kerberos][:data][:spnego][:princhost]%>@<%=node[:bcpc][:hadoop][:kerberos][:realm]%></value>
+    <% if @ooz_hosts.length >= 2 %>
+      <value>*</value>
+    <% else %>
+      <value><%=node[:bcpc][:hadoop][:kerberos][:data][:spnego][:principal]%>/<%=node[:bcpc][:hadoop][:kerberos][:data][:spnego][:princhost]=="_HOST" ? float_host(node[:fqdn]) : node[:bcpc][:hadoop][:kerberos][:data][:spnego][:princhost]%>@<%=node[:bcpc][:hadoop][:kerberos][:realm]%></value>
+    <% end %>
     <description>Indicates the Kerberos principal to be used for HTTP endpoint. The principal MUST start with 'HTTP/' as per Kerberos HTTP SPNEGO specification.</description>
   </property>
 
@@ -388,6 +392,25 @@
     <name>oozie.service.ActionCheckerService.action.check.delay</name>
     <value><%= node['bcpc']['hadoop']['oozie']['check_action_delay'] %></value>
   </property>
+  
+  <property>
+     <name>oozie.services.ext</name>
+     <value><%= node["bcpc"]["hadoop"]["oozie"]["service"]["ext"] %></value>
+  </property>
 
+  <property>
+     <name>oozie.zookeeper.namespace</name>
+     <value><%= node.chef_environment %>/oozie</value>
+  </property>
+
+  <property>
+     <name>oozie.instance.id</name>
+     <value><%= float_host(node['fqdn']) %></value>
+  </property>
+
+  <property>
+    <name>oozie.zookeeper.connection.string</name>
+    <value><%= node[:bcpc][:hadoop][:zookeeper][:servers].map{ |s| float_host(s[:hostname])}.join(",") %></value>
+  </property>
 
 </configuration>
