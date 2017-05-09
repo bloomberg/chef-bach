@@ -1,8 +1,8 @@
 #
-# Cookbook Name:: bcpc
+# Cookbook Name:: bach_repository
 # Recipe:: mysql_connector
 #
-# Copyright (C) 2015 Bloomberg Finance L.P.
+# Copyright (C) 2017 Bloomberg Finance L.P.
 #
 # This recipe creates a very ugly Debian package from the Java MySQL
 # Connector jar using FPM.
