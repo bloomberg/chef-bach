@@ -52,8 +52,8 @@ export HADOOP_SECURE_DN_USER=<%= node["bcpc"]["hadoop"]["hadoop_secure_dn_user"]
    datanode_heap = [node["bcpc"]["hadoop"]["datanode"]["xmx"]["max_size"], (node["memory"]["total"].to_i * node["bcpc"]["hadoop"]["datanode"]["xmx"]["max_ratio"]/1024).floor].min
    datanode_newsize = [(0.125*datanode_heap).ceil, 3072].min
 
-   namenode_heap = [node["bcpc"]["hadoop"]["namenode"]["xmx"]["max_size"], (node["memory"]["total"].to_i * node["bcpc"]["hadoop"]["namenode"]["xmx"]["max_ratio"]/1024).floor].min
-   namenode_newsize = [(0.125*namenode_heap).ceil, 3072].min 
+   namenode_heap = [node["bcpc"]["hadoop"]["namenode"]["xmx"]["max_size"], (node["memory"]["total"].to_i * node["bcpc"]["hadoop"]["namenode"]["xmx"]["max_ratio"]/1024).floor].max
+   namenode_newsize = [node["bcpc"]["hadoop"]["namenode"]["xmn"]["max_size"], (0.125 * namenode_heap).ceil].max 
 
    maxpermsize = [(node["memory"]["total"].to_i * 0.021).floor, 256].min
 -%>
