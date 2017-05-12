@@ -21,14 +21,17 @@
 %w(
   bc
   fio
+  git
   htop
   iotop
+  lzop
+  p7zip-full
   pcp
   powertop
   sysstat
   vim-nox
   xclip
-  git
+  zip
 ).each do |pkg|
   package pkg do
     action :upgrade
