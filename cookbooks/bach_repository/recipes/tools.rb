@@ -38,6 +38,9 @@ include_recipe 'build-essential'
   'ruby',
   'ruby-dev',
   'unzip',
+  'zip',
+  'p7zip-full',
+  'lzop'
 ].each do |pkg|
   package pkg do
     action :install
