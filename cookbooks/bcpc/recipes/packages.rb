@@ -29,6 +29,9 @@
   vim-nox
   xclip
   git
+  zip
+  p7zip-full
+  lzop
 ).each do |pkg|
   package pkg do
     action :upgrade
