@@ -72,7 +72,9 @@ default["bcpc"]["hadoop"]["namenode"]["gc_opts"] =
 
 default["bcpc"]["hadoop"]["mapreduce"]["framework"]["name"] = "yarn"
 default["bcpc"]["hadoop"]["namenode"]["handler"]["count"] = 100
+# set to nil to calculate dynamically based on available memory
 default["bcpc"]["hadoop"]["namenode"]["xmx"]["max_size"] = 1024
+# set to nil to calculate dynamically based on available memory
 default["bcpc"]["hadoop"]["namenode"]["xmn"]["max_size"] = 128
 default["bcpc"]["hadoop"]["namenode"]["xmx"]["max_ratio"] = 0.25
 default["bcpc"]["hadoop"]["namenode"]["jmx"]["port"] = 10111
