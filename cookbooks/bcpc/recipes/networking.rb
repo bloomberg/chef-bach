@@ -44,7 +44,6 @@ package 'vlan'
   iftop
   nmap
   ngrep
-  ntop
 ).each do |p|
   package p do
     action :upgrade
