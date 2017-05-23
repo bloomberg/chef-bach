@@ -23,11 +23,11 @@ remote_file "#{bins_dir}/jce_policy-8.zip" do
   checksum 'f3020a3922efd6626c2fff45695d527f34a8020e938a49292561f18ad1320b59'
 end
 
-remote_file "#{bins_dir}/jdk-8u101-linux-x64.tar.gz" do
-  source 'http://download.oracle.com/otn-pub/java/jdk/8u101-b13/' \
-    'jdk-8u101-linux-x64.tar.gz'
+remote_file "#{bins_dir}/jdk-8u131-linux-x64.tar.gz" do
+  source 'http://download.oracle.com/otn-pub/java/jdk/' \
+    '8u131-b11/d54c1d3a095b4ff2b6607d096fa80163/jdk-8u131-linux-x64.tar.gz'
   user 'root'
   group 'root'
   mode 0444
-  checksum '467f323ba38df2b87311a7818bcbf60fe0feb2139c455dfa0e08ba7ed8581328'
+  checksum '62b215bdfb48bace523723cdbb2157c665e6a25429c73828a32f00e587301236'
 end
