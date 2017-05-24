@@ -24,18 +24,42 @@ directory "#{node['bach']['repository']['repo_directory']}/.bundle" do
 end
 
 file "#{node['bach']['repository']['repo_directory']}/.bundle/config" do
-  content <<-EOF
----
-BUNDLE_PATH: '#{node['bach']['repository']['repo_directory']}/vendor/bundle'
-BUNDLE_DISABLE_SHARED_GEMS: 'true'
-EOF
+  content <<-EOF.gsub(/^\s+/,'')
+    ---
+    BUNDLE_PATH: '#{node['bach']['repository']['repo_directory']}/vendor/bundle'
+    BUNDLE_DISABLE_SHARED_GEMS: 'true'
+  EOF
   owner 'vagrant'
   action :create
 end
 
+#
+# Bundler gets run in two completely different contexts.  The first
+# time, it is run on an internet-connected host to generate a
+# self-contained package of gems and a Gemfile.lock.  The second time
+# it is run on an internet-disconnected host only to verify the
+# extracted package is complete.
+#
+# This ruby_block checks for the presence of a Gemfile.lock in order
+# to determine which scenario applies, then append a --deployment
+# switch in the latter case.
+#
+ruby_block 'determine-bundler-command' do
+  block do
+    if File.exists?(File.join(node['bach']['repository']['repo_directory'],
+                              'Gemfile.lock'))
+      node.run_state[:bcpc_bootstrap_bundler_command] =
+        "#{bundler_bin} install --deployment"
+    else
+      node.run_state[:bcpc_bootstrap_bundler_command] =
+        "#{bundler_bin} install"
+    end
+  end
+end
+
 execute 'bundler install' do
   cwd node['bach']['repository']['repo_directory']
-  command "#{bundler_bin} install"
+  command lazy { node.run_state[:bcpc_bootstrap_bundler_command] }
   # restore system PKG_CONFIG_PATH so mkmf::pkg_config()
   # can find system libraries
   environment \
