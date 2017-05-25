@@ -47,6 +47,7 @@ default["bcpc"]["hadoop"]["hbase_master"]["PretenureSizeThreshold"] = "1m"
 default["bcpc"]["hadoop"]["hbase_master"]["xmn"]["size"] = 256
 default["bcpc"]["hadoop"]["hbase_master"]["xms"]["size"] = 1024
 default["bcpc"]["hadoop"]["hbase_master"]["xmx"]["size"] = 1024
+default["bcpc"]["hadoop"]["hbase_master"]["mx_dir_mem"]["size"] = 256
 default["bcpc"]["hadoop"]["hbase_rs"]["jmx"]["port"] = 10102
 default["bcpc"]["hadoop"]["hbase_rs"]["xmn"]["size"] = 256
 default["bcpc"]["hadoop"]["hbase_rs"]["xms"]["size"] = 1024
