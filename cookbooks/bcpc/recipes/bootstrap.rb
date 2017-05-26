@@ -164,6 +164,12 @@ end
 
 package 'sshpass'
 
-link '/etc/chef/client.d/knife.rb' do
-  to '/home/vagrant/chef-bcpc/.chef/knife.rb'
+# Symlink configuration for chef-client AND for chef-shell
+vagrantchefconf = '/home/vagrant/chef-bcpc/.chef/knife.rb'
+chefconflinks = ['/etc/chef/client.d/knife.rb', '/etc/chef/client.rb']
+
+chefconflinks.each do |chefconflink|
+  link chefconflink do
+    to vagrantchefconf
+  end
 end
