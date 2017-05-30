@@ -20,7 +20,7 @@ default["bcpc"]["hadoop"]["hadoop_mapred_pid_dir"] = "/var/run/hadoop-mapreduce"
 default["bcpc"]["hadoop"]["hadoop_secure_dn_user"] = "hdfs"
 default["bcpc"]["hadoop"]["hadoop"]["bin"]["path"] = "/usr/bin/hadoop"
 default["bcpc"]["hadoop"]["hadoop"]["config"]["dir"] = "/etc/hadoop/conf"
-# Flag to control whether automatic restarts due to config changes need to be skipped 
+# Flag to control whether automatic restarts due to config changes need to be skipped
 # for e.g. if ZK quorum is down or if the recipes need to be run in a non ZK env
 default["bcpc"]["hadoop"]["skip_restart_coordination"] = false
 default["bcpc"]["hadoop"]["hdfs"]["site_xml"]["dfs.datanode.sync.behind.writes"] = true
@@ -40,33 +40,33 @@ default["bcpc"]["hadoop"]["datanode"]["jmx"]["port"] = 10112
 
 common_opts =
   '-XX:+UseParNewGC ' +
-  '-XX:+UseConcMarkSweepGC ' +  
+  '-XX:+UseConcMarkSweepGC ' +
   '-verbose:gc -XX:+PrintHeapAtGC ' +
   '-XX:+PrintGCDetails ' +
-  '-XX:+PrintGCTimeStamps ' + 
-  '-XX:+PrintGCDateStamps ' + 
+  '-XX:+PrintGCTimeStamps ' +
+  '-XX:+PrintGCDateStamps ' +
   '-XX:+UseNUMA ' +
   '-XX:+PrintGCApplicationStoppedTime ' +
   '-XX:+UseCompressedOops ' +
-  '-XX:+PrintClassHistogram ' + 
-  '-XX:+PrintGCApplicationConcurrentTime ' + 
-  '-XX:+UseCMSInitiatingOccupancyOnly ' + 
-  '-XX:CMSInitiatingOccupancyFraction=70 ' + 
-  '-XX:+HeapDumpOnOutOfMemoryError ' + 
+  '-XX:+PrintClassHistogram ' +
+  '-XX:+PrintGCApplicationConcurrentTime ' +
+  '-XX:+UseCMSInitiatingOccupancyOnly ' +
+  '-XX:CMSInitiatingOccupancyFraction=70 ' +
+  '-XX:+HeapDumpOnOutOfMemoryError ' +
   '-XX:+PrintTenuringDistribution ' +
   '-XX:+ExitOnOutOfMemoryError'
 
 # GC Options for DataNode
-default["bcpc"]["hadoop"]["datanode"]["gc_opts"] =  
-  '-server -XX:ParallelGCThreads=4 ' + 
-  '-Xloggc:/var/log/hadoop-hdfs/gc/gc.log-dn-$$-$(hostname)-$(date +\'%Y%m%d%H%M\').log ' + 
+default["bcpc"]["hadoop"]["datanode"]["gc_opts"] =
+  '-server -XX:ParallelGCThreads=4 ' +
+  '-Xloggc:/var/log/hadoop-hdfs/gc/gc.log-dn-$$-$(hostname)-$(date +\'%Y%m%d%H%M\').log ' +
   '-XX:HeapDumpPath=/var/log/hadoop-hdfs/heap-dump-dn-$$-$(hostname)-$(date +\'%Y%m%d%H%M\').hprof ' +
   common_opts
 
 # GC Options for NameNode
-default["bcpc"]["hadoop"]["namenode"]["gc_opts"] = 
-  '-server -XX:ParallelGCThreads=14 ' + 
-  '-Xloggc:/var/log/hadoop-hdfs/gc/gc.log-nn-$$-$(hostname)-$(date +\'%Y%m%d%H%M\').log ' + 
+default["bcpc"]["hadoop"]["namenode"]["gc_opts"] =
+  '-server -XX:ParallelGCThreads=14 ' +
+  '-Xloggc:/var/log/hadoop-hdfs/gc/gc.log-nn-$$-$(hostname)-$(date +\'%Y%m%d%H%M\').log ' +
   '-XX:HeapDumpPath=/var/log/hadoop-hdfs/heap-dump-nn-$$-$(hostname)-$(date +\'%Y%m%d%H%M\').hprof ' +
   common_opts
 
@@ -79,7 +79,7 @@ default["bcpc"]["hadoop"]["namenode"]["xmn"]["max_size"] = 128
 default["bcpc"]["hadoop"]["namenode"]["xmx"]["max_ratio"] = 0.25
 default["bcpc"]["hadoop"]["namenode"]["jmx"]["port"] = 10111
 default["bcpc"]["hadoop"]["namenode"]["rpc"]["port"] = 8020
-default["bcpc"]["hadoop"]["namenode"]["http"]["port"] = 50070 
+default["bcpc"]["hadoop"]["namenode"]["http"]["port"] = 50070
 default["bcpc"]["hadoop"]["namenode"]["https"]["port"] = 50470
 default["bcpc"]["hadoop"]["kafka"]["jmx"]["port"] = 9995
 default["bcpc"]["hadoop"]["topology"]["script"] = "topology"
@@ -160,7 +160,7 @@ default['bcpc']['hadoop']['copylog_rollup_interval'] = 86400
 # Ensure copylogs can read Chef's client.log
 default['chef_client']['log_perm'] = '00644'
 
-default['bcpc']['hadoop']['copylog']['syslog'] = { 
+default['bcpc']['hadoop']['copylog']['syslog'] = {
     'logfile' => '/var/log/syslog',
     'docopy' => true
 }
@@ -191,10 +191,10 @@ default['java']['install_flavor'] = 'oracle'
 default['java']['accept_license_agreement'] = true
 
 default['java']['jdk']['8']['x86_64']['url'] =
-  get_binary_server_url + 'jdk-8u101-linux-x64.tar.gz'
+  get_binary_server_url + 'jdk-8u131-linux-x64.tar.gz'
 
 default['java']['jdk']['8']['x86_64']['checksum'] =
-  '467f323ba38df2b87311a7818bcbf60fe0feb2139c455dfa0e08ba7ed8581328'
+  '62b215bdfb48bace523723cdbb2157c665e6a25429c73828a32f00e587301236'
 
 default['java']['oracle']['jce']['enabled'] = true
 

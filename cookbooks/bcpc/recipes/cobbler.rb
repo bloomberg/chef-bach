@@ -214,6 +214,11 @@ template '/etc/cobbler/dhcp.template' do
   notifies :run, 'bash[cobbler-sync]', :delayed
 end
 
+template '/var/lib/cobbler/scripts/select_bach_root_disk' do
+  source 'cobbler/select_bach_root_disk.erb'
+  mode 0644
+end
+
 cookbook_file '/var/lib/cobbler/loaders/ipxe-x86_64.efi' do
   source 'ipxe-x86_64.efi'
   mode 0644

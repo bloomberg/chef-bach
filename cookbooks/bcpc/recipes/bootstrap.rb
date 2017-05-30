@@ -45,31 +45,11 @@ require 'rubygems'
 gem_path = Pathname.new(Gem.ruby).dirname.join('gem').to_s
 local_gem_source = 'file:' + node[:bach][:repository][:bins_directory]
 
-gem_package 'ruby-augeas' do
-    #
-    # Options MUST be specified as a string, not a hash.
-    # Using gem_binary with hash options results in undefined behavior.
-    #
-    options "--clear-sources -s #{local_gem_source}"
-    gem_binary gem_path
-    version ">=0.0.0"
-    action :nothing
-end.run_action(:install)
-
-#
-# With a restrictive umask chef installs gemspec files with permission 770 on bootstrap node 
-# Need to change it so that all the users can read it without which knife without sudo will fail
-#
-Gem.path.each do |dir|
-  Dir[Pathname.new(dir).join("specifications","ruby-augeas*")].each do |val|
-    file "#{val}" do
-      action :create
-      mode "0644"
-    end
-  end
+bcpc_chef_gem 'ruby-augeas' do
+  version '>= 0.0.0'
+  compile_time true
 end
 
-Gem.clear_paths
 require 'augeas'
 
 include_recipe "bcpc::default"
@@ -108,7 +88,7 @@ if node[:bcpc][:networks].length > 1
   # create a hash of ipaddresses -- skip interfaces without addresses
   ips = ifs.map{ |a| node[:network][:interfaces][a].attribute?(:addresses) and
                      node[:network][:interfaces][a][:addresses] or {}}.reduce({}, :merge)
-  if not ips.keys.include?(node[:bcpc][:bootstrap][:vip]) 
+  if not ips.keys.include?(node[:bcpc][:bootstrap][:vip])
     ifconfig node[:bcpc][:bootstrap][:vip] do
       device "#{node[:bcpc][:bootstrap][:pxe_interface]}:0"
       mask "255.255.255.255"
