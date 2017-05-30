@@ -29,8 +29,24 @@ default['bcpc']['bootstrap']['preseed'].tap do |preseed|
     'touch /target/etc/udev/rules.d/75-persistent-net-generator.rules'
 
   #
+  # This is an ordered array of preferred disk controller kernel
+  # drivers.  The first enumerated disk found from the earliest driver
+  # in the list will be chosen by the preseed for use as a root device.
+  #
+  # If none of the drivers are in use, the first available /dev/sd*
+  # device will be used.
+  #
+  # See select_bach_root_disk.erb for details.
+  #
+  preseed['preferred_disk_drivers'] = ['ahci']
+
+  #
   # All these lines get concatenated, hence the semicolons and
   # backslashes.
+  #
+  # Despite the name "preseed," this is run during the partman stage.
+  # udevadm and friends are already available in the install
+  # environment.
   #
   preseed['early_command'] = <<-EOM.gsub(/^ {4}/, '')
       udevadm trigger; udevadm settle --timeout=30 ; \\
