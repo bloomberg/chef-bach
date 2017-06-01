@@ -57,3 +57,11 @@ default[:bach][:repository][:mysql_connector].tap do |connector|
     '_' +
     node[:bach][:repository][:mysql_connector][:version] + '_all.deb'
 end
+
+# Java attributes
+default['bach']['repository']['java'].tap do |java|
+  java['jce_url'] = node['java']['oracle']['jce']['8']['url']
+  java['jce_checksum'] = node['java']['oracle']['jce']['8']['checksum']
+  java['jdk_url'] = node['java']['jdk']['8']['x86_64']['url']
+  java['jdk_checksum'] = node['java']['jdk']['8']['x86_64']['checksum']
+end

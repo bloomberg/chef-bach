@@ -191,10 +191,10 @@ default['java']['install_flavor'] = 'oracle'
 default['java']['accept_license_agreement'] = true
 
 default['java']['jdk']['8']['x86_64']['url'] =
-  get_binary_server_url + 'jdk-8u101-linux-x64.tar.gz'
+  get_binary_server_url + 'jdk-linux-x64.tar.gz'
 
 default['java']['jdk']['8']['x86_64']['checksum'] =
-  '467f323ba38df2b87311a7818bcbf60fe0feb2139c455dfa0e08ba7ed8581328'
+  node['java']['jdk']['8']['x86_64']['checksum']
 
 default['java']['oracle']['jce']['enabled'] = true
 
