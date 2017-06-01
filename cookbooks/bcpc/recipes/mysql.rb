@@ -120,10 +120,34 @@ end
 # 'service' command.
 #
 service 'mysql' do
-  action [:enable, :start]
+  action :enable
   supports({restart: true,
             reload: true,
             status: true})
+end
+
+execute 'bootstrap MySQL quorum' do
+  command 'service mysql bootstrap-pxc'
+  action :nothing
+end
+
+ruby_block 'decide to bootstrap MySQL quorum' do 
+ block do
+   mysql_servers = get_head_nodes.map{ |srv| srv[:ip_address] }
+   mysql_conn = mysql_servers.map{ |srv| mysql_remote_connection_info(srv) } 
+   status_collection = mysql_conn.map{ |conn| wsrep_ready_value(conn) }
+   if status_collection.include? "ON" then
+     self.notifies :start, 'service[mysql]', :immediate
+   else
+     if node['bcpc']['mysql']['bootstrap_on_error'] == true then
+       self.notifies :run, 'execute[bootstrap MySQL quorum]', :immediate
+     else
+         raise 'All node appear to be inactive but bootstrap on error is disabled, this requires manual intervention'
+     end
+   end
+   self.resolve_notification_references
+ end
+ action :run
 end
 
 [
@@ -192,8 +216,7 @@ mysql_database_user root_user do
   action :grant
 end
 
-mysql_nodes = get_nodes_for('mysql', 'bcpc')
-all_nodes = get_all_nodes
+mysql_nodes = get_head_nodes
 pool_size = node['bcpc']['mysql']['innodb_buffer_pool_size']
 
 template '/etc/mysql/conf.d/wsrep.cnf' do
@@ -204,7 +227,7 @@ template '/etc/mysql/conf.d/wsrep.cnf' do
             servers: mysql_nodes)
   sensitive true if respond_to?(:sensitive)
   notifies :stop, 'service[mysql]', :immediate
-  notifies :start, 'service[mysql]', :immediate
+  notifies :run, 'ruby_block[decide to bootstrap MySQL quorum]', :immediate
 end
 
 # #
@@ -226,21 +249,8 @@ end
 
 ruby_block 'Check MySQL Quorum Status' do
   block do
-    require 'mysql2'
-    require 'timeout'
-
     # Returns 'ON' if wsrep is ready.
     # Returns 'nil' if we time out or get an error.
-    def wsrep_ready_value(client_options)
-      Timeout.timeout(5) do
-        client = Mysql2::Client.new(client_options)
-        result = client.query("SHOW GLOBAL STATUS LIKE 'wsrep_ready'")
-        result.first['Value']
-      end
-    rescue
-      nil
-    end
-
     mysql_status = nil
     poll_attempts = 10
 

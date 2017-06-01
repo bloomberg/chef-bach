@@ -25,6 +25,8 @@ fi
 /opt/chef/embedded/bin/gem sources --remove http://rubygems.org/ || true
 /opt/chef/embedded/bin/gem sources --remove https://rubygems.org/ || true
 /opt/chef/embedded/bin/gem sources | grep -q "^http://<%= node['bcpc']['bootstrap']['server'] %>/$" || (echo "Failed to add bootstrap to gem sources")
+/opt/chef/embedded/bin/gem install faraday || (echo "Failed to install Faraday"; exit 1)
+/opt/chef/embedded/bin/gem install cluster_def || (echo "Failed to install cluster_def"; exit 1)
 
 # Update chef client configuration
 mkdir -p /etc/chef/client.d || (echo "Failed to create /etc/chef/client.d")

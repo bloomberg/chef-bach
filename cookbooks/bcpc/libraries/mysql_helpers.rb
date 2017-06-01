@@ -21,6 +21,8 @@
 # Returns a configuration hash suitable for use with mysql2 or the
 # database cookbook's providers, using a local socket to connect.
 #
+
+
 def mysql_local_connection_info(category='root')
   #
   # The passwords are ALWAYS stored in a data bag. Sometimes the users
@@ -59,4 +61,28 @@ def mysql_global_vip_connection_info(category='root')
                port: 3306
               }
   mysql_local_connection_info.merge(host_info)
+end
+
+# all connection info methods should ideally be factored into one
+# a task for a sifferent day
+# remote is an ip address or a host name
+def mysql_remote_connection_info(category='root', remote)
+  host_info = {
+               host: remote,
+               port: 3306
+              }
+  mysql_local_connection_info.merge(host_info)
+end
+
+def wsrep_ready_value(client_options)
+  require 'mysql2'
+  require 'timeout'
+
+  Timeout.timeout(5) do
+    client = Mysql2::Client.new(client_options)
+    result = client.query("SHOW GLOBAL STATUS LIKE 'wsrep_ready'")
+    result.first['Value']
+  end
+  rescue
+    nil
 end
