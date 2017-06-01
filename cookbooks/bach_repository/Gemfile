@@ -1,4 +1,5 @@
 # -*- mode: enh-ruby -*-
+ruby RUBY_VERSION
 source 'https://rubygems.org' do
 
   gem 'berkshelf'
@@ -7,4 +8,4 @@ source 'https://rubygems.org' do
   gem 'test-kitchen'
   gem 'builder'
 end
-gem 'fpm', :git => 'https://github.com/cbaenziger/fpm' # workaround fpm #1197
+gem 'fpm'

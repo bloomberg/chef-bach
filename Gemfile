@@ -7,6 +7,10 @@ if File.exist?('/opt/chefdk/Gemfile')
     # strip off a Gem from a Git repo as it seems to confuse things
     opscode_gem_data.gsub!(/^gem.*opscode-pushy-client.*\n/,'')
     instance_eval(opscode_gem_data, "/opt/chefdk/Gemfile")
+elsif File.exist?('/opt/chef/Gemfile')
+  # overload the path so we do not re-cache these gems
+    opscode_gem_data = IO.read("/opt/chef/Gemfile")
+    instance_eval(opscode_gem_data, "/opt/chef/Gemfile")
 else
   source 'https://rubygems.org' do
     gem 'parallel'
@@ -25,7 +29,7 @@ else
   end
 end
 
-gem 'fpm', :git => 'https://github.com/cbaenziger/fpm' # workaround fpm #1197
+gem 'fpm'
 
 source 'https://rubygems.org' do
   gem 'faker'
