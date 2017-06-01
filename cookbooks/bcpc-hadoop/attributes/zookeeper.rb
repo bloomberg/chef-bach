@@ -53,3 +53,9 @@ default[:bcpc][:hadoop][:zookeeper][:snap][:retain_count] = 5
 
 # ZooKeeper snapshot purge interval in hours
 default[:bcpc][:hadoop][:zookeeper][:snap][:purge_interval] = 24
+
+# Flag to set whether the ZooKeeper server restart process was successful or not
+default[:bcpc][:hadoop][:zookeeper_server][:restart_failed] = false
+
+# Attribute to save the time when ZooKeeper server restart process failed
+default[:bcpc][:hadoop][:zookeeper_server][:restart_failed_time] = ""

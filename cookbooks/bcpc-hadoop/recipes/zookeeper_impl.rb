@@ -80,15 +80,16 @@ file "#{node[:bcpc][:hadoop][:zookeeper][:data_dir]}/myid" do
   subscribes :create, "bash[init-zookeeper]", :immediate
 end
 
-service "zookeeper-server" do
-  supports :status => true, :restart => true, :reload => false
-  action [:enable, :start]
-  subscribes :restart, "link[/etc/init.d/zookeeper-server]", :immediate
-  subscribes :restart, "template[#{node[:bcpc][:hadoop][:zookeeper][:conf_dir]}/zoo.cfg]", :delayed
-  subscribes :restart, "template[#{node[:bcpc][:hadoop][:zookeeper][:conf_dir]}/zookeeper-env.sh]", :delayed
-  subscribes :restart, "link[/usr/lib/zookeeper/bin/zkServer.sh]", :delayed
-  subscribes :restart, "file[#{node[:bcpc][:hadoop][:zookeeper][:data_dir]}/myid]", :delayed
-  subscribes :restart, "user_ulimit[zookeeper]", :delayed
-  subscribes :restart, "bash[hdp-select zookeeper-server]", :delayed
-  subscribes :restart, "log[jdk-version-changed]", :delayed
+zk_service_dep = ["template[#{node[:bcpc][:hadoop][:zookeeper][:conf_dir]}/zoo.cfg]",
+                  "link[/etc/init.d/zookeeper-server]",
+                  "template[#{node[:bcpc][:hadoop][:zookeeper][:conf_dir]}/zookeeper-env.sh]",
+                  "link[/usr/lib/zookeeper/bin/zkServer.sh]",
+                  "file[#{node[:bcpc][:hadoop][:zookeeper][:data_dir]}/myid]",
+                  "user_ulimit[zookeeper]",
+                  "bash[hdp-select zookeeper-server]",
+                  "log[jdk-version-changed]"]
+
+hadoop_service "zookeeper-server" do
+  dependencies zk_service_dep
+  process_identifier "org.apache.zookeeper.server.quorum.QuorumPeerMain"
 end
