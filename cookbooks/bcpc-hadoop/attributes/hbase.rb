@@ -19,10 +19,10 @@ default["bcpc"]["hadoop"]["hbase"]["dfs"]["client"]["read"]["shortcircuit"]["buf
 default["bcpc"]["hadoop"]["hbase"]["regionserver"]["handler"]["count"] = 128
 # Interval in milli seconds when HBase major compaction need to be run. Disabled by default
 default["bcpc"]["hadoop"]["hbase"]["major_compact"]["time"] = 0
-default["bcpc"]["hadoop"]["hbase"]["bucketcache"]["enabled"] = false
 default["bcpc"]["hadoop"]["hbase_rs"]["coprocessor"]["abortonerror"] = true
 default["bcpc"]["hadoop"]["hbase"]["blockcache"]["size"] = 0.4
-default["bcpc"]["hadoop"]["hbase"]["bucketcache"]["size"] = 1434
+default["bcpc"]["hadoop"]["hbase"]["bucketcache"]["enabled"] = false
+default["bcpc"]["hadoop"]["hbase"]["bucketcache"]["size_by_ratio"] = 0.1 # of the total memory
 default["bcpc"]["hadoop"]["hbase"]["bucketcache"]["ioengine"] = "offheap"
 default["bcpc"]["hadoop"]["hbase"]["bucketcache"]["combinedcache"]["percentage"] = 0.71
 default["bcpc"]["hadoop"]["hbase"]["shortcircuit"]["read"] = false
@@ -52,8 +52,8 @@ default["bcpc"]["hadoop"]["hbase_rs"]["jmx"]["port"] = 10102
 default["bcpc"]["hadoop"]["hbase_rs"]["xmn"]["size"] = 256
 default["bcpc"]["hadoop"]["hbase_rs"]["xms"]["size"] = 1024
 default["bcpc"]["hadoop"]["hbase_rs"]["xmx"]["size"] = 1024
-default["bcpc"]["hadoop"]["hbase_rs"]["mx_dir_mem"]["size"] = 256
-default["bcpc"]["hadoop"]["hbase_rs"]["hdfs_dir_mem"]["size"] = 128
+default["bcpc"]["hadoop"]["hbase_rs"]["mx_dir_mem"]["size_by_ratio"] = 0.2 # of total memory
+default["bcpc"]["hadoop"]["hbase_rs"]["hdfs_dir_mem"]["size_by_ratio"] = 0.1 # of total memory
 default["bcpc"]["hadoop"]["hbase_rs"]["gc_thread"]["cpu_ratio"] = 0.4
 default["bcpc"]["hadoop"]["hbase_rs"]["memstore"]["upperlimit"] = 0.4
 default["bcpc"]["hadoop"]["hbase_rs"]["memstore"]["lowerlimit"] = 0.2
@@ -64,8 +64,6 @@ default["bcpc"]["hadoop"]["hbase_rs"]["PretenureSizeThreshold"] = "1m"
 
 #Apache Phoenix related attributes 
 default["bcpc"]["hadoop"]["phoenix"]["tracing"]["enabled"] = false
-
-bucketcache_size = (node["bcpc"]["hadoop"]["hbase_rs"]["mx_dir_mem"]["size"] -  node["bcpc"]["hadoop"]["hbase_rs"]["hdfs_dir_mem"]["size"]).floor 
 
 # These will become key/value pairs in 'hbase_site.xml'
 default[:bcpc][:hadoop][:hbase][:site_xml].tap do |site_xml|
