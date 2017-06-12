@@ -222,6 +222,9 @@ class ClusterAssignRoles
     target_head_nodes = target_nodes & all_hadoop_head_nodes
     target_worker_nodes = target_nodes - all_hadoop_head_nodes
 
+    # first prepare commonly used services
+    install_bootstrap(all_hadoop_head_nodes)
+
     #
     # Many bcpc recipes expect to be able to search for nodes based on
     # their configured roles.  This means we have to pre-populate the
