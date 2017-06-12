@@ -3,6 +3,7 @@
 #  Hadoop specific configs
 #
 #############################################
+require 'pathname'
 
 default["bcpc"]["hadoop"] = {}
 default["bcpc"]["hadoop"]["distribution"]["release"] = '2.3.6.2-3'
@@ -190,8 +191,11 @@ default['java']['jdk_version'] = 8
 default['java']['install_flavor'] = 'oracle'
 default['java']['accept_license_agreement'] = true
 
+java_url = node['java']['jdk']['8']['x86_64']['url']
+java_tgz_name = Pathname.new(java_url).basename.to_s
+
 default['java']['jdk']['8']['x86_64']['url'] =
-  get_binary_server_url + 'jdk-linux-x64.tar.gz'
+  get_binary_server_url + java_tgz_name
 
 default['java']['jdk']['8']['x86_64']['checksum'] =
   node['java']['jdk']['8']['x86_64']['checksum']

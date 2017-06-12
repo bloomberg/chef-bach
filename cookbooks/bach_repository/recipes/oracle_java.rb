@@ -2,6 +2,7 @@
 # Cookbook Name:: bach_repository
 # Recipe:: oracle_java
 #
+require 'pathname'
 include_recipe 'bach_repository::directory'
 bins_dir = node['bach']['repository']['bins_directory']
 
@@ -29,7 +30,10 @@ remote_file "#{bins_dir}/jce_policy-8.zip" do
   checksum node['bach']['repository']['java']['jce_checksum']
 end
 
-remote_file "#{bins_dir}/jdk-linux-x64.tar.gz" do
+java_tgz_name = Pathname.new(node['bach']['repository']['java']['jdk_url'])\
+                        .basename.to_s
+
+remote_file "#{bins_dir}/#{java_tgz_name}" do
   source node['bach']['repository']['java']['jdk_url']
   user 'root'
   group 'root'
