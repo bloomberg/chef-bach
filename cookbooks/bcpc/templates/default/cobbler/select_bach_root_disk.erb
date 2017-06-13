@@ -1,0 +1,67 @@
+## -*- mode: shell-script -*-
+##
+## This script uses the ordered list of disk drivers from the bcpc
+## cookbook to preferentially select a root disk.  By default, the
+## first disk found attached to earliest disk driver in the list will
+## be used for the root disk.
+##
+## If no disks are attached to preferred disk drivers, all /dev/sd*
+## devices are included at the end of the glob, so we will fall back to
+## whatever is found first.
+##
+## This file starts out as an erb file, which chef renders to a
+## cheetah template.  Cobbler, in turn, renders the cheetah template
+## to a finished script.  The Cheetah format requires the unusual
+## comment and escape syntax.
+##
+mkdir -p /etc/udev/rules.d
+echo '' > /etc/udev/rules.d/99-bach.rules
+
+##
+## These udev rules create symlinks named by disk driver for block
+## devices attached to our preferred drivers.
+##
+<% preferred_drivers =
+    node['bcpc']['bootstrap']['preseed']['preferred_disk_drivers'] %>
+<% preferred_drivers.each do |module_name| %>
+echo 'KERNEL=="sd[a-z]", DRIVERS=="<%= module_name %>",'\
+     'SYMLINK+="<%= module_name %>/%k"' >> \
+     /etc/udev/rules.d/99-bach.rules
+<% end %>
+
+udevadm control --reload
+udevadm trigger
+udevadm settle --timeout=30
+
+<%
+  driver_globs = preferred_drivers.map do |module_name|
+    "/dev/#{module_name}/*"
+  end
+
+  candidate_disks_glob = driver_globs.join(' ') +
+    '/dev/sd[a-z] /dev/sd[a-z][a-z]'
+%>
+##
+## After creating the symlinks with udev, we create a glob that places
+## block devices attached to preferred disk controllers at the
+## beginning of the expanded string.
+##
+## The first item in the space-separated string, whether it is a
+## preferred disk controller device or a fallback, will be our root
+## disk.
+##
+## In bash this would be more easily written with arrays, but the
+## debian-installer environment only has 'ash,' a primitive Almquist
+## shell.  This degenerate example of the 'for' loop will leave the
+## first value in the $candidate_disk variable.
+##
+for candidate_disk in <%= candidate_disks_glob %>
+do break; done
+
+##
+## All candidate disk filenames are the original kernel name (the %k
+## substitution), so we can fulfill the contract with partman-auto by
+## taking the basename and pre-pending "/dev/" to the front.
+##
+devname=/dev/`basename \$candidate_disk`
+debconf-set partman-auto/disk \$devname
