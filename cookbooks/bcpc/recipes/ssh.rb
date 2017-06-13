@@ -24,7 +24,8 @@
 # It has to be done in a data bag because we commonly delete the node
 # and client objects when a host is reinstalled.
 #
-include_recipe 'bcpc::chef_vault_install'
+
+include_recipe 'bcpc::chef_gems'
 
 package 'openssh-client' do
   action :upgrade
