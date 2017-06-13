@@ -33,6 +33,12 @@ EOF
   action :create
 end
 
+# https://github.com/bloomberg/chef-bach/issues/874
+execute 'permissions hack' do
+  cwd '/home/vagrant'
+  command 'chown -R vagrant:vagrant .bundle || /bin/true '
+end
+
 execute 'bundler install' do
   cwd node['bach']['repository']['repo_directory']
   command "#{bundler_bin} install"
