@@ -33,6 +33,12 @@ file "#{node['bach']['repository']['repo_directory']}/.bundle/config" do
   action :create
 end
 
+# https://github.com/bloomberg/chef-bach/issues/874
+execute 'permissions hack' do
+  cwd '/home/vagrant'
+  command 'chown -R vagrant:vagrant .bundle || /bin/true'
+end
+
 #
 # Bundler gets run in two completely different contexts.  The first
 # time, it is run on an internet-connected host to generate a
