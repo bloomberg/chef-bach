@@ -19,3 +19,13 @@ else
     echo 'Checksum did not match for <%= @download_url %>!'
     exit 1
 fi
+
+# Remove rubygems and install only our gemserver
+/opt/chef/embedded/bin/gem sources --add http://<%= node['bcpc']['bootstrap']['server'] %>/ || (echo "Failed to add local Gem repo")
+/opt/chef/embedded/bin/gem sources --remove http://rubygems.org/ || true
+/opt/chef/embedded/bin/gem sources --remove https://rubygems.org/ || true
+/opt/chef/embedded/bin/gem sources | grep -q "^http://<%= node['bcpc']['bootstrap']['server'] %>/$" || (echo "Failed to add bootstrap to gem sources")
+
+# Update chef client configuration
+mkdir -p /etc/chef/client.d || (echo "Failed to create /etc/chef/client.d")
+echo "rubygems_url 'http://<%= node['bcpc']['bootstrap']['server'] %>/'" > /etc/chef/client.d/rubygems_url.rb || (echo "Failed to write rubygems_url file in /etc/chef/client.d")
