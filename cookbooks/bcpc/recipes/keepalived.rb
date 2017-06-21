@@ -30,12 +30,6 @@ end
 keepalived_admins = (get_head_node_names + [get_bootstrap]).join(',')
 
 chef_vault_secret "keepalived" do
-  #
-  # For some reason, we are compelled to specify a provider.
-  # This will probably break if we ever move to chef-vault cookbook 2.x
-  #
-  provider ChefVaultCookbook::Provider::ChefVaultSecret
-
   data_bag 'os'
   raw_data({ 'password' => keepalived_password })
   admins keepalived_admins

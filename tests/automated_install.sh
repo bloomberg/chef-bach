@@ -131,6 +131,12 @@ done
 wait && printf "Done Snapshotting\n"
 
 printf "#### Chef machine bcpc-vms with Bootstrap\n"
+# https://github.com/bloomberg/chef-bach/issues/847
+# We know the first run might fail set +e
+set +e
+vagrant ssh -c "cd chef-bcpc; ./cluster-assign-roles.sh $ENVIRONMENT Bootstrap"
+# if we still fail here we have some other issue
+set -e
 vagrant ssh -c "cd chef-bcpc; ./cluster-assign-roles.sh $ENVIRONMENT Bootstrap"
 printf "Snapshotting Post-Bootstrap\n"
 for i in bootstrap vm1 vm2 vm3; do

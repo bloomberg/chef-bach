@@ -51,12 +51,6 @@ root_password = secure_password if root_password.nil?
 root_password_salted = root_password.crypt('$6$' + rand(36**8).to_s(36))
 
 chef_vault_secret 'cobbler' do
-  #
-  # For some reason, we are compelled to specify a provider.
-  # This will probably break if we ever move to chef-vault cookbook 2.x
-  #
-  provider ChefVaultCookbook::Provider::ChefVaultSecret
-
   data_bag 'os'
   raw_data('web-password' => web_password,
            'root-password' => root_password,

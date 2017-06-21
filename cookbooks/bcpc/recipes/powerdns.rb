@@ -26,12 +26,7 @@ end
 
 pdns_admins = (get_head_node_names + [get_bootstrap]).join(',')
 
-#
-# For some reason, we are compelled to specify a provider.
-# This will probably break if we ever move to chef-vault cookbook 2.x
-#
 chef_vault_secret "mysql-pdns" do
-  provider ChefVaultCookbook::Provider::ChefVaultSecret
   data_bag 'os'
   raw_data({ 'password' => mysql_pdns_password })
   admins pdns_admins
