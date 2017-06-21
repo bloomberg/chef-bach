@@ -27,7 +27,7 @@ def get_name_server
   end.first.chomp.gsub(/^\s*nameserver\s*/,'')
 
   # see if we have a DHCP leases file to parse
-  if !ns || ns.start_with? '127.'
+  if !ns || ns.start_with?('127.')
     # Find the newest DHCP client lease file
     latest_lease = Dir.glob('/var/lib/dhcp/dhclient*.lease*').sort do |a, b|
       File.mtime(a) <=> File.mtime(b)
@@ -46,7 +46,7 @@ def get_name_server
   end
   
   # see if we are a network manager managed machine -- for Ubuntu >= 15
-  if !ns || ns.start_with? '127.'
+  if !ns || ns.start_with?('127.')
     # Produces output like:
     # a6cccd07-b700-4e42-a728-646d775d1fbb:wlp3s0
     # 1b9dd6a0-a124-4f39-abfd-59117e77a060:docker0
@@ -75,7 +75,7 @@ def get_name_server
   end
 
   raise 'No DNS server provided, and none found in local DHCP leases' if \
-    !ns || ns.start_with? '127.'
+    !ns || ns.start_with?('127.')
   ns
 end
 
