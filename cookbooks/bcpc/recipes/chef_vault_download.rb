@@ -24,6 +24,3 @@ log 'vault-download-noop' do
           'local-mode session before the first chef run.'
   level :info
 end
-
-include_recipe 'bach_repository::gems'
-
