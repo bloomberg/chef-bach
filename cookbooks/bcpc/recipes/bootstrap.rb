@@ -58,7 +58,6 @@ bins_dir = '/home/vagrant/chef-bcpc/bins'
 
 include_recipe 'bcpc::chef_vault_download'
 include_recipe 'bcpc::chef_vault_install'
-include_recipe 'bach_repository::default'
 
 execute 'apt-get update' do
   action :run
