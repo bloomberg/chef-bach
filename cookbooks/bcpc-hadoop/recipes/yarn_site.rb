@@ -236,10 +236,10 @@ if node.roles.include?("BCPC-Hadoop-Head-YarnTimeLineServer")
         node[:bcpc][:hadoop][:kerberos][:keytab][:dir] + '/' +
         node[:bcpc][:hadoop][:kerberos][:data][:resourcemanager][:keytab], 
       'yarn.timeline-service.http-authentication.type' => "kerberos",
-      'yarn.timeline-service.http-authentication.kerberos.principal' => "HTTP/#{float_host(node.fqdn)}@#{node["bcpc"]["hadoop"]["kerberos"]["realm"] }",
+      'yarn.timeline-service.http-authentication.kerberos.principal' => "HTTP/#{kerberos_host}@#{node["bcpc"]["hadoop"]["kerberos"]["realm"] }",
       'yarn.timeline-service.http-authentication.kerberos.keytab' => 
         node[:bcpc][:hadoop][:kerberos][:keytab][:dir] + '/' +
-        node[:bcpc][:hadoop][:kerberos][:data][:resourcemanager][:keytab],
+        node[:bcpc][:hadoop][:kerberos][:data][:resourcemanager][:spnego_keytab],
    } 
   node.run_state[:yarn_site_generated_values].merge!(yts_properties)
 end
