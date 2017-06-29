@@ -2,8 +2,28 @@ core_site_values = node[:bcpc][:hadoop][:core][:site_xml]
 node.run_state[:core_site_generated_values] = {}
 
 if node[:bcpc][:hadoop][:kerberos][:enable]
+
+  kerberos_data = node[:bcpc][:hadoop][:kerberos][:data]
+
+  if kerberos_data[:spnego][:princhost] == '_HOST'
+    spnego_host = '_HOST'
+  else
+    spnego_host = kerberos_data[:spnego][:princhost]
+  end
+
+  spnego_principal =
+    kerberos_data[:spnego][:principal] + '/' + spnego_host + '@' +
+    node[:bcpc][:hadoop][:kerberos][:realm]
+
+  spnego_keytab = File.join(node[:bcpc][:hadoop][:kerberos][:keytab][:dir],
+    kerberos_data[:namenode][:spnego_keytab])
+
   kerberos_properties =
     {
+     'hadoop.http.authentication.type' => 'kerberos',
+     'hadoop.http.authentication.simple.anonymous.allowed' => 'false',
+     'hadoop.http.authentication.kerberos.principal' => spnego_principal,
+     'hadoop.http.authentication.kerberos.keytab' => spnego_keytab,
      'hadoop.security.authentication' => 'kerberos',
      'hadoop.security.authorization' => true,
      'hadoop.security.auth_to_local' =>
