@@ -28,13 +28,8 @@ pushd $DIR
 
 KEYFILE=bootstrap_chef.id_rsa
 
-# If we're using EFI VMs, then we must use Ubuntu 14.04 "Trusty"
-if vboxmanage showvminfo bcpc-vm1 --machinereadable | grep -i 'firmware="EFI"'
-then
-    PROFILE="bcpc_host_trusty"
-else
-    PROFILE="bcpc_host_precise"
-fi
+# If we're using EFI VMs, then we must use Ubuntu 14.04 "Trusty" or above.
+PROFILE="bcpc_host_trusty"
 
 if [ "$CLUSTER_TYPE" == "Kafka" ];then
     VM_LIST=(bcpc-vm1 bcpc-vm2 bcpc-vm3 bcpc-vm4 bcpc-vm5 bcpc-vm6)
