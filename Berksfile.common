@@ -27,17 +27,24 @@ cookbook 'ntp'
 cookbook 'pam'
 cookbook 'ubuntu'
 
+# Transitive dependencies that need to be pinned for time travel
+cookbook 'chef_handler', '= 2.1.0'
+cookbook 'openssl', '~> 6.0.0'
+cookbook 'yum', '~> 4.1.0'
+
 #
 # Transitive dependencies that have been forked for one reason or another.
 #
 
 # bfd is not on the supermarket
 cookbook 'bfd',
-  git: 'https://github.com/bloomberg/openbfdd-cookbook'
+  git: 'https://github.com/bloomberg/openbfdd-cookbook',
+  ref: '3ef2fb3f4f1605a2f40705ddf621563ba71453b1'
 
 # cobblerd forked, pending destruction of earth by moon.
 cookbook 'cobblerd', 
-  git: 'https://github.com/bloomberg/cobbler-cookbook'
+  git: 'https://github.com/bloomberg/cobbler-cookbook',
+  ref: '3d8a5a819a938f9863559d67f625ac7f407f3ea3'
 
 # jmxtrans 1.0+ isn't on the supermarket.
 cookbook 'jmxtrans', 
