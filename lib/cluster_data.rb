@@ -1,3 +1,4 @@
+# vim: tabstop=2:shiftwidth=2:softtabstop=2 
 #
 # This module holds utility methods shared between repxe_host.rb and
 # cluster_assign_roles.rb.
@@ -100,8 +101,13 @@ module BACH
       %r{^08:00:27}.match(entry[:mac_address])
     end
 
-    def parse_cluster_txt
+    def fetch_cluster_def(url)
+    end 
+      
+
+    def parse_cluster_def(cluster_def)
       fields = [
+                :node_id
                 :hostname,
                 :mac_address,
                 :ip_address,
@@ -112,10 +118,14 @@ module BACH
                ]
 
       # This is really gross because Ruby 1.9 lacks Array#to_h.
-      File.readlines(File.join(repo_dir, 'cluster.txt')).map do |line|
+      cluster_def.map do |line|
         entry = Hash[*fields.zip(line.split(' ')).flatten(1)]
         entry.merge({fqdn: fqdn(entry)})
       end
+    end
+
+    def parse_cluster_txt
+      parse_cluster_def(File.readlines(File.join(repo_dir, 'cluster.txt')))
     end
 
     def refresh_vault_keys(entry=nil)

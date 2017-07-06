@@ -83,4 +83,13 @@
             allow from all
         </IfModule>
     </Directory>
+
+   Alias "/cluster-def/" "/home/vagrant/cluster/cluster.txt"
+   <Directory "/home/vagrant/cluster">
+       AllowOverride None
+       Require all granted
+       <Files "cluster.txt">
+       </Files>
+   </Directory>
+
 </VirtualHost>
