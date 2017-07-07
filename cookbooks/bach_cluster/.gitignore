@@ -1,0 +1,4 @@
+data/*.crt
+.kitchen.local.yml
+Berksfile.lock
+.kitchen/
