@@ -19,6 +19,7 @@ vagrant ssh -c "tar cvpzf ~/${tarball_name} -C ~/chef-bcpc \
     bins vendor/bundle vendor/cache Gemfile.lock" | log_pretty
 vagrant ssh -c "cp -fv  ~/${tarball_name} \
     /chef-bcpc-host/${tarball_name}" | log_pretty
+mv -v ${tarball_name} ../${tarball_name} | log_pretty
 
 set +x
-printf "Bins tarball in ${tarball_name}\n" | log_pretty
+printf "Bins tarball in ../${tarball_name}\n" | log_pretty
