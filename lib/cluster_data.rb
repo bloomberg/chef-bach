@@ -12,6 +12,7 @@ require 'json'
 require 'ohai'
 require 'pry'
 require 'ridley'
+require_relative '../cookbooks/bach_cluster/files/gem/lib/cluster_data'
 Ridley::Logging.logger.level = Logger.const_get 'ERROR'
 
 module BACH
@@ -82,14 +83,6 @@ module BACH
       end
     end
 
-    def fqdn(entry)
-      if(entry[:dns_domain])
-        entry[:hostname] + '.' + entry[:dns_domain]
-      else
-        entry[:hostname]
-      end
-    end
-
     def get_entry(name)
       parse_cluster_txt.select do |ee|
         ee[:hostname] == name || fqdn(ee) == name
@@ -101,21 +94,8 @@ module BACH
     end
 
     def parse_cluster_txt
-      fields = [
-                :hostname,
-                :mac_address,
-                :ip_address,
-                :ilo_address,
-                :cobbler_profile,
-                :dns_domain,
-                :runlist
-               ]
-
-      # This is really gross because Ruby 1.9 lacks Array#to_h.
-      File.readlines(File.join(repo_dir, 'cluster.txt')).map do |line|
-        entry = Hash[*fields.zip(line.split(' ')).flatten(1)]
-        entry.merge({fqdn: fqdn(entry)})
-      end
+      parser = Text.read(File.join(repo_dir, 'cluster.txt'))
+      parser.list_nodes
     end
 
     def refresh_vault_keys(entry=nil)
