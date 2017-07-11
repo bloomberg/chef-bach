@@ -47,9 +47,9 @@ ruby_block 'enumerate-disks' do
       # What disks will bcpc and bcpc-hadoop feel free to blank?
       # By default, all sd* devices (excluding sda) and all md* devices.
       #
-      # On our EFI-based VM builds, it's very important to the 32 MB
+      # On our EFI-based VM builds, it's very important to omit the 32 MB
       # image containing iPXE.  (It's relatively harmless to overwrite
-      # it, but it will cause graphite to fail when /disk/0 fills up.)
+      # the image, but it will cause graphite to fail when /disk/0 fills up.)
       #
       # We also reject any block device we are unable to open with O_EXCL,
       # because that means it is already in use by the kernel.
