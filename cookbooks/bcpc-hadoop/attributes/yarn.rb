@@ -18,8 +18,16 @@ yarn_log_dir = '/var/log/hadoop-yarn'
 yarn_pid_dir = '/var/run/hadoop-yarn'
 yarn_user = 'yarn'
 yarn_conf_dir = '/etc/hadoop/conf'
-yarn_logfile = 'yarn-$(hostname).log'
 yarn_policyfile = 'hadoop-policy.xml'
+yarn_logfile = 
+  if node.run_list.expand(node.chef_environment)
+         .recipes.include?('bcpc-hadoop::datanode')
+      'yarn-yarn-nodemanager-$(hostname).log'
+  elsif node.run_list.expand(node.chef_environment)
+            .recipes.include?('bcpc-hadoop::resource_manager')
+      'yarn-yarn-resourcemanager-$(hostname).log'
+  end
+
 
 default[:bcpc][:hadoop][:yarn][:env_sh].tap do |env_sh|
   env_sh[:YARN_LOG_DIR] = yarn_log_dir
@@ -38,7 +46,7 @@ default[:bcpc][:hadoop][:yarn][:env_sh].tap do |env_sh|
     ' -Dhadoop.log.dir=' + yarn_log_dir +
     ' -Dyarn.log.dir=' + yarn_log_dir +
     ' -Dhadoop.log.file=' + yarn_logfile  +
-    ' -Dyarn.log.dir=' + yarn_logfile +
+    ' -Dyarn.log.file=' + yarn_logfile +
     ' -Dyarn.id.str=' + yarn_user +
     ' -Dhadoop.root.logger=INFO,CONSOLE ' +
     ' -Dyarn.root.logger=INFO,CONSOLE ' +
