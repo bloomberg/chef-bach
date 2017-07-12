@@ -68,7 +68,8 @@ default[:bcpc][:hadoop][:hive][:env_sh].tap do |env_sh|
     '-XX:HeapDumpPath=/var/log/hive/heap-dump-hive-$$-$(hostname)-$(date +\'%Y%m%d%H%M\').hprof ' +
     '-XX:+CMSClassUnloadingEnabled ' +
     '-XX:+UseParNewGC ' + 
-    '-XX:+ExitOnOutOfMemoryError' 
+    '-XX:+ExitOnOutOfMemoryError ' +
+    "-agentpath:#{node['bcpc-hadoop']['jvmkill']['lib_file']}"
 
   env_sh[:HIVE_LOG_DIR] = "/var/log/hive"
   env_sh[:HIVE_PID_DIR] = "/var/run/hive"

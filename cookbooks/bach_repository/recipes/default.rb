@@ -33,5 +33,8 @@ include_recipe 'bach_repository::apt'
 include_recipe "java::default"
 include_recipe "java::oracle_jce"
 
+# build jvmkill lib
+include_recipe 'bach_repository::jvmkill'
+
 # Run after everything to fix perms.
 include_recipe 'bach_repository::permissions'

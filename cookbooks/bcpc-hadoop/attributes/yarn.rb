@@ -57,7 +57,8 @@ default[:bcpc][:hadoop][:yarn][:env_sh].tap do |env_sh|
    ' -XX:+UseParNewGC' +
    ' -XX:+UseConcMarkSweepGC ' +
    ' -Dcom.sun.management.jmxremote.ssl=false' +
-   ' -Dcom.sun.management.jmxremote.authenticate=false'
+   ' -Dcom.sun.management.jmxremote.authenticate=false' +
+   " -agentpath:#{node['bcpc-hadoop']['jvmkill']['lib_file']}"
 
   env_sh[:YARN_RESOURCEMANAGER_OPTS] =
     ' -Dcom.sun.management.jmxremote.port=' +
@@ -70,7 +71,8 @@ default[:bcpc][:hadoop][:yarn][:env_sh].tap do |env_sh|
     ' -XX:+UseParNewGC' +
     ' -XX:+UseConcMarkSweepGC ' +
     ' -Dcom.sun.management.jmxremote.ssl=false' +
-    ' -Dcom.sun.management.jmxremote.authenticate=false'
+    ' -Dcom.sun.management.jmxremote.authenticate=false' +
+    " -agentpath:#{node['bcpc-hadoop']['jvmkill']['lib_file']}"
 end
 
 default[:bcpc][:hadoop][:yarn][:site_xml].tap do |site_xml|

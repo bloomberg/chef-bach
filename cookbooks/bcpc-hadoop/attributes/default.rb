@@ -39,6 +39,9 @@ default["bcpc"]["hadoop"]["datanode"]["xmx"]["max_ratio"] = 0.25
 default["bcpc"]["hadoop"]["datanode"]["max"]["xferthreads"] = 16384
 default["bcpc"]["hadoop"]["datanode"]["jmx"]["port"] = 10112
 
+# for jvmkill library
+default['bcpc-hadoop']['jvmkill']['lib_file'] = '/var/lib/jvmkill/libjvmkill.so'
+
 common_opts =
   '-XX:+UseParNewGC ' +
   '-XX:+UseConcMarkSweepGC ' +  
@@ -55,7 +58,8 @@ common_opts =
   '-XX:CMSInitiatingOccupancyFraction=70 ' + 
   '-XX:+HeapDumpOnOutOfMemoryError ' + 
   '-XX:+PrintTenuringDistribution ' +
-  '-XX:+ExitOnOutOfMemoryError'
+  '-XX:+ExitOnOutOfMemoryError ' +
+  "-agentpath:#{node['bcpc-hadoop']['jvmkill']['lib_file']}"
 
 # GC Options for DataNode
 default["bcpc"]["hadoop"]["datanode"]["gc_opts"] =  
@@ -194,7 +198,7 @@ default['java']['install_flavor'] = 'oracle'
 default['java']['accept_license_agreement'] = true
 default['java']['oracle']['jce']['enabled'] = true
 
-# redirect the installation urls to the bootstrap node
+# redirect the installation URLs to the bootstrap node
 jdk_url = node['java']['jdk']['8']['x86_64']['url']
 jce_url = node['java']['oracle']['jce']['8']['url']
 
@@ -207,5 +211,4 @@ default['java']['oracle']['jce']['8']['url'] = get_binary_server_url + jce_tgz_n
 # Set the JAVA_HOME for Hadoop components
 default['bcpc']['hadoop']['java'] = "/usr/lib/jvm/java-8-oracle-amd64"
 
-default['bcpc']['cluster']['file_path'] =
-  '/home/vagrant/chef-bcpc/cluster.txt'
+default['bcpc']['cluster']['file_path'] = '/home/vagrant/chef-bcpc/cluster.txt'

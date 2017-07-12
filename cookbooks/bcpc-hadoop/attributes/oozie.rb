@@ -5,7 +5,8 @@ default["bcpc"]["hadoop"]["oozie"]["memory_opts"] =
   " -XX:MaxPermSize=256m" +
   " -XX:+HeapDumpOnOutOfMemoryError " +
   " -XX:HeapDumpPath=/var/log/oozie/heap-dump-oozie-$$-$(hostname)-$(date +\'%Y%m%d%H%M\').hprof" +
-  " -XX:+ExitOnOutOfMemoryError"
+  " -XX:+ExitOnOutOfMemoryError" +
+  " -agentpath:#{node['bcpc-hadoop']['jvmkill']['lib_file']}"
 default["bcpc"]["hadoop"]["oozie"]["sharelib_checksum"] = nil
 default["bcpc"]["hadoop"]["oozie_config"] = "/etc/oozie/conf"
 default["bcpc"]["hadoop"]["oozie_data"] = "/var/lib/oozie"

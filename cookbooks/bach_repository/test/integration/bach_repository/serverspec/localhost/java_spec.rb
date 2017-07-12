@@ -15,13 +15,8 @@ describe file(jce_file) do
   it { should be_file }
 end
 
-describe command("env | grep JAVA_HOME") do
+describe command("/usr/lib/jvm/java-8-oracle-amd64/bin/java -version") do
   its(:exit_status) { should eq 0 }
-  its(:stdout) { should contain('/usr/lib/jvm/java-8-oracle-amd64') }
-u
-end
-
-describe command("java -version") do
-  its(:exit_status) { should eq 0 }
+  its(:stderr) { should match(/java version.*1\.8/) }
 end
 

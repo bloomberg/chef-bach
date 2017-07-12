@@ -26,7 +26,8 @@ common_opts =
   ' -XX:+UseCompressedOops' +
   ' -XX:+PrintClassHistogram' +
   ' -XX:+PrintGCApplicationConcurrentTime' +
-  ' -XX:+ExitOnOutOfMemoryError'
+  ' -XX:+ExitOnOutOfMemoryError' +
+  " -agentpath:#{node['bcpc-hadoop']['jvmkill']['lib_file']}"
 
 node.default['bcpc']['hadoop']['hbase']['env'].tap do |hbase_env|
   hbase_env['JAVA_HOME'] = node[:bcpc][:hadoop][:java]
