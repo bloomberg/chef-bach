@@ -38,6 +38,7 @@ cookbook_path '$(pwd)/vendor/cookbooks'
 ssl_verify_mode :verify_none
 verify_api_cert false
 
+knife[:vault_mode] = 'client'
 File.umask(0007)
 EOF
 
