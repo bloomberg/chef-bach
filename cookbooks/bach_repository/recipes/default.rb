@@ -29,5 +29,9 @@ include_recipe 'bach_repository::python'
 # Builds the apt repository: packages file, signatures, etc.
 include_recipe 'bach_repository::apt'
 
+# Install Java
+include_recipe "java::default"
+include_recipe "java::oracle_jce"
+
 # Run after everything to fix perms.
 include_recipe 'bach_repository::permissions'

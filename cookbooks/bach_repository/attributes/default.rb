@@ -58,10 +58,21 @@ default[:bach][:repository][:mysql_connector].tap do |connector|
     node[:bach][:repository][:mysql_connector][:version] + '_all.deb'
 end
 
-# Java attributes
+# Get the URLs to download Java installation packages
+# use java cookbook (https://github.com/agileorbit-cookbooks/java)
 default['bach']['repository']['java'].tap do |java|
-  java['jce_url'] = node['java']['oracle']['jce']['8']['url']
+  java['jce_url']      = node['java']['oracle']['jce']['8']['url']
   java['jce_checksum'] = node['java']['oracle']['jce']['8']['checksum']
-  java['jdk_url'] = node['java']['jdk']['8']['x86_64']['url']
+  java['jdk_url']      = node['java']['jdk']['8']['x86_64']['url']
   java['jdk_checksum'] = node['java']['jdk']['8']['x86_64']['checksum']
 end
+
+# Install Java on bootstrap node
+default['java']['jdk_version'] = 8
+default['java']['install_flavor'] = 'oracle'
+default['java']['accept_license_agreement'] = true
+default['java']['oracle']['accept_oracle_download_terms'] = true
+default['java']['oracle']['jce']['enabled'] = true
+
+# Set the JAVA_HOME for Hadoop components
+default['bcpc']['hadoop']['java'] = "/usr/lib/jvm/java-8-oracle-amd64"
