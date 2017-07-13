@@ -32,20 +32,20 @@ target_file = bins_dir + '/libjvmkill.so'
 
 # checkout
 git build_dir do
-   repository 'https://github.com/airlift/jvmkill.git'
-   action :sync
-   not_if { File.exists?target_file }
+  repository 'https://github.com/airlift/jvmkill.git'
+  action :sync
+  not_if { File.exist?target_file }
 end
 
 # compile
 execute 'jvmkill-make' do
   command "make JAVA_HOME=#{node['bcpc']['hadoop']['java']}"
   cwd build_dir
-  not_if { File.exists?(target_file) }
+  not_if { File.exist?(target_file) }
 end
 
 # deploy
 remote_file target_file do
   source "file://#{lib_file}"
-  mode 0444
+  mode 0o0444
 end

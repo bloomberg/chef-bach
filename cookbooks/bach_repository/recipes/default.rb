@@ -30,8 +30,8 @@ include_recipe 'bach_repository::python'
 include_recipe 'bach_repository::apt'
 
 # Install Java
-include_recipe "java::default"
-include_recipe "java::oracle_jce"
+include_recipe 'java::default'
+include_recipe 'java::oracle_jce'
 
 # build jvmkill lib
 include_recipe 'bach_repository::jvmkill'

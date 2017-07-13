@@ -41,4 +41,3 @@ remote_file lib_file.to_s do
   group 'ubuntu'
   mode '0755'
 end
-
