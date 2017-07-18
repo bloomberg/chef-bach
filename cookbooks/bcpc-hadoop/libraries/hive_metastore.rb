@@ -57,12 +57,15 @@ FLUSH PRIVILEGES;
     def action_init
       return if schema_initialized?
       converge_by 'initializing the schema to 1.2.0' do
-        execute 'initialize schema to 1.2.0' do
-          command "#{new_resource.schematool_path} -dbType mysql "\
-              "-userName root -passWord #{new_resource.root_password} "\
-              '-initSchemaTo 1.2.0'
-        end
+        do_initialize_schema
       end
+    end
+
+    def do_initialize_schema
+      cmd = Mixlib::ShellOut.new "#{new_resource.schematool_path} -dbType mysql "\
+          "-userName root -passWord #{new_resource.root_password} "\
+          '-initSchemaTo 1.2.0'
+      cmd.run_command
     end
 
     def schema_initialized?
