@@ -15,8 +15,9 @@ module BcpcHadoop::HiveMetastore::Database
 
     attribute :root_password, kind_of: String
     attribute :hive_password, kind_of: String
+    attribute :schematool_path, kind_of: String
 
-    actions :create
+    actions :create, :init
   end
 
   class Provider < Chef::Provider
@@ -49,6 +50,24 @@ FLUSH PRIVILEGES;
           'WHERE SCHEMA_NAME = "metastore"\' | grep -q metastore'
       command.run_command
       command.exitstatus == 0
+    end
+
+    def action_init
+      return if schema_initialized?
+      converge_by 'initializing the schema to 1.2.0' do
+        execute 'initialize schema to 1.2.0' do
+          command "#{new_resource.schematool_path} -dbType mysql "\
+                  "-userName root -passWord #{new_resource.root_password} "\
+                  '-initSchemaTo 1.2.0'
+        end
+      end
+    end
+
+    def schema_initialized?
+      schema_info = Mixlib::ShellOut.new "#{new_resource.schematool_path} -dbType mysql -info"
+      schema_info.run_command
+      !(schema_info.stderr =~ /metastore.VERSION' doesn't exist/) &&
+        (schema_info.stdout =~ /Metastore schema version:\s+\d+\.\d+\.\d+/)
     end
   end
 end
