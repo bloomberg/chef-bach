@@ -95,6 +95,7 @@ FLUSH PRIVILEGES;
 
     it 'marks the resource as updated' do
       allow(provider).to receive(:schema_initialized?).and_return(false)
+      allow(provider).to receive(:do_initialize_schema)
       provider.run_action :init
 
       expect(resource).to be_updated
@@ -102,6 +103,8 @@ FLUSH PRIVILEGES;
 
     describe '#schema_initalized?' do
       it 'shells out to schematool' do
+        allow(provider).to receive(:do_initialize_schema)
+
         expect(Mixlib::ShellOut).to receive(:new).and_return(double.as_null_object)
           .with('/the/path/to/schematool -dbType mysql -info')
 
@@ -137,10 +140,6 @@ Hive distribution version:       1.2.1000
 Metastore schema version:        1.2.0
         eos
         allow(fake_shellout).to receive(:stderr).and_return(<<-eos)
-Java HotSpot(TM) 64-Bit Server VM warning: Cannot open file /var/log/hive/gc/gc.log-9311-bcpc-vm2-201707181116.log due to Permission denied
-
-Java HotSpot(TM) 64-Bit Server VM warning: Cannot open file /var/log/hive/gc/gc.log-9311-bcpc-vm2-201707181116.log due to Permission denied
-
 2017-07-18 11:16:06,856 WARN  [main] conf.HiveConf: HiveConf of name hive.server2.logging.operation.verbose does not exist
 org.apache.hadoop.hive.metastore.HiveMetaException: Metastore schema version is not compatible. Hive Version: 1.2.1000, Database Schema Version: 1.2.0
 Use --verbose for detailed stacktrace.
