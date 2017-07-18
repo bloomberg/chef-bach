@@ -62,16 +62,17 @@ bash 'create-hive-scratch' do
   user 'hdfs'
 end
 
+hive_metastore_database 'hive' do
+  hive_password lazy { get_config 'mysql-hive-password' }
+  root_password lazy { get_config! 'password', 'mysql-root', 'os' }
+  action :create
+end
+
 ruby_block "hive-metastore-database-creation" do
   cmd = "mysql -uroot -p#{get_config!('password','mysql-root','os')} -e"
-  privs = "SELECT,INSERT,UPDATE,DELETE,LOCK TABLES,EXECUTE" # todo node[:bcpc][:hadoop][:hive_db_privs].join(",")
   block do
     if not system " #{cmd} 'SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = \"metastore\"' | grep -q metastore" then
       code = <<-EOF
-        CREATE DATABASE metastore;
-        GRANT #{privs} ON metastore.* TO 'hive'@'%' IDENTIFIED BY '#{get_config('mysql-hive-password')}';
-        GRANT #{privs} ON metastore.* TO 'hive'@'localhost' IDENTIFIED BY '#{get_config('mysql-hive-password')}';
-        FLUSH PRIVILEGES;
         USE metastore;
         SOURCE /usr/hdp/current/hive-metastore/scripts/metastore/upgrade/mysql/hive-schema-0.14.0.mysql.sql;
         EOF
