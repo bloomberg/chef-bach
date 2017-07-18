@@ -154,4 +154,70 @@ Use --verbose for detailed stacktrace.
       end
     end
   end
+
+  describe '#upgrade' do
+    let(:the_action)  { :upgrade }
+
+    it 'marks the resource as updated' do
+      fake_shellout = double 'schematool shellout'
+      allow(fake_shellout).to receive(:stdout).and_return(<<-eos)
+Metastore connection URL:        jdbc:mysql:loadbalance://bcpc-vm1.bcpc.example.com:3306,bcpc-vm2.bcpc.example.com:3306/metastore?loadBalanceBlacklistTimeout=5000
+Metastore Connection Driver :    com.mysql.jdbc.Driver
+Metastore connection User:       root
+Starting upgrade metastore schema from version 1.2.0 to 1.2.1000
+Upgrade script upgrade-1.2.0-to-1.2.1000.mysql.sql
+Completed upgrade-1.2.0-to-1.2.1000.mysql.sql
+schemaTool completed
+      eos
+      allow(fake_shellout).to receive(:stderr)
+      allow(fake_shellout).to receive(:run_command)
+
+      allow(Mixlib::ShellOut).to receive(:new).and_return fake_shellout
+
+      provider.run_action :upgrade
+
+      expect(resource).to be_updated
+    end
+
+    context 'when the schema is at the correct version' do
+      it 'doesn\'t update the resource' do
+        fake_shellout = double 'schematool shellout'
+        allow(fake_shellout).to receive(:stdout).and_return(<<-eos)
+No schema upgrade required from version 1.2.1000
+schemaTool completed
+        eos
+
+        expect(resource).to_not be_updated
+      end
+    end
+
+    context 'when there is no database' do
+      it 'signals an exception ' do
+        fake_shellout = double 'schematool shellout'
+        allow(fake_shellout).to receive(:stderr).and_return(<<-eos)
+2017-07-18 13:46:24,706 WARN  [main] conf.HiveConf: HiveConf of name hive.server2.logging.operation.verbose does not exist
+org.apache.hadoop.hive.metastore.HiveMetaException: Failed to get schema version.
+Underlying cause: com.mysql.jdbc.exceptions.jdbc4.MySQLSyntaxErrorException : Unknown database 'metastore'
+SQL Error code: 1049
+        eos
+        allow(fake_shellout).to receive(:error?).and_return true
+        allow(fake_shellout).to receive(:run_command)
+        allow(fake_shellout).to receive(:stdout)
+        allow(fake_shellout).to receive(:format_for_exception).and_return(<<-eos)
+---- Begin output of /usr/hdp/current/hive-metastore/bin/schematool -dbType mysql  -userName root  -passWord therootpassword -upgradeSchema ----
+STDOUT: unimportant stdout details
+STDERR: unimportant stderr details
+---- End output of /usr/hdp/current/hive-metastore/bin/schematool -dbType mysql  -userName root  -passWord therootpassword -upgradeSchema ----
+Ran /usr/hdp/current/hive-metastore/bin/schematool -dbType mysql  -userName root  -passWord therootpassword -upgradeSchema returned 1
+        eos
+        allow(Mixlib::ShellOut).to receive(:new).and_return fake_shellout
+
+        upgrade_error = BcpcHadoop::HiveMetastore::Database::UpgradeError
+        expect do
+          provider.run_action :upgrade
+        end.to raise_error(upgrade_error)
+          .with_message(/.*passWord <scrubbed>/m)
+      end
+    end
+  end
 end

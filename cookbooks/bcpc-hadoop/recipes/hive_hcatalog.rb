@@ -66,9 +66,8 @@ hive_metastore_database 'hive' do
   hive_password lazy { get_config 'mysql-hive-password' }
   root_password lazy { get_config! 'password', 'mysql-root', 'os' }
   schematool_path '/usr/hdp/current/hive-metastore/bin/schematool'
-  action %w(create init)
+  action %w(create init upgrade)
   notifies :enable, "service[hive-metastore]", :delayed
-  resolve_notification_references
 end
 
 template "/etc/init.d/hive-metastore" do

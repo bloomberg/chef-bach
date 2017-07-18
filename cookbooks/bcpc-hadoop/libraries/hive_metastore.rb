@@ -8,6 +8,8 @@ module BcpcHadoop
 end
 
 module BcpcHadoop::HiveMetastore::Database
+  class UpgradeError < RuntimeError; end
+
   class Resource < Chef::Resource
     include Poise
 
@@ -17,7 +19,7 @@ module BcpcHadoop::HiveMetastore::Database
     attribute :hive_password, kind_of: String
     attribute :schematool_path, kind_of: String
 
-    actions :create, :init
+    actions :create, :init, :upgrade
   end
 
   class Provider < Chef::Provider
@@ -57,8 +59,8 @@ FLUSH PRIVILEGES;
       converge_by 'initializing the schema to 1.2.0' do
         execute 'initialize schema to 1.2.0' do
           command "#{new_resource.schematool_path} -dbType mysql "\
-                  "-userName root -passWord #{new_resource.root_password} "\
-                  '-initSchemaTo 1.2.0'
+              "-userName root -passWord #{new_resource.root_password} "\
+              '-initSchemaTo 1.2.0'
         end
       end
     end
@@ -68,6 +70,24 @@ FLUSH PRIVILEGES;
       schema_info.run_command
       !(schema_info.stderr =~ /metastore.VERSION' doesn't exist/) &&
         (schema_info.stdout =~ /Metastore schema version:\s+\d+\.\d+\.\d+/)
+    end
+
+    # schematool -upgradeSchema is idempotent. So we just inspect the output if
+    # it indeed do a noop.
+    def action_upgrade
+      cmd = Mixlib::ShellOut.new "#{new_resource.schematool_path} -dbType mysql "\
+          "-userName root -passWord #{new_resource.root_password} "\
+          '-upgradeSchema'
+      cmd.run_command
+
+      if cmd.stdout =~ /Starting upgrade metastore schema from version.*\nUpgrade script/
+        new_resource.updated_by_last_action true
+      elsif cmd.stdout =~ /No schema upgrade required from version.*/
+        new_resource.updated_by_last_action false
+      else
+        error_details = cmd.format_for_exception.gsub(/passWord \w+/, 'passWord <scrubbed>')
+        raise UpgradeError, 'Unexpected error when running upgrade' + "\n" + error_details
+      end
     end
   end
 end
