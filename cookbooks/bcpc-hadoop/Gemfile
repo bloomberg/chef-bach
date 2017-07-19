@@ -3,6 +3,7 @@ source 'https://rubygems.org' do
 
   gem 'rack'
   gem 'chef'
+  gem 'cheffish'
   gem 'buff-ruby_engine'
   gem 'buff-extensions'
   gem 'berkshelf'
