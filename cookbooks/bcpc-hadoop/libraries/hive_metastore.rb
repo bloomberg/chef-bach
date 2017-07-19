@@ -37,11 +37,11 @@ module BcpcHadoop::HiveMetastore::Database
     def create_hive_database
       privs = 'SELECT,INSERT,UPDATE,DELETE,LOCK TABLES,EXECUTE'
       command = Mixlib::ShellOut.new "mysql -uroot -p#{new_resource.root_password}",
-        input: <<-eos
-CREATE DATABASE metastore;
-GRANT #{privs} ON metastore.* TO 'hive'@'%' IDENTIFIED BY '#{new_resource.hive_password}';
-GRANT #{privs} ON metastore.* TO 'hive'@'localhost' IDENTIFIED BY '#{new_resource.hive_password}';
-FLUSH PRIVILEGES;
+        input: <<~eos
+          CREATE DATABASE metastore;
+          GRANT #{privs} ON metastore.* TO 'hive'@'%' IDENTIFIED BY '#{new_resource.hive_password}';
+          GRANT #{privs} ON metastore.* TO 'hive'@'localhost' IDENTIFIED BY '#{new_resource.hive_password}';
+          FLUSH PRIVILEGES;
         eos
       command.run_command
     end
