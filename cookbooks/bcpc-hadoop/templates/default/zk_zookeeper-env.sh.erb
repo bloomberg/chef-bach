@@ -18,6 +18,10 @@ CLIENT_JVMFLAGS="$CLIENT_JVMFLAGS -Djute.maxbuffer=<%= node[:bcpc][:hadoop][:jut
 export JMXPORT=<%= @zk_jmx_port %>
 <% end %>
 
+<% if node[:bcpc][:hadoop].attribute?(:jmx_agent_enabled) and node[:bcpc][:hadoop][:jmx_agent_enabled] %>
+export JMXTRANS_AGENT_OPTS=-javaagent:<%= @jmxtrans_agent_lib %>=<%= @jmxtrans_agent_xml %>
+<% end %>
+
 <% if node[:bcpc][:hadoop][:kerberos][:enable] == true %>
 SERVER_JVMFLAGS="$SERVER_JVMFLAGS -Djava.security.auth.login.config=/etc/zookeeper/conf/zookeeper-server.jaas"
 CLIENT_JVMFLAGS="$CLIENT_JVMFLAGS -Djava.security.auth.login.config=/etc/zookeeper/conf/zookeeper-client.jaas"

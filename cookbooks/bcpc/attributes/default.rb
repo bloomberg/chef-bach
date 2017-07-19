@@ -274,3 +274,7 @@ default['bcpc']['chefvault']['checksum'] =
 # bcpc binary server pathnames
 default['bcpc']['bin_dir']['path'] = '/home/vagrant/chef-bcpc/bins/'
 default['bcpc']['bin_dir']['gems'] = "#{node['bcpc']['bin_dir']['path']}/gems"
+
+# jmxtrans-agent deploy location
+default['bcpc']['jmxtrans_agent']['lib_file'] = '/usr/lib/jmxtrans_agent/jmxtrans-agent-1.2.5.jar'
+default['bcpc']['jmxtrans_agent']['lib_file_checksum'] = 'd351ac0b863ffb2742477001296f65cbca6f8e9bb5bec3dc2194c447d838ae17'

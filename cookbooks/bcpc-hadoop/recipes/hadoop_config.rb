@@ -76,4 +76,4 @@ include_recipe 'bcpc-hadoop::core_site'
 include_recipe 'bcpc-hadoop::hdfs_site'
 include_recipe 'bcpc-hadoop::mapred_site'
 include_recipe 'bcpc-hadoop::yarn_config'
-
+include_recipe 'bcpc-hadoop::jmxtrans_agent'

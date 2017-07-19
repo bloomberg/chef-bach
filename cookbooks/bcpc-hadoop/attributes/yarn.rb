@@ -58,6 +58,10 @@ default['bcpc']['hadoop']['yarn']['env_sh'].tap do |env_sh|
     ' -Dcom.sun.management.jmxremote.authenticate=false' \
     " -agentpath:#{node['bcpc-hadoop']['jvmkill']['lib_file']}"
 
+  if node['bcpc']['hadoop']['jmx_agent_enabled']
+    env_sh['YARN_NODEMANAGER_OPTS'].concat(" -javaagent:#{node['bcpc']['jmxtrans_agent']['lib_file']}=#{node['bcpc']['hadoop']['jmxtrans_agent']['nodemanager']['xml']}")
+  end
+
   env_sh['YARN_RESOURCEMANAGER_OPTS'] =
     ' -Dcom.sun.management.jmxremote.port=' +
     node['bcpc']['hadoop']['yarn']['resourcemanager']['jmx']['port'].to_s +
@@ -71,6 +75,10 @@ default['bcpc']['hadoop']['yarn']['env_sh'].tap do |env_sh|
     ' -Dcom.sun.management.jmxremote.ssl=false' \
     ' -Dcom.sun.management.jmxremote.authenticate=false' \
     " -agentpath:#{node['bcpc-hadoop']['jvmkill']['lib_file']}"
+
+  if node['bcpc']['hadoop']['jmx_agent_enabled']
+    env_sh['YARN_RESOURCEMANAGER_OPTS'].concat(" -javaagent:#{node['bcpc']['jmxtrans_agent']['lib_file']}=#{node['bcpc']['hadoop']['jmxtrans_agent']['resourcemanager']['xml']}")
+  end
 end
 
 default['bcpc']['hadoop']['yarn']['site_xml'].tap do |site_xml|
