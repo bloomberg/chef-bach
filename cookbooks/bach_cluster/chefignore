@@ -1,0 +1,8 @@
+.git
+*.swp
+.kitchen
+.kitchen.local.yml
+chef
+cookbooks
+data
+vendor

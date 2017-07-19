@@ -1,0 +1,3 @@
+-I./files/gem/lib
+--color
+--format documentation

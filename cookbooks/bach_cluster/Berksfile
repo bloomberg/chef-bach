@@ -1,0 +1,6 @@
+# -*- mode: enh-ruby -*-
+source "https://supermarket.chef.io"
+
+metadata
+
+cookbook 'bach_cluster_test', path: 'test/cookbooks/bach_cluster_test'
