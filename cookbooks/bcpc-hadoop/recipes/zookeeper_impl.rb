@@ -31,7 +31,11 @@ include_recipe 'bcpc-hadoop::jolokia'
 template "#{node[:bcpc][:hadoop][:zookeeper][:conf_dir]}/zookeeper-env.sh" do
   source "zk_zookeeper-env.sh.erb"
   mode 0644
-  variables(:zk_jmx_port => node[:bcpc][:hadoop][:zookeeper][:jmx][:port])
+  variables(
+    zk_jmx_port: node[:bcpc][:hadoop][:zookeeper][:jmx][:port],
+    jmxtrans_agent_lib: node['bcpc']['jmxtrans_agent']['lib_file'],
+    jmxtrans_agent_xml: node['bcpc']['hadoop']['jmxtrans_agent']['zookeeper']['xml']
+  )
 end
 
 directory node[:bcpc][:hadoop][:zookeeper][:data_dir] do

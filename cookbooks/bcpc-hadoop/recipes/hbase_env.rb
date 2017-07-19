@@ -90,6 +90,18 @@ if node[:bcpc][:hadoop].attribute?(:jmx_enabled) && node[:bcpc][:hadoop][:jmx_en
     ' -Dcom.sun.management.jmxremote.port=' + node[:bcpc][:hadoop][:hbase_rs][:jmx][:port].to_s
 end
 
+if node[:bcpc][:hadoop][:jmx_agent_enabled]
+  node.default['bcpc']['hadoop']['hbase']['env']['HBASE_MASTER_OPTS'].concat(
+    " -javaagent:#{node['bcpc']['jmxtrans_agent']['lib_file']}=" \
+    "#{node['bcpc']['hadoop']['jmxtrans_agent']['hbase_master']['xml']}"
+  )
+
+  node.default['bcpc']['hadoop']['hbase']['env']['HBASE_REGIONSERVER_OPTS'].concat(
+    " -javaagent:#{node['bcpc']['jmxtrans_agent']['lib_file']}" \
+    "=#{node['bcpc']['hadoop']['jmxtrans_agent']['hbase_rs']['xml']}"
+  )
+end
+
 template '/etc/hbase/conf/hbase-env.sh' do
   source 'generic_env.sh.erb'
   mode 0o0644
