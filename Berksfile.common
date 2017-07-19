@@ -59,4 +59,4 @@ cookbook 'pdns',
 
 # locking_resource is not on the supermarket
 cookbook 'locking_resource',
-  git: 'https://github.com/cbaenziger/locking_resource-cookbook'
+  git: 'https://github.com/bloomberg/locking_resource-cookbook'
