@@ -87,14 +87,9 @@ bcpc_repo 'cobbler26'
   end
 end
 
-service 'xinetd' do
-  action [:enable, :start]
-
-  if node[:lsb][:release] == 'trusty'
-    ignore_failure true
-  end
-
-  subscribes :restart, 'bash[cobbler-sync]', :immediately
+apt_package 'cobbler' do
+  action :install
+  version '2.6.11-1'
 end
 
 #
@@ -105,14 +100,13 @@ service 'tftpd-hpa' do
   action [:stop, :disable]
 end
 
-apt_package 'cobbler' do
-  action :install
-  version '2.6.11-1'
-  notifies :restart, 'service[xinetd]', :immediately
-end
-
 link '/tftpboot' do
   to '/var/lib/tftpboot'
+end
+
+service 'xinetd' do
+  action :enable
+  subscribes :restart, 'bash[cobbler-sync]'
 end
 
 [
@@ -350,14 +344,4 @@ service 'isc-dhcp-server' do
   supports :status => true, :restart => true
   action [:enable,:start]
   notifies :run, 'bash[cobbler-sync]', :delayed
-end
-
-#
-# After recurring problems with reloading the xinetd
-# configuration, we resort to a forced restart on every chef run.
-#
-ruby_block 'xinetd-restart' do
-  block do
-    resources('service[xinetd]').run_action(:restart)
-  end
 end
