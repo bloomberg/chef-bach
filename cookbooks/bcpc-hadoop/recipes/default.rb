@@ -31,6 +31,15 @@ require 'rubygems'
   end.run_action(:install)
 end
 
+# build requirement for augeas
+package 'libaugeas-dev' do
+  action :upgrade
+end
+
+bcpc_chef_gem 'augeas' do
+  compile_time false
+end
+
 bcpc_chef_gem 'poise' do
   version '~>2.0'
   compile_time true

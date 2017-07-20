@@ -1,0 +1,28 @@
+<%=
+
+#
+# First, render the original client.rb template from the chef-client
+# cookbook.
+#
+# This code could definitely break on Chef 14+, since it assumes
+# that the current template is already a Chef::Mixin::TemplateContext
+#
+template_path =
+  Chef::Provider::TemplateFinder.new(node.run_context,
+                                     'chef-client',
+                                     node).find('client.rb.erb')
+require 'erubis'
+Erubis::Eruby.new(File.read(template_path)).evaluate(self)
+
+%>
+
+<% # Second, append our proxy variables. %>
+<% %w(http_proxy https_proxy no_proxy).each do |variable_name| %>
+<%   if node['chef_client']['config'][variable_name] %>
+ENV[<%= "'#{variable_name}'" %>] =
+  '<%= node['chef_client']['config'][variable_name] %>'
+<%   end %>
+<% end %>
+
+
+

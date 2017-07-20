@@ -18,7 +18,7 @@
 # limitations under the License.
 #
 
-['xfsprogs', 'parted'].each do |package_name|
+['xfsprogs', 'parted', 'util-linux'].each do |package_name|
   package package_name do
     action :upgrade
   end
@@ -42,45 +42,6 @@ ruby_block 'enumerate-disks' do
     # know in advance.  These are easily overridden in an environment.
     #
     node.run_state[:bcpc_hadoop_disks] = {}
-    node.run_state[:bcpc_hadoop_disks].tap do |disks|
-      #
-      # What disks will bcpc and bcpc-hadoop feel free to blank?
-      # By default, all sd* devices (excluding sda) and all md* devices.
-      #
-      # On our EFI-based VM builds, it's very important to omit the 32 MB
-      # image containing iPXE.  (It's relatively harmless to overwrite
-      # the image, but it will cause graphite to fail when /disk/0 fills up.)
-      #
-      # We also reject any block device we are unable to open with O_EXCL,
-      # because that means it is already in use by the kernel.
-      #
-      all_drives = node[:block_device].keys.select do |dd|
-        dd =~ /sd[a-i]?[a-z]/ || dd =~ /md\d+/
-      end.select do |dd|
-        begin
-          require 'fcntl'
-          fd = IO::sysopen("/dev/#{dd}", Fcntl::O_RDONLY | Fcntl::O_EXCL)
-          fd.close
-          true
-        rescue Exception => ee
-          Chef::Log.debug("Unable to open #{dd} with O_EXCL: #{ee}")
-          nil
-        end
-      end
-
-      disks[:unformatted_disks] =
-        if node[:dmi][:system][:product_name] == 'VirtualBox'
-
-          # Reject all disks with fewer than a million blocks, so that we
-          # do not attempt to use the iPXE image as a data disk.
-          all_drives.reject do |dd|
-            node[:block_device][dd].nil? ||
-              node[:block_device][dd][:size].to_i < 10**6
-          end
-        else
-          all_drives
-        end
-    end
   end
 end
 
@@ -89,6 +50,39 @@ directory '/disk' do
   group 'root'
   mode 00755
   action :create
+end
+
+#
+# 0. call mount -a
+#
+# 1. identify unused disks
+#
+# 2. delete any fstab entries that match un-mounted targets
+#
+# 3. generate a list of (device, target) tuples to be provided to the
+#    otherwise-idempotent formatting + mounting process
+#
+# 4. use mounts data to replace any fstab lines using raw device names
+#    with uuids
+#
+
+execute 'bcpc-hadoop-mount-all' do
+  command '/bin/mount -a'
+end
+
+ruby_block 'purge-stale-fstab-entries' do
+  block do
+    require 'augeas'
+
+    bcpc_unused_targets.each do |mount_target|
+      Augeas::open do |aug|
+        aug.rm("/files/etc/fstab/*[file='#{mount_target}']")
+
+        aug.save or
+          raise "Failed to remove stale #{mount_target} from /etc/fstab"
+      end
+    end
+  end
 end
 
 ruby_block 'format-disks' do
@@ -101,13 +95,16 @@ ruby_block 'format-disks' do
       node[:bcpc][:hadoop][:disks][:reservation_requests]
 
     #
-    # The available disks list is generated dynamically, at converge time.
+    # This is a list of tuples of unused disk names and available
+    # targets to mount them at.
     #
-    unformatted_disks =
-      node.run_state[:bcpc_hadoop_disks][:unformatted_disks]
+    # The relevant helpers are defined in
+    # cookbooks/bcpc/libraries/disk_helpers.rb
+    #
+    mounts_to_create = bcpc_unused_disks.zip(bcpc_unused_targets)
 
-    unformatted_disks.each_index do |i|
-      Chef::Resource::Directory.new("/disk/#{i}",
+    mounts_to_create.each do |base_name, mount_target|
+      Chef::Resource::Directory.new(mount_target,
                                     node.run_context).tap do |dd|
         dd.owner 'root'
         dd.group 'root'
@@ -115,8 +112,6 @@ ruby_block 'format-disks' do
         dd.recursive true
         dd.run_action(:create)
       end
-
-      base_name = available_disks[i]
 
       #
       # If the raw disk has already been formatted with an FS, no
@@ -167,13 +162,53 @@ ruby_block 'format-disks' do
         end
       end
 
-      Chef::Resource::Mount.new("/disk/#{i}",
+      mount_device = bcpc_uuid_for_device(dev_name) || dev_name
+
+      Chef::Resource::Mount.new(mount_target,
                                 node.run_context).tap do |mm|
-        mm.device dev_name
+        mm.device mount_device
         mm.fstype 'xfs'
         mm.options 'noatime,nodiratime,inode64'
         mm.run_action(:enable)
         mm.run_action(:mount)
+      end
+    end
+  end
+end
+
+#
+# This block uses augeas to update the fstab entries for any
+# mounted filesystems matching the bcpc pattern (/disk/NN).
+#
+# The new entries, when possible, use a UUID instead of a device name.
+#
+ruby_block 'use-uuids-in-fstab' do
+  block do
+    require 'augeas'
+
+    bcpc_mounted_filesystems.each do |dev_name, fs|
+      uuid = bcpc_uuid_for_device(dev_name)
+
+      unless uuid
+        Chef::Log.warn("Cannot derive UUID for mounted fs at #{dev_name}!")
+        next
+      end
+
+      uuid_device = "UUID=#{uuid}"
+
+      Augeas::open do |aug|
+        fstab_device =
+          aug.get("/files/etc/fstab/*[file='#{fs[:mount]}']/spec")
+
+        unless fstab_device.include?('UUID')
+          Chef::Log.debug("Not updating fstab for #{dev_name}")
+          next
+        end
+
+        aug.set("/files/etc/fstab/*[file='#{fs[:mount]}']/spec", uuid)
+
+        aug.save or
+          raise "Failed to update fstab with UUID for #{dev_name}"
       end
     end
   end
@@ -190,12 +225,10 @@ ruby_block 'hadoop-disk-reservations' do
     node.automatic_attrs.merge! ohai.data
     Chef::Log.info('ohai[filesystem] reloaded')
 
-    available_disks = node[:filesystem].select do |device, mount_point|
-      # All disks formatted by this recipe were mounted at /disk/NN.
-      mount_point =~ /\/disk\/\d+/
-    end.keys
+    # This helper is defined in cookbooks/bcpc/libraries/disk_helpers.rb
+    available_disks = bcpc_mounted_filesystems.keys
 
-    # is our role included in the list
+    # Is this node's current role in the list?
     if (node[:bcpc][:hadoop][:disks][:disk_reserve_roles] &
         node.roles).any?
       #

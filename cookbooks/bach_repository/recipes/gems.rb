@@ -34,9 +34,14 @@ file "#{node['bach']['repository']['repo_directory']}/.bundle/config" do
 end
 
 # https://github.com/bloomberg/chef-bach/issues/874
-execute 'permissions hack' do
+paths = %w(.bundle chef-bcpc/vendor/bundle chef-bcpc/vendor/cache)
+
+execute 'Coerce Gem bundle permissions' do
   cwd '/home/vagrant'
-  command 'chown -R vagrant:vagrant .bundle || /bin/true'
+  command "chown -Rf vagrant:vagrant #{paths.join(' ')}; " \
+    "chmod -Rf u+rw #{paths.join(' ')}"
+  # Some paths may not exist yet, and that's ok.
+  ignore_failure true
 end
 
 #
@@ -60,6 +65,12 @@ ruby_block 'determine-bundler-command' do
       node.run_state[:bcpc_bootstrap_bundler_command] =
         "#{bundler_bin} install"
     end
+
+    Chef::Resource::Log.new('bundler_command', run_context).tap do |ll|
+      ll.level :info
+      ll.message("Computed bundler command: " +
+                 node.run_state[:bcpc_bootstrap_bundler_command])
+    end.run_action(:write)
   end
 end
 
