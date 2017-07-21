@@ -159,7 +159,7 @@ ruby_block 'format-disks' do
 
       Chef::Resource::Mount.new(mount_target,
                                 node.run_context).tap do |mm|
-        mm.device mount_device
+        mm.device "UUID=#{mount_device}"
         mm.fstype 'xfs'
         mm.options 'noatime,nodiratime,inode64'
         mm.run_action(:enable)
