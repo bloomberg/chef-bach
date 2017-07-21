@@ -36,7 +36,7 @@ package 'libaugeas-dev' do
   action :upgrade
 end
 
-bcpc_chef_gem 'augeas' do
+bcpc_chef_gem 'ruby-augeas' do
   compile_time false
 end
 
