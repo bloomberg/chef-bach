@@ -205,7 +205,7 @@ ruby_block 'use-uuids-in-fstab' do
           next
         end
 
-        aug.set("/files/etc/fstab/*[file='#{fs[:mount]}']/spec", uuid)
+        aug.set("/files/etc/fstab/*[file='#{fs[:mount]}']/spec", uuid_device)
 
         aug.save or
           raise "Failed to update fstab with UUID for #{dev_name}"
