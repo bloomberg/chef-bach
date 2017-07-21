@@ -88,13 +88,6 @@ end
 ruby_block 'format-disks' do
   block do
     #
-    # Reservation requests and role_min_disks are set statically, in
-    # Chef's "compile" pass.
-    #
-    reservation_requests =
-      node[:bcpc][:hadoop][:disks][:reservation_requests]
-
-    #
     # This is a list of tuples of unused disk names and available
     # targets to mount them at.
     #
@@ -216,6 +209,13 @@ end
 
 ruby_block 'hadoop-disk-reservations' do
   block do
+    #
+    # Reservation requests and role_min_disks are set statically, in
+    # Chef's "compile" pass.
+    #
+    reservation_requests =
+      node[:bcpc][:hadoop][:disks][:reservation_requests]
+
     #
     # Reload Ohai filesystem plugin, in order to pick up any newly
     # formatted filesystems.
