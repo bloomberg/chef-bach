@@ -155,7 +155,13 @@ ruby_block 'format-disks' do
         end
       end
 
-      mount_device = bcpc_uuid_for_device(dev_name) || dev_name
+      uuid_candidate = bcpc_uuid_for_device(dev_name)
+
+      mount_device = if uuid_candidate
+                       "UUID=#{uuid_candidate}"
+                     else
+                       dev_name
+                     end
 
       Chef::Resource::Mount.new(mount_target,
                                 node.run_context).tap do |mm|
