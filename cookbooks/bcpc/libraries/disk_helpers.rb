@@ -81,9 +81,9 @@ def bcpc_unused_disks
     begin
       require 'fcntl'
       fd = IO::sysopen("/dev/#{dd}", Fcntl::O_RDONLY | Fcntl::O_EXCL)
-      fd.close
+      IO.new(fd).close
       true
-    rescue Exception => ee
+    rescue Errno::EBUSY => ee
       Chef::Log.debug("Unable to open #{dd} with O_EXCL: #{ee}")
       nil
     end
