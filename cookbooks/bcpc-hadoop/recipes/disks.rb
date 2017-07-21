@@ -157,15 +157,16 @@ ruby_block 'format-disks' do
 
       uuid_candidate = bcpc_uuid_for_device(dev_name)
 
-      mount_device = if uuid_candidate
-                       "UUID=#{uuid_candidate}"
-                     else
-                       dev_name
-                     end
-
       Chef::Resource::Mount.new(mount_target,
                                 node.run_context).tap do |mm|
-        mm.device mount_device
+        if uuid_candidate
+          mm.device uuid_candidate
+          mm.device_type :uuid
+        else
+          mm.device dev_name
+          mm.device_type :device
+        end
+
         mm.fstype 'xfs'
         mm.options 'noatime,nodiratime,inode64'
         mm.run_action(:enable)
