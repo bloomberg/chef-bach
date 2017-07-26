@@ -263,7 +263,7 @@ def find_chef_env
     Mixlib::ShellOut.new('sudo', 'knife',
                          'node', 'show',
                          o[:fqdn] || o[:hostname], '-E',
-                         '-f', 'json')
+                         '-F', 'json')
 
   env_command.run_command
 
