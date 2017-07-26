@@ -29,8 +29,24 @@ default['bcpc']['bootstrap']['preseed'].tap do |preseed|
     'touch /target/etc/udev/rules.d/75-persistent-net-generator.rules'
 
   #
+  # This is an ordered array of preferred disk controller kernel
+  # drivers.  The first enumerated disk found from the earliest driver
+  # in the list will be chosen by the preseed for use as a root device.
+  #
+  # If none of the drivers are in use, the first available /dev/sd*
+  # device will be used.
+  #
+  # See select_bach_root_disk.erb for details.
+  #
+  preseed['preferred_disk_drivers'] = ['ahci']
+
+  #
   # All these lines get concatenated, hence the semicolons and
   # backslashes.
+  #
+  # Despite the name "preseed," this is run during the partman stage.
+  # udevadm and friends are already available in the install
+  # environment.
   #
   preseed['early_command'] = <<-EOM.gsub(/^ {4}/, '')
       udevadm trigger; udevadm settle --timeout=30 ; \\
@@ -138,8 +154,7 @@ default['bcpc']['repos_for']['precise'].tap do |precise_repos|
     repo[:distribution] = 'HDP'
     repo[:key] = 'hortonworks.key'
     repo[:uri] =
-      'http://s3.amazonaws.com/dev.hortonworks.com/HDP/ubuntu12/2.x/BUILDS/' \
-      '2.3.6.2-3'
+      'http://public-repo-1.hortonworks.com/HDP/ubuntu12/2.x/updates/2.6.1.0'
   end
 
   precise_repos['hdp-utils'].tap do |repo|
@@ -147,7 +162,7 @@ default['bcpc']['repos_for']['precise'].tap do |precise_repos|
     repo[:distribution] = 'HDP-UTILS'
     repo[:key] = 'hortonworks.key'
     repo[:uri] =
-      'http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.20/repos/ubuntu12'
+      'http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.21/repos/ubuntu12'
   end
 
   precise_repos['cobbler26'].tap do |repo|
@@ -192,8 +207,7 @@ default['bcpc']['repos_for']['trusty'].tap do |trusty_repos|
     repo[:distribution] = 'HDP'
     repo[:key] = 'hortonworks.key'
     repo[:uri] =
-      'http://s3.amazonaws.com/dev.hortonworks.com/HDP/ubuntu14/2.x/BUILDS/' \
-      '2.3.6.2-3'
+      'http://public-repo-1.hortonworks.com/HDP/ubuntu14/2.x/updates/2.6.1.0'
   end
 
   trusty_repos['hdp-utils'].tap do |repo|
@@ -201,7 +215,7 @@ default['bcpc']['repos_for']['trusty'].tap do |trusty_repos|
     repo[:distribution] = 'HDP-UTILS'
     repo[:key] = 'hortonworks.key'
     repo[:uri] =
-      'http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.20/repos/ubuntu14'
+      'http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.21/repos/ubuntu14'
   end
 
   trusty_repos['cobbler26'].tap do |repo|

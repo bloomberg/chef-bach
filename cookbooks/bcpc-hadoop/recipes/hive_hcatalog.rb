@@ -62,33 +62,13 @@ bash 'create-hive-scratch' do
   user 'hdfs'
 end
 
-ruby_block "hive-metastore-database-creation" do
-  cmd = "mysql -uroot -p#{get_config!('password','mysql-root','os')} -e"
-  privs = "SELECT,INSERT,UPDATE,DELETE,LOCK TABLES,EXECUTE" # todo node[:bcpc][:hadoop][:hive_db_privs].join(",")
-  block do
-    if not system " #{cmd} 'SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = \"metastore\"' | grep -q metastore" then
-      code = <<-EOF
-        CREATE DATABASE metastore;
-        GRANT #{privs} ON metastore.* TO 'hive'@'%' IDENTIFIED BY '#{get_config('mysql-hive-password')}';
-        GRANT #{privs} ON metastore.* TO 'hive'@'localhost' IDENTIFIED BY '#{get_config('mysql-hive-password')}';
-        FLUSH PRIVILEGES;
-        USE metastore;
-        SOURCE /usr/hdp/current/hive-metastore/scripts/metastore/upgrade/mysql/hive-schema-0.14.0.mysql.sql;
-        EOF
-      IO.popen("mysql -uroot -p#{get_config!('password','mysql-root','os')}", "r+") do |db|
-        db.write code
-      end
-      self.notifies :enable, "service[hive-metastore]", :delayed
-      self.resolve_notification_references
-    end
-  end
+hive_metastore_database 'hive' do
+  hive_password lazy { get_config 'mysql-hive-password' }
+  root_password lazy { get_config! 'password', 'mysql-root', 'os' }
+  schematool_path '/usr/hdp/current/hive-metastore/bin/schematool'
+  action %w(create init upgrade)
+  notifies :enable, "service[hive-metastore]", :delayed
 end
-
-#bash "create-hive-metastore-db" do
-#  code <<-EOH
-#  /usr/hdp/#{node[:bcpc][:hadoop][:distribution][:active_release]}/hive/bin/schematool -initSchema -dbType mysql -verbose
-#  EOH
-#end
 
 template "/etc/init.d/hive-metastore" do
   source "hdp_hive-metastore-initd.erb"

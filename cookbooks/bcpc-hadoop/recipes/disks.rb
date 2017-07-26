@@ -18,7 +18,7 @@
 # limitations under the License.
 #
 
-['xfsprogs', 'parted'].each do |package_name|
+['xfsprogs', 'parted', 'util-linux'].each do |package_name|
   package package_name do
     action :upgrade
   end
@@ -42,34 +42,6 @@ ruby_block 'enumerate-disks' do
     # know in advance.  These are easily overridden in an environment.
     #
     node.run_state[:bcpc_hadoop_disks] = {}
-    node.run_state[:bcpc_hadoop_disks].tap do |disks|
-      #
-      # What disks will bcpc and bcpc-hadoop feel free to blank?
-      # By default, all sd* devices (excluding sda) and all md* devices.
-      #
-      # On our EFI-based VM builds, it's very important to omit sdb, as
-      # that is the 32 MB image containing iPXE.  (It's relatively
-      # harmless to overwrite it, but it will cause graphite to fail when
-      # /disk/0 fills up.)
-      #
-      all_drives = node[:block_device].keys.select do |dd|
-        dd =~ /sd[a-i]?[b-z]/ ||
-        dd =~ /md\d+/
-      end
-
-      disks[:available_disks] =
-        if node[:dmi][:system][:product_name] == 'VirtualBox'
-
-          # Reject all disks with fewer than a million blocks, so that we
-          # do not attempt to use the iPXE image as a data disk.
-          all_drives.reject do |dd|
-            node[:block_device][dd].nil? ||
-              node[:block_device][dd][:size].to_i < 10**6
-          end
-        else
-          all_drives
-        end
-    end
   end
 end
 
@@ -80,7 +52,169 @@ directory '/disk' do
   action :create
 end
 
+#
+# 0. call mount -a
+#
+# 1. identify unused disks
+#
+# 2. delete any fstab entries that match un-mounted targets
+#
+# 3. generate a list of (device, target) tuples to be provided to the
+#    otherwise-idempotent formatting + mounting process
+#
+# 4. use mounts data to replace any fstab lines using raw device names
+#    with uuids
+#
+
+execute 'bcpc-hadoop-mount-all' do
+  command '/bin/mount -a'
+end
+
+ruby_block 'purge-stale-fstab-entries' do
+  block do
+    require 'augeas'
+
+    bcpc_unused_targets.each do |mount_target|
+      Augeas::open do |aug|
+        aug.rm("/files/etc/fstab/*[file='#{mount_target}']")
+
+        aug.save or
+          raise "Failed to remove stale #{mount_target} from /etc/fstab"
+      end
+    end
+  end
+end
+
 ruby_block 'format-disks' do
+  block do
+    #
+    # This is a list of tuples of unused disk names and available
+    # targets to mount them at.
+    #
+    # The relevant helpers are defined in
+    # cookbooks/bcpc/libraries/disk_helpers.rb
+    #
+    mounts_to_create = bcpc_unused_disks.zip(bcpc_unused_targets)
+
+    mounts_to_create.each do |base_name, mount_target|
+      Chef::Resource::Directory.new(mount_target,
+                                    node.run_context).tap do |dd|
+        dd.owner 'root'
+        dd.group 'root'
+        dd.mode 00755
+        dd.recursive true
+        dd.run_action(:create)
+      end
+
+      #
+      # If the raw disk has already been formatted with an FS, no
+      # partition table is necessary.
+      #
+      # Otherwise, create a partition and format that.
+      #
+      require 'mixlib/shellout'
+
+      fs_check =
+        Mixlib::ShellOut.new('file', '-s', "/dev/#{base_name}")
+      fs_check.run_command
+
+      dev_name = if fs_check.status.success? &&
+                     fs_check.stdout.include?('SGI XFS filesystem')
+                   "/dev/#{base_name}"
+                 else
+                   "/dev/#{base_name}1"
+                 end
+
+      if dev_name.end_with?('1')
+        unless ::File.exist?(dev_name)
+          Chef::Resource::Execute.new("mklabel-#{base_name}",
+                                      node.run_context).tap do |ee|
+            ee.command "parted -s /dev/#{base_name} mklabel gpt"
+            ee.run_action(:run)
+          end
+
+          Chef::Resource::Execute.new("mkpart-#{base_name}",
+                                      node.run_context).tap do |ee|
+            ee.command "parted -s /dev/#{base_name} " \
+              'mkpart bach_data ext4 0% 100%'
+            ee.run_action(:run)
+          end
+        end
+      end
+
+      check_command =
+        Mixlib::ShellOut.new("file -s #{dev_name} | " \
+                             "grep -q 'SGI XFS filesystem'")
+      check_command.run_command
+
+      unless check_command.status.success?
+        Chef::Resource::Execute.new("mkfs-#{dev_name}",
+                                    node.run_context).tap do |ee|
+          ee.command "mkfs -t xfs -f #{dev_name}"
+          ee.run_action(:run)
+        end
+      end
+
+      uuid_candidate = bcpc_uuid_for_device(dev_name)
+
+      Chef::Resource::Mount.new(mount_target,
+                                node.run_context).tap do |mm|
+        if uuid_candidate
+          mm.device uuid_candidate
+          mm.device_type :uuid
+        else
+          mm.device dev_name
+          mm.device_type :device
+        end
+
+        mm.fstype 'xfs'
+        mm.options 'noatime,nodiratime,inode64'
+        mm.run_action(:enable)
+        mm.run_action(:mount)
+      end
+    end
+  end
+end
+
+#
+# This block uses augeas to update the fstab entries for any
+# mounted filesystems matching the bcpc pattern (/disk/NN).
+#
+# The new entries, when possible, use a UUID instead of a device name.
+#
+ruby_block 'use-uuids-in-fstab' do
+  block do
+    require 'augeas'
+
+    bcpc_mounted_filesystems.each do |dev_name, fs|
+      uuid = bcpc_uuid_for_device(dev_name)
+
+      unless uuid
+        Chef::Log.warn("Cannot derive UUID for mounted fs at #{dev_name}!")
+        next
+      end
+
+      uuid_device = "UUID=#{uuid}"
+
+      Augeas::open do |aug|
+        fstab_device =
+          aug.get("/files/etc/fstab/*[file='#{fs[:mount]}']/spec")
+
+        unless fstab_device.include?('UUID')
+          Chef::Log.debug("Not updating fstab for #{dev_name}")
+          next
+        end
+
+        aug.set("/files/etc/fstab/*[file='#{fs[:mount]}']/spec", uuid_device)
+
+        aug.save or
+          raise "Failed to update fstab with UUID for #{dev_name}"
+      end
+    end
+  end
+end
+
+ruby_block 'hadoop-disk-reservations' do
   block do
     #
     # Reservation requests and role_min_disks are set statically, in
@@ -89,113 +223,44 @@ ruby_block 'format-disks' do
     reservation_requests =
       node[:bcpc][:hadoop][:disks][:reservation_requests]
 
-    role_min_disk =
-      node[:bcpc][:hadoop][:disks][:role_min_disk]
-
     #
-    # The available disks list is generated dynamically, at converge time.
+    # Reload Ohai filesystem plugin, in order to pick up any newly
+    # formatted filesystems.
     #
-    available_disks =
-      node.run_state[:bcpc_hadoop_disks][:available_disks]
+    ohai = ::Ohai::System.new
+    ohai.all_plugins('filesystem')
+    node.automatic_attrs.merge! ohai.data
+    Chef::Log.info('ohai[filesystem] reloaded')
 
-    if available_disks.any?
-      available_disks.each_index do |i|
-        Chef::Resource::Directory.new("/disk/#{i}",
-                                      node.run_context).tap do |dd|
-          dd.owner 'root'
-          dd.group 'root'
-          dd.mode 00755
-          dd.recursive true
-          dd.run_action(:create)
-        end
+    # This helper is defined in cookbooks/bcpc/libraries/disk_helpers.rb
+    available_disks = bcpc_mounted_filesystems.keys
 
-        base_name = available_disks[i]
-
-        #
-        # If the raw disk has already been formatted with an FS, no
-        # partition table is necessary.
-        #
-        # Otherwise, create a partition and format that.
-        #
-        require 'mixlib/shellout'
-
-        fs_check =
-          Mixlib::ShellOut.new('file', '-s', "/dev/#{base_name}")
-        fs_check.run_command
-
-        dev_name = if fs_check.status.success? &&
-                       fs_check.stdout.include?('SGI XFS filesystem')
-                     "/dev/#{base_name}"
-                   else
-                     "/dev/#{base_name}1"
-                   end
-
-        if dev_name.end_with?('1')
-          unless ::File.exist?(dev_name)
-            Chef::Resource::Execute.new("mklabel-#{base_name}",
-                                        node.run_context).tap do |ee|
-              ee.command "parted -s /dev/#{base_name} mklabel gpt"
-              ee.run_action(:run)
-            end
-
-            Chef::Resource::Execute.new("mkpart-#{base_name}",
-                                        node.run_context).tap do |ee|
-              ee.command "parted -s /dev/#{base_name} " \
-                'mkpart bach_data ext4 0% 100%'
-              ee.run_action(:run)
-            end
-          end
-
-        end
-
-        check_command =
-          Mixlib::ShellOut.new("file -s #{dev_name} | " \
-                               "grep -q 'SGI XFS filesystem'")
-        check_command.run_command
-
-        unless check_command.status.success?
-          Chef::Resource::Execute.new("mkfs-#{dev_name}",
-                                      node.run_context).tap do |ee|
-            ee.command "mkfs -t xfs -f #{dev_name}"
-            ee.run_action(:run)
-          end
-        end
-
-        Chef::Resource::Mount.new("/disk/#{i}",
-                                  node.run_context).tap do |mm|
-          mm.device dev_name
-          mm.fstype 'xfs'
-          mm.options 'noatime,nodiratime,inode64'
-          mm.run_action(:enable)
-          mm.run_action(:mount)
-        end
+    # Is this node's current role in the list?
+    if (node[:bcpc][:hadoop][:disks][:disk_reserve_roles] &
+        node.roles).any?
+      #
+      # Make sure we have enough disks to fulfill reservations and
+      # also normal operations of the DN and NN.
+      #
+      if reservation_requests.length > available_disks.length
+        raise 'Reservations exceeds available disks'
       end
 
-      # is our role included in the list
-      if (node[:bcpc][:hadoop][:disks][:disk_reserve_roles] &
-          node.roles).any?
+      role_min_disk =
+        node[:bcpc][:hadoop][:disks][:role_min_disk]
 
-        # make sure we have enough disks to fulfill reservations and
-        # also normal opration of the DN and NN
-        if reservation_requests.length > available_disks.length
-          Chef::Application.fatal!('Reservations exceeds available disks')
-        end
-
-        if available_disks.length - reservation_requests.length < role_min_disk
-          Chef::Application.fatal!('Minimum disk requirement not met')
-        end
-
-        mount_indexes =
-          (0..(available_disks.length - 1)).to_a -
-          reservation_requests.each_index.to_a
-
-        node.run_state[:bcpc_hadoop_disks][:mounts] = mount_indexes
-      else
-        node.run_state[:bcpc_hadoop_disks][:mounts] =
-          (0..(available_disks.length - 1)).to_a
+      if available_disks.length - reservation_requests.length < role_min_disk
+        raise 'Minimum disk requirement not met'
       end
+
+      mount_indexes =
+        (0..(available_disks.length - 1)).to_a -
+        reservation_requests.each_index.to_a
+
+      node.run_state[:bcpc_hadoop_disks][:mounts] = mount_indexes
     else
-      Chef::Application.fatal!('No available disks found!')
+      node.run_state[:bcpc_hadoop_disks][:mounts] =
+        (0..(available_disks.length - 1)).to_a
     end
   end
 end

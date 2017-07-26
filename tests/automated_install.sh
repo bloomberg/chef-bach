@@ -130,6 +130,12 @@ printf "Cluster type: $CLUSTER_TYPE\n"
 # Kafka does not run Bootstrap step
 if [ "${CLUSTER_TYPE,,}" == "hadoop" ]; then
   printf "Running C-A-R 'bootstrap' before final C-A-R"
+  # https://github.com/bloomberg/chef-bach/issues/847
+  # We know the first run might fail set +e
+  set +e
+  vagrant ssh -c "cd chef-bcpc; ./cluster-assign-roles.sh $ENVIRONMENT Bootstrap"
+  # if we still fail here we have some other issue
+  set -e
   vagrant ssh -c "cd chef-bcpc; ./cluster-assign-roles.sh $ENVIRONMENT Bootstrap"
   for vm in ${VM_LIST[*]} bcpc-bootstrap; do
     [[ $(vboxmanage snapshot $vm list --machinereadable | grep -q 'Post-Bootstrap') ]] || \

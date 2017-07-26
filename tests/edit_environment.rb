@@ -19,32 +19,64 @@
 
 require 'json'
 require 'uri'
+require 'open3'
 
 def get_name_server
   ns = File.readlines('/etc/resolv.conf').select do |ll|
     ll.include?('nameserver')
   end.first.chomp.gsub(/^\s*nameserver\s*/,'')
 
-  if ns == '127.0.0.1'
+  # see if we have a DHCP leases file to parse
+  if !ns || ns.start_with?('127.')
     # Find the newest DHCP client lease file
     latest_lease = Dir.glob('/var/lib/dhcp/dhclient*.lease*').sort do |a, b|
       File.mtime(a) <=> File.mtime(b)
     end.last
 
-    # Look for a DNS option in the lease
-    dns_option = File.readlines(latest_lease).select do |ll|
-      ll.include?('option domain-name-servers')
-    end.first
+    if latest_lease 
+      # Look for a DNS option in the lease
+      dns_option = File.readlines(latest_lease).select do |ll|
+        ll.include?('option domain-name-servers')
+      end.first
 
-    # If we found a DNS option, extract a name server.
-    if dns_option
-      dns_option.chomp.gsub(/^\s*option domain-name-servers\s*([^,]*),.*/,'\1')
-    else
-      raise 'No DNS server provided, and none found in local DHCP leases'
+      # If we found a DNS option, extract a name server.
+      ns = dns_option.chomp\
+        .gsub(/^\s*option domain-name-servers\s*([^,]*),.*/,'\1') if dns_option
     end
-  else
-    ns
   end
+  
+  # see if we are a network manager managed machine -- for Ubuntu >= 15
+  if !ns || ns.start_with?('127.')
+    # Produces output like:
+    # a6cccd07-b700-4e42-a728-646d775d1fbb:wlp3s0
+    # 1b9dd6a0-a124-4f39-abfd-59117e77a060:docker0
+    # 1c0ff330-a123-1234-1234-1234567890ab:--
+    # 1c0ff330-a123-1234-1234-1deadbeef001:--
+    nm_cli_cnxn_cmd = '/usr/bin/nmcli -t -f UUID,DEVICE connection show'
+    # Produces output like: IP4.DNS[1]:10.0.0.4
+    nm_cli_cnxn_dns = "/usr/bin/nmcli -t -f IP4.DNS connection show %{uuid}"
+
+    con_devs = nil
+    begin
+      con_devs = Open3.capture2(nm_cli_cnxn_cmd)[0].split("\n")
+      con_devs = con_devs.select{ |con_dev| con_dev.split(':')[-1] != '--' }
+    rescue SystemCallError => e
+      nil
+    end
+
+    ns = con_devs.map do |con_dev|
+      begin
+        out = Open3.capture2(nm_cli_cnxn_dns % {uuid: con_dev.split(':')[0]})[0]
+        out.strip.split(':').last
+      rescue SystemCallError => e
+        nil
+      end
+    end.select { |v| v && !v.empty? }.last
+  end
+
+  raise 'No DNS server provided, and none found in local DHCP leases' if \
+    !ns || ns.start_with?('127.')
+  ns
 end
 
 name_server = ENV['BACH_DNS_SERVER'] || get_name_server

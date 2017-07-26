@@ -51,12 +51,6 @@ root_password = secure_password if root_password.nil?
 root_password_salted = root_password.crypt('$6$' + rand(36**8).to_s(36))
 
 chef_vault_secret 'cobbler' do
-  #
-  # For some reason, we are compelled to specify a provider.
-  # This will probably break if we ever move to chef-vault cookbook 2.x
-  #
-  provider ChefVaultCookbook::Provider::ChefVaultSecret
-
   data_bag 'os'
   raw_data('web-password' => web_password,
            'root-password' => root_password,
@@ -212,6 +206,11 @@ template '/etc/cobbler/dhcp.template' do
   mode 0644
   variables(subnets: node[:bcpc][:networks])
   notifies :run, 'bash[cobbler-sync]', :delayed
+end
+
+template '/var/lib/cobbler/scripts/select_bach_root_disk' do
+  source 'cobbler/select_bach_root_disk.erb'
+  mode 0644
 end
 
 cookbook_file '/var/lib/cobbler/loaders/ipxe-x86_64.efi' do

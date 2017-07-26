@@ -41,9 +41,9 @@ default[:kafka][:broker].tap do |broker|
   broker[:dual][:commit][:enabled] = false
   broker[:offsets][:storage] = 'kafka'
 
-  # Use 0.9.x protocol to enable cluster upgrade to 0.10.x
-  broker[:inter][:broker][:protocol][:version] = '0.9.0'
-  broker[:log][:message][:format][:version] = '0.9.0'
+  # Default to a 0.10.0 protocol for 0.11.x upgrades.
+  broker[:inter][:broker][:protocol][:version] = '0.10.0'
+  broker[:log][:message][:format][:version] = '0.10.0'
 
   # Defaults for new topics
   broker[:num][:partitions] = 3
@@ -60,11 +60,11 @@ end
 #
 # These attributes are normally overriden in the Chef environment.
 #
-default[:kafka][:version] = '0.10.1.1'
+default[:kafka][:version] = '0.11.0.0'
 default[:kafka][:scala_version] = '2.11'
 
 default[:kafka][:checksum] =
-  '1540800779429d8f0a08be7b300e4cb6500056961440a01c8dbb281db76f0929'
+  '63209e820598ec11c0a6634ea16d92bdd2c27013525ee260627349c0cbf4bd5c'
 
 default[:kafka][:md5_checksum] = ''
 

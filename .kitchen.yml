@@ -20,8 +20,8 @@ platforms:
       bcpc: {
         hadoop: {
           repos: {
-            hortonworks: 'http://public-repo-1.hortonworks.com/HDP/ubuntu14/2.x/updates/2.3.2.0/',
-            hdp_utils: 'http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.20/repos/ubuntu14'
+            hortonworks: 'http://public-repo-1.hortonworks.com/HDP/ubuntu14/2.x/updates/2.6.1.0',
+            hdp_utils: 'http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.21/repos/ubuntu14'
           }
         }
       }
