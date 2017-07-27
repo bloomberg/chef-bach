@@ -4,6 +4,13 @@ default["hadoop"]["hdfs"]["balancer"]["bandwidth"] = 1048576
 # balancer thread multiplier constant
 default["hadoop"]["hdfs"]["balancer"]["max_concurrent_moves_multiplier"] = 10
 
+# JMX port mappings
+default['bcpc']['hadoop'].tap do |jmx|
+  jmx['journalnode']['jmx']['port'] = 10110
+  jmx['datanode']['jmx']['port'] = 10112
+  jmx['namenode']['jmx']['port'] = 10111
+end
+
 default[:bcpc][:hadoop][:hdfs][:dfs].tap do |dfs|
   dfs[:namenode][:audit][:log][:async] = true
   dfs[:webhdfs][:enabled] = true
