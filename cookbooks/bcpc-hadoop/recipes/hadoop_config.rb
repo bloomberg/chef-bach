@@ -66,8 +66,9 @@ template "/etc/hadoop/conf/hadoop-env.sh" do
   source "hdp_hadoop-env.sh.erb"
   mode 0555
   variables(
-    :nn_jmx_port => node[:bcpc][:hadoop][:namenode][:jmx][:port],
-    :dn_jmx_port => node[:bcpc][:hadoop][:datanode][:jmx][:port]
+    :nn_jmx_port => node['bcpc']['hadoop']['namenode']['jmx']['port'],
+    :dn_jmx_port => node['bcpc']['hadoop']['datanode']['jmx']['port'],
+    :jn_jmx_port => node['bcpc']['hadoop']['journalnode']['jmx']['port']
   )
 end
 
