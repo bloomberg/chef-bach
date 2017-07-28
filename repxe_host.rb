@@ -263,7 +263,7 @@ def find_chef_env
     Mixlib::ShellOut.new('sudo', 'knife',
                          'node', 'show',
                          o[:fqdn] || o[:hostname], '-E',
-                         '-f', 'json')
+                         '-F', 'json')
 
   env_command.run_command
 
@@ -377,8 +377,7 @@ def run_chef_client(chef_env, vm_entry, params = ' ')
   c = Mixlib::ShellOut.new('./nodessh.sh',
                            chef_env,
                            vm_entry[:hostname],
-                           'chef-client',
-                           params,
+                           "chef-client #{params}",
                            'sudo')
   c.run_command
   if c.status.success?
@@ -392,6 +391,10 @@ end
 def stop_all_services(chef_env, vm_entry)
   puts 'Stopping services.'
   [
+    'carbon-relay',
+    'carbon-aggregator',
+    'carbon-cache',
+    'apache2', # graphite-web
     'jmxtrans',
     'hbase-regionserver',
     'hbase-master',
