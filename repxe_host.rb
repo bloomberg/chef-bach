@@ -392,6 +392,10 @@ end
 def stop_all_services(chef_env, vm_entry)
   puts 'Stopping services.'
   [
+    'carbon-relay',
+    'carbon-aggregator',
+    'carbon-cache',
+    'apache2', # graphite-web
     'jmxtrans',
     'hbase-regionserver',
     'hbase-master',
