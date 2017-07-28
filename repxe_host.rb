@@ -377,8 +377,7 @@ def run_chef_client(chef_env, vm_entry, params = ' ')
   c = Mixlib::ShellOut.new('./nodessh.sh',
                            chef_env,
                            vm_entry[:hostname],
-                           'chef-client',
-                           params,
+                           "chef-client #{params}",
                            'sudo')
   c.run_command
   if c.status.success?
