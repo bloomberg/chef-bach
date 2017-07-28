@@ -23,8 +23,7 @@
     "recipe[pam::default]",
     "recipe[bcpc-hadoop::zookeeper_server]",
     "recipe[bcpc-hadoop::journalnode]",
-    "recipe[bcpc-hadoop::graphite_to_zabbix]",
-    "recipe[bcpc_jmxtrans]"
+    "recipe[bcpc-hadoop::graphite_to_zabbix]"
   ],
   "description": "A highly-available head node in a BCPC Hadoop cluster",
   "chef_type": "role",

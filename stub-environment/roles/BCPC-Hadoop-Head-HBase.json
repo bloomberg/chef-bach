@@ -5,7 +5,6 @@
     "role[Basic]",
     "recipe[bcpc-hadoop::hbase_repl]",
     "recipe[bcpc-hadoop::hbase_master]",
-    "recipe[bcpc_jmxtrans]",
     "recipe[bcpc::diamond]"
   ],
   "description": "A highly-available head node in a BCPC Hadoop cluster",

@@ -3,8 +3,7 @@
   "json_class": "Chef::Role",
   "run_list": [
     "role[Basic]",
-    "recipe[bcpc-hadoop::namenode_no_HA]",
-    "recipe[bcpc_jmxtrans]"
+    "recipe[bcpc-hadoop::namenode_no_HA]"
   ],
   "description": "Non-HA version of Hadoop 1 role in a BCPC Hadoop cluster",
   "chef_type": "role",

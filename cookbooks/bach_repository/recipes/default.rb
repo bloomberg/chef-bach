@@ -36,5 +36,8 @@ include_recipe 'java::oracle_jce'
 # build jvmkill lib
 include_recipe 'bach_repository::jvmkill'
 
+# download jmxtrans-agent
+include_recipe 'bach_repository::jmxtrans_agent'
+
 # Run after everything to fix perms.
 include_recipe 'bach_repository::permissions'

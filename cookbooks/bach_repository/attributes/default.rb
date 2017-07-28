@@ -76,3 +76,6 @@ default['java']['oracle']['jce']['enabled'] = true
 
 # Set the JAVA_HOME for Hadoop components
 default['bcpc']['hadoop']['java'] = "/usr/lib/jvm/java-8-oracle-amd64"
+
+# jmxtrans-agent (https://github.com/jmxtrans/jmxtrans-agent)
+default['bach']['repository']['jmxtrans_agent']['download_url'] = 'https://github.com/jmxtrans/jmxtrans-agent/releases/download/jmxtrans-agent-1.2.5/jmxtrans-agent-1.2.5.jar'

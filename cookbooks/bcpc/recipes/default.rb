@@ -38,6 +38,7 @@ include_recipe 'bcpc::nscd'
 include_recipe 'bcpc::packages'
 include_recipe 'ubuntu'
 include_recipe 'bcpc::cluster_local_repository'
+include_recipe 'bcpc::jmxtrans_agent'
 
 require 'ipaddr'
 
