@@ -5,7 +5,7 @@ maintainer       'Bloomberg Finance L.P.'
 maintainer_email 'hadoop@bloomberg.net'
 description      'Recipes to setup prerequisites for Kafka cluster'
 long_description IO.read(File.join(File.dirname(__FILE__), 'README.md'))
-version          '3.0.0'
+version          '3.0.1'
 
 depends 'bcpc'
 depends 'bcpc-hadoop'
