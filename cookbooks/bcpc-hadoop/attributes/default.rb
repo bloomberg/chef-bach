@@ -22,21 +22,23 @@ default["bcpc"]["hadoop"]["hadoop"]["bin"]["path"] = "/usr/bin/hadoop"
 default["bcpc"]["hadoop"]["hadoop"]["config"]["dir"] = "/etc/hadoop/conf"
 # Flag to control whether automatic restarts due to config changes need to be skipped 
 # for e.g. if ZK quorum is down or if the recipes need to be run in a non ZK env
-default["bcpc"]["hadoop"]["skip_restart_coordination"] = false
-default["bcpc"]["hadoop"]["hdfs"]["site_xml"]["dfs.datanode.sync.behind.writes"] = true
-default["bcpc"]["hadoop"]["hdfs"]["site_xml"]["dfs.datanode.synconclose"] = true
-default["bcpc"]["hadoop"]["hdfs"]["site_xml"]["dfs.namenode.stale.datanode.interval"] = 30000
-default["bcpc"]["hadoop"]["hdfs"]["HA"] = true
-default["bcpc"]["hadoop"]["hdfs"]["failed_volumes_tolerated"] = 1
-default["bcpc"]["hadoop"]["hdfs"]["dfs_replication_factor"] = 3
-default["bcpc"]["hadoop"]["hdfs"]["dfs_blocksize"] = "128m"
-default['bcpc']['hadoop']['hdfs_url']="hdfs://#{node.chef_environment}"
-default["bcpc"]["hadoop"]["jmx_enabled"] = true
-default[:bcpc][:hadoop][:jute][:maxbuffer] = 6291456
-default["bcpc"]["hadoop"]["datanode"]["xmx"]["max_size"] = 4096
-default["bcpc"]["hadoop"]["datanode"]["xmx"]["max_ratio"] = 0.25
-default["bcpc"]["hadoop"]["datanode"]["max"]["xferthreads"] = 16384
-default["bcpc"]["hadoop"]["datanode"]["jmx"]["port"] = 10112
+default['bcpc']['hadoop']['skip_restart_coordination'] = false
+default['bcpc']['hadoop']['hdfs']['site_xml']['dfs.datanode.sync.behind.writes'] = true
+default['bcpc']['hadoop']['hdfs']['site_xml']['dfs.datanode.synconclose'] = true
+default['bcpc']['hadoop']['hdfs']['site_xml']['dfs.namenode.stale.datanode.interval'] = 30_000
+default['bcpc']['hadoop']['hdfs']['HA'] = true
+default['bcpc']['hadoop']['hdfs']['failed_volumes_tolerated'] = 1
+default['bcpc']['hadoop']['hdfs']['dfs_replication_factor'] = 3
+default['bcpc']['hadoop']['hdfs']['dfs_blocksize'] = '128m'
+default['bcpc']['hadoop']['hdfs_url'] = "hdfs://#{node.chef_environment}"
+default['bcpc']['hadoop']['jmx_enabled'] = true
+default[:bcpc][:hadoop][:jute][:maxbuffer] = 6_291_456
+default['bcpc']['hadoop']['datanode']['xmx']['max_size'] = 4_096
+default['bcpc']['hadoop']['datanode']['xmx']['max_ratio'] = 0.25
+default['bcpc']['hadoop']['datanode']['max']['xferthreads'] = 16_384
+
+# for jvmkill library
+default['bcpc-hadoop']['jvmkill']['lib_file'] = '/var/lib/jvmkill/libjvmkill.so'
 
 common_opts =
   '-XX:+UseParNewGC ' +
@@ -70,18 +72,20 @@ default["bcpc"]["hadoop"]["namenode"]["gc_opts"] =
   '-XX:HeapDumpPath=/var/log/hadoop-hdfs/heap-dump-nn-$$-$(hostname)-$(date +\'%Y%m%d%H%M\').hprof ' +
   common_opts
 
-default["bcpc"]["hadoop"]["mapreduce"]["framework"]["name"] = "yarn"
-default["bcpc"]["hadoop"]["namenode"]["handler"]["count"] = 100
-default["bcpc"]["hadoop"]["namenode"]["xmx"]["max_size"] = 16384
-default["bcpc"]["hadoop"]["namenode"]["xmx"]["max_ratio"] = 0.25
-default["bcpc"]["hadoop"]["namenode"]["jmx"]["port"] = 10111
-default["bcpc"]["hadoop"]["namenode"]["rpc"]["port"] = 8020
-default["bcpc"]["hadoop"]["namenode"]["http"]["port"] = 50070 
-default["bcpc"]["hadoop"]["namenode"]["https"]["port"] = 50470
-default["bcpc"]["hadoop"]["kafka"]["jmx"]["port"] = 9995
-default["bcpc"]["hadoop"]["topology"]["script"] = "topology"
-default["bcpc"]["hadoop"]["topology"]["cookbook"] = "bcpc-hadoop"
-default["bcpc"]["hadoop"]["yarn"]["scheduler"]["minimum-allocation-mb"] = 256
+default['bcpc']['hadoop']['mapreduce']['framework']['name'] = 'yarn'
+default['bcpc']['hadoop']['namenode']['handler']['count'] = 100
+# set to nil to calculate dynamically based on available memory
+default['bcpc']['hadoop']['namenode']['xmx']['max_size'] = 1024
+# set to nil to calculate dynamically based on available memory
+default['bcpc']['hadoop']['namenode']['xmn']['max_size'] = 128
+default['bcpc']['hadoop']['namenode']['xmx']['max_ratio'] = 0.25
+default['bcpc']['hadoop']['namenode']['rpc']['port'] = 8020
+default['bcpc']['hadoop']['namenode']['http']['port'] = 50070
+default['bcpc']['hadoop']['namenode']['https']['port'] = 50470
+default['bcpc']['hadoop']['kafka']['jmx']['port'] = 9995
+default['bcpc']['hadoop']['topology']['script'] = 'topology'
+default['bcpc']['hadoop']['topology']['cookbook'] = 'bcpc-hadoop'
+default['bcpc']['hadoop']['yarn']['scheduler']['minimum-allocation-mb'] = 256
 
 #
 # Attributes for service rolling restart process

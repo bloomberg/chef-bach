@@ -6,6 +6,41 @@ include_recipe 'bcpc-hadoop::hadoop_config'
 hdprel=node[:bcpc][:hadoop][:distribution][:active_release]
 hdppath="/usr/hdp/#{hdprel}"
 
+# Setup JMXTrans information
+node.default['jmxtrans'].tap do |jmxtrans|
+  jmxtrans['servers'] = [
+                          {
+                          'type': 'journalnode',
+                          'service': 'hadoop-hdfs-journalnode',
+                          'service_cmd': 'org.apache.hadoop.hdfs.qjournal.server.JournalNode'
+                          }
+                        ]
+  jmxtrans['default_queries']['journalnode'] =
+    [
+      {
+        'obj': 'Hadoop:service=JournalNode,name=RpcDetailedActivityForPort*',
+        'result_alias': 'DetailedRPCActivity',
+        'attr': []
+      },
+      {
+        'obj': 'Hadoop:service=JournalNode,name=RpcActivityForPort8485',
+        'result_alias': 'RPCActivity',
+        'attr': []
+      },
+      {
+        'obj': 'Hadoop:service=JournalNode,name=UgiMetrics',
+        'result_alias': 'UgiMetrics',
+        'attr': []
+      },
+      {
+        'obj': 'Hadoop:service=JournalNode,name=Journal-*',
+        'result_alias': 'JNActivity',
+        'attr': []
+      }
+    ]
+    
+end
+
 %w{hadoop-hdfs-namenode hadoop-hdfs-journalnode}.each do |pkg|
   package hwx_pkg_str(pkg, hdprel) do
     action :install
