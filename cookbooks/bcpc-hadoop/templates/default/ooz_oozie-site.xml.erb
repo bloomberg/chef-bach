@@ -413,4 +413,24 @@
     <value><%= node[:bcpc][:hadoop][:zookeeper][:servers].map{ |s| float_host(s[:hostname])}.join(",") %></value>
   </property>
 
+  <% if node['bcpc']['hadoop']['oozie']['smtp_host'] != nil then %> 
+
+  <property>
+    <name>oozie.email.smtp.host</name>
+    <value><%= node['bcpc']['hadoop']['oozie']['smtp_host'] %></value>
+  </property>
+
+  <property>
+    <name>oozie.email.from.address</name>
+    <value><%= node['bcpc']['hadoop']['oozie']['from_email'] %></value>
+  </property>
+
+  <property>
+    <name>oozie.email.smtp.port</name>
+    <value><%= node['bcpc']['hadoop']['oozie']['smtp_port'] %></value>
+  </property>
+
+  <% end %>
+</configuration>
+
 </configuration>
