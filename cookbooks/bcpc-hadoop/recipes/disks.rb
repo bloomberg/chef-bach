@@ -18,6 +18,12 @@
 # limitations under the License.
 #
 
+#
+# This included recipe is very misleadingly named.  It mostly contains
+# chef gems.
+#
+include_recipe 'bcpc-hadoop::default'
+
 ['xfsprogs', 'parted', 'util-linux'].each do |package_name|
   package package_name do
     action :upgrade
@@ -74,8 +80,8 @@ ruby_block 'purge-stale-fstab-entries' do
   block do
     require 'augeas'
 
-    bcpc_unused_targets.each do |mount_target|
-      Augeas::open do |aug|
+    Augeas::open do |aug|
+      bcpc_unused_targets.each do |mount_target|
         aug.rm("/files/etc/fstab/*[file='#{mount_target}']")
 
         aug.save or

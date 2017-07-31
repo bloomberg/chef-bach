@@ -1,6 +1,13 @@
 #
 # Set up zookeeper configs
 #
+
+#
+# The ZK packages are required because post-install scripts will
+# create the ZK user accounts, if absent.
+#
+include_recipe 'bcpc-hadoop::zookeeper_packages'
+
 directory "#{node[:bcpc][:hadoop][:zookeeper][:conf_dir]}.#{node.chef_environment}" do
   owner node[:bcpc][:hadoop][:zookeeper][:owner]
   group node[:bcpc][:hadoop][:zookeeper][:group]

@@ -1,4 +1,3 @@
-
 module Bcpc_Hadoop
   module Helper
 
@@ -31,9 +30,10 @@ module Bcpc_Hadoop
     # (should be called only in the compile phase)
     #
     def hdp_select(package, version)
+      package_string = hwx_pkg_str(package, version)
       bash "hdp-select #{package}" do
         code "hdp-select set #{package} #{version}"
-        subscribes :run, "package[#{hwx_pkg_str(package, version)}]", :immediate
+        subscribes :run, "package[#{package_string}]", :immediate
         not_if { ::File.readlink("/usr/hdp/current/#{package}").start_with?("/usr/hdp/#{version}/") }
       end
     end
