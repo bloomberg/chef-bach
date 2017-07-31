@@ -28,7 +28,7 @@ cookbook 'pam'
 cookbook 'ubuntu'
 cookbook 'chef-sugar'
 cookbook 'openssl'
-cookbook 'postgresql' 
+cookbook 'postgresql'
 cookbook 'resolvconf'
 cookbook 'database'
 
@@ -41,19 +41,19 @@ cookbook 'bfd',
   git: 'https://github.com/bloomberg/openbfdd-cookbook'
 
 # cobblerd upstream, pending submitting update to supermarket
-cookbook 'cobblerd', 
+cookbook 'cobblerd',
   git: 'https://github.com/bloomberg/cobbler-cookbook'
 
 # jmxtrans 1.0+ isn't on the supermarket.
-cookbook 'jmxtrans', 
+cookbook 'jmxtrans',
   git: 'https://github.com/jmxtrans/jmxtrans-cookbook',
   branch: 'ver-2.0'
 
 # 'kafka' has an entry on the supermarket, but it's the wrong cookbook.
 cookbook 'kafka',
   git: 'https://github.com/mthssdrbrg/kafka-cookbook.git',
-  tag: 'v2.0.2'
- 
+  tag: 'v2.2.2'
+
 cookbook 'pdns',
   git: 'https://github.com/http-418/pdns'
 

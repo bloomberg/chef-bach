@@ -6,7 +6,7 @@
 require 'pathname'
 
 default['bcpc']['hadoop'] = {}
-default['bcpc']['hadoop']['distribution']['release'] = '2.6.1.0-129'
+default['bcpc']['hadoop']['distribution']['release'] = '2.6.1.17-1'
 default['bcpc']['hadoop']['distribution']['active_release'] = node['bcpc']['hadoop']['distribution']['release']
 default['bcpc']['hadoop']['decommission']['hosts'] = []
 # disks to use for Hadoop activities (expected to be an environment or role set variable)
@@ -37,7 +37,6 @@ default[:bcpc][:hadoop][:jute][:maxbuffer] = 6_291_456
 default['bcpc']['hadoop']['datanode']['xmx']['max_size'] = 4_096
 default['bcpc']['hadoop']['datanode']['xmx']['max_ratio'] = 0.25
 default['bcpc']['hadoop']['datanode']['max']['xferthreads'] = 16_384
-default['bcpc']['hadoop']['datanode']['jmx']['port'] = 10112
 
 # for jvmkill library
 default['bcpc-hadoop']['jvmkill']['lib_file'] = '/var/lib/jvmkill/libjvmkill.so'
@@ -82,7 +81,6 @@ default['bcpc']['hadoop']['namenode']['xmx']['max_size'] = 1024
 # set to nil to calculate dynamically based on available memory
 default['bcpc']['hadoop']['namenode']['xmn']['max_size'] = 128
 default['bcpc']['hadoop']['namenode']['xmx']['max_ratio'] = 0.25
-default['bcpc']['hadoop']['namenode']['jmx']['port'] = 10111
 default['bcpc']['hadoop']['namenode']['rpc']['port'] = 8020
 default['bcpc']['hadoop']['namenode']['http']['port'] = 50070
 default['bcpc']['hadoop']['namenode']['https']['port'] = 50470

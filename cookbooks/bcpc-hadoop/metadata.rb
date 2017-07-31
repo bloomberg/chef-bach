@@ -7,6 +7,7 @@ long_description IO.read(File.join(File.dirname(__FILE__), 'README.md'))
 version          '3.0.0'
 
 depends 'bcpc', '= 3.0.0'
+depends 'bach_krb5', '= 3.0.0'
 depends 'database'
 depends 'java'
 depends 'maven'

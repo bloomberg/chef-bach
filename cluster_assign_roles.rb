@@ -52,7 +52,7 @@ class ClusterAssignRoles
     nodes_with_incomplete_runlist =
       possible_head_nodes - confirmed_head_nodes
 
-    if nodes_with_incomplete_runlist.any?
+    if nodes_with_incomplete_runlist.any? && confirmed_head_nodes.any?
       raise "Aborting cluster assign roles. " \
         "Found potential head nodes lacking role[BCPC-Hadoop-Head]: " +
         nodes_with_incomplete_runlist.map { |nn| nn[:hostname] || 'null' }.join

@@ -3,14 +3,8 @@
 ::Chef::Resource::Bash.send(:include, BCPC::Utils)
 ::Chef::Resource::File.send(:include, BCPC::Utils)
 
-include_recipe 'bcpc-hadoop::hdp_repo'
+include_recipe 'bcpc-hadoop::zookeeper_packages'
 include_recipe 'bach_krb5::keytab_directory'
-
-package  hwx_pkg_str('zookeeper-server', node[:bcpc][:hadoop][:distribution][:release]) do
-  action :install
-end
-
-hdp_select('zookeeper-server', node[:bcpc][:hadoop][:distribution][:active_release])
 
 user_ulimit "zookeeper" do
   filehandle_limit 65536

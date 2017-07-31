@@ -14,9 +14,6 @@ common_opts =
   ' -XX:+PrintGCDateStamps' \
   ' -XX:+UseParNewGC' \
   ' -Xloggc:${HBASE_LOG_DIR}/gc/gc-pid-$$-$(hostname)-$(date +\'%Y%m%d%H%M\').log' \
-  ' -Xmn' + node['bcpc']['hadoop']['hbase_rs']['xmn']['size'].to_s + 'm' \
-  ' -Xms' + node['bcpc']['hadoop']['hbase_rs']['xms']['size'].to_s + 'm' \
-  ' -Xmx' + node['bcpc']['hadoop']['hbase_rs']['xmx']['size'].to_s + 'm' \
   ' -XX:+ExplicitGCInvokesConcurrent' \
   ' -XX:+PrintTenuringDistribution' \
   ' -XX:+UseNUMA' \
@@ -41,12 +38,18 @@ node.default['bcpc']['hadoop']['hbase']['env'].tap do |hbase_env|
 
   hbase_env['HBASE_MASTER_OPTS'] =
     '$HBASE_MASTER_OPTS' + common_opts +
+    ' -Xmn' + node['bcpc']['hadoop']['hbase_master']['xmn']['size'].to_s + 'm' +
+    ' -Xms' + node['bcpc']['hadoop']['hbase_master']['xms']['size'].to_s + 'm' +
+    ' -Xmx' + node['bcpc']['hadoop']['hbase_master']['xmx']['size'].to_s + 'm' +
     ' -XX:CMSInitiatingOccupancyFraction=' + node['bcpc']['hadoop']['hbase_master']['cmsinitiatingoccupancyfraction'].to_s +
     ' -XX:HeapDumpPath=${HBASE_LOG_DIR}/heap-dump-hm-$$-$(hostname)-$(date +\'%Y%m%d%H%M\').hprof' \
     ' -XX:PretenureSizeThreshold=' + node['bcpc']['hadoop']['hbase_master']['PretenureSizeThreshold'].to_s
 
   hbase_env['HBASE_REGIONSERVER_OPTS'] =
     '$HBASE_REGION_SERVER_OPTS' + common_opts +
+    ' -Xmn' + node['bcpc']['hadoop']['hbase_rs']['xmn']['size'].to_s + 'm' +
+    ' -Xms' + node['bcpc']['hadoop']['hbase_rs']['xms']['size'].to_s + 'm' +
+    ' -Xmx' + node['bcpc']['hadoop']['hbase_rs']['xmx']['size'].to_s + 'm' +
     ' -XX:CMSInitiatingOccupancyFraction=' + node['bcpc']['hadoop']['hbase_rs']['cmsinitiatingoccupancyfraction'].to_s +
     ' -XX:HeapDumpPath=${HBASE_LOG_DIR}/heap-dump-rs-$$-$(hostname)-$(date +\'%Y%m%d%H%M\').hprof' \
     ' -XX:PretenureSizeThreshold=' + node['bcpc']['hadoop']['hbase_rs']['PretenureSizeThreshold'].to_s
