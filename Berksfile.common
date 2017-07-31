@@ -53,6 +53,11 @@ cookbook 'jmxtrans',
 cookbook 'kafka',
   git: 'https://github.com/mthssdrbrg/kafka-cookbook.git',
   tag: 'v2.0.2'
+
+# ambari-chef community cookbook
+cookbook 'ambari-chef',
+  git: 'https://github.com/dbist/ambari-chef.git',
+  branch: 'kerberos'
  
 cookbook 'pdns',
   git: 'https://github.com/http-418/pdns'
