@@ -6,7 +6,7 @@
 require 'pathname'
 
 default['bcpc']['hadoop'] = {}
-default['bcpc']['hadoop']['distribution']['release'] = '2.6.1.0-129'
+default['bcpc']['hadoop']['distribution']['release'] = '2.6.1.17-1'
 default['bcpc']['hadoop']['distribution']['active_release'] = node['bcpc']['hadoop']['distribution']['release']
 default['bcpc']['hadoop']['decommission']['hosts'] = []
 # disks to use for Hadoop activities (expected to be an environment or role set variable)
