@@ -48,4 +48,5 @@ end
 remote_file target_file do
   source "file://#{lib_file}"
   mode 0o0444
+  not_if { File.exist?(target_file) }
 end
