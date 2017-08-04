@@ -22,8 +22,7 @@
     "recipe[bcpc-hadoop::tez]",
     "recipe[bcpc-hadoop::mahout]",
     "recipe[bcpc-hadoop::oozie_client]",
-    "recipe[bcpc::diamond]",
-    "recipe[bcpc_jmxtrans]"
+    "recipe[bcpc::diamond]"
   ],
   "description": "A highly-available head node in a BCPC Hadoop cluster",
   "chef_type": "role",

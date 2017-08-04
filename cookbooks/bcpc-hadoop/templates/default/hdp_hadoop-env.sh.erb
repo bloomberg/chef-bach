@@ -70,4 +70,9 @@ export HADOOP_DATANODE_OPTS="$HADOOP_DATANODE_OPTS $JMX_OPTS -Dcom.sun.managemen
 export HADOOP_JOURNALNODE_OPTS="$HADOOP_JOURNALNODE_OPTS $JMX_OPTS -Dcom.sun.management.jmxremote.port=<%= @jn_jmx_port %>"
 <% end %>
 
+<% if node[:bcpc][:hadoop].attribute?(:jmx_agent_enabled) and node[:bcpc][:hadoop][:jmx_agent_enabled] %>
+export HADOOP_NAMENODE_OPTS="$HADOOP_NAMENODE_OPTS -javaagent:<%= node['bcpc']['jmxtrans_agent']['lib_file'] %>=<%= node['bcpc']['hadoop']['jmxtrans_agent']['namenode']['xml']%>"
+export HADOOP_DATANODE_OPTS="$HADOOP_DATANODE_OPTS -javaagent:<%= node['bcpc']['jmxtrans_agent']['lib_file'] %>=<%= node['bcpc']['hadoop']['jmxtrans_agent']['datanode']['xml']%>"
+<% end %>
+
 export HADOOP_NAMENODE_OPTS="$HADOOP_NAMENODE_OPTS -Dhadoop.security.logger=INFO,RFAS -Dhdfs.audit.logger=INFO,RFAAUDIT"

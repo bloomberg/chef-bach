@@ -4,8 +4,7 @@
   "run_list": [
     "role[Basic]",
     "recipe[bcpc-hadoop::configs]",
-    "recipe[bcpc-hadoop::namenode_standby]",
-    "recipe[bcpc_jmxtrans]"
+    "recipe[bcpc-hadoop::namenode_standby]"
   ],
   "description": "A highly-available head node in a BCPC Hadoop cluster",
   "chef_type": "role",

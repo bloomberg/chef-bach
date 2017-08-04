@@ -195,6 +195,7 @@ service "generally run hadoop-hdfs-namenode" do
   subscribes :restart, "user_ulimit[hdfs]", :delayed
   subscribes :restart, "bash[initialize-shared-edits]", :immediately
   subscribes :restart, "bash[hdp-select hadoop-hdfs-namenode]", :delayed
+  subscribes :restart, node['bcpc']['hadoop']['jmxtrans_agent']['namenode']['xml'], :delayed
 end
 
 ruby_block "create-format-UUID-File" do
