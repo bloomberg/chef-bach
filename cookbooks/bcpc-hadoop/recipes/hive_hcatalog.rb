@@ -47,8 +47,8 @@ end
 bash 'create-hive-warehouse' do
   code <<-EOH
   hdfs dfs -mkdir -p #{node['bcpc']['hadoop']['hive']['warehouse']['dir']}
-  hdfs dfs -chmod -R 775 #{node['bcpc']['hadoop']['hive']['warehouse']['dir']}
-  hdfs dfs -chown -R hive:hdfs #{node['bcpc']['hadoop']['hive']['warehouse']['dir']}
+  hdfs dfs -chmod 775 #{node['bcpc']['hadoop']['hive']['warehouse']['dir']}
+  hdfs dfs -chown hive:hdfs #{node['bcpc']['hadoop']['hive']['warehouse']['dir']}
   EOH
   user 'hdfs'
 end
