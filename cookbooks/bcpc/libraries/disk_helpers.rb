@@ -76,7 +76,7 @@ def bcpc_unused_disks
   #
   all_drives = node[:block_device].keys.select do |dd|
     # /dev/sdiv is currently the last possible SCSI device node.
-    dd =~ /sd[a-i]?[a-z]/ || dd =~ /md\d+/ || dd =~ /vd[a-z]?[a-f]/
+    dd =~ /sd[a-i]?[a-z]/ || dd =~ /md\d+/ || dd =~ /vd[a-z][a-f]?/
   end.select do |dd|
     begin
       require 'fcntl'
