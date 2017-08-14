@@ -69,7 +69,7 @@ class ClusterAssignRoles
   #   nothing
   # side-affect:
   #   updates Chef-server with runlists for nodes passed in
-  def assign_roles(nodes:, runlist: nil)
+def assign_roles(nodes:, runlist: nil)
     nodes.each do |node|
       chef_node_object = ridley.node.find(node[:fqdn])
 
@@ -113,6 +113,7 @@ class ClusterAssignRoles
       else
         if ii % 60 == 0
           if ii == 0
+            stop_all_clients
             reindex_chef_server
           end
           puts "Waiting for nodes to appear in search results (#{search})..."
@@ -417,6 +418,26 @@ class ClusterAssignRoles
       end
       session.loop
       {stdout: stdout, stderr: stderr, status: exit_status}
+    end
+  end
+
+  def stop_all_clients
+    target_nodes = parse_cluster_txt.reject do |entry|
+      entry[:runlist].include?('SKIP')
+    end
+
+    target_nodes.each do |node|
+      result = ssh(host: node[:ip_address],
+                   username: 'ubuntu',
+                   password: cobbler_root_password,
+                   command: 'sudo killall -9 chef-client',
+                   streaming: true)
+
+      if result[:status] == 0
+        puts "#{node[:fqdn]}: Stopped chef-client"
+      else
+        raise "#{node[:fqdn]}: Failed to stop chef-client!"
+      end
     end
   end
 
