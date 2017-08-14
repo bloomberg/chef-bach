@@ -74,6 +74,33 @@ default['bcpc']['hadoop']['jmxtrans_agent']['datanode']['queries'] = default['bc
   }
 ]
 
+# HDFS journalnode
+default['bcpc']['hadoop']['jmxtrans_agent']['journalnode']['xml'] = '/etc/hadoop/conf/jmxtrans_agent_journalnode.xml'
+default['bcpc']['hadoop']['jmxtrans_agent']['journalnode']['name_prefix'] = 'jmx.journalnode'
+default['bcpc']['hadoop']['jmxtrans_agent']['journalnode']['queries'] = default['bcpc']['hadoop']['jmxtrans_agent']['basic']['queries'] + [
+  {
+    'objectName' => 'Hadoop:service=JournalNode,name=RpcDetailedActivityForPort*',
+    'resultAlias' => 'journal_node.%name%.#attribute#',
+    'attributes' => ''
+  },
+  {
+    'objectName' => 'Hadoop:service=JournalNode,name=RpcActivityForPort8485',
+    'resultAlias' => 'journal_node.%name%.#attribute#',
+    'attributes' => ''
+  },
+  {
+    'objectName': 'Hadoop:service=JournalNode,name=UgiMetrics',
+    'resultAlias': 'journal_node.%name%.#attribute#',
+    'attributes': ''
+  },
+  {
+    'objectName': 'Hadoop:service=JournalNode,name=Journal-*',
+    'resultAlias': 'journal_node.%name%.#attribute#',
+    'attributes': ''
+  }
+]
+
+
 # HBase master
 default['bcpc']['hadoop']['jmxtrans_agent']['hbase_master']['xml'] = '/etc/hadoop/conf/jmxtrans_agent_hbase_master.xml'
 default['bcpc']['hadoop']['jmxtrans_agent']['hbase_master']['name_prefix'] = 'jmx.hbase_master'
