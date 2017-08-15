@@ -30,6 +30,8 @@ stats_password = make_config('mysql-hive-table-stats-password', secure_password)
   end
 end
 
+set_hosts
+
 hive_site_vars = {
   is_hive_server: node.run_list.expand(node.chef_environment).recipes.include?('bcpc-hadoop::hive_hcatalog'),
   mysql_hosts: node['bcpc']['hadoop']['mysql_hosts'].map { |m| m[:hostname] + ':3306' },
