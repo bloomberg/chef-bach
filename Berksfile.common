@@ -54,6 +54,9 @@ cookbook 'kafka',
   git: 'https://github.com/mthssdrbrg/kafka-cookbook.git',
   tag: 'v2.2.2'
 
+cookbook 'pdns',
+  git: 'https://github.com/http-418/pdns'
+
 # locking_resource is not on the supermarket
 cookbook 'locking_resource',
   git: 'https://github.com/bloomberg/locking_resource-cookbook'
