@@ -427,17 +427,8 @@ def assign_roles(nodes:, runlist: nil)
     end
 
     target_nodes.each do |node|
-      result = ssh(host: node[:ip_address],
-                   username: 'ubuntu',
-                   password: cobbler_root_password,
-                   command: 'sudo killall -9 chef-client',
-                   streaming: true)
-
-      if result[:status] == 0
-        puts "#{node[:fqdn]}: Stopped chef-client"
-      else
-        raise "#{node[:fqdn]}: Failed to stop chef-client!"
-      end
+      client = ChefBach::ChefClient.new chef_environment_name, node
+      client.kill
     end
   end
 
