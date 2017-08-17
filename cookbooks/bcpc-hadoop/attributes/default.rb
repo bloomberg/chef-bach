@@ -5,6 +5,8 @@
 #############################################
 require 'pathname'
 
+user = node['bcpc']['bootstrap']['admin']['user']
+
 default['bcpc']['hadoop'] = {}
 default['bcpc']['hadoop']['distribution']['release'] = '2.6.1.17-1'
 default['bcpc']['hadoop']['distribution']['active_release'] = node['bcpc']['hadoop']['distribution']['release']
@@ -208,4 +210,4 @@ default['java']['oracle']['jce']['8']['url'] = get_binary_server_url + jce_tgz_n
 # Set the JAVA_HOME for Hadoop components
 default['bcpc']['hadoop']['java'] = '/usr/lib/jvm/java-8-oracle-amd64'
 
-default['bcpc']['cluster']['file_path'] = '/home/vagrant/chef-bcpc/cluster.txt'
+default['bcpc']['cluster']['file_path'] = "/home/#{user}/chef-bcpc/cluster.txt"

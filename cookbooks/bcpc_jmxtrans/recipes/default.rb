@@ -37,7 +37,8 @@ node.override['jmxtrans']['servers']=vservers
 #
 
 if node['jmxtrans']['graphite']['host'].nil? || node['jmxtrans']['graphite']['host'] == 'graphite'
-   node.default['jmxtrans']['graphite']['host'] = node['bcpc']['management']['vip']
+  node.default['jmxtrans']['graphite']['host'] = node['bcpc']['management']['vip']
+
 end
 
 if node.default['jmxtrans']['graphite']['port'] != node['bcpc']['graphite']['relay_port']

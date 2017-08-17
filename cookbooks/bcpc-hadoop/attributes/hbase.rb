@@ -65,7 +65,7 @@ default["bcpc"]["hadoop"]["hbase_rs"]["PretenureSizeThreshold"] = "1m"
 #Apache Phoenix related attributes 
 default["bcpc"]["hadoop"]["phoenix"]["tracing"]["enabled"] = false
 
-bucketcache_size = (node["bcpc"]["hadoop"]["hbase_rs"]["mx_dir_mem"]["size"] -  node["bcpc"]["hadoop"]["hbase_rs"]["hdfs_dir_mem"]["size"]).floor 
+bucketcache_size = (node["bcpc"]["hadoop"]["hbase_rs"]["mx_dir_mem"]["size"] -  node["bcpc"]["hadoop"]["hbase_rs"]["hdfs_dir_mem"]["size"]).floor
 
 # These will become key/value pairs in 'hbase_site.xml'
 default[:bcpc][:hadoop][:hbase][:site_xml].tap do |site_xml|

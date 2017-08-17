@@ -42,6 +42,20 @@ def get_bootstrap
       nil
     end
 end
+# Terraform : The hostname may not have bootstap in the name. We need
+# another way to find it. If the problems are fixed with get_bootstrap
+# and chef-client, we can move this into a conditional with get_bootstrap
+# as an alternate way of finding the bootstrap
+def get_bootstrap_by_role
+  node.run_state['bootstrap_host'] ||=
+    begin
+      get_all_nodes.select do |obj|
+        obj[:roles].to_s.include?('BCPC-Bootstrap')
+      end.first.fqdn
+    rescue
+      nil
+    end
+end
 
 #
 # Constant string which defines the default attributes which need to be retrieved from node objects

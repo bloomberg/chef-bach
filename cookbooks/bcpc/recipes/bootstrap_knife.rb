@@ -9,13 +9,15 @@
 # Now it uses the chef-client cookbook to accomplish the same task.
 #
 
-knife_path = '/home/vagrant/chef-bcpc/.chef/knife.rb'
+user = node['bcpc']['bootstrap']['admin']['user']
+
+knife_path = "/home/#{user}/chef-bcpc/.chef/knife.rb"
 
 file knife_path do
   action :create_if_missing
   content '# This was a dummy file created by Chef.'
-  owner 'vagrant'
-  group 'vagrant'
+  owner "#{user}"
+  group "#{user}"
   mode 00644
 end
 

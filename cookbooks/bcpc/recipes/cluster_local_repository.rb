@@ -32,8 +32,12 @@
 # bootstrap.
 #
 require 'uri'
+
+user = node['bcpc']['bootstrap']['admin']['user']
+
+
 apt_uri = if node[:fqdn] == get_bootstrap
-            URI.parse('file:///home/vagrant/chef-bcpc/bins')
+            URI.parse("file:///home/#{user}/chef-bcpc/bins")
           else
             URI.parse(get_binary_server_url)
           end

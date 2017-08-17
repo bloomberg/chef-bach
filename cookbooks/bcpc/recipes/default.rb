@@ -45,39 +45,47 @@ ifs = node[:network][:interfaces].keys
 
 # create a hash of ipaddresses -- skip interfaces without addresses
 ips = ifs.map{ |a| node[:network][:interfaces][a].attribute?(:addresses) and
-                     node[:network][:interfaces][a][:addresses] or {}}.reduce({}, :merge)
+               node[:network][:interfaces][a][:addresses] or {}}.reduce({}, :merge)
 
-# build a list of networks on this machine
-nets = ips.keys.select{ |ip| ips[ip]['family'] == "inet" }.map{ |ip| IPAddr.new("#{ip}/#{ips[ip]['prefixlen']}") }
+# select the fixed IP if we are on OpenStack and get rid of vip
+node.set['bcpc']['management']['ip'] = node['openstack']['local_ipv4'] if node['openstack']['local_ipv4']
+node.force_override['bcpc']['management']['vip'] = node['openstack']['local_ipv4'] if node['openstack']['local_ipv4']
+node.force_override['hostname'] = node['openstack']['hostname'] if node['openstack']['hostname']
+node.force_override['bcpc']['management']['viphost'] = node['openstack']['hostname'] if node['openstack']['hostname']
+node.force_override['bcpc']['floating']['ip'] = node['openstack']['local_ipv4'] if node['openstack']['local_ipv4']
 
-# find which subnet contains this machine's management network
-subnet = node[:bcpc][:networks].keys.map do |env_net|
-  matches = nets.select{|n| n == IPAddr.new(node[:bcpc][:networks][env_net][:management][:cidr])}
-  if matches.length >= 1
-    env_net
-  else
-    false
+unless node['openstack']['local_ipv4']
+  
+  nets = ips.keys.select{ |ip| ips[ip]['family'] == "inet" }.map{ |ip| IPAddr.new("#{ip}/#{ips[ip]['prefixlen']}") }
+
+  # find which subnet contains this machine's management network
+  subnet = node[:bcpc][:networks].keys.map do |env_net|
+    matches = nets.select{|n| n == IPAddr.new(node[:bcpc][:networks][env_net][:management][:cidr])}
+    if matches.length >= 1
+      env_net
+    else
+      false
+    end
+  end.select{|n| n}.first
+
+  raise "Could not find subnet!" if subnet.nil?
+  node.default['bcpc']['management']['subnet'] = subnet
+
+  mgmt_cidr = IPAddr.new(node['bcpc']['networks'][subnet]['management']['cidr'])
+  mgmt_vip = IPAddr.new(node['bcpc']['networks'][subnet]['management']['vip'])
+
+  # select the first IP address which is on the management network
+  plausible_ips = ips.select {|ip,v| v['family'] == "inet" and
+                              ip != mgmt_vip and mgmt_cidr===ip}.first
+  if not plausible_ips or plausible_ips.length < 1
+    raise "Unable to find any plausible IPs for node['bcpc']['management']['ip']\nPossible IPs: #{ips}\nCan not match #{mgmt_vip} and must be in network #{subnet} -- #{mgmt_cidr.to_range}"
   end
-end.select{|n| n}.first
 
-raise "Could not find subnet!" if subnet.nil?
-node.default['bcpc']['management']['subnet'] = subnet
+  node.default['bcpc']['management']['ip'] = ips.select {|ip,v| v['family'] == "inet" and
+                                                         ip != mgmt_vip and mgmt_cidr===ip}.first[0] if not node['bcpc']['management']['ip']
 
-mgmt_cidr = IPAddr.new(node['bcpc']['networks'][subnet]['management']['cidr'])
-mgmt_vip = IPAddr.new(node['bcpc']['networks'][subnet]['management']['vip'])
-
-# select the first IP address which is on the management network
-plausible_ips = ips.select {|ip,v| v['family'] == "inet" and
-                            ip != mgmt_vip and mgmt_cidr===ip}.first
-if not plausible_ips or plausible_ips.length < 1
-  raise "Unable to find any plausible IPs for node['bcpc']['management']['ip']\nPossible IPs: #{ips}\nCan not match #{mgmt_vip} and must be in network #{subnet} -- #{mgmt_cidr.to_range}"
-end
-
-node.default['bcpc']['management']['ip'] = ips.select {|ip,v| v['family'] == "inet" and
-                                                   ip != mgmt_vip and mgmt_cidr===ip}.first[0]
-
-mgmt_bitlen = (node['bcpc']['networks'][subnet]['management']['cidr'].match /\d+\.\d+\.\d+\.\d+\/(\d+)/)[1].to_i
-mgmt_hostaddr = IPAddr.new(node['bcpc']['management']['ip'])<<mgmt_bitlen>>mgmt_bitlen
+  mgmt_bitlen = (node['bcpc']['networks'][subnet]['management']['cidr'].match /\d+\.\d+\.\d+\.\d+\/(\d+)/)[1].to_i
+  mgmt_hostaddr = IPAddr.new(node['bcpc']['management']['ip'])<<mgmt_bitlen>>mgmt_bitlen
 
 stor_bitlen = (node['bcpc']['networks'][subnet]['storage']['cidr'].match /\d+\.\d+\.\d+\.\d+\/(\d+)/)[1].to_i
 stor_hostaddr = IPAddr.new(node['bcpc']['management']['ip'])<<stor_bitlen>>stor_bitlen
@@ -92,4 +100,6 @@ node.default['bcpc']['storage']['ip'] = ((IPAddr.new(node['bcpc']['networks'][su
 node.default['bcpc']['floating']['ip'] = ((IPAddr.new(node['bcpc']['networks'][subnet]['floating']['cidr'])>>(32-flot_bitlen)<<(32-flot_bitlen))|flot_hostaddr).to_s
 node.default['bcpc']['floating']['cidr'] = node['bcpc']['networks'][subnet]['floating']['cidr']
 
+end
 node.save rescue nil
+

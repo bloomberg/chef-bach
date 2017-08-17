@@ -28,6 +28,7 @@
   p7zip-full
   pcp
   powertop
+  silversearcher-ag
   sysstat
   vim-nox
   xclip

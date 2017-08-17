@@ -17,6 +17,9 @@
 # limitations under the License.
 #
 
+
+user = node['bcpc']['bootstrap']['admin']['user']
+
 %w{make gcc pkg-config libaugeas-dev}.each do |pkg|
   package pkg do
     action :nothing
@@ -54,7 +57,7 @@ require 'augeas'
 
 include_recipe "bcpc::default"
 
-bins_dir = '/home/vagrant/chef-bcpc/bins'
+bins_dir = "/home/#{user}/chef-bcpc/bins"
 
 include_recipe 'bcpc::chef_vault_download'
 include_recipe 'bcpc::chef_vault_install'
@@ -63,10 +66,10 @@ include_recipe 'bach_repository::default'
 execute 'apt-get update' do
   action :run
 end
+if node[:bcpc][:management][:ip] != node[:bcpc][:management][:vip]
+  include_recipe 'bfd::default'
 
-include_recipe 'bfd::default'
-
-if node[:bcpc][:networks].length > 1
+  if node[:bcpc][:networks].length > 1
   bfd_session "Global Bootstrap VIP Connect" do
     action :connect
     remote_ip node[:bcpc][:networks][node[:bcpc][:management][:subnet]][:management][:gateway]
@@ -100,23 +103,23 @@ if node[:bcpc][:networks].length > 1
     remote_ip node[:bcpc][:networks][node[:bcpc][:management][:subnet]][:management][:gateway]
     local_ip node[:bcpc][:management][:ip]
   end
-else
-  service 'bfdd-beacon' do
-    action [:stop, :disable]
-    ignore_failure true
+  else
+    service 'bfdd-beacon' do
+      action [:stop, :disable]
+      ignore_failure true
   end
 
   # Upstart is not very reliable when stopping bfdd-beacon.
   execute 'killall bfdd-beacon' do
     only_if 'pgrep bfdd'
   end
+  end
 end
-
 node[:bcpc][:bootstrap][:admin_users].each do |user_name|
   user user_name do
     action :create
     home "/home/#{user_name}"
-    group 'vagrant'
+    group "#{user}"
     supports :manage_home => true
   end
   bash 'set group permission on homedir' do
@@ -126,16 +129,16 @@ end
 
 sudo 'cluster-interaction' do
   user      node[:bcpc][:bootstrap][:admin_users] * ','
-  runas     'vagrant'
-  commands  ['/home/vagrant/chef-bcpc/cluster-assign-roles.sh','/home/vagrant/chef-bcpc/nodessh.sh','/usr/bin/knife']
+  runas     "#{user}"
+  commands  ["/home/#{user}/chef-bcpc/cluster-assign-roles.sh','/home/#{user}/chef-bcpc/nodessh.sh",'/usr/bin/knife']
   only_if { node[:bcpc][:bootstrap][:admin_users].length >= 1 }
 end
 
 package 'acl'
 
 cron 'synchronize chef' do
-  user  'vagrant'
-  home '/home/vagrant'
+  user  "#{user}"
+  home "/home/#{user}"
   command 'cd ~/chef-bcpc; ' \
     'knife role from file roles/*.json; ' \
     'knife cookbook upload -a; '\
