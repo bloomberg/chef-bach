@@ -12,7 +12,7 @@ default['bcpc']['hadoop']['hive']['server2']['port'] = '10000'
 default['bcpc']['hadoop']['hive']['warehouse']['dir'] = \
   ::File.join(node[:bcpc][:hadoop][:hdfs_url], '/user/hive/warehouse')
 default['bcpc']['hadoop']['hive']['scratch']['dir'] = \
-  ::File.join(node[:bcpc][:hadoop][:hdfs_url], '/tmp/hive-scratch/')
+  ::File.join(node[:bcpc][:hadoop][:hdfs_url], '/user/${user.name}/hive-tmp')
 
 # These will become key/value pairs in 'hive_site.xml'
 default[:bcpc][:hadoop][:hive][:site_xml].tap do |site_xml|
