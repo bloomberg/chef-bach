@@ -12,7 +12,9 @@
 
 <VirtualHost <%="#{node[:bcpc][:management][:ip]}"%>:443>
     ServerAlias <%="#{node[:bcpc][:management][:vip]}"%>
+    <% if node[:bcpc][:management][:vip] != node[:bcpc][:management][:ip] -%>
     ServerAlias <%="#{node[:bcpc][:management][:ip]}"%>
+    <% end -%>
 
     SSLEngine on
     SSLCertificateFile /etc/ssl/certs/ssl-bcpc.pem

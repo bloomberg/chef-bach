@@ -12,14 +12,16 @@ bundler_bin = node['bach']['repository']['bundler_bin']
 package 'libaugeas-dev'
 package 'libkrb5-dev'
 
+user = node['bcpc']['bootstrap']['admin']['user']
+
 directory "#{node['bach']['repository']['repo_directory']}/vendor" do
-  owner 'vagrant'
+  owner "#{user}"
   mode 0755
   recursive true
 end
 
 directory "#{node['bach']['repository']['repo_directory']}/.bundle" do
-  owner 'vagrant'
+  owner "#{user}"
   mode 0755
 end
 
@@ -29,7 +31,7 @@ file "#{node['bach']['repository']['repo_directory']}/.bundle/config" do
     BUNDLE_PATH: '#{node['bach']['repository']['repo_directory']}/vendor/bundle'
     BUNDLE_DISABLE_SHARED_GEMS: 'true'
   EOF
-  owner 'vagrant'
+  owner "#{user}"
   action :create
 end
 
@@ -37,8 +39,8 @@ end
 paths = %w(.bundle chef-bcpc/vendor/bundle chef-bcpc/vendor/cache)
 
 execute 'Coerce Gem bundle permissions' do
-  cwd '/home/vagrant'
-  command "chown -Rf vagrant:vagrant #{paths.join(' ')}; " \
+  cwd "/home/#{user}"
+  command "chown -Rf #{user}:#{user} #{paths.join(' ')}; " \
     "chmod -Rf u+rw #{paths.join(' ')}"
   # Some paths may not exist yet, and that's ok.
   ignore_failure true
@@ -65,7 +67,6 @@ ruby_block 'determine-bundler-command' do
       node.run_state[:bcpc_bootstrap_bundler_command] =
         "#{bundler_bin} install"
     end
-
     Chef::Resource::Log.new('bundler_command', run_context).tap do |ll|
       ll.level :info
       ll.message("Computed bundler command: " +
@@ -84,7 +85,7 @@ execute 'bundler install' do
                             /usr/lib/x86_64-linux-gnu/pkgconfig
                             /usr/share/pkgconfig).join(':'),
     'PATH' => [::File.dirname(bundler_bin), ENV['PATH']].join(':')
-  user 'vagrant'
+  user "#{user}"
 end
 
 execute 'bundler package' do
@@ -97,13 +98,13 @@ execute 'bundler package' do
                             /usr/lib/x86_64-linux-gnu/pkgconfig
                             /usr/share/pkgconfig).join(':'),
     'PATH' => [::File.dirname(bundler_bin), ENV['PATH']].join(':')
-  user 'vagrant'
+  user "#{user}"
 end
 
 # if we make the cache directory before running bundle we get an error
 # that we can't open a (non-existant) gem in the directory
 directory gems_dir do
-  owner 'vagrant'
+  owner "#{user}"
   mode 0555
 end
 

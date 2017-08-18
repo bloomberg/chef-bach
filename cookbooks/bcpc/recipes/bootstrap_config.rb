@@ -1,11 +1,14 @@
-file "/home/vagrant/chef-bcpc/.chef/#{node[:hostname]}.pem" do
-  owner 'vagrant'
+
+user = node['bcpc']['bootstrap']['admin']['user']
+
+file "/home/#{user}/chef-bcpc/.chef/#{node[:hostname]}.pem" do
+  owner "#{user}"
   group 'root'
   mode '550'
 end
 
-directory "/home/vagrant/chef-bcpc/.chef/syntax_check_cache" do
-  owner 'vagrant'
+directory "/home/#{user}/chef-bcpc/.chef/syntax_check_cache" do
+  owner "#{user}"
   group 'root'
   mode '550'
   recursive true

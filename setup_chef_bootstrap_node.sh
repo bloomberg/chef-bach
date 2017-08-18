@@ -51,6 +51,7 @@ sudo chef-client \
 # For some reason that I don't understand,we need to do this before
 # BCPC-Bootstrap so that we have os in the chef vault to allow bootstrap-gpg
 # to be properly put inside the configs/Test-Laptop data bag as we aren't even installing the chef vault until after the first apt run
+#
 sudo -E chef-client \
      -c .chef/knife.rb \
      -o 'recipe[bach_repository::apt]'

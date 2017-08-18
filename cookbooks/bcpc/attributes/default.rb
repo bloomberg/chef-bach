@@ -3,6 +3,9 @@
 #  General configuration for this cluster
 #
 ###########################################
+user = ENV['SUDO_USER'] || ENV['USER'] || 'vagrant'
+default['bcpc']['bootstrap']['admin']['user'] = user
+
 default['bcpc']['country'] = 'US'
 default['bcpc']['state'] = 'NY'
 default['bcpc']['location'] = 'New York'
@@ -272,5 +275,5 @@ default['bcpc']['chefvault']['checksum'] =
   '8d89c96554f614ec2a80ef20e98b0574c355a6ea119a30bd49aa9cfdcde15b4a'
 
 # bcpc binary server pathnames
-default['bcpc']['bin_dir']['path'] = '/home/vagrant/chef-bcpc/bins/'
+default['bcpc']['bin_dir']['path'] = "/home/#{user}/chef-bcpc/bins/"
 default['bcpc']['bin_dir']['gems'] = "#{node['bcpc']['bin_dir']['path']}/gems"

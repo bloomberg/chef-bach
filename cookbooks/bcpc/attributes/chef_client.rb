@@ -5,7 +5,7 @@
 # This file contains configuration for the chef-client cookbook, to
 # ensure both bootstrap and client nodes configure chef correctly.
 #
-sudo_user = ENV['SUDO_USER'] || 'vagrant'
+sudo_user = node['bcpc']['bootstrap']['admin']['user']
 
 #
 # The size of the result set on a host bound to a directory service

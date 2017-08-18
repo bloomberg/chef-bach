@@ -14,10 +14,14 @@
 # vagrant home directory, so that it can be shared by chef-client,
 # knife, and chef-shell.
 #
+
+
+user = ENV['SUDO_USER'] || ENV['USER'] || 'vagrant'
+
 if node[:fqdn] == get_bootstrap
   # Symlink configuration for chef-client, chef-shell, and knife.
   link '/etc/chef/client.rb' do
-    to '/home/vagrant/chef-bcpc/.chef/knife.rb'
+    to "/home/#{user}/chef-bcpc/.chef/knife.rb"
   end
 
   # Remove the existing client.d directory, if present.
@@ -25,18 +29,18 @@ if node[:fqdn] == get_bootstrap
     only_if{ File.directory?('/etc/chef/client.d') }
   end
 
-  directory '/home/vagrant/.chef/client.d' do
+  directory "/home/#{user}/.chef/client.d" do
     mode 0755
-    user 'vagrant'
-    group 'vagrant'
+    user "#{user}"
+    group "#{user}"
   end
 
   link '/etc/chef/client.d' do
-    to '/home/vagrant/.chef/client.d'
+    to "/home/#{user}/.chef/client.d"
   end
 
   link '/etc/chef/client.pem' do
-    to "/home/vagrant/chef-bcpc/.chef/#{node[:fqdn]}.pem"
+    to "/home/#{user}/chef-bcpc/.chef/#{node[:fqdn]}.pem"
   end
 end
 

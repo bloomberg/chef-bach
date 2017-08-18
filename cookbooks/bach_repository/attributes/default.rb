@@ -6,7 +6,9 @@
 # was made by the old build_bins.sh.  For now, we are just replicating
 # the behavior of the old script.
 #
-default[:bach][:repository][:repo_directory] = '/home/vagrant/chef-bcpc'
+user = node['bcpc']['bootstrap']['admin']['user']
+
+default[:bach][:repository][:repo_directory] = "/home/#{user}/chef-bcpc"
 default[:bach][:repository][:bins_directory] = \
   ::File.join(node[:bach][:repository][:repo_directory], 'bins')
 default[:bach][:repository][:bundle_directory] = \
@@ -29,7 +31,7 @@ default['bach']['repository']['fpm_bin'] = \
   "#{node['bach']['repository']['bundler_bin']} exec fpm"
 
 # Apt signing keys.
-default[:bach][:repository][:private_key_path] = '/home/vagrant/apt_key.sec'
+default[:bach][:repository][:private_key_path] = "/home/#{user}/apt_key.sec"
 default[:bach][:repository][:public_key_path] = 
   default[:bach][:repository][:bins_directory] + '/apt_key.pub'
 default[:bach][:repository][:ascii_key_path] = 

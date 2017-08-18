@@ -1,5 +1,7 @@
 package 'git'
 
+user = node['bcpc']['bootstrap']['admin']['user']
+
 directory 'repo directory' do
   path node['bach']['repository']['repo_directory']
   recursive true
@@ -15,5 +17,5 @@ git 'chef-bach' do
 end
 
 execute 'chown repo dir' do
-  command "chown -R vagrant #{node['bach']['repository']['repo_directory']}"
+  command "chown -R #{user} #{node['bach']['repository']['repo_directory']}"
 end
