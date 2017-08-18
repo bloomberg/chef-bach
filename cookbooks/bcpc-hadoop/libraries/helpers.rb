@@ -1,6 +1,6 @@
-module Bcpc_Hadoop
+module Bcpc_Hadoop # TODO: CamelCase this name to make rubocop happy
+  # Load Helper module for BCPC-Hadoop
   module Helper
-
     include Chef::Mixin::ShellOut
 
     # Apply translation rules for Hortonworks release
@@ -16,7 +16,7 @@ module Bcpc_Hadoop
     #  hadoop-2-2-0-2041-hdfs-datanode)
     #
     def hwx_pkg_str(package, version)
-      version_hyphenated = version.gsub('.', '-')
+      version_hyphenated = version.tr('.', '-')
       package.index('-').nil? ? package.dup + '-' + version_hyphenated : package.dup.insert(package.index('-'), "-#{version_hyphenated}")
     end
 
@@ -48,17 +48,12 @@ module Bcpc_Hadoop
     # Raises Mixlib::ShellOut::CommandTimeout on a hung command
     #
     def new_dir_creation(hdfs, path, user, perms, run_context)
-      hdfs_dir_test = "sudo -u hdfs hdfs dfs -test -d #{hdfs}/#{path}"
-      # Do not rescue Mixlib::ShellOut::CommandTimeout -- we should fail the run if HDFS is unavailable
-      Chef::Log.info("Verifying HDFS dir #{path}")
-      if Mixlib::ShellOut.new(hdfs_dir_test, :timeout=>90).run_command.exitstatus == 1
-        Chef::Log.info("HDFS dir #{path} creation")
-        hdfs_mkdir_cmds = "sudo -u hdfs hdfs dfs -mkdir #{hdfs}/#{path} && sudo -u hdfs hdfs dfs -chown #{user} #{hdfs}/#{path}"
-        so = Mixlib::ShellOut.new(hdfs_mkdir_cmds, :timeout=>90)
-        if so.run_command.exitstatus != 0
-          raise "Unable to successfully run: #{hdfs_mkdir_cmds}\nReturn code #{so.stderr}; stderr: #{so.stderr}\n"
-        end
-      end
+      Chef::Log.info("HDFS dir #{path} creation")
+      hdfs_mkdir_cmds = "sudo -u hdfs hdfs dfs -mkdir -p #{hdfs}/#{path} && " \
+                        "sudo -u hdfs hdfs dfs -chown #{user} #{hdfs}/#{path}"
+      so = Mixlib::ShellOut.new(hdfs_mkdir_cmds, timeout: 90)
+      so.run_command
+      so.error!
     end
 
     # Verify a Group Matches Business Rules
@@ -76,8 +71,8 @@ module Bcpc_Hadoop
       # weed out groups which failed name resolution (so we get the GID)
       return false if group.to_i.to_s == group
 
-      prohibited_regexs = prohibited_groups.map{ |regex_str| Regexp.new(regex_str) }
-      return !prohibited_regexs.map!{ |r| r.match(group) }.any?
+      prohibited_regexs = prohibited_groups.map { |regex_str| Regexp.new(regex_str) }
+      prohibited_regexs.map! { |r| r.match(group) }.none?
     end
   end
 end
