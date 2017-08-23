@@ -3,8 +3,18 @@
 #  General configuration for this cluster
 #
 ###########################################
-user = ENV['SUDO_USER'] || ENV['USER'] || 'vagrant'
-default['bcpc']['bootstrap']['admin']['user'] = user
+
+#
+# bach_repository and bcpc constitute a recursive dependency set, so
+# we have to set this value in both places so both load orders work.
+#
+node.run_state[:bcpc_admin_user] ||=
+  ENV['SUDO_USER'] || ENV['USER'] || 'vagrant'
+
+default['bcpc']['bootstrap']['admin']['user'] =
+  node.run_state[:bcpc_admin_user]
+
+user = node.run_state[:bcpc_admin_user]
 
 default['bcpc']['country'] = 'US'
 default['bcpc']['state'] = 'NY'
