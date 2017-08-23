@@ -26,6 +26,9 @@ export CLUSTER_VM_MEM=${CLUSTER_VM_MEM:-7120}
 export CLUSTER_VM_CPUs=${CLUSTER_VM_CPUs:-4}
 export CLUSTER_TYPE=${CLUSTER_TYPE:-Hadoop}
 
+# normalize capitaliztion of CLUSTER_TYPE to lower case
+typeset -l CLUSTER_TYPE="${CLUSTER_TYPE}"
+
 printf "#### Setup configuration files\n"
 # setup vagrant
 $SEDINPLACE 's/vb.gui = true/vb.gui = false/' Vagrantfile
@@ -34,7 +37,9 @@ $SEDINPLACE 's/vb.gui = true/vb.gui = false/' Vagrantfile
 if hash ruby; then
   ruby ./tests/edit_environment.rb
 else
-  printf "WARN: no ruby found -- proceeding without editing environment!\n"
+  printf "#### WARNING: no ruby found -- proceeding without editing environment!\n" > /dev/stderr
+  mkdir -p ../cluster
+  cp -rv stub-environment/* ../cluster
 fi
 
 if [ "${CLUSTER_TYPE,,}" == "kafka" ]; then
@@ -49,23 +54,11 @@ fi
 rm -f ../cluster/kafka_cluster.txt
 rm -f ../cluster/hadoop_cluster.txt
 
-# pull back the modified environment so that it can be copied to remote host
-tar -czf cluster.tgz ../cluster
-
 printf "#### Setup VB's and Bootstrap\n"
 source ./vbox_create.sh
 
 download_VM_files || ( echo "############## VBOX CREATE DOWNLOAD VM FILES RETURNED $? ##############" && exit 1 )
 create_bootstrap_VM || ( echo "############## VBOX CREATE BOOTSTRAP VM RETURNED $? ##############" && exit 1 )
-
-# Copy cluster mutable data to bootstrap.
-if [[ -d ../cluster ]]; then
-  tar -C .. -cf - cluster | vagrant ssh -c 'cd ~; tar -xvf -'
-elif [[ -f ./cluster.tgz ]]; then
-  gunzip -c cluster.tgz | vagrant ssh -c 'cd ~; tar -xvf -'
-else
-  ( echo "############## No cluster data found in ../cluster or ./cluster.tgz! ##############" && exit 1 )
-fi
 
 create_cluster_VMs || ( echo "############## VBOX CREATE CLUSTER VMs RETURNED $? ##############" && exit 1 )
 install_cluster $ENVIRONMENT || ( echo "############## VBOX CREATE INSTALL CLUSTER RETURNED $? ##############" && exit 1 )
@@ -116,7 +109,7 @@ fi
 vagrant ssh -c "cd chef-bcpc; source proxy_setup.sh; ./wait-for-hosts.sh ${VM_LIST[*]}"
 printf "Snapshotting post-Cobbler\n"
 for vm in ${VM_LIST[*]} bcpc-bootstrap; do
-  [[ ! $(vboxmanage snapshot $vm list --machinereadable | grep -q 'Post-Cobble') ]] && \
+  [[ $(vboxmanage snapshot $vm list --machinereadable | grep -q 'Post-Cobble') ]] || \
     [[ "$vms_started" == "True" ]] && VBoxManage snapshot $vm take Post-Cobble --live &
 done
 wait && printf "Done Snapshotting\n"
@@ -124,26 +117,33 @@ wait && printf "Done Snapshotting\n"
 printf "#### Chef the nodes with Basic role\n"
 vagrant ssh -c "cd chef-bcpc; ./cluster-assign-roles.sh $ENVIRONMENT Basic"
 printf "Snapshotting Post-Basic\n"
-for i in bootstrap vm1 vm2 vm3; do
-  [[ $(vboxmanage snapshot bcpc-$i list --machinereadable | grep -q 'Post-Basic') ]] && \
-    VBoxManage snapshot bcpc-$i take Post-Basic &
+for vm in ${VM_LIST[*]} bcpc-bootstrap; do
+  [[ $(vboxmanage snapshot $vm list --machinereadable | grep -q 'Post-Basic') ]] || \
+    VBoxManage snapshot $vm take Post-Basic &
 done
 wait && printf "Done Snapshotting\n"
 
-printf "#### Chef machine bcpc-vms with Bootstrap\n"
-# https://github.com/bloomberg/chef-bach/issues/847
-# We know the first run might fail set +e
-set +e
-vagrant ssh -c "cd chef-bcpc; ./cluster-assign-roles.sh $ENVIRONMENT Bootstrap"
-# if we still fail here we have some other issue
-set -e
-vagrant ssh -c "cd chef-bcpc; ./cluster-assign-roles.sh $ENVIRONMENT Bootstrap"
-printf "Snapshotting Post-Bootstrap\n"
-for i in bootstrap vm1 vm2 vm3; do
-  [[ $(vboxmanage snapshot bcpc-$i list --machinereadable | grep -q 'Post-Bootstrap') ]] && \
-    VBoxManage snapshot bcpc-$i take Post-Bootstrap &
-done
-wait && printf "Done Snapshotting\n"
+printf "#### Chef the nodes with complete roles\n"
+printf "Cluster type: $CLUSTER_TYPE\n"
+
+
+# Kafka does not run Bootstrap step
+if [ "${CLUSTER_TYPE,,}" == "hadoop" ]; then
+  printf "Running C-A-R 'bootstrap' before final C-A-R"
+  # https://github.com/bloomberg/chef-bach/issues/847
+  # We know the first run might fail set +e
+  set +e
+  vagrant ssh -c "cd chef-bcpc; ./cluster-assign-roles.sh $ENVIRONMENT Bootstrap"
+  # if we still fail here we have some other issue
+  set -e
+  vagrant ssh -c "cd chef-bcpc; ./cluster-assign-roles.sh $ENVIRONMENT Bootstrap"
+  for vm in ${VM_LIST[*]} bcpc-bootstrap; do
+    [[ $(vboxmanage snapshot $vm list --machinereadable | grep -q 'Post-Bootstrap') ]] || \
+      VBoxManage snapshot $vm take Post-Bootstrap --live &
+  done
+  wait && printf "Done Snapshotting\n"
+  printf "Running final C-A-R"
+fi
 
 printf "#### Chef machine bcpc-vms with $CLUSTER_TYPE\n"
 vagrant ssh -c "cd chef-bcpc; ./cluster-assign-roles.sh $ENVIRONMENT $CLUSTER_TYPE"
@@ -153,9 +153,9 @@ if [[ "${CLUSTER_TYPE,,}" == "hadoop" ]]; then
   vagrant ssh -c "cd chef-bcpc; ./cluster-assign-roles.sh $ENVIRONMENT $CLUSTER_TYPE BCPC-Hadoop-Head"
 fi
 printf "Snapshotting Post-Install\n"
-for i in bootstrap vm1 vm2 vm3; do
-  [[ $(vboxmanage snapshot bcpc-$i list --machinereadable | grep -q 'Post-Install') ]] && \
-    VBoxManage snapshot bcpc-$i take Post-Install &
+for vm in ${VM_LIST[*]} bcpc-bootstrap; do
+  [[ $(vboxmanage snapshot $vm list --machinereadable | grep -q 'Post-Install') ]] || \
+    VBoxManage snapshot $vm take Post-Install --live &
 done
 wait && printf "Done Snapshotting\n"
 
