@@ -31,7 +31,7 @@ KEYFILE=bootstrap_chef.id_rsa
 # If we're using EFI VMs, then we must use Ubuntu 14.04 "Trusty" or above.
 PROFILE="bcpc_host_trusty"
 
-if [ "$CLUSTER_TYPE" == "Kafka" ];then
+if [ ${CLUSTER_TYPE,,} == "kafka" ];then
     VM_LIST=(bcpc-vm1 bcpc-vm2 bcpc-vm3 bcpc-vm4 bcpc-vm5 bcpc-vm6)
 else
     VM_LIST=(bcpc-vm1 bcpc-vm2 bcpc-vm3)
