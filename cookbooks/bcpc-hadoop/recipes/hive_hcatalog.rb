@@ -3,6 +3,8 @@
 #
 include_recipe "bcpc-hadoop::hive_config"
 include_recipe "bcpc-hadoop::hive_table_stat"
+include_recipe 'bcpc-hadoop::mysql_connector'
+
 ::Chef::Recipe.send(:include, Bcpc_Hadoop::Helper)
 ::Chef::Resource::Bash.send(:include, Bcpc_Hadoop::Helper)
 
@@ -14,10 +16,6 @@ end.each do |pkg|
   end
 end
 
-package 'mysql-connector-java' do
-  action :upgrade
-end
-  
 (["hive-webhcat", "hive-metastore", "hive-server2"]).each do |pkg|
   hdp_select(pkg, node[:bcpc][:hadoop][:distribution][:active_release])
 end
