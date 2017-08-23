@@ -17,6 +17,8 @@
 # limitations under the License.
 #
 
+include_recipe 'bcpc_kafka::default'
+
 #
 # We need node search to set a reasonable value for num.partitions, so
 # the value from the attributes file must be overriden.
@@ -68,16 +70,26 @@ node.default[:kafka][:broker][:log][:dirs] = data_volumes.map do |dd|
   File.join(dd, 'kafka', 'data')
 end
 
-include_recipe 'bcpc_kafka::default'
-include_recipe 'kafka::default'
+# Install jolokia's jvm agent to node['bcpc']['jolokia']['path']
+include_recipe 'bcpc-hadoop::jolokia'
 
-node.force_default[:kafka][:ulimit_file] = 32_768
+# Add the jolokia agent to the Kafka broker's launch options
+node.default[:kafka][:generic_opts] = node[:bcpc][:jolokia][:jvm_args]
+
+# Increase the default FD limit -- kafka opens a lot of sockets.
+node.default[:kafka][:ulimit_file] = 32_768
+
+include_recipe 'kafka::default'
 
 user_ulimit 'kafka' do
   filehandle_limit node[:kafka][:ulimit_file]
   notifies :restart, 'service[kafka-broker]', :immediately
 end
 
+#
+# This is probably no longer needed now that the upstream kafka
+# cookbook includes its _coordinate recipe.
+#
 ruby_block 'kafkaup' do
   block do
     zk_path =

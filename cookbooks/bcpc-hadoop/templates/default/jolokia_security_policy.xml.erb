@@ -1,0 +1,8 @@
+<!-- This file was created by Chef.  Local changes may be reverted. -->
+<restrict>
+  <remote>
+  <% @whitelist.each do |source| %>
+    <%= "<host>#{source}</host>" %>
+  <% end %> 
+  </remote>
+</restrict>
