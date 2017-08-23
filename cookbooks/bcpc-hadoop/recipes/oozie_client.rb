@@ -13,7 +13,7 @@ end
 hdp_select('oozie-client', node[:bcpc][:hadoop][:distribution][:active_release])
 
 oozie_url = "http://#{node[:bcpc][:management][:vip]}:" +
-  node[:bcpc][:hadoop][:oozie_port].to_s
+  node[:bcpc][:hadoop][:oozie_port].to_s + '/oozie'
 
 file '/etc/profile.d/oozie-url.sh' do
   mode 0555
