@@ -129,10 +129,10 @@ if node.run_list.expand(node.chef_environment).recipes
        node["bcpc"]["hadoop"]["yarn"]["nodemanager"]["port"].to_s,
 
      'yarn.nodemanager.bind-host' =>
-       node[:bcpc][:floating][:ip],
+       float_host(node[:fqdn]),
 
      'yarn.nodemanager.hostname' =>
-       float_host(node[:hostname]),
+       float_host(node[:fqdn]),
     }
 
 
@@ -145,7 +145,7 @@ if node.run_list.expand(node.chef_environment).recipes
   rm_properties =
     {
      'yarn.resourcemanager.bind-host' =>
-       node[:bcpc][:floating][:ip],
+       float_host(node[:fqdn]),
     }
 
   node.run_state[:yarn_site_generated_values].merge!(rm_properties)
@@ -236,10 +236,10 @@ if node.roles.include?("BCPC-Hadoop-Head-YarnTimeLineServer")
         node[:bcpc][:hadoop][:kerberos][:keytab][:dir] + '/' +
         node[:bcpc][:hadoop][:kerberos][:data][:resourcemanager][:keytab], 
       'yarn.timeline-service.http-authentication.type' => "kerberos",
-      'yarn.timeline-service.http-authentication.kerberos.principal' => "HTTP/#{float_host(node.fqdn)}@#{node["bcpc"]["hadoop"]["kerberos"]["realm"] }",
+      'yarn.timeline-service.http-authentication.kerberos.principal' => "HTTP/#{kerberos_host}@#{node["bcpc"]["hadoop"]["kerberos"]["realm"] }",
       'yarn.timeline-service.http-authentication.kerberos.keytab' => 
         node[:bcpc][:hadoop][:kerberos][:keytab][:dir] + '/' +
-        node[:bcpc][:hadoop][:kerberos][:data][:resourcemanager][:keytab],
+        node[:bcpc][:hadoop][:kerberos][:data][:resourcemanager][:spnego_keytab],
    } 
   node.run_state[:yarn_site_generated_values].merge!(yts_properties)
 end
