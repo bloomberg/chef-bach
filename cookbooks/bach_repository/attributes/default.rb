@@ -6,7 +6,18 @@
 # was made by the old build_bins.sh.  For now, we are just replicating
 # the behavior of the old script.
 #
-user = node['bcpc']['bootstrap']['admin']['user']
+
+#
+# bach_repository and bcpc constitute a recursive dependency set, so
+# we have to set this value in both places so both load orders work.
+#
+node.run_state[:bcpc_admin_user] ||=
+  ENV['SUDO_USER'] || ENV['USER'] || 'vagrant'
+
+default['bcpc']['bootstrap']['admin']['user'] =
+  node.run_state[:bcpc_admin_user]
+
+user = node.run_state[:bcpc_admin_user]
 
 default[:bach][:repository][:repo_directory] = "/home/#{user}/chef-bcpc"
 default[:bach][:repository][:bins_directory] = \
@@ -32,14 +43,14 @@ default['bach']['repository']['fpm_bin'] = \
 
 # Apt signing keys.
 default[:bach][:repository][:private_key_path] = "/home/#{user}/apt_key.sec"
-default[:bach][:repository][:public_key_path] = 
+default[:bach][:repository][:public_key_path] =
   default[:bach][:repository][:bins_directory] + '/apt_key.pub'
-default[:bach][:repository][:ascii_key_path] = 
+default[:bach][:repository][:ascii_key_path] =
   default[:bach][:repository][:bins_directory] + '/apt_key.asc'
 
 # Apt repository location
 default[:bach][:repository][:apt_directory] =
-  default[:bach][:repository][:bins_directory] + '/dists/' + 
+  default[:bach][:repository][:bins_directory] + '/dists/' +
   default[:bach][:repository][:apt_repo_version]
 
 # mysql connector attributes
