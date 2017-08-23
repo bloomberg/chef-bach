@@ -5,10 +5,10 @@ maintainer       'Bloomberg Finance L.P.'
 maintainer_email 'hadoop@bloomberg.net'
 description      'Wrapper cookbook for krb5 community cookbook'
 long_description IO.read(File.join(File.dirname(__FILE__), 'README.md'))
-version          '3.0.14'
+version          '3.0.15'
 
-depends 'bcpc', '= 3.0.14'
-depends 'bcpc-hadoop', '= 3.0.14'
+depends 'bcpc', '= 3.0.15'
+depends 'bcpc-hadoop', '= 3.0.15'
 depends 'krb5'
 
 %w(ubuntu).each do |os|
