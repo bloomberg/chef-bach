@@ -105,8 +105,37 @@ link '/tftpboot' do
 end
 
 service 'xinetd' do
-  action :enable
-  subscribes :restart, 'bash[cobbler-sync]'
+  action [:enable, :start]
+end
+
+#
+# Modern revisions of cobbler may not sync a tftp configuration until
+# a tftp-requiring node is enrolled.
+#
+# To make sure tftp is enabled immediately, we pre-seed a
+# configuration just in case.
+#
+file '/etc/xinetd.d/tftp' do
+  action :create_if_missing
+  mode 0444
+  user 'root'
+  group 'root'
+  content <<-EOM.gsub(/^ {4}/,'')
+    service tftp
+    {
+        disable                 = no
+        socket_type             = dgram
+        protocol                = udp
+        wait                    = yes
+        user                    = root
+        server                  = /usr/sbin/in.tftpd
+        server_args             = -B 1380 -v -s /var/lib/tftpboot
+        per_source              = 11
+        cps                     = 100 2
+        flags                   = IPv4
+    }
+  EOM
+  notifies :restart, 'service[xinetd]', :immediately
 end
 
 [
