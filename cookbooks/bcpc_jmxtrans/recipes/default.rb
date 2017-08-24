@@ -44,11 +44,13 @@ end
 if node.default['jmxtrans']['graphite']['port'] != node['bcpc']['graphite']['relay_port']
    node.default['jmxtrans']['graphite']['port'] = node['bcpc']['graphite']['relay_port']
 end
+
 #
-# Logic to set the URL from where the jmxtrans software need to be downloaded
+# The JMXtrans cookbook expects to talk to Maven Central with a
+# remote_file resource, so we will need a proxy configuration on
+# internet-connected clients.
 #
-sw_download_url = get_binary_server_url
-node.default['jmxtrans']['url'] = "#{sw_download_url}"
+include_recipe 'bcpc::proxy_configuration'
 
 include_recipe 'jmxtrans'
 
@@ -61,7 +63,7 @@ rewind 'ark[jmxtrans]' do
 end
 
 #
-# Get an array of hosts which are garphite heads
+# Get an array of hosts which are graphite heads
 #
 graphite_hosts = get_nodes_for("graphite","bcpc").map{|x| x.bcpc.management.ip}
 #
