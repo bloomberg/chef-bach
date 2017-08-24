@@ -16,6 +16,11 @@ if [ $(dpkg-query -W -f='${Status}' libaugeas-dev 2>/dev/null | grep -c 'ok inst
   sudo apt-get install -y libaugeas-dev
 fi
 
+if [ $(dpkg-query -W -f='${Status}' libkrb5-dev 2>/dev/null | grep -c 'ok installed') -ne 1 ] && [ "$(uname)" != "Darwin" ]; then
+  echo "#### Need libkrb5-dev for the rkerberos Gem" > /dev/stderr
+  sudo apt-get install -y libkrb5-dev
+fi
+
 export PKG_CONFIG_PATH=/usr/lib/pkgconfig:/usr/lib/x86_64-linux-gnu/pkgconfig:/usr/share/pkgconfig
 bundle config --local PATH vendor/bundle
 bundle config --local DISABLE_SHARED_GEMS true
