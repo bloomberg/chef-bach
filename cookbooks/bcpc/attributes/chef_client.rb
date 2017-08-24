@@ -30,6 +30,22 @@ default['chef_client']['config'].tap do |config|
       "https://#{node[:bcpc][:bootstrap][:vip]}"
     end
 
+  if node[:bcpc][:bootstrap][:proxy]
+    no_proxy_array = [
+                      'localhost',
+                      node[:ipaddress],
+                      node[:hostname],
+                      node[:fqdn],
+                      node[:bcpc][:bootstrap][:server],
+                      node[:bcpc][:bootstrap][:server],
+                      node[:domain] ? "*#{node[:domain]}" : nil
+                     ].compact.uniq
+
+    config['http_proxy'] = node[:bcpc][:bootstrap][:proxy]
+    config['https_proxy'] = node[:bcpc][:bootstrap][:proxy].sub('http','https')
+    config['no_proxy'] = no_proxy_array.join(',')
+  end
+
   #
   # All configuration past this point only applies to the bootstrap node.
   #
@@ -38,24 +54,8 @@ default['chef_client']['config'].tap do |config|
   if node[:fqdn] == get_bootstrap
     config['syntax_check_cache_path'] =
       "/home/#{sudo_user}/chef-bcpc/.chef/syntax_check_cache"
-    
+
     config['cookbook_path'] =
       "/home/#{sudo_user}/chef-bcpc/vendor/cookbooks"
-
-    if node[:bcpc][:bootstrap][:proxy]
-      no_proxy_array = [
-                        'localhost',
-                        node[:ipaddress],
-                        node[:hostname],
-                        node[:fqdn],
-                        node[:bcpc][:bootstrap][:server],
-                        node[:bcpc][:bootstrap][:server],
-                        node[:domain] ? "*#{node[:domain]}" : nil
-                       ].compact.uniq
-      
-      config['http_proxy'] = node[:bcpc][:bootstrap][:proxy]
-      config['https_proxy'] = node[:bcpc][:bootstrap][:proxy].sub('http','https')
-      config['no_proxy'] = no_proxy_array.join(',')
-    end
-  end    
+  end
 end

@@ -17,11 +17,15 @@
 # limitations under the License.
 #
 
+if node['bcpc']['bootstrap']['proxy']
+  include_recipe 'bcpc::proxy_configuration'
+end
+
 include_recipe 'java'
 include_recipe 'java::oracle_jce'
 include_recipe 'maven'
 
-# Implicit dependencies of the maven cookbook.
+# Dependencies of the maven cookbook.
 ['gyoku', 'nori'].each do |gem_name|
   bcpc_chef_gem gem_name do
     compile_time true
@@ -44,4 +48,34 @@ maven_settings 'settings.mirrors' do
                    mirrorOf: '*'
                   }
          })
+end
+
+# On internet-connected hosts, maven needs a proxy.
+if node['bcpc']['bootstrap']['proxy']
+  require 'uri'
+  http_uri = URI(node['chef_client']['config']['http_proxy'])
+  https_uri = URI(node['chef_client']['config']['https_proxy'])
+
+  maven_settings 'settings.proxies' do
+    value({
+           proxy: [
+                   {
+                    id: 'http_proxy',
+                    protocol: 'http',
+                    active: true,
+                    host: http_uri.host,
+                    port: http_uri.port,
+                    nonProxyHosts: node['chef_client']['config']['no_proxy']
+                   },
+                   {
+                    id: 'https_proxy',
+                    protocol: 'https',
+                    active: true,
+                    host: https_uri.host,
+                    port: https_uri.port,
+                    nonProxyHosts: node['chef_client']['config']['no_proxy']
+                   }
+                  ]
+          })
+  end
 end

@@ -13,3 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+
+#
+# The upstream maven cookbook has a non-functioning maven 1.x URL
+# configured as the default value, so we are obliged to override it.
+#
+default['maven']['repositories'] = ['http://repo1.maven.apache.org/maven2']
