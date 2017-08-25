@@ -65,7 +65,10 @@ end
 #
 # Get an array of hosts which are graphite heads
 #
-graphite_hosts = get_nodes_for("graphite","bcpc").map{|x| x.bcpc.management.ip}
+graphite_hosts = get_nodes_for('graphite','bcpc').map do
+  |hh| hh[:bcpc][:management][:ip]
+end
+
 #
 # Array to store the list of services on which jxmtrans dependent on i.e. collects data from
 # If any of the services gets restarted jmxtrans process need to be restarted

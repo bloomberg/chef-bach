@@ -4,7 +4,6 @@ default['jmxtrans']['version'] = '256'
 #
 # The JMXtrans Debian package is hosted on Maven Central.  By default,
 # we rely on the Maven cookbook attributes to determine a URL.
-
 #
 default['jmxtrans']['url'] =
   node['maven']['repositories'].first +

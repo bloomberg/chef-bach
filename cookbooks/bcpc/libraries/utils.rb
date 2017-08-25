@@ -37,7 +37,7 @@ def get_bootstrap
     begin
       get_all_nodes.select do |obj|
         obj[:hostname].to_s.include?('bootstrap')
-      end.first.fqdn
+      end.first[:fqdn]
     rescue
       nil
     end
@@ -336,7 +336,7 @@ def calc_reverse_ip_address(ip)
   reverse_ip = ipAddr.reverse
 end
 
-# Internal: Check if the given host is the Zabbix leader 
+# Internal: Check if the given host is the Zabbix leader
 #
 # host - host id (eg: hostname)
 #
