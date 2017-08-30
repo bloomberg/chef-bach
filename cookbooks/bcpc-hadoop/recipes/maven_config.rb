@@ -45,7 +45,7 @@ maven_settings 'settings.mirrors' do
                    id: 'primary-mirror',
                    name: 'Chef-configured primary mirror',
                    url: node['maven']['repositories'].first,
-                   mirrorOf: '*'
+                   mirrorOf: 'central'
                   }
          })
 end
