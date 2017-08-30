@@ -79,6 +79,12 @@ node.default[:kafka][:generic_opts] = node[:bcpc][:jolokia][:jvm_args]
 # Increase the default FD limit -- kafka opens a lot of sockets.
 node.default[:kafka][:ulimit_file] = 32_768
 
+#
+# On internet-connected hosts, kafka::default will need a proxy to
+# reach the Kafka mirrors.
+#
+include_recipe 'bcpc::proxy_configuration'
+
 include_recipe 'kafka::default'
 
 user_ulimit 'kafka' do

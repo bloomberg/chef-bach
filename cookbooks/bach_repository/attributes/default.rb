@@ -53,24 +53,6 @@ default[:bach][:repository][:apt_directory] =
   default[:bach][:repository][:bins_directory] + '/dists/' +
   default[:bach][:repository][:apt_repo_version]
 
-# mysql connector attributes
-default[:bach][:repository][:mysql_connector].tap do |connector|
-  connector[:version] = '5.1.37'
-
-  connector[:tarball_md5sum] = '9ef584d3328735db51bd5dde3f602c22'
-
-  connector[:url] =
-    'http://dev.mysql.com/get/Downloads/Connector-J/mysql-connector-java-' +
-    node[:bach][:repository][:mysql_connector][:version] + '.tar.gz'
-
-  connector[:package][:short_name] = 'mysql-connector-java'
-
-  connector[:package][:name] =
-    node[:bach][:repository][:mysql_connector][:package][:short_name] +
-    '_' +
-    node[:bach][:repository][:mysql_connector][:version] + '_all.deb'
-end
-
 # Get the URLs to download Java installation packages
 # use java cookbook (https://github.com/agileorbit-cookbooks/java)
 default['bach']['repository']['java'].tap do |java|

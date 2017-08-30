@@ -2,6 +2,15 @@
 default['jmxtrans']['version'] = '256'
 
 #
+# The JMXtrans Debian package is hosted on Maven Central.  By default,
+# we rely on the Maven cookbook attributes to determine a URL.
+#
+default['jmxtrans']['url'] =
+  node['maven']['repositories'].first +
+  '/org/jmxtrans/jmxtrans/' +
+  node['jmxtrans']['version']
+
+#
 # Since we rely on the bootstrap VM to host the jmxtrans distribution,
 # this checksum needs to match the checksum found in
 # bach_repository::jmxtrans.
@@ -21,31 +30,31 @@ default['jmxtrans']['default_queries']['nodemanager'] = [
   }
 ]
 default['jmxtrans']['default_queries']['resourcemanager'] = [
-  { 
+  {
     'obj' => "Hadoop:service=ResourceManager,name=ClusterMetrics*",
     'result_alias' => "ResourceManager",
     'attr' => [ "NumActiveNMs" ]
-  }, 
+  },
   {
     'type_name' => ["name", "q0", "user"],
     'obj' => "Hadoop:service=ResourceManager,name=QueueMetrics,q0=root,user=*",
     'result_alias' => "ResourceManager",
-    'attr' => [ 
-                "AppsRunning",                                  
-                "AppsPending",                                  
-                "AllocatedMB",                                  
-                "AllocatedVCores",                              
-                "AllocatedContainers",                          
-                "PendingMB",                                    
-                "PendingVCores",                                
-                "PendingContainers",                            
-                "ReservedMB",                                   
-                "ReservedVCores",                               
-                "ReservedContainers",                           
-                "ActiveUsers",                                  
-                "ActiveApplications"                            
-    ]           
-  }     
+    'attr' => [
+                "AppsRunning",
+                "AppsPending",
+                "AllocatedMB",
+                "AllocatedVCores",
+                "AllocatedContainers",
+                "PendingMB",
+                "PendingVCores",
+                "PendingContainers",
+                "ReservedMB",
+                "ReservedVCores",
+                "ReservedContainers",
+                "ActiveUsers",
+                "ActiveApplications"
+    ]
+  }
 ]
 default['jmxtrans']['default_queries']['zookeeper'] = [
   {
@@ -63,24 +72,24 @@ default['jmxtrans']['default_queries']['kafka'] = [
   {
     'obj' => "\\\"kafka.server\\\":type=\\\"BrokerTopicMetrics\\\",name=*",
     'result_alias' => "kafka.BrokerTopicMetrics",
-    'attr' => 
-      [ 
-        "Count", 
-        "MeanRate", 
-        "OneMinuteRate", 
-        "FiveMinuteRate", 
-        "FifteenMinuteRate" 
+    'attr' =>
+      [
+        "Count",
+        "MeanRate",
+        "OneMinuteRate",
+        "FiveMinuteRate",
+        "FifteenMinuteRate"
       ]
   },
   {
     'obj' => "\\\"kafka.server\\\":type=\\\"DelayedFetchRequestMetrics\\\",name=*",
     'result_alias' => "kafka.server.DelayedFetchRequestMetrics",
-    'attr' => 
-      [ 
-        "Count", 
-        "MeanRate", 
-        "OneMinuteRate", 
-        "FiveMinuteRate", 
+    'attr' =>
+      [
+        "Count",
+        "MeanRate",
+        "OneMinuteRate",
+        "FiveMinuteRate",
         "FifteenMinuteRate"
       ]
   }
@@ -89,7 +98,7 @@ default['jmxtrans']['default_queries']['datanode'] = [
   {
     'obj' => "Hadoop:name=JvmMetrics,service=DataNode",
     'result_alias' => "dn_jvm_metrics",
-    'attr' => 
+    'attr' =>
       [
         "GcCount",
         "GcTimeMillis",
@@ -113,7 +122,7 @@ default['jmxtrans']['default_queries']['datanode'] = [
   {
     'obj' => "Hadoop:name=DataNodeInfo,service=DataNode",
     'result_alias' => "dn_data_node_info",
-    'attr' => 
+    'attr' =>
       [
         "ClusterId",
         "HttpPort",
@@ -129,7 +138,7 @@ default['jmxtrans']['default_queries']['namenode'] = [
   {
     'obj' => "Hadoop:name=JvmMetrics,service=NameNode",
     'result_alias' => "nn_jvm_metrics",
-    'attr' => 
+    'attr' =>
       [
         "GcCount",
         "GcCountCopy",
@@ -157,7 +166,7 @@ default['jmxtrans']['default_queries']['namenode'] = [
   {
     'obj' => "Hadoop:name=FSNamesystem,service=NameNode",
     'result_alias' => "nn_fs_name_system",
-    'attr' => 
+    'attr' =>
       [
         "BlockCapacity",
         "BlocksTotal",
@@ -195,7 +204,7 @@ default['jmxtrans']['default_queries']['namenode'] = [
   {
     'obj' => "Hadoop:name=FSNamesystemState,service=NameNode",
     'result_alias' => "nn_fs_name_system_state",
-    'attr' => 
+    'attr' =>
       [
         "BlocksTotal",
         "CapacityRemaining",
@@ -215,7 +224,7 @@ default['jmxtrans']['default_queries']['namenode'] = [
   {
     'obj' => "Hadoop:name=NameNodeActivity,service=NameNode",
     'result_alias' => "nn_name_node_activity",
-    'attr' => 
+    'attr' =>
       [
         "AddBlockOps",
         "AllowSnapshotOps",
@@ -256,7 +265,7 @@ default['jmxtrans']['default_queries']['namenode'] = [
   {
     'obj' => "Hadoop:name=NameNodeInfo,service=NameNode",
     'result_alias' => "nn_name_node_info",
-    'attr' => 
+    'attr' =>
       [
         "BlockPoolId",
         "BlockPoolUsedSpace",
@@ -289,7 +298,7 @@ default['jmxtrans']['default_queries']['hbase_master'] = [
   {
     'obj' => "Hadoop:name=JvmMetrics,service=HBase",
     'result_alias' => "hbm_jvm_metrics",
-    'attr' => 
+    'attr' =>
       [
         "GcCount",
         "GcTimeMillis",
@@ -313,7 +322,7 @@ default['jmxtrans']['default_queries']['hbase_master'] = [
   {
     'obj' => "Hadoop:name=Master,service=HBase,sub=Server",
     'result_alias' => "hbm_server",
-    'attr' => 
+    'attr' =>
       [
         "averageLoad",
         "clusterRequests",
@@ -326,7 +335,7 @@ default['jmxtrans']['default_queries']['hbase_master'] = [
   {
     'obj' => "Hadoop:name=Master,service=HBase,sub=AssignmentManger",
     'result_alias' => "hbm_am",
-    'attr' => 
+    'attr' =>
       [
         "ritOldestAge",
         "ritCountOverThreshold",
@@ -343,7 +352,7 @@ default['jmxtrans']['default_queries']['hbase_rs'] = [
   {
     'obj' => "Hadoop:name=JvmMetrics,service=HBase",
     'result_alias' => "hb_rs_jvm_metrics",
-    'attr' => 
+    'attr' =>
       [
         "GcCount",
         "GcTimeMillis",
@@ -364,10 +373,10 @@ default['jmxtrans']['default_queries']['hbase_rs'] = [
         "ThreadsWaiting"
      ]
   },
-  {   
+  {
     "obj"=> "Hadoop:name=RegionServer,service=HBase,sub=IPC",
     "result_alias"=> "hb_ipc",
-    "attr" => 
+    "attr" =>
     [
       "QueueCallTime_num_ops",
       "QueueCallTime_min",
@@ -399,12 +408,12 @@ default['jmxtrans']['default_queries']['hbase_rs'] = [
       "numActiveHandler"
     ]
   },
-  {   
+  {
     "attr" => [],
     "obj" => "Hadoop:service=HBase,name=RegionServer,sub=Regions,*",
     "result_alias" => "hb_regions"
   },
-  {   
+  {
     "attr" => [],
     "obj" => "Hadoop:service=HBase,name=RegionServer,sub=Replication,*",
     "result_alias" => "hb_replication"
@@ -412,8 +421,8 @@ default['jmxtrans']['default_queries']['hbase_rs'] = [
   {
     "obj" => "Hadoop:service=HBase,name=RegionServer,sub=Server,*",
     "result_alias" => "hb_rs_server",
-    "attr" => []                        
-  } 
+    "attr" => []
+  }
 ]
 
 # Override defaults for the jmxtrans cookbook

@@ -16,7 +16,6 @@ default[:use_hadoop_zookeeper_quorum] = false
 default[:kafka][:automatic_start] = true
 default[:kafka][:automatic_restart] = true
 default[:kafka][:jmx_port] = node[:bcpc][:hadoop][:kafka][:jmx][:port]
-default[:kafka][:base_url] = get_binary_server_url + 'kafka'
 
 #
 # Kafka broker settings
