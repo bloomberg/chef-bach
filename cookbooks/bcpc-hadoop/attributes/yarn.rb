@@ -139,6 +139,7 @@ default['bcpc']['hadoop']['yarn']['site_xml'].tap do |site_xml|
 
   site_xml['yarn.scheduler.maximum-allocation-mb'] = yarn_max_memory.call
   site_xml['yarn.acl.enable'] = 'true'
+  site_xml['mapred.job.acl-view-job'] = '*'
 
   site_xml['yarn.timeline-service.client.max-retries'] = 0
   site_xml['yarn.nodemanager.disk-health-checker.min-free-space-per-disk-mb'] = node['bcpc']['hadoop']['yarn']['min-free-space-per-disk-mb']
