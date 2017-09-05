@@ -1,5 +1,9 @@
 source 'https://supermarket.chef.io'
 
-cookbook 'cobblerd', git: 'https://github.com/bloomberg/cobbler-cookbook.git'
+# cobblerd upstream, pending submitting update to supermarket
+cookbook 'cobblerd',
+  git: 'https://github.com/cbaenziger/cobbler-cookbook',
+  branch: 'source_build'
+
 cookbook 'bfd', git: 'https://github.com/bloomberg/openbfdd-cookbook'
 metadata

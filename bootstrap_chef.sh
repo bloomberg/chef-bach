@@ -79,7 +79,7 @@ else
 fi
 
 echo "Running rsync of Vagrant install"
-$SSH_CMD "rsync $RSYNCEXTRA -avP --exclude vbox --exclude vendor --exclude Gemfile.lock --exclude .chef /chef-bcpc-host/ /home/vagrant/chef-bcpc/"
+$SSH_CMD "rsync $RSYNCEXTRA -avP --exclude vbox --exclude vendor --exclude Gemfile.lock --exclude .kitchen --exclude .chef /chef-bcpc-host/ /home/vagrant/chef-bcpc/"
 
 # cluster external environment will go here
 #$SSH_CMD "mkdir -p cluster"

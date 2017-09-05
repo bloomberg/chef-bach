@@ -178,19 +178,6 @@ default['bcpc']['repos_for']['precise'].tap do |precise_repos|
       'http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.21/repos/ubuntu12'
   end
 
-  precise_repos['cobbler26'].tap do |repo|
-    repo[:components] = ['/']
-    repo[:distribution] = nil
-    repo[:uri] =
-      'http://download.opensuse.org/repositories/home:/libertas-ict:' \
-      '/cobbler26/xUbuntu_12.04'
-    #
-    # The public apt repository is signed with an expired key, so
-    # we're forced to use 'trusted' in order to defeat the signing.
-    #
-    repo[:trusted] = true
-  end
-
   precise_repos['zabbix'].tap do |repo|
     repo[:components] = ['main']
     repo[:distribution] = 'precise'
@@ -231,19 +218,6 @@ default['bcpc']['repos_for']['trusty'].tap do |trusty_repos|
       'http://private-repo-1.hortonworks.com/HDP-UTILS-1.1.0.21/repos/ubuntu14'
   end
 
-  trusty_repos['cobbler26'].tap do |repo|
-    repo[:components] = ['/']
-    repo[:distribution] = nil
-    repo[:uri] =
-      'http://download.opensuse.org/repositories/home:/libertas-ict:' \
-      '/cobbler26/xUbuntu_14.04'
-    #
-    # The public apt repository is signed with an expired key, so
-    # we're forced to use 'trusted' in order to defeat the signing.
-    #
-    repo[:trusted] = true
-  end
-
   trusty_repos['zabbix'].tap do |repo|
     repo[:components] = ['main']
     repo[:distribution] = 'trusty'
@@ -253,6 +227,7 @@ default['bcpc']['repos_for']['trusty'].tap do |trusty_repos|
 end
 
 default[:bcpc][:repos] = node[:bcpc][:repos_for][node[:lsb][:codename]]
+default['cobbler']['package']['type'] = 'apt'
 
 ###########################################
 #
