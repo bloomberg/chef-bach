@@ -125,6 +125,9 @@ if node["bcpc"]["hadoop"]["hbase"]["bucketcache"]["enabled"] == true then
   generated_values['hbase.bucketcache.size'] = bucketcache_size
   generated_values['hbase.bucketcache.ioengine '] = node["bcpc"]["hadoop"]["hbase"]["bucketcache"]["ioengine"]
   generated_values['hbase.bucketcache.combinedcache.enabled'] = true
+  if !node['bcpc']['hadoop']['hbase']['bucketcache.bucket.sizes'].nil?
+    generated_values['hbase.bucketcache.bucket.sizes'] = node['bcpc']['hadoop']['hbase']['bucketcache.bucket.sizes']
+  end
 end
 
 #
