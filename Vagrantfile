@@ -71,7 +71,7 @@ $bach_local_environment = cluster_environment
 $bach_local_mirror = nil
 
 Vagrant.configure('2') do |config|
-  config.vm.define 'bootstrap'.to_sym do |bootstrap|
+  config.vm.define bootstrap_hostname.to_sym do |bootstrap|
     bootstrap.vm.hostname = "#{bootstrap_hostname}.#{bootstrap_domain}"
 
     # Awaiting https://github.com/ruby/ruby/pull/1269 to properly retrieve mask
