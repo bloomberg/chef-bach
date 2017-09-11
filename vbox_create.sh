@@ -28,7 +28,7 @@ export CLUSTER_TYPE=${CLUSTER_TYPE:-Hadoop}
 # Cluster VM Defaults
 export CLUSTER_VM_MEM=${CLUSTER_VM_MEM-2048}
 export CLUSTER_VM_CPUs=${CLUSTER_VM_CPUs-1}
-export CLUSTER_VM_EFI=${CLUSTER_VM_EFI:-false}
+export CLUSTER_VM_EFI=${CLUSTER_VM_EFI:-true}
 export CLUSTER_VM_DRIVE_SIZE=${CLUSTER_VM_DRIVE_SIZE-20480}
 
 if !hash vagrant 2> /dev/null ; then
