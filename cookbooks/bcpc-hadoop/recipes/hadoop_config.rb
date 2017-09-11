@@ -74,8 +74,6 @@ end
 file "/etc/hadoop/conf/dfs.exclude" do
   content node["bcpc"]["hadoop"]["decommission"]["hosts"].join("\n")
   mode 0644
-  owner 'yarn'
-  group 'hdfs'
   only_if { !node["bcpc"]["hadoop"]["decommission"]["hosts"].nil? }
 end
 
