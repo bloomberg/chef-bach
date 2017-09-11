@@ -40,7 +40,7 @@ end
 maven 'mysql-connector-java' do
   group_id 'mysql'
   version  '5.1.43'
-  dest '/usr/share/java/mysql-connector-java.jar'
+  dest '/usr/share/java'
   action :put
   timeout 1800
 end

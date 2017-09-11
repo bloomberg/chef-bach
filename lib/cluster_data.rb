@@ -6,12 +6,18 @@
 # will attempt to contact the chef server.  These should probably be
 # separated from each other.
 #
+
+# Suppress Hashie warnings by loading it early.
+require 'hashie/logger'
+Hashie.logger.level = Logger.const_get 'ERROR'
+
 require 'chef'
 require 'chef-vault'
 require 'json'
 require 'ohai'
 require 'pry'
 require 'ridley'
+
 Ridley::Logging.logger.level = Logger.const_get 'ERROR'
 
 module BACH
