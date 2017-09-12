@@ -34,27 +34,133 @@ default['bcpc']['hadoop']['jmxtrans_agent']['namenode']['queries'] = default['bc
   {
     'objectName' => 'Hadoop:name=JvmMetrics,service=NameNode',
     'resultAlias' => 'nn_jvm_metrics.%name%.#attribute#',
-    'attributes' => ''
+    'attributes' =>
+      'GcCount,' \
+      'GcCountCopy,' \
+      'GcCountMarkSweepCompact,' \
+      'GcTimeMillis,' \
+      'GcTimeMillisCopy,' \
+      'GcTimeMillisMarkSweepCompact,' \
+      'LogError,' \
+      'LogFatal,' \
+      'LogInfo,' \
+      'LogWarn,' \
+      'MemHeapCommittedM,' \
+      'MemHeapUsedM,' \
+      'MemMaxM,' \
+      'MemNonHeapCommittedM,' \
+      'MemNonHeapUsedM,' \
+      'ThreadsBlocked,' \
+      'ThreadsNew,' \
+      'ThreadsRunnable,' \
+      'ThreadsTerminated,' \
+      'ThreadsTimedWaiting,' \
+      'ThreadsWaiting'
   },
   {
     'objectName' => 'Hadoop:name=FSNamesystem,service=NameNode',
     'resultAlias' => 'nn_fs_name_system.%name%.#attribute#',
-    'attributes' => ''
+    'attributes' =>
+      'BlockCapacity,' \
+      'BlocksTotal,' \
+      'CapacityRemaining,' \
+      'CapacityRemainingGB,' \
+      'CapacityTotal,' \
+      'CapacityTotalGB,' \
+      'CapacityUsed,' \
+      'CapacityUsedGB,' \
+      'CapacityUsedNonDFS,' \
+      'CorruptBlocks,' \
+      'ExcessBlocks,' \
+      'ExpiredHeartbeats,' \
+      'FilesTotal,' \
+      'LastCheckpointTime,' \
+      'LastWrittenTransactionId,' \
+      'MillisSinceLastLoadedEdits,' \
+      'MissingBlocks,' \
+      'PendingDataNodeMessageCount,' \
+      'PendingDeletionBlocks,' \
+      'PendingReplicationBlocks,' \
+      'PostponedMisreplicatedBlocks,' \
+      'ScheduledReplicationBlocks,' \
+      'Snapshots,' \
+      'SnapshottableDirectories,' \
+      'TotalFiles,' \
+      'TotalLoad,' \
+      'TransactionsSinceLastCheckpoint,' \
+      'TransactionsSinceLastLogRoll,' \
+      'UnderReplicatedBlocks'
   },
   {
     'objectName' => 'Hadoop:name=FSNamesystemState,service=NameNode',
     'resultAlias' => 'nn_fs_name_system_state.%name%.#attribute#',
-    'attributes' => ''
+    'attributes' =>
+      'BlocksTotal,' \
+      'CapacityRemaining,' \
+      'CapacityTotal,' \
+      'CapacityUsed,' \
+      'FilesTotal,' \
+      'NumDeadDataNodes,' \
+      'NumLiveDataNodes,' \
+      'NumStaleDataNodes,' \
+      'PendingReplicationBlocks,' \
+      'ScheduledReplicationBlocks,' \
+      'TotalLoad,' \
+      'UnderReplicatedBlocks'
   },
   {
     'objectName' => 'Hadoop:name=NameNodeActivity,service=NameNode',
     'resultAlias' => 'nn_name_node_activity.%name%.#attribute#',
-    'attributes' => ''
+    'attributes' =>
+      'AddBlockOps,' \
+      'AllowSnapshotOps,' \
+      'BlockReportAvgTime,' \
+      'BlockReportNumOps,' \
+      'CreateFileOps,' \
+      'CreateSnapshotOps,' \
+      'CreateSymlinkOps,' \
+      'DeleteFileOps,' \
+      'DeleteSnapshotOps,' \
+      'DisallowSnapshotOps,' \
+      'FileInfoOps,' \
+      'FilesAppended,' \
+      'FilesCreated,' \
+      'FilesDeleted,' \
+      'FilesInGetListingOps,' \
+      'FilesRenamed,' \
+      'FsImageLoadTime,' \
+      'GetAdditionalDatanodeOps,' \
+      'GetBlockLocations,' \
+      'GetLinkTargetOps,' \
+      'GetListingOps,' \
+      'ListSnapshottableDirOps,' \
+      'RenameSnapshotOps,' \
+      'SafeModeTime,' \
+      'SnapshotDiffReportOps,' \
+      'SyncsAvgTime,' \
+      'SyncsNumOps,' \
+      'TransactionsAvgTime,' \
+      'TransactionsBatchedInSync,' \
+      'TransactionsNumOps'
   },
   {
     'objectName' => 'Hadoop:name=NameNodeInfo,service=NameNode',
     'resultAlias' => 'nn_name_node_info.%name%.#attribute#',
-    'attributes' => ''
+    'attributes' =>
+      'BlockPoolUsedSpace,' \
+      'DistinctVersionCount,' \
+      'Free,' \
+      'JournalTransactionInfo,' \
+      'NonDfsUsedSpace,' \
+      'NumberOfMissingBlocks,' \
+      'PercentBlockPoolUsed,' \
+      'PercentRemaining,' \
+      'PercentUsed,' \
+      'Threads,' \
+      'Total,' \
+      'TotalBlocks,' \
+      'TotalFiles,' \
+      'Used'
   }
 ]
 
@@ -65,14 +171,131 @@ default['bcpc']['hadoop']['jmxtrans_agent']['datanode']['queries'] = default['bc
   {
     'objectName' => 'Hadoop:name=JvmMetrics,service=DataNode',
     'resultAlias' => 'dn_jvm_metrics.%name%.#attribute#',
-    'attributes' => ''
+    'attributes' =>
+      'GcCount,' \
+      'GcTimeMillis,' \
+      'LogError,' \
+      'LogFatal,' \
+      'LogInfo,' \
+      'LogWarn,' \
+      'MemHeapCommittedM,' \
+      'MemHeapUsedM,' \
+      'MemMaxM,' \
+      'MemNonHeapCommittedM,' \
+      'MemNonHeapUsedM,' \
+      'ThreadsBlocked,' \
+      'ThreadsNew,' \
+      'ThreadsRunnable,' \
+      'ThreadsTerminated,' \
+      'ThreadsTimedWaiting,' \
+      'ThreadsWaiting'
   },
   {
     'objectName' => 'Hadoop:name=DataNodeInfo,service=DataNode',
     'resultAlias' => 'dn_data_node_info.%name%.#attribute#',
-    'attributes' => ''
+    'attributes' =>
+      'HttpPort,' \
+      'RpcPort,' \
+      'XceiverCount'
   }
 ]
+
+# HDFS journalnode
+default['bcpc']['hadoop']['jmxtrans_agent']['journalnode']['xml'] = '/etc/hadoop/conf/jmxtrans_agent_journalnode.xml'
+default['bcpc']['hadoop']['jmxtrans_agent']['journalnode']['name_prefix'] = 'jmx.journalnode'
+default['bcpc']['hadoop']['jmxtrans_agent']['journalnode']['queries'] = default['bcpc']['hadoop']['jmxtrans_agent']['basic']['queries'] + [
+  {
+    'objectName' => 'Hadoop:service=JournalNode,name=RpcDetailedActivityForPort*',
+    'resultAlias' => 'journal_node.%name%.#attribute#',
+    'attributes' =>
+      'BatchesWritten,' \
+      'BatchesWrittenWhileLagging,' \
+      'BytesWritten,' \
+      'CurrentLagTxns,' \
+      'LastPromisedEpoch,' \
+      'LastWriterEpoch,' \
+      'LastWrittenTxId,' \
+      'Syncs300s50thPercentileLatencyMicros,' \
+      'Syncs300s75thPercentileLatencyMicros,' \
+      'Syncs300s90thPercentileLatencyMicros,' \
+      'Syncs300s95thPercentileLatencyMicros,' \
+      'Syncs300s99thPercentileLatencyMicros,' \
+      'Syncs300sNumOps,' \
+      'Syncs3600s50thPercentileLatencyMicros,' \
+      'Syncs3600s75thPercentileLatencyMicros,' \
+      'Syncs3600s90thPercentileLatencyMicros,' \
+      'Syncs3600s95thPercentileLatencyMicros,' \
+      'Syncs3600s99thPercentileLatencyMicros,' \
+      'Syncs3600sNumOps,' \
+      'Syncs60s50thPercentileLatencyMicros,' \
+      'Syncs60s75thPercentileLatencyMicros,' \
+      'Syncs60s90thPercentileLatencyMicros,' \
+      'Syncs60s95thPercentileLatencyMicros,' \
+      'Syncs60s99thPercentileLatencyMicros,' \
+      'Syncs60sNumOps,' \
+      'TxnsWritten'
+  },
+  {
+    'objectName' => 'Hadoop:service=JournalNode,name=RpcActivityForPort8485',
+    'resultAlias' => 'journal_node.%name%.#attribute#',
+    'attributes' =>
+      'CallQueueLength,' \
+      'NumOpenConnections,' \
+      'ReceivedBytes,' \
+      'RpcAuthenticationFailures,' \
+      'RpcAuthenticationSuccesses,' \
+      'RpcAuthorizationFailures,' \
+      'RpcAuthorizationSuccesses,' \
+      'RpcClientBackoff,' \
+      'RpcProcessingTimeAvgTime,' \
+      'RpcProcessingTimeNumOps,' \
+      'RpcQueueTimeAvgTime,' \
+      'RpcQueueTimeNumOps,' \
+      'RpcSlowCalls,' \
+      'SentBytes'
+  },
+  {
+    'objectName': 'Hadoop:service=JournalNode,name=UgiMetrics',
+    'resultAlias': 'journal_node.%name%.#attribute#',
+    'attributes':
+      'AcceptRecoveryAvgTime,' \
+      'AcceptRecoveryNumOps,' \
+      'FinalizeLogSegmentAvgTime,' \
+      'FinalizeLogSegmentNumOps,' \
+      'GetEditLogManifestAvgTime,' \
+      'GetEditLogManifestNumOps,' \
+      'GetJournalStateAvgTime,' \
+      'GetJournalStateNumOps,' \
+      'HeartbeatAvgTime,' \
+      'HeartbeatNumOps,' \
+      'JournalAvgTime,' \
+      'JournalNumOps,' \
+      'JournalOutOfSyncExceptionAvgTime,' \
+      'JournalOutOfSyncExceptionNumOps,' \
+      'NewEpochAvgTime,' \
+      'NewEpochNumOps,' \
+      'PrepareRecoveryAvgTime,' \
+      'PrepareRecoveryNumOps,' \
+      'PurgeLogsAvgTime,' \
+      'PurgeLogsNumOps,' \
+      'StartLogSegmentAvgTime,' \
+      'StartLogSegmentNumOps'
+  },
+  {
+    'objectName': 'Hadoop:service=JournalNode,name=Journal-*',
+    'resultAlias': 'journal_node.%name%.#attribute#',
+    'attributes':
+      'GetGroupsAvgTime,' \
+      'GetGroupsNumOps,' \
+      'LoginFailureAvgTime,' \
+      'LoginFailureNumOps,' \
+      'LoginSuccessAvgTime,' \
+      'LoginSuccessNumOps,' \
+      'RenewalFailures,' \
+      'RenewalFailuresTotal'
+  }
+]
+
 
 # HBase master
 default['bcpc']['hadoop']['jmxtrans_agent']['hbase_master']['xml'] = '/etc/hadoop/conf/jmxtrans_agent_hbase_master.xml'
@@ -81,17 +304,43 @@ default['bcpc']['hadoop']['jmxtrans_agent']['hbase_master']['queries'] = default
   {
     'objectName' => 'Hadoop:name=JvmMetrics,service=HBase',
     'resultAlias' => 'hbm_jvm_metrics.%name%.#attribute#',
-    'attributes' => ''
+    'attributes' =>
+      'GcCount,' \
+      'GcTimeMillis,' \
+      'LogError,' \
+      'LogFatal,' \
+      'LogInfo,' \
+      'LogWarn,' \
+      'MemHeapCommittedM,' \
+      'MemHeapUsedM,' \
+      'MemMaxM,' \
+      'MemNonHeapCommittedM,' \
+      'MemNonHeapUsedM,' \
+      'ThreadsBlocked,' \
+      'ThreadsNew,' \
+      'ThreadsRunnable,' \
+      'ThreadsTerminated,' \
+      'ThreadsTimedWaiting,' \
+      'ThreadsWaiting'
   },
   {
     'objectName' => 'Hadoop:name=Master,service=HBase,sub=Server',
     'resultAlias' => 'hbm_server.%name%.#attribute#',
-    'attributes' => ''
+    'attributes' =>
+      'averageLoad,' \
+      'clusterRequests,' \
+      'masterActiveTime,' \
+      'masterStartTime,' \
+      'numDeadRegionServers,' \
+      'numRegionServers'
   },
   {
     'objectName' => 'Hadoop:name=Master,service=HBase,sub=AssignmentManger',
     'resultAlias' => 'hbm_am.%name%.#attribute#',
-    'attributes' => ''
+    'attributes' =>
+      'ritOldestAge,' \
+      'ritCountOverThreshold,' \
+      'ritCount'
   },
   {
     'objectName' => 'Hadoop:name=Master,service=HBase,sub=IPC',

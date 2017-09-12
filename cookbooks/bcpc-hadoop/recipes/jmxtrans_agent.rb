@@ -27,6 +27,20 @@ template node['bcpc']['hadoop']['jmxtrans_agent']['datanode']['xml'] do
   )
 end
 
+# journalnode
+template node['bcpc']['hadoop']['jmxtrans_agent']['journalnode']['xml'] do
+  source 'jmxtrans_agent.xml.erb'
+  mode 0o644
+  variables(
+    collect_interval_in_seconds: node['bcpc']['hadoop']['jmxtrans_agent']['collect_interval_in_seconds'],
+    output_writer_class: node['bcpc']['hadoop']['jmxtrans_agent']['output_writer']['class'],
+    output_writer_host: node['bcpc']['hadoop']['jmxtrans_agent']['output_writer']['host'],
+    output_writer_port: node['bcpc']['hadoop']['jmxtrans_agent']['output_writer']['port'],
+    output_writer_name_prefix: node['bcpc']['hadoop']['jmxtrans_agent']['journalnode']['name_prefix'],
+    queries: node['bcpc']['hadoop']['jmxtrans_agent']['journalnode']['queries']
+  )
+end
+
 # HBase
 ## master
 template node['bcpc']['hadoop']['jmxtrans_agent']['hbase_master']['xml'] do
