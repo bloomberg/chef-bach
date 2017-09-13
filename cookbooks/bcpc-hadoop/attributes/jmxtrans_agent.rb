@@ -208,6 +208,55 @@ default['bcpc']['hadoop']['jmxtrans_agent']['journalnode']['queries'] = default[
     'objectName' => 'Hadoop:service=JournalNode,name=RpcDetailedActivityForPort*',
     'resultAlias' => 'journal_node.%name%.#attribute#',
     'attributes' =>
+      'FinalizeLogSegmentAvgTime,' \
+      'FinalizeLogSegmentNumOps,' \
+      'GetEditLogManifestAvgTime,' \
+      'GetEditLogManifestNumOps,' \
+      'HeartbeatAvgTime,' \
+      'HeartbeatNumOps,' \
+      'JournalAvgTime,' \
+      'JournalNumOps,' \
+      'JournalOutOfSyncExceptionAvgTime,' \
+      'JournalOutOfSyncExceptionNumOps,' \
+      'StartLogSegmentAvgTime,' \
+      'StartLogSegmentNumOps'
+  },
+  {
+    'objectName' => 'Hadoop:service=JournalNode,name=RpcActivityForPort8485',
+    'resultAlias' => 'journal_node.%name%.#attribute#',
+    'attributes' =>
+      'CallQueueLength,' \
+      'NumOpenConnections,' \
+      'ReceivedBytes,' \
+      'RpcAuthenticationFailures,' \
+      'RpcAuthenticationSuccesses,' \
+      'RpcAuthorizationFailures,' \
+      'RpcAuthorizationSuccesses,' \
+      'RpcClientBackoff,' \
+      'RpcProcessingTimeAvgTime,' \
+      'RpcProcessingTimeNumOps,' \
+      'RpcQueueTimeAvgTime,' \
+      'RpcQueueTimeNumOps,' \
+      'RpcSlowCalls,' \
+      'SentBytes'
+  },
+  {
+    'objectName': 'Hadoop:service=JournalNode,name=UgiMetrics',
+    'resultAlias': 'journal_node.%name%.#attribute#',
+    'attributes':
+      'GetGroupsAvgTime,' \
+      'GetGroupsNumOps,' \
+      'LoginFailureAvgTime,' \
+      'LoginFailureNumOps,' \
+      'LoginSuccessAvgTime,' \
+      'LoginSuccessNumOps,' \
+      'RenewalFailures,' \
+      'RenewalFailuresTotal'
+  },
+  {
+    'objectName': 'Hadoop:service=JournalNode,name=Journal-*',
+    'resultAlias': 'journal_node.%name%.#attribute#',
+    'attributes':
       'BatchesWritten,' \
       'BatchesWrittenWhileLagging,' \
       'BytesWritten,' \
@@ -234,65 +283,6 @@ default['bcpc']['hadoop']['jmxtrans_agent']['journalnode']['queries'] = default[
       'Syncs60s99thPercentileLatencyMicros,' \
       'Syncs60sNumOps,' \
       'TxnsWritten'
-  },
-  {
-    'objectName' => 'Hadoop:service=JournalNode,name=RpcActivityForPort8485',
-    'resultAlias' => 'journal_node.%name%.#attribute#',
-    'attributes' =>
-      'CallQueueLength,' \
-      'NumOpenConnections,' \
-      'ReceivedBytes,' \
-      'RpcAuthenticationFailures,' \
-      'RpcAuthenticationSuccesses,' \
-      'RpcAuthorizationFailures,' \
-      'RpcAuthorizationSuccesses,' \
-      'RpcClientBackoff,' \
-      'RpcProcessingTimeAvgTime,' \
-      'RpcProcessingTimeNumOps,' \
-      'RpcQueueTimeAvgTime,' \
-      'RpcQueueTimeNumOps,' \
-      'RpcSlowCalls,' \
-      'SentBytes'
-  },
-  {
-    'objectName': 'Hadoop:service=JournalNode,name=UgiMetrics',
-    'resultAlias': 'journal_node.%name%.#attribute#',
-    'attributes':
-      'AcceptRecoveryAvgTime,' \
-      'AcceptRecoveryNumOps,' \
-      'FinalizeLogSegmentAvgTime,' \
-      'FinalizeLogSegmentNumOps,' \
-      'GetEditLogManifestAvgTime,' \
-      'GetEditLogManifestNumOps,' \
-      'GetJournalStateAvgTime,' \
-      'GetJournalStateNumOps,' \
-      'HeartbeatAvgTime,' \
-      'HeartbeatNumOps,' \
-      'JournalAvgTime,' \
-      'JournalNumOps,' \
-      'JournalOutOfSyncExceptionAvgTime,' \
-      'JournalOutOfSyncExceptionNumOps,' \
-      'NewEpochAvgTime,' \
-      'NewEpochNumOps,' \
-      'PrepareRecoveryAvgTime,' \
-      'PrepareRecoveryNumOps,' \
-      'PurgeLogsAvgTime,' \
-      'PurgeLogsNumOps,' \
-      'StartLogSegmentAvgTime,' \
-      'StartLogSegmentNumOps'
-  },
-  {
-    'objectName': 'Hadoop:service=JournalNode,name=Journal-*',
-    'resultAlias': 'journal_node.%name%.#attribute#',
-    'attributes':
-      'GetGroupsAvgTime,' \
-      'GetGroupsNumOps,' \
-      'LoginFailureAvgTime,' \
-      'LoginFailureNumOps,' \
-      'LoginSuccessAvgTime,' \
-      'LoginSuccessNumOps,' \
-      'RenewalFailures,' \
-      'RenewalFailuresTotal'
   }
 ]
 
