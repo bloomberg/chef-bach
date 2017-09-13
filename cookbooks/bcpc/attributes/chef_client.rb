@@ -37,7 +37,7 @@ default['chef_client']['config'].tap do |config|
                       node[:hostname],
                       node[:fqdn],
                       node[:bcpc][:bootstrap][:server],
-                      node[:bcpc][:bootstrap][:server],
+                      node[:bcpc][:management][:vip],
                       node[:domain] ? "*#{node[:domain]}" : nil
                      ].compact.uniq
 
