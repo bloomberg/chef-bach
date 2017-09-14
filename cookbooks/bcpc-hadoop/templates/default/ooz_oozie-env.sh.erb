@@ -17,7 +17,7 @@ export OOZIE_PID_DIR=/var/run/oozie
 export OOZIE_CATALINA_HOME=/usr/lib/bigtop-tomcat
 export CATALINA_TMPDIR=/tmp
 export CATALINA_PID=/var/run/oozie/oozie.pid
-export CATALINA_BASE=/usr/hdp/current/oozie-server/oozie-server
+export CATALINA_BASE=/usr/hdp/current/oozie-server/
 export CATALINA_OPTS="<%= node["bcpc"]["hadoop"]["oozie"]["memory_opts"] %>"
 export OOZIE_HTTPS_PORT="11443"
 export OOZIE_HTTPS_KEYSTORE_PASS="<%=get_config("oozie-keystore-password") %>"
