@@ -43,7 +43,7 @@ default[:bcpc][:hadoop][:mapreduce][:site_xml].tap do |site_xml|
      '$PWD/mr-framework/hadoop/share/hadoop/hdfs/*',
      '$PWD/mr-framework/hadoop/share/hadoop/hdfs/lib/*',
      "#{hdp_path}/hadoop/lib/hadoop-lzo-0.6.0." +
-       "${hdp.version}.jar",
+       "${hdp.version}",
      "#{hdp_path}/phoenix/phoenix-server.jar",
      '$HADOOP_CONF_DIR',
     ].join(',')
