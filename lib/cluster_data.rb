@@ -13,18 +13,22 @@ begin
 rescue LoadError
 end
 
-# Suppress Hashie warnings by loading it early.
-require 'hashie/logger'
-Hashie.logger.level = Logger.const_get 'ERROR'
+#
+#
+# Workaround log spam in older versions of ChefDK.
+#
+# https://github.com/berkshelf/berkshelf/pull/1668/
+# https://github.com/intridea/hashie/issues/394
+#
+begin
+  require 'hashie'
+  require 'hashie/logger'
+  Hashie.logger.level = Logger.const_get 'ERROR'
+  Hashie.logger = Logger.new(nil)
+rescue LoadError
+end
 
-require 'chef'
-require 'chef-vault'
 require 'json'
-require 'ohai'
-require 'pry'
-require 'ridley'
-
-Ridley::Logging.logger.level = Logger.const_get 'ERROR'
 
 module BACH
   #
