@@ -172,9 +172,9 @@ function create_cluster_VMs {
     sort | \
     sed -e 's/.*=//' -e 's/"//g'))
   IFS="$oifs"
-  VBN0="${bootstrap_interfaces[0]}"
-  VBN1="${bootstrap_interfaces[1]}"
-  VBN2="${bootstrap_interfaces[2]}"
+  VBN0="${bootstrap_interfaces[0]?Need a Virtualbox network 1 for the bootstrap}"
+  VBN1="${bootstrap_interfaces[1]?Need a Virtualbox network 2 for the bootstrap}"
+  VBN2="${bootstrap_interfaces[2]?Need a Virtualbox network 3 for the bootstrap}"
 
   #
   # Add the ipxe USB key to the vbox storage registry as an immutable
