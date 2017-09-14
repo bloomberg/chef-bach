@@ -10,17 +10,15 @@ default["bcpc"]["hadoop"]["yarn"]["app"]["mapreduce"]["am"]["staging-dir"] = "/u
 default[:bcpc][:hadoop][:mapreduce][:site_xml].tap do |site_xml|
   site_xml['mapreduce.admin.map.child.java.opts'] =
     '-server -Djava.net.preferIPv4Stack=true -Dhdp.version=' +
-    '${hdp.version}'
-
-  site_xml['mapreduce.admin.reduce.child.java.opts'] =
-    '-server -Djava.net.preferIPv4Stack=true -Dhdp.version=' +
-    '${hdp.version}'
+    node[:bcpc][:hadoop][:distribution][:release].to_s
 
   hdp_path =
-    File.join('/usr/hdp', '${hdp.version}')
+    File.join('/usr/hdp',
+              node[:bcpc][:hadoop][:distribution][:active_release])
 
   hdp_apps_path =
-    File.join('/hdp/apps', '${hdp.version}')
+    File.join('/hdp/apps',
+              node[:bcpc][:hadoop][:distribution][:active_release])
   
   site_xml['mapreduce.admin.user.env'] =
     'LD_LIBRARY_PATH=' +
@@ -43,7 +41,7 @@ default[:bcpc][:hadoop][:mapreduce][:site_xml].tap do |site_xml|
      '$PWD/mr-framework/hadoop/share/hadoop/hdfs/*',
      '$PWD/mr-framework/hadoop/share/hadoop/hdfs/lib/*',
      "#{hdp_path}/hadoop/lib/hadoop-lzo-0.6.0." +
-       "${hdp.version}",
+       "#{node[:bcpc][:hadoop][:distribution][:active_release]}.jar",
      "#{hdp_path}/phoenix/phoenix-server.jar",
      '$HADOOP_CONF_DIR',
     ].join(',')
@@ -52,9 +50,6 @@ default[:bcpc][:hadoop][:mapreduce][:site_xml].tap do |site_xml|
     File.join(hdp_apps_path, 'mapreduce', 'mapreduce.tar.gz#mr-framework')
 
   site_xml['mapreduce.map.output.compress'] = true
-
-  site_xml['yarn.app.mapreduce.am.admin-command-opts'] = 
-    '-Dhdp.version=${hdp.version}'
 
   site_xml['mapred.map.output.compress.codec'] =
     "org.apache.hadoop.io.compress.SnappyCodec"
