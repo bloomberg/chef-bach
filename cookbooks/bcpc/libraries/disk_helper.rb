@@ -25,8 +25,8 @@
 def bcpc_mounted_filesystems
   bcpc_ohai_reload(:filesystem)
 
-  node[:filesystem].select do |_, fs|
-    fs[:mount] =~ %r(^/disk/\d+$)
+  node['filesystem'].select do |_, fs|
+    fs[:mount] =~ %r{^/disk/\d+$}
   end
 end
 
@@ -50,7 +50,7 @@ def bcpc_ohai_reload(plugin_name)
   #
   node.automatic_attrs.merge!(ohai.data)
 
-  Chef::Log.info("ohai[#{plugin_name.to_s}] reloaded")
+  Chef::Log.info("ohai[#{plugin_name}] reloaded")
 
   nil
 end
@@ -74,13 +74,13 @@ def bcpc_unused_disks
   # We also reject any block device we are unable to open with O_EXCL,
   # because that means it is already in use, presumably by the kernel.
   #
-  all_drives = node[:block_device].keys.select do |dd|
+  all_drives = node['block_device'].keys.select do |dd|
     # /dev/sdiv is currently the last possible SCSI device node.
     dd =~ /sd[a-i]?[a-z]/ || dd =~ /md\d+/ || dd =~ /vd[a-z][a-f]?/ || dd =~ /nvme\d+n\d+/
   end.select do |dd|
     begin
       require 'fcntl'
-      fd = IO::sysopen("/dev/#{dd}", Fcntl::O_RDONLY | Fcntl::O_EXCL)
+      fd = IO.sysopen("/dev/#{dd}", Fcntl::O_RDONLY | Fcntl::O_EXCL)
       IO.new(fd).close
       true
     rescue Errno::EBUSY => ee
@@ -89,15 +89,15 @@ def bcpc_unused_disks
     end
   end
 
-  if node[:dmi][:system][:product_name] == 'VirtualBox'
+  if node['dmi']['system']['product_name'] == 'VirtualBox'
     #
     # On a VM build, we reject all disks with fewer than a million
     # blocks, so that we do not attempt to use the iPXE image as a
     # data disk.
     #
     all_drives.reject do |dd|
-      node[:block_device][dd].nil? ||
-        node[:block_device][dd][:size].to_i < 10**6
+      node['block_device'][dd].nil? ||
+        node['block_device'][dd]['size'].to_i < 10**6
     end
   else
     all_drives
@@ -113,7 +113,7 @@ def bcpc_unused_targets
   #
   # If we ever do, someone will need to update this magic value!
   #
-  all_targets = (0 .. 255).to_a.map do |nn|
+  all_targets = (0..255).to_a.map do |nn|
     "/disk/#{nn}"
   end
 
@@ -133,7 +133,7 @@ def bcpc_uuid_for_device(dev_name)
 
   if blkid_command.status.success?
     begin
-      blkid_command.stdout.match(%r{UUID="(.*?)"})[1]
+      blkid_command.stdout.match(/UUID="(.*?)"/)[1]
     rescue
       Chef::Log.debug("No UUID found for '#{dev_name}'")
       nil
