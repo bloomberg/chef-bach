@@ -38,7 +38,8 @@ cookbook 'database'
 
 # bfd is not on the supermarket
 cookbook 'bfd',
-  git: 'https://github.com/bloomberg/openbfdd-cookbook'
+  git: 'https://github.com/bloomberg/openbfdd-cookbook',
+  ref: '33c10ee5caf543b0b68e2f98dc3866af91078e78'
 
 # cobblerd forked, pending destruction of earth by moon.
 cookbook 'cobblerd', 
@@ -47,6 +48,7 @@ cookbook 'cobblerd',
 # jmxtrans 1.0+ isn't on the supermarket.
 cookbook 'jmxtrans', 
   git: 'https://github.com/jmxtrans/jmxtrans-cookbook',
+  ref: '2a9aeb6898fad0043ef254998c803c04ca485fd8',
   branch: 'ver-2.0'
 
 # 'kafka' has an entry on the supermarket, but it's the wrong cookbook.
