@@ -54,7 +54,8 @@ ruby_block "zabbix_monitor" do
       :url => "https://#{node['bcpc']['management']['vip']}" +
         ":#{node['bcpc']['zabbix']['web_port']}/api_jsonrpc.php",
       :user => get_config!('zabbix-admin-user'),
-      :password => "#{get_config!('password','zabbix-admin','os')}"
+      :password => "#{get_config!('password','zabbix-admin','os')}",
+      :no_proxy => true
     )
     if zbx.nil?
       Chef::Log.error("Could not connect to Zabbix server")
