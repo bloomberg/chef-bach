@@ -8,6 +8,7 @@
 #
 
 # Suppress Hashie warnings by loading it early.
+require 'hashie'
 require 'hashie/logger'
 Hashie.logger.level = Logger.const_get 'ERROR'
 
