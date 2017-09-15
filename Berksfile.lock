@@ -21,7 +21,8 @@ DEPENDENCIES
     path: cookbooks/bcpc_kafka
   bfd
     git: https://github.com/bloomberg/openbfdd-cookbook
-    revision: 0b951af724b0ff6c111ad81671e711327a796dd7
+    revision: 33c10ee5caf543b0b68e2f98dc3866af91078e78
+    ref: 33c10ee
   chef-client
   chef-sugar
   cobblerd
@@ -33,7 +34,8 @@ DEPENDENCIES
   java
   jmxtrans
     git: https://github.com/jmxtrans/jmxtrans-cookbook
-    revision: 8ab006bb985c8f94e85af9ed783d8e19b64d0dda
+    revision: 2a9aeb6898fad0043ef254998c803c04ca485fd8
+    ref: 2a9aeb6
     branch: ver-2.0
   kafka
     git: https://github.com/mthssdrbrg/kafka-cookbook.git
@@ -112,7 +114,7 @@ GRAPH
     cron (>= 1.2.2)
     database (>= 0.0.0)
     graphite_handler (>= 0.0.0)
-    line (>= 0.0.0)
+    line (~> 0.6.3)
     nscd (>= 0.0.0)
     ntp (>= 1.10.1)
     pdns (>= 0.0.0)
@@ -174,7 +176,7 @@ GRAPH
   kafka (2.0.2)
   krb5 (2.0.0)
     ntp (>= 0.0.0)
-  line (1.0.2)
+  line (0.6.3)
   logrotate (1.9.2)
   maven (2.1.1)
     ark (~> 1.0)
@@ -199,7 +201,7 @@ GRAPH
   python (1.4.6)
     build-essential (>= 0.0.0)
     yum-epel (>= 0.0.0)
-  resolvconf (0.4.0)
+  resolvconf (1.0.0)
   seven_zip (2.0.2)
     windows (>= 1.2.2)
   sudo (3.5.3)
