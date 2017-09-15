@@ -128,7 +128,12 @@ ruby_block 'format-disks' do
                      fs_check.stdout.include?('SGI XFS filesystem')
                    "/dev/#{base_name}"
                  else
-                   "/dev/#{base_name}1"
+                   case base_name
+                   when /^nvme/
+                     "/dev/#{base_name}p1"
+                   else
+                     "/dev/#{base_name}1"
+                   end
                  end
 
       if dev_name.end_with?('1')
