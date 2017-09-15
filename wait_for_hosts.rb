@@ -97,7 +97,7 @@ end
 #   - a list of reachable hosts
 #
 def listening_hosts(target_hosts=installed_hosts)
-  host_entries = parse_cluster_txt.select do |entry|
+  host_entries = parse_cluster_txt(cluster_txt).select do |entry|
     target_hosts.include?(entry[:hostname]) ||
     target_hosts.include?(entry[:fqdn])
   end

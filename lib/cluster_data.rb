@@ -97,7 +97,7 @@ module BACH
     end
 
     def get_entry(name)
-      parse_cluster_txt.select do |ee|
+      parse_cluster_txt(cluster_txt).select do |ee|
         ee[:hostname] == name || fqdn(ee) == name
       end.first
     end
@@ -106,7 +106,14 @@ module BACH
       %r{^08:00:27}.match(entry[:mac_address])
     end
 
-    def parse_cluster_txt
+    # Return the default cluster.txt data
+    # Returns: Array of cluster.txt lines
+    # Raise: if the file is not found
+    def cluster_txt
+      File.readlines(File.join(repo_dir, 'cluster.txt'))
+    end
+
+    def parse_cluster_txt(entries)
       fields = [
                 :hostname,
                 :mac_address,
@@ -116,11 +123,10 @@ module BACH
                 :dns_domain,
                 :runlist
                ]
-
-      # This is really gross because Ruby 1.9 lacks Array#to_h.
-      File.readlines(File.join(repo_dir, 'cluster.txt')).map do |line|
-        entry = Hash[*fields.zip(line.split(' ')).flatten(1)]
-        entry.merge({fqdn: fqdn(entry)})
+      entries.map do |line|
+         # This is really gross because Ruby 1.9 lacks Array#to_h.
+         entry = Hash[*fields.zip(line.split(' ')).flatten(1)]
+         entry.merge({fqdn: fqdn(entry)})
       end
     end
 

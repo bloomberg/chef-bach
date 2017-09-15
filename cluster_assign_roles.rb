@@ -36,12 +36,12 @@ class ClusterAssignRoles
   #
   def all_hadoop_head_nodes
     # All head nodes should have this specific role.
-    confirmed_head_nodes = parse_cluster_txt.select do |nn|
+    confirmed_head_nodes = parse_cluster_txt(cluster_txt).select do |nn|
       nn[:runlist].include?('role[BCPC-Hadoop-Head]')
     end
 
     # Any nodes that have something matching "Head"
-    possible_head_nodes = parse_cluster_txt.select do |nn|
+    possible_head_nodes = parse_cluster_txt(cluster_txt).select do |nn|
       nn[:runlist].include?('Head')
     end
 
@@ -249,7 +249,7 @@ class ClusterAssignRoles
 
   def install_kafka(target_nodes)
     # Zookeeper has to come up before Kafka.
-    all_zk_nodes = parse_cluster_txt.select do |node|
+    all_zk_nodes = parse_cluster_txt(cluster_txt).select do |node|
       node[:runlist].include?('role[BCPC-Kafka-Head-Zookeeper]')
     end
 
@@ -440,15 +440,17 @@ class ClusterAssignRoles
     end
 
     target_nodes = if optional_thing.nil?
-                     parse_cluster_txt
+                     parse_cluster_txt(cluster_txt)
                    else
-                     node_matches = parse_cluster_txt.select do |entry|
+                     node_matches = \
+                       parse_cluster_txt(cluster_txt).select do |entry|
                        entry[:ip_address].include?(optional_thing) ||
                        entry[:fqdn].include?(optional_thing.downcase)
                      end
 
                      if node_matches.empty?
-                       node_matches = parse_cluster_txt.select do |entry|
+                       node_matches = \
+                         parse_cluster_txt(cluster_txt).select do |entry|
                          entry[:runlist]
                            .downcase
                            .include?(optional_thing.downcase)
