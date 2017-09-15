@@ -17,24 +17,7 @@
 # limitations under the License.
 #
 
-gem_path = Pathname.new(Gem.ruby).dirname.join('gem').to_s
-rewind_version = '0.0.9'
-
-#
-# Move to installing chef-rewind via execute block to work around
-# issue where version string is empty when combining gem_binary,
-# version and options in the gem_package resource
-#
-execute 'gem_install_chef-rewind' do
-  command gem_path + ' install chef-rewind -q --no-rdoc --no-ri -v "' \
-    + rewind_version + "\" --clear-sources -s #{get_binary_server_url}"
-  not_if gem_path + ' list chef-rewind -i -v "' + rewind_version + '"'
-  action :nothing
-  environment ({ 'no_proxy' => URI.parse(get_binary_server_url).host })
-end.run_action(:run)
-
 require 'digest/sha2'
-require 'chef/rewind'
 require 'chef-vault'
 
 make_config('cobbler-web-user', 'cobbler')
@@ -63,8 +46,6 @@ end
 # The cobblerd cookbook relies on this attribute.
 node.force_default[:cobblerd][:web_password] = web_password
 
-bcpc_repo 'cobbler26'
-
 [
   'python',
   'apache2',
@@ -85,11 +66,6 @@ bcpc_repo 'cobbler26'
   package package_name do
     action :upgrade
   end
-end
-
-apt_package 'cobbler' do
-  action :install
-  version '2.6.11-1'
 end
 
 #
@@ -156,57 +132,8 @@ end
 
 package 'isc-dhcp-server'
 
-#
-# The cobblerd cookbook assumes we use the Ubuntu 'universe'
-# packages. Unlike "universe," the upstream packages include the
-# cobbler-web material in the main package, so we do not need the
-# second package.
-#
-# The "unwind" resource is no longer reliable under Chef 12.x, but
-# the replacement for unwind is not available under Chef 11.x.  Until
-# we can consilidate all nodes on 12.x, we're stuck doing this the
-# hard way with equivs.
-#
-package 'equivs'
-
-control_file_path =
-  ::File.join(Chef::Config.file_cache_path, 'cobbler-web.control')
-
-file control_file_path do
-  content <<-EOM.gsub(/^ {4}/,'')
-    Section: admin
-    Priority: optional
-    Standards-Version: 3.9.2
-
-    Package: cobbler-web
-    Version: 2.6.11-1
-    Maintainer: BACH <hadoop@bloomberg.net>
-    Architecture: all
-    Description: Dummy package to prevent the installation of cobbler-web
-  EOM
-end
-
-deb_file_path =
-   ::File.join(Chef::Config.file_cache_path,'cobbler-web_2.6.11-1_all.deb')
-
-execute 'cobbler-web-build' do
-   cwd ::File.dirname(deb_file_path)
-   command "equivs-build #{control_file_path}"
-   creates deb_file_path
-end
-
-dpkg_package deb_file_path
-
+include_recipe 'cobblerd::cobbler_source_install'
 include_recipe 'cobblerd::default'
-include_recipe 'cobblerd::web'
-
-#
-# The cobblerd cookbook references the wrong service name. Upstream
-# cobbler packages use 'cobblerd' instead of 'cobbler'
-#
-rewind 'service[cobbler]' do
-  service_name 'cobblerd'
-end
 
 template '/etc/apache2/conf.d/cobbler.conf' do
   source 'cobbler/apache.conf.erb'
@@ -227,7 +154,7 @@ end
 template '/etc/cobbler/settings' do
   source 'cobbler/settings.erb'
   mode 0644
-  notifies :restart, 'service[cobbler]', :immediately
+  notifies :restart, "service[#{node['cobbler']['service']['name']}]", :immediately
 end
 
 template '/etc/cobbler/dhcp.template' do
@@ -258,13 +185,6 @@ link '/var/lib/tftpboot/chain.c32' do
   link_type :hard
 end
 
-cobbler_image 'ubuntu-12.04-mini' do
-  source "#{get_binary_server_url}/ubuntu-12.04-hwe313-mini.iso"
-  os_version 'precise'
-  os_breed 'ubuntu'
-  action :import
-end
-
 cobbler_image 'ubuntu-14.04-mini' do
   source "#{get_binary_server_url}/ubuntu-14.04-hwe44-mini.iso"
   os_version 'trusty'
@@ -274,7 +194,6 @@ end
 
 {
   trusty: 'ubuntu-14.04-mini-x86_64',
-  precise: 'ubuntu-12.04-mini-x86_64'
 }.each do |version, distro_name|
   cobbler_profile "bcpc_host_#{version}" do
     kickstart "cobbler/#{version}.preseed"

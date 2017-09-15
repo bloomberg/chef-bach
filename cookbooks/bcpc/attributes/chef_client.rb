@@ -14,7 +14,7 @@ sudo_user = node['bcpc']['bootstrap']['admin']['user']
 # The solution is to disable the passwd plugin, so users are not
 # recorded on the chef server.
 #
-default['ohai']['disabled_plugins'] = [ 'passwd' ]
+# XXX this keeps breaking Chef12 knife default['ohai']['disabled_plugins'] = [ 'passwd' ]
 
 default['chef_client']['config'].tap do |config|
   config['log_level'] = ':info'
@@ -57,5 +57,20 @@ default['chef_client']['config'].tap do |config|
 
     config['cookbook_path'] =
       "/home/#{sudo_user}/chef-bcpc/vendor/cookbooks"
-  end
+
+    if node[:bcpc][:bootstrap][:proxy]
+      no_proxy_array = [
+                        'localhost',
+                        node[:ipaddress],
+                        node[:hostname],
+                        node[:fqdn],
+                        node[:bcpc][:bootstrap][:server],
+                        node[:domain] ? "*#{node[:domain]}" : nil
+                       ].compact.uniq
+      
+      config['http_proxy'] = node[:bcpc][:bootstrap][:proxy]
+      config['https_proxy'] = node[:bcpc][:bootstrap][:proxy]
+      config['no_proxy'] = no_proxy_array.join(',')
+    end
+  end    
 end

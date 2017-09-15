@@ -1,4 +1,5 @@
 require 'simplecov'
+require 'chefspec'
 require 'rspec/matchers'
 
 formatters = [ SimpleCov::Formatter::HTMLFormatter ]
@@ -17,15 +18,6 @@ end
 
 SimpleCov.formatters = formatters
 SimpleCov.start
-
-# Require all our libraries
-# XXX Dir["#{__dir__}/../bin/*.rb"].each do |f|
-# XXX   begin
-# XXX     require File.expand_path(f)
-# XXX   rescue NameError => ex
-# XXX     STDERR.write("Failed to load: #{ex}")
-# XXX   end
-# XXX end
 
 RSpec.configure do |config|
   config.color = true

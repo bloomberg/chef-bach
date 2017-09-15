@@ -55,7 +55,9 @@ require 'timeout'
 require 'optparse'
 
 require_relative 'lib/cluster_data'
+require_relative 'lib/chef_node'
 include BACH::ClusterData
+include BACH::ClusterData::ChefNode
 
 def cluster_assign_roles(environment, type, entry=nil)
   types = %w[basic hadoop kafka]
@@ -107,7 +109,7 @@ def cobbler_enroll(entry)
                            '--profile', entry[:cobbler_profile],
                            '--ip-address', entry[:ip_address],
                            '--interface=eth0',
-                           '--mac', corrected_mac(entry))
+                           '--mac', empirical_mac(entry))
 
   c.run_command
 
@@ -178,7 +180,7 @@ def delete_node_data(entry)
 end
 
 def restart_host(entry)
-  # if is_virtualbox_vm?(entry)
+  # if virtualbox_vm?(entry)
   #   # If it's a virtualbox VM, prompt the user to do it for us.
   #   puts 'Please reboot ' + entry[:hostname] + ', then hit enter'
   #   STDIN.gets

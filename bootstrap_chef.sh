@@ -67,11 +67,10 @@ $SSH_CMD "sudo chown -R vagrant $BCPC_DIR; \
 	  sudo rm -rf /var/chef/cache/cookbooks; \
           sudo rm -rf $BCPC_DIR/vendor/cookbooks"
 
-# pull back the modified environment so that it can be copied to remote host
-tar -czf cluster.tgz ../cluster
-
 # Copy cluster mutable data to bootstrap.
 if [[ -d ../cluster ]]; then
+  # pull back the modified environment so that it can be copied to remote host
+  tar -czf cluster.tgz ../cluster
   tar -C .. -cf - cluster | vagrant ssh -c 'cd ~; tar -xvf -'
 elif [[ -f ./cluster.tgz ]]; then
   gunzip -c cluster.tgz | vagrant ssh -c 'cd ~; tar -xvf -'
@@ -80,7 +79,7 @@ else
 fi
 
 echo "Running rsync of Vagrant install"
-$SSH_CMD "rsync $RSYNCEXTRA -avP --exclude vbox --exclude vendor --exclude .chef /chef-bcpc-host/ /home/vagrant/chef-bcpc/"
+$SSH_CMD "rsync $RSYNCEXTRA -avP --exclude vbox --exclude vendor --exclude Gemfile.lock --exclude .kitchen --exclude .chef /chef-bcpc-host/ /home/vagrant/chef-bcpc/"
 
 # cluster external environment will go here
 #$SSH_CMD "mkdir -p cluster"

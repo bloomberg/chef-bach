@@ -7,7 +7,9 @@ require 'pry'
 require 'socket'
 
 require_relative 'lib/cluster_data'
+require_relative 'lib/chef_node'
 include BACH::ClusterData
+include BACH::ClusterData::ChefNode
 
 def raw_apache_log
   cc = Mixlib::ShellOut.new('sudo cat /var/log/apache2/access.log')
@@ -49,15 +51,51 @@ def parsed_apache_log
   end
 end
 
-def installed_hosts
-  pxe_log_entries = parsed_apache_log.select do |entry|
-    entry[:request].include?('/cblr/svc/op/nopxe/system/')
+#
+# booted_hosts - Tells us where is a host in the boot sequence
+# Depends On: parsed_apache_log() 
+# Returns:
+#  - A hash of:
+#    hosts: a hash of hostnames to bootstate
+#    messages: an array of match strings
+#
+def booted_hosts
+  # Example log entries which are parsed
+  # 10.0.100.11 - - [29/Mar/2017:04:04:28 +0000] "GET /cblr/svc/op/gpxe/system/bcpc-vm1 HTTP/1.1" 200 753 "-" "iPXE/1.0.0+"
+  # 10.0.100.11 - - [29/Mar/2017:04:04:28 +0000] "GET /cobbler/images/ubuntu-14.04-mini-x86_64/linux HTTP/1.1" 200 6939425 "-" "iPXE/1.0.0+"
+  # 10.0.100.12 - - [29/Mar/2017:04:04:28 +0000] "GET /cblr/svc/op/gpxe/system/bcpc-vm2 HTTP/1.1" 200 753 "-" "iPXE/1.0.0+"
+  # 10.0.100.12 - - [29/Mar/2017:04:04:29 +0000] "GET /cobbler/images/ubuntu-14.04-mini-x86_64/linux HTTP/1.1" 200 6939425 "-" "iPXE/1.0.0+"
+  # 10.0.100.13 - - [29/Mar/2017:04:04:29 +0000] "GET /cblr/svc/op/gpxe/system/bcpc-vm3 HTTP/1.1" 200 753 "-" "iPXE/1.0.0+"
+  # 10.0.100.13 - - [29/Mar/2017:04:04:29 +0000] "GET /cobbler/images/ubuntu-14.04-mini-x86_64/linux HTTP/1.1" 200 6939425 "-" "iPXE/1.0.0+"
+  # 10.0.100.11 - - [29/Mar/2017:04:04:28 +0000] "GET /cobbler/images/ubuntu-14.04-mini-x86_64/initrd.gz HTTP/1.1" 200 41147799 "-" "iPXE/1.0.0+"
+  # 10.0.100.12 - - [29/Mar/2017:04:04:29 +0000] "GET /cobbler/images/ubuntu-14.04-mini-x86_64/initrd.gz HTTP/1.1" 200 41147799 "-" "iPXE/1.0.0+"
+  # 10.0.100.13 - - [29/Mar/2017:04:04:30 +0000] "GET /cobbler/images/ubuntu-14.04-mini-x86_64/initrd.gz HTTP/1.1" 200 41147799 "-" "iPXE/1.0.0+"
+  gpxe_url = Regexp.new('/cblr/svc/op/gpxe/system/')
+  ubuntu_url = Regexp.new('/cobbler/images/ubuntu-.*-x86_64/linux')
+  initrd_url = Regexp.new('/cobbler/images/ubuntu-.*-x86_64/initrd.gz')
+  # array should be sorted from first URL to last URL in boot process
+  match_strings = [gpxe_url, ubuntu_url, initrd_url]
+
+  # create a hash of hostnames to bootstate from match_strings array
+  boot_log_entries = {}
+  parsed_apache_log.each do |entry|
+    match = match_strings.select { |x| x.match(entry[:request]) }.last
+    state = match_strings.index(match)
+    boot_log_entries[entry[:hostname]] = \
+      [boot_log_entries.fetch(entry[:hostname], -1), state].max if state
   end
 
+  {hosts: boot_log_entries, messages: match_strings}
+end
+
+def installed_hosts
+  cobbler_nopxe_log_entries = parsed_apache_log.select do |entry|
+    entry[:request].include?('/cblr/svc/op/nopxe/system/')
+  end
   @request_regex ||=
     Regexp.new('/cblr/svc/op/nopxe/system/(.*?)\s')
 
-  pxe_log_entries.map do |entry|
+  cobbler_nopxe_log_entries.map do |entry|
     md = @request_regex.match(entry[:request])
     md.nil? ? nil : md[1]
   end
@@ -97,7 +135,7 @@ end
 #   - a list of reachable hosts
 #
 def listening_hosts(target_hosts=installed_hosts)
-  host_entries = parse_cluster_txt.select do |entry|
+  host_entries = parse_cluster_txt(cluster_txt).select do |entry|
     target_hosts.include?(entry[:hostname]) ||
     target_hosts.include?(entry[:fqdn])
   end
@@ -117,6 +155,13 @@ minutes = 120
   all_installed = installed_hosts.sort & target_hosts
   contacted_hosts = listening_hosts(all_installed).sort & target_hosts
   missing_hosts = (target_hosts - contacted_hosts).sort
+
+  booted_hosts_string = booted_hosts[:hosts].map do |host, state|
+    "#{host}: stage-#{state}"
+  end.join("\n\t\t")
+  puts "\tBooted hosts from apache log " \
+    "(#{booted_hosts[:hosts].count}/#{target_hosts.count}):\n" \
+    "\t\t#{booted_hosts_string}\n\n"
 
   puts "\tCompleted installations from apache log " \
     "(#{all_installed.count}/#{target_hosts.count}):\n" \

@@ -25,9 +25,11 @@ require 'parallel'
 require 'pry'
 require 'uri'
 require_relative 'lib/cluster_data'
+require_relative 'lib/chef_node'
 
 class ClusterAssignRoles
   include BACH::ClusterData
+  include BACH::ClusterData::ChefNode
 
   #
   # Takes no arguments.
@@ -201,6 +203,10 @@ class ClusterAssignRoles
   #
   def install_bootstrap(target_nodes)
     # Head nodes must be installed before workers.
+    all_hadoop_head_nodes = parse_cluster_txt(cluster_txt).select do |node|
+      node[:runlist].include?('role[BCPC-Hadoop-Head]')
+    end
+
     target_head_nodes = target_nodes & all_hadoop_head_nodes
 
     partial_runlist = 'role[BCPC-Hadoop-Head]'
@@ -219,6 +225,10 @@ class ClusterAssignRoles
 
   def install_hadoop(target_nodes)
     # Head nodes must be installed before workers.
+    all_hadoop_head_nodes = parse_cluster_txt(cluster_txt).select do |node|
+      node[:runlist].include?('role[BCPC-Hadoop-Head]')
+    end
+
     target_head_nodes = target_nodes & all_hadoop_head_nodes
     target_worker_nodes = target_nodes - all_hadoop_head_nodes
 
@@ -249,7 +259,7 @@ class ClusterAssignRoles
 
   def install_kafka(target_nodes)
     # Zookeeper has to come up before Kafka.
-    all_zk_nodes = parse_cluster_txt.select do |node|
+    all_zk_nodes = parse_cluster_txt(cluster_txt).select do |node|
       node[:runlist].include?('role[BCPC-Kafka-Head-Zookeeper]')
     end
 
@@ -440,15 +450,17 @@ class ClusterAssignRoles
     end
 
     target_nodes = if optional_thing.nil?
-                     parse_cluster_txt
+                     parse_cluster_txt(cluster_txt)
                    else
-                     node_matches = parse_cluster_txt.select do |entry|
+                     node_matches = \
+                       parse_cluster_txt(cluster_txt).select do |entry|
                        entry[:ip_address].include?(optional_thing) ||
                        entry[:fqdn].include?(optional_thing.downcase)
                      end
 
                      if node_matches.empty?
-                       node_matches = parse_cluster_txt.select do |entry|
+                       node_matches = \
+                         parse_cluster_txt(cluster_txt).select do |entry|
                          entry[:runlist]
                            .downcase
                            .include?(optional_thing.downcase)

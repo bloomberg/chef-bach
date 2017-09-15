@@ -47,6 +47,10 @@ end
 
 ruby_block "zabbix_monitor" do
   block do
+    ENV.delete('http_proxy')
+    ENV.delete('https_proxy')
+    ENV.delete('HTTP_PROXY')
+    ENV.delete('HTTPS_PROXY')
     require 'zabbixapi'
 
     # Make connection to zabbix api url

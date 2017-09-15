@@ -1,29 +1,52 @@
 #
-# This module holds utility methods shared between repxe_host.rb and
-# cluster_assign_roles.rb.
+# This module holds utility methods shared between repxe_host.rb,
+# cluster_assign_roles.rb and Vagrantfile
+# NOTE: Testing should be done with ChefDK and Vagrant rubys
 #
-# Most of the methods pertain to cluster.txt and its contents.  A few
-# will attempt to contact the chef server.  These should probably be
-# separated from each other.
+# Most of the methods pertain to cluster.txt and its contents; should not
+# contact the Chef server, use Chef client or VirtualBox.
 #
 
-# Suppress Hashie warnings by loading it early.
-require 'hashie/logger'
-Hashie.logger.level = Logger.const_get 'ERROR'
+# pry is not required but nice to have
+begin
+  require 'pry'
+rescue LoadError
+end
 
-require 'chef'
-require 'chef-vault'
+#
+#
+# Workaround log spam in older versions of ChefDK.
+#
+# https://github.com/berkshelf/berkshelf/pull/1668/
+# https://github.com/intridea/hashie/issues/394
+#
+begin
+  require 'hashie'
+  require 'hashie/logger'
+  Hashie.logger.level = Logger.const_get 'ERROR'
+  Hashie.logger = Logger.new(nil)
+rescue LoadError
+end
+
 require 'json'
-require 'ohai'
-require 'pry'
-require 'ridley'
-
-Ridley::Logging.logger.level = Logger.const_get 'ERROR'
 
 module BACH
+  #
+  # Methods to get data about a BACH cluster
+  #
   module ClusterData
-    def chef_environment
-      ridley.environment.find(chef_environment_name)
+    # bogus VirtualBox MAC (keep the vendor OUI set to VirtualBox's)
+    BOGUS_VB_MAC = '08:00:27:C0:FF:EE'
+    LEGACY_COBBLER_PROFILE = 'bcpc_host_precise'
+    EFI_COBBLER_PROFILE = 'bcpc_host_trusty'
+
+    def repo_dir
+      # This file is in the 'lib' subdirectory, so the repo dir is its parent.
+      File.expand_path('..', File.dirname(__FILE__))
+    end
+
+    def chef_environment_name
+      File.basename(chef_environment_path).gsub(/.json$/, '')
     end
 
     def chef_environment_path
@@ -37,51 +60,43 @@ module BACH
       env_files.first
     end
 
-    def chef_environment_name
-      File.basename(chef_environment_path).gsub(%r{.json$}, '')
-    end
-
     #
-    # Returns the password for the 'ubuntu' account in plaintext.
-    # The method name comes from the confusing name of the data bag item.
+    # Return the MAC address for a host empirically trying to talk to the host
     #
-    def cobbler_root_password
-      # Among other things, Ridley will set up Chef::Config for ChefVault.
-      unless ridley.data_bag.find('os/cobbler_keys')
-        raise('No os/cobbler_keys data bag item found. ' \
-              'Is this cluster using chef-vault?')
+    def empirical_mac(entry)
+      ping = Mixlib::ShellOut.new('ping', entry[:ip_address], '-c', '1')
+      ping.run_command
+      unless ping.status.success?
+        puts "Ping to #{entry[:hostname]} (#{entry[:ip_address]}) failed, " \
+          'checking ARP anyway.'
       end
 
-      ChefVault::Item.load('os', 'cobbler')['root-password']
+      arp = Mixlib::ShellOut.new('arp', '-an')
+      arp.run_command
+      arp_entry = arp.stdout.split("\n")
+                     .map(&:chomp)
+                     .select { |l| l.include?(entry[:ip_address]) }
+                     .first
+      match_data =
+        /(\w\w:\w\w:\w\w:\w\w:\w\w:\w\w) .ether./.match(arp_entry.to_s)
+      if !match_data.nil? && match_data.captures.count == 1
+        mac = match_data[1]
+        puts "Found #{mac} for #{entry[:hostname]} (#{entry[:ip_address]})"
+        mac
+      else
+        raise 'Could not find ARP entry for ' \
+          "#{entry[:hostname]} (#{entry[:ip_address]})!"
+      end
     end
 
+    #
+    # Corrected MAC address
+    #
     def corrected_mac(entry)
-      if is_virtualbox_vm?(entry)
-        # If it's a virtualbox VM, cluster.txt is wrong, and we need to
-        # find the real MAC.
-        ping = Mixlib::ShellOut.new('ping', entry[:ip_address], '-c', '1')
-        ping.run_command
-        if !ping.status.success?
-          puts "Ping to #{entry[:hostname]} (#{entry[:ip_address]}) failed, " \
-            'checking ARP anyway.'
-        end
-
-        arp = Mixlib::ShellOut.new('arp', '-an')
-        arp.run_command
-        arp_entry = arp.stdout.split("\n")
-          .map{|l| l.chomp}
-          .select{ |l| l.include?(entry[:ip_address]) }
-          .first
-        match_data =
-          /(\w\w:\w\w:\w\w:\w\w:\w\w:\w\w) .ether./.match(arp_entry.to_s)
-        if !match_data.nil? && match_data.captures.count == 1
-          mac = match_data[1]
-          puts "Found #{mac} for #{entry[:hostname]} (#{entry[:ip_address]})"
-          mac
-        else
-          raise 'Could not find ARP entry for ' +
-            "#{entry[:hostname]} (#{entry[:ip_address]})!"
-        end
+      # If it's a virtualbox VM, cluster.txt is wrong, and we need to
+      # find the real MAC.
+      if virtualbox_vm?(entry)
+        empirical_mac(entry)
       else
         # Otherwise, assume cluster.txt is correct.
         entry[:mac_address]
@@ -89,7 +104,7 @@ module BACH
     end
 
     def fqdn(entry)
-      if(entry[:dns_domain])
+      if entry[:dns_domain]
         entry[:hostname] + '.' + entry[:dns_domain]
       else
         entry[:hostname]
@@ -97,105 +112,41 @@ module BACH
     end
 
     def get_entry(name)
-      parse_cluster_txt.select do |ee|
+      parse_cluster_txt(cluster_txt).select do |ee|
         ee[:hostname] == name || fqdn(ee) == name
       end.first
     end
 
-    def is_virtualbox_vm?(entry)
-      %r{^08:00:27}.match(entry[:mac_address])
+    def virtualbox_vm?(entry)
+      /^08:00:27/.match(entry[:mac_address])
     end
 
-    def parse_cluster_txt
+    # Return the default cluster.txt data
+    # Returns: Array of cluster.txt lines
+    # Raise: if the file is not found
+    def cluster_txt
+      File.readlines(File.join(repo_dir, 'cluster.txt'))
+    end
+
+    def parse_cluster_txt(entries)
       fields = [
-                :hostname,
-                :mac_address,
-                :ip_address,
-                :ilo_address,
-                :cobbler_profile,
-                :dns_domain,
-                :runlist
-               ]
+        :hostname,
+        :mac_address,
+        :ip_address,
+        :ilo_address,
+        :cobbler_profile,
+        :dns_domain,
+        :runlist
+      ]
 
-      # This is really gross because Ruby 1.9 lacks Array#to_h.
-      File.readlines(File.join(repo_dir, 'cluster.txt')).map do |line|
+      parsed = entries.map do |line|
+        # This is really gross because Ruby 1.9 lacks Array#to_h.
         entry = Hash[*fields.zip(line.split(' ')).flatten(1)]
-        entry.merge({fqdn: fqdn(entry)})
+        entry.merge(fqdn: fqdn(entry))
       end
-    end
-
-    def refresh_vault_keys(entry=nil)
-      reindex_and_wait(entry) if entry
-
-      #
-      # Vault data bags can be identified by distinctively named data
-      # bag items ending in "_keys".
-      #
-      # Here we build a list of all the vaults by looking for "_keys"
-      # and ignoring any data bags that contain no vault-items.
-      #
-      vault_list = ridley.data_bag.all.map do |db|
-        vault_items = db.item.all.map do |dbi|
-          if dbi.chef_id.end_with?('_keys')
-            dbi.chef_id.gsub(%r{_keys$}, '')
-          else
-            nil
-          end
-        end.compact
-
-        if vault_items.any?
-          { db.name => vault_items }
-        else
-          nil
-        end
-      end.compact.reduce({}, :merge)
-
-      vault_list.each do |vault, item_list|
-        item_list.each do |item|
-          begin
-            vv = ChefVault::Item.load(vault, item)
-            vv.refresh
-            vv.save
-            puts "Refreshed chef-vault item #{vault}/#{item}"
-          rescue
-            $stderr.puts "Failed to refresh chef-vault item #{vault}/#{item}!"
-          end
-        end
-      end
-    end
-
-    def reindex_chef_server
-      cc = Mixlib::ShellOut.new('sudo', 'chef-server-ctl', 'reindex')
-      result = cc.run_command
-      cc.error!
-      result
-    end
-
-    def reindex_and_wait(entry)
-      180.times do |i|
-        if ridley.search(:node, "name:#{entry[:fqdn]}").any?
-          puts "Found #{entry[:fqdn]} in search index"
-          return
-        else
-          reindex_chef_server if i == 0
-
-          if i % 60 == 0
-            puts "Waiting for #{entry[:fqdn]} to appear in Chef index..."
-          end
-          sleep 1
-        end
-      end
-
-      raise "Did not find #{entry[:fqdn]} in Chef index after 180 seconds!"
-    end
-
-    def repo_dir
-      # This file is in the 'lib' subdirectory, so the repo dir is its parent.
-      File.expand_path('..', File.dirname(__FILE__))
-    end
-
-    def ridley
-      @ridley ||= Dir.chdir(repo_dir) { Ridley.from_chef_config }
+      raise "Malformed cluster.txt:\n#{parsed}" \
+        if parsed.any? { |e| e.value?(nil) }
+      parsed
     end
   end
 end

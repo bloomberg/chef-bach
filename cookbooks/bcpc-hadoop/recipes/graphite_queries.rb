@@ -11,6 +11,7 @@ graphite_query_time = "#{node["bcpc"]["hadoop"]["zabbix"]["graphite_query_time"]
 triggers_sensitivity = "#{node["bcpc"]["hadoop"]["zabbix"]["triggers_sensitivity"]}m"
 
 head_nodes_objs = get_head_nodes
+bootstrap_hostname = node['bcpc']['bootstrap']['hostname']
 
 # Graphite queries which specify property to query and alarming trigger,
 # severity(maps to zabbix's api -> trigger -> priority)and owner who the
@@ -22,13 +23,13 @@ head_nodes_objs = get_head_nodes
 # By default items, triggers actions are disabled and won't be monitored.
 # To enable them, set "enable=true" in the json structure
 triggers = {
-  'bcpc-bootstrap' => {
-    'chef.bcpc-bootstrap.success' => {
+  bootstrap_hostname => {
+    "chef.#{bootstrap_hostname}.success" => {
       'query' => 'chef.*.success',
       'query_range' => '-10min',
       'trigger_val' => "max(#{node["bcpc"]["hadoop"]["zabbix"]["chef_client_check_interval"]})",
       'trigger_cond' => '=0',
-      'trigger_name' => 'bcpc-bootstrap_ChefClientNotRun',
+      'trigger_name' => "#{bootstrap_hostname}_ChefClientNotRun",
       'enable' => true,
       'trigger_desc' => 'Chef-client has not run in 30m',
       'severity' => 2,

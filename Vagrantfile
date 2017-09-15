@@ -8,6 +8,13 @@
 #
 
 require 'json'
+require 'ipaddr'
+prefix = File.basename(File.expand_path('.')) == 'vbox' ? '../' : ''
+require_relative "#{prefix}lib/cluster_data"
+require_relative "#{prefix}lib/hypervisor_node"
+
+include BACH::ClusterData
+include BACH::ClusterData::HypervisorNode
 
 #
 # You can override parts of the vagrant config by creating a
@@ -34,34 +41,11 @@ end
 # ~/chef-bcpc/vbox directory, finding correct location for environment
 # file is important.
 #
-# To set the base_dir correct we check if we are inside "vbox"
-# directory or not and act accordingly
-#
-
-base_dir = if File.basename(File.expand_path('.')) == 'vbox'
-             File.expand_path('../environments')
-           else
-             File.expand_path('./environments')
-           end
-
 if ENV['BACH_DEBUG']
-  $stderr.puts "Base directory is : #{base_dir}"
+  $stderr.puts "Base directory is : #{repo_dir}"
 end
 
-json_file = Dir[File.join("#{base_dir}/../environments/", '*.json')]
-
-if json_file.empty?
-  $stderr.puts 'No environment file found to parse. ' \
-    'Please make sure at least one environment file exists.'
-  exit
-end
-
-if json_file.length > 1
-  $stderr.puts 'More than one environment file found.'
-  exit
-end
-
-chef_env = JSON.parse(File.read(json_file.join(',')))
+chef_env = JSON.parse(File.read(chef_environment_path))
 
 cluster_environment = chef_env['name']
 
@@ -71,29 +55,50 @@ bootstrap_hostname =
 bootstrap_domain =
   chef_env['override_attributes']['bcpc']['domain_name'] || 'bcpc.example.com'
 
+# Management IP, Float IP, Storage IP
+rack = chef_env['override_attributes']['bcpc']['networks'].keys.first
+network_json = chef_env['override_attributes']['bcpc']['networks'][rack]
+management_net =
+  IPAddr.new(network_json['management']['cidr'] || '10.0.100.0/24')
+float_net =
+  IPAddr.new(network_json['floating']['cidr'] || '192.168.100.0/24')
+storage_net =
+  IPAddr.new(network_json['storage']['cidr'] || '172.16.100.0/24')
+
 # We rely on global variables to deal with Vagrantfile scoping rules.
 # rubocop:disable Style/GlobalVars
 $bach_local_environment = cluster_environment
 $bach_local_mirror = nil
 
 Vagrant.configure('2') do |config|
-  config.vm.define :bootstrap do |bootstrap|
+  config.vm.define bootstrap_hostname.to_sym do |bootstrap|
     bootstrap.vm.hostname = "#{bootstrap_hostname}.#{bootstrap_domain}"
 
-    bootstrap.vm.network(:private_network,
-                         ip: '10.0.100.3',
-                         netmask: '255.255.255.0',
-                         adapter_ip: '10.0.100.2')
+    # Awaiting https://github.com/ruby/ruby/pull/1269 to properly retrieve mask
+    mgmt_mask = IPAddr.new(management_net.instance_variable_get('@mask_addr'),
+                           Socket::AF_INET).to_s
+    storage_mask = IPAddr.new(storage_net.instance_variable_get('@mask_addr'),
+                              Socket::AF_INET).to_s
+    float_mask = IPAddr.new(float_net.instance_variable_get('@mask_addr'),
+                            Socket::AF_INET).to_s
 
     bootstrap.vm.network(:private_network,
-                         ip: '172.16.100.3',
-                         netmask: '255.255.255.0',
-                         adapter_ip: '172.16.100.2')
+                         ip: management_net.succ.succ.succ.to_s,
+                         netmask: mgmt_mask,
+                         adapter_ip: management_net.succ.succ.to_s,
+                         type:     :static)
 
     bootstrap.vm.network(:private_network,
-                         ip: '192.168.100.3',
-                         netmask: '255.255.255.0',
-                         adapter_ip: '192.168.100.2')
+                         ip: storage_net.succ.succ.succ.to_s,
+                         netmask: storage_mask,
+                         adapter_ip: storage_net.succ.succ.to_s,
+                         type:     :static)
+
+    bootstrap.vm.network(:private_network,
+                         ip: float_net.succ.succ.succ.to_s,
+                         netmask: float_mask,
+                         adapter_ip: float_net.succ.succ.to_s,
+                         type:     :static)
 
     if File.basename(File.expand_path('.')) == 'vbox'
       bootstrap.vm.synced_folder '../', '/chef-bcpc-host'

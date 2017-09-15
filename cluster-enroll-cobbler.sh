@@ -72,6 +72,7 @@ if [[ ! -z "$MATCH" ]]; then
     # made at least one change to cobbler config
     echo "Cobbler sync..."
     sudo cobbler sync
+    sudo service xinetd restart
 else
     if [[ -z "$EXACTHOST" ]]; then
 	echo No hosts defined, no action taken.

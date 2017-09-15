@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 #
 # This script injects proxy, DNS, and NTP configurations into the
-# "Test-Laptop" environment for VM cluster builds.
+# environment for VM cluster builds.
 #
 # We attempt to auto-detect these values.  To override DNS, NTP, or
 # proxy servers, export the appropriate environment variable before
@@ -81,11 +81,13 @@ end
 
 name_server = ENV['BACH_DNS_SERVER'] || get_name_server
 ntp_server = ENV['BACH_NTP_SERVER'] || name_server
+environment = ENV['BACH_ENVIRONMENT'] || 'Test-Laptop'
 proxy_uri = if ENV['http_proxy']
               URI.parse(ENV['http_proxy'])
             else
               nil
             end
+cluster_name = ENV['BACH_CLUSTER_PREFIX']
 
 #
 # This file is in the 'tests' subdir, so __FILE__/.. is our repo dir.
@@ -121,13 +123,21 @@ unless File.directory?(cluster_dir)
 end
 
 environment_path =
-  File.expand_path(File.join(cluster_dir, 'environments', 'Test-Laptop.json'))
+  File.expand_path(File.join(cluster_dir, 'environments', environment + '.json'))
 
 environment_data = JSON.parse(File.read(environment_path))
 
 environment_data['override_attributes'].tap do |attrs|
   attrs['bcpc']['ntp_servers'] = [ntp_server]
   attrs['bcpc']['dns_servers'] = [name_server]
+
+  # if we have a clusetr_name prefix adjust the necessary parameters
+  if cluster_name
+    attrs['bcpc']['cluster_name'] = cluster_name
+    attrs['bcpc']['bootstrap']['hostname'] = \
+      cluster_name + attrs['bcpc']['bootstrap']['hostname'] unless \
+      attrs['bcpc']['bootstrap']['hostname'].start_with?(cluster_name)
+  end
 
   if proxy_uri
     attrs['bcpc']['bootstrap']['proxy'] = proxy_uri.to_s

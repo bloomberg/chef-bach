@@ -53,14 +53,19 @@ end
 # it is run on an internet-disconnected host only to verify the
 # extracted package is complete.
 #
-# This ruby_block checks for the presence of a Gemfile.lock in order
+# This ruby_block checks for the presence of a Gemfile.lock on the file
+# system and in the Git repo (as required by Bundler) in order
 # to determine which scenario applies, then append a --deployment
 # switch in the latter case.
 #
 ruby_block 'determine-bundler-command' do
   block do
-    if File.exists?(File.join(node['bach']['repository']['repo_directory'],
-                              'Gemfile.lock'))
+    gemfile_lock_path = File.join(node['bach']['repository']['repo_directory'],
+                          'Gemfile.lock')
+    gemfile_lock_cmd = Mixlib::ShellOut.new('git', 'diff', '--name-status',
+                                            gemfile_lock_path)
+    gemfile_lock_cmd.run_command
+    if File.exists?(gemfile_lock_path) && !gemfile_lock_cmd.error?
       node.run_state[:bcpc_bootstrap_bundler_command] =
         "#{bundler_bin} install --deployment"
     else

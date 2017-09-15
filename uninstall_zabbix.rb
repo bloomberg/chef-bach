@@ -50,33 +50,17 @@ require 'rubygems'
 require 'ohai'
 require 'mixlib/shellout'
 
-def get_entry(name)
-  parse_cluster_txt.select { |e| e['runlist'].include? name }.first
-end
+require_relative 'lib/cluster_data'
+include BACH::ClusterData
 
 def head_nodes
-  parse_cluster_txt.select { |e| e['runlist'].include? 'Head' }
+  parse_cluster_txt(cluster_txt).select do |e|
+    e['runlist'].include? 'Head'
+  end
 end
 
 def worker_nodes
-  parse_cluster_txt.select { |e| e['runlist'].include? 'Worker' }
-end
-
-def virtualbox_vm?(entry)
-  /^08:00:27/.match(entry['mac_address'])
-end
-
-def parse_cluster_txt
-  fields =
-    %w(hostname mac_address ip_address ilo_address cobbler_profile
-       dns_domain runlist)
-  # This is really gross because Ruby 1.9 lacks Array#to_h.
-  File.readlines(File.join(repo_dir, 'cluster.txt'))
-    .map { |line| Hash[*fields.zip(line.split(' ')).flatten(1)] }
-end
-
-def repo_dir
-  File.dirname(__FILE__)
+  parse_cluster_txt(cluster_txt).select { |e| e['runlist'].include? 'Worker' }
 end
 
 # check the status of the Mixlib::Shellout c
