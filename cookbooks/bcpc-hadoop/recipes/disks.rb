@@ -47,14 +47,14 @@ ruby_block 'enumerate-disks' do
     # node[:bcpc][:hadoop][:disks] is for static attributes that we
     # know in advance.  These are easily overridden in an environment.
     #
-    node.run_state[:bcpc_hadoop_disks] = {}
+    node.run_state['bcpc_hadoop_disks'] = {}
   end
 end
 
 directory '/disk' do
   owner 'root'
   group 'root'
-  mode 00755
+  mode 0o0755
   action :create
 end
 
@@ -80,7 +80,7 @@ ruby_block 'purge-stale-fstab-entries' do
   block do
     require 'augeas'
 
-    Augeas::open do |aug|
+    Augeas.open do |aug|
       bcpc_unused_targets.each do |mount_target|
         aug.rm("/files/etc/fstab/*[file='#{mount_target}']")
 
@@ -107,7 +107,7 @@ ruby_block 'format-disks' do
                                     node.run_context).tap do |dd|
         dd.owner 'root'
         dd.group 'root'
-        dd.mode 00755
+        dd.mode 0o0755
         dd.recursive true
         dd.run_action(:create)
       end
@@ -125,10 +125,15 @@ ruby_block 'format-disks' do
       fs_check.run_command
 
       dev_name = if fs_check.status.success? &&
-                     fs_check.stdout.include?('SGI XFS filesystem')
+                    fs_check.stdout.include?('SGI XFS filesystem')
                    "/dev/#{base_name}"
                  else
-                   "/dev/#{base_name}1"
+                   case base_name
+                   when /^nvme/
+                     "/dev/#{base_name}p1"
+                   else
+                     "/dev/#{base_name}1"
+                   end
                  end
 
       if dev_name.end_with?('1')
@@ -202,7 +207,7 @@ ruby_block 'use-uuids-in-fstab' do
 
       uuid_device = "UUID=#{uuid}"
 
-      Augeas::open do |aug|
+      Augeas.open do |aug|
         fstab_device =
           aug.get("/files/etc/fstab/*[file='#{fs[:mount]}']/spec")
 
@@ -227,7 +232,7 @@ ruby_block 'hadoop-disk-reservations' do
     # Chef's "compile" pass.
     #
     reservation_requests =
-      node[:bcpc][:hadoop][:disks][:reservation_requests]
+      node['bcpc']['hadoop']['disks']['reservation_requests']
 
     #
     # Reload Ohai filesystem plugin, in order to pick up any newly
@@ -242,8 +247,8 @@ ruby_block 'hadoop-disk-reservations' do
     available_disks = bcpc_mounted_filesystems.keys
 
     # Is this node's current role in the list?
-    if (node[:bcpc][:hadoop][:disks][:disk_reserve_roles] &
-        node.roles).any?
+    if (node['bcpc']['hadoop']['disks']['disk_reserve_roles'] &
+        node['roles']).any?
       #
       # Make sure we have enough disks to fulfill reservations and
       # also normal operations of the DN and NN.
@@ -253,7 +258,7 @@ ruby_block 'hadoop-disk-reservations' do
       end
 
       role_min_disk =
-        node[:bcpc][:hadoop][:disks][:role_min_disk]
+        node['bcpc']['hadoop']['disks']['role_min_disk']
 
       if available_disks.length - reservation_requests.length < role_min_disk
         raise 'Minimum disk requirement not met'
@@ -263,9 +268,9 @@ ruby_block 'hadoop-disk-reservations' do
         (0..(available_disks.length - 1)).to_a -
         reservation_requests.each_index.to_a
 
-      node.run_state[:bcpc_hadoop_disks][:mounts] = mount_indexes
+      node.run_state['bcpc_hadoop_disks']['mounts'] = mount_indexes
     else
-      node.run_state[:bcpc_hadoop_disks][:mounts] =
+      node.run_state['bcpc_hadoop_disks']['mounts'] =
         (0..(available_disks.length - 1)).to_a
     end
   end
