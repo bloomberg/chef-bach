@@ -74,6 +74,7 @@ default[:bcpc][:hadoop][:hbase][:site_xml].tap do |site_xml|
   site_xml['hbase.bulkload.staging.dir'] = "#{node['bcpc']['hadoop']['hbase']['bulkload_staging_dir']}"
   site_xml['hbase.fs.tmp.dir'] = '/user/${user.name}/hbase-staging'
   site_xml['hbase.cluster.distributed'] = "#{node["bcpc"]["hadoop"]["hbase"]["cluster"]["distributed"]}"
+  site_xml['hbase.quota.enabled'] = 'true'
   site_xml['hbase.hregion.majorcompaction'] = "#{node["bcpc"]["hadoop"]["hbase"]["major_compact"]["time"]}"
   site_xml['hbase.regionserver.ipc.address'] = "#{node["bcpc"]["floating"]["ip"]}"
   site_xml['hbase.master.ipc.address'] = "#{node["bcpc"]["floating"]["ip"]}"
