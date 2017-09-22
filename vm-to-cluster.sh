@@ -11,15 +11,13 @@ REPO_DIR="`dirname ${BASH_SOURCE[0]}`"
 cd $REPO_DIR
 . ./proxy_setup.sh
 
-if [ $(dpkg-query -W -f='${Status}' libaugeas-dev 2>/dev/null | grep -c 'ok installed') -ne 1 ] && [ "$(uname)" != "Darwin" ]; then
-  echo "#### Need libaugeas-dev for the Augeas Gem" > /dev/stderr
-  sudo apt-get install -y libaugeas-dev libmysqlclient-dev libmysqlclient20 libmysqld-dev
-fi
-
-if [ $(dpkg-query -W -f='${Status}' libkrb5-dev 2>/dev/null | grep -c 'ok installed') -ne 1 ] && [ "$(uname)" != "Darwin" ]; then
-  echo "#### Need libkrb5-dev for the rkerberos Gem" > /dev/stderr
-  sudo apt-get install -y libkrb5-dev
-fi
+# Iterate over a list of "<dpkg name> <gem name>" necessary for the Gemfile
+for p in "libaugeas-dev ruby-augeas" "libmysqlclient-dev mysql2" "libmysqlclient20 mysql2" "libmysqld-dev mysql2" "libkrb5-dev rkerberos"; do 
+  if [ $(dpkg-query -W -f='${Status}' ${p% *} 2>/dev/null | grep -c 'ok installed') -ne 1 ] && [ "$(uname)" != "Darwin" ]; then
+    echo "#### Need ${p% *} for the ${p#* } Gem" > /dev/stderr
+    sudo apt-get install -y ${p% *}
+  fi
+done
 
 export PKG_CONFIG_PATH=/usr/lib/pkgconfig:/usr/lib/x86_64-linux-gnu/pkgconfig:/usr/share/pkgconfig
 bundle config --local PATH vendor/bundle
