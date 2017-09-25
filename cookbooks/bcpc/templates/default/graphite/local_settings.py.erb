@@ -16,12 +16,12 @@
 # install. This key is used for salting of hashes used in auth tokens,
 # CRSF middleware, cookie storage, etc. This should be set identically among
 # instances if used behind a load balancer.
-#SECRET_KEY = 'UNSAFE_DEFAULT'
+SECRET_KEY = 'BACH_SAFE_DEFAULT'
 
 # In Django 1.5+ set this to the list of hosts your graphite instances is
 # accessible as. See:
 # https://docs.djangoproject.com/en/dev/ref/settings/#std:setting-ALLOWED_HOSTS
-#ALLOWED_HOSTS = [ '*' ]
+ALLOWED_HOSTS = [ '*' ]
 
 # Set your local timezone (Django's default is America/Chicago)
 # If your graphs appear to be offset by a couple hours then this probably
@@ -36,8 +36,8 @@ TIME_ZONE = <%= node['bcpc']['graphite']['timezone'] %>
 
 # Logging
 LOG_ROTATION = True
-#LOG_RENDERING_PERFORMANCE = True
-#LOG_CACHE_PERFORMANCE = True
+LOG_RENDERING_PERFORMANCE = True
+LOG_CACHE_PERFORMANCE = True
 #LOG_METRIC_ACCESS = True
 
 # Enable full debug page display on exceptions (Internal Server Error pages)
@@ -84,7 +84,7 @@ MEMCACHE_HOSTS = ['<%="#{node[:bcpc][:graphite][:ip]}"%>:11211']
 ## Data directories
 # NOTE: If any directory is unreadable in DATA_DIRS it will break metric browsing
 #CERES_DIR = '/opt/graphite/storage/ceres'
-WHISPER_DIR = '<%= node['bcpc']['graphite']['local_data_dir'] %>' 
+WHISPER_DIR = '<%= node['bcpc']['graphite']['local_data_dir'] %>'
 #RRD_DIR = '/opt/graphite/storage/rrd'
 #STANDARD_DIRS = [WHISPER_DIR, RRD_DIR] # Default: set from the above variables
 #LOG_DIR = '/opt/graphite/storage/log/webapp'
@@ -139,7 +139,7 @@ WHISPER_DIR = '<%= node['bcpc']['graphite']['local_data_dir'] %>'
 # NOTE: Ignored if DASHBOARD_REQUIRE_AUTHENTICATION is not set
 #DASHBOARD_REQUIRE_EDIT_GROUP = 'dashboard-editors-group'
 
-# If set to True, dashboards can be saved or deleted by any user having the appropriate 
+# If set to True, dashboards can be saved or deleted by any user having the appropriate
 # (change or delete) permission (as set in the Django Admin app).  Defaults to False
 # NOTE: Ignored if DASHBOARD_REQUIRE_AUTHENTICATION is not set
 #DASHBOARD_REQUIRE_PERMISSIONS = True
@@ -169,11 +169,11 @@ DATABASES = {
 # remote server in the cluster. These servers must each have local access to
 # metric data. Note that the first server to return a match for a query will be
 # used.
-CLUSTER_SERVERS = [ <%="#{@servers.map{|x| "\""+x['mgmt_ip']+":"+x['graphite_webport'].to_s+"\""}.join(', ')}"%> ]
+CLUSTER_SERVERS = [ <%="#{@servers.map{|x| "\""+x['mgmt_ip']+":"+x['graphite_webport'].to_s+"\""}.sort.join(', ')}"%> ]
 INTRACLUSTER_HTTPS = <%="#{node['bcpc']['graphite']['web_https'] == true ? 'True' : 'False'}" %>
 ## These are timeout values (in seconds) for requests to remote webapps
-#REMOTE_FIND_TIMEOUT = 3.0             # Timeout for metric find requests
-#REMOTE_FETCH_TIMEOUT = 6.0            # Timeout to fetch series data
+REMOTE_FIND_TIMEOUT = 6.0             # Timeout for metric find requests
+REMOTE_FETCH_TIMEOUT = 10.0            # Timeout to fetch series data
 #REMOTE_RETRY_DELAY = 60.0             # Time before retrying a failed remote webapp
 #REMOTE_EXCLUDE_LOCAL = False          # Try to detect when a cluster server is localhost and don't forward queries
 #REMOTE_READER_CACHE_SIZE_LIMIT = 1000 # Maximum number of remote URL queries to cache
@@ -199,7 +199,7 @@ INTRACLUSTER_HTTPS = <%="#{node['bcpc']['graphite']['web_https'] == true ? 'True
 # and a common scheme is to use 7102 for instance b, 7202 for instance c, etc.
 #
 # You *should* use 127.0.0.1 here in most cases
-CARBONLINK_HOSTS = [ <%="#{@servers.collect{|x| "\""+x['mgmt_ip']+":7002\""}.sort.join(', ')}"%> ]
+CARBONLINK_HOSTS = ['<%="#{node[:bcpc][:management][:ip]}"%>:7002']
 #CARBONLINK_TIMEOUT = 1.0
 #CARBONLINK_RETRY_DELAY = 15 # Seconds to blacklist a failed remote server
 
@@ -209,11 +209,11 @@ CARBONLINK_HOSTS = [ <%="#{@servers.collect{|x| "\""+x['mgmt_ip']+":7002\""}.sor
 #CARBONLINK_HASHING_KEYFUNC = "/opt/graphite/bin/keyfuncs.py:my_keyfunc"
 
 # Prefix set in carbon for the carbon specific metrics.  Default in carbon is 'carbon'
-#CARBON_METRIC_PREFIX='carbon'
+CARBON_METRIC_PREFIX='carbon'
 
 # The replication factor to use with consistent hashing
 # This should usually match the value configured in Carbon
-REPLICATION_FACTOR = <%="#{@min_quorum}"%> 
+REPLICATION_FACTOR = 1
 
 # How often should render.datalib.fetch() retry to get remote data
 # MAX_FETCH_RETRIES = 2
@@ -224,5 +224,5 @@ REPLICATION_FACTOR = <%="#{@min_quorum}"%>
 #####################################
 # Uncomment the following line for direct access to Django settings such as
 # MIDDLEWARE_CLASSES or APPS
-#from graphite.app_settings import *
+from graphite.app_settings import *
 
