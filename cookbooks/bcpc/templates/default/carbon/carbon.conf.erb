@@ -152,9 +152,9 @@ USE_FLOW_CONTROL = True
 # This can be excessive and degrade performance if logging on the same
 # volume as the whisper data is stored.
 LOG_UPDATES = False
-LOG_CREATES = False
-LOG_CACHE_HITS = False
-LOG_CACHE_QUEUE_SORTS = False
+LOG_CREATES = True
+LOG_CACHE_HITS = True
+LOG_CACHE_QUEUE_SORTS = True
 
 # The thread that writes metrics to disk can use one of the following strategies
 # determining the order in which metrics are removed from cache and flushed to
@@ -186,7 +186,7 @@ LOG_CACHE_QUEUE_SORTS = False
 # pattern.
 #
 # CACHE_WRITE_STRATEGY = sorted
-CACHE_WRITE_STRATEGY = max 
+CACHE_WRITE_STRATEGY = sorted
 
 # On some systems it is desirable for whisper to write synchronously.
 # Set this option to True if you'd like to try this. Basically it will
@@ -396,7 +396,7 @@ DESTINATIONS = <%= "#{@servers.map{|x| x['mgmt_ip']+':2024'}.sort.join(', ')}" %
 # for a single destination. Once this limit is hit, we will
 # stop accepting new data if USE_FLOW_CONTROL is True, otherwise
 # we will drop any subsequently received datapoints.
-MAX_QUEUE_SIZE = 10000
+MAX_QUEUE_SIZE = 100000
 
 # This defines the maximum "message size" between carbon daemons.  If
 # your queue is large, setting this to a lower number will cause the
@@ -530,7 +530,7 @@ REPLICATION_FACTOR = 1
 # for a single destination. Once this limit is hit, we will
 # stop accepting new data if USE_FLOW_CONTROL is True, otherwise
 # we will drop any subsequently received datapoints.
-MAX_QUEUE_SIZE = 10000
+MAX_QUEUE_SIZE = 100000
 
 # Set this to False to drop datapoints when any send queue (sending datapoints
 # to a downstream carbon daemon) hits MAX_QUEUE_SIZE. If this is True (the
@@ -583,7 +583,7 @@ LOG_LISTENER_CONN_SUCCESS = False
 
 # In order to turn off logging of metrics with no corresponding
 # aggregation rules receiver, set this to False
-# LOG_AGGREGATOR_MISSES = False
+LOG_AGGREGATOR_MISSES = False
 
 # Specify the user to drop privileges to
 # If this is blank carbon-aggregator runs as the user that invokes it

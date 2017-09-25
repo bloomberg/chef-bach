@@ -34,8 +34,8 @@ graphite_user = get_config!('mysql-graphite-user')
 graphite_password = get_config!('password', 'mysql-graphite', 'os')
 
 %w{
+  python-dev
   python-pytz
-  python-pyparsing
   python-mysqldb
   python-pip
   python-cairo
@@ -44,6 +44,9 @@ graphite_password = get_config!('password', 'mysql-graphite', 'os')
   python-twisted
   python-memcache
   python-pyparsing
+  python-scandir
+  libcairo2-dev
+  libffi-dev
 }.each do |pkg|
   package pkg do
     action :upgrade
@@ -252,6 +255,7 @@ execute 'graphite-database-sync' do
     python /opt/graphite/bin/django-admin.py createsuperuser \
       --username=admin --email=#{node[:bcpc][:admin_email]} --noinput
     python /opt/graphite/bin/django-admin.py collectstatic --noinput
+    python /opt/graphite/bin/django-admin.py migrate --settings=graphite.settings
   EOH
   notifies :restart, 'service[apache2]', :immediately
 end
