@@ -28,11 +28,6 @@
 node.default['bcpc']['jolokia'].tap do |jolokia|
   jolokia['policy_path'] = '/etc/bach/jolokia_security_policy.xml'
   jolokia['jar_path'] = '/usr/local/jolokia/lib/jolokia-jvm.jar'
-  jolokia['whitelist'] = [
-                          '127.0.0.1',
-                          node[:bcpc][:bootstrap][:ip],
-                          node[:bcpc][:management][:ip]
-                         ]
   jolokia['host'] = '0.0.0.0'
   jolokia['port'] = 7777
   jolokia['jvm_args'] =
