@@ -217,6 +217,23 @@ ruby_block 'update sharelib checksum' do
       Digest::MD5.hexdigest(File.read(OOZIE_SHARELIB_TARBALL_PATH))
   end
   action :nothing
+
+  
+  notifies :run, 'ruby_block[oozie sharelib sqoop-action workaround for 2.6.1]', :immediately
+end
+
+ruby_block 'oozie sharelib sqoop-action workaround for 2.6.1' do
+  block do
+    node[:bcpc][:hadoop][:oozie_hosts].each do |oozie_host|
+      instrumentation = shell_out! "#{OOZIE_CLIENT_PATH}/bin/oozie admin "\
+        "-oozie http://#{float_host(oozie_host['hostname'])}:11000/oozie "\
+        '-instrumentation | grep libs.sharelib.system.libpath', user: 'oozie'
+      libpath = instrumentation.stdout.match(/hdfs:\/\/.*$/)
+      shell_out! "hdfs dfs -cp -p #{libpath}/hive #{libpath}/sqoop-hive", user: 'hdfs'
+      shell_out! "hdfs dfs -rm #{libpath}/sqoop-hive/hive-cli-1.2.1000.2.6.1.17-1.jar", user: 'hdfs'
+    end if node['bcpc']['hadoop']['distribution']['active_release'] == '2.6.1.17-1'
+  end
+  action :nothing
   notifies :run, 'ruby_block[notify sharelib update]', :immediately
 end
 
