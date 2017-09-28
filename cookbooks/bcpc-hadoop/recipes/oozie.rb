@@ -34,7 +34,7 @@ include_recipe 'bcpc-hadoop::oozie_config'
 oozie_user = get_config('mysql-oozie-user') || 'oozie'
 oozie_password = get_config!('password', 'mysql-oozie', 'os')
 
-hdp_rel = node[:bcpc][:hadoop][:distribution][:active_release]
+hdp_rel = node['bcpc']['hadoop']['distribution']['active_release']
 oozie_conf_dir = "/etc/oozie/conf.#{node.chef_environment}"
 
 [
@@ -53,7 +53,7 @@ oozie_conf_dir = "/etc/oozie/conf.#{node.chef_environment}"
 end
 
 ['oozie-server', 'oozie-client'].each do |pkg|
-  hdp_select(pkg, node[:bcpc][:hadoop][:distribution][:active_release])
+  hdp_select(pkg, node['bcpc']['hadoop']['distribution']['active_release'])
 end
 
 configure_kerberos 'oozie_spnego' do
@@ -76,7 +76,7 @@ OOZIE_SERVER_PATH =
 OOZIE_SHARELIB_TARBALL_PATH =
   "/usr/hdp/#{hdp_rel}/oozie/oozie-sharelib.tar.gz".freeze
 
-HDFS_URL = node[:bcpc][:hadoop][:hdfs_url]
+HDFS_URL = node['bcpc']['hadoop']['hdfs_url']
 
 directory "#{OOZIE_LIB_PATH}/libext" do
   owner 'oozie'
@@ -205,7 +205,7 @@ bash 'oozie create shared libs' do
   user 'oozie'
   not_if do
     require 'digest'
-    chksum = node[:bcpc][:hadoop][:oozie][:sharelib_checksum]
+    chksum = node['bcpc']['hadoop']['oozie']['sharelib_checksum']
     !chksum.nil? &&
       Digest::MD5.hexdigest(File.read(OOZIE_SHARELIB_TARBALL_PATH)) == chksum
   end
@@ -217,9 +217,9 @@ end
 ruby_block 'update sharelib checksum' do
   block do
     require 'digest'
-    node[:bcpc][:hadoop][:oozie_hosts].each do |oozie_host|
+    node['bcpc']['hadoop']['oozie_hosts'].each do |oozie_host|
       next unless oozie_running?(float_host(oozie_host['hostname']))
-      node.set[:bcpc][:hadoop][:oozie][:sharelib_checksum] =
+      node.set['bcpc']['hadoop']['oozie']['sharelib_checksum'] =
         Digest::MD5.hexdigest(File.read(OOZIE_SHARELIB_TARBALL_PATH))
       break
     end
@@ -234,7 +234,7 @@ ruby_block 'oozie sharelib sqoop-action workaround for 2.6.1' do
   block do
     active_release = node['bcpc']['hadoop']['distribution']['active_release']
     if active_release == '2.6.1.17-1'
-      node[:bcpc][:hadoop][:oozie_hosts].each do |oozie_host|
+      node['bcpc']['hadoop']['oozie_hosts'].each do |oozie_host|
         next unless oozie_running?(float_host(oozie_host['hostname']))
         instrumentation = shell_out! "#{OOZIE_CLIENT_PATH}/bin/oozie admin "\
           "-oozie http://#{float_host(oozie_host['hostname'])}:11000/oozie "\
@@ -253,8 +253,8 @@ end
 
 ruby_block 'notify sharelib update' do
   block do
-    node[:bcpc][:hadoop][:oozie_hosts].each do |oozie_host|
-      update_oozie_sharelib(float_host(oozie_host[:hostname]))
+    node['bcpc']['hadoop']['oozie_hosts'].each do |oozie_host|
+      update_oozie_sharelib(float_host(oozie_host['hostname']))
     end
   end
   action :nothing
@@ -345,7 +345,7 @@ end
 ruby_block 'check if oozie running' do
   i = 0
   block do
-    until oozie_running?(float_host(node[:fqdn]))
+    until oozie_running?(float_host(node['fqdn']))
       if i < 10
         sleep(0.5)
         i += 1
@@ -359,5 +359,5 @@ ruby_block 'check if oozie running' do
     end
     Chef::Log.debug('Oozie is up')
   end
-  not_if { oozie_running?(float_host(node[:fqdn])) }
+  not_if { oozie_running?(float_host(node['fqdn'])) }
 end
