@@ -30,12 +30,9 @@ apt-get -o Dir::Etc::SourceList=/etc/apt/sources.list.d/bcpc.list \
 	-o APT::Get::List-Cleanup="0" \
 	update
 
-apt-get -y install chef=12.19.36-1
-
-if dpkg -s chef-server 2>/dev/null | grep -q ^Status.*installed && \
-   dpkg -s chef 2>/dev/null | grep -q ^Version.*12; then
+if dpkg -s chef-server 2>/dev/null | grep -q ^Status.*installed; then 
   chef-server-ctl restart
-  echo 'chef-server and client are installed and the server has been restarted'
+  echo 'chef-server is installed and the server has been restarted'
 else
   apt-get -y install chef-server
   mkdir -p /etc/chef-server
