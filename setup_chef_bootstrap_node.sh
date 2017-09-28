@@ -16,7 +16,7 @@ CHEF_SERVER=$1
 CHEF_ENVIRONMENT=$2
 
 # Assume we are running in the chef-bcpc directory
-sudo chef-client -E "$CHEF_ENVIRONMENT" -c .chef/knife.rb
+sudo /opt/chefdk/bin/chef-client -E "$CHEF_ENVIRONMENT" -c .chef/knife.rb
 PEM_RELATIVE_PATH=.chef/$(hostname -f).pem
 sudo chown $(whoami):root $PEM_RELATIVE_PATH
 sudo chmod 550 $PEM_RELATIVE_PATH
@@ -34,15 +34,15 @@ fi
 # still need to configure Apache and chef-vault before doing a
 # complete Chef run.
 #
-sudo -E chef-client \
+sudo -E /opt/chefdk/bin/chef-client \
      -c .chef/knife.rb \
      -o 'recipe[bcpc::apache-mirror]'
 
-sudo -E chef-client \
+sudo -E /opt/chefdk/bin/chef-client \
      -c .chef/knife.rb \
      -o 'recipe[bcpc::chef_vault_install]'
 
-sudo chef-client \
+sudo /opt/chefdk/bin/chef-client \
      -c .chef/knife.rb \
      -o 'recipe[bcpc::chef_poise_install]'
 
@@ -52,7 +52,7 @@ sudo chef-client \
 # BCPC-Bootstrap so that we have os in the chef vault to allow bootstrap-gpg
 # to be properly put inside the configs/Test-Laptop data bag as we aren't even installing the chef vault until after the first apt run
 #
-sudo -E chef-client \
+sudo -E /opt/chefdk/bin/chef-client \
      -c .chef/knife.rb \
      -o 'recipe[bach_repository::apt]'
 
@@ -62,7 +62,7 @@ sudo -E chef-client \
 # With chef-vault installed and the repo configured, it's safe to save
 # and converge the complete runlist.
 #
-sudo -E chef-client \
+sudo -E /opt/chefdk/bin/chef-client \
      -c .chef/knife.rb \
      -r 'role[BCPC-Bootstrap]'
 
@@ -71,6 +71,6 @@ sudo -E chef-client \
 # bug in the bach_repository::apt recipe.  The bootstrap fails to save
 # its GPG public/private keys even after it should be able to do so.
 #
-sudo -E chef-client \
+sudo -E /opt/chefdk/bin/chef-client \
      -c .chef/knife.rb \
      -o 'recipe[bach_repository::apt]'

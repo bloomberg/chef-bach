@@ -17,11 +17,6 @@ fi
 # Clean up any left-behind chef config from prior runs.
 rm -f /tmp/build_bins_chef_config.?????????.rb
 
-#
-# It's important to install the chefdk before chef, so that
-# /usr/bin/knife and /usr/bin/chef-client are symlinks into /opt/chef
-# instead of /opt/chefdk.
-#
 DIR=`dirname $0`
 mkdir -p $DIR/bins
 pushd $DIR/bins/ > /dev/null
