@@ -133,9 +133,9 @@ end
 #
 # if HBASE region replication is enabled the properties in this section will be included in hbase-site.xml
 #
-if node["bcpc"]["hadoop"]["hbase"]["region"]["replication"]["enabled"] == true then
+if node['bcpc']['hadoop']['hbase']['site_xml']['hbase.region.replica.replication.enabled'] then
   generated_values['hbase.regionserver.storefile.refresh.period'] = node["bcpc"]["hadoop"]["hbase_rs"]["storefile"]["refresh"]["period"]
-  generated_values['hbase.region.replica.replication.enabled'] = node["bcpc"]["hadoop"]["hbase"]["region"]["replication"]["enabled"]
+  generated_values['hbase.region.replica.replication.enabled'] = node['bcpc']['hadoop']['hbase']['site_xml']['hbase.region.replica.replication.enabled'].to_s
   generated_values['hbase.master.hfilecleaner.ttl'] = node["bcpc"]["hadoop"]["hbase_master"]["hfilecleaner"]["ttl"]
   generated_values['hbase.meta.replica.count'] = node["bcpc"]["hadoop"]["hbase"]["meta"]["replica"]["count"]
   generated_values['hbase.regionserver.storefile.refresh.all'] = node["bcpc"]["hadoop"]["hbase_rs"]["storefile"]["refresh"]["all"]
