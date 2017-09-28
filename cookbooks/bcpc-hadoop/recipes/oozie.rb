@@ -214,8 +214,12 @@ end
 ruby_block 'update sharelib checksum' do
   block do
     require 'digest'
-    node.set[:bcpc][:hadoop][:oozie][:sharelib_checksum] =
-      Digest::MD5.hexdigest(File.read(OOZIE_SHARELIB_TARBALL_PATH))
+    node[:bcpc][:hadoop][:oozie_hosts].each do |oozie_host|
+      next unless oozie_running?(float_host oozie_host['hostname'])
+      node.set[:bcpc][:hadoop][:oozie][:sharelib_checksum] =
+        Digest::MD5.hexdigest(File.read(OOZIE_SHARELIB_TARBALL_PATH))
+      break
+    end
   end
   action :nothing
 
@@ -226,6 +230,7 @@ end
 ruby_block 'oozie sharelib sqoop-action workaround for 2.6.1' do
   block do
     node[:bcpc][:hadoop][:oozie_hosts].each do |oozie_host|
+      next unless oozie_running?(float_host oozie_host['hostname'])
       instrumentation = shell_out! "#{OOZIE_CLIENT_PATH}/bin/oozie admin "\
         "-oozie http://#{float_host(oozie_host['hostname'])}:11000/oozie "\
         '-instrumentation | grep libs.sharelib.system.libpath', user: 'oozie'
