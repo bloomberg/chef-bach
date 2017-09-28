@@ -46,7 +46,7 @@ include_recipe 'bcpc-hadoop::mysql_connector'
   'hadooplzo',
   'hadooplzo-native',
   hwx_pkg_str('oozie-server', hdp_rel),
-  hwx_pkg_str('oozie-client', hdp_rel),
+  hwx_pkg_str('oozie-client', hdp_rel)
 ].flatten.each do |pkg|
   package pkg do
     action :upgrade
@@ -82,7 +82,7 @@ HDFS_URL = node[:bcpc][:hadoop][:hdfs_url]
 directory "#{OOZIE_LIB_PATH}/libext" do
   owner 'oozie'
   group 'oozie'
-  mode 00755
+  mode 0o0755
   action :create
   recursive true
 end
@@ -90,7 +90,7 @@ end
 directory '/var/run/oozie' do
   owner 'oozie'
   group 'oozie'
-  mode 00755
+  mode 0o0755
   action :create
   recursive true
 end
@@ -105,30 +105,34 @@ end
   end
 end
 
-if not (node.run_list.expand(node.chef_environment).recipes
-  .include?('bcpc-hadoop::hbase_master')) then
+unless node.run_list.expand(node.chef_environment).recipes
+           .include?('bcpc-hadoop::hbase_master')
   package 'hbase' do
     action :upgrade
   end
 end
 
-if not (node.run_list.expand(node.chef_environment).recipes
-  .include?('bcpc-hadoop::hbase_master')) then
+unless node.run_list.expand(node.chef_environment).recipes
+           .include?('bcpc-hadoop::hbase_master')
   package 'hbase' do
     action :upgrade
   end
 end
 
-HBASE_CLIENT_LIB = "/usr/hdp/#{hdp_rel}/hbase/lib"
-(["hbase-common.jar", "hbase-client.jar", "hbase-server.jar",
- "hbase-protocol.jar", "hbase-hadoop2-compat.jar"].map do |flname|
-   "#{HBASE_CLIENT_LIB}/#{flname}"
-  end +
-  Dir["/usr/hdp/#{hdp_rel}/hbase/lib/htrace-core-*"] +
-  Dir["/usr/hdp/#{hdp_rel}/hbase/lib/netty-*"]).each do |link_candidate|
-    link "link_hbase_jar_#{link_candidate}" do
-      to link_candidate
-      target_file "#{OOZIE_CLIENT_PATH}/libext/#{File.basename(link_candidate)}"
+HBASE_CLIENT_LIB = "/usr/hdp/#{hdp_rel}/hbase/lib".freeze
+
+link_candidates = ['hbase-common.jar', 'hbase-client.jar', 'hbase-server.jar',
+                   'hbase-protocol.jar', 'hbase-hadoop2-compat.jar']
+                  .map do |flname|
+  "#{HBASE_CLIENT_LIB}/#{flname}"
+end
+link_candidates += Dir["/usr/hdp/#{hdp_rel}/hbase/lib/htrace-core-*"]
+link_candidates += Dir["/usr/hdp/#{hdp_rel}/hbase/lib/netty-*"]
+
+link_candidates.each do |link_candidate|
+  link "link_hbase_jar_#{link_candidate}" do
+    to link_candidate
+    target_file "#{OOZIE_CLIENT_PATH}/libext/#{File.basename(link_candidate)}"
   end
 end
 
@@ -160,7 +164,7 @@ end
 directory "#{oozie_conf_dir}/action-conf" do
   owner 'root'
   group 'root'
-  mode 00755
+  mode 0o0755
   action :create
   recursive true
 end
@@ -172,7 +176,7 @@ end
 directory "#{oozie_conf_dir}/hadoop-conf" do
   owner 'root'
   group 'root'
-  mode 00755
+  mode 0o0755
   action :create
   recursive true
 end
@@ -215,7 +219,7 @@ ruby_block 'update sharelib checksum' do
   block do
     require 'digest'
     node[:bcpc][:hadoop][:oozie_hosts].each do |oozie_host|
-      next unless oozie_running?(float_host oozie_host['hostname'])
+      next unless oozie_running?(float_host(oozie_host['hostname']))
       node.set[:bcpc][:hadoop][:oozie][:sharelib_checksum] =
         Digest::MD5.hexdigest(File.read(OOZIE_SHARELIB_TARBALL_PATH))
       break
@@ -223,21 +227,26 @@ ruby_block 'update sharelib checksum' do
   end
   action :nothing
 
-  
-  notifies :run, 'ruby_block[oozie sharelib sqoop-action workaround for 2.6.1]', :immediately
+  notifies :run, 'ruby_block[oozie sharelib sqoop-action '\
+                 'workaround for 2.6.1]', :immediately
 end
 
 ruby_block 'oozie sharelib sqoop-action workaround for 2.6.1' do
   block do
-    node[:bcpc][:hadoop][:oozie_hosts].each do |oozie_host|
-      next unless oozie_running?(float_host oozie_host['hostname'])
-      instrumentation = shell_out! "#{OOZIE_CLIENT_PATH}/bin/oozie admin "\
-        "-oozie http://#{float_host(oozie_host['hostname'])}:11000/oozie "\
-        '-instrumentation | grep libs.sharelib.system.libpath', user: 'oozie'
-      libpath = instrumentation.stdout.match(/hdfs:\/\/.*$/)
-      shell_out! "hdfs dfs -cp -p #{libpath}/hive #{libpath}/sqoop-hive", user: 'hdfs'
-      shell_out! "hdfs dfs -rm #{libpath}/sqoop-hive/hive-cli-1.2.1000.2.6.1.17-1.jar", user: 'hdfs'
-    end if node['bcpc']['hadoop']['distribution']['active_release'] == '2.6.1.17-1'
+    active_release = node['bcpc']['hadoop']['distribution']['active_release']
+    if active_release == '2.6.1.17-1'
+      node[:bcpc][:hadoop][:oozie_hosts].each do |oozie_host|
+        next unless oozie_running?(float_host(oozie_host['hostname']))
+        instrumentation = shell_out! "#{OOZIE_CLIENT_PATH}/bin/oozie admin "\
+          "-oozie http://#{float_host(oozie_host['hostname'])}:11000/oozie "\
+          '-instrumentation | grep libs.sharelib.system.libpath', user: 'oozie'
+        libpath = instrumentation.stdout.match(%r{hdfs:\/\/.*$})
+        shell_out! "hdfs dfs -cp -p #{libpath}/hive #{libpath}/sqoop-hive",
+                   user: 'hdfs'
+        shell_out! "hdfs dfs -rm #{libpath}/sqoop-hive/"\
+                   'hive-cli-1.2.1000.2.6.1.17-1.jar', user: 'hdfs'
+      end
+    end
   end
   action :nothing
   notifies :run, 'ruby_block[notify sharelib update]', :immediately
@@ -253,7 +262,7 @@ ruby_block 'notify sharelib update' do
 end
 
 template "#{oozie_conf_dir}/action-conf/hive.xml" do
-  mode 0644
+  mode 0o0644
   source 'ooz_action_hive.xml.erb'
 end
 
@@ -344,7 +353,8 @@ ruby_block 'check if oozie running' do
         Chef::Log.debug('Oozie is down')
       else
         Chef::Application.fatal!(
-          'Oozie is reported as down for more than 5 seconds')
+          'Oozie is reported as down for more than 5 seconds'
+        )
         raise
       end
     end
