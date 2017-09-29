@@ -79,7 +79,13 @@ if File.basename(__FILE__) == File.basename($PROGRAM_NAME)
     profile = ! vms.key?(e[:hostname]) ?  e[:cobbler_profile] : \
       virtualbox_bios(e[:hostname]).eql?('EFI') ? \
       EFI_COBBLER_PROFILE : LEGACY_COBBLER_PROFILE
-    host_name = "#{ENV['BACH_CLUSTER_PREFIX']}-e[:hostname]"
+
+    # make sure to handle no prefix
+    host_name = if ENV['BACH_CLUSTER_PREFIX'] != '' then 
+                  "#{ENV['BACH_CLUSTER_PREFIX']}-#{e[:hostname]}"
+                else
+                  e[:hostname]
+                end
     [host_name, mac, ip, e[:ilo_address], profile, e[:dns_domain], e[:runlist]]
   end
 
