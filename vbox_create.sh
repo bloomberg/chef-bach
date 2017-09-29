@@ -44,10 +44,6 @@ if (( ${#environments[*]} > 1 )); then
   exit 1
 fi
 
-# Prefix a name to the cluster for running multiple tests per machine
-python_to_find_cluster_name="import json; j = json.load(file('${environments[0]}')); print j['override_attributes']['bcpc'].get('cluster_name','')"
-export CLUSTER_PREFIX=$(python -c "$python_to_find_cluster_name")
-
 if !hash vagrant 2> /dev/null ; then
   echo 'Vagrant not detected - we need Vagrant!' >&2
   exit 1
@@ -59,13 +55,6 @@ CLUSTER_VM_ROOT_DRIVE_SIZE=$((CLUSTER_VM_DRIVE_SIZE + CLUSTER_VM_MEM - 2048))
 VBOX_DIR="`dirname ${BASH_SOURCE[0]}`/vbox"
 [[ -d $VBOX_DIR ]] || mkdir $VBOX_DIR
 P=`python -c "import os.path; print os.path.abspath(\"${VBOX_DIR}/\")"`
-
-# ensure cluster.txt has CLUSTER_PREFIX prepended before VM names
-# NOTE: somewhat crude we see if any line does not start with the
-# cluster name and if so all lines have it prepended
-if [[ -n "$(grep -v "^${CLUSTER_PREFIX}" ./cluster.txt)" ]]; then
-  sed -i "s/^/${CLUSTER_PREFIX}-/" cluster.txt
-fi
 
 # Populate the VM list array from cluster.txt
 export VM_LIST=( $(cut -f1 -d' ' ./cluster.txt) )
@@ -166,7 +155,7 @@ function create_cluster_VMs {
   # Gather VirtualBox networks in use by bootstrap VM
   oifs="$IFS"
   IFS=$'\n'
-  bootstrap_interfaces=($($VBM showvminfo ${CLUSTER_PREFIX}bcpc-bootstrap \
+  bootstrap_interfaces=($($VBM showvminfo ${BACH_CLUSTER_PREFIX}bcpc-bootstrap \
     --machinereadable | \
     egrep '^hostonlyadapter[0-9]=' | \
     sort | \
