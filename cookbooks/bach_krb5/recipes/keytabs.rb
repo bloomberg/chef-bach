@@ -1,8 +1,9 @@
 keytab_dir = node[:bcpc][:hadoop][:kerberos][:keytab][:dir]
 realm = node[:bcpc][:hadoop][:kerberos][:realm]
-viphost = float_host(node[:bcpc][:management][:viphost])
+viphost = node[:bcpc][:management][:viphost]
 
-get_cluster_nodes().each do |h|
+host_list = get_cluster_nodes() + [viphost]
+host_list.each do |h|
   include_recipe 'bach_krb5::keytab_directory'
 
   # Generate all the principals
@@ -37,7 +38,7 @@ get_cluster_nodes().each do |h|
   end
 end
 
-get_cluster_nodes().each do |h|
+host_list.each do |h|
   host_fqdn = float_host(h)
 
   # Create a subdirectory for each host.
@@ -54,7 +55,7 @@ get_cluster_nodes().each do |h|
     keytab_file = va['keytab']
     keytab_path = ::File.join(keytab_dir, host_fqdn, keytab_file)
     regular_principal = "#{service_principal}/#{host_fqdn}@#{realm}"
-    vip_principal = "#{service_principal}/#{viphost}@#{realm}"
+    vip_principal = "#{service_principal}/#{float_host(viphost)}@#{realm}"
 
     # Variable to hold all principals for a single keytab
     keytab_principals = "#{regular_principal} #{vip_principal}"
