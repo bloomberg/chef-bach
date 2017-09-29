@@ -155,7 +155,7 @@ function create_cluster_VMs {
   # Gather VirtualBox networks in use by bootstrap VM
   oifs="$IFS"
   IFS=$'\n'
-  bootstrap_interfaces=($($VBM showvminfo ${BACH_CLUSTER_PREFIX}bcpc-bootstrap \
+  bootstrap_interfaces=($($VBM showvminfo ${BACH_CLUSTER_PREFIX}-bcpc-bootstrap \
     --machinereadable | \
     egrep '^hostonlyadapter[0-9]=' | \
     sort | \
