@@ -160,6 +160,14 @@ def delete_node_data(entry)
                          entry[:fqdn], '--yes').run_command
   end
 
+  # Delete vaulted ssh keys so that new host keys are not reinstated 
+  # after "first contact" and do not break ssh host authentication
+  Mixlib::ShellOut.new('sudo', 'knife',
+                        'vault', 'delete',
+                        'ssh_host_keys', entry[:fqdn],
+                        '-m client').run_command
+
+
   # Running knife with sudo can set the permissions to root:root.
   # We need to correct the permissions before running ssh-keygen.
   Mixlib::ShellOut.new('sudo', 'chown',
