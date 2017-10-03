@@ -103,4 +103,7 @@ default[:bcpc][:hadoop][:hdfs][:site_xml].tap do |site_xml|
   
   site_xml['dfs.namenode.handler.count'] =
     node[:bcpc][:hadoop][:namenode][:handler][:count]
+
+  site_xml['dfs.client.socket-timeout'] =
+    '30000'
 end
