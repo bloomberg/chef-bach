@@ -86,8 +86,7 @@ end
 def restart_chef_server
   c = Mixlib::ShellOut.new('sudo', 'chef-server-ctl', 'restart')
   c.run_command
-
-  raise 'Failed to restart chef-server' unless c.status.success?
+  c.invalid! 'Failed to restart chef-server' unless c.status.success?
 
   puts 'restarted chef-server'
 end
@@ -96,8 +95,7 @@ def cobbler_unenroll(entry)
   c = Mixlib::ShellOut.new('sudo', 'cobbler', 'system', 'remove',
                            '--name', entry[:hostname])
   c.run_command
-
-  raise "Failed to un-enroll #{entry[:hostname]}!" unless c.status.success?
+  c.invalid! "Failed to un-enroll #{entry[:hostname]}!" unless c.status.success?
 
   puts "Un-enrolled #{entry[:hostname]} from cobbler"
 end
@@ -112,10 +110,7 @@ def cobbler_enroll(entry)
                            '--mac', empirical_mac(entry))
 
   c.run_command
-
-  unless c.status.success?
-    raise "Failed to enroll #{entry[:hostname]}!"
-  end
+  c.invalid! "Failed to enroll #{entry[:hostname]}!" unless c.status.success?
 
   puts "Enrolled #{entry[:hostname]} in cobbler"
 end
@@ -135,11 +130,7 @@ def cobbler_root_password
 
   vault_command.run_command
 
-  unless vault_command.status.success?
-    raise 'Could not retrieve cobbler password!\n' +
-          vault_command.stdout + '\n' +
-          vault_command.stderr
-  end
+  vault_command.invalid! 'Could not retrieve cobbler password!' unless vault_command.status.success?
 
   JSON.parse(vault_command.stdout)['root-password']
 end
@@ -147,7 +138,7 @@ end
 def cobbler_sync
   c = Mixlib::ShellOut.new('sudo', 'cobbler', 'sync')
   c.run_command
-  raise 'Failed to sync cobbler' unless c.status.success?
+  c.invalid! 'Failed to sync cobbler' unless c.status.success?
 end
 
 # Removes the Chef server objects and SSH known_hosts entries for a host.
@@ -171,9 +162,8 @@ def delete_node_data(entry)
    entry[:hostname]].each do |ssh_name|
     del = Mixlib::ShellOut.new('ssh-keygen', '-R', ssh_name)
     del.run_command
-    unless del.status.success?
-      raise "Failed to delete SSH key for #{ssh_name}: #{del.stderr}"
-    end
+    del.invalid! "Failed to delete SSH key for #{ssh_name}: #{del.stderr}" \
+      unless del.status.success?
   end
 
   puts "Deleted SSH fingerprints and Chef objects for #{entry[:hostname]}"
@@ -269,11 +259,8 @@ def find_chef_env
 
   env_command.run_command
 
-  unless env_command.status.success?
-    raise 'Could not retrieve Chef environment!\n' +
-          env_command.stdout + '\n' +
-          env_command.stderr
-  end
+  env_command.invalid! 'Could not retrieve Chef environment!' \
+      unless env_command.success?
 
   JSON.parse(env_command.stdout)['chef_environment']
 end
@@ -308,7 +295,7 @@ def unmount_disks(chef_env, vm_entry)
     if c.status.success?
       puts 'Unmounted ' + disk
     else
-      raise 'Could not unmount ' + disk + ' ' + c.stdout + '\n' + c.stderr
+      c.invalid! 'Could not unmount ' + disk 
     end
   end
 end
@@ -355,7 +342,7 @@ def kill_chef_client(chef_env, vm_entry)
     c.run_command
   end
   confirm_chef_client_down(chef_env, vm_entry)
-  puts 'Chef client is down'
+  puts 'Chef client is down' 
 end
 
 def start_chef_client(chef_env, vm_entry)
@@ -370,7 +357,7 @@ def start_chef_client(chef_env, vm_entry)
     puts 'Chef client started.'
   else
     puts 'Chef client did not start successfully: ' +
-         c.stdout + '\n' + c.stderr
+      c.format_for_exception
   end
 end
 
@@ -386,7 +373,7 @@ def run_chef_client(chef_env, vm_entry, params = ' ')
     puts 'Chef client ran.'
   else
     puts 'Chef client did not run successfully: ' +
-         c.stdout + '\n' + c.stderr
+         c.format_for_exception
   end
 end
 
@@ -418,7 +405,7 @@ def stop_all_services(chef_env, vm_entry)
       puts 'Stopped ' + service
     else
       puts 'Could not stop service ' +
-           service + ' ' + c.stdout + '\n' + c.stderr
+           service + ' ' + c.format_for_exception
     end
   end
 end
@@ -432,7 +419,7 @@ def shutdown_box(chef_env, vm_entry)
   c.run_command
   if !c.status.success?
     raise 'Could not shut down host ' +
-          vm_entry[:hostname] + '\n' + c.stdout + '\n' + c.stderr
+          vm_entry[:hostname] + '\n' + c.format_for_exception
   else
     puts 'Host has been shut down.'
   end
