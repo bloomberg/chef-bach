@@ -49,6 +49,7 @@ MIN_RESET_STAT_FLOW=1000
 MIN_RESET_RATIO=0.9
 MIN_RESET_INTERVAL=121
 METRIC_CLIENT_IDLE_TIMEOUT = <%="#{node[:bcpc][:graphite][:carbon][:relay][:idle_timeout]}"%> 
+USE_WHITELIST = <%="#{node[:bcpc][:graphite][:carbon][:relay][:use_whitelist]}"%>
 
 [aggregator]
 LOG_LISTENER_CONN_SUCCESS = False

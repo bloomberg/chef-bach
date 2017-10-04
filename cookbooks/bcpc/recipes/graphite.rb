@@ -172,6 +172,18 @@ template '/opt/graphite/conf/rewrite-rules.conf' do
   mode 00644
 end
 
+# if use_whitelist is set to true, graphite will look for both
+# whitelist.conf and blacklist.conf
+template '/opt/graphite/conf/blacklist.conf' do
+  source 'carbon/blacklist.conf.erb'
+  owner 'root'
+  group 'root'
+  mode 00644
+  variables( :blacklist => node[:bcpc][:graphite][:carbon][:relay][:blacklist])
+  only_if { node[:bcpc][:graphite][:carbon][:relay][:use_whitelist] }
+  notifies :restart, 'service[carbon-relay]', :delayed
+end
+
 #
 # a2ensite for httpd 2.4 (Ubuntu 14.04) expects the file to end in '.conf'
 # a2ensite for httpd 2.2 (Ubuntu 12.04) expects it NOT to end in '.conf'
