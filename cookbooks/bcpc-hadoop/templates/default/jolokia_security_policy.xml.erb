@@ -1,8 +1,11 @@
 <!-- This file was created by Chef.  Local changes may be reverted. -->
+
+<!-- Do away with a whitelist, and allow global read-only access. -->
 <restrict>
-  <remote>
-  <% @whitelist.each do |source| %>
-    <%= "<host>#{source}</host>" %>
-  <% end %> 
-  </remote>
+  <commands>
+    <command>list</command>
+    <command>read</command>
+    <command>search</command>
+    <command>version</command>
+  </commands>
 </restrict>

@@ -56,5 +56,4 @@ template node['bcpc']['jolokia']['policy_path'] do
   mode 0444
   user 'root'
   group 'root'
-  variables({ whitelist: node['bcpc']['jolokia']['whitelist'] })
 end
