@@ -47,7 +47,7 @@ ruby_block 'enumerate-disks' do
     # node[:bcpc][:hadoop][:disks] is for static attributes that we
     # know in advance.  These are easily overridden in an environment.
     #
-    node.run_state[:bcpc_hadoop_disks] = {}
+    node.run_state['bcpc_hadoop_disks'] = {}
   end
 end
 
@@ -268,9 +268,9 @@ ruby_block 'hadoop-disk-reservations' do
         (0..(available_disks.length - 1)).to_a -
         reservation_requests.each_index.to_a
 
-      node.run_state[:bcpc_hadoop_disks][:mounts] = mount_indexes
+      node.run_state['bcpc_hadoop_disks']['mounts'] = mount_indexes
     else
-      node.run_state[:bcpc_hadoop_disks][:mounts] =
+      node.run_state['bcpc_hadoop_disks']['mounts'] =
         (0..(available_disks.length - 1)).to_a
     end
   end
