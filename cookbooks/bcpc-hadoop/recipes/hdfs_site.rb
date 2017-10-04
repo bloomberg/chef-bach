@@ -8,7 +8,7 @@ ruby_block "hdfs_site_generated_values_common" do
     node.run_state['hdfs_site_generated_values'] =
     {
      'dfs.namenode.name.dir' =>
-       node.run_state[:bcpc_hadoop_disks][:mounts]
+       node.run_state['bcpc_hadoop_disks']['mounts']
        .map{ |d| "file:///disk/#{d}/dfs/nn" }.join(','),
 
      "dfs.ha.namenodes.#{node.chef_environment}" =>
@@ -17,11 +17,11 @@ ruby_block "hdfs_site_generated_values_common" do
        .map{ |nn| "namenode#{nn[:bcpc][:node_number]}" }.join(','),
 
      'dfs.datanode.data.dir' =>
-       node.run_state[:bcpc_hadoop_disks][:mounts]
+       node.run_state['bcpc_hadoop_disks']['mounts']
        .map{ |d| "file:///disk/#{d}/dfs/dn" }.join(','),
 
      'dfs.journalnode.edits.dir' =>
-       File.join('/disk', node.run_state[:bcpc_hadoop_disks][:mounts][0].to_s, 'dfs', 'jn'),
+       File.join('/disk', node.run_state['bcpc_hadoop_disks']['mounts'][0].to_s, 'dfs', 'jn'),
 
      'dfs.client.local.interfaces' =>
        node['bcpc']['floating']['ip'] + '/32'
@@ -33,7 +33,7 @@ ruby_block "hdfs_site_generated_values_balancer_properties" do
   block do
     # get the speed of the fastest interface and use
     max_concurrent_moves =
-      node.run_state[:bcpc_hadoop_disks][:mounts].length *
+      node.run_state['bcpc_hadoop_disks']['mounts'].length *
       node['hadoop']['hdfs']['balancer']['max_concurrent_moves_multiplier']
 
     default_speed = node['hadoop']['hdfs']['balancer']['bandwidth']
@@ -269,7 +269,7 @@ ruby_block "hdfs_site_generated_values_ha_properties" do
 
          # Why is this added twice?
          'dfs.journalnode.edits.dir' =>
-           File.join('/disk', node.run_state[:bcpc_hadoop_disks][:mounts][0].to_s, 'dfs', 'jn')
+           File.join('/disk', node.run_state['bcpc_hadoop_disks']['mounts'][0].to_s, 'dfs', 'jn')
         }
       node.run_state['hdfs_site_generated_values'].merge!(ha_properties)
     end

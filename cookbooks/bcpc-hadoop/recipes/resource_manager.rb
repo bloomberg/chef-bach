@@ -4,7 +4,7 @@ include_recipe 'bcpc-hadoop::hadoop_config'
 
 ruby_block 'create-yarn-directories' do
   block do
-    node.run_state[:bcpc_hadoop_disks][:mounts].each do |disk_number|
+    node.run_state['bcpc_hadoop_disks']['mounts'].each do |disk_number|
       Chef::Resource::Directory.new("/disk/#{disk_number}/yarn/local",
                                     node.run_context).tap do |dd|
         dd.owner 'yarn'
