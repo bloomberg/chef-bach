@@ -257,7 +257,7 @@ end
 
 ruby_block 'yarn_site_generated_values' do
   block do
-    mounts = node.run_state[:bcpc_hadoop_disks][:mounts]
+    mounts = node.run_state['bcpc_hadoop_disks']['mounts']
     directory_values =
     {
      'yarn.nodemanager.local-dirs' =>

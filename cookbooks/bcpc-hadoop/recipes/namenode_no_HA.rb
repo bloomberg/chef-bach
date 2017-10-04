@@ -78,7 +78,7 @@ end
 
 ruby_block 'create-nn-directories' do
   block do
-    node.run_state[:bcpc_hadoop_disks][:mounts].each do |disk_number|
+    node.run_state['bcpc_hadoop_disks']['mounts'].each do |disk_number|
       Chef::Resource::Directory.new("/disk/#{disk_number}/dfs/nn",
                                     node.run_context).tap do |dd|
         dd.owner 'hdfs'
@@ -111,8 +111,8 @@ bash "format namenode" do
   code "#{hdfs_cmd} namenode -format -nonInteractive -force"
   user "hdfs"
   action :run
-  creates lazy { "/disk/#{node.run_state[:bcpc_hadoop_disks][:mounts][0]}/dfs/nn/current/VERSION" }
-  not_if { node.run_state[:bcpc_hadoop_disks][:mounts].any? { |d| File.exists?("/disk/#{d}/dfs/nn/current/VERSION") } }
+  creates lazy { "/disk/#{node.run_state['bcpc_hadoop_disks']['mounts'][0]}/dfs/nn/current/VERSION" }
+  not_if { node.run_state['bcpc_hadoop_disks']['mounts'].any? { |d| File.exists?("/disk/#{d}/dfs/nn/current/VERSION") } }
 end
 
 link "/etc/init.d/hadoop-hdfs-namenode" do

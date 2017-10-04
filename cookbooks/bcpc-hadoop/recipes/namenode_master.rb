@@ -80,7 +80,7 @@ end
 
 ruby_block 'create-nn-directories' do
   block do
-    node.run_state[:bcpc_hadoop_disks][:mounts].each do |disk_number|
+    node.run_state['bcpc_hadoop_disks']['mounts'].each do |disk_number|
       Chef::Resource::Directory.new("/disk/#{disk_number}/dfs/nn",
                                     node.run_context).tap do |dd|
         dd.owner 'hdfs'
@@ -113,8 +113,8 @@ bash "format namenode" do
   code "#{hdfs_cmd} namenode -format -nonInteractive -force"
   user "hdfs"
   action :run
-  creates lazy { "/disk/#{node.run_state[:bcpc_hadoop_disks][:mounts][0]}/dfs/nn/current/VERSION" }
-  not_if { node.run_state[:bcpc_hadoop_disks][:mounts].any? { |d| File.exists?("/disk/#{d}/dfs/nn/current/VERSION") } }
+  creates lazy { "/disk/#{node.run_state['bcpc_hadoop_disks']['mounts'][0]}/dfs/nn/current/VERSION" }
+  not_if { node.run_state['bcpc_hadoop_disks']['mounts'].any? { |d| File.exists?("/disk/#{d}/dfs/nn/current/VERSION") } }
 end
 
 bash "format-zk-hdfs-ha" do
@@ -158,7 +158,7 @@ service "bring hadoop-hdfs-namenode down for shared edits and HA transition" do
   action :stop
   supports :status => true
   notifies :run, "bash[initialize shared edits]", :immediately
-  only_if { node.run_state[:bcpc_hadoop_disks][:mounts].all? { |d| not File.exists?("/disk/#{d}/dfs/jn/#{node.chef_environment}/current/VERSION") } }
+  only_if { node.run_state['bcpc_hadoop_disks']['mounts'].all? { |d| not File.exists?("/disk/#{d}/dfs/jn/#{node.chef_environment}/current/VERSION") } }
 end
 
 bash "initialize shared edits" do
@@ -199,12 +199,12 @@ end
 
 ruby_block "create-format-UUID-File" do
   block do
-    Dir.chdir("/disk/#{node.run_state[:bcpc_hadoop_disks][:mounts][0]}/dfs/") do
+    Dir.chdir("/disk/#{node.run_state['bcpc_hadoop_disks']['mounts'][0]}/dfs/") do
       system("tar czvf #{Chef::Config[:file_cache_path]}/jn_fmt.tgz jn/#{node.chef_environment}/current/VERSION")
     end
   end
   action :run
-  only_if { File.exists?("/disk/#{node.run_state[:bcpc_hadoop_disks][:mounts][0]}/dfs/jn/#{node.chef_environment}/current/VERSION") }
+  only_if { File.exists?("/disk/#{node.run_state['bcpc_hadoop_disks']['mounts'][0]}/dfs/jn/#{node.chef_environment}/current/VERSION") }
 end
 
 ruby_block "upload-format-UUID-File" do

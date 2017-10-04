@@ -160,7 +160,7 @@ template "/etc/hadoop/conf/container-executor.cfg" do
   owner "root"
   group "yarn"
   mode "0400"
-  variables lazy{{mounts: node.run_state[:bcpc_hadoop_disks][:mounts]}}
+  variables lazy{{mounts: node.run_state['bcpc_hadoop_disks']['mounts']}}
   action :create
   notifies :run, "bash[verify-container-executor]", :immediate
 end
@@ -209,7 +209,7 @@ end
 ruby_block 'count-mounts' do
   block do
     mount_count =
-      node.run_state[:bcpc_hadoop_disks][:mounts].length rescue 0
+      node.run_state['bcpc_hadoop_disks']['mounts'].length rescue 0
     tolerated_failures =
       node[:bcpc][:hadoop][:hdfs][:failed_volumes_tolerated]
     if mount_count <= tolerated_failures
@@ -234,7 +234,7 @@ end
 # Build nodes for HDFS storage
 ruby_block 'create-hdfs-directories' do
   block do
-    node.run_state[:bcpc_hadoop_disks][:mounts].each do |i|
+    node.run_state['bcpc_hadoop_disks']['mounts'].each do |i|
       Chef::Resource::Directory.new("/disk/#{i}/dfs",
                                     node.run_context).tap do |dd|
         dd.owner 'hdfs'

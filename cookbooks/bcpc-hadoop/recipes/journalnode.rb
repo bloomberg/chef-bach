@@ -50,7 +50,7 @@ end
 
 ruby_block 'setup-jn-data' do
   block do
-    jndisk="/disk/#{node.run_state[:bcpc_hadoop_disks][:mounts][0]}"
+    jndisk="/disk/#{node.run_state['bcpc_hadoop_disks']['mounts'][0]}"
     jnfile="/dfs/jn/#{node.chef_environment}/current/VERSION"
     jncurrent="/dfs/jn/#{node.chef_environment}/current"
     jnfile2chk=jndisk + jnfile

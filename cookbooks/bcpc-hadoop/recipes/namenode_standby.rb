@@ -74,7 +74,7 @@ end
 
 ruby_block 'create-namenode-directories' do
   block do
-    node.run_state[:bcpc_hadoop_disks][:mounts].each do |d|
+    node.run_state['bcpc_hadoop_disks']['mounts'].each do |d|
       Chef::Resource::Directory.new("/disk/#{d}/dfs/nn",
                                     node.run_context).tap do |dd|
         dd.owner "hdfs"

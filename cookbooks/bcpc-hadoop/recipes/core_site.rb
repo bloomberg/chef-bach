@@ -77,7 +77,7 @@ end
 
 ruby_block 'node.run_state[:core_site_generated_values]' do
   block do
-    mounts = node.run_state[:bcpc_hadoop_disks][:mounts]
+    mounts = node.run_state['bcpc_hadoop_disks']['mounts']
     directory_values =
       {
        'mapreduce.cluster.local.dir' =>
