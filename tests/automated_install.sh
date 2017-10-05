@@ -164,7 +164,7 @@ if [[ "${CLUSTER_TYPE,,}" == "hadoop" ]]; then
 fi
 
 printf "Snapshotting Post-Install\n"
-for vm in ${VM_LIST[*]} ${BACH_CLUSTER_PREFIX}bcpc-bootstrap; do
+for vm in ${VM_LIST[*]} ${BOOTSTRAP_NAME}; do
   [[ $(vboxmanage snapshot $vm list --machinereadable | grep -q 'Post-Install') ]] || \
     VBoxManage snapshot $vm take Post-Install --live &
 done
