@@ -56,8 +56,22 @@ VBOX_DIR="`dirname ${BASH_SOURCE[0]}`/vbox"
 [[ -d $VBOX_DIR ]] || mkdir $VBOX_DIR
 P=`python -c "import os.path; print os.path.abspath(\"${VBOX_DIR}/\")"`
 
-# Populate the VM list array from cluster.txt
-export VM_LIST=( $(cut -f1 -d' ' ./cluster.txt) )
+# populate the VM_LIST array from cluster.txt
+# HACK: This is called prior to cluster.txt modification
+# we need to "manually" prepend BACH_CLUSTER_PREFIX to
+# all hostnames as we will generate VMs before cluster.txt
+# is edited
+if [ ${BACH_CLUSTER_PREFIX} == '']; then
+  export VM_LIST=( $(cut -f1 -d' ' ./cluster.txt) )
+else
+  vms=( $(cut -f1 -d' ' ./cluster.txt) )
+  VM_LIST=()
+  for old_vm in ${vms[*]}; do
+    VM_LIST+=( "${BACH_CLUSTER_PREFIX}-${old_vm}" )
+  done
+  echo "NEW VM LIST ${VM_LIST}"
+  export VM_LIST
+fi
 
 ######################################################
 # Function to download files necessary for VM stand-up

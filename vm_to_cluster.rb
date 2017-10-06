@@ -67,6 +67,12 @@ if File.basename(__FILE__) == File.basename($PROGRAM_NAME)
   entries = parse_cluster_txt(cluster_txt)
 
   cluster_lines = entries.map do |e|
+    # HACK: We have not edited cluster.txt yet, but may have 
+    # forced the VMs to have a ${BACH_CLUSTER_PREFIX}-
+    # when we generated VM_LIST in vbox_create.sh
+    if ENV['BACH_CLUSTER_PREFIX'] != '' then
+      e[:hostname] = "#{ENV['BACH_CLUSTER_PREFIX']}-#{e[:hostname]}"
+    end
     # use a bogus MAC for not yet created VMs in case it gets handed to Cobbler
     # otherwise use the MAC as passed in
     mac = vms.key?(e[:hostname]) ? virtualbox_mac(e[:hostname]) : \
@@ -80,13 +86,7 @@ if File.basename(__FILE__) == File.basename($PROGRAM_NAME)
       virtualbox_bios(e[:hostname]).eql?('EFI') ? \
       EFI_COBBLER_PROFILE : LEGACY_COBBLER_PROFILE
 
-    # make sure to handle no prefix
-    host_name = if ENV['BACH_CLUSTER_PREFIX'] != '' then 
-                  "#{ENV['BACH_CLUSTER_PREFIX']}-#{e[:hostname]}"
-                else
-                  e[:hostname]
-                end
-    [host_name, mac, ip, e[:ilo_address], profile, e[:dns_domain], e[:runlist]]
+    [e[:hostname], mac, ip, e[:ilo_address], profile, e[:dns_domain], e[:runlist]]
   end
 
   # check to see if we should raise an error
