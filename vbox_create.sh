@@ -58,20 +58,16 @@ P=`python -c "import os.path; print os.path.abspath(\"${VBOX_DIR}/\")"`
 
 # populate the VM_LIST array from cluster.txt
 # HACK: This is called prior to cluster.txt modification
-# we need to "manually" prepend BACH_CLUSTER_PREFIX to
-# all hostnames as we will generate VMs before cluster.txt
-# is edited
-if [ ${BACH_CLUSTER_PREFIX} == '']; then
-  export VM_LIST=( $(cut -f1 -d' ' ./cluster.txt) )
-else
-  vms=( $(cut -f1 -d' ' ./cluster.txt) )
-  VM_LIST=()
-  for old_vm in ${vms[*]}; do
-    VM_LIST+=( "${BACH_CLUSTER_PREFIX}-${old_vm}" )
-  done
-  echo "NEW VM LIST ${VM_LIST}"
-  export VM_LIST
-fi
+code_to_produce_vm_list="
+require './lib/cluster_data.rb';
+include BACH::ClusterData;
+cp=ENV.fetch('BACH_CLUSTER_PREFIX', '');
+cp += '-' unless cp.empty?;
+vms = parse_cluster_txt(File.readlines('cluster.txt'))
+puts vms.map{|e| cp + e[:hostname]}.join(' ')
+"
+VM_LIST=( $(ruby -e "$code_to_produce_vm_list") )
+export VM_LIST
 
 ######################################################
 # Function to download files necessary for VM stand-up
