@@ -27,7 +27,6 @@ default["bcpc"]["hadoop"]["hbase"]["bucketcache"]["ioengine"] = "offheap"
 default["bcpc"]["hadoop"]["hbase"]["bucketcache"]["combinedcache"]["percentage"] = 0.71
 default['bcpc']['hadoop']['hbase']['bucketcache.bucket.sizes'] = nil
 default["bcpc"]["hadoop"]["hbase"]["shortcircuit"]["read"] = false
-default["bcpc"]["hadoop"]["hbase"]["region"]["replication"]["enabled"] = false
 default["bcpc"]["hadoop"]["hbase"]["region"]["replica"]["storefile"]["refresh"]["memstore"]["multiplier"] = 4
 default["bcpc"]["hadoop"]["hbase"]["region"]["replica"]["wait"]["for"]["primary"]["flush"] = true
 default["bcpc"]["hadoop"]["hbase"]["hregion"]["memstore"]["block"]["multiplier"] = 8
@@ -93,5 +92,5 @@ default[:bcpc][:hadoop][:hbase][:site_xml].tap do |site_xml|
   site_xml['hbase.coprocessor.abortonerror'] = node["bcpc"]["hadoop"]["hbase_rs"]["coprocessor"]["abortonerror"] 
   site_xml['hbase.master.balancer.stochastic.tableSkewCost']=3000
   site_xml['hbase.master.balancer.stochastic.localityCost']=1000
+  site_xml['hbase.region.replica.replication.enabled'] = false
 end
-
