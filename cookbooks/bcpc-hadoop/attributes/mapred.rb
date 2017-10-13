@@ -58,4 +58,7 @@ default[:bcpc][:hadoop][:mapreduce][:site_xml].tap do |site_xml|
 
   site_xml['yarn.app.mapreduce.am.staging-dir'] =
     node["bcpc"]["hadoop"]["yarn"]["app"]["mapreduce"]["am"]["staging-dir"]
+
+  site_xml['mapreduce.job.acl-view-job'] = '*'
+  site_xml['mapreduce.cluster.acls.enabled'] = true
 end
