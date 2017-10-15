@@ -7,7 +7,7 @@ bundler_args: --without cookbooks
 cache: bundler
 gemfile: gemfiles/bootstrap.gemfile
 before_install:
-  - chef --version &> /dev/null || curl -L https://www.getchef.com/chef/install.sh | sudo bash -s -- -P chefdk -v 1.2.22
+  - chef --version &> /dev/null || curl -L https://www.getchef.com/chef/install.sh | sudo bash -s -- -P chefdk
   - eval "$(/opt/chefdk/bin/chef shell-init bash)"
   - bundle config --local PATH vendor/bootstrap
   - bundle config --local DISABLE_SHARED_GEMS true
