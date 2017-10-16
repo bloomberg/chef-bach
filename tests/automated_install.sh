@@ -75,9 +75,6 @@ done
 download_VM_files || ( echo "############## VBOX CREATE DOWNLOAD VM FILES RETURNED $? ##############" && exit 1 )
 create_bootstrap_VM || ( echo "############## VBOX CREATE BOOTSTRAP VM RETURNED $? ##############" && exit 1 )
 
-echo "VM LIST"
-for vm in ${VM_LIST[*]}; do echo "${vm} "; done
-
 python_to_find_bootstrap_ip="import json; j = json.load(file('${environments[0]}')); print j['override_attributes']['bcpc']['bootstrap']['server']"
 BOOTSTRAP_IP=$(python -c "$python_to_find_bootstrap_ip")
 
