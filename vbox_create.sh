@@ -165,6 +165,7 @@ function create_cluster_VMs {
   # Gather VirtualBox networks in use by bootstrap VM
   oifs="$IFS"
   IFS=$'\n'
+  # BOOTSTRAP_NAME is exported by automated_install.sh
   bootstrap_interfaces=($($VBM showvminfo ${BOOTSTRAP_NAME} \
     --machinereadable | \
     egrep '^hostonlyadapter[0-9]=' | \
