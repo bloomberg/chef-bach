@@ -85,9 +85,20 @@ Using the script [tests/automated_install.sh](./tests/automated_install.sh) on M
 will require [`brew`](http://brew.sh) to be available/installed.
 
 Note: To run more than one test cluster at a time with VirtualBox, one may
-      set in `tests/automated_install.sh` their desired cluster name prefix.
-      This will namespace the cluster's virtual machines to not collide on the
-      hypervisor. One also needs to ensure their management, float and storage
+      export BACH_CLUSTER_PREFIX to set their desired cluster name prefix.
+      This will set the namespace so that the cluster's virtual machines do not 
+      collide on the hypervisor.  Resulting in names following the convention
+
+````
+      $BACH_CLUSTER_PREFIX-bcpc-bootstrap
+      $BACH_CLUSTER_PREFIX-bcpc-vm1
+      $BACH_CLUSTER_PREFIX-bcpc-vm2
+      $BACH_CLUSTER_PREFIX-bcpc-vm3
+````
+
+      Lacking that tests/automated_install.sh 
+      not assign a cluster prefix to the cluster hosts or bootstrap 
+      One also needs to ensure their management, float and storage
       network ranges are exclusive in the environment and cluster.txt)
       updated to be unique as well. Further, one needs to have each cluster's
       repository in a different parent directory (to avoid the `cluster`

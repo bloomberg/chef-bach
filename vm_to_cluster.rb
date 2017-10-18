@@ -67,6 +67,12 @@ if File.basename(__FILE__) == File.basename($PROGRAM_NAME)
   entries = parse_cluster_txt(cluster_txt)
 
   cluster_lines = entries.map do |e|
+    # HACK: We have not edited cluster.txt yet, but may have 
+    # forced the VMs to have a ${BACH_CLUSTER_PREFIX}-
+    # when we generated VM_LIST in vbox_create.sh
+    if ENV['BACH_CLUSTER_PREFIX'] != '' then
+      e[:hostname] = "#{ENV['BACH_CLUSTER_PREFIX']}-#{e[:hostname]}"
+    end
     # use a bogus MAC for not yet created VMs in case it gets handed to Cobbler
     # otherwise use the MAC as passed in
     mac = vms.key?(e[:hostname]) ? virtualbox_mac(e[:hostname]) : \

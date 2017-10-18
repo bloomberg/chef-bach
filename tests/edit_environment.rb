@@ -134,8 +134,7 @@ environment_data['override_attributes'].tap do |attrs|
   # if we have a clusetr_name prefix adjust the necessary parameters
   if cluster_name
     attrs['bcpc']['cluster_name'] = cluster_name
-    attrs['bcpc']['bootstrap']['hostname'] = \
-      cluster_name + attrs['bcpc']['bootstrap']['hostname'] unless \
+    attrs['bcpc']['bootstrap']['hostname'] = ENV['BOOTSTRAP_NAME']
       attrs['bcpc']['bootstrap']['hostname'].start_with?(cluster_name)
   end
 

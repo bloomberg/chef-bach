@@ -2,7 +2,6 @@
   "name": "Test-Laptop",
   "override_attributes": {
     "bcpc": {
-      "cluster_name": "foo",
       "management": {
         "vip" : "10.0.101.5"
       },
