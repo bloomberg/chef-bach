@@ -22,15 +22,25 @@ require 'base64'
 
 krb_realm = node[:bcpc][:hadoop][:kerberos][:realm]
 test_user = node['hadoop_smoke_tests']['oozie_user']
+hbase_ns = node['hadoop_smoke_tests']['hbase_ns']
 tester_princ = "#{test_user}@#{krb_realm}"
 tester_keytab = get_config('keytab', 'test_user_keytab', 'os')
 
 include_recipe "bcpc-hadoop::smoke_test_user"
 
+# create hbase namespace for tester
+bash "HBASE namespace for smoke tests #{hbase_ns}" do
+  code <<-EOH
+  echo "create_namespace '#{hbase_ns}'" | hbase shell
+  EOH
+  user 'hbase'
+  not_if "hbase shell <<< 'list_namespace' | grep #{hbase_ns}", user: 'hbase'
+end
+
 # Permissions test user to access HBase and get DTs
 bash "HBASE permission for #{test_user}" do
   code <<-EOH
-  echo "grant '#{test_user}', 'RWCAX'" | hbase shell
+  echo "grant '#{test_user}', 'RWCAX', @#{hbase_ns}" | hbase shell
   EOH
   user 'hbase'
 end
