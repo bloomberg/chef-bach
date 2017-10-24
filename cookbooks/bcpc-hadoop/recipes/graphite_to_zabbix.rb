@@ -26,7 +26,7 @@ template node['bcpc']['zabbix']['scripts']['query_graphite'] do
             :max_bytes => node[:bcpc][:hadoop][:zabbix][:query_graphite][:rolling_max_bytes],
             :backup_count => node[:bcpc][:hadoop][:zabbix][:query_graphite][:rolling_backup_count],
             :graphite_url => "https://#{node['bcpc']['management']['vip']}:#{node[:bcpc][:graphite][:web_port]}",
-            :metric_fetch_period => node[:bcpc][:hadoop][:graphite][:metric_fetch_period],
+            :default_query_range=> node[:bcpc][:hadoop][:graphite][:default_query_range],
             :worker_count => node[:bcpc][:hadoop][:graphite][:worker_count]
            )
   mode 0744
@@ -38,11 +38,19 @@ template node[:bcpc][:hadoop][:zabbix][:query_graphite][:config_file] do
   source "graphite.query_graphite.config.erb"
   mode 0544
   zabbix_triggers = node.run_state["zabbix_triggers"] or {}
-  variables(:queries => zabbix_triggers.map{ |host,item| item.select{|key, attr| !attr.key?('is_graphite_query') || attr['is_graphite_query'] }.map{ |key, attr| attr['query'] }}.flatten.to_set )
+  variables(:queries => zabbix_triggers.map{ 
+    |host,item| item.select{|key, attr| !attr.key?('is_graphite_query') || attr['is_graphite_query'] }.map{ 
+      |key, attr| attr['query'] + " " + (attr['query_range'] ? attr['query_range'] : node[:bcpc][:hadoop][:graphite][:default_query_range])}
+  }.flatten(1).to_set
+  )
 end
 
 ruby_block "zabbix_monitor" do
   block do
+    ENV.delete('http_proxy')
+    ENV.delete('https_proxy')
+    ENV.delete('HTTP_PROXY')
+    ENV.delete('HTTPS_PROXY')
     require 'zabbixapi'
 
     # Make connection to zabbix api url
@@ -50,7 +58,8 @@ ruby_block "zabbix_monitor" do
       :url => "https://#{node['bcpc']['management']['vip']}" +
         ":#{node['bcpc']['zabbix']['web_port']}/api_jsonrpc.php",
       :user => get_config!('zabbix-admin-user'),
-      :password => "#{get_config!('password','zabbix-admin','os')}"
+      :password => "#{get_config!('password','zabbix-admin','os')}",
+      :no_proxy => true
     )
     if zbx.nil?
       Chef::Log.error("Could not connect to Zabbix server")

@@ -2,7 +2,7 @@
 # Cookbook Name:: bcpc
 # Recipe:: cobbler
 #
-# Copyright 2013, Bloomberg Finance L.P.
+# Copyright 2017, Bloomberg Finance L.P.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,10 +17,7 @@
 # limitations under the License.
 #
 
-chef_gem 'chef-rewind'
-
 require 'digest/sha2'
-require 'chef/rewind'
 require 'chef-vault'
 
 make_config('cobbler-web-user', 'cobbler')
@@ -43,15 +40,11 @@ chef_vault_secret 'cobbler' do
            'root-password-salted' => root_password_salted)
   admins node[:fqdn]
   search '*:*'
-  action :nothing
-end.run_action(:create_if_missing)
+  action :create_if_missing
+end
 
-node.set[:cobbler][:web_username] =
-  get_config('cobbler-web-user')
-node.set[:cobbler][:web_password] =
-  get_config('web-password', 'cobbler', 'os')
-
-bcpc_repo 'cobbler26'
+# The cobblerd cookbook relies on this attribute.
+node.force_default[:cobblerd][:web_password] = web_password
 
 [
   'python',
@@ -75,11 +68,6 @@ bcpc_repo 'cobbler26'
   end
 end
 
-apt_package 'cobbler' do
-  action :install
-  version '2.6.11-1'
-end
-
 #
 # Cobbler 2.6 expects to drop off a tftp configuration in
 # /etc/xinetd.d, so we stop the independent tftp service ASAP.
@@ -93,8 +81,37 @@ link '/tftpboot' do
 end
 
 service 'xinetd' do
-  action :enable
-  subscribes :restart, 'bash[cobbler-sync]'
+  action [:enable, :start]
+end
+
+#
+# Modern revisions of cobbler may not sync a tftp configuration until
+# a tftp-requiring node is enrolled.
+#
+# To make sure tftp is enabled immediately, we pre-seed a
+# configuration just in case.
+#
+file '/etc/xinetd.d/tftp' do
+  action :create_if_missing
+  mode 0444
+  user 'root'
+  group 'root'
+  content <<-EOM.gsub(/^ {4}/,'')
+    service tftp
+    {
+        disable                 = no
+        socket_type             = dgram
+        protocol                = udp
+        wait                    = yes
+        user                    = root
+        server                  = /usr/sbin/in.tftpd
+        server_args             = -B 1380 -v -s /var/lib/tftpboot
+        per_source              = 11
+        cps                     = 100 2
+        flags                   = IPv4
+    }
+  EOM
+  notifies :restart, 'service[xinetd]', :immediately
 end
 
 [
@@ -105,27 +122,18 @@ end
     not_if {
       File.exist?("/etc/apache2/mods-enabled/#{mod_name}.load")
     }
+    #
     # We need to restart apache2 before any cobbler commands are run.
     # Restarting it multiple times is pretty harmless.
+    #
     notifies :restart, 'service[apache2]', :immediately
   end
 end
 
 package 'isc-dhcp-server'
 
-include_recipe 'cobblerd::web'
-
-# The cobblerd cookbook assumes we use the Ubuntu 'universe'
-# packages. Unlike "universe," the upstream packages include the
-# cobbler-web material in the main package, so we do not need the
-# second package resource.
-unwind 'package[cobbler-web]'
-
-# The cobblerd cookbook references the wrong service name. Upstream
-# cobbler packages use 'cobblerd' instead of 'cobbler'
-rewind 'service[cobbler]' do
-  service_name 'cobblerd'
-end
+include_recipe 'cobblerd::cobbler_source_install'
+include_recipe 'cobblerd::default'
 
 template '/etc/apache2/conf.d/cobbler.conf' do
   source 'cobbler/apache.conf.erb'
@@ -135,8 +143,10 @@ end
 ['cobbler.conf', 'cobbler_web.conf'].each do |conf_file|
   link "/etc/apache2/conf-enabled/#{conf_file}" do
     to "/etc/apache2/conf.d/#{conf_file}"
+    #
     # We need to restart apache2 before any cobbler commands are run.
     # Restarting it multiple times is pretty harmless.
+    #
     notifies :restart, 'service[apache2]', :immediately
   end
 end
@@ -144,7 +154,7 @@ end
 template '/etc/cobbler/settings' do
   source 'cobbler/settings.erb'
   mode 0644
-  notifies :restart, 'service[cobbler]', :immediately
+  notifies :restart, "service[#{node['cobbler']['service']['name']}]", :immediately
 end
 
 template '/etc/cobbler/dhcp.template' do
@@ -152,6 +162,11 @@ template '/etc/cobbler/dhcp.template' do
   mode 0644
   variables(subnets: node[:bcpc][:networks])
   notifies :run, 'bash[cobbler-sync]', :delayed
+end
+
+template '/var/lib/cobbler/scripts/select_bach_root_disk' do
+  source 'cobbler/select_bach_root_disk.erb'
+  mode 0644
 end
 
 cookbook_file '/var/lib/cobbler/loaders/ipxe-x86_64.efi' do
@@ -170,25 +185,20 @@ link '/var/lib/tftpboot/chain.c32' do
   link_type :hard
 end
 
-cobbler_image 'ubuntu-12.04-mini' do
-  source "#{get_binary_server_url}/ubuntu-12.04-hwe313-mini.iso"
-  os_version 'precise'
-  os_breed 'ubuntu'
-end
-
 cobbler_image 'ubuntu-14.04-mini' do
   source "#{get_binary_server_url}/ubuntu-14.04-hwe44-mini.iso"
   os_version 'trusty'
   os_breed 'ubuntu'
+  action :import
 end
 
 {
   trusty: 'ubuntu-14.04-mini-x86_64',
-  precise: 'ubuntu-12.04-mini-x86_64'
 }.each do |version, distro_name|
   cobbler_profile "bcpc_host_#{version}" do
     kickstart "cobbler/#{version}.preseed"
     distro distro_name
+    action :import
   end
 
   #
@@ -262,9 +272,7 @@ file '/etc/cobbler/pxe/gpxe_system_local.template' do
   notifies :run, 'bash[cobbler-sync]', :delayed
 end
 
-#
-# The "LOCALBOOT -1" does not seem to work reliably on VirtualBox.
-#
+# The "LOCALBOOT -1" statement does not seem to work reliably on VirtualBox.
 file '/etc/cobbler/pxe/pxelocal.template' do
   content <<-EOM.gsub(/^ {4}/, '')
     DEFAULT local
@@ -280,14 +288,8 @@ file '/etc/cobbler/pxe/pxelocal.template' do
   notifies :run, 'bash[cobbler-sync]', :delayed
 end
 
-
 service 'isc-dhcp-server' do
-  #
-  # We :enable instead of :start because Ubuntu 14.04 upstart returns
-  # '1' when a service is already running, which aborts the chef run.
-  #
-  # 'cobbler sync' will start/restart the service in any case.
-  #
-  action [:enable]
+  supports :status => true, :restart => true
+  action [:enable,:start]
   notifies :run, 'bash[cobbler-sync]', :delayed
 end

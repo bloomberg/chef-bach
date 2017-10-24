@@ -1,39 +1,34 @@
 keytab_dir = node[:bcpc][:hadoop][:kerberos][:keytab][:dir]
 realm = node[:bcpc][:hadoop][:kerberos][:realm]
+viphost = node[:bcpc][:management][:viphost]
 
-get_cluster_nodes().each do |h|
-  # Create directory for the the host to store keytabs
-  directory "#{keytab_dir}/#{float_host(h)}" do
-    action :create
-    owner "root"
-    group "root"
-    mode 0755
-    recursive true
-  end
-  
+host_list = get_cluster_nodes() + [viphost]
+host_list.each do |h|
+  include_recipe 'bach_krb5::keytab_directory'
+
   # Generate all the principals
   node[:bcpc][:hadoop][:kerberos][:data].each do |ke, va|
-  
+
     service_principal = va['principal']
     host_fqdn = float_host(h)
     keytab_file = va['keytab']
-  
+
     # Delete the existing kerberos principal if principal is being recreated
     krb5_principal "#{service_principal}/#{host_fqdn}@#{realm}" do
       action :delete
-      only_if { principal_exists?("#{service_principal}/#{host_fqdn}@#{realm}") && 
+      only_if { principal_exists?("#{service_principal}/#{host_fqdn}@#{realm}") &&
                 node[:bcpc][:hadoop][:kerberos][:keytab][:recreate] == true
               }
     end
-    
+
     # Delete the existing Keytab file if principal is being recreated
     file "#{keytab_dir}/#{host_fqdn}/#{keytab_file}" do
       action :delete
-      only_if { File.exists?("#{keytab_dir}/#{host_fqdn}/#{keytab_file}") && 
+      only_if { File.exists?("#{keytab_dir}/#{host_fqdn}/#{keytab_file}") &&
                 node[:bcpc][:hadoop][:kerberos][:keytab][:recreate] == true
               }
     end
-    
+
     # Create the principal
     krb5_principal "#{service_principal}/#{host_fqdn}@#{realm}" do
       action :create
@@ -43,18 +38,49 @@ get_cluster_nodes().each do |h|
   end
 end
 
+host_list.each do |h|
+  host_fqdn = float_host(h)
 
-get_cluster_nodes().each do |h|
+  # Create a subdirectory for each host.
+  directory File.join(keytab_dir, host_fqdn) do
+    action :create
+    user 'root'
+    group 'root'
+    mode 0700
+  end
+
   node[:bcpc][:hadoop][:kerberos][:data].each do |ke, va|
     service_principal = va['principal']
-    host_fqdn = float_host(h)
-    keytab_file = va['keytab']
 
+    keytab_file = va['keytab']
+    keytab_path = ::File.join(keytab_dir, host_fqdn, keytab_file)
+    regular_principal = "#{service_principal}/#{host_fqdn}@#{realm}"
+    vip_principal = "#{service_principal}/#{float_host(viphost)}@#{realm}"
+
+    # Variable to hold all principals for a single keytab
+    keytab_principals = "#{regular_principal} #{vip_principal}"
+    
     # Create the keytab file
     execute "creating-keytab-for-#{ke}" do
-      command "kadmin.local -q 'xst -k #{keytab_dir}/#{host_fqdn}/#{keytab_file} -norandkey #{service_principal}/#{host_fqdn}@#{realm} HTTP/#{host_fqdn}@#{realm}'"
+      command "kadmin.local -q 'xst -k #{keytab_path} " \
+        "-norandkey #{keytab_principals}'"
       action :run
-      not_if {File.exists?("#{keytab_dir}/#{host_fqdn}/#{keytab_file}")}
+      not_if {
+        # Don't run if all principals are found in an existing keytab file.
+        require 'mixlib/shellout'
+        [regular_principal, vip_principal].map do |princ|
+          cc = Mixlib::ShellOut.new("klist -k #{keytab_path} | grep #{princ}")
+          cc.run_command
+          cc.status.success?
+        end.all?
+      }
+    end
+
+    # Verify the keytab file, because kadmin.local does not return errors.
+    [regular_principal, vip_principal].each do |princ|
+      execute "verifying-#{princ}-keytab" do
+        command "klist -k #{keytab_path} | grep #{princ}"
+      end
     end
   end
 end

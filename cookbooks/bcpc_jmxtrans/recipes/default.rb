@@ -4,8 +4,15 @@
 #
 # Copyright 2014, Bloomberg L.P
 #
-# All rights reserved 
+# All rights reserved
 #
+
+bcpc_chef_gem 'chef-rewind' do
+  version '>0.0'
+  compile_time true
+end
+
+require 'chef/rewind'
 
 #
 # Logic to include the node ip so that the JMXTrans JSON file can be genereated correctly
@@ -30,23 +37,38 @@ node.override['jmxtrans']['servers']=vservers
 #
 
 if node['jmxtrans']['graphite']['host'].nil? || node['jmxtrans']['graphite']['host'] == 'graphite'
-   node.default['jmxtrans']['graphite']['host'] = node['bcpc']['management']['vip']
+  node.default['jmxtrans']['graphite']['host'] = node['bcpc']['management']['vip']
+
 end
 
 if node.default['jmxtrans']['graphite']['port'] != node['bcpc']['graphite']['relay_port']
    node.default['jmxtrans']['graphite']['port'] = node['bcpc']['graphite']['relay_port']
 end
+
 #
-# Logic to set the URL from where the jmxtrans software need to be downloaded
+# The JMXtrans cookbook expects to talk to Maven Central with a
+# remote_file resource, so we will need a proxy configuration on
+# internet-connected clients.
 #
-sw_download_url = get_binary_server_url
-node.default['jmxtrans']['url'] = "#{sw_download_url}"
+include_recipe 'bcpc::proxy_configuration'
 
 include_recipe 'jmxtrans'
+
 #
-# Get an array of hosts which are garphite heads
+# The jmxtrans cookbook v2.0 omits a checksum on its ark
+# resource, so we rewind it to re-add it.
 #
-graphite_hosts = get_nodes_for("graphite","bcpc").map{|x| x.bcpc.management.ip}
+rewind 'ark[jmxtrans]' do
+  checksum node['jmxtrans']['checksum']
+end
+
+#
+# Get an array of hosts which are graphite heads
+#
+graphite_hosts = get_nodes_for('graphite','bcpc').map do
+  |hh| hh[:bcpc][:management][:ip]
+end
+
 #
 # Array to store the list of services on which jxmtrans dependent on i.e. collects data from
 # If any of the services gets restarted jmxtrans process need to be restarted
@@ -66,7 +88,7 @@ graphite_hosts.each do |host|
   end
 end
 #
-# Add services of processes on this node from which jmx data are collected by jmxtrans 
+# Add services of processes on this node from which jmx data are collected by jmxtrans
 #
 node['jmxtrans']['servers'].each do |server|
   jmx_services.push(server['service'])
@@ -81,9 +103,9 @@ service "restart jmxtrans on dependent service" do
   supports :restart => true, :status => true, :reload => true
   action   :restart
   #
-  # Using the services array generate chef service resources to restart when the monitored services are restarted 
+  # Using the services array generate chef service resources to restart when the monitored services are restarted
   #
-  jmx_services.each do |jmx_dep_service| 
+  jmx_services.each do |jmx_dep_service|
     subscribes :restart, "service[#{jmx_dep_service}]", :delayed
   end
   # Run if we see a service was restarted (either manually or from a service restart subscribed above)

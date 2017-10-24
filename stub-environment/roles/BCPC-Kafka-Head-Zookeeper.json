@@ -1,34 +1,23 @@
 {
   "name": "BCPC-Kafka-Head-Zookeeper",
   "default_attributes": {
-   "jmxtrans":  {
+    "jmxtrans":  {
       "servers":  [
-                 {
-                    "type": "zookeeper",
-                    "service": "zookeeper-server",
-                    "service_cmd": "org.apache.zookeeper.server.quorum.QuorumPeerMain"
-                 }
-        ]
-      }
+        {
+          "type": "zookeeper",
+          "service": "zookeeper-server",
+          "service_cmd": "org.apache.zookeeper.server.quorum.QuorumPeerMain"
+        }
+      ]
+    }
   },
   "json_class": "Chef::Role",
   "run_list": [
     "role[Basic]",
-    "recipe[bcpc::default]",
-    "recipe[bcpc::networking]",
-    "recipe[bcpc-hadoop::disks]",
-    "recipe[bcpc::ubuntu_tools_repo]",
-    "recipe[kafka-bcpc::default]", 
-    "recipe[kafka-bcpc::setattr]",
-    "recipe[java::oracle]",
-    "recipe[bcpc-hadoop::hdp_repo]",
-    "recipe[kafka-bcpc::zookeeper_server]",
-    "recipe[bcpc::diamond]",
-    "recipe[bcpc_jmxtrans]"
+    "recipe[bcpc_kafka::zookeeper_server]"
   ],
   "description": "Zookeeper Role for Kafka Machines",
   "chef_type": "role",
   "override_attributes": {
   }
 }
-

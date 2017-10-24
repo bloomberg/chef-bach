@@ -12,8 +12,7 @@ describe Bcpc_Hadoop::Helper do
     let(:chef_run) do
       ChefSpec::SoloRunner.new do |node|
         Fauxhai.mock(platform: 'ubuntu', version: '12.04')
-        node.set['memory']['total'] = 1024
-        node.set['cpu']['total'] = 1
+        SET_ATTRIBUTES.call(node)
         node.set[:bcpc][:hadoop][:group_dir_prohibited_groups] = ['^users$', '^svn.*$', '^git.*$', 'dba']
       end.converge("recipe[bcpc-hadoop::hdfs_group_directories]")
     end

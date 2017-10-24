@@ -1,0 +1,20 @@
+fs.defaultFS=<%= @smoke['fs'] %>
+nameNode=<%= @smoke['fs'] %>
+oozie.coord.application.path=<%= @smoke['co_path'] %>
+mapreduce.jobtracker.address=<%= @smoke['rm'] %>
+jobTracker=<%= @smoke['rm'] %>
+queueName=default
+mapTasks=10
+reduceTasks=1
+oozie.use.system.libpath=true
+queueName=default
+oozie.wf.application.path=<%= @smoke['hdfs_wf_path'] %>
+inputDir=inputForPi
+outputDir=outputForPi
+metastoreUri=<%= @smoke['thrift_uris'] %>
+hMetastorePrinc=<%= @smoke['hive_hmeta_princ'] %>
+hcMetastorePrinc=<%= @smoke['hive_hserver_princ'] %>
+hbMasterPrinc=<%= @smoke['hbase_master_princ'] %>
+hbRegionPrinc=<%= @smoke['hbase_region_princ'] %>
+ZKPort=2181
+ZKQuorum=<%= @smoke['zk_quorum'] %>

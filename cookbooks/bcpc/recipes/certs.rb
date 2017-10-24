@@ -18,7 +18,8 @@
 #
 
 require 'openssl'
-include_recipe "bcpc::default"
+include_recipe 'bcpc::default'
+include_recipe 'bcpc::chef_vault_install'
 
 template "/tmp/openssl.cnf" do
     source "openssl.cnf.erb"
@@ -28,10 +29,10 @@ template "/tmp/openssl.cnf" do
 end
 
 node.default[:temp][:value] = ""
-bootstrap = get_all_nodes.select{|s| s.hostname.include? 'bootstrap'}[0].fqdn
+bootstrap = get_bootstrap
 key = OpenSSL::PKey::RSA.new 2048;
 
-results = get_nodes_for("certs").map!{ |x| x['fqdn'] }.join(",")
+results = get_all_nodes.map!{ |x| x['fqdn'] }.join(",")
 nodes = results == "" ? node['fqdn'] : results
 
 ruby_block "initialize-ssh-keys" do
@@ -51,7 +52,7 @@ if ssh_private_key.nil?
   ssh_private_key = key.to_pem
 end
 
-chef_vault_secret "ssh" do
+chef_vault_secret 'ssh' do  
   data_bag 'os'
   raw_data({ "private-key" => key.to_pem })
   admins "#{ nodes },#{ bootstrap }"

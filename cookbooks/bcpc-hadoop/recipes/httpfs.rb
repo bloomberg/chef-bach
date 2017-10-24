@@ -24,6 +24,10 @@ bash "kill hdfs-httpfs" do
   returns [0, 1]
 end
 
+configure_kerberos 'httpfs_spnego' do
+  service_name 'spnego'
+end
+
 configure_kerberos 'httpfs_kerb' do
   service_name 'httpfs'
 end

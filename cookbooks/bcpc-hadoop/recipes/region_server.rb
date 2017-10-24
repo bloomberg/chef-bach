@@ -24,7 +24,7 @@ end
 end
 
 user_ulimit "hbase" do
-  filehandle_limit 32769
+  filehandle_limit 65536
 end
 
 directory "/usr/hdp/#{node[:bcpc][:hadoop][:distribution][:active_release]}/hbase/lib/native/Linux-amd64-64" do
@@ -40,6 +40,10 @@ template "/etc/default/hbase" do
   source "hdp_hbase.default.erb"
   mode 0655
   variables(:hbrs_jmx_port => node[:bcpc][:hadoop][:hbase_rs][:jmx][:port])
+end
+
+configure_kerberos 'region_server_spnego' do
+  service_name 'spnego'
 end
 
 configure_kerberos 'hbasers_kerb' do

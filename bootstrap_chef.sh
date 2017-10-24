@@ -55,25 +55,40 @@ if [[ ! -f "environments/${CHEF_ENVIRONMENT}.json" ]]; then
     exit
 fi
 
+#
+# Clear stale cookbooks in case we are re-running the
+# tests/automated_install.sh script.
+#
+# This isn't entirely safe, but this script already assumes it can use
+# rsync to overwrite anything in the vendor directory. Realistically,
+# it should only be run on VM clusters.
+#
+$SSH_CMD "sudo chown -R vagrant $BCPC_DIR; \
+	  sudo rm -rf /var/chef/cache/cookbooks; \
+          sudo rm -rf $BCPC_DIR/vendor/cookbooks"
 
-if [[ -z $VAGRANT ]]; then
-  if [[ ! -f $KEYFILE ]]; then
-    ssh-keygen -N "" -f $KEYFILE
-  fi
-  echo "Running rsync of non-Vagrant install"
-  rsync  $RSYNCEXTRA -avP -e "ssh -i $KEYFILE" --exclude vbox --exclude $KEYFILE --exclude .chef . ${SSH_USER}@$IP:chef-bcpc 
-  $SSH_CMD "cd $BCPC_DIR && ./setup_ssh_keys.sh ${KEYFILE}.pub"
+# Copy cluster mutable data to bootstrap.
+if [[ -d ../cluster ]]; then
+  # pull back the modified environment so that it can be copied to remote host
+  tar -czf cluster.tgz ../cluster
+  tar -C .. -cf - cluster | vagrant ssh -c 'cd ~; tar -xvf -'
+elif [[ -f ./cluster.tgz ]]; then
+  gunzip -c cluster.tgz | vagrant ssh -c 'cd ~; tar -xvf -'
 else
-  echo "Running rsync of Vagrant install"
-  $SSH_CMD "rsync $RSYNCEXTRA -avP --exclude vbox --exclude .chef /chef-bcpc-host/ /home/vagrant/chef-bcpc/"
+  ( echo "############## No cluster data found in ../cluster or ./cluster.tgz! ##############" && exit 1 )
 fi
 
+echo "Running rsync of Vagrant install"
+$SSH_CMD "rsync $RSYNCEXTRA -avP --exclude vbox --exclude vendor --exclude Gemfile.lock --exclude .kitchen --exclude .chef /chef-bcpc-host/ /home/vagrant/chef-bcpc/"
 
 # cluster external environment will go here
 #$SSH_CMD "mkdir -p cluster"
 $SSH_CMD "tar -xzf /chef-bcpc-host/cluster.tgz -C /home/vagrant" || (echo '### Vagrant ssh failed to deploy cluster environment returned $? ###'; exit 1)
 echo "Building bins"
 $SSH_CMD "cd $BCPC_DIR && sudo ./build_bins.sh"
+# https://github.com/bloomberg/chef-bach/issues/848
+echo "HACK - removing stacktrace file, since the build_bins run succeeded."
+$SSH_CMD "sudo rm -f /var/chef/cache/chef-stacktrace.out"
 echo "Setting up chef server"
 $SSH_CMD "cd $BCPC_DIR && sudo ./setup_chef_server.sh ${CHEF_ENVIRONMENT}"
 echo "Setting up chef cookbooks"

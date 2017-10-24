@@ -44,7 +44,6 @@ hadoop_non_templates =
    log4j.properties
    ssl-client.xml
    ssl-server.xml
-   dfs.exclude
   }
 
 hadoop_non_templates.each do |t|
@@ -66,9 +65,16 @@ template "/etc/hadoop/conf/hadoop-env.sh" do
   source "hdp_hadoop-env.sh.erb"
   mode 0555
   variables(
-    :nn_jmx_port => node[:bcpc][:hadoop][:namenode][:jmx][:port],
-    :dn_jmx_port => node[:bcpc][:hadoop][:datanode][:jmx][:port]
+    :nn_jmx_port => node['bcpc']['hadoop']['namenode']['jmx']['port'],
+    :dn_jmx_port => node['bcpc']['hadoop']['datanode']['jmx']['port'],
+    :jn_jmx_port => node['bcpc']['hadoop']['journalnode']['jmx']['port']
   )
+end
+
+file "/etc/hadoop/conf/dfs.exclude" do
+  content node["bcpc"]["hadoop"]["decommission"]["hosts"].join("\n")
+  mode 0644
+  only_if { !node["bcpc"]["hadoop"]["decommission"]["hosts"].nil? }
 end
 
 include_recipe 'bcpc-hadoop::core_site'

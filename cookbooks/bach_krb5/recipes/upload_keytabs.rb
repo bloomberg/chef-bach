@@ -1,6 +1,10 @@
 require 'base64'
 # Upload keytabs to chef-server
-get_cluster_nodes().each do |h|
+
+viphost = node[:bcpc][:management][:viphost]
+host_list = get_cluster_nodes() + [viphost]
+
+host_list.each do |h|
   node[:bcpc][:hadoop][:kerberos][:data].each do |srvc, srvdat|
     # Set host based on configuration
     config_host=srvdat['princhost'] == "_HOST" ? float_host(h.split('.')[0]) : srvdat['princhost'].split('.')[0]

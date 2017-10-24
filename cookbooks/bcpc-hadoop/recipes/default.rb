@@ -23,40 +23,66 @@
 # assume gem is in the same dir (valid for Chef 10, Chef 11 dpkg and Chef 11 Omnibus)
 require 'pathname'
 require 'rubygems'
-gem_path = Pathname.new(Gem.ruby).dirname.join("gem").to_s
 
 # build requirements for zookeeper
-%w{make patch gcc}.each do |pkg|
+%w{ruby-dev make patch gcc}.each do |pkg|
   package pkg do
     action :nothing
   end.run_action(:install)
 end
 
-gem_package "zookeeper" do
-    gem_binary gem_path
-    version ">0.0"
-    action :nothing
-end.run_action(:install)
+# build requirement for augeas
+package 'libaugeas-dev' do
+  action :upgrade
+end
 
-gem_package "webhdfs" do
-    gem_binary gem_path
-    version ">=0.0.0"
-    action :nothing
-end.run_action(:install)
+bcpc_chef_gem 'ruby-augeas' do
+  compile_time false
+end
 
-gem_package "zabbixapi" do
-    gem_binary gem_path
-    version ">=2.4"
-    action :nothing
-end.run_action(:install)
+bcpc_chef_gem 'poise' do
+  version '~>2.0'
+  compile_time true
+end
 
-Gem.clear_paths
+bcpc_chef_gem 'json' do
+  # Due to Zabbixapi #64 otherwise could use 2.0+
+  version '~>1.6'
+  compile_time true
+end
+
+bcpc_chef_gem 'zookeeper' do
+  version '>0.0'
+  compile_time true
+end
+
+bcpc_chef_gem 'webhdfs' do
+  version '>=0.0.0'
+  compile_time true
+end
+
+bcpc_chef_gem 'zabbixapi' do
+  version '>=2.4'
+  compile_time true
+end
+
+['libxslt1-dev', 'libxml2-dev', 'pkg-config'].each do |pkg_name|
+  package pkg_name do
+    action :upgrade
+  end.run_action(:install)
+end
+
+#
+# By default, nokogiri will attempt to install libxml2, libxslt, and
+# zlib from the internet.
+#
+# The "--use-system-libraries" switch is intended to force nokogiri
+# extconf.rb to compile against system libraries.
+#
+bcpc_chef_gem 'nokogiri' do
+  options  '-- --use-system-libraries'
+  version '>=1.6.2'
+  compile_time true
+end
+
 require 'zookeeper'
-
-execute "correct-gem-permissions" do
-  command 'find /opt/chef/embedded/lib/ruby/gems -type f -exec chmod a+r {} \; && ' +
-          'find /opt/chef/embedded/lib/ruby/gems -type d -exec chmod a+rx {} \;'
-  user "root"
-   action :nothing
-end.run_action(:run)
-

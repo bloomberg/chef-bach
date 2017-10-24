@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Parameters : 
+# Parameters :
 # $1 is the IP address of the bootstrap node
 # $2 is the Chef environment name, default "Test-Laptop"
 
@@ -16,11 +16,12 @@ CHEF_SERVER=$1
 CHEF_ENVIRONMENT=$2
 
 # Assume we are running in the chef-bcpc directory
-
-# Are we running under Vagrant?  If so, jump through some extra hoops.
-sudo chef-client -E "$CHEF_ENVIRONMENT" -c .chef/knife.rb
-sudo chown $(whoami):root .chef/$(hostname -f).pem
-sudo chmod 550 .chef/$(hostname -f).pem
+sudo /opt/chefdk/bin/chef-client -E "$CHEF_ENVIRONMENT" -c .chef/knife.rb
+PEM_RELATIVE_PATH=.chef/$(hostname -f).pem
+sudo chown $(whoami):root $PEM_RELATIVE_PATH
+sudo chmod 550 $PEM_RELATIVE_PATH
+sudo ln -s $(readlink -f $PEM_RELATIVE_PATH) /etc/chef/client.pem
+sudo ln -s $(readlink -f .chef) ~/.chef
 
 admin_val=`knife client show $(hostname -f) -c .chef/knife.rb | grep ^admin: | sed "s/admin:[^a-z]*//"`
 if [[ "$admin_val" != "true" ]]; then
@@ -28,5 +29,48 @@ if [[ "$admin_val" != "true" ]]; then
   echo -e "/\"admin\": false\ns/false/true\nw\nq\n" | EDITOR=ed sudo -E knife client edit `hostname -f` -c .chef/knife.rb -k /etc/chef-server/admin.pem -u admin
 fi
 
-knife node run_list add $(hostname -f) 'role[BCPC-Bootstrap]' -c .chef/knife.rb
-sudo chef-client -c .chef/knife.rb
+#
+# build_bins.sh has already built the BCPC local repository, but we
+# still need to configure Apache and chef-vault before doing a
+# complete Chef run.
+#
+sudo -E /opt/chefdk/bin/chef-client \
+     -c .chef/knife.rb \
+     -o 'recipe[bcpc::apache-mirror]'
+
+sudo -E /opt/chefdk/bin/chef-client \
+     -c .chef/knife.rb \
+     -o 'recipe[bcpc::chef_vault_install]'
+
+sudo /opt/chefdk/bin/chef-client \
+     -c .chef/knife.rb \
+     -o 'recipe[bcpc::chef_poise_install]'
+
+
+#
+# For some reason that I don't understand,we need to do this before
+# BCPC-Bootstrap so that we have os in the chef vault to allow bootstrap-gpg
+# to be properly put inside the configs/Test-Laptop data bag as we aren't even installing the chef vault until after the first apt run
+#
+sudo -E /opt/chefdk/bin/chef-client \
+     -c .chef/knife.rb \
+     -o 'recipe[bach_repository::apt]'
+
+
+
+#
+# With chef-vault installed and the repo configured, it's safe to save
+# and converge the complete runlist.
+#
+sudo -E /opt/chefdk/bin/chef-client \
+     -c .chef/knife.rb \
+     -r 'role[BCPC-Bootstrap]'
+
+#
+# TODO: This chef run should not be necessary.  This is definitely a
+# bug in the bach_repository::apt recipe.  The bootstrap fails to save
+# its GPG public/private keys even after it should be able to do so.
+#
+sudo -E /opt/chefdk/bin/chef-client \
+     -c .chef/knife.rb \
+     -o 'recipe[bach_repository::apt]'

@@ -31,12 +31,17 @@ phoenix-client
   hdp_select(p, node[:bcpc][:hadoop][:distribution][:active_release])
 end
 
+configure_kerberos 'hbase_spnego' do
+  service_name 'spnego'
+end
+
 configure_kerberos 'hbase_kerb' do
   service_name 'hbase'
 end
 
 user_ulimit "hbase" do
-  filehandle_limit 32769
+  filehandle_limit 65536
+  process_limit 65536
 end
 
 service "hbase-thrift" do

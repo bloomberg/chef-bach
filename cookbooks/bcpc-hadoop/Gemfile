@@ -1,6 +1,20 @@
-source 'https://rubygems.org'
+ruby RUBY_VERSION
+source 'https://rubygems.org' do
 
-gem 'rspec', :require => false, :group => :test
-gem 'simplecov', :require => false, :group => :test
-gem 'simplecov-json', :require => false, :group => :test
-gem 'simplecov-rcov', :require => false, :group => :test
+  gem 'rack'
+  gem 'chef'
+  gem 'cheffish'
+  gem 'buff-ruby_engine'
+  gem 'buff-extensions'
+  gem 'berkshelf'
+  gem 'chefspec'
+  gem 'fauxhai'
+  gem 'poise'
+  gem 'nokogiri'
+  gem 'webhdfs'
+  gem 'zookeeper'
+  gem 'equivalent-xml', :require => false, :group => :test
+  gem 'simplecov', :require => false, :group => :test
+  gem 'simplecov-json', :require => false, :group => :test
+  gem 'simplecov-rcov', :require => false, :group => :test
+end

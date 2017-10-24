@@ -68,6 +68,7 @@ end
 %w{
   cache
   relay
+  aggregator
 }.each do |pkg|
   template "/etc/init.d/carbon-#{pkg}" do
     source 'carbon/init.erb'
@@ -127,6 +128,7 @@ template '/opt/graphite/conf/carbon.conf' do
     :servers => mysql_servers,
     :min_quorum => mysql_servers.length/2 + 1 )
   notifies :restart, 'service[carbon-cache]', :delayed
+  notifies :restart, 'service[carbon-aggregator]', :delayed
   notifies :restart, 'service[carbon-relay]', :delayed
 end
 
@@ -153,6 +155,21 @@ template '/opt/graphite/conf/relay-rules.conf' do
   mode 00644
   variables( :servers => mysql_servers )
   notifies :restart, 'service[carbon-relay]', :delayed
+end
+
+template '/opt/graphite/conf/aggregation-rules.conf' do
+  source 'carbon/aggregation-rules.conf.erb'
+  owner 'root'
+  group 'root'
+  mode 00644
+  notifies :restart, 'service[carbon-aggregator]', :delayed
+end
+
+template '/opt/graphite/conf/rewrite-rules.conf' do
+  source 'carbon/rewrite-rules.conf.erb'
+  owner 'root'
+  group 'root'
+  mode 00644
 end
 
 #

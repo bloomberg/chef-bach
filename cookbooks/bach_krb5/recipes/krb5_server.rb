@@ -1,6 +1,7 @@
 include_recipe "bach_krb5::default"
 include_recipe "krb5::kadmin"
 include_recipe "krb5::kadmin_service"
+include_recipe "krb5::kdc_service"
 
 template "/etc/krb5kdc/kdc.conf" do
   owner 'root'

@@ -15,24 +15,17 @@ ENVIRONMENT="${3-Test-Laptop}"
 # load binary_server_url and binary_server_host (usually the bootstrap)
 load_binary_server_info "$ENVIRONMENT"
 
-# make sure we do not have a previous .chef directory in place to allow re-runs
-if [[ -f .chef/knife.rb ]]; then
-  sudo knife node delete `hostname -f` -y -k /etc/chef-server/admin.pem -u admin || true
-  sudo knife client delete `hostname -f` -y -k /etc/chef-server/admin.pem -u admin || true
-  mv .chef/ ".chef_found_$(date +"%m-%d-%Y %H:%M:%S")"
-fi
-
-mkdir .chef
+mkdir -p .chef
 cat << EOF > .chef/knife.rb
 require 'rubygems'
 require 'ohai'
 
 # Disable the Ohai password module which explodes on a Single-Sign-On-joined system
-Ohai::Config[:disabled_plugins] = [ "passwd" ]
+ohai.disabled_plugins = [ "passwd" ]
 
 o = Ohai::System.new
 o.all_plugins(['hostname','ipaddress'])
- 
+
 log_level                :info
 node_name                o[:fqdn]
 client_key               "$(pwd)/.chef/#{o[:fqdn]}.pem"
@@ -41,16 +34,17 @@ validation_key           '/etc/chef-server/chef-validator.pem'
 chef_server_url          'https://${BOOTSTRAP_IP}'
 syntax_check_cache_path  '$(pwd)/.chef/syntax_check_cache'
 cookbook_path '$(pwd)/vendor/cookbooks'
- 
-# Disable the Ohai password module which explodes on a Single-Sign-On-joined system
-Ohai::Config[:disabled_plugins] = [ "passwd" ]
 
+ssl_verify_mode :verify_none
+verify_api_cert false
+
+knife[:vault_mode] = 'client'
 File.umask(0007)
 EOF
 
-if [[ -n "$PROXY" ]]; then
+if [[ -n "$http_proxy" ]]; then
   cat << EOF >> .chef/knife.rb
-no_proxy_array = ["localhost", o[:ipaddress], o[:hostname], o[:fqdn], "${BOOTSTRAP_IP}", "${binary_server_host}"]
+no_proxy_array = ["localhost", o[:ipaddress], o[:hostname], o[:fqdn], "${BOOTSTRAP_IP}", "${binary_server_host}", ENV['no_proxy']].compact
 no_proxy_array.insert("*#{o[:domain]}") unless o[:domain].nil?
 no_proxy_string = no_proxy_array.uniq * ","
 ENV['no_proxy'] = no_proxy_string
@@ -68,7 +62,7 @@ https_proxy ENV['https_proxy']
 no_proxy no_proxy_string
 ENV['GIT_SSL_NO_VERIFY'] = 'true'
 EOF
-fi
+fi # end of [[ ! -f .chef/knife.rb ]]
 
 mkdir -p ./vendor
 /opt/chefdk/bin/berks vendor ./vendor/cookbooks

@@ -30,23 +30,8 @@ package 'libperconaserverclient18-dev' do
   action :upgrade
 end
 
-#
-# For Chef 11.x compatibility, it is important to use gem_package
-# instead of chef_gem.  Chef 11 does not include the 'compile_time'
-# attribute for chef_gem resources.
-#
-# Additionally, the Chef 11.x gem_package resource will fail to
-# install unless a version is provided.  (I believe this is a bug.)
-#
-# As a result, these hardcoded versions will need to match the
-# hardcoded versions found in build_bins.sh
-#
-{
-  mysql2: '0.4.4',
-  sequel: '4.36.0'
-}.each do |gem_name, gem_version|
-  gem_package gem_name.to_s do
-    gem_binary File.join(Chef::Config.embedded_dir,'bin','gem')
-    version gem_version
+%w{mysql2 sequel}.each do |gem_name|
+  bcpc_chef_gem gem_name.to_s do
+    compile_time false
   end
 end

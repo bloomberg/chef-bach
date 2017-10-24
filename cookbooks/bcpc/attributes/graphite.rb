@@ -16,12 +16,12 @@ default['bcpc']['graphite']['local_log_dir'] = "/opt/graphite/storage/log"
 # new setting
 default['bcpc']['graphite']['carbon']['storage'] = { 
   "carbon" => { "pattern" => "^carbon\\.", "retentions" => "60:90d" },
-  "hbase" => { "pattern" => "^jmx\\.hbase_rs\\.*\\.hb*\\.", "retentions" => "15s:15d" },
+  "hbase" => { "pattern" => "^jmx\\.hbase_rs\\..*\\.hb_regions\\.RegionServer\\.", "retentions" => "15s:1d,1m:7d" },
   "chef" => { "pattern" => "^chef\\.", "retentions" => "60:30d" },
   "default" => { "pattern" => ".*", "retentions" => "15s:7d,1m:30d,5m:90d" }
 }
 default['bcpc']['graphite']['django']['version'] = "1.5.4" 
 default['bcpc']['graphite']['carbon']['relay']['idle_timeout'] = 1800 
-default['bcpc']['graphite']['carbon']['cache']['MAX_UPDATES_PER_SECOND'] = 170 
+default['bcpc']['graphite']['carbon']['cache']['MAX_UPDATES_PER_SECOND'] = 300
 
 default[:bcpc][:graphite][:ip] = node[:bcpc][:management][:vip]

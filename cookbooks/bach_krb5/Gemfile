@@ -1,0 +1,5 @@
+source 'https://rubygems.org' do
+
+  gem 'rake-compiler'
+  gem 'rkerberos'
+end

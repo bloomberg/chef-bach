@@ -1,3 +1,8 @@
+
+user = node['bcpc']['bootstrap']['admin']['user']
+
+
+
 ruby_block "cleanup-old-environment-databag" do
   block do
     rest = Chef::REST.new(node[:bcpc][:bootstrap][:server], "admin", "/etc/chef-server/admin.pem")
@@ -33,12 +38,12 @@ ruby_block "cleanup-old-nodes" do
   ignore_failure true
 end
 
-Dir["/home/vagrant/chef-bcpc/.chef/*.pem"].each do |f|
+Dir["/home/#{user}/chef-bcpc/.chef/*.pem"].each do |f|
   file "#{f}" do
     action :delete
   end
 end
 
-file "/home/vagrant/chef-bcpc/environments/GENERIC.json" do
+file "/home/#{user}/chef-bcpc/environments/GENERIC.json" do
   action :delete
 end

@@ -16,6 +16,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+::Chef::Resource::Template.send(:include, BCPC::Utils)
 
 include_recipe "bcpc::default"
 
@@ -26,14 +27,12 @@ if keepalived_password.nil?
   keepalived_password = secure_password
 end
 
-bootstrap = get_bootstrap
-results = get_nodes_for("keepalived").map!{ |x| x['fqdn'] }.join(",")
-nodes = results == "" ? node['fqdn'] : results
+keepalived_admins = (get_head_node_names + [get_bootstrap]).join(',')
 
 chef_vault_secret "keepalived" do
   data_bag 'os'
   raw_data({ 'password' => keepalived_password })
-  admins "#{ nodes },#{ bootstrap }"
+  admins keepalived_admins
   search '*:*'
   action :nothing
 end.run_action(:create_if_missing)
@@ -91,9 +90,6 @@ if node[:bcpc][:networks].length > 1
 else
   service 'bfdd-beacon' do
     action [:stop, :disable]
-  end
-
-  execute 'killall bfdd-beacon' do
     ignore_failure true
   end
 end

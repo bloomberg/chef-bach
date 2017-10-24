@@ -19,21 +19,12 @@
 
 include_recipe 'bcpc::default'
 include_recipe 'bcpc::certs'
+include_recipe 'bcpc::ssh'
 
 template '/etc/hosts' do
   source 'hosts.erb'
   mode 00644
   variables(servers: get_all_nodes)
-end
-
-template '/etc/ssh/sshd_config' do
-  source 'sshd_config.erb'
-  mode 00644
-  notifies :restart, 'service[ssh]', :immediately
-end
-
-service 'ssh' do
-  action [:enable, :start]
 end
 
 service 'cron' do
@@ -43,16 +34,45 @@ end
 # Core networking package
 package 'vlan'
 
-# Useful system tools
-package 'fio'
-package 'bc'
-package 'htop'
-package 'sysstat'
-package 'iperf'
+# Useful networking tools
+%w(
+  ethtool
+  iperf
+  mtr-tiny
+  iptraf
+  ethstatus
+  iftop
+  nmap
+  ngrep
+).each do |p|
+  package p do
+    action :upgrade
+  end
+end
 
 # Remove spurious logging failures from this package
 package 'powernap' do
   action :remove
+end
+
+log 'udev persistent-net.rules file found! Your NICs may have been renamed.' do
+  level :warn
+  only_if { File.exists?('/etc/udev/rules.d/70-persistent-nic.rules') }
+end
+
+#
+# Disable NIC renaming on future boots by creating an empty
+# persistent-net-generator to override the one in /lib/udev
+#
+file '/etc/udev/rules.d/75-persistent-net-generator.rules' do
+  content "# This file was created by Chef.\n" \
+          "# (It is intentionally empty.)\n"
+  mode 0444
+end
+
+# Remove existing NIC renaming rules.
+file '/etc/udev/rules.d/70-persistent-net.rules' do
+  action :delete
 end
 
 bash 'enable-ip-forwarding' do
@@ -155,11 +175,10 @@ end
 
 ruby_block 'bcpc-add-resolvers' do
   resolvconf_interface_name =
-    node[:bcpc][:networks][subnet][:management][:interface].to_s + '.inet'
+    node[:bcpc][:networks][subnet][:management][:interface].to_s
 
   block do
     require 'English'
-
     IO.popen(['resolvconf', '-a', resolvconf_interface_name],
              'r+') do |resolvconf|
       resolvers.each do |rr|
@@ -224,13 +243,19 @@ ruby_block 'bcpc-deconfigure-dhcp-interfaces' do
 
     lease_interface_lines = lease_files.map do |file_name|
       ::File.readlines(file_name).select do |line|
-        line.include?('interface') 
+        line.include?('interface')
       end
     end.flatten
 
+    # This is a list of all interfaces mentioned in DHCP lease files.
     lease_interfaces = lease_interface_lines.map do |line|
       lease_interface_regex.match(line)[1] rescue nil
     end.compact.uniq
+
+    # This is a list of all interfaces we may use in our bond.
+    bonded_interfaces = node[:bcpc][:networks][subnet].values.map do |vv|
+      vv['slaves']
+    end.compact.flatten.uniq
 
     #
     # Before we begin, verify that we have a new default route
@@ -246,10 +271,28 @@ ruby_block 'bcpc-deconfigure-dhcp-interfaces' do
       line.start_with?('default')
     end
 
-    if default_routes.length < 2
-      raise 'Cannot deconfigure DHCP interfaces (' +
-        (lease_interfaces.join(' ') rescue '') + '), ' \
-        'fewer than 2 default routes are configured!'
+    #
+    # If the list of DHCP-configured interfaces and bond slaves
+    # overlaps, or if we have only a single NIC, warn the hapless
+    # reader of the log.  (If anything goes wrong, we will stop
+    # talking to the user!)
+    #
+    if bonded_interfaces.none?
+      Chef::Log.info('This host is not using a bonded configuration, ' \
+                     'so interfaces will not be flushed and restarted. ' \
+                     'If something goes wrong, you may not notice until ' \
+                     'reboot!')
+    elsif (bonded_interfaces & lease_interfaces).any?
+      Chef::Log.warn('DANGER: since the boot/DHCP interface is a member of ' \
+                     'the LACP bond, we may lose network connectivity ' \
+                     'while trying to configure the bond!')
+    else
+      # If they do NOT overlap, we should have no fewer than two routes.
+      if default_routes.length < 2
+        raise 'Cannot deconfigure DHCP interfaces (' +
+          (lease_interfaces.join(' ') rescue '') + '), ' \
+          'fewer than 2 default routes are configured!'
+      end
     end
 
     #
@@ -277,7 +320,12 @@ ruby_block 'bcpc-deconfigure-dhcp-interfaces' do
       end.any?
     end
 
-    unless active_route_interfaces.any?
+    #
+    # If there are no bond slaves, this shouldn't matter, because we
+    # won't be deconfiguring anything (no ip addr flush), only killing
+    # the dhclient process and installing a static configuration.
+    #
+    if bonded_interfaces.any? && active_route_interfaces.none?
       raise 'Cannot deconfigure DHCP interfaces, ' \
         'no active interface would be configured with a default route!'
     end

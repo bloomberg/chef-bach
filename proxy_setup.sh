@@ -4,29 +4,37 @@
 # Only define http_proxy if you will be using a proxy
 #
 
-#export PROXY="proxy.example.com:80"
-
 export CURL='curl'
-if [ -n "${PROXY-}" ]; then
-  echo "Using a proxy at $PROXY"
+if [ -n "$http_proxy" ]; then
+  echo "Using a proxy at $http_proxy"
+
+  # Set https_proxy to http_proxy if not otherwise defined.
+  export https_proxy=${https_proxy:-$http_proxy}
+
+  if [ -z "$no_proxy" ]; then
+    export no_proxy="localhost"
+  else
+    export no_proxy="$no_proxy,localhost"
+  fi
+
+  if domainname | grep -q '(none)'; then
+    DOMAIN=""
+  else
+    DOMAIN="$(domainname),"
+  fi
 
   local_ips=$(ip addr list |grep 'inet '|sed -e 's/.* inet //' -e 's#/.*#,#')
-  
-  export http_proxy=http://${PROXY}
-  export https_proxy=http://${PROXY}
-  export no_proxy="$(sed 's/ //g' <<< $local_ips)localhost,$(hostname),$(hostname -f),.$(domainname),10.0.100.,10.0.100.*"
-  export NO_PROXY="$(sed 's/ //g' <<< $local_ips)localhost,$(hostname),$(hostname -f),.$(domainname),10.0.100.,10.0.100.*"
-  
-  # to ignore SSL errors
-  export GIT_SSL_NO_VERIFY=true
-  export CURL="curl -k -x http://${PROXY}"
+  export no_proxy="$(sed 's/ //g' <<< $local_ips)$(hostname),$(hostname -f),$DOMAIN10.0.100.,10.0.100.*,$no_proxy"
+  export NO_PROXY="$no_proxy"
+  echo "Force Ruby ecosystem to use system SSL certificates"
+  export SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
 fi
 
 #################################################
 # load_binary_server_info
 # Arguments: $1 - Chef Environment
 # Post-Condition: sets $binary_server_url
-#                      $binary_server_host 
+#                      $binary_server_host
 # Raises: Error if Chef environment not passed in
 function load_binary_server_info {
   environment="${1:?"Need a Chef environment"}"
@@ -41,7 +49,7 @@ function load_binary_server_info {
   export binary_server_host=$(ruby -e "require 'uri'; print URI('$binary_server_url').host")
 }
 
-# the bootstrap node may have multiple IP's we 
+# the bootstrap node may have multiple IP's we
 # load_chef_server_ip
 # Arguments: None
 # Pre-Condition: Chef has been run on bootstrap node

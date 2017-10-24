@@ -28,7 +28,7 @@ require 'thread'
 # as an example
 #
 
-# For Kerberos to work we need FQDN for each host. Changing "HOSTNAME" to "FQDN". 
+# For Kerberos to work we need FQDN for each host. Changing "HOSTNAME" to "FQDN".
 # Hadoop breaks principal into 3 parts  (Service, FQDN and REALM)
 
 HOSTNAME_ATTR_SRCH_KEYS = {'hostname' => 'fqdn'}
@@ -81,14 +81,8 @@ def make_config!(key, value)
   return value
 end
 
-def get_head_nodes
-  results = search(:node, "role:BCPC-Hadoop-Head* AND chef_environment:#{node.chef_environment}")
-  results.map!{ |x| x['hostname'] == node[:hostname] ? node : x }
-  return (results == []) ? [node] : results.sort
-end
-
 def get_hadoop_heads
-  results = search(:node, "role:BCPC-Hadoop-Head AND chef_environment:#{node.chef_environment}")
+  results = Chef::Search::Query.new.search(:node, "role:BCPC-Hadoop-Head AND chef_environment:#{node.chef_environment}").first
   if results.any?{|x| x['hostname'] == node[:hostname]}
     results.map!{|x| x['hostname'] == node[:hostname] ? node : x}
   else
@@ -98,7 +92,7 @@ def get_hadoop_heads
 end
 
 def get_quorum_hosts
-  results = search(:node, "(roles:BCPC-Hadoop-Quorumnode or role:BCPC-Hadoop-Head) AND chef_environment:#{node.chef_environment}")
+  results = Chef::Search::Query.new.search(:node, "(roles:BCPC-Hadoop-Quorumnode or role:BCPC-Hadoop-Head) AND chef_environment:#{node.chef_environment}").first
   if results.any?{|x| x['hostname'] == node[:hostname]}
     results.map!{|x| x['hostname'] == node[:hostname] ? node : x}
   else
@@ -108,7 +102,7 @@ def get_quorum_hosts
 end
 
 def get_hadoop_workers
-  results = search(:node, "role:BCPC-Hadoop-Worker AND chef_environment:#{node.chef_environment}")
+  results = Chef::Search::Query.new.search(:node, "role:BCPC-Hadoop-Worker AND chef_environment:#{node.chef_environment}").first
   if results.any?{|x| x['hostname'] == node[:hostname]}
     results.map!{|x| x['hostname'] == node[:hostname] ? node : x}
   else
@@ -121,17 +115,17 @@ def get_namenodes()
   # Logic to get all namenodes if running in HA
   # or to get only the master namenode if not running in HA
   if node['bcpc']['hadoop']['hdfs']['HA']
-    nnrole = search(:node, "role:BCPC-Hadoop-Head-Namenode* AND chef_environment:#{node.chef_environment}")
-    nnroles = search(:node, "roles:BCPC-Hadoop-Head-Namenode* AND chef_environment:#{node.chef_environment}")
+    nnrole = Chef::Search::Query.new.search(:node, "role:BCPC-Hadoop-Head-Namenode* AND chef_environment:#{node.chef_environment}").first
+    nnroles = Chef::Search::Query.new.search(:node, "roles:BCPC-Hadoop-Head-Namenode* AND chef_environment:#{node.chef_environment}").first
     nn_hosts = nnrole.concat nnroles
   else
     nn_hosts = get_nodes_for("namenode_no_HA")
   end
-  return nn_hosts.uniq{ |x| float_host(x[:hostname]) }.sort 
+  return nn_hosts.uniq{ |x| float_host(x[:hostname]) }.sort
 end
 
 def get_nodes_for(recipe, cookbook=cookbook_name)
-  results = search(:node, "recipes:#{cookbook}\\:\\:#{recipe} AND chef_environment:#{node.chef_environment}")
+  results = Chef::Search::Query.new.search(:node, "recipes:#{cookbook}\\:\\:#{recipe} AND chef_environment:#{node.chef_environment}").first
   results.map!{ |x| x['hostname'] == node[:hostname] ? node : x }
   if node.run_list.expand(node.chef_environment).recipes.include?("#{cookbook}::#{recipe}") and not results.include?(node)
     results.push(node)
@@ -176,11 +170,11 @@ def znode_exists?(znode_path, zk_host="localhost:2181")
     zk = Zookeeper.new(zk_host)
     if !zk.connected?
       raise "znode_exists : Unable to connect to zookeeper quorum #{zk_host}"
-    end 
+    end
     r = zk.get(:path => znode_path)
     if r[:rc] == 0
       znode_found = true
-    end 
+    end
   rescue Exception => e
     puts e.message
   ensure
@@ -192,19 +186,9 @@ def znode_exists?(znode_path, zk_host="localhost:2181")
 end
 
 #
-# Library function to get attributes from all namenode node object
-#
-def get_namenode_attr
-  all_node_attr = get_namenodes()
-  ret = get_req_node_attributes(all_node_attr,HOSTNAME_NODENO_ATTR_SRCH_KEYS)
-  return ret
-end
-
-#
 # Function to retrieve commonly used node attributes so that the call to chef server is minimized
 #
 def set_hosts
-  node.default[:bcpc][:hadoop][:nn_hosts] = get_namenode_attr()
   node.default[:bcpc][:hadoop][:zookeeper][:servers] = get_node_attributes(HOSTNAME_NODENO_ATTR_SRCH_KEYS,"zookeeper_server","bcpc-hadoop")
   node.default[:bcpc][:hadoop][:jn_hosts] = get_node_attributes(HOSTNAME_ATTR_SRCH_KEYS,"journalnode","bcpc-hadoop")
   node.default[:bcpc][:hadoop][:rm_hosts] = get_node_attributes(HOSTNAME_NODENO_ATTR_SRCH_KEYS,"resource_manager","bcpc-hadoop")
@@ -222,9 +206,9 @@ end
 # Restarting of hadoop processes need to be controlled in a way that all the nodes
 # are not down at the sametime, the consequence of which will impact users. In order
 # to achieve this, nodes need to acquire a lock before restarting the process of interest.
-# This function is to acquire the lock which is a znode in zookeeper. The znode name is the name  
+# This function is to acquire the lock which is a znode in zookeeper. The znode name is the name
 # of the service to be restarted for e.g "hadoop-hdfs-datanode" and is located by default at "/".
-# The imput parameters are service name along with the ZK path (znode name), string of zookeeper 
+# The imput parameters are service name along with the ZK path (znode name), string of zookeeper
 # servers ("zk_host1:port,sk_host2:port"), and the fqdn of the node acquiring the lock
 # Return value : true or false
 #
@@ -245,7 +229,7 @@ def acquire_restart_lock(znode_path, zk_hosts="localhost:2181",node_name)
     puts e.message
   ensure
     if !zk.nil?
-      zk.close unless zk.closed? 
+      zk.close unless zk.closed?
     end
   end
   return lock_acquired
@@ -253,7 +237,7 @@ end
 
 #
 # This function is to check whether the lock to restart a particular service is held by a node.
-# The input parameters are the path to the znode used to restart a hadoop service, a string containing the 
+# The input parameters are the path to the znode used to restart a hadoop service, a string containing the
 # host port values of the ZooKeeper nodes "host1:port, host2:port" and the fqdn of the host
 # Return value : true or false
 #
@@ -309,7 +293,7 @@ def rel_restart_lock(znode_path, zk_hosts="localhost:2181",node_name)
     puts e.message
   ensure
     if !zk.nil?
-      zk.close unless zk.closed? 
+      zk.close unless zk.closed?
     end
   end
   return lock_released
@@ -317,7 +301,7 @@ end
 
 #
 # Function to get the node name which is holding a particular service restart lock
-# Input parameters: The path to the znode (lock) and the string of zookeeper hosts:port 
+# Input parameters: The path to the znode (lock) and the string of zookeeper hosts:port
 # Return value    : The fqdn of the node which created the znode to restart or nil
 #
 def get_restart_lock_holder(znode_path, zk_hosts="localhost:2181")
@@ -345,7 +329,7 @@ end
 #
 # Function to generate the full path of znode which will be used to create a restart lock znode
 # Input paramaters: The path in ZK where znodes are created for the retart locks and the lock name
-# Return value    : Fully formed path which can be used to create the znode 
+# Return value    : Fully formed path which can be used to create the znode
 #
 def format_restart_lock_path(root, lock_name)
   begin
@@ -372,7 +356,7 @@ def process_start_time(process_identifier)
       return nil
     else
       target_process_pid_arr = Array.new()
-      target_process_pid_arr = target_process_pid.split("\n").map{|pid| (`ps --no-header -o start_time #{pid}`).strip}
+      target_process_pid_arr = target_process_pid.split("\n").map{|pid| (`ps --no-header -o lstart #{pid}`).strip}
       start_time_arr = Array.new()
       target_process_pid_arr.each do |t|
         if t != ""
@@ -395,7 +379,7 @@ def process_restarted_after_failure?(restart_failure_time, process_identifier)
     if start_time.nil?
       return false
     elsif Time.parse(restart_failure_time).to_i < Time.parse(start_time).to_i
-      Chef::Log.info ("#{process_identifier} seem to be started at #{start_time} after last restart failure at #{restart_failure_time}") 
+      Chef::Log.info ("#{process_identifier} seem to be started at #{start_time} after last restart failure at #{restart_failure_time}")
       return true
     else
       return false
@@ -418,11 +402,11 @@ def group_exists?(group_name)
   chk_grp_cmd = "getent group #{group_name}"
   Chef::Log.debug("Executing command: #{chk_grp_cmd}")
   cmd = Mixlib::ShellOut.new(chk_grp_cmd, :timeout => 10).run_command
-  return cmd.exitstatus == 0 ? true : false 
+  return cmd.exitstatus == 0 ? true : false
 end
 
 def get_group_action(group_name)
-  return group_exists?(group_name) ? :manage : :create 
+  return group_exists?(group_name) ? :manage : :create
 end
 
 def has_vip?
@@ -451,15 +435,15 @@ def oozie_running?(host)
     cmd.exitstatus == 0 && cmd.stdout.include?('NORMAL')
 end
 
-# Internal: Have the specified Oozie host update its ShareLib to the latest lib_<timestamp> 
-#           sharelib directory on hdfs:/user/oozie/share/lib/, without having to restart 
+# Internal: Have the specified Oozie host update its ShareLib to the latest lib_<timestamp>
+#           sharelib directory on hdfs:/user/oozie/share/lib/, without having to restart
 #           that Oozie server. Oozie server, by default, uses the latest one when it (re)starts.
 #
 # host - Endpoint (FQDN/IP) on which Oozie server is available.
 #
-# Returns nothing. 
+# Returns nothing.
 def update_oozie_sharelib(host)
-  if oozie_running?(host) 
+  if oozie_running?(host)
     update_sharelib = "sudo -u oozie oozie admin -oozie http://#{host}:11000/oozie -sharelibupdate"
     cmd = Mixlib::ShellOut.new(
       update_sharelib, :timeout => 20
@@ -470,7 +454,7 @@ def update_oozie_sharelib(host)
       Chef::Log.info("Sharelibupdate: sharelibupdate command failed on #{host}")
       Chef::Log.info("  stdout: #{cmd.stdout}")
       Chef::Log.info("  stderr: #{cmd.stderr}")
-    end 
+    end
   else
     Chef::Log.info("Sharelibupdate: Oozie server not running on #{host}")
   end
@@ -485,12 +469,16 @@ def get_cluster_nodes()
     raise
   end
 
-  fileList = Array.new
+  nodeList = Array.new
 
   File::open(cluster_file,"r").each_line do |line|
     lines = line.split()
-    fileList.push("#{lines[0]}.#{lines[5]}")
+    nodeList.push("#{lines[0]}.#{lines[5]}")
   end
 
-  fileList  
+  if ! node[:bcpc][:management][:viphost].nil?
+    nodeList.push(node[:bcpc][:management][:viphost])
+  end
+
+  nodeList  
 end

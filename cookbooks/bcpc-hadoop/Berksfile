@@ -1,6 +1,12 @@
-#ENV['BERKSHELF_PATH'] = "#{File.expand_path('../',__FILE__)}:#{File.expand_path('../../../vendor', __FILE__)}"
+# -*- mode: ruby -*-
 source 'https://supermarket.chef.io'
 
-cookbook 'bcpc', path: File.expand_path('../../bcpc', __FILE__)
-cookbook 'cobblerd', git: 'https://github.com/bloomberg/cobbler-cookbook.git'
 metadata
+
+group :integration do
+  instance_eval(File.read('../../Berksfile.common'))
+
+  cookbook 'bcpc_hadoop_test', path: 'test/cookbooks/bcpc_hadoop_test'
+  cookbook 'bcpc', path: File.expand_path('../bcpc')
+  cookbook 'bach_repository', path: File.expand_path('../bach_repository')
+end

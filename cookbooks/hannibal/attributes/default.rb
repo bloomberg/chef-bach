@@ -2,6 +2,8 @@
 #  Hannibal specific attributes  #
 ##################################
 
+user = node['bcpc']['bootstrap']['user']
+
 default[:hannibal][:local_tarball] = true
 default[:hannibal][:download_url] = 'https://github.com/sentric/hannibal/releases/download/v.0.10.1'
 default[:hannibal][:repo][:url] = 'https://github.com/kiiranh/hannibal.git'
@@ -13,7 +15,7 @@ default[:hannibal][:service_dir] = '/etc/init'
 default[:hannibal][:log_dir] = '/var/log/hannibal'
 default[:hannibal][:data_dir] = '/var/lib/hannibal/data'
 default[:hannibal][:working_dir] = '/var/run/hannibal'
-default[:hannibal][:bin_dir] = '/home/vagrant/chef-bcpc/bins'
+default[:hannibal][:bin_dir] = "/home/#{user}/chef-bcpc/bins"
 
 default[:hannibal][:port] = 9000
 default[:hannibal][:service_endpoint] = "http://localhost:#{node[:hannibal][:port]}/api/heartbeat" 

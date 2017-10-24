@@ -3,27 +3,30 @@
 #
 include_recipe "bcpc-hadoop::hive_config"
 include_recipe "bcpc-hadoop::hive_table_stat"
+include_recipe 'bcpc-hadoop::mysql_connector'
+
 ::Chef::Recipe.send(:include, Bcpc_Hadoop::Helper)
 ::Chef::Resource::Bash.send(:include, Bcpc_Hadoop::Helper)
 
-
-hwx_package = %w{hadooplzo hadooplzo-native hive-hcatalog}
-
-(hwx_package.map{|p| hwx_pkg_str(p, node[:bcpc][:hadoop][:distribution][:release])} +
-  %W{#{node['bcpc']['mysql']['connector']['package']['short_name']}
-                     }).each do |pkg|
+%w{hadooplzo hadooplzo-native hive-hcatalog}.map do |pp|
+  hwx_pkg_str(pp, node[:bcpc][:hadoop][:distribution][:release])
+end.each do |pkg|
   package pkg do
-    action :install
+    action :upgrade
   end
 end
-  
+
 (["hive-webhcat", "hive-metastore", "hive-server2"]).each do |pkg|
   hdp_select(pkg, node[:bcpc][:hadoop][:distribution][:active_release])
 end
 
 user_ulimit "hive" do
-  filehandle_limit 32769
+  filehandle_limit 65536
   process_limit 65536
+end
+
+configure_kerberos 'hive_spnego' do
+  service_name 'spnego'
 end
 
 configure_kerberos 'hive_kerb' do
@@ -36,63 +39,34 @@ bash "create-hive-user-home" do
   hdfs dfs -chmod 1777 /user/hive
   hdfs dfs -chown hive:hdfs /user/hive
   EOH
-  user "hdfs"
+  user 'hdfs'
 end
 
-bash "create-hive-warehouse" do
+bash 'create-hive-warehouse' do
   code <<-EOH
-  hdfs dfs -mkdir -p /apps/hive/warehousehadoop
-  hdfs dfs -chmod -R 775 /apps/hive
-  hdfs dfs -chown -R hive:hdfs /apps/hive
+  hdfs dfs -mkdir -p #{node['bcpc']['hadoop']['hive']['warehouse']['dir']}
+  hdfs dfs -chmod 777 #{node['bcpc']['hadoop']['hive']['warehouse']['dir']}
+  hdfs dfs -chown hive:hdfs #{node['bcpc']['hadoop']['hive']['warehouse']['dir']}
   EOH
-  user "hdfs"
+  user 'hdfs'
 end
 
-bash "create-hive-scratch" do
+bash 'create-hive-scratch' do
   code <<-EOH
-  hdfs dfs -mkdir -p /tmp/scratch
-  hdfs dfs -chmod -R 1777 /tmp/scratch
-  hdfs dfs -chown -R hive:hdfs /tmp/scratch
+  hdfs dfs -mkdir -p #{node['bcpc']['hadoop']['hive']['scratch']['dir']}
+  hdfs dfs -chmod -R 1777 #{node['bcpc']['hadoop']['hive']['scratch']['dir']}
+  hdfs dfs -chown -R hive:hdfs #{node['bcpc']['hadoop']['hive']['scratch']['dir']}
   EOH
-  user "hdfs"
+  user 'hdfs'
 end
 
-bash "create-beeline-scratchroot" do
-  code <<-EOH
-  hadoop fs -mkdir -p /tmp/hive-hive
-  hadoop fs -chmod 1777 /tmp/hive-hive
-  hadoop fs -chown hive /tmp/hive-hive
-  EOH
-  user "hdfs"
+hive_metastore_database 'hive' do
+  hive_password lazy { get_config 'mysql-hive-password' }
+  root_password lazy { get_config! 'password', 'mysql-root', 'os' }
+  schematool_path '/usr/hdp/current/hive-metastore/bin/schematool'
+  action %w(create init upgrade)
+  notifies :enable, "service[hive-metastore]", :delayed
 end
-
-ruby_block "hive-metastore-database-creation" do
-  cmd = "mysql -uroot -p#{get_config!('password','mysql-root','os')} -e"
-  privs = "SELECT,INSERT,UPDATE,DELETE,LOCK TABLES,EXECUTE" # todo node[:bcpc][:hadoop][:hive_db_privs].join(",")
-  block do
-    if not system " #{cmd} 'SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = \"metastore\"' | grep -q metastore" then
-      code = <<-EOF
-        CREATE DATABASE metastore;
-        GRANT #{privs} ON metastore.* TO 'hive'@'%' IDENTIFIED BY '#{get_config('mysql-hive-password')}';
-        GRANT #{privs} ON metastore.* TO 'hive'@'localhost' IDENTIFIED BY '#{get_config('mysql-hive-password')}';
-        FLUSH PRIVILEGES;
-        USE metastore;
-        SOURCE /usr/hdp/current/hive-metastore/scripts/metastore/upgrade/mysql/hive-schema-0.14.0.mysql.sql;
-        EOF
-      IO.popen("mysql -uroot -p#{get_config!('password','mysql-root','os')}", "r+") do |db|
-        db.write code
-      end
-      self.notifies :enable, "service[hive-metastore]", :delayed
-      self.resolve_notification_references
-    end
-  end
-end
-
-#bash "create-hive-metastore-db" do
-#  code <<-EOH
-#  /usr/hdp/#{node[:bcpc][:hadoop][:distribution][:active_release]}/hive/bin/schematool -initSchema -dbType mysql -verbose
-#  EOH
-#end
 
 template "/etc/init.d/hive-metastore" do
   source "hdp_hive-metastore-initd.erb"

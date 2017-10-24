@@ -2,14 +2,19 @@
 # -*- mode: shell-script -*-
 #
 # 01-bach-variables
-# 
+#
 # Print relevant BACH variables and hardware info on login.
 #
 
-<% mfg = node['dmi']['system']['manufacturer']
-   product = node['dmi']['system']['product_name']
-   gb = (node['memory']['total'].to_f / 1024 / 1024).round
-   cores = node[:cpu]['0'][:cores].to_i * node[:cpu][:real] %>
+<%
+ mfg = node['dmi']['system']['manufacturer']
+ product = node['dmi']['system']['product_name']
+ gb = (node['memory']['total'].to_f / 1024 / 1024).round
+ cores = node[:cpu]['0'][:cores].to_i * node[:cpu][:real]
+
+ chef_bach_version =
+   node.run_context.cookbook_collection['bach_common'].version rescue nil
+%>
 
 cat << EOF
 
@@ -22,6 +27,7 @@ This system is a <%= mfg %> <%= product %>.
 It is equipped with <%= gb %> GB of RAM and <%= cores %> CPU cores.
 <% end %>
 
+Chef-bach version: <%= chef_bach_version || 'UNKNOWN' %>
 Environment: <%= node.chef_environment %>
 Zabbix URL: https://<%= node[:bcpc][:management][:vip] %>:<%= node[:bcpc][:zabbix][:web_port] %>
 Graphite URL: https://<%= node[:bcpc][:management][:vip] %>:<%= node[:bcpc][:graphite][:web_port] %>
@@ -32,4 +38,3 @@ Roles:
 <% end %>
 
 EOF
-

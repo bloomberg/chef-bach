@@ -32,8 +32,12 @@
 # bootstrap.
 #
 require 'uri'
+
+user = node['bcpc']['bootstrap']['admin']['user']
+
+
 apt_uri = if node[:fqdn] == get_bootstrap
-            URI.parse('file:///home/vagrant/chef-bcpc/bins')
+            URI.parse("file:///home/#{user}/chef-bcpc/bins")
           else
             URI.parse(get_binary_server_url)
           end
@@ -51,20 +55,20 @@ if apt_uri.host
 end
 
 unless node[:fqdn] == get_bootstrap
-  bcpc_public_key = get_config!('bootstrap-gpg-public_key_base64')
-
-  require 'tempfile'
-  bcpc_apt_key_path = Tempfile.new('bootstrap-gpg-key').path
+  bcpc_apt_key_path = File.join(Chef::Config[:file_cache_path],
+                                'bcpc-cluster-local-repo.gpg')
 
   file bcpc_apt_key_path do
     mode 0444
-    content Base64.decode64(bcpc_public_key)
+    content Base64.decode64(get_config!('bootstrap-gpg-public_key_base64'))
   end
 
   ruby_block 'get-bootstrap-gpg-fingerprint' do
     block do
       require 'mixlib/shellout'
-      cc = Mixlib::ShellOut.new('gpg', '--with-fingerprint', bcpc_apt_key_path)
+      cc = Mixlib::ShellOut.new('gpg',
+                                '--with-fingerprint',
+                                bcpc_apt_key_path)
       cc.run_command
       cc.error!
       node.run_state['bootstrap_gpg_fingerprint'] =
@@ -75,7 +79,7 @@ unless node[:fqdn] == get_bootstrap
   end
 
   execute 'install-bootstrap-gpg' do
-    command "apt-key add '#{bcpc_apt_key_path}'"
+    command lazy { "apt-key add '#{bcpc_apt_key_path}'" }
   end
 end
 
@@ -89,4 +93,8 @@ apt_repository 'bcpc' do
   else
     key node.run_state['bootstrap_gpg_fingerprint']
   end
+end
+
+execute 'apt-get update' do
+  action :run
 end

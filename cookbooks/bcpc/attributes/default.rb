@@ -3,13 +3,23 @@
 #  General configuration for this cluster
 #
 ###########################################
+
+#
+# bach_repository and bcpc constitute a recursive dependency set, so
+# we have to set this value in both places so both load orders work.
+#
+node.run_state[:bcpc_admin_user] ||=
+  ENV['SUDO_USER'] || ENV['USER'] || 'vagrant'
+
+default['bcpc']['bootstrap']['admin']['user'] =
+  node.run_state[:bcpc_admin_user]
+
+user = node.run_state[:bcpc_admin_user]
+
 default['bcpc']['country'] = 'US'
 default['bcpc']['state'] = 'NY'
 default['bcpc']['location'] = 'New York'
 default['bcpc']['organization'] = 'Bloomberg'
-
-# Should be kvm (or qemu if testing in VMs)
-default['bcpc']['virt_type'] = 'kvm'
 
 # Region name for this cluster
 default['bcpc']['region_name'] = node.chef_environment
@@ -17,8 +27,6 @@ default['bcpc']['region_name'] = node.chef_environment
 # Domain name that will be used for DNS
 default['bcpc']['domain_name'] = 'bcpc.example.com'
 
-# Key if Cobalt+VMS is to be used
-default['bcpc']['vms_key'] = nil
 default['bcpc']['encrypt_data_bag'] = false
 
 # This is where you would set a proxy if one is needed at install time.
@@ -26,11 +34,32 @@ default['bcpc']['bootstrap']['proxy'] = nil
 
 default['bcpc']['bootstrap']['preseed'].tap do |preseed|
   preseed['add_kernel_opts'] = 'console=ttyS0'
-  preseed['additional_packages'] = %w[openssh-server lldpd]
-  preseed['late_command'] = 'true'
+  preseed['additional_packages'] = %w(openssh-server lldpd)
+
+  # Disable device renaming -- use the kernel's enumeration order.
+  preseed['late_command'] =
+    'rm /target/etc/udev/rules.d/70-persistent-net.rules; ' \
+    'touch /target/etc/udev/rules.d/75-persistent-net-generator.rules'
+
+  #
+  # This is an ordered array of preferred disk controller kernel
+  # drivers.  The first enumerated disk found from the earliest driver
+  # in the list will be chosen by the preseed for use as a root device.
+  #
+  # If none of the drivers are in use, the first available /dev/sd*
+  # device will be used.
+  #
+  # See select_bach_root_disk.erb for details.
+  #
+  preseed['preferred_disk_drivers'] = ['ahci']
+
   #
   # All these lines get concatenated, hence the semicolons and
   # backslashes.
+  #
+  # Despite the name "preseed," this is run during the partman stage.
+  # udevadm and friends are already available in the install
+  # environment.
   #
   preseed['early_command'] = <<-EOM.gsub(/^ {4}/, '')
       udevadm trigger; udevadm settle --timeout=30 ; \\
@@ -76,8 +105,8 @@ unless node['bcpc']['node_number']
   end
 
   unless all_macs.count > 0
-    fail 'Could not find MAC addresses for ' +
-      'node[:network][:default_interface] ' +
+    fail 'Could not find MAC addresses for ' \
+      'node[:network][:default_interface] ' \
       "(#{node[:network][:default_interface]}) !"
   end
 
@@ -106,11 +135,10 @@ default['bcpc']['bootstrap']['dhcp_subnet'] = '10.0.100.0'
 #
 ###########################################
 default['bcpc']['management']['vip'] = '1.2.3.5'
+default['bcpc']['management']['viphost'] = "#{node.chef_environment.downcase}"\
+                                           ".#{node['bcpc']['domain_name']}"
 default['bcpc']['management']['ip'] = '1.2.3.4'
 
-default['bcpc']['metadata']['ip'] = '169.254.169.254'
-
-default['bcpc']['ntp_servers'] = ['pool.ntp.org']
 default['bcpc']['dns_servers'] = ['8.8.8.8', '8.8.4.4']
 
 ###########################################
@@ -118,8 +146,6 @@ default['bcpc']['dns_servers'] = ['8.8.8.8', '8.8.4.4']
 #  Repos for things we rely on
 #
 ###########################################
-default['bcpc']['ubuntu']['version'] = 'precise'
-
 default['bcpc']['repos_for']['precise'].tap do |precise_repos|
   precise_repos['percona'].tap do |repo|
     repo[:components] = ['main']
@@ -141,8 +167,7 @@ default['bcpc']['repos_for']['precise'].tap do |precise_repos|
     repo[:distribution] = 'HDP'
     repo[:key] = 'hortonworks.key'
     repo[:uri] =
-      'http://s3.amazonaws.com/dev.hortonworks.com/HDP/ubuntu12/2.x/BUILDS/' \
-      '2.3.6.2-3'
+      'http://private-repo-1.hortonworks.com/HDP/ubuntu12/2.x/updates/2.6.1.17-1'
   end
 
   precise_repos['hdp-utils'].tap do |repo|
@@ -150,20 +175,7 @@ default['bcpc']['repos_for']['precise'].tap do |precise_repos|
     repo[:distribution] = 'HDP-UTILS'
     repo[:key] = 'hortonworks.key'
     repo[:uri] =
-      'http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.20/repos/ubuntu12'
-  end
-
-  precise_repos['cobbler26'].tap do |repo|
-    repo[:components] = ['/']
-    repo[:distribution] = nil
-    repo[:uri] =
-      'http://download.opensuse.org/repositories/home:/libertas-ict:' \
-      '/cobbler26/xUbuntu_12.04'
-    #
-    # The public apt repository is signed with an expired key, so
-    # we're forced to use 'trusted' in order to defeat the signing.
-    #
-    repo[:trusted] = true
+      'http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.21/repos/ubuntu12'
   end
 
   precise_repos['zabbix'].tap do |repo|
@@ -195,8 +207,7 @@ default['bcpc']['repos_for']['trusty'].tap do |trusty_repos|
     repo[:distribution] = 'HDP'
     repo[:key] = 'hortonworks.key'
     repo[:uri] =
-      'http://s3.amazonaws.com/dev.hortonworks.com/HDP/ubuntu14/2.x/BUILDS/' \
-      '2.3.6.2-3'
+      'http://private-repo-1.hortonworks.com/HDP/ubuntu14/2.x/updates/2.6.1.17-1'
   end
 
   trusty_repos['hdp-utils'].tap do |repo|
@@ -204,20 +215,7 @@ default['bcpc']['repos_for']['trusty'].tap do |trusty_repos|
     repo[:distribution] = 'HDP-UTILS'
     repo[:key] = 'hortonworks.key'
     repo[:uri] =
-      'http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.20/repos/ubuntu14'
-  end
-
-  trusty_repos['cobbler26'].tap do |repo|
-    repo[:components] = ['/']
-    repo[:distribution] = nil
-    repo[:uri] =
-      'http://download.opensuse.org/repositories/home:/libertas-ict:' \
-      '/cobbler26/xUbuntu_14.04'
-    #
-    # The public apt repository is signed with an expired key, so
-    # we're forced to use 'trusted' in order to defeat the signing.
-    #
-    repo[:trusted] = true
+      'http://private-repo-1.hortonworks.com/HDP-UTILS-1.1.0.21/repos/ubuntu14'
   end
 
   trusty_repos['zabbix'].tap do |repo|
@@ -229,6 +227,7 @@ default['bcpc']['repos_for']['trusty'].tap do |trusty_repos|
 end
 
 default[:bcpc][:repos] = node[:bcpc][:repos_for][node[:lsb][:codename]]
+default['cobbler']['package']['type'] = 'apt'
 
 ###########################################
 #
@@ -236,7 +235,7 @@ default[:bcpc][:repos] = node[:bcpc][:repos_for][node[:lsb][:codename]]
 #
 ###########################################
 default[:ubuntu][:archive_url] =
-  'http://mirror.cc.columbia.edu/pub/linux/ubuntu/archive/'
+  'http://mirror.math.princeton.edu/pub/ubuntu'
 
 default[:ubuntu][:security_url] =
   node[:ubuntu][:archive_url]
@@ -249,19 +248,7 @@ default[:ubuntu][:security_url] =
 default['bcpc']['pdns_dbname'] = 'pdns'
 default['bcpc']['zabbix_dbname'] = 'zabbix'
 
-default['bcpc']['admin_tenant'] = 'AdminTenant'
-default['bcpc']['admin_role'] = 'Admin'
-default['bcpc']['member_role'] = 'Member'
-default['bcpc']['admin_email'] = 'admin@localhost.com'
-
-default[:bcpc][:ports][:apache][:radosgw] = 8080
-default[:bcpc][:ports][:apache][:radosgw_https] = 8443
-default[:bcpc][:ports][:haproxy][:radosgw] = 80
-default[:bcpc][:ports][:haproxy][:radosgw_https] = 443
-
-# Memory where InnoDB caches table and index data (in MB). Default is 128M.
-default['bcpc']['mysql']['innodb_buffer_pool_size'] =
-  ([(node[:memory][:total].to_i / 1024 * 0.02).floor, 128].max)
+default['bcpc']['admin_email'] = 'admin@example.com'
 
 #################################################
 #  attributes for chef vault download and install
@@ -273,25 +260,5 @@ default['bcpc']['chefvault']['checksum'] =
   '8d89c96554f614ec2a80ef20e98b0574c355a6ea119a30bd49aa9cfdcde15b4a'
 
 # bcpc binary server pathnames
-default['bcpc']['bin_dir']['path'] = '/home/vagrant/chef-bcpc/bins/'
+default['bcpc']['bin_dir']['path'] = "/home/#{user}/chef-bcpc/bins/"
 default['bcpc']['bin_dir']['gems'] = "#{node['bcpc']['bin_dir']['path']}/gems"
-
-# rubygems download website URL
-default['bcpc']['gem_source'] = 'https://rubygems.org/downloads'
-
-# mysql connector attributes
-default['bcpc']['mysql']['connector'].tap do |connector|
-  connector['version'] = '5.1.37'
-
-  connector['tarball_md5sum'] = '9ef584d3328735db51bd5dde3f602c22'
-
-  connector['url'] =
-    'http://dev.mysql.com/get/Downloads/Connector-J/mysql-connector-java-' +
-    node['bcpc']['mysql']['connector']['version'] + '.tar.gz'
-
-  connector['package']['short_name'] = 'mysql-connector-java'
-
-  connector['package']['name'] =
-    node['bcpc']['mysql']['connector']['package']['short_name'] + '_' +
-    node['bcpc']['mysql']['connector']['version'] + '_all.deb'
-end

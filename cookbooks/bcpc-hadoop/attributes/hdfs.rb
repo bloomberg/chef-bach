@@ -1,3 +1,16 @@
+# vim: tabstop=2:shiftwidth=2:softtabstop=2 
+# Setting balancer andwidth to default value as per hdfs-default.xml
+default["hadoop"]["hdfs"]["balancer"]["bandwidth"] = 1048576
+# balancer thread multiplier constant
+default["hadoop"]["hdfs"]["balancer"]["max_concurrent_moves_multiplier"] = 10
+
+# JMX port mappings
+default['bcpc']['hadoop'].tap do |jmx|
+  jmx['journalnode']['jmx']['port'] = 10110
+  jmx['datanode']['jmx']['port'] = 10112
+  jmx['namenode']['jmx']['port'] = 10111
+end
+
 default[:bcpc][:hadoop][:hdfs][:dfs].tap do |dfs|
   dfs[:namenode][:audit][:log][:async] = true
   dfs[:webhdfs][:enabled] = true
@@ -9,7 +22,7 @@ default[:bcpc][:hadoop][:hdfs][:dfs].tap do |dfs|
   dfs[:namenode][:avoid][:read][:stale][:datanode] = true
   dfs[:namenode][:avoid][:write][:stale][:datanode] = true
   dfs[:hosts][:exclude] = "/etc/hadoop/conf/dfs.exclude"
-  dfs[:datanode][:du][:reserved] = 1073741824
+  dfs[:datanode][:du][:reserved] = 209715200 # 200 MB
   dfs[:permissions][:superusergroup] = "hdfs"
   dfs[:cluster][:administrators] = "hdfs"
   dfs[:dfs][:ha]['automatic-failover'][:enabled] = true
@@ -35,8 +48,6 @@ default[:bcpc][:hadoop][:hdfs][:site_xml].tap do |site_xml|
   site_xml['dfs.namenode.audit.log.async'] =
     dfs[:namenode][:audit][:log][:async]
 
-  site_xml['dfs.datanode.balance.bandwidthPerSec'] =
-    node[:bcpc][:hadoop][:balancer][:bandwidth]
 
   site_xml['dfs.nameservices'] = node.chef_environment
 
@@ -72,9 +83,6 @@ default[:bcpc][:hadoop][:hdfs][:site_xml].tap do |site_xml|
   site_xml['dfs.namenode.datanode.registration.ip-hostname-check'] =
     dfs[:namenode][:datanode][:registration]['ip-hostname-check']
 
-  site_xml['dfs.datanode.ipc.address'] =
-    node[:bcpc][:floating][:ip].to_s + ':50020'
-
   site_xml['dfs.namenode.avoid.read.stale.datanode'] =
     dfs[:namenode][:avoid][:read][:stale][:datanode]
 
@@ -95,4 +103,7 @@ default[:bcpc][:hadoop][:hdfs][:site_xml].tap do |site_xml|
   
   site_xml['dfs.namenode.handler.count'] =
     node[:bcpc][:hadoop][:namenode][:handler][:count]
+
+  site_xml['dfs.client.socket-timeout'] =
+    '30000'
 end

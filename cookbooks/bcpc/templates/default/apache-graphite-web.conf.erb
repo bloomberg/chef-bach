@@ -5,12 +5,19 @@
 ################################################
 
 Listen <%="#{node[:bcpc][:graphite][:ip]}"%>:<%="#{node[:bcpc][:graphite][:web_port]}"%>
-Listen <%="#{node[:bcpc][:management][:ip]}"%>:<%="#{node[:bcpc][:graphite][:web_port]}"%>
+<% unless node[:bcpc][:graphite][:ip] == node[:bcpc][:management][:vip] -%>
+Listen <%="#{node[:bcpc][:management][:vip]}"%>:<%="#{node[:bcpc][:graphite][:web_port]}"%>
+<% end -%>
 NameVirtualHost <%="#{node[:bcpc][:management][:ip]}"%>:443
 
-<VirtualHost <%="#{node[:bcpc][:graphite][:ip]}"%>:<%="#{node[:bcpc][:graphite][:web_port]}"%> <%="#{node[:bcpc][:management][:ip]}"%>:443 <%="#{node[:bcpc][:management][:ip]}"%>:<%="#{node[:bcpc][:graphite][:web_port]}"%>>
-    ServerName "graphite.<%="#{node[:bcpc][:domain_name]}"%>"
 
+<% unless node[:bcpc][:graphite][:ip] == node[:bcpc][:management][:vip] -%>
+<VirtualHost <%="#{node[:bcpc][:graphite][:ip]}"%>:<%="#{node[:bcpc][:graphite][:web_port]}"%> <%="#{node[:bcpc][:management][:vip]}"%>:443 <%="#{node[:bcpc][:management][:ip]}"%>:<%="#{node[:bcpc][:graphite][:web_port]}"%>>
+<% else -%>
+<VirtualHost <%="#{node[:bcpc][:graphite][:ip]}"%>:<%="#{node[:bcpc][:graphite][:web_port]}"%> <%="#{node[:bcpc][:management][:vip]}"%>:443  >
+<% end -%>
+
+    ServerName "graphite.<%="#{node[:bcpc][:domain_name]}"%>"
     DocumentRoot "/opt/graphite/webapp"
 
     # I've found that an equal number of processes & threads tends

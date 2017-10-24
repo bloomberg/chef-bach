@@ -20,8 +20,8 @@ platforms:
       bcpc: {
         hadoop: {
           repos: {
-            hortonworks: 'http://public-repo-1.hortonworks.com/HDP/ubuntu14/2.x/updates/2.3.2.0/',
-            hdp_utils: 'http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.20/repos/ubuntu14'
+            hortonworks: 'http://private-repo-1.hortonworks.com/HDP/ubuntu14/2.x/updates/2.6.1.17-1',
+            hdp_utils: 'http://private-repo-1.hortonworks.com/HDP-UTILS-1.1.0.21/repos/ubuntu14'
           }
         }
       }
@@ -37,7 +37,18 @@ suites:
           path: "/tmp/"
   - name: zookeeper
     run_list:
-      - 'recipe[kafka-bcpc::zookeeper_server]'
+      - 'recipe[bcpc_kafka::zookeeper_server]'
+  - name: yarn
+    run_list:
+      - 'recipe[bcpc::default]'
+      - 'recipe[java::default]'
+      - 'recipe[openssh::default]'
+      - 'recipe[bcpc-hadoop::hdp_repo]'
+      - 'recipe[bcpc-hadoop::configs]'
+      - 'recipe[bcpc-hadoop::hadoop_config]'
+      - 'recipe[bcpc-hadoop::namenode_no_HA]'
+      - 'recipe[bcpc-hadoop::datanode]'
+      - 'recipe[bcpc-hadoop::resource_manager]'
   - name: kafka
     attributes: {
       kafka: {
@@ -48,7 +59,7 @@ suites:
       }
     }
     run_list:
-      - 'recipe[kafka-bcpc::default]' 
-      - 'recipe[kafka-bcpc::setattr]'
+      - 'recipe[bcpc_kafka::default]' 
+      - 'recipe[bcpc_kafka::setattr]'
       - 'recipe[kafka::default]'
-      - 'recipe[kafka-bcpc::kafka]'
+      - 'recipe[bcpc_kafka::kafka]'

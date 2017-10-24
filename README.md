@@ -84,6 +84,25 @@ automated build tests.)
 Using the script [tests/automated_install.sh](./tests/automated_install.sh) on Mac OS (OS X),
 will require [`brew`](http://brew.sh) to be available/installed.
 
+Note: To run more than one test cluster at a time with VirtualBox, one may
+      export BACH_CLUSTER_PREFIX to set their desired cluster name prefix.
+      This will set the namespace so that the cluster's virtual machines do not 
+      collide on the hypervisor.  Resulting in names following the convention
+
+````
+      $BACH_CLUSTER_PREFIX-bcpc-bootstrap
+      $BACH_CLUSTER_PREFIX-bcpc-vm1
+      $BACH_CLUSTER_PREFIX-bcpc-vm2
+      $BACH_CLUSTER_PREFIX-bcpc-vm3
+````
+
+      Lacking that tests/automated_install.sh 
+      not assign a cluster prefix to the cluster hosts or bootstrap 
+      One also needs to ensure their management, float and storage
+      network ranges are exclusive in the environment and cluster.txt)
+      updated to be unique as well. Further, one needs to have each cluster's
+      repository in a different parent directory (to avoid the `cluster`
+      directory from colliding).
 
 Other Deployment Flavors
 ------------------------
@@ -143,21 +162,43 @@ Xceivers: 12
 Last contact: Fri Aug 14 21:08:23 EDT 2015
 ```
 
+Chef-BACH Philosophies
+----------------------
+The philosophy behind BACH cluster operation is that no single machine is
+special and all services are multi-master or have sufficiently fast failover
+to prevent failure in application data paths and availability. Commits to
+the codebase should be deployable without requiring path dependence from the
+previous repository state. For example, a machine should be able to be
+PXE-booted fresh into a particular version of the code, while an existing
+machine should be able to simply run Chef to upgrade into a particular
+Chef-BACH version. Unhealthy machines should always be able to be torn down and
+reinstalled from scratch without disruption. Any Chef-BACH version which
+requires manual interaction is considered BREAKING (as a GitHub tag) and
+should be avoided as much as possible; our mantra is that all operations are
+handled automatically. All services should be secured and kerberized as
+appropriate.  Yet, testing should be done both with a kerberized VM cluster
+as well as a non-kerberized cluster (or Test-Kitchen VM) to ensure both workflows
+run-through. The non-kerberized path is useful to ensure others can more
+easily integrate starting in a non-secure environment before going fully
+secure.
+
 BACH Services
 -------------
 
 BACH currently relies upon a number of open-source packages:
 
  - [Apache Bigtop](http://bigtop.apache.org/)
+ - [Apache Flume](http://flume.apache.org/)
  - [Apache Hadoop](http://hadoop.apache.org/)
- - [Apache Spark](http://spark.apache.org/)
  - [Apache HBase](http://hbase.apache.org/)
  - [Apache Hive](http://hive.apache.org/)
  - [Apache HTTP Server](http://httpd.apache.org/)
+ - [Apache Kafka](http://kafka.apache.org/)
  - [Apache Mahout](http://mahout.apache.org/)
  - [Apache Oozie](http://oozie.apache.org/)
- - [Apache Pig](http://pig.apache.org/)
  - [Apache Phoenix](http://phoenix.apache.org)
+ - [Apache Pig](http://pig.apache.org/)
+ - [Apache Spark](http://spark.apache.org/)
  - [Apache Sqoop](http://sqoop.apache.org/)
  - [Apache Tez](http://tez.apache.org)
  - [Apache Zookeeper](http://zookeeper.apache.org)
@@ -182,31 +223,4 @@ Thanks to all of these communities for producing this software!
 Contributing
 ------------
 
-To propose changes to Chef-BACH, please fork the [GitHub repo](https://github.com/bloomberg/chef-bach)
-and issue a pull request with your proposed change. We are endeavoring to
-follow the following standards:
-
-Libraries:
-* [Chef Library Recommendations](https://www.chef.io/blog/2014/03/12/writing-libraries-in-chef-cookbooks/)
-
-All Chef Code:
-* [TomDoc](http://tomdoc.org/)
-
-Static Code Analysis:
-* Warnings not increased:
-  * [RuboCop](http://batsov.com/rubocop/)
-  * [Foodcritic](http://acrmp.github.io/foodcritic/)
-    * [Etsy rules](https://github.com/etsy/foodcritic-rules)
-    * [CustomInk rules](https://github.com/customink-webops/foodcritic-rules)
-* Markup Verified With:
-  * JSON: `python -m json.tool <json files>`
-  * XML: `xmllint --format <xml files>`
-  * ERB: `erb -P -x -T '-' <erb file> | ruby -c`
-
-Otherwise generally follow [bbatsov/ruby-style-guide](https://github.com/bbatsov/ruby-style-guide)
-
-The GitHub workflow we follow is captured below:
-![Flow Chart of GitHub Workflow from Issue or PR created to PR in progress and Code Review to Issue or PR resolved][gh_workflow]
-
-[gh_workflow]: https://github.com/bloomberg/chef-bach/blob/pages/readme-images/GitHub%20Workflow.png "GitHub process captured in yWorks yEd flow-chart"
-[bach_deployments]: https://github.com/bloomberg/chef-bach/blob/pages/readme-images/BACH%20Deployment%20Types.png "BACH deployment options in yWorks yEd diagram"
+See our [contributing](./CONTRIBUTING.md) document for more.

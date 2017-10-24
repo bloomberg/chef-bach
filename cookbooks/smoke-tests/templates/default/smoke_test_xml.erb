@@ -1,0 +1,185 @@
+<workflow-app xmlns="uri:oozie:workflow:0.3" name="Cluster-Smoke-Test">
+  <credentials>
+    <credential name="hcat_creds" type="hcat">
+      <property>
+        <name>hcat.metastore.uri</name>
+        <value>${metastoreUri}</value>
+      </property>
+      <property>
+        <name>hive.metastore.kerberos.principal</name>
+        <value>${hMetastorePrinc}</value>
+      </property>
+      <property>
+        <name>hcat.metastore.principal</name>
+        <value>${hcMetastorePrinc}</value>
+      </property>
+    </credential>
+    <credential name="hbase_creds" type="hbase">
+      <property>
+        <name>hadoop.security.authentication</name>
+        <value>kerberos</value>
+      </property>
+      <property>
+        <name>hbase.security.authentication</name>
+        <value>kerberos</value>
+      </property>
+      <property>
+        <name>hadoop.rpc.protection</name>
+        <value>authentication</value>
+        <!-- This must match configuration or defaults -->
+      </property>
+      <property>
+        <name>hbase.rpc.protection</name>
+        <value>authentication</value>
+        <!-- This must match configuration or defaults -->
+      </property>
+      <property>
+        <name>hbase.master.kerberos.principal</name>
+        <value>${hbMasterPrinc}</value>
+      </property>
+     <property>
+        <name>hbase.regionserver.kerberos.principal</name>
+        <value>${hbRegionPrinc}</value>
+      </property>
+      <property>
+        <name>hbase.zookeeper.quorum</name>
+        <value>${ZKQuorum}</value>
+      </property>
+      <property>
+        <name>hbase.zookeeper.property.clientPort</name>
+        <value>${ZKPort}</value>
+      </property>
+      <property>
+        <name>hbase.rpc.engine</name>
+        <value>org.apache.hadoop.hbase.ipc.SecureRpcEngine</value>
+      </property>
+    </credential>
+  </credentials>
+  <start to="Shell-Action"/>
+  <action name="Shell-Action">
+    <shell xmlns="uri:oozie:shell-action:0.1">
+      <job-tracker>${jobTracker}</job-tracker>
+      <name-node>${nameNode}</name-node>
+      <exec>sleep</exec>
+      <argument>10</argument>
+    </shell>
+      <ok to="MapReduce-Action"/>
+      <error to="fail"/>
+  </action>
+  <action name="MapReduce-Action">
+    <map-reduce>
+      <job-tracker>${jobTracker}</job-tracker>
+      <name-node>${nameNode}</name-node>  
+      <prepare>
+        <delete path="/user/${wf:user()}/${inputDir}"/>
+        <delete path="/user/${wf:user()}/${outputDir}"/>
+        <mkdir path="/user/${wf:user()}/${inputDir}"/>
+      </prepare>
+      <configuration>
+        <property>
+          <name>mapred.mapper.new-api</name>
+          <value>true</value>
+        </property>
+        <property>
+          <name>mapred.reducer.new-api</name>
+          <value>true</value>
+        </property>
+        <property>
+          <name>mapred.job.queue.name</name>
+          <value>${queueName}</value>
+        </property>
+        <property>
+          <name>mapreduce.map.class</name>
+          <value>org.apache.hadoop.examples.QuasiMonteCarlo$QmcMapper</value>
+        </property>
+        <property>
+          <name>mapreduce.reduce.class</name>
+          <value>org.apache.hadoop.examples.QuasiMonteCarlo$QmcReducer</value>
+        </property>
+        <property>
+          <name>mapreduce.map.tasks</name>
+          <value>${mapTasks}</value>
+        </property>
+        <property>
+          <name>mapred.reduce.tasks</name>
+          <value>${reduceTasks}</value>
+        </property>
+        <property>
+          <name>mapred.map.tasks.speculative.execution</name>
+          <value>false</value>
+        </property>
+        <property>
+          <name>mapred.reduce.tasks.speculative.execution</name>
+          <value>false</value>
+        </property>
+        <property>
+          <name>mapreduce.job.inputformat.class</name>
+          <value>org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat</value>
+        </property>
+        <property>
+          <name>mapreduce.job.outputformat.class</name>
+          <value>org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat</value>
+        </property>
+        <property>
+          <name>mapreduce.job.output.key.class</name>
+          <value>org.apache.hadoop.io.BooleanWritable</value>
+        </property>
+        <property>
+          <name>mapreduce.job.output.value.class</name>
+          <value>org.apache.hadoop.io.Text</value>
+        </property>
+        <property>
+          <name>mapreduce.input.fileinputformat.inputdir</name>
+          <value>/user/${wf:user()}/${inputDir}</value>
+        </property>
+        <property>
+          <name>mapreduce.output.fileoutputformat.outputdir</name>
+          <value>/user/${wf:user()}/${outputDir}</value>
+        </property>
+      </configuration>
+    </map-reduce>
+      <ok to="Hive-CLI"/>
+      <error to="fail"/>
+  </action>
+  <action name="Hive-CLI" cred="hcat_creds">
+    <shell xmlns="uri:oozie:shell-action:0.1">
+      <job-tracker>${jobTracker}</job-tracker>
+      <name-node>${nameNode}</name-node>
+      <exec>hive</exec>
+      <argument>-e</argument>
+      <argument>"show databases"</argument>
+    </shell>
+      <ok to="HBASE-Shell"/>
+      <error to="fail"/>
+  </action>
+  <action name="HBASE-Shell" cred="hbase_creds">
+    <shell xmlns="uri:oozie:shell-action:0.1">
+      <job-tracker>${jobTracker}</job-tracker>
+      <name-node>${nameNode}</name-node>
+      <exec>echo</exec>
+      <argument>list</argument>
+      <argument>|</argument>
+      <argument>hbase</argument>
+      <argument>shell</argument>
+      <argument>-n</argument>
+    </shell>
+      <ok to="report-success-zabbix"/>
+      <error to="fail"/>
+  </action>
+  <action name="report-success-zabbix">
+    <shell xmlns="uri:oozie:shell-action:0.1">
+      <job-tracker>${jobTracker}</job-tracker>
+      <name-node>${nameNode}</name-node>
+      <exec>bash</exec>
+      <argument>-x</argument>
+      <argument>send_to_graphite.sh</argument>
+      <file>send_to_graphite.sh#send_to_graphite.sh</file>
+    </shell>
+      <ok to="end"/>
+      <error to="fail"/>
+  </action>
+  <kill name="fail">
+    <message>Action failed, error message[${wf:errorMessage(wf:lastErrorNode())}]</message>
+  </kill>
+  <end name="end"/>
+</workflow-app>

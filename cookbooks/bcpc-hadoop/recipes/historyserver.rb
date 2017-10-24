@@ -33,6 +33,10 @@ end
   end
 end
 
+configure_kerberos 'historyserver_spnego' do
+  service_name 'spnego'
+end
+
 configure_kerberos 'historyserver_kerb' do
   service_name 'historyserver'
 end

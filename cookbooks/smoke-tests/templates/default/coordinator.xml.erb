@@ -1,0 +1,16 @@
+<coordinator-app name="<%= @appname %>" 
+   frequency="<%= @frequency %>" 
+   start="<%= @start_date %>" end="<%= @end_date %>" timezone="America/New_York" 
+   xmlns="uri:oozie:coordinator:0.1">
+
+   <controls>
+      <concurrency>1</concurrency>
+      <execution>LAST_ONLY</execution>
+   </controls>
+
+   <action>
+      <workflow>
+         <app-path><%= @workflow %></app-path>
+      </workflow>
+   </action>
+</coordinator-app>

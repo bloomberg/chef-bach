@@ -1,7 +1,22 @@
+# The filename is derived from the version number.
+default['jmxtrans']['version'] = '256'
+
 #
-# Name of jmxtrans software downloaded
+# The JMXtrans Debian package is hosted on Maven Central.  By default,
+# we rely on the Maven cookbook attributes to determine a URL.
 #
-default['jmxtrans']['version'] = "256"
+default['jmxtrans']['url'] =
+  node['maven']['repositories'].first +
+  '/org/jmxtrans/jmxtrans/' +
+  node['jmxtrans']['version']
+
+#
+# Since we rely on the bootstrap VM to host the jmxtrans distribution,
+# this checksum needs to match the checksum found in
+# bach_repository::jmxtrans.
+#
+default['jmxtrans']['checksum'] =
+  '3219cc40954f62cc9fba4fddb1ff70a3ffce1eac63f1d37ec6cb72b90a48999f'
 #
 # Add additional JMX queries following the existing queries as sample
 # Also refer to the jmxtrans community cookbook if queries of the category you are planning to add is
@@ -15,31 +30,31 @@ default['jmxtrans']['default_queries']['nodemanager'] = [
   }
 ]
 default['jmxtrans']['default_queries']['resourcemanager'] = [
-  { 
+  {
     'obj' => "Hadoop:service=ResourceManager,name=ClusterMetrics*",
     'result_alias' => "ResourceManager",
     'attr' => [ "NumActiveNMs" ]
-  }, 
+  },
   {
     'type_name' => ["name", "q0", "user"],
     'obj' => "Hadoop:service=ResourceManager,name=QueueMetrics,q0=root,user=*",
     'result_alias' => "ResourceManager",
-    'attr' => [ 
-                "AppsRunning",                                  
-                "AppsPending",                                  
-                "AllocatedMB",                                  
-                "AllocatedVCores",                              
-                "AllocatedContainers",                          
-                "PendingMB",                                    
-                "PendingVCores",                                
-                "PendingContainers",                            
-                "ReservedMB",                                   
-                "ReservedVCores",                               
-                "ReservedContainers",                           
-                "ActiveUsers",                                  
-                "ActiveApplications"                            
-    ]           
-  }     
+    'attr' => [
+                "AppsRunning",
+                "AppsPending",
+                "AllocatedMB",
+                "AllocatedVCores",
+                "AllocatedContainers",
+                "PendingMB",
+                "PendingVCores",
+                "PendingContainers",
+                "ReservedMB",
+                "ReservedVCores",
+                "ReservedContainers",
+                "ActiveUsers",
+                "ActiveApplications"
+    ]
+  }
 ]
 default['jmxtrans']['default_queries']['zookeeper'] = [
   {
@@ -57,24 +72,24 @@ default['jmxtrans']['default_queries']['kafka'] = [
   {
     'obj' => "\\\"kafka.server\\\":type=\\\"BrokerTopicMetrics\\\",name=*",
     'result_alias' => "kafka.BrokerTopicMetrics",
-    'attr' => 
-      [ 
-        "Count", 
-        "MeanRate", 
-        "OneMinuteRate", 
-        "FiveMinuteRate", 
-        "FifteenMinuteRate" 
+    'attr' =>
+      [
+        "Count",
+        "MeanRate",
+        "OneMinuteRate",
+        "FiveMinuteRate",
+        "FifteenMinuteRate"
       ]
   },
   {
     'obj' => "\\\"kafka.server\\\":type=\\\"DelayedFetchRequestMetrics\\\",name=*",
     'result_alias' => "kafka.server.DelayedFetchRequestMetrics",
-    'attr' => 
-      [ 
-        "Count", 
-        "MeanRate", 
-        "OneMinuteRate", 
-        "FiveMinuteRate", 
+    'attr' =>
+      [
+        "Count",
+        "MeanRate",
+        "OneMinuteRate",
+        "FiveMinuteRate",
         "FifteenMinuteRate"
       ]
   }
@@ -83,7 +98,7 @@ default['jmxtrans']['default_queries']['datanode'] = [
   {
     'obj' => "Hadoop:name=JvmMetrics,service=DataNode",
     'result_alias' => "dn_jvm_metrics",
-    'attr' => 
+    'attr' =>
       [
         "GcCount",
         "GcTimeMillis",
@@ -107,7 +122,7 @@ default['jmxtrans']['default_queries']['datanode'] = [
   {
     'obj' => "Hadoop:name=DataNodeInfo,service=DataNode",
     'result_alias' => "dn_data_node_info",
-    'attr' => 
+    'attr' =>
       [
         "ClusterId",
         "HttpPort",
@@ -123,7 +138,7 @@ default['jmxtrans']['default_queries']['namenode'] = [
   {
     'obj' => "Hadoop:name=JvmMetrics,service=NameNode",
     'result_alias' => "nn_jvm_metrics",
-    'attr' => 
+    'attr' =>
       [
         "GcCount",
         "GcCountCopy",
@@ -151,7 +166,7 @@ default['jmxtrans']['default_queries']['namenode'] = [
   {
     'obj' => "Hadoop:name=FSNamesystem,service=NameNode",
     'result_alias' => "nn_fs_name_system",
-    'attr' => 
+    'attr' =>
       [
         "BlockCapacity",
         "BlocksTotal",
@@ -189,7 +204,7 @@ default['jmxtrans']['default_queries']['namenode'] = [
   {
     'obj' => "Hadoop:name=FSNamesystemState,service=NameNode",
     'result_alias' => "nn_fs_name_system_state",
-    'attr' => 
+    'attr' =>
       [
         "BlocksTotal",
         "CapacityRemaining",
@@ -209,7 +224,7 @@ default['jmxtrans']['default_queries']['namenode'] = [
   {
     'obj' => "Hadoop:name=NameNodeActivity,service=NameNode",
     'result_alias' => "nn_name_node_activity",
-    'attr' => 
+    'attr' =>
       [
         "AddBlockOps",
         "AllowSnapshotOps",
@@ -250,7 +265,7 @@ default['jmxtrans']['default_queries']['namenode'] = [
   {
     'obj' => "Hadoop:name=NameNodeInfo,service=NameNode",
     'result_alias' => "nn_name_node_info",
-    'attr' => 
+    'attr' =>
       [
         "BlockPoolId",
         "BlockPoolUsedSpace",
@@ -283,7 +298,7 @@ default['jmxtrans']['default_queries']['hbase_master'] = [
   {
     'obj' => "Hadoop:name=JvmMetrics,service=HBase",
     'result_alias' => "hbm_jvm_metrics",
-    'attr' => 
+    'attr' =>
       [
         "GcCount",
         "GcTimeMillis",
@@ -307,7 +322,7 @@ default['jmxtrans']['default_queries']['hbase_master'] = [
   {
     'obj' => "Hadoop:name=Master,service=HBase,sub=Server",
     'result_alias' => "hbm_server",
-    'attr' => 
+    'attr' =>
       [
         "averageLoad",
         "clusterRequests",
@@ -316,13 +331,28 @@ default['jmxtrans']['default_queries']['hbase_master'] = [
         "numDeadRegionServers",
         "numRegionServers"
       ]
+  },
+  {
+    'obj' => "Hadoop:name=Master,service=HBase,sub=AssignmentManger",
+    'result_alias' => "hbm_am",
+    'attr' =>
+      [
+        "ritOldestAge",
+        "ritCountOverThreshold",
+        "ritCount"
+      ]
+  },
+  {
+    'obj' => "Hadoop:name=Master,service=HBase,sub=IPC",
+    'result_alias' => "hbm_ipc",
+    'attr' => []
   }
 ]
 default['jmxtrans']['default_queries']['hbase_rs'] = [
   {
     'obj' => "Hadoop:name=JvmMetrics,service=HBase",
     'result_alias' => "hb_rs_jvm_metrics",
-    'attr' => 
+    'attr' =>
       [
         "GcCount",
         "GcTimeMillis",
@@ -343,10 +373,10 @@ default['jmxtrans']['default_queries']['hbase_rs'] = [
         "ThreadsWaiting"
      ]
   },
-  {   
-    "obj"=> "Hadoop:name=IPC,service=HBase,sub=IPC",
+  {
+    "obj"=> "Hadoop:name=RegionServer,service=HBase,sub=IPC",
     "result_alias"=> "hb_ipc",
-    "attr" => 
+    "attr" =>
     [
       "QueueCallTime_num_ops",
       "QueueCallTime_min",
@@ -378,98 +408,21 @@ default['jmxtrans']['default_queries']['hbase_rs'] = [
       "numActiveHandler"
     ]
   },
-  {   
+  {
     "attr" => [],
     "obj" => "Hadoop:service=HBase,name=RegionServer,sub=Regions,*",
     "result_alias" => "hb_regions"
   },
-  {   
+  {
     "attr" => [],
     "obj" => "Hadoop:service=HBase,name=RegionServer,sub=Replication,*",
     "result_alias" => "hb_replication"
   },
   {
-    'obj' => "Hadoop:name=RegionServer,service=HBase,sub=Server",
-    'result_alias' => "hb_rs_server",
-    'attr' => [                        
-      "regionCount",
-      "storeCount",
-      "hlogFileCount",
-      "hlogFileSize",
-      "storeFileCount",
-      "memStoreSize",
-      "storeFileSize",
-      "regionServerStartTime",
-      "storeFileIndexSize",
-      "staticIndexSize",
-      "staticBloomSize",
-      "percentFilesLocal",
-      "compactionQueueLength",
-      "flushQueueLength",
-      "totalRequestCount",
-      "readRequestCount",
-      "writeRequestCount",
-      "slowGetCount",
-      "slowAppendCount",
-      "slowPutCount",
-      "blockCacheFreeSize",
-      "blockCacheHitCount",
-      "blockCacheMissCount",
-      "blockCacheCount",
-      "blockCacheEvictionCount",
-      "blockCacheSize",
-      "blockCountHitPercent",
-      "updatesBlockedTime",
-      "Append_num_ops",
-      "Append_min",
-      "Append_max",
-      "Append_mean",
-      "Append_median",
-      "Append_99th_percentile",
-      "Append_95th_percentile",
-      "Append_75th_percentile",
-      "Delete_num_ops",
-      "Delete_min",
-      "Delete_max",
-      "Delete_mean",
-      "Delete_median",
-      "Delete_99th_percentile",
-      "Delete_95th_percentile",
-      "Delete_75th_percentile",
-      "Mutate_num_ops",
-      "Mutate_min",
-      "Mutate_max",
-      "Mutate_mean",
-      "Mutate_median",
-      "Mutate_99th_percentile",
-      "Mutate_95th_percentile",
-      "Mutate_75th_percentile",
-      "Get_num_ops",
-      "Get_min",
-      "Get_max",
-      "Get_mean",
-      "Get_median",
-      "Get_99th_percentile",
-      "Get_95th_percentile",
-      "Get_75th_percentile",
-      "Replay_num_ops",
-      "Replay_min",
-      "Replay_max",
-      "Replay_mean",
-      "Replay_median",
-      "Replay_99th_percentile",
-      "Replay_95th_percentile",
-      "Replay_75th_percentile",
-      "Increment_num_ops",
-      "Increment_min",
-      "Increment_max",
-      "Increment_mean",
-      "Increment_median",
-      "Increment_99th_percentile",
-      "Increment_95th_percentile",
-      "Increment_75th_percentile"
-    ]
-  } 
+    "obj" => "Hadoop:service=HBase,name=RegionServer,sub=Server,*",
+    "result_alias" => "hb_rs_server",
+    "attr" => []
+  }
 ]
 
 # Override defaults for the jmxtrans cookbook

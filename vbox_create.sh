@@ -3,10 +3,6 @@
 # bash imports
 source ./virtualbox_env.sh
 
-if [[ "$OSTYPE" == msys || "$OSTYPE" == cygwin ]]; then
-  WIN=TRUE
-fi
-
 set -x
 
 if [[ -f ./proxy_setup.sh ]]; then
@@ -25,21 +21,57 @@ export BOOTSTRAP_VM_CPUs=${BOOTSTRAP_VM_CPUs-1}
 # -- Vagrant VMs do not use this size --
 #BOOTSTRAP_VM_DRIVE_SIZE=120480
 
+# Is this a Hadoop or Kafka cluster?
+# (Kafka clusters, being 6 nodes, will require more RAM.)
+export CLUSTER_TYPE=${CLUSTER_TYPE:-Hadoop}
+
 # Cluster VM Defaults
-CLUSTER_VM_MEM=${CLUSTER_VM_MEM-2048}
-CLUSTER_VM_CPUs=${CLUSTER_VM_CPUs-1}
-CLUSTER_VM_EFI=${CLUSTER_VM_EFI:-true}
-CLUSTER_VM_DRIVE_SIZE=${CLUSTER_VM_DRIVE_SIZE-20480}
+export CLUSTER_VM_MEM=${CLUSTER_VM_MEM-2048}
+export CLUSTER_VM_CPUs=${CLUSTER_VM_CPUs-1}
+export CLUSTER_VM_EFI=${CLUSTER_VM_EFI:-true}
+export CLUSTER_VM_DRIVE_SIZE=${CLUSTER_VM_DRIVE_SIZE-20480}
+
+if !hash vagrant 2> /dev/null ; then
+  echo 'Vagrant not detected - we need Vagrant!' >&2
+  exit 1
+fi
+
+# Gather override_attribute bcpc/cluster_name or an empty string
+environments=( ./environments/*.json )
+if (( ${#environments[*]} > 1 )); then
+  echo 'Need one and only one environment in environments/*.json; got: ' \
+       "${environments[*]}" >&2
+  exit 1
+fi
+
+if !hash vagrant 2> /dev/null ; then
+  echo 'Vagrant not detected - we need Vagrant!' >&2
+  exit 1
+fi
 
 # The root drive on cluster nodes must allow for a RAM-sized swap volume.
 CLUSTER_VM_ROOT_DRIVE_SIZE=$((CLUSTER_VM_DRIVE_SIZE + CLUSTER_VM_MEM - 2048))
 
 VBOX_DIR="`dirname ${BASH_SOURCE[0]}`/vbox"
+[[ -d $VBOX_DIR ]] || mkdir $VBOX_DIR
 P=`python -c "import os.path; print os.path.abspath(\"${VBOX_DIR}/\")"`
+
+# populate the VM_LIST array from cluster.txt
+# HACK: This is called prior to cluster.txt modification
+code_to_produce_vm_list="
+require './lib/cluster_data.rb';
+include BACH::ClusterData;
+cp=ENV.fetch('BACH_CLUSTER_PREFIX', '');
+cp += '-' unless cp.empty?;
+vms = parse_cluster_txt(File.readlines('cluster.txt'))
+puts vms.map{|e| cp + e[:hostname]}.join(' ')
+"
+VM_LIST=( $(ruby -e "$code_to_produce_vm_list") )
+export VM_LIST
 
 ######################################################
 # Function to download files necessary for VM stand-up
-# 
+#
 function download_VM_files {
   pushd $P
 
@@ -49,14 +81,32 @@ function download_VM_files {
   fi
 
   # Can we create the bootstrap VM via Vagrant
-  if hash vagrant ; then
-    echo "Vagrant detected - downloading Vagrant box for bcpc-bootstrap VM"
-    if [[ ! -f trusty-server-cloudimg-amd64-vagrant-disk1.box ]]; then
-      $CURL -o trusty-server-cloudimg-amd64-vagrant-disk1.box http://cloud-images.ubuntu.com/vagrant/trusty/current/trusty-server-cloudimg-amd64-vagrant-disk1.box
-    fi
+  if [[ ! -f trusty-server-cloudimg-amd64-vagrant-disk1.box ]]; then
+    $CURL -o trusty-server-cloudimg-amd64-vagrant-disk1.box http://cloud-images.ubuntu.com/vagrant/trusty/current/trusty-server-cloudimg-amd64-vagrant-disk1.box
   fi
-
   popd
+}
+
+################################################################################
+# Function to enumerate VirtualBox hostonly interfaces
+# in use from VM's.
+# Argument: name of an associative array defined in calling context
+# Post-Condition: Updates associative array provided by name with keys being
+#                 all interfaces in use and values being the number of VMs on
+#                 each network
+function discover_VBOX_hostonly_ifs {
+  local -n used_ifs=$1
+  for net in $($VBM list hostonlyifs | grep '^Name:' | sed 's/^Name:[ ]*//'); do
+    used_ifs[$net]=0
+  done
+  for vm in $($VBM list vms | sed -e 's/^[^{]*{//' -e 's/}$//'); do
+    ifs=$($VBM showvminfo --machinereadable $vm | \
+      egrep '^hostonlyadapter[0-9]*' | \
+      sed -e 's/^hostonlyadapter[0-9]*="//' -e 's/"$//')
+    for interface in $ifs; do
+      used_ifs[$interface]=$((${used_ifs[$interface]} + 1))
+    done
+  done
 }
 
 ################################################################################
@@ -65,13 +115,13 @@ function download_VM_files {
 # (expecting if a remove fails the function should bail)
 # If a network is provided, removes that network's DHCP server
 # (or passes the vboxmanage error and return code up to the caller)
-# 
+#
 function remove_DHCPservers {
   local network_name=${1-}
   if [[ -z "$network_name" ]]; then
-    local vms=$(vboxmanage list vms|sed 's/^.*{\([0-9a-f-]*\)}/\1/')
+    local vms=$($VBM list vms|sed 's/^.*{\([0-9a-f-]*\)}/\1/')
     # will produce a list of networks like ^vboxnet0$|^vboxnet1$ which are in use by VMs
-    local existing_nets_reg_ex=$(sed -e 's/^/^/' -e '/$/$/' -e 's/ /$|^/g' <<< $(for vm in $vms; do vboxmanage showvminfo --details --machinereadable $vm | grep -i 'adapter[2-9]=' | sed -e 's/^.*=//' -e 's/"//g'; done | sort -u))
+    local existing_nets_reg_ex=$(sed -e 's/^/^/' -e '/$/$/' -e 's/ /$|^/g' <<< $(for vm in $vms; do $VBM showvminfo --details --machinereadable $vm | grep -i 'adapter[2-9]=' | sed -e 's/^.*=//' -e 's/"//g'; done | sort -u))
 
     $VBM list dhcpservers | grep -E "^NetworkName:\s+HostInterfaceNetworking" | sed 's/^.*-//' |
     while read -r network_name; do
@@ -86,125 +136,45 @@ function remove_DHCPservers {
 
 ###################################################################
 # Function to create the bootstrap VM
-# uses Vagrant or stands-up the VM in VirtualBox for manual install
-# 
+#
 function create_bootstrap_VM {
   pushd $P
 
   remove_DHCPservers
 
-  if hash vagrant 2> /dev/null ; then
-    echo "Vagrant detected - using Vagrant to initialize bcpc-bootstrap VM"
-    cp ../Vagrantfile .
+  echo "Vagrant detected - using Vagrant to initialize bcpc-bootstrap VM"
+  cp ../Vagrantfile .
 
-    if [[ -f ../Vagrantfile.local.rb ]]; then
-	cp ../Vagrantfile.local.rb .
-    fi
-    
-    if [[ ! -f insecure_private_key ]]; then
-      # Ensure that the private key has been created by running vagrant at least once
-      vagrant status
-      cp $HOME/.vagrant.d/insecure_private_key .
-    fi
-    vagrant up --provision
-  else
-    echo "Vagrant not detected - using raw VirtualBox for bcpc-bootstrap"
-    if [[ -z "WIN" ]]; then
-      # Make the three BCPC networks we'll need, but clear all nets and dhcpservers first
-      for i in 0 1 2 3 4 5 6 7 8 9; do
-        if [[ ! -z `$VBM list hostonlyifs | grep vboxnet$i | cut -f2 -d" "` ]]; then
-          $VBM hostonlyif remove vboxnet$i || true
-        fi
-      done
-    else
-      # On Windows the first interface has no number
-      # The second interface is #2
-      # Remove in reverse to avoid substring matching issue
-      for i in 10 9 8 7 6 5 4 3 2 1; do
-        if [[ i -gt 1 ]]; then
-          IF="VirtualBox Host-Only Ethernet Adapter #$i";
-        else
-          IF="VirtualBox Host-Only Ethernet Adapter";
-        fi
-        if [[ ! -z `$VBM list hostonlyifs | grep "$IF"` ]]; then
-          $VBM hostonlyif remove "$IF"
-        fi
-      done
-    fi
-  
-    $VBM hostonlyif create
-    $VBM hostonlyif create
-    $VBM hostonlyif create
-  
-    if [[ -z "$WIN" ]]; then
-      remove_DHCPservers vboxnet0 || true
-      remove_DHCPservers vboxnet1 || true
-      remove_DHCPservers vboxnet2 || true
-      # use variable names to refer to our three interfaces to disturb
-      # the remaining code that refers to these as little as possible -
-      # the names are compact on Unix :
-      VBN0=vboxnet0
-      VBN1=vboxnet1
-      VBN2=vboxnet2
-    else
-      # However, the names are verbose on Windows :
-      VBN0="VirtualBox Host-Only Ethernet Adapter"
-      VBN1="VirtualBox Host-Only Ethernet Adapter #2"
-      VBN2="VirtualBox Host-Only Ethernet Adapter #3"
-    fi
-
-    $VBM hostonlyif ipconfig "$VBN0" --ip 10.0.100.2    --netmask 255.255.255.0
-    $VBM hostonlyif ipconfig "$VBN1" --ip 172.16.100.2  --netmask 255.255.255.0
-    $VBM hostonlyif ipconfig "$VBN2" --ip 192.168.100.2 --netmask 255.255.255.0
-   
-    # Create bootstrap VM
-    for vm in bcpc-bootstrap; do
-      # Only if VM doesn't exist
-      if ! $VBM list vms | grep "^\"${vm}\"" ; then
-          $VBM createvm --name $vm --ostype Ubuntu_64 --basefolder $P --register
-          $VBM modifyvm $vm --memory $BOOTSTRAP_VM_MEM
-          $VBM modifyvm $vm --cpus $BOOTSTRAP_VM_CPUs
-          $VBM storagectl $vm --name "SATA Controller" --add sata
-          $VBM storagectl $vm --name "IDE Controller" --add ide
-          # Create a number of hard disks
-          port=0
-          for disk in a; do
-              $VBM createhd --filename $P/$vm/$vm-$disk.vdi --size ${BOOTSTRAP_VM_DRIVE_SIZE-20480}
-              $VBM storageattach $vm --storagectl "SATA Controller" --device 0 --port $port --type hdd --medium $P/$vm/$vm-$disk.vdi
-              port=$((port+1))
-          done
-          # Add the network interfaces
-          $VBM modifyvm $vm --nic1 nat
-          $VBM modifyvm $vm --nic2 hostonly --hostonlyadapter2 "$VBN0"
-          $VBM modifyvm $vm --nic3 hostonly --hostonlyadapter3 "$VBN1"
-          $VBM modifyvm $vm --nic4 hostonly --hostonlyadapter4 "$VBN2"
-          # Add the bootable mini ISO for installing Ubuntu 14.04
-          $VBM storageattach $vm --storagectl "IDE Controller" --device 0 --port 0 --type dvddrive --medium ubuntu-14.04-mini.iso
-          $VBM modifyvm $vm --boot1 disk
-          # Add serial ports
-          $VBM modifyvm $vm --uart1 0x3F8 4
-          $VBM modifyvm $vm --uartmode1 server /tmp/serial-${vm}-ttyS0
-      fi
-    done
+  if [[ -f ../Vagrantfile.local.rb ]]; then
+      cp ../Vagrantfile.local.rb .
   fi
+
+  if [[ ! -f insecure_private_key ]]; then
+    # Ensure that the private key has been created by running vagrant at least once
+    vagrant status
+    cp $HOME/.vagrant.d/insecure_private_key .
+  fi
+  vagrant up --provision
   popd
 }
 
 ###################################################################
 # Function to create the BCPC cluster VMs
-# 
+#
 function create_cluster_VMs {
   # Gather VirtualBox networks in use by bootstrap VM
   oifs="$IFS"
   IFS=$'\n'
-  bootstrap_interfaces=($($VBM showvminfo bcpc-bootstrap --machinereadable | \
-				 egrep '^hostonlyadapter[0-9]=' | \
-				 sort | \
-				 sed -e 's/.*=//' -e 's/"//g'))
+  # BOOTSTRAP_NAME is exported by automated_install.sh
+  bootstrap_interfaces=($($VBM showvminfo ${BOOTSTRAP_NAME} \
+    --machinereadable | \
+    egrep '^hostonlyadapter[0-9]=' | \
+    sort | \
+    sed -e 's/.*=//' -e 's/"//g'))
   IFS="$oifs"
-  VBN0="${bootstrap_interfaces[0]}"
-  VBN1="${bootstrap_interfaces[1]}"
-  VBN2="${bootstrap_interfaces[2]}"
+  VBN0="${bootstrap_interfaces[0]?Need a Virtualbox network 1 for the bootstrap}"
+  VBN1="${bootstrap_interfaces[1]?Need a Virtualbox network 2 for the bootstrap}"
+  VBN2="${bootstrap_interfaces[2]?Need a Virtualbox network 3 for the bootstrap}"
 
   #
   # Add the ipxe USB key to the vbox storage registry as an immutable
@@ -215,12 +185,12 @@ function create_cluster_VMs {
   $VBM modifyhd -type immutable $IPXE_DISK
 
   # Create each VM
-  for vm in bcpc-vm1 bcpc-vm2 bcpc-vm3; do
+  for vm in ${VM_LIST[*]}; do
       # Only if VM doesn't exist
       if ! $VBM list vms | grep "^\"${vm}\"" ; then
           $VBM createvm --name $vm --ostype Ubuntu_64 \
 	       --basefolder $P --register
-	  
+
           $VBM modifyvm $vm --memory $CLUSTER_VM_MEM
           $VBM modifyvm $vm --cpus $CLUSTER_VM_CPUs
 
@@ -276,7 +246,7 @@ function create_cluster_VMs {
 		   --device 0 --port $port --type hdd --medium $DISK_PATH
               port=$((port+1))
           done
-	  
+
           # Set hardware acceleration options
           $VBM modifyvm $vm \
 	       --largepages on \
@@ -290,33 +260,40 @@ function create_cluster_VMs {
           $VBM modifyvm $vm --uartmode1 server /tmp/serial-${vm}-ttyS0
       fi
   done
+  # update cluster.txt to match VirtualBox MAC's
+  ./vm-to-cluster.sh
 }
 
+###################################################################
+# Function to setup the bootstrap VM
+# Assumes cluster VMs are created
+#
 function install_cluster {
-environment=${1-Test-Laptop}
-ip=${2-10.0.100.3}
-  # VMs are now created - if we are using Vagrant, finish the install process.
-  if hash vagrant ; then
-    pushd $P
-    # N.B. As of Aug 2013, grub-pc gets confused and wants to prompt re: 3-way
-    # merge.  Sigh.
-    #vagrant ssh -c "sudo ucf -p /etc/default/grub"
-    #vagrant ssh -c "sudo ucfr -p grub-pc /etc/default/grub"
-    vagrant ssh -c "test -f /etc/default/grub.ucf-dist && sudo mv /etc/default/grub.ucf-dist /etc/default/grub" || true
-    # Duplicate what d-i's apt-setup generators/50mirror does when set in preseed
-    if [ -n "$http_proxy" ]; then
-      proxy_found=true
-      vagrant ssh -c "grep Acquire::http::Proxy /etc/apt/apt.conf" || proxy_found=false
-      if [ $proxy_found == "false" ]; then
-        vagrant ssh -c "echo 'Acquire::http::Proxy \"$http_proxy\";' | sudo tee -a /etc/apt/apt.conf"
-      fi
+  environment=${1-Test-Laptop}
+  ip=${2-10.0.100.3}
+  # N.B. As of Aug 2013, grub-pc gets confused and wants to prompt re: 3-way
+  # merge.  Sigh.
+  #vagrant ssh -c "sudo ucf -p /etc/default/grub"
+  #vagrant ssh -c "sudo ucfr -p grub-pc /etc/default/grub"
+  vagrant ssh -c "test -f /etc/default/grub.ucf-dist && sudo mv /etc/default/grub.ucf-dist /etc/default/grub" || true
+  # Duplicate what d-i's apt-setup generators/50mirror does when set in preseed
+  if [ -n "$http_proxy" ]; then
+    proxy_found=true
+    vagrant ssh -c "grep Acquire::http::Proxy /etc/apt/apt.conf" || proxy_found=false
+    if [ $proxy_found == "false" ]; then
+      vagrant ssh -c "echo 'Acquire::http::Proxy \"$http_proxy\";' | sudo tee -a /etc/apt/apt.conf"
     fi
-    popd
-    echo "Bootstrap complete - setting up Chef server"
-    echo "N.B. This may take approximately 30-45 minutes to complete."
-    ./bootstrap_chef.sh --vagrant-remote $ip $environment
-    ./enroll_cobbler.sh
   fi
+  echo "Bootstrap complete - setting up Chef server"
+  echo "N.B. This may take approximately 30-45 minutes to complete."
+  vagrant ssh -c 'sudo rm -f /var/chef/cache/chef-stacktrace.out'
+  ./bootstrap_chef.sh --vagrant-remote $ip $environment
+  if vagrant ssh -c 'test -e /var/chef/cache/chef-stacktrace.out' || \
+      ! vagrant ssh -c 'test -d /etc/chef-server'; then
+    echo '========= Failed to Chef!' >&2
+    exit 1
+  fi
+  vagrant ssh -c 'cd chef-bcpc; ./cluster-enroll-cobbler.sh add'
 }
 
 # only execute functions if being run and not sourced

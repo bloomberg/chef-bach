@@ -1,23 +1,20 @@
 ::Chef::Recipe.send(:include, Bcpc_Hadoop::Helper)
 ::Chef::Resource::Bash.send(:include, Bcpc_Hadoop::Helper)
+::Chef::Resource::Bash.send(:include, BCPC::Utils)
+::Chef::Resource::File.send(:include, BCPC::Utils)
 
-package  hwx_pkg_str('zookeeper-server', node[:bcpc][:hadoop][:distribution][:release]) do
-  action :install
-end
-
-include_recipe 'bcpc-hadoop::zookeeper_config'
-
-hdp_select('zookeeper-server', node[:bcpc][:hadoop][:distribution][:active_release])
+include_recipe 'bcpc-hadoop::zookeeper_packages'
+include_recipe 'bach_krb5::keytab_directory'
 
 user_ulimit "zookeeper" do
-  filehandle_limit 32769
+  filehandle_limit 65536
 end
 
 configure_kerberos 'zookeeper_kerb' do
   service_name 'zookeeper'
 end
-   
-directory "/var/run/zookeeper" do 
+
+directory "/var/run/zookeeper" do
   owner "zookeeper"
   group "zookeeper"
   mode "0755"
@@ -27,6 +24,9 @@ end
 link "/usr/bin/zookeeper-server-initialize" do
   to "/usr/hdp/current/zookeeper-client/bin/zookeeper-server-initialize"
 end
+
+# Install jolokia's jvm agent to node['bcpc']['jolokia']['path']
+include_recipe 'bcpc-hadoop::jolokia'
 
 template "#{node[:bcpc][:hadoop][:zookeeper][:conf_dir]}/zookeeper-env.sh" do
   source "zk_zookeeper-env.sh.erb"
@@ -59,11 +59,11 @@ end
 bash 'init-zookeeper' do
   code "service zookeeper-server init " +
     "--myid=#{bcpc_8bit_node_number}"
-  
+
   not_if do
     ::File.exists?("#{node[:bcpc][:hadoop][:zookeeper][:data_dir]}/myid")
   end
-  
+
   # race immediate run of restarting ZK on initial stand-up
   subscribes :run, "link[/etc/init.d/zookeeper-server]", :immediate
 end

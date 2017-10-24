@@ -27,14 +27,12 @@ if haproxy_stats_password.nil?
   haproxy_stats_password = secure_password
 end
 
-bootstrap = get_all_nodes.select{|s| s.hostname.include? 'bootstrap'}[0].fqdn
-
-nodes = get_nodes_for("haproxy").map!{ |x| x['fqdn'] }.join(",")
+haproxy_admins = (get_head_node_names + [get_bootstrap]).join(',')
 
 chef_vault_secret "haproxy-stats" do
   data_bag 'os'
   raw_data({ 'password' => haproxy_stats_password })
-  admins "#{ nodes },#{ bootstrap }"
+  admins haproxy_admins
   search '*:*'
   action :nothing
 end.run_action(:create_if_missing)
@@ -55,7 +53,8 @@ end
 template "/etc/haproxy/haproxy.cfg" do
   source "haproxy.cfg.erb"
   mode 00644
-  variables(:mysql_servers => get_nodes_for("mysql","bcpc"))
+  variables(:mysql_servers => get_nodes_for("mysql","bcpc"),
+    :oozie_servers => get_nodes_for("oozie", "bcpc-hadoop"))
   notifies :restart, "service[haproxy]", :immediately
 end
 

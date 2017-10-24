@@ -76,6 +76,7 @@ end
 template '/etc/mysql/debian.cnf' do
   source 'mysql/my-debian.cnf.erb'
   mode 00644
+  sensitive true if respond_to?(:sensitive)
   notifies :reload, 'service[mysql]', :delayed
 end
 
@@ -100,13 +101,29 @@ apt_package 'percona-xtradb-cluster-56' do
           '-o Dpkg::Options::="--force-confold"'
 end
 
+# This package is needed to be a donor in the SST process.
+package 'percona-xtrabackup' do
+  action :upgrade
+end
+
 directory '/var/run/mysql' do
   owner 'mysql'
   mode 0775
 end
 
+#
+# On Ubuntu, supports[:status] defaults to false, which causes chef to
+# use 'pgrep -f' to look for the running service.  This will always
+# succeed because java processes include MySQL in their classpaths.
+#
+# Setting it to true induces chef to check service status through the
+# 'service' command.
+#
 service 'mysql' do
   action [:enable, :start]
+  supports({restart: true,
+            reload: true,
+            status: true})
 end
 
 [
@@ -177,19 +194,15 @@ end
 
 mysql_nodes = get_nodes_for('mysql', 'bcpc')
 all_nodes = get_all_nodes
-max_connections =
-  [
-    (mysql_nodes.length * 50 + all_nodes.length * 5),
-    200
-  ].max
 pool_size = node['bcpc']['mysql']['innodb_buffer_pool_size']
 
 template '/etc/mysql/conf.d/wsrep.cnf' do
   source 'mysql/wsrep.cnf.erb'
   mode 00644
-  variables(max_connections: max_connections,
+  variables(max_connections: node['bcpc']['mysql']['max_connections'],
             innodb_buffer_pool_size: pool_size,
             servers: mysql_nodes)
+  sensitive true if respond_to?(:sensitive)
   notifies :stop, 'service[mysql]', :immediate
   notifies :start, 'service[mysql]', :immediate
 end
@@ -268,7 +281,19 @@ template '/etc/xinetd.d/mysqlchk' do
   owner 'root'
   group 'root'
   mode 00440
-  notifies :restart, 'service[xinetd]', :immediately
+  sensitive true if respond_to?(:sensitive)
+
+  #
+  # xinetd restart is unreliable under upstart and systemd. Instead,
+  # reload the configuration in the running daemon.
+  #
+  signal = if node[:lsb][:release].to_f >= 14.04
+             :reload
+           else
+             :restart
+           end
+
+  notifies signal, 'service[xinetd]', :immediately
 end
 
 #
