@@ -28,7 +28,7 @@ export CLUSTER_VM_CPUs=${CLUSTER_VM_CPUs:-4}
 export CLUSTER_TYPE=${CLUSTER_TYPE:-Hadoop}
 
 BOOTSTRAP_NAME="bcpc-bootstrap"
-if [ $BACH_CLUSTER_PREFIX != '' ]; then
+if [ "$BACH_CLUSTER_PREFIX" != "" ]; then
   BOOTSTRAP_NAME="${BACH_CLUSTER_PREFIX}-bcpc-bootstrap"
 fi
 
