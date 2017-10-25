@@ -6,6 +6,7 @@ and issue a pull request with your proposed change.
 # automated_install
 
 Our full integration test is run via [tests/automated_install.sh](./tests/automated_install.sh). The following user-modifiable settings are available:
+* BACH_CLUSTER_PREFIX -- supply a string to supply as a prefix to all hosts in the VM cluster, this making host names unique and allowing multiple VM clusters to coexist on a single hypervisor
 * BOOTSTRAP_VM_MEM -- Quantitiy of memory to offer the bootstrap (infrastructure) VM
 * BOOTSTRAP_VM_CPUs -- Quantitiy of virtual CPU's to offer the bootstrap (infrastructure) VM
 * CLUSTER_VM_MEM -- Quantitiy of memory to offer each cluster VM
