@@ -300,67 +300,6 @@ def unmount_disks(chef_env, vm_entry)
   end
 end
 
-def confirm_chef_client_down(chef_env, vm_entry)
-  #
-  # If it takes more than 2 minutes
-  # something is really broken.
-  #
-  # This will make 30 attempts with a 1 minute sleep between attempts,
-  # or timeout after 31 minutes.
-  #
-  command = 'ps -ef | grep chef-client | grep -v grep'
-  Timeout.timeout(120) do
-    max = 5
-    1.upto(max) do |idx|
-      c = Mixlib::ShellOut.new('./nodessh.sh',
-                               chef_env,
-                               vm_entry[:hostname],
-                               command)
-      c.run_command
-      if c.exitstatus == 1 && c.stdout == ''
-        puts 'chef client is down'
-        break
-      else
-        puts "Waiting for chef to go down (attempt #{idx}/#{max})"
-        sleep 30
-      end
-    end
-  end
-end
-
-def kill_chef_client(chef_env, vm_entry)
-  puts 'Stopping chef-client'
-  [
-    'service chef-client stop ',
-    'pkill -f chef-client'
-  ].each do |command|
-    c = Mixlib::ShellOut.new('./nodessh.sh',
-                             chef_env,
-                             vm_entry[:hostname],
-                             command,
-                             'sudo')
-    c.run_command
-  end
-  confirm_chef_client_down(chef_env, vm_entry)
-  puts 'Chef client is down' 
-end
-
-def start_chef_client(chef_env, vm_entry)
-  puts 'Starting chef-client'
-  c = Mixlib::ShellOut.new('./nodessh.sh',
-                           chef_env,
-                           vm_entry[:hostname],
-                           'service chef-client start',
-                           'sudo')
-  c.run_command
-  if c.status.success?
-    puts 'Chef client started.'
-  else
-    puts 'Chef client did not start successfully: ' +
-      c.format_for_exception
-  end
-end
-
 def run_chef_client(chef_env, vm_entry, params = ' ')
   puts 'Running chef-client'
   c = Mixlib::ShellOut.new('./nodessh.sh',
@@ -428,7 +367,6 @@ end
 # Graceful shutdown - bring down all services, unmount disks, shutdown
 def graceful_shutdown(chef_env, vm_entry)
   puts 'Running graceful shutdown of ' + vm_entry[:hostname]
-  kill_chef_client(chef_env, vm_entry)
   stop_all_services(chef_env, vm_entry)
   unmount_disks(chef_env, vm_entry)
   shutdown_box(chef_env, vm_entry)
@@ -516,5 +454,4 @@ if __FILE__ == $PROGRAM_NAME
   cluster_assign_roles(chef_env, :hadoop, vm_entry)
   # HACK: sometimes rechefing seems to do the trick...
   run_chef_client(chef_env, vm_entry)
-  start_chef_client(chef_env, vm_entry)
 end
