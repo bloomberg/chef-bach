@@ -108,7 +108,7 @@ module BACH
             puts "Found #{entry[:fqdn]} in search index"
             return
           else
-            reindex_chef_server if i == 0
+            reindex_chef_server if i == 179
 
             if i % 60 == 0
               puts "Waiting for #{entry[:fqdn]} to appear in Chef index..."
