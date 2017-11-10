@@ -13,6 +13,11 @@ default['bcpc']['hadoop']['hive']['warehouse']['dir'] = \
   ::File.join(node[:bcpc][:hadoop][:hdfs_url], '/user/hive/warehouse')
 default['bcpc']['hadoop']['hive']['scratch']['dir'] = \
   ::File.join(node[:bcpc][:hadoop][:hdfs_url], '/tmp/hive-scratch/')
+# Database overrides
+default['bcpc']['hadoop']['hive']['mysql_hosts'] = []
+default['bcpc']['hadoop']['hive']['mysql_port'] = nil
+default['bcpc']['hadoop']['hive']['mysql_user'] = 'hive'
+default['bcpc']['hadoop']['hive']['mysql_db'] = 'metastore'
 
 # These will become key/value pairs in 'hive_site.xml'
 default[:bcpc][:hadoop][:hive][:site_xml].tap do |site_xml|
@@ -42,7 +47,7 @@ default[:bcpc][:hadoop][:hive][:site_xml].tap do |site_xml|
   site_xml['datanucleus.autoCreateSchema'] = false
   site_xml['datanucleus.fixedDatastore'] = true
   site_xml['javax.jdo.option.ConnectionDriverName'] = 'com.mysql.jdbc.Driver'
-  site_xml['javax.jdo.option.ConnectionUserName'] = 'hive'
+  site_xml['javax.jdo.option.ConnectionUserName'] = node['bcpc']['hadoop']['hive']['mysql_user']
 end
 
 # These will become key/value pairs in 'hive-env.sh'

@@ -63,8 +63,8 @@ bash 'create-hive-scratch' do
 end
 
 hive_metastore_database 'hive' do
-  hive_password lazy { get_config 'mysql-hive-password' }
-  root_password lazy { get_config! 'password', 'mysql-root', 'os' }
+  dbadmin_password lazy { get_config! 'password', 'mysql-root', 'os' }
+  metastore_db_password lazy { get_config 'mysql-hive-password' }
   schematool_path '/usr/hdp/current/hive-metastore/bin/schematool'
   action %w(create init upgrade)
   notifies :enable, "service[hive-metastore]", :delayed
