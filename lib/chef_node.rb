@@ -108,6 +108,7 @@ module BACH
             puts "Found #{entry[:fqdn]} in search index"
             return
           else
+            # the #times method counts up, not down, so i == 179 on the 180th iteration.
             reindex_chef_server if i == 179
 
             if i % 60 == 0
