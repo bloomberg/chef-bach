@@ -15,8 +15,13 @@ module BcpcHadoop::HiveMetastore::Database
 
     provides :hive_metastore_database
 
-    attribute :root_password, kind_of: String
-    attribute :hive_password, kind_of: String
+    attribute :dbadmin_username, kind_of: String, default: 'root'
+    attribute :dbadmin_password, kind_of: String
+    attribute :metastore_db_username, kind_of: String, default: 'hive'
+    attribute :metastore_db, kind_of: String, default: 'metastore'
+    attribute :metastore_db_host, kind_of: String, default: 'localhost' 
+    attribute :metastore_db_port, kind_of: Fixnum, default: 3306
+    attribute :metastore_db_password, kind_of: String
     attribute :schematool_path, kind_of: String
 
     actions :create, :init, :upgrade
@@ -36,20 +41,20 @@ module BcpcHadoop::HiveMetastore::Database
 
     def create_hive_database
       privs = 'SELECT,INSERT,UPDATE,DELETE,LOCK TABLES,EXECUTE'
-      command = Mixlib::ShellOut.new "mysql -uroot -p#{new_resource.root_password}",
+      command = Mixlib::ShellOut.new "mysql -u#{new_resource.dbadmin_username} -p#{new_resource.dbadmin_password} -h#{new_resource.metastore_db_host} -P#{new_resource.metastore_db_port}",
         input: <<~eos
-          CREATE DATABASE metastore;
-          GRANT #{privs} ON metastore.* TO 'hive'@'%' IDENTIFIED BY '#{new_resource.hive_password}';
-          GRANT #{privs} ON metastore.* TO 'hive'@'localhost' IDENTIFIED BY '#{new_resource.hive_password}';
+          CREATE DATABASE #{new_resource.metastore_db};
+          GRANT #{privs} ON #{new_resource.metastore_db}.* TO '#{new_resource.metastore_db_username}'@'%' IDENTIFIED BY '#{new_resource.metastore_db_password}';
+          GRANT #{privs} ON #{new_resource.metastore_db}.* TO '#{new_resource.metastore_db_username}'@'localhost' IDENTIFIED BY '#{new_resource.metastore_db_password}';
           FLUSH PRIVILEGES;
         eos
       command.run_command
     end
 
     def database_created?
-      command = Mixlib::ShellOut.new "mysql -uroot -p#{new_resource.root_password} -e "\
+      command = Mixlib::ShellOut.new "mysql -u#{new_resource.dbadmin_username} -p#{new_resource.dbadmin_password} -h#{new_resource.metastore_db_host} -P#{new_resource.metastore_db_port} -e "\
           '\'SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA '\
-          'WHERE SCHEMA_NAME = "metastore"\' | grep -q metastore'
+          "WHERE SCHEMA_NAME = \"#{new_resource.metastore_db}\"' | grep -q metastore"
       command.run_command
       command.exitstatus == 0
     end
@@ -63,7 +68,7 @@ module BcpcHadoop::HiveMetastore::Database
 
     def do_initialize_schema
       cmd = Mixlib::ShellOut.new "#{new_resource.schematool_path} -dbType mysql "\
-          "-userName root -passWord #{new_resource.root_password} "\
+        "-userName #{new_resource.dbadmin_username} -passWord #{new_resource.dbadmin_password} "\
           '-initSchemaTo 1.2.0'
       cmd.run_command
     end
@@ -79,7 +84,7 @@ module BcpcHadoop::HiveMetastore::Database
     # it indeed do a noop.
     def action_upgrade
       cmd = Mixlib::ShellOut.new "#{new_resource.schematool_path} -dbType mysql "\
-          "-userName root -passWord #{new_resource.root_password} "\
+        "-userName #{new_resource.dbadmin_username} -passWord #{new_resource.dbadmin_password} "\
           '-upgradeSchema'
       cmd.run_command
 
