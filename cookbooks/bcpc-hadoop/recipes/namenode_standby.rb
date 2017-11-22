@@ -165,6 +165,7 @@ if node['bcpc']['hadoop']['hdfs']['HA'] == true then
     subscribes :restart, "file[/etc/hadoop/conf/ldap-conn-pass.txt]", :delayed
     subscribes :restart, "bash[hdp-select hadoop-hdfs-namenode]", :delayed
     subscribes :restart, "log[jdk-version-changed]", :delayed
+    subscribes :restart, node['bcpc']['hadoop']['jmxtrans_agent']['namenode']['xml'], :delayed
   end
 else
   Chef::Log.info "Not running standby namenode services yet -- HA disabled!"
