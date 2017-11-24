@@ -496,7 +496,11 @@ if __FILE__ == $PROGRAM_NAME
   unless options[:newmachine]
     delete_node_data(vm_entry)
     rotate_vault_keys
-    cobbler_unenroll(vm_entry)
+    begin
+      cobbler_unenroll(vm_entry)
+    rescue
+      puts "WARNING: Unenroll failed, will continue anyway" 
+    end
   end
 
   # HACK: restart to free up memory.  Chef server 11 has a memory leak.
