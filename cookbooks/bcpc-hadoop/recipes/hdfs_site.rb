@@ -3,6 +3,24 @@ subnet = node[:bcpc][:management][:subnet]
 
 hdfs_site_values = node[:bcpc][:hadoop][:hdfs][:site_xml]
 
+# Function to tell us what type of storage tier an HDFS data dir
+# should be
+# Arguments:
+#   mount_point - string of the mount-point root
+# Returns:
+#   DISK, SSD, etc. per:
+#     https://hadoop.apache.org/docs/stable/hadoop-project-dist/hadoop-hdfs/ArchivalStorage.html
+# Raises:
+#   If mount point fails to be found
+def hdfs_disk_type(mount_point)
+  dev = node['disk'].select do |n|
+    n['mount'] == mount_point
+  end.first or raise "Failed to find a device for mount-point: #{mount_point}"
+  ::File.open("/sys/block/#{dev}/queue/rotational", 'r') do |f|
+    f.read().chomp == 0 ? 'SSD' : 'DISK'
+  end
+end
+
 ruby_block "hdfs_site_generated_values_common" do
   block do
     node.run_state['hdfs_site_generated_values'] =
@@ -18,7 +36,10 @@ ruby_block "hdfs_site_generated_values_common" do
 
      'dfs.datanode.data.dir' =>
        node.run_state['bcpc_hadoop_disks']['mounts']
-       .map{ |d| "file:///disk/#{d}/dfs/dn" }.join(','),
+       .map do |disk|
+         dev = node['disk'].select{ |n| n['mount'] == disk }.first
+         "[#{hdfs_disk_type(disk)}]file:///disk/#{disk}/dfs/dn"
+       end.join(','),
 
      'dfs.journalnode.edits.dir' =>
        File.join('/disk', node.run_state['bcpc_hadoop_disks']['mounts'][0].to_s, 'dfs', 'jn'),
