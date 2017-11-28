@@ -35,6 +35,9 @@ collectors_config_path = /etc/diamond/collectors/
 # Directory to load handler configs from
 handlers_config_path = /etc/diamond/handlers/
 
+# Directory to load handler modules from
+handlers_path = /usr/share/pyshared/diamond/handler/
+
 # Interval to reload collectors
 collectors_reload_interval = 3600
 
@@ -116,6 +119,7 @@ timeout = 15
 user = user@example.com
 apikey = abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz01
 
+# And any other config settings from GraphiteHandler are valid here
 
 [[HttpPostHandler]]
 
@@ -152,6 +156,9 @@ batch = 100
 # hostname          = `hostname`
 # hostname_rev      = `hostname` in reverse (com.example.www)
 
+# shell             = Run the string set in hostname as a shell command and use its
+#                     output(with spaces trimmed off from both ends) as the hostname.
+
 # hostname_method = smart
 
 # Path Prefix and Suffix
@@ -160,8 +167,37 @@ batch = 100
 # path_prefix = servers
 # path_suffix =
 
+# Path Prefix for Virtual Machines
+# If the host supports virtual machines, collectors may report per
+# VM metrics. Following OpenStack nomenclature, the prefix for
+# reporting per VM metrics is "instances", and metric foo for VM
+# bar will be reported as: instances.bar.foo...
+# instance_prefix = instances
+
 # Default Poll Interval (seconds)
 interval = 15
+
+################################################################################
+# Default enabled collectors
+################################################################################
+
+[[CPUCollector]]
+enabled = True
+
+[[DiskSpaceCollector]]
+enabled = True
+
+[[DiskUsageCollector]]
+enabled = True
+
+[[LoadAverageCollector]]
+enabled = True
+
+[[MemoryCollector]]
+enabled = True
+
+[[VMStatCollector]]
+enabled = True
 
 [[KSMCollector]]
 enabled = True
@@ -223,3 +259,16 @@ args = ('/var/log/diamond/diamond.log', 'midnight', 1, 7)
 
 format = [%(asctime)s] [%(threadName)s] %(message)s
 datefmt =
+
+################################################################################
+### Options for config merging
+# [configs]
+# path = "/etc/diamond/configs/"
+# extension = ".conf"
+#-------------------------------------------------------------------------------
+# Example:
+# /etc/diamond/configs/net.conf
+# [collectors]
+#
+# [[NetworkCollector]]
+# enabled = True
