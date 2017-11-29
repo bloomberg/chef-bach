@@ -34,7 +34,7 @@ bash "HBASE namespace for smoke tests #{hbase_ns}" do
   echo "create_namespace '#{hbase_ns}'" | hbase shell
   EOH
   user 'hbase'
-  not_if "hbase shell <<< 'list_namespace' | grep #{hbase_ns}", user: 'hbase'
+  not_if "hbase shell <<< 'list_namespace' | grep '#{hbase_ns}'", user: 'hbase'
 end
 
 # Permissions test user to access HBase and get DTs
