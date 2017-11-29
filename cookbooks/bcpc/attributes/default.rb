@@ -247,6 +247,7 @@ default[:ubuntu][:security_url] =
 ###########################################
 default['bcpc']['pdns_dbname'] = 'pdns'
 default['bcpc']['zabbix_dbname'] = 'zabbix'
+default['bcpc']['zabbix_dbport'] = '3306'
 
 default['bcpc']['admin_email'] = 'admin@example.com'
 

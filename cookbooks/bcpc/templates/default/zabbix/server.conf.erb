@@ -11,7 +11,8 @@ LogFile=/var/log/zabbix/zabbix_server.log
 LogFileSize=32
 PidFile=/var/run/zabbix/zabbix_server.pid
 
-DBHost=<%="#{node[:bcpc][:management][:vip]}"%>
+DBHost=<%=node[:bcpc][:zabbix_dbhost] || node[:bcpc][:management][:vip]%>
+DBPort=<%=node[:bcpc][:zabbix_dbport]%>
 DBName=<%="#{node[:bcpc][:zabbix_dbname]}"%>
 DBUser=<%="#{get_config('mysql-zabbix-user')}"%>
 DBPassword=<%="#{get_config!('password','mysql-zabbix','os')}"%>
