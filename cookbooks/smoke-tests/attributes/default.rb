@@ -3,6 +3,7 @@ default['hadoop_smoke_tests'] = {}
 default['hadoop_smoke_tests']['app_name'] = 'Oozie-Smoke-Test-Coordinator'
 default['hadoop_smoke_tests']['oozie_hosts'] = ['f-bcpc-vm2.bcpc.example.com']
 default['hadoop_smoke_tests']['oozie_user'] = 'ubuntu'
+default['hadoop_smoke_tests']['hbase_ns'] = 'smoketests'
 default['hadoop_smoke_tests']['wf_path'] =
   'hdfs://Test-Laptop/user/ubuntu/oozie-smoke-tests/wf'
 default['hadoop_smoke_tests']['carbon-line-receiver'] = '10.0.100.5'
