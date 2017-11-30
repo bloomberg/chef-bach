@@ -93,6 +93,9 @@ for vm in ${VM_LIST[*]} ${BOOTSTRAP_NAME}; do
   vboxmanage showvminfo $vm | grep -q '^State:.*running' || VBoxManage startvm $vm --type headless
 done
 
+WAIT_FOR_HOST_CMD="vagrant ssh -c 'cd chef-bcpc; source proxy_setup.sh; "\
+"./wait-for-hosts.sh \"${VM_LIST[*]}\"'"
+KILL_SCREEN_CMD='sleep 5 && kill $(ps -o ppid=$$)'
 if hash screen; then
   if [ "$(uname)" == "Darwin" ]; then
     brew install coreutils
@@ -102,23 +105,28 @@ if hash screen; then
   fi
 
   # Create a new screenrc with our VM list in it
+  SCREENRC=../../cluster/screenrc
   cp ./screenrc ../../cluster/screenrc
 
-  echo "cd `pwd`; cd .." >> ../../cluster/screenrc
+  echo "cd `pwd`; cd .." >> $SCREENRC
 
   ii=1
   for vm in ${VM_LIST[*]}; do
     echo "screen -t \"$vm serial console\" $ii" \
-         "./tests/virtualbox_serial_console.sh $vm" >> ../../cluster/screenrc
+         "./tests/virtualbox_serial_console.sh $vm" >> $SCREENRC
     ((ii++))
   done
+  echo "screen -t \"Wait For Hosts\" 0 $WAIT_FOR_HOST_CMD; $KILL_SCREEN_CMD" >> $SCREENRC
   popd > /dev/null
-  echo "Enter this command to view VM serial consoles:"
-  echo "  screen -S 'BACH serial consoles' `readlink -f ../cluster/screenrc`"
-  echo
+
+  screen -S 'BACH VM Install Progress' -c `readlink -f ../cluster/screenrc`
+else
+  echo "#### WARNING: Did not find screen -- please use " \
+"tests/virtualbox_serial_console.sh " \
+"<vm name> if you need a serial console" > /dev/stderr
+  $WAIT_FOR_HOST_CMD
 fi
 
-vagrant ssh -c "cd chef-bcpc; source proxy_setup.sh; ./wait-for-hosts.sh ${VM_LIST[*]}"
 printf "Snapshotting post-Cobbler\n"
 for vm in ${VM_LIST[*]} ${BOOTSTRAP_NAME}; do
   [[ $(vboxmanage snapshot $vm list --machinereadable | grep -q 'Post-Cobble') ]] || \
