@@ -8,7 +8,7 @@ default["bcpc"]["hadoop"]["hbase_regionserver"]["restart_failed"] = false
 # Attribute to save the time when HBase region server restart process failed
 default["bcpc"]["hadoop"]["hbase_regionserver"]["restart_failed_time"] = ""
 default['bcpc']['hadoop']['hbase']['root_dir'] = "#{node['bcpc']['hadoop']['hdfs_url']}/hbase"
-default['bcpc']['hadoop']['hbase']['bulkload_staging_dir'] = "/tmp/hbase"
+default['bcpc']['hadoop']['hbase']['bulkload_staging_dir'] = "/user/hbase"
 default["bcpc"]["hadoop"]["hbase"]["repl"]["enabled"] = false
 default["bcpc"]["hadoop"]["hbase"]["repl"]["peer_id"] = node.chef_environment.gsub("-","_")
 default["bcpc"]["hadoop"]["hbase"]["repl"]["target"] = ""
