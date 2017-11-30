@@ -33,7 +33,7 @@ default['bcpc']['encrypt_data_bag'] = false
 default['bcpc']['bootstrap']['proxy'] = nil
 
 default['bcpc']['bootstrap']['preseed'].tap do |preseed|
-  preseed['add_kernel_opts'] = 'console=ttyS0'
+  preseed['add_kernel_opts'] = 'console=tty0 console=ttyS0,115200n8'
   preseed['additional_packages'] = %w(openssh-server lldpd)
 
   # Disable device renaming -- use the kernel's enumeration order.
