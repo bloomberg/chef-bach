@@ -5,6 +5,39 @@
 # Chef server.
 # See http://www.vagrantup.com/ for info on Vagrant.
 
+class VboxMachineFolderPlugin < Vagrant.plugin('2')
+  name 'VboxMachineFolder'
+  description <<-DESC
+    Set the Virtualbox default machine folder before 'up'
+  DESC
+
+  def initialize(app,env)
+    @app = app
+  end
+
+  def call(env)
+    new_machine_folder =
+      File.expand_path(File.dirname(File.realpath(__FILE__)))
+
+    puts "Setting machine folder to #{new_machine_folder}..."
+
+    system('vboxmanage', 'setproperty', 'machinefolder',
+           new_machine_folder)
+
+    if $?.success?
+      puts "Successfully set default machine folder"
+    else
+      raise "Failed to set default machine folder!"
+    end
+
+    @app.call(env)
+  end
+
+  action_hook(:VboxMachineFolder, :machine_action_up) do |hook|
+    hook.prepend(VboxMachineFolderPlugin)
+  end
+end
+
 require 'json'
 
 base_dir = File.expand_path(File.dirname(File.realpath(__FILE__)))
