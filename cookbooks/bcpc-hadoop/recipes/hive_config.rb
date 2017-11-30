@@ -30,9 +30,21 @@ stats_password = make_config('mysql-hive-table-stats-password', secure_password)
   end
 end
 
+mysql_port = 
+  node['bcpc']['hadoop']['hive']['mysql_port'] || 3306
+mysql_hosts = 
+  if node['bcpc']['hadoop']['hive']['mysql_hosts'].length > 0 then 
+    # our list is just a plain list of hosts
+    node['bcpc']['hadoop']['hive']['mysql_hosts'].each\
+      .map { |m| m + ":#{mysql_port}" }
+  else
+    node['bcpc']['hadoop']['mysql_hosts']\
+      .map { |m| m[:hostname] + ":#{mysql_port}" }
+  end
+
 hive_site_vars = {
   is_hive_server: node.run_list.expand(node.chef_environment).recipes.include?('bcpc-hadoop::hive_hcatalog'),
-  mysql_hosts: node['bcpc']['hadoop']['mysql_hosts'].map { |m| m[:hostname] + ':3306' },
+  mysql_hosts: mysql_hosts,
   zk_hosts: node['bcpc']['hadoop']['zookeeper']['servers'],
   hive_hosts: node['bcpc']['hadoop']['hive_hosts'],
   stats_user: stats_user,
@@ -78,7 +90,7 @@ generated_values = {
     'javax.jdo.option.ConnectionURL' =>
       'jdbc:mysql:loadbalance://' +
       hive_site_vars[:mysql_hosts].join(',') +
-      '/metastore?loadBalanceBlacklistTimeout=5000',
+      "/#{node['bcpc']['hadoop']['hive']['mysql_db']}?loadBalanceBlacklistTimeout=5000",
 
     'javax.jdo.option.ConnectionPassword' =>
       hive_site_vars[:hive_sql_password],
