@@ -27,6 +27,8 @@ hadoop.log.maxbackupindex=20
 log4j.appender.RFA=org.apache.log4j.RollingFileAppender
 log4j.appender.RFA.File=${hadoop.log.dir}/${hadoop.log.file}
 
+log4j.logger.org.apache.hadoop.ipc.Client=ERROR
+
 log4j.appender.RFA.MaxFileSize=${hadoop.log.maxfilesize}
 log4j.appender.RFA.MaxBackupIndex=${hadoop.log.maxbackupindex}
 
