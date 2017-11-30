@@ -40,7 +40,6 @@ end
 #             message: offset as value
 #           Array messages: array of errors matched to offset
 def data_check(cluster_lines)
-  errors = ['Found bogus MAC address']
   # check for failed MAC addresses
   failed_macs = cluster_lines.select { |l| l[1].eql?(BOGUS_VB_MAC) }\
                              .collect { |l| {line: l.join(' '), message: 0} }
@@ -67,7 +66,7 @@ if File.basename(__FILE__) == File.basename($PROGRAM_NAME)
   entries = parse_cluster_txt(cluster_txt)
 
   cluster_lines = entries.map do |e|
-    # HACK: We have not edited cluster.txt yet, but may have 
+    # HACK: We have not edited cluster.txt yet, but may have
     # forced the VMs to have a ${BACH_CLUSTER_PREFIX}-
     # when we generated VM_LIST in vbox_create.sh
     if ENV['BACH_CLUSTER_PREFIX'] != '' then
