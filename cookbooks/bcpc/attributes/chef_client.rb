@@ -16,6 +16,8 @@ sudo_user = node['bcpc']['bootstrap']['admin']['user']
 #
 # XXX this keeps breaking Chef12 knife default['ohai']['disabled_plugins'] = [ 'passwd' ]
 
+# FIXME No longer needed in chef-client 13.2+
+default['chef_client']['log_rotation']['postrotate'] = '/etc/init.d/chef-client restart >/dev/null || :'
 default['chef_client']['config'].tap do |config|
   config['log_level'] = ':info'
   config['log_location'] = 'STDOUT'
