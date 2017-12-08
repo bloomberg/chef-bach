@@ -13,7 +13,7 @@
 [server]
 
 # Handlers for published metrics.
-handlers = diamond.handler.graphitepickle.GraphitePickleHandler
+handlers = <%= @handlers %>
 
 # User diamond will run as
 # Leave empty to use the current user
@@ -63,7 +63,7 @@ days = 7
 ### Options for GraphiteHandler
 
 # Graphite server host
-host = <%="#{node[:bcpc][:management][:vip]}"%>
+host = <%= @graphite %>
 
 # Port to send metrics to
 port = 2013
@@ -78,7 +78,7 @@ batch = 512
 ### Options for GraphitePickleHandler
 
 # Graphite server host
-host = <%="#{node[:bcpc][:management][:vip]}"%>
+host = <%= @graphite %>
 
 # Port to send metrics to
 port = 2014
@@ -107,11 +107,11 @@ col_metric  = metric
 col_value   = value
 
 [[StatsdHandler]]
-host = 127.0.0.1
+host = <%= @statsd %>
 port = 8125
 
 [[TSDBHandler]]
-host = 127.0.0.1
+host = <%= @opentsdb %>
 port = 4242
 timeout = 15
 
