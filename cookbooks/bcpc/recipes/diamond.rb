@@ -44,8 +44,6 @@ bash 'diamond-set-user' do
   notifies :restart, 'service[diamond]', :delayed
 end
 
-has_mysql = get_nodes_for('mysql', 'bcpc').include?(node)
-
 package 'smartmontools' do
   action :upgrade
 end if node['virtualization']['role'] != 'guest'
@@ -55,7 +53,7 @@ template '/etc/diamond/diamond.conf' do
   owner 'diamond'
   group 'root'
   mode 00600
-  variables(:servers => get_head_node_names, :has_mysql => has_mysql)
+  variables(:servers => get_head_node_names)
   notifies :restart, 'service[diamond]', :delayed
 end
 
