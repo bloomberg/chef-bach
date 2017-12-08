@@ -19,7 +19,7 @@
 
 include_recipe 'bcpc::default'
 
-%w(python-support python-configobj python-pip python-httplib2).each do |pkg|
+%w(python-support python-configobj python-pip python-httplib2 python-statsd).each do |pkg|
   package pkg do
     action :upgrade
   end
