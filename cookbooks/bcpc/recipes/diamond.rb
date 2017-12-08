@@ -53,7 +53,9 @@ template '/etc/diamond/diamond.conf' do
   owner 'diamond'
   group 'root'
   mode 00600
-  variables(:servers => get_head_node_names)
+  settings =  node['bcpc']['diamond'].dup
+  settings['servers'] = get_head_node_names
+  variables settings
   notifies :restart, 'service[diamond]', :delayed
 end
 
