@@ -55,6 +55,8 @@ template '/etc/diamond/diamond.conf' do
   mode 00600
   settings =  node['bcpc']['diamond'].dup
   settings['servers'] = get_head_node_names
+  # FIXME Will not be needed if upstream Diamond is fixed
+  settings['cluster'] = node.chef_environment.gsub(/[\-_]/, '')
   variables settings
   notifies :restart, 'service[diamond]', :delayed
 end
