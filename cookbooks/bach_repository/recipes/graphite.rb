@@ -52,10 +52,10 @@ epoch = Time.now.strftime('%s')
     checksum: 'd5ead0f43ac5a8dd89e8475ada557037bbeb7ed709491861e84356ef17a3f8ac'
   },
   {
-   name: 'pyparsing',
-   version: '2.0.6',
-   url: 'https://pypi.python.org/packages/source/p/pyparsing/pyparsing-2.0.6.zip',
-   checksum: '697f04b1b5d01741f4f7b7267ff2f2cc845c336e65efa71609339a250a0e9c72'
+    name: 'pyparsing',
+    version: '2.0.6',
+    url: 'https://pypi.python.org/packages/source/p/pyparsing/pyparsing-2.0.6.zip',
+    checksum: '697f04b1b5d01741f4f7b7267ff2f2cc845c336e65efa71609339a250a0e9c72'
   },
   {
     name: 'txamqp',
@@ -97,7 +97,7 @@ epoch = Time.now.strftime('%s')
   end
 
   fpm_command =
-    if (package[:name] == 'graphite-web')
+    if package[:name] == 'graphite-web'
       "#{fpm_path} --python-install-lib /opt/graphite/webapp " \
         "--epoch #{epoch} " \
         "-p #{deb_path} " \
