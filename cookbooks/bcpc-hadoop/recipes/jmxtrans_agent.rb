@@ -41,7 +41,6 @@ template node['bcpc']['hadoop']['jmxtrans_agent']['journalnode']['xml'] do
   )
 end
 
-
 # HBase
 ## master
 template node['bcpc']['hadoop']['jmxtrans_agent']['hbase_master']['xml'] do
