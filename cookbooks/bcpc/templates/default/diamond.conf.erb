@@ -115,6 +115,8 @@ host = <%= @opentsdb %>
 port = 4242
 timeout = 15
 
+tags = cluster=<%= @cluster %>
+
 [[LibratoHandler]]
 user = user@example.com
 apikey = abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz01
@@ -164,7 +166,7 @@ batch = 100
 # Path Prefix and Suffix
 # you can use one or both to craft the path where you want to put metrics
 # such as: %(path_prefix)s.$(hostname)s.$(path_suffix)s.$(metric)s
-# path_prefix = servers
+path_prefix = servers.<%= @cluster %>
 # path_suffix =
 
 # Path Prefix for Virtual Machines
