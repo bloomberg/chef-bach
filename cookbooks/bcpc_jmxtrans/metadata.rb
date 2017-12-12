@@ -4,7 +4,7 @@ maintainer_email 'bnair10@bloomberg.net'
 license          'Apache License 2.0'
 description      'Installs/Configures bcpc_jmxtrans'
 long_description IO.read(File.join(File.dirname(__FILE__), 'README.md'))
-version          '3.0.37'
+version          '3.0.38'
 
 depends 	 'jmxtrans'
 depends		 'bcpc-hadoop'
