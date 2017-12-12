@@ -118,6 +118,15 @@ default['bcpc']['hadoop']['kerberos']['data'] = {
     princhost: '_HOST',
     perms: '0440',
     spnego_keytab: 'spnego.service.keytab'
+  },
+  hannibal: {
+    principal: 'hannibal',
+    keytab: 'hannibal.service.keytab',
+    owner: 'hbase',
+    group: 'hbase',
+    princhost: '_HOST',
+    perms: '0440',
+    spnego_keytab: 'spnego.service.keytab'
   }
 }
 default[:bcpc][:hadoop][:kerberos][:keytab][:dir] = "/etc/security/keytabs"
