@@ -27,8 +27,6 @@ include_recipe 'bcpc::mysql_data_bags'
 # These data bags and vault items are pre-populated at compile time by
 # the bcpc::mysql_data_bags recipe.
 #
-# root_user = get_config!('mysql-root-user')
-# root_password = get_config!('password', 'mysql-root', 'os')
 
 graphite_user = get_config!('mysql-graphite-user')
 graphite_password = get_config!('password', 'mysql-graphite', 'os')
@@ -77,7 +75,7 @@ end
     source 'carbon/init.erb'
     owner 'root'
     group 'root'
-    mode 0o755
+    mode 0o0755
     notifies :restart, "service[carbon-#{pkg}]", :delayed
     variables('daemon' => pkg.to_s)
   end
@@ -126,7 +124,7 @@ template '/opt/graphite/conf/carbon.conf' do
   source 'carbon/carbon.conf.erb'
   owner 'root'
   group 'root'
-  mode 0o644
+  mode 0o0644
   variables(
     'servers' => mysql_servers,
     'min_quorum' => mysql_servers.length / 2 + 1
@@ -140,7 +138,7 @@ template '/opt/graphite/conf/storage-schemas.conf' do
   source 'carbon/storage-schemas.conf.erb'
   owner 'root'
   group 'root'
-  mode 0o644
+  mode 0o0644
   notifies :restart, 'service[carbon-cache]', :delayed
 end
 
@@ -148,7 +146,7 @@ template '/opt/graphite/conf/storage-aggregation.conf' do
   source 'carbon/storage-aggregation.conf.erb'
   owner 'root'
   group 'root'
-  mode 0o644
+  mode 0o0644
   notifies :restart, 'service[carbon-cache]', :delayed
 end
 
@@ -156,7 +154,7 @@ template '/opt/graphite/conf/relay-rules.conf' do
   source 'carbon/relay-rules.conf.erb'
   owner 'root'
   group 'root'
-  mode 0o644
+  mode 0o0644
   variables('servers' => mysql_servers)
   notifies :restart, 'service[carbon-relay]', :delayed
 end
@@ -165,7 +163,7 @@ template '/opt/graphite/conf/aggregation-rules.conf' do
   source 'carbon/aggregation-rules.conf.erb'
   owner 'root'
   group 'root'
-  mode 0o644
+  mode 0o0644
   notifies :restart, 'service[carbon-aggregator]', :delayed
 end
 
@@ -173,7 +171,7 @@ template '/opt/graphite/conf/rewrite-rules.conf' do
   source 'carbon/rewrite-rules.conf.erb'
   owner 'root'
   group 'root'
-  mode 0o644
+  mode 0o0644
 end
 
 #
@@ -191,7 +189,7 @@ template graphite_web_conf_file do
   source 'apache-graphite-web.conf.erb'
   owner 'root'
   group 'root'
-  mode 0o644
+  mode 0o0644
   notifies :restart, 'service[apache2]', :delayed
 end
 
@@ -206,14 +204,14 @@ template '/opt/graphite/conf/graphite.wsgi' do
   source 'graphite/wsgi.erb'
   owner 'root'
   group 'root'
-  mode 0o755
+  mode 0o0755
 end
 
 template '/opt/graphite/webapp/graphite/local_settings.py' do
   source 'graphite/local_settings.py.erb'
   owner 'root'
   group 'www-data'
-  mode 0o440
+  mode 0o0440
   variables(
     'servers' => mysql_servers,
     'min_quorum' => mysql_servers.length / 2 + 1

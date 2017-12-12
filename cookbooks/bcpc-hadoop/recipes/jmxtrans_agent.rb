@@ -2,7 +2,7 @@
 ## namenode
 template node['bcpc']['hadoop']['jmxtrans_agent']['namenode']['xml'] do
   source 'jmxtrans_agent.xml.erb'
-  mode 0o644
+  mode 0o0644
   variables(
     collect_interval_in_seconds: node['bcpc']['hadoop']['jmxtrans_agent']['collect_interval_in_seconds'],
     output_writer_class: node['bcpc']['hadoop']['jmxtrans_agent']['output_writer']['class'],
@@ -16,7 +16,7 @@ end
 # datanode
 template node['bcpc']['hadoop']['jmxtrans_agent']['datanode']['xml'] do
   source 'jmxtrans_agent.xml.erb'
-  mode 0o644
+  mode 0o0644
   variables(
     collect_interval_in_seconds: node['bcpc']['hadoop']['jmxtrans_agent']['collect_interval_in_seconds'],
     output_writer_class: node['bcpc']['hadoop']['jmxtrans_agent']['output_writer']['class'],
@@ -30,7 +30,7 @@ end
 # journalnode
 template node['bcpc']['hadoop']['jmxtrans_agent']['journalnode']['xml'] do
   source 'jmxtrans_agent.xml.erb'
-  mode 0o644
+  mode 0o0644
   variables(
     collect_interval_in_seconds: node['bcpc']['hadoop']['jmxtrans_agent']['collect_interval_in_seconds'],
     output_writer_class: node['bcpc']['hadoop']['jmxtrans_agent']['output_writer']['class'],
@@ -45,7 +45,7 @@ end
 ## master
 template node['bcpc']['hadoop']['jmxtrans_agent']['hbase_master']['xml'] do
   source 'jmxtrans_agent.xml.erb'
-  mode 0o644
+  mode 0o0644
   variables(
     collect_interval_in_seconds: node['bcpc']['hadoop']['jmxtrans_agent']['collect_interval_in_seconds'],
     output_writer_class: node['bcpc']['hadoop']['jmxtrans_agent']['output_writer']['class'],
@@ -59,7 +59,7 @@ end
 # region server
 template node['bcpc']['hadoop']['jmxtrans_agent']['hbase_rs']['xml'] do
   source 'jmxtrans_agent.xml.erb'
-  mode 0o644
+  mode 0o0644
   variables(
     collect_interval_in_seconds: node['bcpc']['hadoop']['jmxtrans_agent']['collect_interval_in_seconds'],
     output_writer_class: node['bcpc']['hadoop']['jmxtrans_agent']['output_writer']['class'],
@@ -73,7 +73,7 @@ end
 # node manager
 template node['bcpc']['hadoop']['jmxtrans_agent']['nodemanager']['xml'] do
   source 'jmxtrans_agent.xml.erb'
-  mode 0o644
+  mode 0o0644
   variables(
     collect_interval_in_seconds: node['bcpc']['hadoop']['jmxtrans_agent']['collect_interval_in_seconds'],
     output_writer_class: node['bcpc']['hadoop']['jmxtrans_agent']['output_writer']['class'],
@@ -87,7 +87,7 @@ end
 # resource manager
 template node['bcpc']['hadoop']['jmxtrans_agent']['resourcemanager']['xml'] do
   source 'jmxtrans_agent.xml.erb'
-  mode 0o644
+  mode 0o0644
   variables(
     collect_interval_in_seconds: node['bcpc']['hadoop']['jmxtrans_agent']['collect_interval_in_seconds'],
     output_writer_class: node['bcpc']['hadoop']['jmxtrans_agent']['output_writer']['class'],
@@ -101,7 +101,7 @@ end
 # zookeeper
 template node['bcpc']['hadoop']['jmxtrans_agent']['zookeeper']['xml'] do
   source 'jmxtrans_agent.xml.erb'
-  mode 0o644
+  mode 0o0644
   variables(
     collect_interval_in_seconds: node['bcpc']['hadoop']['jmxtrans_agent']['collect_interval_in_seconds'],
     output_writer_class: node['bcpc']['hadoop']['jmxtrans_agent']['output_writer']['class'],
@@ -115,7 +115,7 @@ end
 # kafka
 template node['bcpc']['hadoop']['jmxtrans_agent']['kafka']['xml'] do
   source 'jmxtrans_agent.xml.erb'
-  mode 0o644
+  mode 0o0644
   variables(
     collect_interval_in_seconds: node['bcpc']['hadoop']['jmxtrans_agent']['collect_interval_in_seconds'],
     output_writer_class: node['bcpc']['hadoop']['jmxtrans_agent']['output_writer']['class'],
