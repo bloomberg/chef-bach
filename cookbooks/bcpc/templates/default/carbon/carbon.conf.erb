@@ -23,11 +23,45 @@ CACHE_QUERY_INTERFACE = <%="#{node[:bcpc][:management][:ip]}"%>
 CACHE_QUERY_PORT = 7002
 USE_FLOW_CONTROL = True
 LOG_UPDATES = False
-LOG_CACHE_HITS = False
-LOG_CACHE_QUEUE_SORTS = False
-LOG_LISTENER_CONN_SUCCESS = False
-LOG_CREATES = False
-CACHE_WRITE_STRATEGY = max 
+LOG_CREATES = True
+LOG_CACHE_HITS = True
+LOG_CACHE_QUEUE_SORTS = True
+
+# The thread that writes metrics to disk can use one of the following strategies
+# determining the order in which metrics are removed from cache and flushed to
+# disk. The default option preserves the same behavior as has been historically
+# available in version 0.9.10.
+#
+# sorted - All metrics in the cache will be counted and an ordered list of
+# them will be sorted according to the number of datapoints in the cache at the
+# moment of the list's creation. Metrics will then be flushed from the cache to
+# disk in that order.
+#
+# timesorted - All metrics in the list will be looked at and sorted according
+# to the timestamp of there datapoints. The metric that were the least recently
+# written will be written first. This is an hybrid strategy between max and
+# sorted which is particularly adapted to sets of metrics with non-uniform
+# resolutions.
+#
+# max - The writer thread will always pop and flush the metric from cache
+# that has the most datapoints. This will give a strong flush preference to
+# frequently updated metrics and will also reduce random file-io. Infrequently
+# updated metrics may only ever be persisted to disk at daemon shutdown if
+# there are a large number of metrics which receive very frequent updates OR if
+# disk i/o is very slow.
+#
+# naive - Metrics will be flushed from the cache to disk in an unordered
+# fashion. This strategy may be desirable in situations where the storage for
+# whisper files is solid state, CPU resources are very limited or deference to
+# the OS's i/o scheduler is expected to compensate for the random write
+# pattern.
+#
+# CACHE_WRITE_STRATEGY = sorted
+CACHE_WRITE_STRATEGY = sorted
+
+# On some systems it is desirable for whisper to write synchronously.
+# Set this option to True if you'd like to try this. Basically it will
+# shift the onus of buffering writes from the kernel into carbon's cache.
 WHISPER_AUTOFLUSH = False
 
 [relay]
@@ -39,7 +73,22 @@ PICKLE_RECEIVER_PORT = 2014
 RELAY_METHOD = consistent-hashing
 REPLICATION_FACTOR = <%="#{@min_quorum}"%>
 DESTINATIONS = <%= "#{@servers.map{|x| x['mgmt_ip']+':2024'}.sort.join(', ')}" %>
-MAX_QUEUE_SIZE = 10000
+
+# This define the protocol to use to contact the destination. It can be
+# set to one of "line", "pickle", "udp" and "protobuf". This list can be
+# extended with CarbonClientFactory plugins and defaults to "pickle".
+# DESTINATION_PROTOCOL = pickle
+
+# This is the maximum number of datapoints that can be queued up
+# for a single destination. Once this limit is hit, we will
+# stop accepting new data if USE_FLOW_CONTROL is True, otherwise
+# we will drop any subsequently received datapoints.
+MAX_QUEUE_SIZE = 100000
+
+# This defines the maximum "message size" between carbon daemons.  If
+# your queue is large, setting this to a lower number will cause the
+# relay to forward smaller discrete chunks of stats, which may prevent
+# overloading on the receiving side after a disconnect.
 MAX_DATAPOINTS_PER_MESSAGE = 500
 QUEUE_LOW_WATERMARK_PCT = 0.8
 TIME_TO_DEFER_SENDING = 0.0001
@@ -58,9 +107,55 @@ PICKLE_RECEIVER_INTERFACE = <%="#{node[:bcpc][:management][:ip]}"%>
 PICKLE_RECEIVER_PORT = 2024
 DESTINATIONS = <%="#{node[:bcpc][:management][:ip]+':2004'}"%>
 REPLICATION_FACTOR = 1
-MAX_QUEUE_SIZE = 10000
+
+# This is the maximum number of datapoints that can be queued up
+# for a single destination. Once this limit is hit, we will
+# stop accepting new data if USE_FLOW_CONTROL is True, otherwise
+# we will drop any subsequently received datapoints.
+MAX_QUEUE_SIZE = 100000
+
+# Set this to False to drop datapoints when any send queue (sending datapoints
+# to a downstream carbon daemon) hits MAX_QUEUE_SIZE. If this is True (the
+# default) then sockets over which metrics are received will temporarily stop accepting
+# data until the send queues fall below 80% MAX_QUEUE_SIZE.
 USE_FLOW_CONTROL = True
 MAX_DATAPOINTS_PER_MESSAGE = 500
 MAX_AGGREGATION_INTERVALS = 5
-FORWARD_ALL = True
+
+# Limit the number of open connections the receiver can handle as any time.
+# Default is no limit. Setting up a limit for sites handling high volume
+# traffic may be recommended to avoid running out of TCP memory or having
+# thousands of TCP connections reduce the throughput of the service.
+#MAX_RECEIVER_CONNECTIONS = inf
+
+# By default (WRITE_BACK_FREQUENCY = 0), carbon-aggregator will write back
+# aggregated data points once every rule.frequency seconds, on a per-rule basis.
+# Set this (WRITE_BACK_FREQUENCY = N) to write back all aggregated data points
+# every N seconds, independent of rule frequency. This is useful, for example,
+# to be able to query partially aggregated metrics from carbon-cache without
+# having to first wait rule.frequency seconds.
+# WRITE_BACK_FREQUENCY = 0
+
+# Set this to True to enable whitelisting and blacklisting of metrics in
+# CONF_DIR/whitelist.conf and CONF_DIR/blacklist.conf. If the whitelist is
+# missing or empty, all metrics will pass through
+# USE_WHITELIST = False
+
+# By default, carbon itself will log statistics (such as a count,
+# metricsReceived) with the top level prefix of 'carbon' at an interval of 60
+# seconds. Set CARBON_METRIC_INTERVAL to 0 to disable instrumentation
+# CARBON_METRIC_PREFIX = carbon
+# CARBON_METRIC_INTERVAL = 60
+
+# In order to turn off logging of successful connections for the line
+# receiver, set this to False
+# LOG_LISTENER_CONN_SUCCESS = True
+LOG_LISTENER_CONN_SUCCESS = False
+
+# In order to turn off logging of metrics with no corresponding
+# aggregation rules receiver, set this to False
 LOG_AGGREGATOR_MISSES = False
+
+# Specify the user to drop privileges to
+# If this is blank carbon-aggregator runs as the user that invokes it
+# USER =

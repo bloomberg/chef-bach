@@ -162,7 +162,7 @@ default['bcpc']['hadoop']['copylog_quota'] = {
 # File rollup interval in secs for log data copied into HDFS through Flume
 default['bcpc']['hadoop']['copylog_rollup_interval'] = 86_400
 # Ensure copylogs can read Chef's client.log
-default['chef_client']['log_perm'] = 0o644
+default['chef_client']['log_perm'] = 0o0644
 
 default['bcpc']['hadoop']['copylog']['syslog'] = {
   'logfile' => '/var/log/syslog',

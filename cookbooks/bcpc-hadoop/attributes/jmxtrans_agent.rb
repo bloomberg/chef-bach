@@ -3,6 +3,499 @@ default['bcpc']['hadoop']['jmxtrans_agent']['output_writer']['class'] = 'org.jmx
 default['bcpc']['hadoop']['jmxtrans_agent']['output_writer']['host'] = node['bcpc']['management']['vip']
 default['bcpc']['hadoop']['jmxtrans_agent']['output_writer']['port'] = node['bcpc']['graphite']['relay_port']
 
+jvm_metrics = 'GcCount,' \
+  'GcTimeMillis,' \
+  'LogError,' \
+  'LogFatal,' \
+  'LogInfo,' \
+  'LogWarn,' \
+  'MemHeapCommittedM,' \
+  'MemHeapUsedM,' \
+  'MemMaxM,' \
+  'MemNonHeapCommittedM,' \
+  'MemNonHeapUsedM,' \
+  'ThreadsBlocked,' \
+  'ThreadsNew,' \
+  'ThreadsRunnable,' \
+  'ThreadsTerminated,' \
+  'ThreadsTimedWaiting,' \
+  'ThreadsWaiting'
+
+hbase_ipc_metrics = 'ProcessCallTime_25th_percentile,' \
+  'ProcessCallTime_75th_percentile,' \
+  'ProcessCallTime_90th_percentile,' \
+  'ProcessCallTime_95th_percentile,' \
+  'ProcessCallTime_98th_percentile,' \
+  'ProcessCallTime_99.9th_percentile,' \
+  'ProcessCallTime_99th_percentile,' \
+  'ProcessCallTime_max,' \
+  'ProcessCallTime_mean,' \
+  'ProcessCallTime_median,' \
+  'ProcessCallTime_min,' \
+  'ProcessCallTime_num_ops,' \
+  'QueueCallTime_25th_percentile,' \
+  'QueueCallTime_75th_percentile,' \
+  'QueueCallTime_90th_percentile,' \
+  'QueueCallTime_95th_percentile,' \
+  'QueueCallTime_98th_percentile,' \
+  'QueueCallTime_99.9th_percentile,' \
+  'QueueCallTime_99th_percentile,' \
+  'QueueCallTime_max,' \
+  'QueueCallTime_mean,' \
+  'QueueCallTime_median,' \
+  'QueueCallTime_min,' \
+  'QueueCallTime_num_ops,' \
+  'RequestSize_25th_percentile,' \
+  'RequestSize_75th_percentile,' \
+  'RequestSize_90th_percentile,' \
+  'RequestSize_95th_percentile,' \
+  'RequestSize_98th_percentile,' \
+  'RequestSize_99.9th_percentile,' \
+  'RequestSize_99th_percentile,' \
+  'RequestSize_max,' \
+  'RequestSize_mean,' \
+  'RequestSize_median,' \
+  'RequestSize_min,' \
+  'RequestSize_num_ops,' \
+  'ResponseSize_25th_percentile,' \
+  'ResponseSize_75th_percentile,' \
+  'ResponseSize_90th_percentile,' \
+  'ResponseSize_95th_percentile,' \
+  'ResponseSize_98th_percentile,' \
+  'ResponseSize_99.9th_percentile,' \
+  'ResponseSize_99th_percentile,' \
+  'ResponseSize_max,' \
+  'ResponseSize_mean,' \
+  'ResponseSize_median,' \
+  'ResponseSize_min,' \
+  'ResponseSize_num_ops,' \
+  'TotalCallTime_25th_percentile,' \
+  'TotalCallTime_75th_percentile,' \
+  'TotalCallTime_90th_percentile,' \
+  'TotalCallTime_95th_percentile,' \
+  'TotalCallTime_98th_percentile,' \
+  'TotalCallTime_99.9th_percentile,' \
+  'TotalCallTime_99th_percentile,' \
+  'TotalCallTime_max,' \
+  'TotalCallTime_mean,' \
+  'TotalCallTime_median,' \
+  'TotalCallTime_min,' \
+  'TotalCallTime_num_ops,' \
+  'authenticationFailures,' \
+  'authenticationSuccesses,' \
+  'authorizationFailures,' \
+  'authorizationSuccesses,' \
+  'exceptions,' \
+  'exceptions.FailedSanityCheckException,' \
+  'exceptions.NotServingRegionException,' \
+  'exceptions.OutOfOrderScannerNextException,' \
+  'exceptions.RegionMovedException,' \
+  'exceptions.RegionTooBusyException,' \
+  'exceptions.ScannerResetException,' \
+  'exceptions.UnknownScannerException,' \
+  'numActiveHandler,' \
+  'numCallsInGeneralQueue,' \
+  'numCallsInPriorityQueue,' \
+  'numCallsInReplicationQueue,' \
+  'numGeneralCallsDropped,' \
+  'numLifoModeSwitches,' \
+  'numOpenConnections,' \
+  'queueSize,' \
+  'receivedBytes,' \
+  'sentBytes'
+
+hb_rs_server_metrics = 'Append_25th_percentile,' \
+  'Append_75th_percentile,' \
+  'Append_90th_percentile,' \
+  'Append_95th_percentile,' \
+  'Append_98th_percentile,' \
+  'Append_99.9th_percentile,' \
+  'Append_99th_percentile,' \
+  'Append_max,' \
+  'Append_mean,' \
+  'Append_median,' \
+  'Append_min,' \
+  'Append_num_ops,' \
+  'CompactionInputFileCount_25th_percentile,' \
+  'CompactionInputFileCount_75th_percentile,' \
+  'CompactionInputFileCount_90th_percentile,' \
+  'CompactionInputFileCount_95th_percentile,' \
+  'CompactionInputFileCount_98th_percentile,' \
+  'CompactionInputFileCount_99.9th_percentile,' \
+  'CompactionInputFileCount_99th_percentile,' \
+  'CompactionInputFileCount_max,' \
+  'CompactionInputFileCount_mean,' \
+  'CompactionInputFileCount_median,' \
+  'CompactionInputFileCount_min,' \
+  'CompactionInputFileCount_num_ops,' \
+  'CompactionInputSize_25th_percentile,' \
+  'CompactionInputSize_75th_percentile,' \
+  'CompactionInputSize_90th_percentile,' \
+  'CompactionInputSize_95th_percentile,' \
+  'CompactionInputSize_98th_percentile,' \
+  'CompactionInputSize_99.9th_percentile,' \
+  'CompactionInputSize_99th_percentile,' \
+  'CompactionInputSize_max,' \
+  'CompactionInputSize_mean,' \
+  'CompactionInputSize_median,' \
+  'CompactionInputSize_min,' \
+  'CompactionInputSize_num_ops,' \
+  'CompactionOutputFileCount_25th_percentile,' \
+  'CompactionOutputFileCount_75th_percentile,' \
+  'CompactionOutputFileCount_90th_percentile,' \
+  'CompactionOutputFileCount_95th_percentile,' \
+  'CompactionOutputFileCount_98th_percentile,' \
+  'CompactionOutputFileCount_99.9th_percentile,' \
+  'CompactionOutputFileCount_99th_percentile,' \
+  'CompactionOutputFileCount_max,' \
+  'CompactionOutputFileCount_mean,' \
+  'CompactionOutputFileCount_median,' \
+  'CompactionOutputFileCount_min,' \
+  'CompactionOutputFileCount_num_ops,' \
+  'CompactionOutputSize_25th_percentile,' \
+  'CompactionOutputSize_75th_percentile,' \
+  'CompactionOutputSize_90th_percentile,' \
+  'CompactionOutputSize_95th_percentile,' \
+  'CompactionOutputSize_98th_percentile,' \
+  'CompactionOutputSize_99.9th_percentile,' \
+  'CompactionOutputSize_99th_percentile,' \
+  'CompactionOutputSize_max,' \
+  'CompactionOutputSize_mean,' \
+  'CompactionOutputSize_median,' \
+  'CompactionOutputSize_min,' \
+  'CompactionOutputSize_num_ops,' \
+  'CompactionTime_25th_percentile,' \
+  'CompactionTime_75th_percentile,' \
+  'CompactionTime_90th_percentile,' \
+  'CompactionTime_95th_percentile,' \
+  'CompactionTime_98th_percentile,' \
+  'CompactionTime_99.9th_percentile,' \
+  'CompactionTime_99th_percentile,' \
+  'CompactionTime_max,' \
+  'CompactionTime_mean,' \
+  'CompactionTime_median,' \
+  'CompactionTime_min,' \
+  'CompactionTime_num_ops,' \
+  'Delete_25th_percentile,' \
+  'Delete_75th_percentile,' \
+  'Delete_90th_percentile,' \
+  'Delete_95th_percentile,' \
+  'Delete_98th_percentile,' \
+  'Delete_99.9th_percentile,' \
+  'Delete_99th_percentile,' \
+  'Delete_max,' \
+  'Delete_mean,' \
+  'Delete_median,' \
+  'Delete_min,' \
+  'Delete_num_ops,' \
+  'FlushMemstoreSize_25th_percentile,' \
+  'FlushMemstoreSize_75th_percentile,' \
+  'FlushMemstoreSize_90th_percentile,' \
+  'FlushMemstoreSize_95th_percentile,' \
+  'FlushMemstoreSize_98th_percentile,' \
+  'FlushMemstoreSize_99.9th_percentile,' \
+  'FlushMemstoreSize_99th_percentile,' \
+  'FlushMemstoreSize_max,' \
+  'FlushMemstoreSize_mean,' \
+  'FlushMemstoreSize_median,' \
+  'FlushMemstoreSize_min,' \
+  'FlushMemstoreSize_num_ops,' \
+  'FlushOutputSize_25th_percentile,' \
+  'FlushOutputSize_75th_percentile,' \
+  'FlushOutputSize_90th_percentile,' \
+  'FlushOutputSize_95th_percentile,' \
+  'FlushOutputSize_98th_percentile,' \
+  'FlushOutputSize_99.9th_percentile,' \
+  'FlushOutputSize_99th_percentile,' \
+  'FlushOutputSize_max,' \
+  'FlushOutputSize_mean,' \
+  'FlushOutputSize_median,' \
+  'FlushOutputSize_min,' \
+  'FlushOutputSize_num_ops,' \
+  'FlushTime_25th_percentile,' \
+  'FlushTime_75th_percentile,' \
+  'FlushTime_90th_percentile,' \
+  'FlushTime_95th_percentile,' \
+  'FlushTime_98th_percentile,' \
+  'FlushTime_99.9th_percentile,' \
+  'FlushTime_99th_percentile,' \
+  'FlushTime_max,' \
+  'FlushTime_mean,' \
+  'FlushTime_median,' \
+  'FlushTime_min,' \
+  'FlushTime_num_ops,' \
+  'Get_25th_percentile,' \
+  'Get_75th_percentile,' \
+  'Get_90th_percentile,' \
+  'Get_95th_percentile,' \
+  'Get_98th_percentile,' \
+  'Get_99.9th_percentile,' \
+  'Get_99th_percentile,' \
+  'Get_max,' \
+  'Get_mean,' \
+  'Get_median,' \
+  'Get_min,' \
+  'Get_num_ops,' \
+  'Increment_25th_percentile,' \
+  'Increment_75th_percentile,' \
+  'Increment_90th_percentile,' \
+  'Increment_95th_percentile,' \
+  'Increment_98th_percentile,' \
+  'Increment_99.9th_percentile,' \
+  'Increment_99th_percentile,' \
+  'Increment_max,' \
+  'Increment_mean,' \
+  'Increment_median,' \
+  'Increment_min,' \
+  'Increment_num_ops,' \
+  'MajorCompactionInputFileCount_25th_percentile,' \
+  'MajorCompactionInputFileCount_75th_percentile,' \
+  'MajorCompactionInputFileCount_90th_percentile,' \
+  'MajorCompactionInputFileCount_95th_percentile,' \
+  'MajorCompactionInputFileCount_98th_percentile,' \
+  'MajorCompactionInputFileCount_99.9th_percentile,' \
+  'MajorCompactionInputFileCount_99th_percentile,' \
+  'MajorCompactionInputFileCount_max,' \
+  'MajorCompactionInputFileCount_mean,' \
+  'MajorCompactionInputFileCount_median,' \
+  'MajorCompactionInputFileCount_min,' \
+  'MajorCompactionInputFileCount_num_ops,' \
+  'MajorCompactionInputSize_25th_percentile,' \
+  'MajorCompactionInputSize_75th_percentile,' \
+  'MajorCompactionInputSize_90th_percentile,' \
+  'MajorCompactionInputSize_95th_percentile,' \
+  'MajorCompactionInputSize_98th_percentile,' \
+  'MajorCompactionInputSize_99.9th_percentile,' \
+  'MajorCompactionInputSize_99th_percentile,' \
+  'MajorCompactionInputSize_max,' \
+  'MajorCompactionInputSize_mean,' \
+  'MajorCompactionInputSize_median,' \
+  'MajorCompactionInputSize_min,' \
+  'MajorCompactionInputSize_num_ops,' \
+  'MajorCompactionOutputFileCount_25th_percentile,' \
+  'MajorCompactionOutputFileCount_75th_percentile,' \
+  'MajorCompactionOutputFileCount_90th_percentile,' \
+  'MajorCompactionOutputFileCount_95th_percentile,' \
+  'MajorCompactionOutputFileCount_98th_percentile,' \
+  'MajorCompactionOutputFileCount_99.9th_percentile,' \
+  'MajorCompactionOutputFileCount_99th_percentile,' \
+  'MajorCompactionOutputFileCount_max,' \
+  'MajorCompactionOutputFileCount_mean,' \
+  'MajorCompactionOutputFileCount_median,' \
+  'MajorCompactionOutputFileCount_min,' \
+  'MajorCompactionOutputFileCount_num_ops,' \
+  'MajorCompactionOutputSize_25th_percentile,' \
+  'MajorCompactionOutputSize_75th_percentile,' \
+  'MajorCompactionOutputSize_90th_percentile,' \
+  'MajorCompactionOutputSize_95th_percentile,' \
+  'MajorCompactionOutputSize_98th_percentile,' \
+  'MajorCompactionOutputSize_99.9th_percentile,' \
+  'MajorCompactionOutputSize_99th_percentile,' \
+  'MajorCompactionOutputSize_max,' \
+  'MajorCompactionOutputSize_mean,' \
+  'MajorCompactionOutputSize_median,' \
+  'MajorCompactionOutputSize_min,' \
+  'MajorCompactionOutputSize_num_ops,' \
+  'MajorCompactionTime_25th_percentile,' \
+  'MajorCompactionTime_75th_percentile,' \
+  'MajorCompactionTime_90th_percentile,' \
+  'MajorCompactionTime_95th_percentile,' \
+  'MajorCompactionTime_98th_percentile,' \
+  'MajorCompactionTime_99.9th_percentile,' \
+  'MajorCompactionTime_99th_percentile,' \
+  'MajorCompactionTime_max,' \
+  'MajorCompactionTime_mean,' \
+  'MajorCompactionTime_median,' \
+  'MajorCompactionTime_min,' \
+  'MajorCompactionTime_num_ops,' \
+  'Mutate_25th_percentile,' \
+  'Mutate_75th_percentile,' \
+  'Mutate_90th_percentile,' \
+  'Mutate_95th_percentile,' \
+  'Mutate_98th_percentile,' \
+  'Mutate_99.9th_percentile,' \
+  'Mutate_99th_percentile,' \
+  'Mutate_max,' \
+  'Mutate_mean,' \
+  'Mutate_median,' \
+  'Mutate_min,' \
+  'Mutate_num_ops,' \
+  'PauseTimeWithGc_25th_percentile,' \
+  'PauseTimeWithGc_75th_percentile,' \
+  'PauseTimeWithGc_90th_percentile,' \
+  'PauseTimeWithGc_95th_percentile,' \
+  'PauseTimeWithGc_98th_percentile,' \
+  'PauseTimeWithGc_99.9th_percentile,' \
+  'PauseTimeWithGc_99th_percentile,' \
+  'PauseTimeWithGc_max,' \
+  'PauseTimeWithGc_mean,' \
+  'PauseTimeWithGc_median,' \
+  'PauseTimeWithGc_min,' \
+  'PauseTimeWithGc_num_ops,' \
+  'PauseTimeWithoutGc_25th_percentile,' \
+  'PauseTimeWithoutGc_75th_percentile,' \
+  'PauseTimeWithoutGc_90th_percentile,' \
+  'PauseTimeWithoutGc_95th_percentile,' \
+  'PauseTimeWithoutGc_98th_percentile,' \
+  'PauseTimeWithoutGc_99.9th_percentile,' \
+  'PauseTimeWithoutGc_99th_percentile,' \
+  'PauseTimeWithoutGc_max,' \
+  'PauseTimeWithoutGc_mean,' \
+  'PauseTimeWithoutGc_median,' \
+  'PauseTimeWithoutGc_min,' \
+  'PauseTimeWithoutGc_num_ops,' \
+  'Replay_25th_percentile,' \
+  'Replay_75th_percentile,' \
+  'Replay_90th_percentile,' \
+  'Replay_95th_percentile,' \
+  'Replay_98th_percentile,' \
+  'Replay_99.9th_percentile,' \
+  'Replay_99th_percentile,' \
+  'Replay_max,' \
+  'Replay_mean,' \
+  'Replay_median,' \
+  'Replay_min,' \
+  'Replay_num_ops,' \
+  'ScanSize_25th_percentile,' \
+  'ScanSize_75th_percentile,' \
+  'ScanSize_90th_percentile,' \
+  'ScanSize_95th_percentile,' \
+  'ScanSize_98th_percentile,' \
+  'ScanSize_99.9th_percentile,' \
+  'ScanSize_99th_percentile,' \
+  'ScanSize_max,' \
+  'ScanSize_mean,' \
+  'ScanSize_median,' \
+  'ScanSize_min,' \
+  'ScanSize_num_ops,' \
+  'ScanTime_25th_percentile,' \
+  'ScanTime_75th_percentile,' \
+  'ScanTime_90th_percentile,' \
+  'ScanTime_95th_percentile,' \
+  'ScanTime_98th_percentile,' \
+  'ScanTime_99.9th_percentile,' \
+  'ScanTime_99th_percentile,' \
+  'ScanTime_max,' \
+  'ScanTime_mean,' \
+  'ScanTime_median,' \
+  'ScanTime_min,' \
+  'ScanTime_num_ops,' \
+  'SplitTime_25th_percentile,' \
+  'SplitTime_75th_percentile,' \
+  'SplitTime_90th_percentile,' \
+  'SplitTime_95th_percentile,' \
+  'SplitTime_98th_percentile,' \
+  'SplitTime_99.9th_percentile,' \
+  'SplitTime_99th_percentile,' \
+  'SplitTime_max,' \
+  'SplitTime_mean,' \
+  'SplitTime_median,' \
+  'SplitTime_min,' \
+  'SplitTime_num_ops,' \
+  'averageRegionSize,' \
+  'avgStoreFileAge,' \
+  'blockCacheBloomChunkHitCount,' \
+  'blockCacheBloomChunkMissCount,' \
+  'blockCacheCount,' \
+  'blockCacheCountHitPercent,' \
+  'blockCacheDataHitCount,' \
+  'blockCacheDataMissCount,' \
+  'blockCacheDeleteFamilyBloomHitCount,' \
+  'blockCacheDeleteFamilyBloomMissCount,' \
+  'blockCacheEvictionCount,' \
+  'blockCacheEvictionCountPrimary,' \
+  'blockCacheExpressHitPercent,' \
+  'blockCacheFileInfoHitCount,' \
+  'blockCacheFileInfoMissCount,' \
+  'blockCacheFreeSize,' \
+  'blockCacheGeneralBloomMetaHitCount,' \
+  'blockCacheGeneralBloomMetaMissCount,' \
+  'blockCacheHitCount,' \
+  'blockCacheHitCountPrimary,' \
+  'blockCacheIntermediateIndexHitCount,' \
+  'blockCacheIntermediateIndexMissCount,' \
+  'blockCacheLeafIndexHitCount,' \
+  'blockCacheLeafIndexMissCount,' \
+  'blockCacheMetaHitCount,' \
+  'blockCacheMetaMissCount,' \
+  'blockCacheMissCount,' \
+  'blockCacheMissCountPrimary,' \
+  'blockCacheRootIndexHitCount,' \
+  'blockCacheRootIndexMissCount,' \
+  'blockCacheSize,' \
+  'blockCacheTrailerHitCount,' \
+  'blockCacheTrailerMissCount,' \
+  'blockedRequestCount,' \
+  'cellsCountCompactedFromMob,' \
+  'cellsCountCompactedToMob,' \
+  'cellsSizeCompactedFromMob,' \
+  'cellsSizeCompactedToMob,' \
+  'checkMutateFailedCount,' \
+  'checkMutatePassedCount,' \
+  'compactedCellsCount,' \
+  'compactedCellsSize,' \
+  'compactedInputBytes,' \
+  'compactedOutputBytes,' \
+  'compactionQueueLength,' \
+  'compactionQueueLength,' \
+  'flushQueueLength,' \
+  'flushedCellsCount,' \
+  'flushedCellsSize,' \
+  'flushedMemstoreBytes,' \
+  'flushedOutputBytes,' \
+  'hlogFileCount,' \
+  'hlogFileSize,' \
+  'largeCompactionQueueLength,' \
+  'majorCompactedCellsCount,' \
+  'majorCompactedCellsSize,' \
+  'majorCompactedInputBytes,' \
+  'majorCompactedOutputBytes,' \
+  'maxStoreFileAge,' \
+  'memStoreSize,' \
+  'minStoreFileAge,' \
+  'mobFileCacheAccessCount,' \
+  'mobFileCacheCount,' \
+  'mobFileCacheEvictedCount,' \
+  'mobFileCacheHitPercent,' \
+  'mobFileCacheMissCount,' \
+  'mobFlushCount,' \
+  'mobFlushedCellsCount,' \
+  'mobFlushedCellsSize,' \
+  'mobScanCellsCount,' \
+  'mobScanCellsSize,' \
+  'mutationsWithoutWALCount,' \
+  'mutationsWithoutWALSize,' \
+  'numReferenceFiles,' \
+  'pauseInfoThresholdExceeded,' \
+  'pauseWarnThresholdExceeded,' \
+  'percentFilesLocal,' \
+  'percentFilesLocalSecondaryRegions,' \
+  'readRequestCount,' \
+  'regionCount,' \
+  'regionServerStartTime,' \
+  'rpcGetRequestCount,' \
+  'rpcMultiRequestCount,' \
+  'rpcMutateRequestCount,' \
+  'rpcScanRequestCount,' \
+  'slowAppendCount,' \
+  'slowDeleteCount,' \
+  'slowGetCount,' \
+  'slowIncrementCount,' \
+  'slowPutCount,' \
+  'smallCompactionQueueLength,' \
+  'splitQueueLength,' \
+  'splitRequestCount,' \
+  'splitSuccessCount,' \
+  'staticBloomSize,' \
+  'staticIndexSize,' \
+  'storeCount,' \
+  'storeFileCount,' \
+  'storeFileIndexSize,' \
+  'storeFileSize,' \
+  'totalRequestCount,' \
+  'updatesBlockedTime,' \
+  'writeRequestCount'
+
 # default queries
 default['bcpc']['hadoop']['jmxtrans_agent']['basic']['queries'] = [
   {
@@ -34,28 +527,7 @@ default['bcpc']['hadoop']['jmxtrans_agent']['namenode']['queries'] = default['bc
   {
     'objectName' => 'Hadoop:name=JvmMetrics,service=NameNode',
     'resultAlias' => 'nn_jvm_metrics.%name%.#attribute#',
-    'attributes' =>
-      'GcCount,' \
-      'GcCountCopy,' \
-      'GcCountMarkSweepCompact,' \
-      'GcTimeMillis,' \
-      'GcTimeMillisCopy,' \
-      'GcTimeMillisMarkSweepCompact,' \
-      'LogError,' \
-      'LogFatal,' \
-      'LogInfo,' \
-      'LogWarn,' \
-      'MemHeapCommittedM,' \
-      'MemHeapUsedM,' \
-      'MemMaxM,' \
-      'MemNonHeapCommittedM,' \
-      'MemNonHeapUsedM,' \
-      'ThreadsBlocked,' \
-      'ThreadsNew,' \
-      'ThreadsRunnable,' \
-      'ThreadsTerminated,' \
-      'ThreadsTimedWaiting,' \
-      'ThreadsWaiting'
+    'attributes' => jvm_metrics
   },
   {
     'objectName' => 'Hadoop:name=FSNamesystem,service=NameNode',
@@ -76,8 +548,13 @@ default['bcpc']['hadoop']['jmxtrans_agent']['namenode']['queries'] = default['bc
       'FilesTotal,' \
       'LastCheckpointTime,' \
       'LastWrittenTransactionId,' \
+      'LockQueueLength,' \
       'MillisSinceLastLoadedEdits,' \
       'MissingBlocks,' \
+      'MissingReplOneBlocks,' \
+      'NumActiveClients,' \
+      'NumFilesUnderConstruction,' \
+      'NumTimedOutPendingReplications,' \
       'PendingDataNodeMessageCount,' \
       'PendingDeletionBlocks,' \
       'PendingReplicationBlocks,' \
@@ -85,8 +562,10 @@ default['bcpc']['hadoop']['jmxtrans_agent']['namenode']['queries'] = default['bc
       'ScheduledReplicationBlocks,' \
       'Snapshots,' \
       'SnapshottableDirectories,' \
+      'StaleDataNodes,' \
       'TotalFiles,' \
       'TotalLoad,' \
+      'TotalSyncCount,' \
       'TransactionsSinceLastCheckpoint,' \
       'TransactionsSinceLastLogRoll,' \
       'UnderReplicatedBlocks'
@@ -95,18 +574,30 @@ default['bcpc']['hadoop']['jmxtrans_agent']['namenode']['queries'] = default['bc
     'objectName' => 'Hadoop:name=FSNamesystemState,service=NameNode',
     'resultAlias' => 'nn_fs_name_system_state.%name%.#attribute#',
     'attributes' =>
+      'BlockDeletionStartTime,' \
       'BlocksTotal,' \
       'CapacityRemaining,' \
       'CapacityTotal,' \
       'CapacityUsed,' \
+      'EstimatedCapacityLostTotal,' \
       'FilesTotal,' \
+      'FsLockQueueLength,' \
+      'MaxObjects,' \
       'NumDeadDataNodes,' \
+      'NumDecomDeadDataNodes,' \
+      'NumDecomLiveDataNodes,' \
+      'NumDecommissioningDataNodes,' \
       'NumLiveDataNodes,' \
       'NumStaleDataNodes,' \
+      'NumStaleStorages,' \
+      'PendingDeletionBlocks,' \
       'PendingReplicationBlocks,' \
       'ScheduledReplicationBlocks,' \
       'TotalLoad,' \
-      'UnderReplicatedBlocks'
+      'TotalSyncCount,' \
+      'TotalSyncTimes,' \
+      'UnderReplicatedBlocks,' \
+      'VolumeFailuresTotal'
   },
   {
     'objectName' => 'Hadoop:name=NameNodeActivity,service=NameNode',
@@ -114,8 +605,13 @@ default['bcpc']['hadoop']['jmxtrans_agent']['namenode']['queries'] = default['bc
     'attributes' =>
       'AddBlockOps,' \
       'AllowSnapshotOps,' \
+      'BlockOpsBatched,' \
+      'BlockOpsQueued,' \
+      'BlockReceivedAndDeletedOps,' \
       'BlockReportAvgTime,' \
       'BlockReportNumOps,' \
+      'CacheReportAvgTime,' \
+      'CacheReportNumOps,' \
       'CreateFileOps,' \
       'CreateSnapshotOps,' \
       'CreateSymlinkOps,' \
@@ -128,17 +624,26 @@ default['bcpc']['hadoop']['jmxtrans_agent']['namenode']['queries'] = default['bc
       'FilesDeleted,' \
       'FilesInGetListingOps,' \
       'FilesRenamed,' \
+      'FilesTruncated,' \
       'FsImageLoadTime,' \
       'GetAdditionalDatanodeOps,' \
       'GetBlockLocations,' \
+      'GetEditAvgTime,' \
+      'GetEditNumOps,' \
+      'GetImageAvgTime,' \
+      'GetImageNumOps,' \
       'GetLinkTargetOps,' \
       'GetListingOps,' \
       'ListSnapshottableDirOps,' \
+      'PutImageAvgTime,' \
+      'PutImageNumOps,' \
       'RenameSnapshotOps,' \
       'SafeModeTime,' \
       'SnapshotDiffReportOps,' \
+      'StorageBlockReportOps,' \
       'SyncsAvgTime,' \
       'SyncsNumOps,' \
+      'TotalFileOps,' \
       'TransactionsAvgTime,' \
       'TransactionsBatchedInSync,' \
       'TransactionsNumOps'
@@ -148,14 +653,17 @@ default['bcpc']['hadoop']['jmxtrans_agent']['namenode']['queries'] = default['bc
     'resultAlias' => 'nn_name_node_info.%name%.#attribute#',
     'attributes' =>
       'BlockPoolUsedSpace,' \
+      'CacheCapacity,' \
+      'CacheUsed,' \
       'DistinctVersionCount,' \
       'Free,' \
-      'JournalTransactionInfo,' \
       'NonDfsUsedSpace,' \
       'NumberOfMissingBlocks,' \
+      'NumberOfMissingBlocksWithReplicationFactorOne,' \
       'PercentBlockPoolUsed,' \
       'PercentRemaining,' \
       'PercentUsed,' \
+      'Safemode,' \
       'Threads,' \
       'Total,' \
       'TotalBlocks,' \
@@ -171,32 +679,12 @@ default['bcpc']['hadoop']['jmxtrans_agent']['datanode']['queries'] = default['bc
   {
     'objectName' => 'Hadoop:name=JvmMetrics,service=DataNode',
     'resultAlias' => 'dn_jvm_metrics.%name%.#attribute#',
-    'attributes' =>
-      'GcCount,' \
-      'GcTimeMillis,' \
-      'LogError,' \
-      'LogFatal,' \
-      'LogInfo,' \
-      'LogWarn,' \
-      'MemHeapCommittedM,' \
-      'MemHeapUsedM,' \
-      'MemMaxM,' \
-      'MemNonHeapCommittedM,' \
-      'MemNonHeapUsedM,' \
-      'ThreadsBlocked,' \
-      'ThreadsNew,' \
-      'ThreadsRunnable,' \
-      'ThreadsTerminated,' \
-      'ThreadsTimedWaiting,' \
-      'ThreadsWaiting'
+    'attributes' => jvm_metrics
   },
   {
     'objectName' => 'Hadoop:name=DataNodeInfo,service=DataNode',
     'resultAlias' => 'dn_data_node_info.%name%.#attribute#',
-    'attributes' =>
-      'HttpPort,' \
-      'RpcPort,' \
-      'XceiverCount'
+    'attributes' => 'RpcPort,XceiverCount'
   }
 ]
 
@@ -241,9 +729,9 @@ default['bcpc']['hadoop']['jmxtrans_agent']['journalnode']['queries'] = default[
       'SentBytes'
   },
   {
-    'objectName': 'Hadoop:service=JournalNode,name=UgiMetrics',
-    'resultAlias': 'journal_node.%name%.#attribute#',
-    'attributes':
+    'objectName' => 'Hadoop:service=JournalNode,name=UgiMetrics',
+    'resultAlias' => 'journal_node.%name%.#attribute#',
+    'attributes' =>
       'GetGroupsAvgTime,' \
       'GetGroupsNumOps,' \
       'LoginFailureAvgTime,' \
@@ -254,9 +742,9 @@ default['bcpc']['hadoop']['jmxtrans_agent']['journalnode']['queries'] = default[
       'RenewalFailuresTotal'
   },
   {
-    'objectName': 'Hadoop:service=JournalNode,name=Journal-*',
-    'resultAlias': 'journal_node.%name%.#attribute#',
-    'attributes':
+    'objectName' => 'Hadoop:service=JournalNode,name=Journal-*',
+    'resultAlias' => 'journal_node.%name%.#attribute#',
+    'attributes' =>
       'BatchesWritten,' \
       'BatchesWrittenWhileLagging,' \
       'BytesWritten,' \
@@ -286,7 +774,6 @@ default['bcpc']['hadoop']['jmxtrans_agent']['journalnode']['queries'] = default[
   }
 ]
 
-
 # HBase master
 default['bcpc']['hadoop']['jmxtrans_agent']['hbase_master']['xml'] = '/etc/hadoop/conf/jmxtrans_agent_hbase_master.xml'
 default['bcpc']['hadoop']['jmxtrans_agent']['hbase_master']['name_prefix'] = 'jmx.hbase_master'
@@ -294,24 +781,7 @@ default['bcpc']['hadoop']['jmxtrans_agent']['hbase_master']['queries'] = default
   {
     'objectName' => 'Hadoop:name=JvmMetrics,service=HBase',
     'resultAlias' => 'hbm_jvm_metrics.%name%.#attribute#',
-    'attributes' =>
-      'GcCount,' \
-      'GcTimeMillis,' \
-      'LogError,' \
-      'LogFatal,' \
-      'LogInfo,' \
-      'LogWarn,' \
-      'MemHeapCommittedM,' \
-      'MemHeapUsedM,' \
-      'MemMaxM,' \
-      'MemNonHeapCommittedM,' \
-      'MemNonHeapUsedM,' \
-      'ThreadsBlocked,' \
-      'ThreadsNew,' \
-      'ThreadsRunnable,' \
-      'ThreadsTerminated,' \
-      'ThreadsTimedWaiting,' \
-      'ThreadsWaiting'
+    'attributes' => jvm_metrics
   },
   {
     'objectName' => 'Hadoop:name=Master,service=HBase,sub=Server',
@@ -327,15 +797,12 @@ default['bcpc']['hadoop']['jmxtrans_agent']['hbase_master']['queries'] = default
   {
     'objectName' => 'Hadoop:name=Master,service=HBase,sub=AssignmentManger',
     'resultAlias' => 'hbm_am.%name%.#attribute#',
-    'attributes' =>
-      'ritOldestAge,' \
-      'ritCountOverThreshold,' \
-      'ritCount'
+    'attributes' => 'ritCount,ritCountOverThreshold,ritOldestAge'
   },
   {
     'objectName' => 'Hadoop:name=Master,service=HBase,sub=IPC',
     'resultAlias' => 'hbm_ipc.%name%.#attribute#',
-    'attributes' => ''
+    'attributes' => hbase_ipc_metrics
   }
 ]
 
@@ -346,57 +813,12 @@ default['bcpc']['hadoop']['jmxtrans_agent']['hbase_rs']['queries'] = default['bc
   {
     'objectName' => 'Hadoop:name=JvmMetrics,service=HBase',
     'resultAlias' => 'hb_rs_jvm_metrics.%name%.#attribute#',
-    'attributes' =>
-      'GcCount,' \
-      'GcTimeMillis,' \
-      'LogError,' \
-      'LogFatal,' \
-      'LogInfo,' \
-      'LogWarn,' \
-      'MemHeapCommittedM,' \
-      'MemHeapUsedM,' \
-      'MemMaxM,' \
-      'MemNonHeapCommittedM,' \
-      'MemNonHeapUsedM,' \
-      'ThreadsBlocked,' \
-      'ThreadsNew,' \
-      'ThreadsRunnable,' \
-      'ThreadsTerminated,' \
-      'ThreadsTimedWaiting,' \
-      'ThreadsWaiting'
+    'attributes' => jvm_metrics
   },
   {
     'objectName' => 'Hadoop:name=RegionServer,service=HBase,sub=IPC',
     'resultAlias' => 'hb_ipc.%name%.#attribute#',
-    'attributes' =>
-      'QueueCallTime_num_ops,' \
-      'QueueCallTime_min,' \
-      'QueueCallTime_max,' \
-      'QueueCallTime_mean,' \
-      'QueueCallTime_median,' \
-      'QueueCallTime_75th_percentile,' \
-      'QueueCallTime_95th_percentile,' \
-      'QueueCallTime_99th_percentile,' \
-      'authenticationFailures,' \
-      'authorizationFailures,' \
-      'authenticationSuccesses,' \
-      'authorizationSuccesses,' \
-      'ProcessCallTime_num_ops,' \
-      'ProcessCallTime_min,' \
-      'ProcessCallTime_max,' \
-      'ProcessCallTime_mean,' \
-      'ProcessCallTime_median,' \
-      'ProcessCallTime_75th_percentile,' \
-      'ProcessCallTime_95th_percentile,' \
-      'ProcessCallTime_99th_percentile,' \
-      'sentBytes,' \
-      'receivedBytes,' \
-      'queueSize,' \
-      'numCallsInGeneralQueue,' \
-      'numCallsInReplicationQueue,' \
-      'numCallsInPriorityQueue,' \
-      'numOpenConnections,' \
-      'numActiveHandler'
+    'attributes' => hbase_ipc_metrics
   },
   {
     'objectName' => 'Hadoop:service=HBase,name=RegionServer,sub=Regions,*',
@@ -406,12 +828,50 @@ default['bcpc']['hadoop']['jmxtrans_agent']['hbase_rs']['queries'] = default['bc
   {
     'objectName' => 'Hadoop:service=HBase,name=RegionServer,sub=Replication,*',
     'resultAlias' => 'hb_replication.%name%.#attribute#',
-    'attributes' => ''
+    'attributes' =>
+      'sink.ageOfLastAppliedOp,' \
+      'sink.appliedBatches,' \
+      'sink.appliedHFiles,' \
+      'sink.appliedOps,' \
+      'source.ageOfLastShippedOp,' \
+      'source.closedLogsWithUnknownFileLength,' \
+      'source.completedLogs,' \
+      'source.completedRecoverQueues,' \
+      'source.ignoredUncleanlyClosedLogContentsInBytes,' \
+      'source.logEditsFiltered,' \
+      'source.logEditsRead,' \
+      'source.logReadInBytes,' \
+      'source.region_replica_replication.ageOfLastShippedOp,' \
+      'source.region_replica_replication.logEditsFiltered,' \
+      'source.region_replica_replication.logEditsRead,' \
+      'source.region_replica_replication.logReadInBytes,' \
+      'source.region_replica_replication.shippedBatches,' \
+      'source.region_replica_replication.shippedHFiles,' \
+      'source.region_replica_replication.shippedKBs,' \
+      'source.region_replica_replication.shippedOps,' \
+      'source.region_replica_replication.sizeOfHFileRefsQueue,' \
+      'source.region_replica_replication.sizeOfLogQueue,' \
+      'source.region_replica_replicationclosedLogsWithUnknownFileLength,' \
+      'source.region_replica_replicationcompletedLogs,' \
+      'source.region_replica_replicationcompletedRecoverQueues,' \
+      'source.region_replica_replicationignoredUncleanlyClosedLogContentsInBytes,' \
+      'source.region_replica_replicationrepeatedLogFileBytes,' \
+      'source.region_replica_replicationrestartedLogReading,' \
+      'source.region_replica_replicationuncleanlyClosedLogs,' \
+      'source.repeatedLogFileBytes,' \
+      'source.restartedLogReading,' \
+      'source.shippedBatches,' \
+      'source.shippedHFiles,' \
+      'source.shippedKBs,' \
+      'source.shippedOps,' \
+      'source.sizeOfHFileRefsQueue,' \
+      'source.sizeOfLogQueue,' \
+      'source.uncleanlyClosedLogs'
   },
   {
     'objectName' => 'Hadoop:service=HBase,name=RegionServer,sub=Server,*',
     'resultAlias' => 'hb_rs_server.%name%.#attribute#',
-    'attributes' => ''
+    'attributes' => hb_rs_server_metrics
   }
 ]
 
@@ -422,7 +882,24 @@ default['bcpc']['hadoop']['jmxtrans_agent']['nodemanager']['queries'] = default[
   {
     'objectName' => 'Hadoop:service=NodeManager,name=NodeManagerMetrics',
     'resultAlias' => 'NodeManager.%name%.#attribute#',
-    'attributes' => ''
+    'attributes' =>
+      'AllocatedContainers,' \
+      'AllocatedGB,' \
+      'AllocatedVCores,' \
+      'AvailableGB,' \
+      'AvailableVCores,' \
+      'BadLocalDirs,' \
+      'BadLogDirs,' \
+      'ContainerLaunchDurationAvgTime,' \
+      'ContainerLaunchDurationNumOps,' \
+      'ContainersCompleted,' \
+      'ContainersFailed,' \
+      'ContainersIniting,' \
+      'ContainersKilled,' \
+      'ContainersLaunched,' \
+      'ContainersRunning,' \
+      'GoodLocalDirsDiskUtilizationPerc,' \
+      'GoodLogDirsDiskUtilizationPerc'
   }
 ]
 
@@ -436,8 +913,8 @@ default['bcpc']['hadoop']['jmxtrans_agent']['resourcemanager']['queries'] = defa
     'attributes' => 'NumActiveNMs'
   },
   {
-    'objectName' => 'Hadoop:service=ResourceManager,name=QueueMetrics,user=*',
-    'resultAlias' => 'ResourceManager.%name%.#attribute#',
+    'objectName' => 'Hadoop:service=ResourceManager,name=QueueMetrics,q0=root,user=*',
+    'resultAlias' => 'ResourceManager.%name%.%user%.#attribute#',
     'attributes' =>
       'AppsRunning,' \
       'AppsPending,' \
