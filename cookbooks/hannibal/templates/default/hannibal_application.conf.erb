@@ -28,16 +28,10 @@ application.langs="en"
 # By convention, the default datasource is named `default`
 #
 
-<% if ("mysql" == node[:hannibal][:db]) then %>
-db.default.driver=<%= node[:hannibal][:mysql][:driver] %>
-db.default.url=<%= node[:hannibal][:mysql][:url] %>
-<% else %>
-db.default.driver=<%= node[:hannibal][:h2][:driver] %>
-db.default.url=<%= node[:hannibal][:h2][:url] %>
-<% end %>
-
-db.default.user=<%= node[:hannibal][:db_user] %>
-db.default.password=<%= node[:hannibal][:db_password] %>
+db.default.driver=<%= node['hannibal']['db']['driver'] %>
+db.default.url=<%= node['hannibal']['db']['url'] %>
+db.default.user=<%= node['hannibal']['db']['user'] %>
+db.default.password=<%= node['hannibal']['db']['password'] %>
 
 # Evolutions
 # ~~~~~
