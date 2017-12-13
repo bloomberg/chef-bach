@@ -19,6 +19,7 @@ cookbooks/*/
 !cookbooks/bcpc-hadoop
 !cookbooks/bcpc_jmxtrans
 !cookbooks/hannibal
+!cookbooks/bach_hannibal
 !cookbooks/bcpc_kafka
 !cookbooks/hdfsdu
 !cookbooks/bach_krb5
@@ -30,3 +31,4 @@ cookbooks/*/coverage
 cookbooks/*/vendor
 cookbooks/bcpc/attributes/repos.rb
 cluster.tgz
+src/

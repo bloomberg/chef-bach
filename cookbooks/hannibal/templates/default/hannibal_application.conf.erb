@@ -28,22 +28,16 @@ application.langs="en"
 # By convention, the default datasource is named `default`
 #
 
-<% if ("mysql" == node[:hannibal][:db]) then %>
-db.default.driver=<%= node[:hannibal][:mysql][:driver] %>
-db.default.url=<%= node[:hannibal][:mysql][:url] %>
-<% else %>
-db.default.driver=<%= node[:hannibal][:h2][:driver] %>
-db.default.url=<%= node[:hannibal][:h2][:url] %>
-<% end %>
-
-db.default.user=<%= node[:hannibal][:db_user] %>
-db.default.password=<%= node[:hannibal][:db_password] %>
+db.<%= node['hannibal']['db']['type']%>.driver=<%= node['hannibal']['db']['driver'] %>
+db.<%= node['hannibal']['db']['type']%>.url=<%= node['hannibal']['db']['url'] %>
+db.<%= node['hannibal']['db']['type']%>.username=<%= node['hannibal']['db']['user'] %>
+db.<%= node['hannibal']['db']['type']%>.password=<%= node['hannibal']['db']['password'] %>
 
 # Evolutions
 # ~~~~~
 # You can disable evolutions if needed
 # evolutionplugin=disabled
-applyEvolutions.default=<%= node[:hannibal][:apply_evolutions] %>
+play.evolutions.db.<%= node['hannibal']['db']['type']%>.autoApply=<%= node[:hannibal][:apply_evolutions] %>
 
 # Logger
 # ~~~~~
