@@ -1,11 +1,5 @@
 # Get a list of cluster nodes to monitor
-cluster_nodes_objs = get_all_nodes.select do |nn|
-  begin
-    !nn['hostname'].include?('bootstrap')
-  rescue
-    nil
-  end
-end.compact
+cluster_nodes_objs = get_all_nodes.compact
 
 graphite_query_time = "#{node["bcpc"]["hadoop"]["zabbix"]["graphite_query_time"]}m"
 triggers_sensitivity = "#{node["bcpc"]["hadoop"]["zabbix"]["triggers_sensitivity"]}m"
