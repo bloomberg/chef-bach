@@ -17,8 +17,8 @@
 # limitations under the License.
 #
 
-
 user = node['bcpc']['bootstrap']['admin']['user']
+node.default['bcpc']['bootstrap']['is_bootstrap'] = true
 
 %w{make gcc pkg-config libaugeas-dev}.each do |pkg|
   package pkg do
