@@ -1,7 +1,9 @@
 ::Chef::Recipe.send(:include, Bcpc_Hadoop::Helper)
 ::Chef::Resource::Bash.send(:include, Bcpc_Hadoop::Helper)
 
-include_recipe 'bcpc-hadoop::mysql_connector'
+package 'mysql-connector-java' do
+  action :upgrade
+end
 
 link "/usr/lib/hive/lib/mysql.jar" do
   to "/usr/share/java/mysql.jar"

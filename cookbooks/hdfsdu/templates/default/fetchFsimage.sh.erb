@@ -1,0 +1,11 @@
+#!/bin/bash -e
+
+echo "START"
+hdfs dfsadmin -fetchImage fsimage
+echo "Got fsimage"
+hdfs oiv -i fsimage -o $1 -p Delimited
+echo "Converted fsimage to delimited tsv format"
+hdfs dfs -copyFromLocal ./$1 $2/
+echo "Copied new $1 to hdfs"
+rm -f ./fsimage*
+echo "DONE"

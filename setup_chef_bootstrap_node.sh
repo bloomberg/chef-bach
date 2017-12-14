@@ -20,8 +20,10 @@ sudo /opt/chefdk/bin/chef-client -E "$CHEF_ENVIRONMENT" -c .chef/knife.rb
 PEM_RELATIVE_PATH=.chef/$(hostname -f).pem
 sudo chown $(whoami):root $PEM_RELATIVE_PATH
 sudo chmod 550 $PEM_RELATIVE_PATH
-sudo ln -s $(readlink -f $PEM_RELATIVE_PATH) /etc/chef/client.pem
-sudo ln -s $(readlink -f .chef) ~/.chef
+[ ! -L /etc/chef/client.pem ] && \
+  sudo ln -s $(readlink -f $PEM_RELATIVE_PATH) /etc/chef/client.pem
+[ ! -L ~/.chef ] && \
+  sudo ln -s $(readlink -f .chef) ~/.chef
 
 admin_val=`knife client show $(hostname -f) -c .chef/knife.rb | grep ^admin: | sed "s/admin:[^a-z]*//"`
 if [[ "$admin_val" != "true" ]]; then

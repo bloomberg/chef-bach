@@ -13,39 +13,30 @@ sudo_user = node['bcpc']['bootstrap']['admin']['user']
 #
 # The solution is to disable the passwd plugin, so users are not
 # recorded on the chef server.
-#
-# XXX this keeps breaking Chef12 knife default['ohai']['disabled_plugins'] = [ 'passwd' ]
+
+# XXX the below keeps breaking Chef12
+# knife default['ohai']['disabled_plugins'] = [ 'passwd' ]
 
 # FIXME No longer needed in chef-client 13.2+
 default['chef_client']['log_rotation']['postrotate'] = '/etc/init.d/chef-client restart >/dev/null || :'
 default['chef_client']['config'].tap do |config|
   config['log_level'] = ':info'
   config['log_location'] = 'STDOUT'
-  config['node_name'] = node[:fqdn]
-  config['client_name'] = node[:fqdn]
+  config['node_name'] = node['fqdn']
+  config['client_name'] = node['fqdn']
   config['client_key'] = '/etc/chef/client.pem'
   config['ssl_verify_mode'] = ':verify_none'
   config['chef_server_url'] =
-    if node[:fqdn] == get_bootstrap
-      "https://#{node[:bcpc][:bootstrap][:server]}"
+    if node['fqdn'] == get_bootstrap
+      "https://#{node['bcpc']['bootstrap']['server']}"
     else
-      "https://#{node[:bcpc][:bootstrap][:vip]}"
+      "https://#{node['bcpc']['bootstrap']['vip']}"
     end
 
-  if node[:bcpc][:bootstrap][:proxy]
-    no_proxy_array = [
-                      'localhost',
-                      node[:ipaddress],
-                      node[:hostname],
-                      node[:fqdn],
-                      node[:bcpc][:bootstrap][:server],
-                      node[:bcpc][:management][:vip],
-                      node[:domain] ? "*#{node[:domain]}" : nil
-                     ].compact.uniq
-
-    config['http_proxy'] = node[:bcpc][:bootstrap][:proxy]
-    config['https_proxy'] = node[:bcpc][:bootstrap][:proxy].sub('http','https')
-    config['no_proxy'] = no_proxy_array.join(',')
+  if node['bcpc']['bootstrap']['proxy']
+    config['http_proxy'] = node['bcpc']['bootstrap']['proxy']
+    config['https_proxy'] = node['bcpc']['bootstrap']['proxy']
+    config['no_proxy'] = node['bcpc']['no_proxy'].join(',')
   end
 
   #
@@ -53,26 +44,11 @@ default['chef_client']['config'].tap do |config|
   #
   # Non-bootstrap nodes will never require knife or proxy configurations.
   #
-  if node[:fqdn] == get_bootstrap
+  if node['fqdn'] == get_bootstrap
     config['syntax_check_cache_path'] =
       "/home/#{sudo_user}/chef-bcpc/.chef/syntax_check_cache"
 
     config['cookbook_path'] =
       "/home/#{sudo_user}/chef-bcpc/vendor/cookbooks"
-
-    if node[:bcpc][:bootstrap][:proxy]
-      no_proxy_array = [
-                        'localhost',
-                        node[:ipaddress],
-                        node[:hostname],
-                        node[:fqdn],
-                        node[:bcpc][:bootstrap][:server],
-                        node[:domain] ? "*#{node[:domain]}" : nil
-                       ].compact.uniq
-      
-      config['http_proxy'] = node[:bcpc][:bootstrap][:proxy]
-      config['https_proxy'] = node[:bcpc][:bootstrap][:proxy]
-      config['no_proxy'] = no_proxy_array.join(',')
-    end
-  end    
+  end
 end

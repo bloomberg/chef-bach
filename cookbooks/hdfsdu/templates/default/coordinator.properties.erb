@@ -1,0 +1,32 @@
+jobTracker=<%= node[:hdfsdu][:jobtracker] %>
+nameNode=<%= node[:hdfsdu][:namenode] %>
+queueName=<%= node[:hdfsdu][:mr_queue] %>
+
+appRoot=${nameNode}<%= node[:hdfsdu][:hdfs_path] %>
+oozie.coord.application.path=${appRoot}/coordinatorConf
+workflowAppPath=${appRoot}/workflowApp
+
+oozie.libpath=${nameNode}/user/oozie/share/lib
+oozie.use.system.libpath=true
+oozie.wf.rerun.failnodes=true
+
+fsimageDelimitedFileName=fsimage.tsv
+fetchFsimageScriptName=fetchFsimage.sh
+fetchFsimageScriptPath=${appRoot}/scripts/${fetchFsimageScriptName}
+processFsimageScriptPath=${appRoot}/scripts/hdfsdu.pig
+processFsimageJobName='Analyzing HDFS disk usage'
+formatUsageDataStarterScriptName=formatUsage.sh
+formatUsageDataScriptName=leaf.py
+formatUsageDataStarterScriptPath=${appRoot}/scripts/${formatUsageDataStarterScriptName}
+formatUsageDataScriptPath=${appRoot}/scripts/${formatUsageDataScriptName}
+
+fsimageInputPath=${workflowAppPath}/input
+fsimageOutputPath=${workflowAppPath}/output
+processFsimageInput=${fsimageInputPath}/fsimage.tsv
+processFsimageOutput=${fsimageOutputPath}/hdfsdu.out
+usageDataOutputPath=${appRoot}/data
+
+freq=<%= node[:hdfsdu][:oozie_frequency] %>
+startTime=<%= node[:hdfsdu][:oozie_start_time] %>
+endTime=<%= node[:hdfsdu][:oozie_end_time] %>
+timezone=<%= node[:hdfsdu][:oozie_timezone] %>

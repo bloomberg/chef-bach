@@ -1,0 +1,17 @@
+{
+    "name": "HDFSDU-Build",
+    "default_attributes": {
+    },
+    "json_class": "Chef::Role",
+    "run_list": [
+      "recipe[java::default]",
+      "recipe[bcpc-hadoop::maven_config]",
+      "recipe[maven::default]",
+      "recipe[bcpc-hadoop::hdfsdu_kerberos]",
+      "recipe[hdfsdu::build]"
+    ],
+    "description": "A hdfsdu build node",
+    "chef_type": "role",
+    "override_attributes": {
+    }
+}

@@ -1,8 +1,22 @@
-# vim: tabstop=2:shiftwidth=2:softtabstop=2 
+# vim: tabstop=2:shiftwidth=2:softtabstop=2
 # Setting balancer andwidth to default value as per hdfs-default.xml
 default["hadoop"]["hdfs"]["balancer"]["bandwidth"] = 1048576
 # balancer thread multiplier constant
 default["hadoop"]["hdfs"]["balancer"]["max_concurrent_moves_multiplier"] = 10
+
+default['bcpc']['hadoop']['datanode']['xmx']['max_size'] = 4_096
+default['bcpc']['hadoop']['datanode']['xmx']['max_ratio'] = 0.25
+default['bcpc']['hadoop']['datanode']['max']['xferthreads'] = 16_384
+default['bcpc']['hadoop']['namenode']['handler']['count'] = 100
+# set to nil to calculate dynamically based on available memory
+default['bcpc']['hadoop']['namenode']['xmx']['max_size'] = 1024
+# # set to nil to calculate dynamically based on available memory
+default['bcpc']['hadoop']['namenode']['xmn']['max_size'] = 128
+default['bcpc']['hadoop']['namenode']['xmx']['max_ratio'] = 0.25
+default['bcpc']['hadoop']['namenode']['jmx']['port'] = 10111
+default['bcpc']['hadoop']['namenode']['rpc']['port'] = 8020
+default['bcpc']['hadoop']['namenode']['http']['port'] = 50070
+default['bcpc']['hadoop']['namenode']['https']['port'] = 50470
 
 # JMX port mappings
 default['bcpc']['hadoop'].tap do |jmx|
@@ -41,13 +55,16 @@ end
 
 default[:bcpc][:hadoop][:hdfs][:site_xml].tap do |site_xml|
   dfs = node[:bcpc][:hadoop][:hdfs][:dfs]
-  
+
   site_xml['dfs.replication'] =
     node[:bcpc][:hadoop][:hdfs][:dfs_replication_factor]
-  
+
   site_xml['dfs.namenode.audit.log.async'] =
     dfs[:namenode][:audit][:log][:async]
 
+  site_xml['dfs.datanode.sync.behind.writes'] = true
+  site_xml['dfs.datanode.synconclose'] = true
+  site_xml['dfs.namenode.stale.datanode.interval'] = 30_000
 
   site_xml['dfs.nameservices'] = node.chef_environment
 
@@ -70,7 +87,7 @@ default[:bcpc][:hadoop][:hdfs][:site_xml].tap do |site_xml|
 
   site_xml['dfs.client.read.shortcircuit'] =
     dfs[:client][:read][:shortcircuit]
-  
+
   site_xml['dfs.domain.socket.path'] =
     dfs[:domain][:socket][:path]
 
@@ -100,7 +117,7 @@ default[:bcpc][:hadoop][:hdfs][:site_xml].tap do |site_xml|
 
   site_xml['dfs.datanode.max.transfer.threads'] =
     node[:bcpc][:hadoop][:datanode][:max][:xferthreads]
-  
+
   site_xml['dfs.namenode.handler.count'] =
     node[:bcpc][:hadoop][:namenode][:handler][:count]
 

@@ -37,14 +37,13 @@ oozie_password = get_config!('password', 'mysql-oozie', 'os')
 hdp_rel = node['bcpc']['hadoop']['distribution']['active_release']
 oozie_conf_dir = "/etc/oozie/conf.#{node.chef_environment}"
 
-include_recipe 'bcpc-hadoop::mysql_connector'
-
 [
   'zip',
   'unzip',
   'extjs',
   'hadooplzo',
   'hadooplzo-native',
+  'mysql-connector-java',
   hwx_pkg_str('oozie-server', hdp_rel),
   hwx_pkg_str('oozie-client', hdp_rel)
 ].flatten.each do |pkg|

@@ -11,6 +11,7 @@
     "recipe[bcpc-hadoop::disks]",
     "recipe[bcpc-hadoop::hdp_repo]",
     "recipe[bach_krb5::krb5_client]",
+    "recipe[hdfsdu::create_user]",
     "recipe[bcpc-hadoop::configs]",
     "recipe[pam::default]",
     "recipe[bach_spark::default]",
@@ -22,6 +23,8 @@
     "recipe[bcpc-hadoop::tez]",
     "recipe[bcpc-hadoop::mahout]",
     "recipe[bcpc-hadoop::oozie_client]",
+    "recipe[bcpc-hadoop::hdfsdu_pre_fetch]",
+    "recipe[hdfsdu::fetch_data]",
     "recipe[bcpc-hadoop::smoke_test_wrapper]",
     "recipe[bcpc::diamond]"
   ],

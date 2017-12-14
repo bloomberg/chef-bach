@@ -1,7 +1,6 @@
 include_recipe 'bcpc::chef_poise_install'
 include_recipe 'bcpc-hadoop::hadoop_config'
 include_recipe 'bcpc-hadoop::hive_config'
-include_recipe 'bcpc-hadoop::mysql_connector'
 
 ::Chef::Recipe.send(:include, Bcpc_Hadoop::Helper)
 ::Chef::Resource::Bash.send(:include, Bcpc_Hadoop::Helper)
@@ -24,6 +23,7 @@ hdp_pkg_strs = (hdp_select_pkgs + %W{
 
 [
   hdp_pkg_strs,
+  'mysql-connector-java',
   'cgroup-bin'
 ].flatten.each do |pkg|
   package pkg do

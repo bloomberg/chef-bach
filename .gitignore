@@ -20,6 +20,7 @@ cookbooks/*/
 !cookbooks/bcpc_jmxtrans
 !cookbooks/hannibal
 !cookbooks/bcpc_kafka
+!cookbooks/hdfsdu
 !cookbooks/bach_krb5
 !cookbooks/smoke-tests
 cookbooks/*/coverage

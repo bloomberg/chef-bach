@@ -20,6 +20,7 @@
 require 'json'
 require 'uri'
 require 'open3'
+require 'mixlib/shellout'
 
 def get_name_server
   ns = File.readlines('/etc/resolv.conf').select do |ll|
@@ -139,7 +140,28 @@ environment_data['override_attributes'].tap do |attrs|
   end
 
   if proxy_uri
+    domainname_cmd = Mixlib::ShellOut.new('/bin/hostname -f')
+    domainname_cmd.run_command
+    # keep the domainname wild card blank if we don't have a domianname
+    domainwildcard = ''
+    unless domainname_cmd.error? || domainname_cmd.stdout.count('.') < 1
+      # split into array of DNS elements
+      #  (e.g. [hostname, subdomain, domain, tld])
+      domainname = domainname_cmd.stdout.strip.split('.')
+      # shift hostname off
+      domainname.shift
+      domainwildcard = (['*'] + domainname).join('.')
+    end
+
     attrs['bcpc']['bootstrap']['proxy'] = proxy_uri.to_s
+    attrs['bcpc']['no_proxy'] = [ENV['additional_no_proxy'],
+                                 ENV['no_proxy'], "localhost",
+                                 domainwildcard,
+                                 attrs['bcpc']['bootstrap']['server'],
+                                 attrs['bcpc']['bootstrap']['hostname'],
+                                 attrs['bcpc']['bootstrap']['hostname'] + '.' +
+                                 attrs['bcpc']['domain_name'],
+                                 '10.0.2.15'].compact.join(',').split(',').uniq
   end
 end
 

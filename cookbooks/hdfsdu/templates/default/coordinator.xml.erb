@@ -1,0 +1,22 @@
+<coordinator-app name="<%= node[:hdfsdu][:coordinator_job_name] %>" 
+   frequency="${freq}" 
+   start="${startTime}" end="${endTime}" timezone="${timezone}" 
+   xmlns="uri:oozie:coordinator:0.1">
+
+   <controls>
+      <concurrency>1</concurrency>
+      <execution>LAST_ONLY</execution>
+   </controls>
+
+   <action>
+      <workflow>
+         <app-path>${workflowAppPath}</app-path>
+         <configuration>
+            <property>
+               <name>customJobName</name>
+               <value>'${coord:user()}: Fetching HSDS disk usage data'</value>
+            </property>
+         </configuration>
+      </workflow>
+   </action>
+</coordinator-app>
