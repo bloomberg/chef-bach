@@ -17,6 +17,8 @@
 # limitations under the License.
 #
 
+node.default['bcpc']['bootstrap']['is_bootstrap'] = true
+
 %w{make gcc pkg-config libaugeas-dev}.each do |pkg|
   package pkg do
     action :nothing
