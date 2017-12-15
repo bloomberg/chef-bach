@@ -1,7 +1,5 @@
-include_recipe 'bcpc-hadoop::mysql_connector'
-
-link "#{node[:hannibal][:install_dir]}/hannibal/lib/mysql-connector-java.jar" do
- to "/usr/share/java/mysql-connector-java.jar"
+package 'mysql-connector-java' do
+  action :upgrade
 end
 
 make_config('hannibal-app-secret-key', secure_password(64))

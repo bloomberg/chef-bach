@@ -15,8 +15,6 @@ group = node[:hannibal][:group]
 user = node[:hannibal][:user]
 file_mode = node[:hannibal][:file_mode]
 exec_mode = node[:hannibal][:exec_mode]
-endpoint = node[:hannibal][:service_endpoint]
-timeout = node[:hannibal][:service_timeout]
 hannibal_dir="#{install_dir}/hannibal"
 
 directory "Hannibal working directory" do
@@ -89,7 +87,6 @@ template "hannibal_service" do
    mode 0755
 end
 
-
 # Set directory permissions
 [hannibal_dir, "#{hannibal_dir}/share", "#{hannibal_dir}/lib", "#{hannibal_dir}/bin", "#{hannibal_dir}/conf", "#{hannibal_dir}/start"].each do |d|
    directory d do
@@ -102,22 +99,6 @@ ruby_block "set_hannibal_file_permissions" do
       FileUtils.chmod 0644, Dir["#{hannibal_dir}/lib/*"]
       FileUtils.chmod 0644, Dir["#{hannibal_dir}/conf/*"]
       FileUtils.chmod_R 0755, Dir["#{hannibal_dir}/conf/evolutions"]
-   end
-   action :nothing
-end
-
-service "hannibal" do
-   supports :status => true, :restart => true 
-   action [:enable, :start]
-   subscribes :restart, "template[application_conf]", :delayed
-   subscribes :restart, "template[hannibal_hbase_site]", :delayed
-   notifies :run, "ruby_block[wait_for_hannibal]", :delayed 
-end
-
-# Confirm service did start; try until timeout and fail 
-ruby_block "wait_for_hannibal" do
-   block do
-      wait_until_ready(endpoint, timeout)
    end
    action :nothing
 end
