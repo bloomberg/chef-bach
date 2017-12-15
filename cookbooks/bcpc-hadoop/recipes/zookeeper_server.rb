@@ -1,4 +1,5 @@
 include_recipe 'bcpc-hadoop::zookeeper_config'
+node.override['bcpc']['jolokia']['jvm_args'] = ''
 include_recipe 'bcpc-hadoop::zookeeper_impl'
 
 # Set Zookeeper related zabbix triggers

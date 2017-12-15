@@ -6,12 +6,12 @@
 require 'pathname'
 
 user = node['bcpc']['bootstrap']['admin']['user']
+default['bcpc']['cluster']['file_path'] = "/home/#{user}/chef-bcpc/cluster.txt"
 
 default['bcpc']['hadoop'] = {}
 default['bcpc']['hadoop']['distribution']['release'] = '2.6.1.17-1'
 default['bcpc']['hadoop']['distribution']['active_release'] = node['bcpc']['hadoop']['distribution']['release']
 default['bcpc']['hadoop']['decommission']['hosts'] = []
-# disks to use for Hadoop activities (expected to be an environment or role set variable)
 default['bcpc']['hadoop']['hadoop_home_warn_suppress'] = 1
 default['bcpc']['hadoop']['hadoop_log_dir'] = '/var/log/hadoop-hdfs'
 default['bcpc']['hadoop']['hadoop_mapred_ident_string'] = 'mapred'
@@ -26,9 +26,6 @@ default['bcpc']['hadoop']['hadoop']['config']['dir'] = '/etc/hadoop/conf'
 # Flag to control whether automatic restarts due to config changes need to be skipped
 # for e.g. if ZK quorum is down or if the recipes need to be run in a non ZK env
 default['bcpc']['hadoop']['skip_restart_coordination'] = false
-default['bcpc']['hadoop']['hdfs']['site_xml']['dfs.datanode.sync.behind.writes'] = true
-default['bcpc']['hadoop']['hdfs']['site_xml']['dfs.datanode.synconclose'] = true
-default['bcpc']['hadoop']['hdfs']['site_xml']['dfs.namenode.stale.datanode.interval'] = 30_000
 default['bcpc']['hadoop']['hdfs']['HA'] = true
 default['bcpc']['hadoop']['hdfs']['failed_volumes_tolerated'] = 1
 default['bcpc']['hadoop']['hdfs']['dfs_replication_factor'] = 3
@@ -36,10 +33,7 @@ default['bcpc']['hadoop']['hdfs']['dfs_blocksize'] = '128m'
 default['bcpc']['hadoop']['hdfs_url'] = "hdfs://#{node.chef_environment}"
 default['bcpc']['hadoop']['jmx_enabled'] = false
 default['bcpc']['hadoop']['jmx_agent_enabled'] = true
-default[:bcpc][:hadoop][:jute][:maxbuffer] = 6_291_456
-default['bcpc']['hadoop']['datanode']['xmx']['max_size'] = 4_096
-default['bcpc']['hadoop']['datanode']['xmx']['max_ratio'] = 0.25
-default['bcpc']['hadoop']['datanode']['max']['xferthreads'] = 16_384
+default['bcpc']['hadoop']['java_https_keystore'] = '/usr/local/maven/conf/keystore'
 
 # for jvmkill library
 default['bcpc-hadoop']['jvmkill']['lib_file'] = '/var/lib/jvmkill/libjvmkill.so'
@@ -78,15 +72,6 @@ default['bcpc']['hadoop']['namenode']['gc_opts'] =
   common_opts
 
 default['bcpc']['hadoop']['mapreduce']['framework']['name'] = 'yarn'
-default['bcpc']['hadoop']['namenode']['handler']['count'] = 100
-# set to nil to calculate dynamically based on available memory
-default['bcpc']['hadoop']['namenode']['xmx']['max_size'] = 1024
-# set to nil to calculate dynamically based on available memory
-default['bcpc']['hadoop']['namenode']['xmn']['max_size'] = 128
-default['bcpc']['hadoop']['namenode']['xmx']['max_ratio'] = 0.25
-default['bcpc']['hadoop']['namenode']['rpc']['port'] = 8020
-default['bcpc']['hadoop']['namenode']['http']['port'] = 50070
-default['bcpc']['hadoop']['namenode']['https']['port'] = 50470
 default['bcpc']['hadoop']['kafka']['jmx']['port'] = 9995
 default['bcpc']['hadoop']['topology']['script'] = 'topology'
 default['bcpc']['hadoop']['topology']['cookbook'] = 'bcpc-hadoop'
@@ -164,7 +149,7 @@ default['bcpc']['hadoop']['copylog_quota'] = {
 # File rollup interval in secs for log data copied into HDFS through Flume
 default['bcpc']['hadoop']['copylog_rollup_interval'] = 86_400
 # Ensure copylogs can read Chef's client.log
-default['chef_client']['log_perm'] = 0o644
+default['chef_client']['log_perm'] = 0o0644
 
 default['bcpc']['hadoop']['copylog']['syslog'] = {
   'logfile' => '/var/log/syslog',
@@ -210,5 +195,3 @@ default['java']['oracle']['jce']['8']['url'] = get_binary_server_url + jce_tgz_n
 
 # Set the JAVA_HOME for Hadoop components
 default['bcpc']['hadoop']['java'] = '/usr/lib/jvm/java-8-oracle-amd64'
-
-default['bcpc']['cluster']['file_path'] = "/home/#{user}/chef-bcpc/cluster.txt"

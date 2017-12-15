@@ -17,8 +17,8 @@
 # limitations under the License.
 #
 
-
 user = node['bcpc']['bootstrap']['admin']['user']
+node.default['bcpc']['bootstrap']['is_bootstrap'] = true
 
 %w{make gcc pkg-config libaugeas-dev}.each do |pkg|
   package pkg do
@@ -148,3 +148,10 @@ end
 package 'sshpass'
 
 include_recipe 'bcpc::chef_client'
+
+cron 'restart-chefserver' do
+  command '/usr/bin/chef-server-ctl restart'
+  day '1'
+  hour '10'
+  weekday '1'
+end

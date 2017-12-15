@@ -12,7 +12,7 @@ cd $REPO_DIR
 . ./proxy_setup.sh
 
 # Iterate over a list of "<dpkg name> <gem name>" necessary for the Gemfile
-for p in "libaugeas-dev ruby-augeas" "libmysqlclient-dev mysql2" "libmysqlclient20 mysql2" "libmysqld-dev mysql2" "libkrb5-dev rkerberos"; do 
+for p in "libaugeas-dev ruby-augeas" "libmysqlclient-dev mysql2" "libmysqld-dev mysql2" "libkrb5-dev rkerberos"; do 
   if [ $(dpkg-query -W -f='${Status}' ${p% *} 2>/dev/null | grep -c 'ok installed') -ne 1 ] && [ "$(uname)" != "Darwin" ]; then
     echo "#### Need ${p% *} for the ${p#* } Gem" > /dev/stderr
     sudo apt-get install -y ${p% *}

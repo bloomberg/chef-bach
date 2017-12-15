@@ -15,6 +15,7 @@ cookbook 'bcpc-hadoop', path: './cookbooks/bcpc-hadoop'
 cookbook 'bcpc_jmxtrans', path: './cookbooks/bcpc_jmxtrans'
 cookbook 'hannibal', path: './cookbooks/hannibal'
 cookbook 'bach_hannibal', path: './cookbooks/bach_hannibal'
+cookbook 'hdfsdu', path: './cookbooks/hdfsdu'
 cookbook 'bcpc_kafka', path: './cookbooks/bcpc_kafka'
 cookbook 'smoke-tests', path: './cookbooks/smoke-tests'
 

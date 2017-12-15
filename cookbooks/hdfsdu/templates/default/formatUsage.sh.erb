@@ -1,0 +1,11 @@
+#!/bin/bash -e
+
+echo "START"
+echo "Executing: $1 $2 > $3/hdfsdu.data"
+hdfs dfs -getmerge $2 hdfsdu.out
+echo "Got hdfsdu.out file"
+python $1 hdfsdu.out > hdfsdu.data
+echo "Formatted usage output"
+hdfs dfs -copyFromLocal hdfsdu.data $3/
+echo "Copied hdfsdu.data to hdfs"
+echo "DONE"

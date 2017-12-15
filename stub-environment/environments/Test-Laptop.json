@@ -2,34 +2,35 @@
   "name": "Test-Laptop",
   "override_attributes": {
     "bcpc": {
+      "domain_name": "bcpc.example.com",
       "management": {
-        "vip" : "10.0.101.5"
+        "vip" : "10.0.100.5"
       },
       "floating": {
-        "vip" : "192.168.101.5"
+        "vip" : "192.168.100.5"
       },
       "networks": {
         "subnet1": {
           "management": {
-            "vip" : "10.0.101.5",
+            "vip" : "10.0.100.5",
             "interface" : "eth0",
             "netmask" : "255.255.255.0",
-            "cidr" : "10.0.101.0/24",
-            "gateway" : "10.0.101.3"
+            "cidr" : "10.0.100.0/24",
+            "gateway" : "10.0.100.3"
           },
           "storage": {
             "interface" : "eth1",
             "netmask" : "255.255.255.0",
-            "cidr" : "172.16.101.0/24",
-            "gateway" : "172.16.101.3"
+            "cidr" : "172.16.100.0/24",
+            "gateway" : "172.16.100.3"
           },
           "floating": {
-            "vip" : "192.168.101.5",
+            "vip" : "192.168.100.5",
             "interface" : "eth2",
             "netmask" : "255.255.255.0",
-            "cidr" : "192.168.101.0/24",
-            "gateway" : "192.168.101.3",
-            "available_subnet" : "192.168.101.128/25"
+            "cidr" : "192.168.100.0/24",
+            "gateway" : "192.168.100.3",
+            "available_subnet" : "192.168.100.128/25"
           }
         }
       },
@@ -37,9 +38,9 @@
         "interface" : "eth0",
         "pxe_interface" : "eth1",
         "hostname" : "bcpc-bootstrap",
-        "server" : "10.0.101.3",
-        "dhcp_subnet" : "10.0.101.0",
-        "dhcp_range" : "10.0.101.14 10.0.101.250",
+        "server" : "10.0.100.3",
+        "dhcp_subnet" : "10.0.100.0",
+        "dhcp_range" : "10.0.100.14 10.0.100.250",
         "preseed": {
           "additional_packages": [ "openssh-server",
                                    "lldpd",
@@ -48,6 +49,14 @@
       },
       "hadoop" : {
         "yarn" : {
+          "nodemanager": {
+            "avail_memory": {
+              "ratio": 0.85
+            },
+            "avail_vcpu": {
+              "ratio": 2.00
+            }
+          },
           "resourcemanager" : {
             "yarn.client.failover-sleep-base-ms": 30000
           }
@@ -67,12 +76,12 @@
                      "3.pool.ntp.org" ]
     },
     "chef_client": {
-      "server_url": "http://10.0.101.3:4000",
+      "server_url": "http://10.0.100.3:4000",
       "cache_path": "/var/chef/cache",
       "config": {
          "verify_api_cert": false,
          "ssl_verify_mode": "verify_none",
-         "rubygems_url": "http://10.0.100.3/"
+         "rubygems_url": "http://10.0.101.3/"
       },
       "backup_path": "/var/chef/backup",
       "validation_client_name": "chef-validator",

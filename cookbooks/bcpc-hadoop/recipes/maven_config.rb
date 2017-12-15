@@ -17,65 +17,90 @@
 # limitations under the License.
 #
 
-if node['bcpc']['bootstrap']['proxy']
-  include_recipe 'bcpc::proxy_configuration'
-end
-
-include_recipe 'java'
-include_recipe 'java::oracle_jce'
-include_recipe 'maven'
+maven_file = Pathname.new(node['maven']['url']).basename
 
 # Dependencies of the maven cookbook.
-['gyoku', 'nori'].each do |gem_name|
+%w(gyoku nori).each do |gem_name|
   bcpc_chef_gem gem_name do
     compile_time true
   end
 end
 
-#
-# On internet-disconnected hosts, node['maven']['repositories'] will
-# be overridden with an internal mirror as the first value, and this
-# settings resource is extremely important.
-#
-# On internet-connected hosts, the default value is harmless.
-#
-maven_settings 'settings.mirrors' do
-  value ({
-          mirror: {
-                   id: 'primary-mirror',
-                   name: 'Chef-configured primary mirror',
-                   url: node['maven']['repositories'].first,
-                   mirrorOf: 'central'
-                  }
-         })
+# handling for custom SSL certificates
+cert_dir = '/usr/local/share/ca-certificates'
+custom_certs = ::Find.find(cert_dir).select { |f| ::File.file?(f) } \
+  if ::Dir.exist?(cert_dir)
+
+include_recipe 'bcpc::proxy_configuration' if node['bcpc']['bootstrap']['proxy']
+
+# download Maven only if not already stashed in the bins directory
+if node['fqdn'] == get_bootstrap
+  internet_download_url = node['maven']['url']
+  remote_file "/home/vagrant/chef-bcpc/bins/#{maven_file}" do
+    source internet_download_url
+    action :create
+    mode 0o0555
+    checksum node['maven']['checksum']
+  end
+else
+  node.override['maven']['url'] = File.join(get_binary_server_url, maven_file)
 end
 
-# On internet-connected hosts, maven needs a proxy.
-if node['bcpc']['bootstrap']['proxy']
-  require 'uri'
-  http_uri = URI(node['chef_client']['config']['http_proxy'])
-  https_uri = URI(node['chef_client']['config']['https_proxy'])
+include_recipe 'maven::default'
 
-  maven_settings 'settings.proxies' do
-    value({
-           proxy: [
-                   {
-                    id: 'http_proxy',
-                    protocol: 'http',
-                    active: true,
-                    host: http_uri.host,
-                    port: http_uri.port,
-                    nonProxyHosts: node['chef_client']['config']['no_proxy']
-                   },
-                   {
-                    id: 'https_proxy',
-                    protocol: 'https',
-                    active: true,
-                    host: https_uri.host,
-                    port: https_uri.port,
-                    nonProxyHosts: node['chef_client']['config']['no_proxy']
-                   }
-                  ]
-          })
+file 'keystore file' do
+  path node['bcpc']['hadoop']['java_https_keystore']
+  action :nothing
+end
+
+unless ::File.exist?(node['bcpc']['hadoop']['java_https_keystore'])
+  custom_certs.map do |cert|
+    execute "create keystore #{::File.basename(cert)}" do
+      command <<-EOH
+        yes | keytool -v -alias #{::File.basename(cert)} -import \
+        -file #{cert} \
+        -keystore #{node['bcpc']['hadoop']['java_https_keystore']} \
+        -storepass changeit \
+        -trustcacerts \
+        -import
+        EOH
+    end
   end
+end
+
+unless custom_certs.empty?
+  node.override['maven']['mavenrc']['opts'] = <<-EOH
+    #{node['maven']['mavenrc']['opts']} \
+    -Djavax.net.ssl.trustStore=#{node['bcpc']['hadoop']['java_https_keystore']} \
+    -Djavax.net.ssl.trustStorePassword=changeit
+  EOH
+end
+
+# Setup custom maven config
+directory '/root/.m2' do
+  owner 'root'
+  group 'root'
+  mode '0755'
+  action :create
+end
+
+include_recipe 'maven::settings'
+
+unless node['bcpc']['bootstrap']['proxy'].nil?
+  maven_settings 'settings.proxies' do
+    uri = URI(node['bcpc']['bootstrap']['proxy'])
+    value proxy: {
+      active: true,
+      protocol: uri.scheme,
+      host: uri.host,
+      port: uri.port,
+      nonProxyHosts: node['bcpc']['no_proxy'].join('|')
+    }
+  end
+end
+
+# it looks like the Maven cookbook uses the default
+# restrictive umask from Chef-Client
+execute 'chmod maven' do
+  command "chmod -R 755 #{node['maven']['m2_home']}"
 end

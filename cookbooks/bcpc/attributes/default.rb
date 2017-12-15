@@ -29,9 +29,6 @@ default['bcpc']['domain_name'] = 'bcpc.example.com'
 
 default['bcpc']['encrypt_data_bag'] = false
 
-# This is where you would set a proxy if one is needed at install time.
-default['bcpc']['bootstrap']['proxy'] = nil
-
 default['bcpc']['bootstrap']['preseed'].tap do |preseed|
   preseed['add_kernel_opts'] = 'console=ttyS0'
   preseed['additional_packages'] = %w(openssh-server lldpd)
@@ -226,8 +223,29 @@ default['bcpc']['repos_for']['trusty'].tap do |trusty_repos|
   end
 end
 
-default[:bcpc][:repos] = node[:bcpc][:repos_for][node[:lsb][:codename]]
+default['bcpc']['repos'] = node['bcpc']['repos_for'][node['lsb']['codename']]
 default['cobbler']['package']['type'] = 'apt'
+
+###########################################
+#
+#  Proxy Configuration
+#
+###########################################
+# This is where you would set a proxy if one is needed at install time.
+default['bcpc']['bootstrap']['proxy'] = nil
+
+# This is to set hosts and domains to not be proxied
+default['bcpc']['additional_no_proxy'] = []
+default['bcpc']['no_proxy'] = [
+  'localhost',
+   node['ipaddress'],
+   node['hostname'],
+   node['fqdn'],
+   node['bcpc']['bootstrap']['server'],
+   node['bcpc']['management']['vip'],
+   node['domain'] ? "*#{node['domain']}" : nil,
+   node['bcpc']['additional_no_proxy']
+].compact.flatten.uniq
 
 ###########################################
 #

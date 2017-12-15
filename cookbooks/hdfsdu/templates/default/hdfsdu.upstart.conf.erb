@@ -1,0 +1,10 @@
+#!upstart
+description "HDFS Disk Usage"
+
+chdir <%= ::File.join(node[:hdfsdu][:install_dir], 'hdfsdu') %> 
+setuid <%= "#{node[:hdfsdu][:service_user]}" %>
+exec java -Xmx<%= node[:hdfsdu][:service_heap_size] %> -cp 'lib/*' \
+     com.twitter.hdfsdu.HdfsDu \
+     <%= "-http_port=#{node[:hdfsdu][:service_port]} -use_glog -use_glog_formatter -input_path=#{node[:hdfsdu][:data_dir]}/hdfsdu.data" %> \
+     > <%= "#{node[:hdfsdu][:log_dir]}/application.log" %> 2>&1
+

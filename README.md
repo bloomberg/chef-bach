@@ -84,25 +84,34 @@ automated build tests.)
 Using the script [tests/automated_install.sh](./tests/automated_install.sh) on Mac OS (OS X),
 will require [`brew`](http://brew.sh) to be available/installed.
 
-Note: To run more than one test cluster at a time with VirtualBox, one may
-      export BACH_CLUSTER_PREFIX to set their desired cluster name prefix.
-      This will set the namespace so that the cluster's virtual machines do not 
-      collide on the hypervisor.  Resulting in names following the convention
+**Note: To run more than one test cluster at a time with VirtualBox:**
+  One may `export BACH_CLUSTER_PREFIX` to set their desired cluster name
+  prefix. This will set the namespace so that the cluster's virtual machines
+  do not collide on the hypervisor.  Resulting in names following the
+  convention:
 
-````
-      $BACH_CLUSTER_PREFIX-bcpc-bootstrap
-      $BACH_CLUSTER_PREFIX-bcpc-vm1
-      $BACH_CLUSTER_PREFIX-bcpc-vm2
-      $BACH_CLUSTER_PREFIX-bcpc-vm3
-````
+```
+      ${BACH_CLUSTER_PREFIX}-bcpc-bootstrap
+      ${BACH_CLUSTER_PREFIX}-bcpc-vm1
+      ${BACH_CLUSTER_PREFIX}-bcpc-vm2
+      ${BACH_CLUSTER_PREFIX}-bcpc-vm3
+```
+ 
+  Lacking a `$BACH_CLUSTER_PREFIX` tests/automated_install.sh 
+  will not assign a cluster prefix to the cluster hosts or bootstrap.
+  One also needs to ensure their management, float and storage
+  network ranges differ between clusters in the environment and cluster.txt)
+  -- update them to be unique. Further, one needs to have each cluster's
+  repository in a different parent directory (to avoid the `cluster`
+  directory from colliding).
 
-      Lacking that tests/automated_install.sh 
-      not assign a cluster prefix to the cluster hosts or bootstrap 
-      One also needs to ensure their management, float and storage
-      network ranges are exclusive in the environment and cluster.txt)
-      updated to be unique as well. Further, one needs to have each cluster's
-      repository in a different parent directory (to avoid the `cluster`
-      directory from colliding).
+**Note: For man-in-the-middle proxy or local repository users:**
+  One need ensure local SSL certificate authority certificates are located on
+  your hypervisor at [`/usr/local/share/ca-certificates`](https://github.com/bloomberg/chef-bach/blob/793e31b82b5269e753e15d29d2d50a889ee0ba78/Vagrantfile.local.rb#L18) this will populate
+  your bootstrap with the necessary certificates. Further, to not use a
+  proxy for specific hosts, one can set `$additional_no_proxy` to a comma
+  separated list of hosts or `*`-wildcard domains.
+  (This is specifically useful for local APT, Maven or Ruby repositories.)
 
 Other Deployment Flavors
 ------------------------
@@ -110,7 +119,7 @@ Other Deployment Flavors
 In addition to the "happy-path" integration test using `automated_install.sh` there are ways to deploy on OpenStack or to bare-metal hosts. Lastly, for those using [test-kitchen](http://kitchen.ci/) there are various test-kitchen [suites](./.kitchen.yml) one can run as well.
 
 A view of the various full-cluster deployment types:
-![Flow Chart of BACH Deployment Flavors -- VBox, OpenStack, Vagrant Bootstrap/Baremetal, Baremetal Only][bach_deployments]
+![Flow Chart of BACH Deployment Flavors -- VBox, OpenStack, Vagrant Bootstrap/Baremetal, Baremetal Only](https://github.com/bloomberg/chef-bach/blob/pages/readme-images/BACH%20Deployment%20Types.png)
 
 Using a BACH cluster
 --------------------
