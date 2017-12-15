@@ -51,6 +51,7 @@ default['hannibal']['hbase_site']['hannibal.kerberos.principal']='hannibal@EXAMP
 default['hannibal']['hbase_site']['hbase.regionserver.info.port']=60200
 
 # Hannibal DB Configurations
+default['hannibal']['db']['type'] = 'default'
 default['hannibal']['db']['user'] = 'hannibal'
 default['hannibal']['db']['password'] = 'hannibal'
 default['hannibal']['db']['driver'] = 'org.h2.Driver'
