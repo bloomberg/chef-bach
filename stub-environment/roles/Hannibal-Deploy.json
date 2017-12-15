@@ -4,7 +4,9 @@
     },
     "json_class": "Chef::Role",
     "run_list": [
-      "recipe[bach_hannibal]",
+      "recipe[bach_hannibal::default]",
+      "recipe[bach_hannibal::hannibaldb]",
+      "recipe[bach_hannibal::hannibalhb]",
       "recipe[hannibal]"
     ],
     "description": "A hannibal node",
