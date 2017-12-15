@@ -1,8 +1,8 @@
-###########################################
+############################################
 #
 #  Hadoop specific configs
 #
-#############################################
+############################################
 require 'pathname'
 
 user = node['bcpc']['bootstrap']['admin']['user']
@@ -10,7 +10,8 @@ default['bcpc']['cluster']['file_path'] = "/home/#{user}/chef-bcpc/cluster.txt"
 
 default['bcpc']['hadoop'] = {}
 default['bcpc']['hadoop']['distribution']['release'] = '2.6.1.17-1'
-default['bcpc']['hadoop']['distribution']['active_release'] = node['bcpc']['hadoop']['distribution']['release']
+default['bcpc']['hadoop']['distribution']['active_release'] = \
+  node['bcpc']['hadoop']['distribution']['release']
 default['bcpc']['hadoop']['decommission']['hosts'] = []
 default['bcpc']['hadoop']['hadoop_home_warn_suppress'] = 1
 default['bcpc']['hadoop']['hadoop_log_dir'] = '/var/log/hadoop-hdfs'
@@ -92,44 +93,20 @@ default['bcpc']['hadoop']['datanode']['restart_failed'] = false
 
 # These are to cache Chef search results and
 # allow hardcoding nodes performing various roles
-default[:bcpc][:hadoop][:nn_hosts] = []
-default[:bcpc][:hadoop][:jn_hosts] = []
-default[:bcpc][:hadoop][:rm_hosts] = []
-default[:bcpc][:hadoop][:hs_hosts] = []
-default[:bcpc][:hadoop][:dn_hosts] = []
-default[:bcpc][:hadoop][:hb_hosts] = []
-default[:bcpc][:hadoop][:hive_hosts] = []
-default[:bcpc][:hadoop][:oozie_hosts] = []
-default[:bcpc][:hadoop][:httpfs_hosts] = []
-default[:bcpc][:hadoop][:httpfs_hosts] = []
-default[:bcpc][:hadoop][:rs_hosts] = []
-default[:bcpc][:hadoop][:mysql_hosts] = []
+default['bcpc']['hadoop']['nn_hosts'] = []
+default['bcpc']['hadoop']['jn_hosts'] = []
+default['bcpc']['hadoop']['rm_hosts'] = []
+default['bcpc']['hadoop']['hs_hosts'] = []
+default['bcpc']['hadoop']['dn_hosts'] = []
+default['bcpc']['hadoop']['hb_hosts'] = []
+default['bcpc']['hadoop']['hive_hosts'] = []
+default['bcpc']['hadoop']['oozie_hosts'] = []
+default['bcpc']['hadoop']['httpfs_hosts'] = []
+default['bcpc']['hadoop']['httpfs_hosts'] = []
+default['bcpc']['hadoop']['rs_hosts'] = []
+default['bcpc']['hadoop']['mysql_hosts'] = []
 
 default['bcpc']['keepalived']['config_template'] = 'keepalived.conf_hadoop'
-
-default['bcpc']['revelytix']['loom_username'] = 'loom'
-default['bcpc']['revelytix']['activescan_hdfs_user'] = 'activescan-user'
-default['bcpc']['revelytix']['activescan_hdfs_enabled'] = 'true'
-default['bcpc']['revelytix']['activescan_table_enabled'] = 'true'
-default['bcpc']['revelytix']['hdfs_scan_interval'] = 60
-default['bcpc']['revelytix']['hdfs_parse_lines'] = 50
-default['bcpc']['revelytix']['hdfs_score_threshold'] = 0.25
-default['bcpc']['revelytix']['hdfs_max_buffer_size'] = 8_388_608
-default['bcpc']['revelytix']['persist_mode'] = 'hive'
-default['bcpc']['revelytix']['dataset_persist_dir'] = 'loom-datasets'
-default['bcpc']['revelytix']['temporary_file_dir'] = 'hdfs-default:loom-temp'
-default['bcpc']['revelytix']['job_service_thread_pool_size'] = 10
-default['bcpc']['revelytix']['security_authentication'] = 'loom'
-default['bcpc']['revelytix']['security_enabled'] = 'true'
-default['bcpc']['revelytix']['ssl_enabled'] = 'true'
-default['bcpc']['revelytix']['ssl_port'] = 8443
-default['bcpc']['revelytix']['ssl_keystore'] = 'config/keystore'
-default['bcpc']['revelytix']['ssl_key_password'] = ''
-default['bcpc']['revelytix']['ssl_trust_store'] = 'config/truststore'
-default['bcpc']['revelytix']['ssl_trust_password'] = ''
-default['bcpc']['revelytix']['loom_dist_cache'] = 'loom-dist-cache'
-default['bcpc']['revelytix']['hive_classloader_blacklist_jars'] = 'slf4j,log4j,commons-logging'
-default['bcpc']['revelytix']['port'] = 8080
 
 # Attributes to store details about (log) files from nodes to be copied
 # into a centralized location (currently HDFS).
@@ -162,7 +139,7 @@ default['bcpc']['hadoop']['copylog']['authlog'] = {
 }
 
 # Ensure the following group mappings in the group database
-default[:bcpc][:hadoop][:os][:group][:hadoop][:members] = %w(
+default['bcpc']['hadoop']['os']['group']['hadoop']['members'] = %w(
   hdfs
   yarn
   hbase
@@ -172,9 +149,8 @@ default[:bcpc][:hadoop][:os][:group][:hadoop][:members] = %w(
   mapred
   httpfs
 )
-
-default[:bcpc][:hadoop][:os][:group][:hdfs][:members] = ['hdfs']
-default[:bcpc][:hadoop][:os][:group][:mapred][:members] = ['yarn']
+default['bcpc']['hadoop']['os']['group']['hdfs']['members'] = ['hdfs']
+default['bcpc']['hadoop']['os']['group']['mapred']['members'] = ['yarn']
 
 # Override attributes to install Java
 # use java cookbook (https://github.com/agileorbit-cookbooks/java)
