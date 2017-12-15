@@ -28,16 +28,16 @@ application.langs="en"
 # By convention, the default datasource is named `default`
 #
 
-db.default.driver=<%= node['hannibal']['db']['driver'] %>
-db.default.url=<%= node['hannibal']['db']['url'] %>
-db.default.user=<%= node['hannibal']['db']['user'] %>
-db.default.password=<%= node['hannibal']['db']['password'] %>
+db.<%= node['hannibal']['db']['type']%>.driver=<%= node['hannibal']['db']['driver'] %>
+db.<%= node['hannibal']['db']['type']%>.url=<%= node['hannibal']['db']['url'] %>
+db.<%= node['hannibal']['db']['type']%>.username=<%= node['hannibal']['db']['user'] %>
+db.<%= node['hannibal']['db']['type']%>.password=<%= node['hannibal']['db']['password'] %>
 
 # Evolutions
 # ~~~~~
 # You can disable evolutions if needed
 # evolutionplugin=disabled
-applyEvolutions.default=<%= node[:hannibal][:apply_evolutions] %>
+play.evolutions.db.<%= node['hannibal']['db']['type']%>.autoApply=<%= node[:hannibal][:apply_evolutions] %>
 
 # Logger
 # ~~~~~
