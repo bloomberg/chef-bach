@@ -19,14 +19,9 @@
 user = ENV['SUDO_USER'] || ENV['USER'] || 'vagrant'
 
 if node[:fqdn] == get_bootstrap
-  # Symlink configuration for chef-client, chef-shell, and knife.
   link '/etc/chef/client.rb' do
-    to "/home/#{user}/chef-bcpc/.chef/knife.rb"
-  end
-
-  # Remove the existing client.d directory, if present.
-  execute 'rm -rf /etc/chef/client.d' do
-    only_if{ File.directory?('/etc/chef/client.d') }
+    action :delete
+    only_if { ::File.symlink?('/etc/chef/client.rb') }
   end
 
   directory "/home/#{user}/.chef/client.d" do
@@ -36,7 +31,8 @@ if node[:fqdn] == get_bootstrap
   end
 
   link '/etc/chef/client.d' do
-    to "/home/#{user}/.chef/client.d"
+    action :delete
+    only_if { ::File.symlink?('/etc/chef/client.d') }
   end
 
   link '/etc/chef/client.pem' do
@@ -45,6 +41,23 @@ if node[:fqdn] == get_bootstrap
 end
 
 include_recipe 'chef-client::config'
+
+knife_rb = "/home/#{user}/chef-bcpc/.chef/knife.rb"
+
+if node[:fqdn] == get_bootstrap
+  # Clone client.rb that is managed by the chef-client cookbook so that knife.rb
+  # can be managed by chef-client::config as well
+  client_rb = resources("template[#{node['chef_client']['conf_dir']}/client.rb]")
+  template knife_rb do
+    source client_rb.source
+    cookbook 'chef-client'
+    owner user
+    group client_rb.group
+    mode client_rb.mode
+    variables client_rb.variables
+  end
+end
+
 
 if node[:bcpc][:bootstrap][:proxy]
   #
@@ -55,9 +68,12 @@ if node[:bcpc][:bootstrap][:proxy]
   # bcpc/templates/default/client.rb.erb will render the original
   # upstream template, then append proxy environment variables.
   #
-  edit_resource!(:template, "#{node['chef_client']['conf_dir']}/client.rb") do
-    source 'client.rb.erb'
-    cookbook 'bcpc'
+  chef_templates = ["#{node['chef_client']['conf_dir']}/client.rb", knife_rb]
+  chef_templates.each do |chef_template|
+    edit_resource!(:template, chef_template) do
+      source 'client.rb.erb'
+      cookbook 'bcpc'
+    end
   end
 end
 
