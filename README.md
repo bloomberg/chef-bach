@@ -36,7 +36,7 @@ Setup
 =====
 
 These recipes are currently intended for building a BACH cluster on top of
-Ubuntu 12.04 servers using Chef 11. When setting this up in VMs, be sure to
+Ubuntu 14.04 servers using Chef 11. When setting this up in VMs, be sure to
 add a few dedicated disks (for HDFS data nodes) aside from boot volume. In
 addition, it's expected that you have three separate NICs per machine, with
 the following as defaults (and recommendations for VM settings):
@@ -213,7 +213,7 @@ BACH currently relies upon a number of open-source packages:
  - [Apache Zookeeper](http://zookeeper.apache.org)
  - [Sentric Hannibal](https://github.com/sentric/hannibal/)
  - [Twitter HDFS-DU](https://github.com/twitter/hdfs-du)
- - [Chef](http://www.getchef.com/chef/)
+ - [Chef](https://www.chef.io/chef/)
  - [Cobbler](http://cobbler.github.io/)
  - [Diamond](https://github.com/BrightcoveOS/Diamond)
  - [Etherboot](http://etherboot.org/)
