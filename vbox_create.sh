@@ -5,12 +5,17 @@ source ./virtualbox_env.sh
 
 set -x
 
+if !hash ruby 2> /dev/null ; then
+  echo 'No ruby in path!'
+  exit 1
+fi
+
 if [[ -f ./proxy_setup.sh ]]; then
   . ./proxy_setup.sh
 fi
 if [[ -z "$CURL" ]]; then
-  echo "CURL is not defined"
-  exit
+  echo 'CURL is not defined'
+  exit 1
 fi
 
 # Bootstrap VM Defaults (these need to be exported for Vagrant's Vagrantfile)
@@ -66,8 +71,7 @@ cp += '-' unless cp.empty?;
 vms = parse_cluster_txt(File.readlines('cluster.txt'))
 puts vms.map{|e| cp + e[:hostname]}.join(' ')
 "
-VM_LIST=( $(ruby -e "$code_to_produce_vm_list") )
-export VM_LIST
+export VM_LIST=( $(/usr/bin/env ruby -e "$code_to_produce_vm_list") )
 
 ######################################################
 # Function to download files necessary for VM stand-up
@@ -158,6 +162,17 @@ function create_bootstrap_VM {
   popd
 }
 
+
+###################################################################
+# Function to create the ipxe disk
+# Args: Location to use for the ipxe disk
+# Post-Condition: The ipxe disk is added as a hdd in virtualbox
+#
+function create_vbox_ipxe_disk {
+  cp files/default/ipxe.vdi $1
+  $VBM modifyhd -type immutable $1
+}
+
 ###################################################################
 # Function to create the BCPC cluster VMs
 #
@@ -176,13 +191,32 @@ function create_cluster_VMs {
   VBN1="${bootstrap_interfaces[1]?Need a Virtualbox network 2 for the bootstrap}"
   VBN2="${bootstrap_interfaces[2]?Need a Virtualbox network 3 for the bootstrap}"
 
-  #
-  # Add the ipxe USB key to the vbox storage registry as an immutable
-  # disk, so we can share it between several VMs.
-  #
-  IPXE_DISK=$P/ipxe.vdi
-  cp files/default/ipxe.vdi $IPXE_DISK
-  $VBM modifyhd -type immutable $IPXE_DISK
+  if [[ $CLUSTER_VM_EFI == true ]]; then
+    #
+    # Add the ipxe USB key to the vbox storage registry as an immutable
+    # disk, so we can share it between several VMs.
+    #
+    current_ipxe=$(vboxmanage list hdds | egrep '^Location:.*ipxe.vdi$')
+    # we have an ipxe disk added
+    if [[ -n "$current_ipxe" ]]; then
+      current_ipxe=$(vboxmanage list hdds | egrep '^Location:.*ipxe.vdi$')
+      ipxe_location=$(echo "$current_ipxe" | sed 's/^Location:[ ]*//')
+      # ensure the location is available -- if not blow it away and recreate
+      if $VBM showmediuminfo "$ipxe_location" | egrep -q '^State:.*inaccessible'; then
+        $VBM closemedium disk "$ipxe_location"
+        # update if we changed ipxe_location to the local workspace
+        ipxe_location="$P/ipxe.vdi"
+        create_vbox_ipxe_disk "$ipxe_location"
+      fi
+    else
+      ipxe_location="$P/ipxe.vdi"
+      create_vbox_ipxe_disk "$ipxe_location"
+    fi
+
+    # provide the IPXE disk location so we know if it is from
+    # another cluster
+    echo "NOTE: Using IPXE volume at: $ipxe_location"
+  fi
 
   # Create each VM
   for vm in ${VM_LIST[*]}; do
@@ -224,7 +258,7 @@ function create_cluster_VMs {
 	  if [[ $CLUSTER_VM_EFI == true ]]; then
 	      # Attach the iPXE boot medium as /dev/sdb.
               $VBM storageattach $vm --storagectl $DISK_CONTROLLER \
-		   --device 0 --port $port --type hdd --medium $IPXE_DISK
+		   --device 0 --port $port --type hdd --medium $ipxe_location
 	      port=$((port+1))
 	  else
 	      # If we're not using EFI, force the BIOS to boot net.
@@ -295,6 +329,7 @@ function install_cluster {
     echo '========= Failed to Chef!' >&2
     exit 1
   fi
+  vagrant ssh -c 'cd chef-bcpc; ./cluster-enroll-cobbler.sh remove' || true
   vagrant ssh -c 'cd chef-bcpc; ./cluster-enroll-cobbler.sh add'
 }
 

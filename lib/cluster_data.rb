@@ -37,7 +37,7 @@ module BACH
   module ClusterData
     # bogus VirtualBox MAC (keep the vendor OUI set to VirtualBox's)
     BOGUS_VB_MAC = '08:00:27:C0:FF:EE'
-    LEGACY_COBBLER_PROFILE = 'bcpc_host_precise'
+    BIOS_COBBLER_PROFILE = 'bcpc_host_trusty'
     EFI_COBBLER_PROFILE = 'bcpc_host_trusty'
 
     def repo_dir

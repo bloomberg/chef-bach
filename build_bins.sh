@@ -78,6 +78,7 @@ mkdir -p /var/chef/cache
 TMPFILE=`mktemp -t build_bins_chef_config.XXXXXXXXX.rb`
 cat <<EOF > $TMPFILE
 cache_path '/var/chef'
+no_lazy_load 'true'
 EOF
 
 #

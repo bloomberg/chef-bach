@@ -73,8 +73,9 @@ def booted_hosts
   gpxe_url = Regexp.new('/cblr/svc/op/gpxe/system/')
   ubuntu_url = Regexp.new('/cobbler/images/ubuntu-.*-x86_64/linux')
   initrd_url = Regexp.new('/cobbler/images/ubuntu-.*-x86_64/initrd.gz')
+  preseed_url = Regexp.new('/cblr/svc/op/ks/system/')
   # array should be sorted from first URL to last URL in boot process
-  match_strings = [gpxe_url, ubuntu_url, initrd_url]
+  match_strings = [gpxe_url, ubuntu_url, initrd_url, preseed_url]
 
   # create a hash of hostnames to bootstate from match_strings array
   boot_log_entries = {}

@@ -37,6 +37,7 @@ cookbook_path '$(pwd)/vendor/cookbooks'
 
 ssl_verify_mode :verify_none
 verify_api_cert false
+no_lazy_load true
 
 knife[:vault_mode] = 'client'
 File.umask(0007)
