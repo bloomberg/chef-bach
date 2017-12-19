@@ -25,6 +25,7 @@ default["bcpc"]["hadoop"]["hbase"]["blockcache"]["size"] = 0.4
 default["bcpc"]["hadoop"]["hbase"]["bucketcache"]["size"] = 1434
 default["bcpc"]["hadoop"]["hbase"]["bucketcache"]["ioengine"] = "offheap"
 default["bcpc"]["hadoop"]["hbase"]["bucketcache"]["combinedcache"]["percentage"] = 0.71
+default['bcpc']['hadoop']['hbase']['bucketcache.bucket.sizes'] = nil
 default["bcpc"]["hadoop"]["hbase"]["shortcircuit"]["read"] = false
 default["bcpc"]["hadoop"]["hbase"]["region"]["replication"]["enabled"] = false
 default["bcpc"]["hadoop"]["hbase"]["region"]["replica"]["storefile"]["refresh"]["memstore"]["multiplier"] = 4
@@ -71,6 +72,7 @@ bucketcache_size = (node["bcpc"]["hadoop"]["hbase_rs"]["mx_dir_mem"]["size"] -  
 default[:bcpc][:hadoop][:hbase][:site_xml].tap do |site_xml|
   site_xml['hbase.rootdir'] = "#{node['bcpc']['hadoop']['hbase']['root_dir']}"
   site_xml['hbase.bulkload.staging.dir'] = "#{node['bcpc']['hadoop']['hbase']['bulkload_staging_dir']}"
+  site_xml['hbase.fs.tmp.dir'] = '/user/${user.name}/hbase-staging'
   site_xml['hbase.cluster.distributed'] = "#{node["bcpc"]["hadoop"]["hbase"]["cluster"]["distributed"]}"
   site_xml['hbase.hregion.majorcompaction'] = "#{node["bcpc"]["hadoop"]["hbase"]["major_compact"]["time"]}"
   site_xml['hbase.regionserver.ipc.address'] = "#{node["bcpc"]["floating"]["ip"]}"
