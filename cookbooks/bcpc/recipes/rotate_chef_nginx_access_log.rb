@@ -10,6 +10,7 @@ logrotate_app 'chef-server-nginx-access-log' do
   path '/var/log/chef-server/nginx/access.log'
   frequency 'daily'
   rotate 5
+  maxsize '1G'
   options %w(missingok notifempty compress delaycompress copytruncate)
   postrotate '/opt/chef-server/embedded/sbin/nginx -s reopen'
 end
