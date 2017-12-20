@@ -84,7 +84,7 @@ if File.basename(__FILE__) == File.basename($PROGRAM_NAME)
     # set to EFI or legacy Cobbler type as desired for VMs
     profile = ! vms.key?(e[:hostname]) ?  e[:cobbler_profile] : \
       virtualbox_bios(e[:hostname]).eql?('EFI') ? \
-      EFI_COBBLER_PROFILE : LEGACY_COBBLER_PROFILE
+      EFI_COBBLER_PROFILE : BIOS_COBBLER_PROFILE
 
     [e[:hostname], mac, ip, e[:ilo_address], profile, e[:dns_domain], e[:runlist]]
   end
