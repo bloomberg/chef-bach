@@ -80,3 +80,9 @@ default['bcpc']['hadoop']['java'] = "/usr/lib/jvm/java-8-oracle-amd64"
 # jmxtrans-agent (https://github.com/jmxtrans/jmxtrans-agent)
 default['bach']['repository']['jmxtrans_agent']['download_url'] = 'https://github.com/jmxtrans/jmxtrans-agent/releases/download/jmxtrans-agent-1.2.5/jmxtrans-agent-1.2.5.jar'
 default['bach']['repository']['jmxtrans_agent']['checksum'] = 'd351ac0b863ffb2742477001296f65cbca6f8e9bb5bec3dc2194c447d838ae17'
+
+# OpenTSDB deb package details
+default['bach']['repository']['opentsdb']['version'] = '2.3.0'
+default['bach']['repository']['opentsdb']['package_name'] = "opentsdb-#{node['bach']['repository']['opentsdb']['version']}_all.deb"
+default['bach']['repository']['opentsdb']['download_url'] = "https://github.com/OpenTSDB/opentsdb/releases/download/v#{node['bach']['repository']['opentsdb']['version']}/#{node['bach']['repository']['opentsdb']['package_name']}"
+default['bach']['repository']['opentsdb']['checksum'] = 'eb3568582180a7cf72f629e59ed9dc545d183e57abb29a1bf0d9c328ef0f2982'

@@ -1,0 +1,121 @@
+###############################################
+##   WARNING - THIS FILE IS MANAGED BY CHEF  ##
+## DO NOT MODIFY BY HAND, OR YOU'LL BE SORRY ##
+###############################################
+
+# --------- NETWORK ----------
+# The TCP port TSD should use for communications
+# *** REQUIRED ***
+tsd.network.port = <%= node['bach_opentsdb']['network']['port'] %>
+
+# The IPv4 network address to bind to, defaults to all addresses
+<% if node['bach_opentsdb']['network']['bind'] -%>
+tsd.network.bind = <%= node['bach_opentsdb']['network']['bind'] %>
+<% else -%>
+# tsd.network.bind = 0.0.0.0
+<% end -%>
+
+# Disable Nagel's algorithm.  Default is True
+<% if node['bach_opentsdb']['network']['tcp_no_delay'] != 'true' -%>
+tsd.network.tcp.no_delay = <%= node['bach_opentsdb']['network']['tcp_no_delay'] %>
+<% else -%>
+#tsd.network.tcp_no_delay = true
+<% end -%>
+
+# Determines whether or not to send keepalive packets to peers, default 
+# is True
+<% if node['bach_opentsdb']['network']['keep_alive'] != 'true' -%>
+tsd.network.keep_alive = <%= node['bach_opentsdb']['network']['keep_alive'] %>
+<% else -%>
+#tsd.network.keep_alive = true
+<% end -%>
+
+# Determines if the same socket should be used for new connections, default 
+# is True
+<% if node['bach_opentsdb']['network']['reuse_address'] != 'true' -%>
+tsd.network.reuse_address = <%= node['bach_opentsdb']['network']['reuse_address'] %>
+<% else -%>
+#tsd.network.reuse_address = true
+<% end -%>
+
+# Number of worker threads dedicated to Netty, defaults to # of CPUs * 2
+<% if node['bach_opentsdb']['network']['worker_threads'] -%>
+tsd.network.worker_threads = <%= node['bach_opentsdb']['network']['worker_threads'] %>
+<% else -%>
+tsd.network.worker_threads = <%= node['cpu']['cores'] %>
+<% end -%>
+
+# Whether or not to use NIO or tradditional blocking IO, defaults to True
+<% if node['bach_opentsdb']['network']['async_io'] != 'true' -%>
+tsd.network.async_io = <%= node['bach_opentsdb']['network']['async_io'] %>
+<% else -%>
+#tsd.network.async_io = true
+<% end -%>
+
+# ----------- HTTP -----------
+# The location of static files for the HTTP GUI interface.
+# *** REQUIRED ***
+tsd.http.staticroot = <%= node['bach_opentsdb']['http']['staticroot'] %>
+
+# Where TSD should write it's cache files to
+# *** REQUIRED ***
+tsd.http.cachedir = <%= node['bach_opentsdb']['http']['cachedir'] %>
+
+# --------- CORE ----------
+# Whether or not to automatically create UIDs for new metric types, default
+# is False
+<% if node['bach_opentsdb']['core']['auto_create_metrics'] != 'false' -%>
+tsd.core.auto_create_metrics = <%= node['bach_opentsdb']['core']['auto_create_metrics'] %>
+<% else -%>
+#tsd.core.auto_create_metrics = false
+<% end -%>
+
+# Full path to a directory containing plugins for OpenTSDB
+tsd.core.plugin_path = <%= node['bach_opentsdb']['core']['plugin_path'] %>
+
+# --------- STORAGE ----------
+# Whether or not to enable data compaction in HBase, default is True
+<% if node['bach_opentsdb']['storage']['enable_compaction'] != 'true' -%>
+tsd.storage.enable_compaction = <%= node['bach_opentsdb']['storage']['enable_compaction'] %>
+<% else -%>
+#tsd.storage.enable_compaction = true
+<% end -%>
+
+# How often, in milliseconds, to flush the data point queue to storage, 
+# default is 1,000
+<% if node['bach_opentsdb']['storage']['flush_interval'] != 1000 -%>
+tsd.storage.flush_interval = <%= node['bach_opentsdb']['storage']['flush_interval'] %>
+<% else -%>
+# tsd.storage.flush_interval = 1000
+<% end -%>
+
+# Name of the HBase table where data points are stored, default is "tsdb"
+<% if node['bach_opentsdb']['storage']['hbase']['data_table'] != 'tsdb' -%>
+tsd.storage.hbase.data_table = <%= node['bach_opentsdb']['storage']['hbase']['data_table'] %>
+<% else -%>
+#tsd.storage.hbase.data_table = tsdb
+<% end -%>
+
+# Name of the HBase table where UID information is stored, default is "tsdb-uid"
+<% if node['bach_opentsdb']['storage']['hbase']['uid_table'] != 'tsdb-uid' -%>
+tsd.storage.hbase.uid_table = <%= node['bach_opentsdb']['storage']['hbase']['uid_table'] %>
+<% else -%>
+#tsd.storage.hbase.uid_table = tsdb-uid
+<% end -%>
+
+# Path under which the znode for the -ROOT- region is located, default is "/hbase"
+<% if node['bach_opentsdb']['storage']['hbase']['zk_basedir'] != '/hbase' -%>
+tsd.storage.hbase.zk_basedir = <%= node['bach_opentsdb']['storage']['hbase']['zk_basedir'] %>
+<% else -%>
+#tsd.storage.hbase.zk_basedir = /hbase
+<% end -%>
+
+# A comma separated list of Zookeeper hosts to connect to, with or without 
+# port specifiers, default is "localhost"
+tsd.storage.hbase.zk_quorum = <%= node['bcpc']['hadoop']['zookeeper']['servers'].map{ |s| float_host(s[:hostname]) + ":#{node['bcpc']['hadoop']['zookeeper']['port']}" }.join(',') %>
+
+# Kerberos additional configuration
+hbase.security.auth.enable=true
+hbase.kerberos.regionserver.principal=<%= node['bcpc']['hadoop']['kerberos']['data']['hbase']['principal'] %>/_HOST@<%= node['bcpc']['hadoop']['kerberos']['realm'] %>
+hbase.sasl.clientconfig=Client
+hbase.security.authentication=kerberos
