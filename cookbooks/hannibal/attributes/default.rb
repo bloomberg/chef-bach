@@ -35,7 +35,7 @@ default[:hannibal][:exec_mode] = '0655'
 default[:hannibal][:port] = 9000
 default[:hannibal][:service_endpoint] = "http://localhost:#{node[:hannibal][:port]}/api/heartbeat" 
 default[:hannibal][:service_timeout] = 360 
-default[:hannibal][:checksum]["1.1.3"] = 'c18ad71a5ea7b822940114dca2770a861ff8b78ae98b334f5c431e72becb8394'
+default[:hannibal][:checksum]["1.1.3"] = '1756455e0f097e28034f57910870c95223ae94e4d580116ae641920931255b02'
 default[:hannibal][:download_url] = 'http://10.0.101.3/'
 
 # HBase configurations for hannibal
