@@ -7,11 +7,14 @@
     <% end %>
   </queries>
 
-  <outputWriter class="<%= @output_writer_class %>">
-      <host><%= @output_writer_host %></host>
-      <port><%= @output_writer_port %></port>
-      <namePrefix><%= @output_writer_name_prefix %>.#escaped_hostname#.</namePrefix>
-  </outputWriter>
+  <% @output_writers.each do |writer_name|  %>
+    <% writer = eval "@#{writer_name}" %>
+    <outputWriter class="<%= writer['class'] %>">
+      <% writer.each do |k, v| %>
+        <<%= k %>><%= v %></<%= k %>>
+      <% end %>
+    </outputWriter>
+  <% end  %>
 
   <collectIntervalInSeconds><%= @collect_interval_in_seconds %></collectIntervalInSeconds>
 </jmxtrans-agent>
