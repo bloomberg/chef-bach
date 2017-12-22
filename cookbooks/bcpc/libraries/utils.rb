@@ -144,10 +144,26 @@ def get_config(key, item=node.chef_environment, bag="configs")
   end
 
   #
-  # We should always provide the vault item if possible.
-  # If that fails, fall back to the data bag.
+  # This is the second iteration of get_config.
+  # Items are retrieved from chef-vault.
   #
-  get_vault_item(key, item, bag) || get_data_bag_item(key, item, bag)
+  def get_node_item(key, item, bag)
+    begin
+      node['bcpc']['databag_overrides'][bag][item][key]
+    # we get a NoMethodError if a key returns nil (not defined)
+    rescue NoMethodError
+      nil
+    end
+  end
+
+  #
+  # We should allow test overrides in the environment, otherwise
+  # provide the vault item if possible. If that fails,
+  # fall back to the data bag.
+  #
+  get_node_item(key, item, bag) || \
+    get_vault_item(key, item, bag) || \
+    get_data_bag_item(key, item, bag)
 end
 
 def delete_config(key)
