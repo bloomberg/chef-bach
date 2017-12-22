@@ -13,8 +13,15 @@ fi
 if [[ -f ./proxy_setup.sh ]]; then
   . ./proxy_setup.sh
 fi
+# CURL is exported by proxy_setup.sh
 if [[ -z "$CURL" ]]; then
   echo 'CURL is not defined'
+  exit 1
+fi
+
+# BOOTSTRAP_NAME is exported by automated_install.sh
+if [[ -z "$BOOTSTRAP_NAME" ]]; then
+  echo 'BOOTSTRAP_NAME is not defined'
   exit 1
 fi
 
@@ -92,6 +99,21 @@ function download_VM_files {
 }
 
 ################################################################################
+# Function to snapshot VirtualBox VMs
+# Argument: name of snapshot to take
+# Post-Condition: If snapshot did not previously exist for VM: VM snapshot taken
+#                 If snapshot previously exists for that VM: Nothing for that VM
+function snapshotVMs {
+  local snapshot_name="$1"
+  printf "Snapshotting ${snapshot_name}\n"
+  for vm in ${VM_LIST[*]} ${BOOTSTRAP_NAME}; do
+    $VBM snapshot $vm list --machinereadable | grep -q "^SnapshotName=\"${snapshot_name}\"\$" || \
+      $VBM snapshot $vm take "${snapshot_name}" &
+  done
+  wait && printf "Done Snapshotting\n"
+}
+
+################################################################################
 # Function to enumerate VirtualBox hostonly interfaces
 # in use from VM's.
 # Argument: name of an associative array defined in calling context
@@ -99,6 +121,7 @@ function download_VM_files {
 #                 all interfaces in use and values being the number of VMs on
 #                 each network
 function discover_VBOX_hostonly_ifs {
+  # make used_ifs a typeref to the passed-in associative array
   local -n used_ifs=$1
   for net in $($VBM list hostonlyifs | grep '^Name:' | sed 's/^Name:[ ]*//'); do
     used_ifs[$net]=0
@@ -180,7 +203,6 @@ function create_cluster_VMs {
   # Gather VirtualBox networks in use by bootstrap VM
   oifs="$IFS"
   IFS=$'\n'
-  # BOOTSTRAP_NAME is exported by automated_install.sh
   bootstrap_interfaces=($($VBM showvminfo ${BOOTSTRAP_NAME} \
     --machinereadable | \
     egrep '^hostonlyadapter[0-9]=' | \

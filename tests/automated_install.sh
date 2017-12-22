@@ -72,6 +72,19 @@ for vm in ${VM_LIST[*]}; do
   echo $vm
 done
 
+# VM Snapshot Statemachine:
+# Before PXE boot:
+SNAP_PRE_PXE='Shoe-less'
+# After OS Install:
+SNAP_POST_PXE='Post-Cobble'
+# After cluster-assign-roles Bootstrap Step:
+SNAP_POST_BASIC='Post-Basic'
+# After cluster-assign-roles <cluster> Step:
+SNAP_POST_BOOTSTRAP='Post-Bootstrap'
+# After cluster-assign-roles <cluster> Step:
+SNAP_POST_INSTALL='Post-Install'
+
+
 download_VM_files || ( echo "############## VBOX CREATE DOWNLOAD VM FILES RETURNED $? ##############" && exit 1 )
 create_bootstrap_VM || ( echo "############## VBOX CREATE BOOTSTRAP VM RETURNED $? ##############" && exit 1 )
 
@@ -82,15 +95,11 @@ create_cluster_VMs || ( echo "############## VBOX CREATE CLUSTER VMs RETURNED $?
 install_cluster $BACH_ENVIRONMENT $BOOTSTRAP_IP || ( echo "############## VBOX CREATE INSTALL CLUSTER RETURNED $? ##############" && exit 1 )
 
 printf "#### Cobbler Boot\n"
-printf "Snapshotting pre-Cobbler and booting (unless already running)\n"
-
-vms_started="False"
+printf "  Snapshotting pre-Cobbler and booting (unless already running)\n"
+snapshotVMs "${SNAP_PRE_PXE}"
 for vm in ${VM_LIST[*]} ${BOOTSTRAP_NAME}; do
-  vboxmanage showvminfo $vm | grep -q '^State:.*running' || vms_started="True"
-  if [[ ! $(vboxmanage snapshot $vm list --machinereadable | grep -q 'Shoe-less') ]]; then
-    vboxmanage showvminfo $vm | grep -q '^State:.*running' || VBoxManage snapshot $vm take Shoe-less
-  fi
-  vboxmanage showvminfo $vm | grep -q '^State:.*running' || VBoxManage startvm $vm --type headless
+  vboxmanage showvminfo $vm --machinereadable | grep -q '^VMState="running"$' || \
+    VBoxManage startvm $vm --type headless
 done
 
 if hash screen; then
@@ -113,32 +122,20 @@ if hash screen; then
     ((ii++))
   done
   popd > /dev/null
-  echo "Enter this command to view VM serial consoles:"
-  echo "  screen -S 'BACH serial consoles' `readlink -f ../cluster/screenrc`"
+  echo "  Enter this command to view VM serial consoles:"
+  echo "    screen -S 'BACH serial consoles' `readlink -f ../cluster/screenrc`"
   echo
 fi
 
 vagrant ssh -c "cd chef-bcpc; source proxy_setup.sh; ./wait-for-hosts.sh ${VM_LIST[*]}"
-printf "Snapshotting post-Cobbler\n"
-for vm in ${VM_LIST[*]} ${BOOTSTRAP_NAME}; do
-  [[ $(vboxmanage snapshot $vm list --machinereadable | grep -q 'Post-Cobble') ]] || \
-    [[ "$vms_started" == "True" ]] && VBoxManage snapshot $vm take Post-Cobble --live &
-done
-wait && printf "Done Snapshotting\n"
+snapshotVMs "${SNAP_POST_PXE}"
 
 printf "#### Chef the nodes with Basic role\n"
 vagrant ssh -c "cd chef-bcpc; ./cluster-assign-roles.sh $BACH_ENVIRONMENT Basic"
-
-printf "Snapshotting Post-Basic\n"
-for vm in ${VM_LIST[*]} ${BOOTSTRAP_NAME}; do
-  [[ $(vboxmanage snapshot $vm list --machinereadable | grep -q 'Post-Basic') ]] || \
-    VBoxManage snapshot $vm take Basic --live &
-done
-wait && printf "Done Snapshotting\n"
+snapshotVMs "${SNAP_POST_BASIC}"
 
 printf "#### Chef the nodes with complete roles\n"
 printf "Cluster type: $CLUSTER_TYPE\n"
-
 
 # Kafka does not run Bootstrap step
 if [ "${CLUSTER_TYPE,,}" == "hadoop" ]; then
@@ -147,14 +144,10 @@ if [ "${CLUSTER_TYPE,,}" == "hadoop" ]; then
   # We know the first run might fail set +e
   set +e
   vagrant ssh -c "cd chef-bcpc; ./cluster-assign-roles.sh $BACH_ENVIRONMENT Bootstrap"
-  # if we still fail here we have some other issue
   set -e
+  # if we still fail here we have some other issue
   vagrant ssh -c "cd chef-bcpc; ./cluster-assign-roles.sh $BACH_ENVIRONMENT Bootstrap"
-  for vm in ${VM_LIST[*]} ${BOOTSTRAP_NAME}; do
-    [[ $(vboxmanage snapshot $vm list --machinereadable | grep -q 'Post-Bootstrap') ]] || \
-      VBoxManage snapshot $vm take Post-Bootstrap --live &
-  done
-  wait && printf "Done Snapshotting\n"
+  snapshotVMs "${SNAP_POST_BOOTSTRAP}"
   printf "Running final C-A-R(s)"
 fi
 
@@ -166,12 +159,6 @@ vagrant ssh -c "cd chef-bcpc; ./cluster-assign-roles.sh $BACH_ENVIRONMENT $CLUST
 if [[ "${CLUSTER_TYPE,,}" == "hadoop" ]]; then
   vagrant ssh -c "cd chef-bcpc; ./cluster-assign-roles.sh $BACH_ENVIRONMENT $CLUSTER_TYPE BCPC-Hadoop-Head"
 fi
-
-printf "Snapshotting Post-Install\n"
-for vm in ${VM_LIST[*]} ${BOOTSTRAP_NAME}; do
-  [[ $(vboxmanage snapshot $vm list --machinereadable | grep -q 'Post-Install') ]] || \
-    VBoxManage snapshot $vm take Post-Install --live &
-done
-wait && printf "Done Snapshotting\n"
+snapshotVMs "${SNAP_POST_INSTALL}"
 
 printf '#### Install Completed!\n'
