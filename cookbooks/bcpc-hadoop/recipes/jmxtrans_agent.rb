@@ -1,12 +1,12 @@
 node['bcpc']['hadoop']['jmxtrans_agent'].tap do |agent|
   graphite = agent['graphite'].dup
-  def graphite.with_prefix(component)
-    self.merge('namePrefix' => "#{component['name_prefix']}.#escaped_hostname#.")
+  def graphite.with_prefix(component, cluster)
+    self.merge('namePrefix' => "#{component['name_prefix']}.#{cluster}.#escaped_hostname#.")
   end
 
   statsd = agent['statsd'].dup
   def statsd.with_prefix(component)
-    self.merge('metricName' => "#{component['name_prefix']}.#escaped_hostname#")
+    self.merge('metricName' => "bach.#{component['name_prefix']}")
   end
   
   %w(namenode datanode journalnode hbase_master hbase_rs nodemanager
@@ -17,7 +17,7 @@ node['bcpc']['hadoop']['jmxtrans_agent'].tap do |agent|
       variables(
         collect_interval_in_seconds: agent['collect_interval_in_seconds'],
         output_writers: agent['output_writers'],
-        graphite: graphite.with_prefix(agent[component]),
+        graphite: graphite.with_prefix(agent[component], node.chef_environment),
         statsd: statsd.with_prefix(agent[component]),
         queries: agent[component]['queries']
       )
