@@ -26,6 +26,7 @@ export BOOTSTRAP_VM_CPUs=${BOOTSTRAP_VM_CPUS:-2}
 export CLUSTER_VM_MEM=${CLUSTER_VM_MEM:-7120}
 export CLUSTER_VM_CPUs=${CLUSTER_VM_CPUs:-4}
 export CLUSTER_TYPE=${CLUSTER_TYPE:-Hadoop}
+export PATH=/opt/chefdk/embedded/bin:$PATH
 
 BOOTSTRAP_NAME="bcpc-bootstrap"
 if [ "$BACH_CLUSTER_PREFIX" != "" ]; then
