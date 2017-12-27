@@ -61,11 +61,11 @@ unless ::File.exist?(node['bcpc']['hadoop']['java_https_keystore'])
         -file #{cert} \
         -keystore #{node['bcpc']['hadoop']['java_https_keystore']} \
         -storepass changeit \
-        -trustcacerts \
+        -trustcacerts
       EOH
-    not_if "keytool -alias #{::File.basename(cert)} -list -file #{cert} \
-      -keystore #{node['bcpc']['hadoop']['java_https_keystore']} \
-      -storepass changeit"
+      not_if "keytool -alias #{::File.basename(cert)} -list -file #{cert} \
+        -keystore #{node['bcpc']['hadoop']['java_https_keystore']} \
+        -storepass changeit"
     end
   end
 end
