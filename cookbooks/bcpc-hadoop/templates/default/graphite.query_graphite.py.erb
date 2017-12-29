@@ -18,12 +18,12 @@ class GraphiteToZabbix(object):
     self.default_query_range = "<%= @default_query_range %>"
     self.threads = threads
     self.re_strip_function = re.compile("^(.+\()(.+)(\))$")
-    # On applying "self.re_strip_function", which index(start=1) in match.groups has the result 
+    # On applying "self.re_strip_function", which index(start=1) in match.groups has the result
     self.re_query_field = 2
     self._main()
 
   def create_log(self, path):
-    """  
+    """
     Creates a rotating log
     """
 
@@ -80,11 +80,14 @@ class GraphiteToZabbix(object):
 
     query = self.fetch_query_from_function(target)
     parts = query.split('.')
-    host = parts[1]
     item = target
     if parts[0] == 'servers':
-      item = '.'.join(str(s) for s in parts[1:]) 
+      # e.g. parts=[u'servers', u'TestLaptop', u'bcpc-vm3', u'diskspace', u'_disk_2', u'byte_avail']
+      host = parts[2]
+      item = '.'.join(str(s) for s in parts[2:])
     elif parts[0] == 'jmx':
+      # e.g. parts=[u'jmx', u'hbase_master', u'Test-Laptop', u'*', u'memory', u'HeapMemoryUsage_committed']
+      host = parts[1]
       item = host + '.' + parts[-1]
     return (host, item)
 
@@ -106,7 +109,7 @@ class GraphiteToZabbix(object):
         sys.stdout.write("%s %d %d\n" % ('graphite-to-zabbix graphite-to-zabbix.QueryResultFormatError',int(time.time()),1))
       if output:
         sys.stdout.write('\n'.join(output) + '\n')
- 
+
   def process_query(self, query):
     """
     Process a single graphite query
@@ -124,7 +127,7 @@ class GraphiteToZabbix(object):
     LOGGER.info('start')
     with open("<%= @config_file %>",'r') as f:
       queries = f.readlines()
-    pool = Pool(processes=self.threads)  
+    pool = Pool(processes=self.threads)
     try:
       pool.map(self.process_query, queries)
     except Exception as e:
@@ -132,8 +135,8 @@ class GraphiteToZabbix(object):
       pass
     finally:
       pool.close()
-      pool.join()  
+      pool.join()
     LOGGER.info('end')
- 
+
 if __name__ == '__main__':
   GraphiteToZabbix(threads=<%= @worker_count %>)
