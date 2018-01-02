@@ -69,7 +69,6 @@ This process is to run tests using ChefDK. It is also possible to run using pure
 * `export PKG_CONFIG_PATH=/usr/lib/pkgconfig:/usr/lib/x86_64-linux-gnu/pkgconfig:/usr/share/pkgconfig`
 * `cd ~vagrant/chef-bcpc`
 * `source proxy_setup.sh`
-* `bundler install --path vendor/bootstrap`
 * `bundler exec rspec`
 * `for c in cookbooks/*; do pushd $c; bundler install --path vendor/bootstrap && bundler exec rspec || echo "Failed in $c" 1>&2 ; popd; done`
 
