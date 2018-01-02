@@ -1,0 +1,11 @@
+// ###############################################
+// ##   WARNING - THIS FILE IS MANAGED BY CHEF  ##
+// ## DO NOT MODIFY BY HAND, OR YOU'LL BE SORRY ##
+// ###############################################
+Client {
+  com.sun.security.auth.module.Krb5LoginModule required
+  useKeyTab=true
+  useTicketCache=false
+  keyTab="<%= node['bach_opentsdb']['keytab_dir'] %>/<%= node['bach_opentsdb']['hbase_keytab'] %>"
+  principal="<%= node['bach_opentsdb']['hbase_master_princ'] %>";
+};

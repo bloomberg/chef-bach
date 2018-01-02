@@ -22,6 +22,7 @@ cookbooks/*/
 !cookbooks/bcpc_kafka
 !cookbooks/hdfsdu
 !cookbooks/bach_krb5
+!cookbooks/bach_opentsdb
 !cookbooks/smoke-tests
 cookbooks/*/coverage
 cookbooks/*/vendor
