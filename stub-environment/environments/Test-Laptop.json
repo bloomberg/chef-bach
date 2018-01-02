@@ -2,6 +2,13 @@
   "name": "Test-Laptop",
   "override_attributes": {
     "bcpc": {
+      "databag_overrides": {
+        "configs": {
+          "Test-Laptop": {
+            "cobbler-root-password": "hadoopy"
+          }
+        }
+      },
       "domain_name": "bcpc.example.com",
       "management": {
         "vip" : "10.0.100.5"
