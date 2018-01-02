@@ -25,7 +25,7 @@ sudo chmod 550 $PEM_RELATIVE_PATH
 [ ! -L ~/.chef ] && \
   sudo ln -s $(readlink -f .chef) ~/.chef
 
-admin_val=`knife client show $(hostname -f) -c .chef/knife.rb | grep ^admin: | sed "s/admin:[^a-z]*//"`
+admin_val=`sudo knife client show $(hostname -f) -c .chef/knife.rb | grep ^admin: | sed "s/admin:[^a-z]*//"`
 if [[ "$admin_val" != "true" ]]; then
   # Make this client an admin user before proceeding.
   echo -e "/\"admin\": false\ns/false/true\nw\nq\n" | EDITOR=ed sudo -E knife client edit `hostname -f` -c .chef/knife.rb -k /etc/chef-server/admin.pem -u admin
