@@ -7,7 +7,9 @@
       "recipe[bach_hannibal::default]",
       "recipe[bach_hannibal::hannibaldb]",
       "recipe[bach_hannibal::hannibalhb]",
-      "recipe[hannibal]"
+      "recipe[hannibal::default]",
+      "recipe[bach_hannibal::mysql_link]",
+      "recipe[hannibal::hannibal_service]"
     ],
     "description": "A hannibal node",
     "chef_type": "role",
