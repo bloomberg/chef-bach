@@ -51,7 +51,12 @@ if rm_hosts.length >= 2
      'yarn.resourcemanager.zk-address' =>
        zk_hosts.map{ |h| float_host(h[:hostname]) +
          ":#{node[:bcpc][:hadoop][:zookeeper][:port]}"}
-       .join(',')
+       .join(','),
+     'hadoop.registry.zk.quorum' =>
+       zk_hosts.map{ |h| float_host(h[:hostname]) +
+         ":#{node[:bcpc][:hadoop][:zookeeper][:port]}"}
+       .join(','),
+     'hadoop.registry.rm.enabled' => true
     }
 
   # Using 'map', a hash is built for each host.
