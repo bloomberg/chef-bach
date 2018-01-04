@@ -931,8 +931,8 @@ default['bcpc']['hadoop']['jmxtrans_agent']['resourcemanager']['queries'] = defa
     'attributes' => 'NumActiveNMs'
   },
   {
-    'objectName' => 'Hadoop:service=ResourceManager,name=QueueMetrics,q0=root,user=*',
-    'resultAlias' => 'ResourceManager.%name%.%user%.#attribute#',
+    'objectName' => 'Hadoop:service=ResourceManager,name=QueueMetrics,*',
+    'resultAlias' => 'ResourceManager.%name%.%q0%_%q1%_%q2%.%user%.#attribute#',
     'attributes' =>
       'AppsRunning,' \
       'AppsPending,' \
