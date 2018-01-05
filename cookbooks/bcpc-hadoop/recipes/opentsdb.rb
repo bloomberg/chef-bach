@@ -34,3 +34,5 @@ node.force_default['bach_opentsdb']['hbase_master_princ'] =
   "hbase/_HOST@#{krb_realm}"
 node.force_default['bach_opentsdb']['hbase_region_princ'] =
   "hbase/_HOST@#{krb_realm}"
+
+include_recipe 'bach_opentsdb'
