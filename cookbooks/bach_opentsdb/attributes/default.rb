@@ -26,6 +26,7 @@ default['bach_opentsdb']['java_home'] = nil
 default['bach_opentsdb']['tsd_user'] = 'hbase'
 default['bach_opentsdb']['tsd_group'] = 'hbase'
 default['bach_opentsdb']['daemon_opts'] = nil
+default['bach_opentsdb']['java_home'] = '/usr/lib/jvm/java-8-oracle-amd64'
 default['bach_opentsdb']['max_open_files'] = nil
 default['bach_opentsdb']['config_directory'] = '/etc/opentsdb'
 default['bach_opentsdb']['bin_directory'] = '/usr/share/opentsdb/bin'
