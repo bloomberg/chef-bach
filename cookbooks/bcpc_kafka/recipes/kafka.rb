@@ -134,3 +134,12 @@ ruby_block 'kafkaup' do
     end
   end
 end
+
+#
+# By default, the upstream cookbook sets server.properties to 600.
+# For internal reasons, we prefer it to be world-readable.
+#
+edit_resource!(:template,
+               ::File.join(node['kafka']['config_dir'], 'server.properties')) do
+  mode 0644
+end
