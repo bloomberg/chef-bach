@@ -106,7 +106,8 @@ execute 'create-opentsdb-hbase-tables' do
   group 'hbase'
   environment(
     COMPRESSION: 'LZO',
-    HBASE_HOME: '/usr/hdp/current/hbase-client'
+    HBASE_HOME: '/usr/hdp/current/hbase-client',
+    JAVA_HOME: node['bach_opentsdb']['java_home']
   )
   not_if 'echo "list" | hbase shell | grep -q "tsdb"'
   notifies :restart, 'service[opentsdb]', :delayed
