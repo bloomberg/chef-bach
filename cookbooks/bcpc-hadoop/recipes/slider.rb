@@ -11,7 +11,7 @@ end
 hdp_select('slider-client', node[:bcpc][:hadoop][:distribution][:active_release])
 
 node.default['bcpc']['hadoop']['slider']['env'] = {}
-node.default['bcpc']['hadoop']['sliser']['env'].tap do |slider_env|
+node.default['bcpc']['hadoop']['slider']['env'].tap do |slider_env|
   slider_env['JAVA_HOME'] = node[:bcpc][:hadoop][:java]
   slider_env['HADOOP_CONF_DIR'] = '/etc/hadoop/conf'
 end
