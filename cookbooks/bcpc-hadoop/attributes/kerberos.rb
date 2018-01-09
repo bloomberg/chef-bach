@@ -83,6 +83,15 @@ default['bcpc']['hadoop']['kerberos']['data'] = {
     perms: '0440',
     spnego_keytab: 'spnego.service.keytab'
   },
+  phoenixqr: {
+    principal: 'phoenixqr',
+    keytab: 'phoenixqr.service.keytab',
+    owner: 'phoenixqr',
+    group: 'phoenixqr',
+    princhost: '_HOST',
+    perms: '0440',
+    spnego_keytab: 'phoenixqr.service.keytab'
+  },
   httpfs: {
     principal: 'httpfs',
     keytab: 'httpfs.service.keytab',
