@@ -79,13 +79,13 @@ end
 file gpg_private_key_path do
   mode 0400
   content Base64.decode64(gpg_private_key_base64)
-  not_if lazy { node.run_state['bach']['repository']['recreate_gpg_keys'] }
+  not_if { node.run_state['bach']['repository']['recreate_gpg_keys'] }
 end
 
 file gpg_public_key_path do
   mode 0444
   content Base64.decode64(gpg_public_key_base64)
-  not_if lazy { node.run_state['bach']['repository']['recreate_gpg_keys'] }
+  not_if { node.run_state['bach']['repository']['recreate_gpg_keys'] }
 end
 
 #
@@ -99,19 +99,19 @@ end
   file "#{file_path}-removal" do
     path file_path
     action :delete
-    only_if lazy { node.run_state['bach']['repository']['recreate_gpg_keys'] }
+    only_if { node.run_state['bach']['repository']['recreate_gpg_keys'] }
   end
 end
 
 execute 'generate-local-bach-keys' do
   command "cat #{gpg_conf_path} | gpg --batch --gen-key"
-  only_if lazy { node.run_state['bach']['repository']['recreate_gpg_keys'] }
+  only_if { node.run_state['bach']['repository']['recreate_gpg_keys'] }
 end
 
 # Set perms.
 file gpg_private_key_path do
   mode 0400
-  only_if lazy { node.run_state['bach']['repository']['recreate_gpg_keys'] }
+  only_if { node.run_state['bach']['repository']['recreate_gpg_keys'] }
 end
 
 # Save the bootstrap-gpg-public_key to the databag
@@ -126,7 +126,7 @@ ruby_block 'bootstrap-gpg-public_key_base64' do
       Base64.encode64(::File.read(gpg_public_key_path))
     dbi.save
   end
-  only_if lazy { node.run_state['bach']['repository']['recreate_gpg_keys'] }
+  only_if { node.run_state['bach']['repository']['recreate_gpg_keys'] }
 end
 
 if chef_vault_loaded && !Chef::Config[:local_mode]
@@ -142,12 +142,12 @@ if chef_vault_loaded && !Chef::Config[:local_mode]
         Base64.encode64(::File.read(gpg_private_key_path))
       vault_item.save
     end
-    only_if lazy { node.run_state['bach']['repository']['recreate_gpg_keys'] }
+    only_if { node.run_state['bach']['repository']['recreate_gpg_keys'] }
   end
 else
   log "Failed to load chef-vault, can't save private gpg key!" do
     level :warn
-    only_if lazy { node.run_state['bach']['repository']['recreate_gpg_keys'] }
+    only_if { node.run_state['bach']['repository']['recreate_gpg_keys'] }
   end
 end
 
