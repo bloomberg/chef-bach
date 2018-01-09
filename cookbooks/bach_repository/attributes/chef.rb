@@ -13,3 +13,4 @@ default['bach']['repository']['chef_server']['url'] = \
   '12.04/x86_64/chef-server_11.1.1-1_amd64.deb'
 default['bach']['repository']['chef_server']['sha256'] = \
   'b6c354178cc83ec94bea40a018cef697704415575c7797c4abdf47ab996eb258'
+default['bach']['repository']['chef_url_base'] = 'https://packages.chef.io/repos/apt/stable/ubuntu/14.04/'

@@ -7,17 +7,9 @@
 # the behavior of the old script.
 #
 
-#
-# bach_repository and bcpc constitute a recursive dependency set, so
-# we have to set this value in both places so both load orders work.
-#
-node.run_state[:bcpc_admin_user] ||=
+default['bach']['repository']['build']['user'] = \
   ENV['SUDO_USER'] || ENV['USER'] || 'vagrant'
-
-default['bcpc']['bootstrap']['admin']['user'] =
-  node.run_state[:bcpc_admin_user]
-
-user = node.run_state[:bcpc_admin_user]
+user = node['bach']['repository']['build']['user']
 
 default[:bach][:repository][:repo_directory] = "/home/#{user}/chef-bcpc"
 default[:bach][:repository][:bins_directory] = \
@@ -48,19 +40,13 @@ default[:bach][:repository][:public_key_path] =
 default[:bach][:repository][:ascii_key_path] =
   default[:bach][:repository][:bins_directory] + '/apt_key.asc'
 
+# Ruby repository location
+default[:bach][:repository][:gem_server] = 'https://rubygems.org'
+
 # Apt repository location
 default[:bach][:repository][:apt_directory] =
   default[:bach][:repository][:bins_directory] + '/dists/' +
   default[:bach][:repository][:apt_repo_version]
-
-# Get the URLs to download Java installation packages
-# use java cookbook (https://github.com/agileorbit-cookbooks/java)
-default['bach']['repository']['java'].tap do |java|
-  java['jce_url']      = node['java']['oracle']['jce']['8']['url']
-  java['jce_checksum'] = node['java']['oracle']['jce']['8']['checksum']
-  java['jdk_url']      = node['java']['jdk']['8']['x86_64']['url']
-  java['jdk_checksum'] = node['java']['jdk']['8']['x86_64']['checksum']
-end
 
 # Install Java on bootstrap node
 default['java']['jdk_version'] = 8
@@ -70,7 +56,7 @@ default['java']['oracle']['accept_oracle_download_terms'] = true
 default['java']['oracle']['jce']['enabled'] = true
 
 # Set the JAVA_HOME for Hadoop components
-default['bcpc']['hadoop']['java'] = "/usr/lib/jvm/java-8-oracle-amd64"
+default['bach']['repository']['java'] = "/usr/lib/jvm/java-8-oracle-amd64"
 
 # jmxtrans-agent (https://github.com/jmxtrans/jmxtrans-agent)
 default['bach']['repository']['jmxtrans_agent']['download_url'] = 'https://github.com/jmxtrans/jmxtrans-agent/releases/download/jmxtrans-agent-1.2.5/jmxtrans-agent-1.2.5.jar'

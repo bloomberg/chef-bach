@@ -94,7 +94,7 @@ EOF
 # defaults.
 #
 pushd $DIR/vendor > /dev/null
-/opt/chefdk/bin/chef-client -z -r 'recipe[bach_repository]' -c $TMPFILE
+/opt/chefdk/bin/chef-client -z -r 'recipe[bcpc::bach_repository_wrapper],recipe[bach_repository]' -c $TMPFILE
 rm $TMPFILE
 popd > /dev/null
 

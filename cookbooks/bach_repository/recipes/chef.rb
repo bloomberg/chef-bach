@@ -45,7 +45,7 @@ end
 # the local bcpc repo, instead of attempting to reach out to the
 # internet for the Omnitruck API.
 #
-download_url = URI.join(get_binary_server_url,
+download_url = URI.join(node['bach']['repository']['chef_url_base'],
                         File.basename(chef_packages_hash[:chef][0]))
 
 checksum = chef_packages_hash[:chef][1]

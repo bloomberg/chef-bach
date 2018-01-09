@@ -13,7 +13,7 @@ bundler_bin = node['bach']['repository']['bundler_bin']
 package 'libaugeas-dev'
 package 'libkrb5-dev'
 
-user = node['bcpc']['bootstrap']['admin']['user']
+user = node['bach']['repository']['build']['user']
 
 directory "#{node['bach']['repository']['repo_directory']}/vendor" do
   owner "#{user}"

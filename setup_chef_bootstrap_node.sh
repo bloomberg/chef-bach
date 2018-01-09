@@ -56,7 +56,7 @@ sudo /opt/chefdk/bin/chef-client \
 #
 sudo -E /opt/chefdk/bin/chef-client \
      -c .chef/knife.rb \
-     -o 'recipe[bach_repository::apt]'
+     -o 'recipe[bcpc::bach_repository_wrapper],recipe[bach_repository::apt]'
 
 
 

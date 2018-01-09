@@ -39,7 +39,7 @@ end
 
 # compile
 execute 'jvmkill-make' do
-  command "make JAVA_HOME=#{node['bcpc']['hadoop']['java']}"
+  command "make JAVA_HOME=#{node['bach']['repository']['java']}"
   cwd build_dir
   not_if { File.exist?(target_file) }
 end
