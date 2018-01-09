@@ -51,12 +51,7 @@ if rm_hosts.length >= 2
      'yarn.resourcemanager.zk-address' =>
        zk_hosts.map{ |h| float_host(h[:hostname]) +
          ":#{node[:bcpc][:hadoop][:zookeeper][:port]}"}
-       .join(','),
-     'hadoop.registry.zk.quorum' =>
-       zk_hosts.map{ |h| float_host(h[:hostname]) +
-         ":#{node[:bcpc][:hadoop][:zookeeper][:port]}"}
-       .join(','),
-     'hadoop.registry.rm.enabled' => true
+       .join(',')
     }
 
   # Using 'map', a hash is built for each host.
@@ -248,6 +243,15 @@ if node.roles.include?("BCPC-Hadoop-Head-YarnTimeLineServer")
    } 
   node.run_state[:yarn_site_generated_values].merge!(yts_properties)
 end
+
+slider_properties = {
+  'hadoop.registry.zk.quorum' =>
+    zk_hosts.map{ |h| float_host(h[:hostname]) +
+      ":#{node[:bcpc][:hadoop][:zookeeper][:port]}"}
+    .join(','),
+  'hadoop.registry.rm.enabled' => true
+}
+node.run_state[:yarn_site_generated_values].merge!(slider_properties)
 
 # This is another set of cached node searches.
 hs_hosts = node[:bcpc][:hadoop][:hs_hosts]
