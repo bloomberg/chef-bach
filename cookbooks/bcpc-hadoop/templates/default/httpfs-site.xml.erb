@@ -14,31 +14,11 @@
 -->
 <configuration>
 
-  <!-- HUE proxy user setting -->
-  <property>
-    <name>httpfs.proxyuser.hue.hosts</name>
-    <value>*</value>
-  </property>
-
-  <property>
-    <name>httpfs.proxyuser.hue.groups</name>
-    <value>*</value>
-  </property>
-
   <property>
     <name>httpfs.hadoop.config.dir</name>
     <value>/etc/hadoop/conf</value>
   </property>
 
-  <property>
-    <name>httpfs.proxyuser.hue.hosts</name>
-    <value>*</value>
-  </property>
-
-  <property>
-    <name>httpfs.proxyuser.hue.groups</name>
-    <value>*</value>
-  </property>
   <% if node[:bcpc][:hadoop][:kerberos][:enable] == true then %>
   <property>
     <name>httpfs.authentication.type</name>
