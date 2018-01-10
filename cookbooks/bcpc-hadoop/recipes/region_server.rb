@@ -57,7 +57,6 @@ directory '/var/log/hbase/gc' do
   group 'hbase'
   mode '0755'
   action :create
-  notifies :restart, 'service[hbase-regionserver]', :delayed
 end
 
 template '/etc/init.d/hbase-regionserver' do
@@ -65,18 +64,29 @@ template '/etc/init.d/hbase-regionserver' do
   mode '0655'
 end
 
-rs_service_dep = %w(template[/etc/hbase/conf/hadoop-metrics2-hbase.properties]
-                    template[/etc/hbase/conf/hbase-site.xml]
-                    template[/etc/hbase/conf/hbase-env.sh]
-                    template[/etc/hbase/conf/hbase-policy.xml]
-                    template[/etc/hadoop/conf/log4j.properties]
-                    template[/etc/hadoop/conf/hdfs-site.xml]
-                    template[/etc/hadoop/conf/core-site.xml]
-                    bash[hdp-select hbase-regionserver]
-                    user_ulimit[hbase]
-                    log[jdk-version-changed])
+service 'hbase-regionserver' do
+  supports :status => true, :restart => true, :reload => false
+  action [:enable, :start]
+end
 
-hadoop_service 'hbase-regionserver' do
-  dependencies rs_service_dep
-  process_identifier 'org.apache.hadoop.hbase.regionserver.HRegionServer'
+locking_resource 'hbase-regionserver' do
+  process_identifier = 'org.apache.hadoop.hbase.regionserver.HRegionServer'
+  resource 'service[hbase-regionserver]'
+  process_pattern {command_string process_identifier
+                   user 'hbase'
+                   full_cmd true}
+  perform :restart
+  action :serialize_process
+  subscribes :serialize, 'link[/etc/init.d/hbase-regionserver]', :delayed
+  subscribes :serialize, 'template[/etc/hbase/conf/hadoop-metrics2-hbase.properties]', :delayed
+  subscribes :serialize, 'template[/etc/hbase/conf/hbase-site.xml]', :delayed
+  subscribes :serialize, 'template[/etc/hbase/conf/hbase-env.sh]', :delayed
+  subscribes :serialize, 'template[/etc/hbase/conf/hbase-policy.xml]', :delayed
+  subscribes :serialize, 'template[/etc/hadoop/conf/log4j.properties]', :delayed
+  subscribes :serialize, 'template[/etc/hadoop/conf/hdfs-site.xml]', :delayed
+  subscribes :serialize, 'template[/etc/hadoop/conf/core-site.xml]', :delayed
+  subscribes :serialize, 'bash[hdp-select hbase-regionserver]', :delayed
+  subscribes :serialize, 'directory[/var/log/hbase/gc]', :delayed
+  subscribes :serialize, 'user_ulimit[hbase]', :delayed
+  subscribes :serialize, 'log[jdk-version-changed]', :delayed
 end
