@@ -4,6 +4,7 @@
   "run_list": [
     "role[Basic]",
     "recipe[bcpc-hadoop::hbase_master]",
+    "recipe[bcpc-hadoop::phoenix_query_server]",
     "recipe[bcpc-hadoop::hbase_repl]",
     "recipe[bcpc::diamond]"
   ],
