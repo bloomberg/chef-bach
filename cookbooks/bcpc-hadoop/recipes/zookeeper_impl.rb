@@ -4,8 +4,6 @@
 ::Chef::Resource::File.send(:include, BCPC::Utils)
 
 include_recipe 'bcpc-hadoop::zookeeper_packages'
-include_recipe 'bach_krb5::keytab_directory'
-include_recipe 'bach_krb5::krb5_client'
 
 user_ulimit 'zookeeper' do
   filehandle_limit 65_536

@@ -23,6 +23,7 @@
     "recipe[hdfsdu::create_user]",
     "recipe[bcpc-hadoop::configs]",
     "recipe[pam::default]",
+    "recipe[bach_krb5::keytab_directory]",
     "recipe[bcpc-hadoop::bach_backup_wrapper]",
     "recipe[bcpc-hadoop::zookeeper_server]",
     "recipe[bcpc-hadoop::journalnode]",

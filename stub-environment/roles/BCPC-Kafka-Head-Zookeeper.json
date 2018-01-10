@@ -14,6 +14,7 @@
   "json_class": "Chef::Role",
   "run_list": [
     "role[Basic]",
+    "recipe[bach_krb5::keytab_directory]",
     "recipe[bcpc_kafka::zookeeper_server]"
   ],
   "description": "Zookeeper Role for Kafka Machines",

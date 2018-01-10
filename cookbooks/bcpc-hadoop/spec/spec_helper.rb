@@ -48,7 +48,10 @@ RSpec.configure do |config|
 
 end
 
-berks = Berkshelf::Berksfile.from_file('Berksfile').install()
+Berkshelf.ui.mute do
+  berksfile = Berkshelf::Berksfile.from_file('Berksfile')
+  berksfile.vendor('../../vendor/cookbooks')
+end
 
 at_exit { ChefSpec::Coverage.report! }
 

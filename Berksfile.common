@@ -42,8 +42,7 @@ cookbook 'bfd',
 
 # cobblerd upstream, pending submitting update to supermarket
 cookbook 'cobblerd',
-  git: 'https://github.com/cbaenziger/cobbler-cookbook',
-  branch: 'source_build'
+  git: 'https://github.com/bloomberg/cobbler-cookbook'
 
 # jmxtrans 1.0+ isn't on the supermarket.
 cookbook 'jmxtrans',
