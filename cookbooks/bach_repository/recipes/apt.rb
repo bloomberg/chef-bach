@@ -62,13 +62,13 @@ end
 ruby_block 'check if gpg keys need to be regenerated' do
   block do
     unless gpg_private_key_base64 && gpg_public_key_base64
-      node.run_state['bach'] = node.run_state['bach'] = node.run_state.\
+      node.run_state['bach'] = node.run_state.\
                                  fetch('bach',{'repository' => {}}).\
-                                 fetch('repository')['recreate_gpg_keys'] = true
+                                 fetch('repository').update({'recreate_gpg_keys': true)}
     else
-      node.run_state['bach'] = node.run_state['bach'] = node.run_state.\
+      node.run_state['bach'] = node.run_state.\
                                  fetch('bach',{'repository' => {}}).\
-                                 fetch('repository')['recreate_gpg_keys'] = false
+                                 fetch('repository').update({'recreate_gpg_keys': false})
     end
   end
 end
