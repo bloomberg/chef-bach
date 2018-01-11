@@ -1,7 +1,7 @@
 # Set hbase related zabbix triggers
 triggers_sensitivity = "#{node[:bcpc][:hadoop][:zabbix][:triggers_sensitivity]}m"
 
-node.set[:bcpc][:hadoop][:graphite][:service_queries][:hbase_master] = {
+node.default[:bcpc][:hadoop][:graphite][:service_queries][:hbase_master] = {
   'hbase_master.HeapMemoryUsage_committed' => {
      'query' => "minSeries(jmx.hbase_master.#{node.chef_environment}.*.memory.HeapMemoryUsage_committed)",
      'trigger_val' => "max(#{triggers_sensitivity})",
@@ -25,7 +25,7 @@ node.set[:bcpc][:hadoop][:graphite][:service_queries][:hbase_master] = {
      'route_to' => "admin"
   }
 }
-node.set[:bcpc][:hadoop][:graphite][:service_queries][:hbase_rs] = {
+node.default[:bcpc][:hadoop][:graphite][:service_queries][:hbase_rs] = {
   'hbase_rs.GcTimeMillis' => {
      'query' => "maxSeries(jmx.hbase_rs.#{node.chef_environment}.*.hb_rs_jvm_metrics.JvmMetrics.GcTimeMillis)",
      'trigger_val' => "max(#{triggers_sensitivity})",

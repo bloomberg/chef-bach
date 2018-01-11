@@ -1,4 +1,4 @@
-node.set['bcpc']['hadoop']['graphite']['service_queries']['namenode'] = {
+node.default['bcpc']['hadoop']['graphite']['service_queries']['namenode'] = {
   'namenode.HeapMemoryUsage_committed' => {
      'query' => "minSeries(jmx.namenode.#{node.chef_environment}.*.memory.HeapMemoryUsage_committed)",
      'trigger_val' => "max(#{node["bcpc"]["hadoop"]["zabbix"]["triggers_sensitivity"]}m)",

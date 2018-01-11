@@ -11,9 +11,9 @@ describe Bcpc_Hadoop::Helper do
     # load a bcpc-hadoop recipe to test cookbook attributes cover business rules
     let(:chef_run) do
       ChefSpec::SoloRunner.new do |node|
-        Fauxhai.mock(platform: 'ubuntu', version: '12.04')
+        Fauxhai.mock(platform: 'ubuntu', version: '14.04')
         SET_ATTRIBUTES.call(node)
-        node.set[:bcpc][:hadoop][:group_dir_prohibited_groups] = ['^users$', '^svn.*$', '^git.*$', 'dba']
+        node.default[:bcpc][:hadoop][:group_dir_prohibited_groups] = ['^users$', '^svn.*$', '^git.*$', 'dba']
       end.converge("recipe[bcpc-hadoop::hdfs_group_directories]")
     end
     let(:node) { chef_run.node }
