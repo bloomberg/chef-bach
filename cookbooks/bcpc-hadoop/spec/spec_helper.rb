@@ -84,13 +84,13 @@ SET_ATTRIBUTES = Proc.new do |node|
   node.automatic[:block_device]
   # for bcpc-hadoop/attributes/hbase.rb
   node.automatic['bcpc']['floating']['ip'] = '0.0.0.0'
+  node
 end
 
 RSpec.shared_context 'recipe tests', type: :recipe do
 
   let(:chef_run) do
     ChefSpec::SoloRunner.new(node_attributes) do |node|
-      Fauxhai.mock(platform: 'ubuntu', version: '14.04')
       SET_ATTRIBUTES.call(node)
     end.converge(described_recipe)
   end
