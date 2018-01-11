@@ -22,12 +22,12 @@ PQS_PY_INIT="/usr/bin/phoenix-queryserver"
 PID_FILE="/var/run/hbase/phoenix-root-server.pid"
 DAEMON="python"
 NAME="Phoenix Query Server"
-PQS_USER="phoenixrs"
+PQS_USER="<%= @qs_runas %>"
 
 case "$1" in
 start)
   log_action_begin_msg "Starting phoenix-queryserver"
-  sudo -u phoenixrs $PQS_PY_INIT start
+  sudo -u "$PQS_USER" $PQS_PY_INIT start
   log_end_msg $?
   ;;
   
