@@ -10,6 +10,18 @@ end
 
 hdp_select('slider-client', node[:bcpc][:hadoop][:distribution][:active_release])
 
+site_xml = node.default[:bcpc][:hadoop][:yarn][:site_xml]
+
+slider_properties = {
+  'hadoop.registry.zk.quorum' =>
+    zk_hosts.map{ |h| float_host(h[:hostname]) +
+      ":#{node[:bcpc][:hadoop][:zookeeper][:port]}"}
+    .join(','),
+  'hadoop.registry.rm.enabled' => true
+}
+site_xml.merge!(slider_properties)
+
+
 node.default['bcpc']['hadoop']['slider']['env'] = {}
 node.default['bcpc']['hadoop']['slider']['env'].tap do |slider_env|
   slider_env['JAVA_HOME'] = node[:bcpc][:hadoop][:java]
