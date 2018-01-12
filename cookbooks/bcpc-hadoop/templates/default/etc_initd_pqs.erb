@@ -27,9 +27,10 @@ PQS_USER="<%= @qs_runas %>"
 
 case "$1" in
 start)
-  setfacl -m u:"$PQS_USER":rwx "$LOG_DIR"
+  #setfacl -m u:"$PQS_USER":rwx "$LOG_DIR"
   log_action_begin_msg "Starting phoenix-queryserver"
-  sudo -u "$PQS_USER" $PQS_PY_INIT start
+  #sudo -u "$PQS_USER" $PQS_PY_INIT start
+  $PQS_PY_INIT start
   log_end_msg $?
   ;;
   
