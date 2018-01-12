@@ -144,7 +144,7 @@ if node['bcpc']['hadoop']['hbase']['site_xml']['hbase.region.replica.replication
   generated_values['hbase.client.primaryCallTimeout.multiget'] = node["bcpc"]["hadoop"]["hbase"]["client"]["primarycalltimeout"]["multiget"]
 end
 
-site_xml = node.default[:bcpc][:hadoop][:hbase][:site_xml]
+site_xml = node[:bcpc][:hadoop][:hbase][:site_xml]
 complete_hbase_site_hash = generated_values.merge(site_xml)
 
 template '/etc/hbase/conf/hbase-site.xml' do
