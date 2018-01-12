@@ -165,24 +165,27 @@ end
 def znode_exists?(znode_path, zk_host="localhost:2181")
   require 'rubygems'
   require 'zookeeper'
-  znode_found = false
+  rc = Zookeeper::Constants::ZSYSTEMERROR
   begin
     zk = Zookeeper.new(zk_host)
     if !zk.connected?
       raise "znode_exists : Unable to connect to zookeeper quorum #{zk_host}"
     end
     r = zk.get(:path => znode_path)
-    if r[:rc] == 0
-      znode_found = true
-    end
-  rescue Exception => e
-    puts e.message
+    rc = r[:rc]
   ensure
     if !zk.nil?
       zk.close unless zk.closed?
     end
   end
-  return znode_found
+
+  if rc == Zookeeper::Constants::ZOK
+    return true
+  elsif rc == Zookeeper::Constants::ZNONODE
+    return false
+  end
+
+  raise "get znode #{znode_path} failed with rc = #{rc}, zk_host=#{zk_host}"
 end
 
 #
@@ -222,7 +225,7 @@ def acquire_restart_lock(znode_path, zk_hosts="localhost:2181",node_name)
       raise "acquire_restart_lock : unable to connect to ZooKeeper quorum #{zk_hosts}"
     end
     ret = zk.create(:path => znode_path, :data => node_name)
-    if ret[:rc] == 0
+    if ret[:rc] == Zookeeper::Constants::ZOK
       lock_acquired = true
     end
   rescue Exception => e
@@ -286,7 +289,7 @@ def rel_restart_lock(znode_path, zk_hosts="localhost:2181",node_name)
     else
       raise "rel_restart_lock : node who is not the owner is trying to release the lock"
     end
-    if ret[:rc] == 0
+    if ret[:rc] == Zookeeper::Constants::ZOK
       lock_released = true
     end
   rescue Exception => e
@@ -312,7 +315,7 @@ def get_restart_lock_holder(znode_path, zk_hosts="localhost:2181")
       raise "get_restart_lock_holder : unable to connect to ZooKeeper quorum #{zk_hosts}"
     end
     ret = zk.get(:path => znode_path)
-    if ret[:rc] == 0
+    if ret[:rc] == Zookeeper::Constants::ZOK
       val = ret[:data]
     end
   rescue Exception => e
