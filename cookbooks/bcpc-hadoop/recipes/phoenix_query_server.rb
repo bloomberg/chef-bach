@@ -2,18 +2,6 @@
 
 include_recipe 'bcpc-hadoop::phoenixqs_kerberos'
 
-site_xml = node.default[:bcpc][:hadoop][:hbase][:site_xml]
-generated_values = {}
-generated_values['phoenix.queryserver.kerberos.principal'] =\
-  node['bcpc']['hadoop']['phoenix']['phoenixqs']['principal'] 
-generated_values['phoenix.queryserver.keytab.file'] =\
-  "#{node[:bcpc][:hadoop][:kerberos][:keytab][:dir]}/" +
-  node[:bcpc][:hadoop][:kerberos][:data][:phoenixqs][:keytab]
-generated_values['phoenix.queryserver.serialization'] =\
-  node['bcpc']['hadoop']['phoenix']['phoenixqs']['serialization']
-
-site_xml.merge!(generated_values)
-
 qs_runas = node['bcpc']['hadoop']['phoenix']['phoenixqs']['username']
 
 user qs_runas do
@@ -21,10 +9,16 @@ user qs_runas do
   only_if { node['bcpc']['hadoop']['phoenix']['phoenixqs']['localuser'] }
 end
 
-group qs_runas do
+group 'hadoop' do
   members [ qs_runas ] 
+  append true
   only_if { node['bcpc']['hadoop']['phoenix']['phoenixqs']['localuser'] }
 end
+
+configure_kerberos 'phoenixqs_keytab' do
+  service_name 'phoenixqs'
+end
+
 
 template '/etc/init.d/pqs' do
   source 'etc_initd_pqs.erb'
@@ -35,4 +29,6 @@ end
 
 service 'pqs' do
   action [:enable, :start]
+  supports status: true, restart: true 
+  subscribes :restart, 'template[/etc/hbase/conf/hbase-site.xml]', :delayed
 end
