@@ -7,11 +7,16 @@ qs_runas = node['bcpc']['hadoop']['phoenix']['phoenixqs']['username']
 user qs_runas do
   comment 'Runs phoenix queryserver'
   only_if { node['bcpc']['hadoop']['phoenix']['phoenixqs']['localuser'] }
+  # apperently these do not happen in order
+  # and group 'hadoop' was being run furst
+  notifies :modify, "group[add #{qs_runas} to hadoop]", :immediate
 end
 
-group 'hadoop' do
-  members [ qs_runas ] 
+group "add #{qs_runas} to hadoop" do
+  group_name 'hadoop'
+  members [ qs_runas ]
   append true
+  action :nothing
   only_if { node['bcpc']['hadoop']['phoenix']['phoenixqs']['localuser'] }
 end
 
