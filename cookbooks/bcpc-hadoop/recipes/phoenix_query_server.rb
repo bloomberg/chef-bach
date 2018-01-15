@@ -36,4 +36,7 @@ service 'pqs' do
   action [:enable, :start]
   supports status: true, restart: true 
   subscribes :restart, 'template[/etc/hbase/conf/hbase-site.xml]', :delayed
+  # we need to know wheh proxyuser chnages
+  #https://github.com/apache/phoenix/blob/27d6582827b9306e66d3bfd430c6186ac165fb08/phoenix-queryserver/src/main/java/org/apache/phoenix/queryserver/server/QueryServer.java#L242-L243
+  subscribes :restart, 'template[/etc/hadoop/conf/core-site.xml]', :delayed
 end
