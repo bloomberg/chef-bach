@@ -26,15 +26,19 @@ default[:hannibal][:hbase_version] = '1.1.3'
 default[:hannibal][:install_dir] = '/usr/lib'
 default[:hannibal][:service_dir] = '/etc/init'
 default[:hannibal][:log_dir] = '/var/log/hannibal'
-default[:hannibal][:data_dir] = '/usr/lib/hannibal/data'
-default[:hannibal][:user] = 'root'
+default[:hannibal][:data_dir] = '/var/lib/hannibal/data'
+default[:hannibal][:working_dir] = '/var/run/hannibal'
+default[:hannibal][:bin_dir] = "/usr/local"
+
+default[:hannibal][:port] = 9000
+default[:hannibal][:service_endpoint] = "http://localhost:#{node[:hannibal][:port]}/api/heartbeat" 
+default[:hannibal][:service_timeout] = 360 
+
+default[:hannibal][:user] = 'nobody'
 default[:hannibal][:owner] = 'root'
 default[:hannibal][:group] = 'root'
 default[:hannibal][:file_mode] = '0644'
 default[:hannibal][:exec_mode] = '0655'
-default[:hannibal][:port] = 9000
-default[:hannibal][:service_endpoint] = "http://localhost:#{node[:hannibal][:port]}/api/heartbeat" 
-default[:hannibal][:service_timeout] = 360 
 default[:hannibal][:checksum]["1.1.3"] = '1756455e0f097e28034f57910870c95223ae94e4d580116ae641920931255b02'
 default[:hannibal][:download_url] = 'http://10.0.101.3/'
 

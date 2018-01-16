@@ -11,6 +11,9 @@ if(node[:hannibal][:local_tarball]) then
    node.override[:hannibal][:download_url] = get_binary_server_url
 end
 
+user = node['bcpc']['bootstrap']['user']
+
+node.override[:hannibal][:bin_dir] = "/home/#{user}/chef-bcpc/bins"
 node.override[:hannibal][:db] = "mysql"
 node.override[:hannibal][:mysql][:db_name] = 'hannibal' 
 node.override[:hannibal][:mysql][:driver] = 'com.mysql.jdbc.Driver' 
