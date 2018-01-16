@@ -90,6 +90,9 @@ end
 RSpec.shared_context 'recipe tests', type: :recipe do
 
   let(:chef_run) do
+    # ensure we do not search when instantiating a search object
+    # https://github.com/chefspec/chefspec/issues/237
+    Chef::Search::Query.any_instance.stub(:search).and_return([])
     ChefSpec::SoloRunner.new(node_attributes) do |node|
       SET_ATTRIBUTES.call(node)
     end.converge(described_recipe)
