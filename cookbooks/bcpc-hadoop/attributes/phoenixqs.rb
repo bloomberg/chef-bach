@@ -2,7 +2,7 @@
 
 default['bcpc']['hadoop']['phoenix']['phoenixqs']['username'] = 'phoenixqs'
 default['bcpc']['hadoop']['phoenix']['phoenixqs']['principal'] =\
-  "HTTP/_HOST@#{node[:bcpc][:hadoop][:kerberos][:realm]}"
+  "HTTP/#{float_host(node[:fqdn])}@#{node[:bcpc][:hadoop][:kerberos][:realm]}"
 default['bcpc']['hadoop']['phoenix']['phoenixqs']['keytab'] =\
   "#{node[:bcpc][:hadoop][:kerberos][:keytab][:dir]}/" +
   node[:bcpc][:hadoop][:kerberos][:data][:spnego][:keytab]

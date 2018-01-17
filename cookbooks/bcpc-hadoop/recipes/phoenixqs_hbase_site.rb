@@ -10,7 +10,5 @@ generated_values['phoenix.queryserver.keytab.file'] =\
   node['bcpc']['hadoop']['phoenix']['phoenixqs']['keytab']
 generated_values['phoenix.queryserver.serialization'] =\
   node['bcpc']['hadoop']['phoenix']['phoenixqs']['serialization']
-generated_values['phoenix.queryserver.dns.interface'] =\
-   node['bcpc']['networks'][node[:bcpc][:management][:subnet]]['floating']['interface']
 
 site_xml.merge!(generated_values)
