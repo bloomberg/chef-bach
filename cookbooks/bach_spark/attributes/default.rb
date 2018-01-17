@@ -27,7 +27,9 @@ default['bach_spark']['config'].tap do |spark_defaults|
   spark_defaults['spark.dynamicAllocation.enabled'] = true
   spark_defaults['spark.shuffle.service.enabled'] = true
   spark_defaults['spark.yarn.archive'] = "#{node['spark']['hdfs_url']}"\
-    "/apps/spark/#{node['bcpc']['hadoop']['distribution']['active_release']}/spark_jars.tgz"
+    '/apps/spark/'\
+    "#{node['bcpc']['hadoop']['distribution']['active_release']}"\
+    '/spark_jars.tgz'
   spark_defaults['spark.master'] = 'yarn-client'
 end
 
@@ -35,16 +37,16 @@ end
 default['bach_spark']['environment'].tap do |spark_env|
   spark_env['SPARK_LOCAL_IP'] = node[:ipaddress]
   spark_env['SPARK_PUBLIC_DNS'] = node[:fqdn]
-  spark_env['SPARK_LOCAL_DIRS'] = "${HOME}/.spark_logs"
+  spark_env['SPARK_LOCAL_DIRS'] = '${HOME}/.spark_logs'
   spark_env['HADOOP_CONF_DIR'] = '/etc/hadoop/conf'
   spark_env['HADOOP_HOME'] = '/usr/hdp'\
     "/#{node['bcpc']['hadoop']['distribution']['active_release']}/hadoop"
   spark_env['HIVE_CONF_DIR'] = '/etc/hive/conf'
   spark_env['SPARK_DIST_CLASSPATH'] =
-    "${HIVE_CONF_DIR}:${SPARK_LIBRARY_PATH}:$(for i in $(export IFS=\":\"; "\
-    "for i in $(hadoop classpath); do find $i -maxdepth 1 -name \"*.jar\"; "\
-    "done | egrep -v \"jackson-databind-.*.jar|jackson-core.jar|"\
-    "jackson-core-.*.jar|jackson-annotations-.*.jar\"); "\
+    '${HIVE_CONF_DIR}:${SPARK_LIBRARY_PATH}:$(for i in $(export IFS=":"; '\
+    'for i in $(hadoop classpath); do find $i -maxdepth 1 -name "*.jar"; '\
+    'done | egrep -v "jackson-databind-.*.jar|jackson-core.jar|'\
+    'jackson-core-.*.jar|jackson-annotations-.*.jar"); '\
     "do echo -n \"${i}:\"; done | sed 's/:$//')"
   spark_env['SPARK_CLASSPATH'] =
     '$SPARK_DIST_CLASSPATH:$SPARK_CLASSPATH'
