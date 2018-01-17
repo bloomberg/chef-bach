@@ -24,10 +24,22 @@ node.default['bcpc']['hadoop']['copylog']['hbase_master_out'] = {
   end
 end
 
-%w{hbase-master
-hbase-client
-phoenix-client
-}.each do |p|
+# from hbase
+symlinks = %w(hadoop-client hadoop-hdfs-client hadoop-hdfs-datanode
+hadoop-hdfs-journalnode hadoop-hdfs-namenode hadoop-hdfs-nfs3
+hadoop-hdfs-portmap hadoop-hdfs-secondarynamenode hbase-client hbase-master
+hbase-regionserver spark2-client spark-client zookeeper-client zookeeper-server)
+
+# from phoenix
+symlinks += %w(hadoop-client hadoop-hdfs-client hadoop-hdfs-datanode
+hadoop-hdfs-journalnode hadoop-hdfs-namenode hadoop-hdfs-nfs3
+hadoop-hdfs-portmap hadoop-hdfs-secondarynamenode hadoop-mapreduce-client
+hadoop-mapreduce-historyserver hadoop-yarn-client hadoop-yarn-nodemanager
+hadoop-yarn-resourcemanager hadoop-yarn-timelineserver hbase-client hbase-master
+hbase-regionserver phoenix-client phoenix-server spark2-client spark-client
+zookeeper-client zookeeper-server)
+
+symlinks.uniq.each do |p|
   hdp_select(p, node[:bcpc][:hadoop][:distribution][:active_release])
 end
 
