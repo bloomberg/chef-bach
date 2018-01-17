@@ -1,15 +1,16 @@
+# module Spark
 module Spark
+  # module Configuration
   module Configuration
-    def render_option(prefix, value, delimiter=" ", keyConvert=true)
-
+    require 'English'
+    def render_option(prefix, value, delimiter = ' ', keyConvert = true)
       prefix = convert_key(prefix) if keyConvert
-
       case value
       when Hash
         lines = value.map do |key, val|
           render_option(%(#{prefix}.#{key}), val)
         end
-        lines.join($/)
+        lines.join($INPUT_RECORD_SEPARATOR)
       when Array
         %(#{prefix}#{delimiter}#{render_array_value(value)})
       else
@@ -20,7 +21,7 @@ module Spark
     private
 
     def convert_key(key)
-      key.include?('.') ? key : key.gsub('_', '.')
+      key.include?('.') ? key : key.tr('_', '.')
     end
 
     def render_array_value(values)
