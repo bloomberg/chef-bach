@@ -25,6 +25,7 @@
 
 spark_bin_dir = node['spark']['bin']['dir']
 spark_conf_dir = node['spark']['conf']['dir']
+spark_active_release = node[:bcpc][:hadoop][:distribution][:active_release]
 
 directory "/etc/spark2/conf.#{node.chef_environment}" do
   owner 'root'
@@ -34,10 +35,10 @@ directory "/etc/spark2/conf.#{node.chef_environment}" do
   action :create
 end
 
-bash "update-spark2-conf-alternatives" do
-  code "update-alternatives --install /etc/spark2/conf spark2-conf " +
-  "/etc/spark2/conf.#{node.chef_environment} 50\n" +
-  "update-alternatives --set spark2-conf " +
+bash 'update-spark2-conf-alternatives' do
+  code 'update-alternatives --install /etc/spark2/conf spark2-conf ' \
+  "/etc/spark2/conf.#{node.chef_environment} 50\n" \
+  'update-alternatives --set spark2-conf ' \
   "/etc/spark2/conf.#{node.chef_environment}\n"
 end
 
@@ -45,7 +46,7 @@ package 'spark2' do
   action :upgrade
 end
 
-hdp_select('spark2-client', node[:bcpc][:hadoop][:distribution][:active_release])
+hdp_select('spark2-client', spark_active_release)
 
 template "#{spark_conf_dir}/spark-env.sh" do
   source 'spark-env.sh.erb'
@@ -68,8 +69,8 @@ end
 # For backward compatibility
 
 directory '/usr/spark' do
-   action :create
-   mode '00755'
+  action :create
+  mode '00755'
 end
 
 link '/usr/spark/current' do
