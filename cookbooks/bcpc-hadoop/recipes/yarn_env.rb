@@ -9,8 +9,9 @@ yarn_env_generated_values = {}
 if node.run_list.expand(node.chef_environment)
        .recipes.include?('bach_spark::default')
   yarn_env_generated_values[:YARN_USER_CLASSPATH] =
-    '/usr/spark/current/yarn/spark-yarn-shuffle.jar'
+    "/usr/hdp/current/spark2-client/aux/spark-#{node[:bcpc][:hadoop][:distribution][:active_release]}-yarn-shuffle.jar"
 end
+
 if node.run_list.expand(node.chef_environment)
        .recipes.include?('bcpc-hadoop::datanode')
   yarn_env_generated_values[:YARN_LOGFILE] =
