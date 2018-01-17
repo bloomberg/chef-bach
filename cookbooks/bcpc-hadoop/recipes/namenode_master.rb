@@ -29,8 +29,27 @@ hdfs_cmd = "/usr/hdp/#{node[:bcpc][:hadoop][:distribution][:active_release]}/had
   end
 end
 
-hdp_select('hadoop-hdfs-namenode', node[:bcpc][:hadoop][:distribution][:active_release])
-hdp_select('hadoop-client', node[:bcpc][:hadoop][:distribution][:active_release])
+# hdp-selected by hadoop-hdfs-namenode and dependencies implicitly
+symlinks = %w(hadoop-client hadoop-hdfs-client hadoop-hdfs-datanode
+hadoop-hdfs-journalnode hadoop-hdfs-namenode hadoop-hdfs-nfs3
+hadoop-hdfs-portmap hadoop-hdfs-secondarynamenode spark2-client spark-client
+zookeeper-client zookeeper-server)
+
+# hdp-selected by hadoop-hdfs-zkfc and dependents implicitly
+symlinks += %w(hadoop-client hadoop-hdfs-client hadoop-hdfs-datanode
+hadoop-hdfs-journalnode hadoop-hdfs-namenode hadoop-hdfs-nfs3
+hadoop-hdfs-portmap hadoop-hdfs-secondarynamenode spark2-client spark-client
+zookeeper-client zookeeper-server)
+
+# hdp-selected by hadoop-mapreduce and dependents implicitly
+symlinks += %w(hadoop-client hadoop-mapreduce-client
+hadoop-mapreduce-historyserver hadoop-yarn-client hadoop-yarn-nodemanager
+hadoop-yarn-resourcemanager hadoop-yarn-timelineserver spark2-client
+spark-client zookeeper-client zookeeper-server)
+
+symlinks.uniq do |symlink|
+  hdp_select(symlink, node[:bcpc][:hadoop][:distribution][:active_release])
+end
 
 # need to ensure hdfs user is in hadoop and hdfs
 # groups. Packages will not add hdfs if it
