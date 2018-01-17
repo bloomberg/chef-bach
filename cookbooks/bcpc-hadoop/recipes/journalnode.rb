@@ -45,7 +45,22 @@ end
   package hwx_pkg_str(pkg, hdprel) do
     action :install
   end
-  hdp_select(pkg, hdprel)
+end
+
+# from hadoop-hdfs-namenode
+symlinks = %w(hadoop-client hadoop-hdfs-client hadoop-hdfs-datanode
+hadoop-hdfs-journalnode hadoop-hdfs-namenode hadoop-hdfs-nfs3
+hadoop-hdfs-portmap hadoop-hdfs-secondarynamenode spark2-client spark-client
+zookeeper-client zookeeper-server)
+
+# from hadoop-hdfs-journalnode
+symlinks += %w(hadoop-client hadoop-hdfs-client hadoop-hdfs-datanode
+hadoop-hdfs-journalnode hadoop-hdfs-namenode hadoop-hdfs-nfs3
+hadoop-hdfs-portmap hadoop-hdfs-secondarynamenode spark2-client spark-client
+zookeeper-client zookeeper-server)
+
+symlinks.uniq.each do |symlink|
+  hdp_select(symlink, hdprel)
 end
 
 ruby_block 'setup-jn-data' do
