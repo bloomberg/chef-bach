@@ -15,11 +15,47 @@ hdp_select_pkgs = %w{
   hadoop-hdfs-datanode
   hadoop-client}
 
+# from hadoop-yarn-nodemanager
+symlinks = %w(hadoop-client hadoop-yarn-client hadoop-yarn-nodemanager
+hadoop-yarn-resourcemanager hadoop-yarn-timelineserver spark2-client
+spark-client zookeeper-client zookeeper-server)
+# from hadoop-hdfs-datanode
+symlinks += %w( hadoop-client hadoop-hdfs-client hadoop-hdfs-datanode
+hadoop-hdfs-journalnode hadoop-hdfs-namenode hadoop-hdfs-nfs3
+hadoop-hdfs-portmap hadoop-hdfs-secondarynamenode spark2-client spark-client
+zookeeper-client zookeeper-server)
+# from hadoop-client
+symlinks += %w(hadoop-client hadoop-hdfs-client hadoop-hdfs-datanode
+hadoop-hdfs-journalnode hadoop-hdfs-namenode hadoop-hdfs-nfs3
+hadoop-hdfs-portmap hadoop-hdfs-secondarynamenode hadoop-mapreduce-client
+hadoop-mapreduce-historyserver hadoop-yarn-client hadoop-yarn-nodemanager
+hadoop-yarn-resourcemanager hadoop-yarn-timelineserver spark2-client
+spark-client zookeeper-client zookeeper-server)
+
 hdp_pkg_strs = (hdp_select_pkgs + %W{
   hadoop-mapreduce
   sqoop
   hadooplzo
   hadooplzo-native}).map{|p| hwx_pkg_str(p, node[:bcpc][:hadoop][:distribution][:release])}
+
+# from hadoop-mapreduce
+symlinks += %w(hadoop-client hadoop-mapreduce-client
+hadoop-mapreduce-historyserver hadoop-yarn-client hadoop-yarn-nodemanager
+hadoop-yarn-resourcemanager hadoop-yarn-timelineserver spark2-client
+spark-client zookeeper-client zookeeper-server)
+# from sqoop
+symlinks += %w(hadoop-client hadoop-hdfs-client hadoop-hdfs-datanode
+hadoop-hdfs-journalnode hadoop-hdfs-namenode hadoop-hdfs-nfs3
+hadoop-hdfs-portmap hadoop-hdfs-secondarynamenode hadoop-mapreduce-client
+hadoop-mapreduce-historyserver hadoop-yarn-client hadoop-yarn-nodemanager
+hadoop-yarn-resourcemanager hadoop-yarn-timelineserver spark2-client
+spark-client sqoop-client sqoop-server zookeeper-client zookeeper-server)
+# from hadooplzo
+symlinks += %w(hadoop-client spark2-client spark-client zookeeper-client
+zookeeper-server)
+# from hadooplzo-native
+symlinks += %w(hadoop-client spark2-client spark-client zookeeper-client
+zookeeper-server)
 
 [
   hdp_pkg_strs,
@@ -31,8 +67,8 @@ hdp_pkg_strs = (hdp_select_pkgs + %W{
   end
 end
 
-(hdp_select_pkgs + ['sqoop-client', 'sqoop-server']).each do |pkg|
-  hdp_select(pkg, node[:bcpc][:hadoop][:distribution][:active_release])
+symlinks.uniq.each do |symlink|
+  hdp_select(symlink, node[:bcpc][:hadoop][:distribution][:active_release])
 end
 
 user_ulimit "root" do
@@ -195,7 +231,16 @@ package hwx_pkg_str('hive-hcatalog', node[:bcpc][:hadoop][:distribution][:releas
   action :install
 end
 
-hdp_select('hive-webhcat', node[:bcpc][:hadoop][:distribution][:active_release])
+%w(hadoop-client hadoop-hdfs-client hadoop-hdfs-datanode
+hadoop-hdfs-journalnode hadoop-hdfs-namenode hadoop-hdfs-nfs3
+hadoop-hdfs-portmap hadoop-hdfs-secondarynamenode hadoop-mapreduce-client
+hadoop-mapreduce-historyserver hadoop-yarn-client hadoop-yarn-nodemanager
+hadoop-yarn-resourcemanager hadoop-yarn-timelineserver hive-client
+hive-metastore hive-server2 hive-webhcat spark2-client spark-client tez-client
+zookeeper-client zookeeper-server).each do |hive_symlinks|
+  hdp_select(hive_symlinks, node[:bcpc][:hadoop][:distribution][:active_release])
+end
+
 
 link "/usr/hdp/current/hive-metastore/lib/mysql-connector-java.jar" do
   to "/usr/share/java/mysql-connector-java.jar"
