@@ -6,8 +6,18 @@ include_recipe 'bcpc-hadoop::hadoop_config'
   package hwx_pkg_str(pkg, node[:bcpc][:hadoop][:distribution][:release]) do
     action :install
   end
+end
 
-  hdp_select(pkg, node[:bcpc][:hadoop][:distribution][:active_release])
+# from hadoop-mapreduce-historyserver
+symlinks = %w(hadoop-client hadoop-hdfs-client hadoop-hdfs-datanode
+hadoop-hdfs-journalnode hadoop-hdfs-namenode hadoop-hdfs-nfs3
+hadoop-hdfs-portmap hadoop-hdfs-secondarynamenode hadoop-mapreduce-client
+hadoop-mapreduce-historyserver hadoop-yarn-client hadoop-yarn-nodemanager
+hadoop-yarn-resourcemanager hadoop-yarn-timelineserver spark2-client
+spark-client zookeeper-client zookeeper-server)
+
+symlinks.uniq.each do |symlink|
+  hdp_select(symlink, node[:bcpc][:hadoop][:distribution][:active_release])
 end
 
 #
