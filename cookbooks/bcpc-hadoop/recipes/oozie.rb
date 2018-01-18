@@ -125,12 +125,8 @@ unless node.run_list.expand(node.chef_environment).recipes
   package 'hbase' do
     action :upgrade
   end
-end
-
-unless node.run_list.expand(node.chef_environment).recipes
-           .include?('bcpc-hadoop::hbase_master')
-  package 'hbase' do
-    action :upgrade
+  %w(hbase-client hbase-master hbase-regionserver).each do |symlink|
+    hdp_select(symlink, hdp_rel)
   end
 end
 
