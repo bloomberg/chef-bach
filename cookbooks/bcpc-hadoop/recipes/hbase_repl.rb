@@ -36,7 +36,7 @@ else
     code <<-EOH
       echo "disable_peer 'region_replica_replication'"|hbase shell
       EOH
-    not_if "echo list_peers|hbase shell|grep region_replica_replication|grep ENABLED"
+    only_if "echo list_peers|hbase shell|grep region_replica_replication|grep ENABLED"
     user 'hbase'
   end
 end

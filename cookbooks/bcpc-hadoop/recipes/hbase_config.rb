@@ -133,19 +133,19 @@ end
 #
 # if HBASE region replication is enabled the properties in this section will be included in hbase-site.xml
 #
-if node['bcpc']['hadoop']['hbase']['site_xml']['hbase.region.replica.replication.enabled'] then
-  generated_values['hbase.regionserver.storefile.refresh.period'] = node["bcpc"]["hadoop"]["hbase_rs"]["storefile"]["refresh"]["period"]
-  generated_values['hbase.region.replica.replication.enabled'] = node['bcpc']['hadoop']['hbase']['site_xml']['hbase.region.replica.replication.enabled'].to_s
-  generated_values['hbase.master.hfilecleaner.ttl'] = node["bcpc"]["hadoop"]["hbase_master"]["hfilecleaner"]["ttl"]
-  generated_values['hbase.meta.replica.count'] = node["bcpc"]["hadoop"]["hbase"]["meta"]["replica"]["count"]
-  generated_values['hbase.regionserver.storefile.refresh.all'] = node["bcpc"]["hadoop"]["hbase_rs"]["storefile"]["refresh"]["all"]
-  generated_values['hbase.region.replica.storefile.refresh.memstore.multiplier'] = node["bcpc"]["hadoop"]["hbase"]["region"]["replica"]["storefile"]["refresh"]["memstore"]["multiplier"]
-  generated_values['hbase.region.replica.wait.for.primary.flush'] = node["bcpc"]["hadoop"]["hbase"]["region"]["replica"]["wait"]["for"]["primary"]["flush"]
-  generated_values['hbase.regionserver.global.memstore.lowerLimit'] = node["bcpc"]["hadoop"]["hbase_rs"]["memstore"]["lowerlimit"]
-  generated_values['hbase.hregion.memstore.block.multiplier'] = node["bcpc"]["hadoop"]["hbase"]["hregion"]["memstore"]["block"]["multiplier"]
-  generated_values['hbase.ipc.client.specificThreadForWriting'] = node["bcpc"]["hadoop"]["hbase"]["ipc"]["client"]["specificthreadforwriting"]
-  generated_values['hbase.client.primaryCallTimeout.get'] = node["bcpc"]["hadoop"]["hbase"]["client"]["primarycalltimeout"]["get"]
-  generated_values['hbase.client.primaryCallTimeout.multiget'] = node["bcpc"]["hadoop"]["hbase"]["client"]["primarycalltimeout"]["multiget"]
+if node["bcpc"]["hadoop"]["hbase"]["region.replication.enabled"] then
+  generated_values['hbase.regionserver.storefile.refresh.period'] = node["bcpc"]["hadoop"]["hbase"]["site_xml"]["hbase.regionserver.storefile.refresh.period"].to_s
+  generated_values['hbase.region.replica.replication.enabled'] = node["bcpc"]["hadoop"]["hbase"]["site_xml"]["hbase.region.replica.replication.enabled"].to_s
+  generated_values['hbase.master.hfilecleaner.ttl'] = node["bcpc"]["hadoop"]["hbase"]["site_xml"]["hbase.master.hfilecleaner.ttl"].to_s
+  generated_values['hbase.meta.replica.count'] = node["bcpc"]["hadoop"]["hbase"]["site_xml"]["hbase.meta.replica.count"].to_s
+  generated_values['hbase.regionserver.storefile.refresh.all'] = node["bcpc"]["hadoop"]["hbase"]["site_xml"]["hbase.regionserver.storefile.refresh.all"].to_s
+  generated_values['hbase.region.replica.storefile.refresh.memstore.multiplier'] = node["bcpc"]["hadoop"]["hbase"]["site_xml"]["hbase.region.replica.storefile.refresh.memstore.multiplier"].to_s
+  generated_values['hbase.region.replica.wait.for.primary.flush'] = node["bcpc"]["hadoop"]["hbase"]["site_xml"]["hbase.region.replica.wait.for.primary.flush"].to_s
+  generated_values['hbase.regionserver.global.memstore.lowerLimit'] = node["bcpc"]["hadoop"]["hbase"]["site_xml"]["hbase.regionserver.global.memstore.lowerLimit"].to_s
+  generated_values['hbase.hregion.memstore.block.multiplier'] = node["bcpc"]["hadoop"]["hbase"]["site_xml"]["hbase.hregion.memstore.block.multiplier"].to_s
+  generated_values['hbase.ipc.client.specificThreadForWriting'] = node["bcpc"]["hadoop"]["hbase"]["site_xml"]["hbase.ipc.client.specificThreadForWriting"].to_s
+  generated_values['hbase.client.primaryCallTimeout.get'] = node["bcpc"]["hadoop"]["hbase"]["site_xml"]["hbase.client.primaryCallTimeout.get"].to_s
+  generated_values['hbase.client.primaryCallTimeout.multiget'] = node["bcpc"]["hadoop"]["hbase"]["site_xml"]["hbase.client.primaryCallTimeout.multiget"].to_s
 end
 
 site_xml = node[:bcpc][:hadoop][:hbase][:site_xml]
