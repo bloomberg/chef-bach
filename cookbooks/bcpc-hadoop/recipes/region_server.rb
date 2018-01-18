@@ -19,8 +19,27 @@ node.default['bcpc']['hadoop']['copylog']['region_server_out'] = {
   end
 end
 
-%w{hbase-client hbase-regionserver phoenix-client}.each do |pkg|
-  hdp_select(pkg, node[:bcpc][:hadoop][:distribution][:active_release])
+# from hbase
+symlinks = %w(hadoop-client hadoop-hdfs-client hadoop-hdfs-datanode
+hadoop-hdfs-journalnode hadoop-hdfs-namenode hadoop-hdfs-nfs3
+hadoop-hdfs-portmap hadoop-hdfs-secondarynamenode hbase-client hbase-master
+hbase-regionserver spark2-client spark-client zookeeper-client zookeeper-server)
+# from hbase-regionserver
+symlinks += %w(hadoop-client hadoop-hdfs-client hadoop-hdfs-datanode
+hadoop-hdfs-journalnode hadoop-hdfs-namenode hadoop-hdfs-nfs3
+hadoop-hdfs-portmap hadoop-hdfs-secondarynamenode hbase-client hbase-master
+hbase-regionserver spark2-client spark-client zookeeper-client zookeeper-server)
+# from phoenix
+symlinks += %w(hadoop-client hadoop-hdfs-client hadoop-hdfs-datanode
+hadoop-hdfs-journalnode hadoop-hdfs-namenode hadoop-hdfs-nfs3
+hadoop-hdfs-portmap hadoop-hdfs-secondarynamenode hadoop-mapreduce-client
+hadoop-mapreduce-historyserver hadoop-yarn-client hadoop-yarn-nodemanager
+hadoop-yarn-resourcemanager hadoop-yarn-timelineserver hbase-client hbase-master
+hbase-regionserver phoenix-client phoenix-server spark2-client spark-client
+zookeeper-client zookeeper-server)
+
+symlinks.uniq.each do |symlink|
+  hdp_select(symlink, node[:bcpc][:hadoop][:distribution][:active_release])
 end
 
 user_ulimit "hbase" do
