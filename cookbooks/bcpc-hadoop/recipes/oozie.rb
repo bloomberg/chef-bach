@@ -52,8 +52,24 @@ oozie_conf_dir = "/etc/oozie/conf.#{node.chef_environment}"
   end
 end
 
-['oozie-server', 'oozie-client'].each do |pkg|
-  hdp_select(pkg, node['bcpc']['hadoop']['distribution']['active_release'])
+# from hadooplzo
+symlinks = %w(hadoop-client spark2-client spark-client zookeeper-client
+zookeeper-server)
+# from hadooplzo-native
+symlinks += %w(hadoop-client spark2-client spark-client zookeeper-client
+zookeeper-server)
+# from oozie-server
+symlinks += %w(hadoop-client hadoop-hdfs-client hadoop-hdfs-datanode
+hadoop-hdfs-journalnode hadoop-hdfs-namenode hadoop-hdfs-nfs3
+hadoop-hdfs-portmap hadoop-hdfs-secondarynamenode hadoop-mapreduce-client
+hadoop-mapreduce-historyserver hadoop-yarn-client hadoop-yarn-nodemanager
+hadoop-yarn-resourcemanager hadoop-yarn-timelineserver oozie-client oozie-server
+spark2-client spark-client zookeeper-client zookeeper-server)
+# from oozie-client
+symlinks += %w(oozie-client)
+
+symlinks.uniq.each do |symlink|
+  hdp_select(symlink, node['bcpc']['hadoop']['distribution']['active_release'])
 end
 
 configure_kerberos 'oozie_spnego' do
