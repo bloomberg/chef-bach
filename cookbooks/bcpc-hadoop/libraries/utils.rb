@@ -162,15 +162,33 @@ def storage_host(*args)
   end
 end
 
+def zk_connect(zk_host)
+  require 'rubygems'
+  require 'zookeeper'
+  zk_host_array = zk_host.split(",")
+  begin
+    zk_host_array.each_with_index do |d, idx|
+      temp = zk_host_array[idx]
+      zk_host_array[idx] = zk_host_array[0]
+      zk_host_array[0] = temp
+      zk = Zookeeper.new(zk_host_array.join(","))
+      if zk.connected?
+        break
+      end
+    end
+    if !zk.connected?
+      raise "zk_connect : Unable to connect to zookeeper quorum #{zk_host}"
+    end
+    return zk
+  end
+end
+
 def znode_exists?(znode_path, zk_host="localhost:2181")
   require 'rubygems'
   require 'zookeeper'
   znode_found = false
   begin
-    zk = Zookeeper.new(zk_host)
-    if !zk.connected?
-      raise "znode_exists : Unable to connect to zookeeper quorum #{zk_host}"
-    end
+    zk = zk_connect(zk_host)
     r = zk.get(:path => znode_path)
     if r[:rc] == 0
       znode_found = true
@@ -217,10 +235,7 @@ def acquire_restart_lock(znode_path, zk_hosts="localhost:2181",node_name)
   lock_acquired = false
   zk = nil
   begin
-    zk = Zookeeper.new(zk_hosts)
-    if !zk.connected?
-      raise "acquire_restart_lock : unable to connect to ZooKeeper quorum #{zk_hosts}"
-    end
+    zk = zk_connect(zk_hosts)
     ret = zk.create(:path => znode_path, :data => node_name)
     if ret[:rc] == 0
       lock_acquired = true
@@ -246,10 +261,7 @@ def my_restart_lock?(znode_path,zk_hosts="localhost:2181",node_name)
   my_lock = false
   zk = nil
   begin
-    zk = Zookeeper.new(zk_hosts)
-    if !zk.connected?
-      raise "my_restart_lock?: unable to connect to ZooKeeper quorum #{zk_hosts}"
-    end
+    zk = zk_connect(zk_hosts)
     ret = zk.get(:path => znode_path)
     val = ret[:data]
     if val == node_name
@@ -277,10 +289,7 @@ def rel_restart_lock(znode_path, zk_hosts="localhost:2181",node_name)
   lock_released = false
   zk = nil
   begin
-    zk = Zookeeper.new(zk_hosts)
-    if !zk.connected?
-      raise "rel_restart_lock : unable to connect to ZooKeeperi quorum #{zk_hosts}"
-    end
+    zk = zk_connect(zk_hosts)
     if my_restart_lock?(znode_path, zk_hosts, node_name)
       ret = zk.delete(:path => znode_path)
     else
@@ -307,10 +316,7 @@ end
 def get_restart_lock_holder(znode_path, zk_hosts="localhost:2181")
   require 'zookeeper'
   begin
-    zk = Zookeeper.new(zk_hosts)
-    if !zk.connected?
-      raise "get_restart_lock_holder : unable to connect to ZooKeeper quorum #{zk_hosts}"
-    end
+    zk = zk_connect(zk_hosts)
     ret = zk.get(:path => znode_path)
     if ret[:rc] == 0
       val = ret[:data]
