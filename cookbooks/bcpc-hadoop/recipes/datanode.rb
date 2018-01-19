@@ -216,7 +216,7 @@ end
 ruby_block 'count-mounts' do
   block do
     mount_count =
-      node.run_state['bcpc_hadoop_disks']['mounts'].length rescue 0 # rubocop:disable Style/RescueModifier, Metrics/LineLength
+      node.run_state['bcpc_hadoop_disks']['mounts'].length rescue 0
     tolerated_failures =
       node[:bcpc][:hadoop][:hdfs][:failed_volumes_tolerated]
     if mount_count <= tolerated_failures
@@ -241,7 +241,6 @@ bash 'kill yarn-yarn-nodemanager' do
 end
 
 # Build nodes for HDFS storage
-# rubocop:disable Metrics/BlockLength
 ruby_block 'create-hdfs-directories' do
   block do
     node.run_state['bcpc_hadoop_disks']['mounts'].each do |i|
@@ -281,7 +280,6 @@ ruby_block 'create-hdfs-directories' do
     end
   end
 end
-# rubocop:enable Metrics/BlockLength
 
 service 'hadoop-hdfs-datanode' do
   supports status: true, restart: true, reload: false
