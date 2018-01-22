@@ -170,10 +170,10 @@ def znode_exists?(znode_path, zk_host = 'localhost:2181')
   begin
     zk = Zookeeper.new(zk_host)
     raise "znode_exists : Unable to connect to zookeeper quorum #{zk_host}" unless zk.connected?
-    r = zk.get('path' => znode_path)
-    rc = r['rc']
+    r = zk.get(path: znode_path)
+    rc = r[:rc]
   ensure
-    zk.close if !zk.nil? && !zk.clsed?
+    zk.close if !zk.nil? && !zk.closed?
   end
 
   return true if rc == Zookeeper::Constants::ZOK
@@ -217,11 +217,11 @@ def acquire_restart_lock(znode_path, node_name, zk_hosts = 'localhost:2181')
     zk = Zookeeper.new(zk_hosts)
     raise "acquire_restart_lock : unable to connect to ZooKeeper quorum #{zk_hosts}" unless zk.connected?
     ret = zk.create('path' => znode_path, 'data' => node_name)
-    lock_acquired = true if ret['rc'] == Zookeeper::Constants::ZOK
+    lock_acquired = true if ret[:rc] == Zookeeper::Constants::ZOK
   rescue => e
     puts e.message
   ensure
-    zk.close if !zk.nil? && !zk.clsed?
+    zk.close if !zk.nil? && !zk.closed?
   end
   lock_acquired
 end
@@ -239,13 +239,13 @@ def my_restart_lock?(znode_path, node_name, zk_hosts = 'localhost:2181')
   begin
     zk = Zookeeper.new(zk_hosts)
     raise "my_restart_lock?: unable to connect to ZooKeeper quorum #{zk_hosts}" unless zk.connected?
-    ret = zk.get('path' => znode_path)
+    ret = zk.get(path: znode_path)
     val = ret['data']
     my_lock = true if val == node_name
   rescue => e
     puts e.message
   ensure
-    zk.close if !zk.nil? && !zk.clsed?
+    zk.close if !zk.nil? && !zk.closed?
   end
   my_lock
 end
@@ -266,11 +266,11 @@ def rel_restart_lock(znode_path, node_name, zk_hosts = 'localhost:2181')
     raise "rel_restart_lock : unable to connect to ZooKeeperi quorum #{zk_hosts}" unless zk.connected?
     raise 'rel_restart_lock : node who is not the owner is trying to release the lock' unless my_restart_lock?(znode_path, node_name, zk_hosts)
     ret = zk.delete('path' => znode_path)
-    lock_released = true if ret['rc'] == Zookeeper::Constants::ZOK
+    lock_released = true if ret[:rc] == Zookeeper::Constants::ZOK
   rescue => e
     puts e.message
   ensure
-    zk.close if !zk.nil? && !zk.clsed?
+    zk.close if !zk.nil? && !zk.closed?
   end
 
   lock_released
@@ -286,12 +286,12 @@ def get_restart_lock_holder(znode_path, zk_hosts = 'localhost:2181')
   begin
     zk = Zookeeper.new(zk_hosts)
     raise "get_restart_lock_holder : unable to connect to ZooKeeper quorum #{zk_hosts}" unless zk.connected?
-    ret = zk.get('path' => znode_path)
-    val = ret['data'] if ret['rc'] == Zookeeper::Constants::ZOK
+    ret = zk.get(path: znode_path)
+    val = ret['data'] if ret[:rc] == Zookeeper::Constants::ZOK
   rescue => e
     puts e.message
   ensure
-    zk.close if !zk.nil? && !zk.clsed?
+    zk.close if !zk.nil? && !zk.closed?
   end
   val
 end
@@ -338,7 +338,7 @@ def process_restarted_after_failure?(restart_failure_time, process_identifier)
   require 'time'
   begin
     start_time = process_start_time(process_identifier)
-    if start_time? && (Time.parse(restart_failure_time).to_i < Time.parse(start_time).to_i)
+    if start_time.nil? && (Time.parse(restart_failure_time).to_i < Time.parse(start_time).to_i)
       Chef::Log.info("#{process_identifier} seem to be started at #{start_time} after last restart failure at #{restart_failure_time}")
       return true
     end
@@ -352,7 +352,7 @@ def user_exists?(user_name)
   chk_usr_cmd = "getent passwd #{user_name}"
   Chef::Log.debug("Executing command: #{chk_usr_cmd}")
   cmd = Mixlib::ShellOut.new(chk_usr_cmd, 'timeout' => 10).run_command
-  user_found = true if cmd.exitstatus.zero?
+  user_found = true if cmd.exitstatus == 0
 
   user_found
 end
@@ -361,7 +361,7 @@ def group_exists?(group_name)
   chk_grp_cmd = "getent group #{group_name}"
   Chef::Log.debug("Executing command: #{chk_grp_cmd}")
   cmd = Mixlib::ShellOut.new(chk_grp_cmd, 'timeout' => 10).run_command
-  cmd.exitstatus.zero ? true : false
+  cmd.exitstatus == 0 ? true : false
 end
 
 def get_group_action(group_name)
@@ -391,7 +391,7 @@ def oozie_running?(host)
     oozie_url, 'timeout' => 20
   ).run_command
   Chef::Log.debug("Oozie status: #{cmd.stdout}")
-  cmd.exitstatus.zero? && cmd.stdout.include?('NORMAL')
+  cmd.exitstatus == 0 && cmd.stdout.include?('NORMAL')
 end
 
 # Internal: Have the specified Oozie host update its ShareLib to the latest lib_<timestamp>
@@ -407,7 +407,7 @@ def update_oozie_sharelib(host)
     cmd = Mixlib::ShellOut.new(
       update_sharelib, 'timeout' => 20
     ).run_command
-    if cmd.exitstatus.zero?
+    if cmd.exitstatus == 0
       Chef::Log.info("Sharelibupdate: Updated sharelib on #{host}")
     else
       Chef::Log.info("Sharelibupdate: sharelibupdate command failed on #{host}")
