@@ -40,7 +40,6 @@ verify_api_cert false
 no_lazy_load true
 
 knife[:vault_mode] = 'client'
-File.umask(0007)
 EOF
 
 if [[ -n "$http_proxy" ]]; then
