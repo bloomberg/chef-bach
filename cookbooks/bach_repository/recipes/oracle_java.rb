@@ -9,15 +9,15 @@ bins_dir = node['bach']['repository']['bins_directory']
 # Set the oracle cookie to indicate we have accepted the license agreement.
 ruby_block 'oracle-cookie-create' do
   block do
-    require 'chef/rest'
+    require 'chef/http'
 
-    Chef::REST::CookieJar.instance['edelivery.oracle.com:80'] =
+    Chef::HTTP::CookieJar.instance['edelivery.oracle.com:80'] =
       'oraclelicense=accept-securebackup-cookie'
-    Chef::REST::CookieJar.instance['edelivery.oracle.com:443'] =
+    Chef::HTTP::CookieJar.instance['edelivery.oracle.com:443'] =
       'oraclelicense=accept-securebackup-cookie'
-    Chef::REST::CookieJar.instance['download.oracle.com:80'] =
+    Chef::HTTP::CookieJar.instance['download.oracle.com:80'] =
       'oraclelicense=accept-securebackup-cookie'
-    Chef::REST::CookieJar.instance['download.oracle.com:443'] =
+    Chef::HTTP::CookieJar.instance['download.oracle.com:443'] =
       'oraclelicense=accept-securebackup-cookie'
   end
 end
