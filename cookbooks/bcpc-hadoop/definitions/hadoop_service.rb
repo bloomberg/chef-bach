@@ -56,7 +56,7 @@ define :hadoop_service, :service_name => nil, :dependencies => nil, :process_ide
         tries = 0
         Chef::Log.info("#{node[:hostname]}: Acquring lock at #{lock_znode_path}")
         while true 
-          lock = acquire_restart_lock(lock_znode_path, zk_hosts, node[:fqdn])
+          lock = acquire_restart_lock(lock_znode_path, node[:fqdn], zk_hosts)
           if lock
             break
           else
@@ -90,7 +90,7 @@ define :hadoop_service, :service_name => nil, :dependencies => nil, :process_ide
         Chef::Log.info("Data node will be restarted in node #{node[:fqdn]}")
       end
       action :create
-      only_if { my_restart_lock?(lock_znode_path, zk_hosts, node[:fqdn]) }
+      only_if { my_restart_lock?(lock_znode_path, node[:fqdn], zk_hosts) }
     end
 
     begin
@@ -105,14 +105,14 @@ define :hadoop_service, :service_name => nil, :dependencies => nil, :process_ide
     ruby_block "release_#{params[:service_name].gsub('-','_')}_restart_lock" do
       block do
         Chef::Log.info("#{node[:hostname]}: Releasing lock at #{lock_znode_path}")
-        lock_rel = rel_restart_lock(lock_znode_path, zk_hosts, node[:fqdn])
+        lock_rel = rel_restart_lock(lock_znode_path, node[:fqdn], zk_hosts)
         if lock_rel
           node.set[:bcpc][:hadoop][params[:service_name].gsub('-','_').to_sym][:restart_failed] = false
           node.save
         end
       end
       action :create
-      only_if { my_restart_lock?(lock_znode_path, zk_hosts, node[:fqdn]) }
+      only_if { my_restart_lock?(lock_znode_path, node[:fqdn], zk_hosts) }
     end
   end
 end
