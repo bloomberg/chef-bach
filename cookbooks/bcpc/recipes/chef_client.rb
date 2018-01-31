@@ -48,13 +48,16 @@ if node[:fqdn] == get_bootstrap
   # Clone client.rb that is managed by the chef-client cookbook so that knife.rb
   # can be managed by chef-client::config as well
   client_rb = resources("template[#{node['chef_client']['conf_dir']}/client.rb]")
+  knife_config = client_rb.variables
+  knife_config[:chef_config] = knife_config[:chef_config].to_hash
+  knife_config[:chef_config].delete('log_location')
   template knife_rb do
     source client_rb.source
     cookbook 'chef-client'
     owner user
     group client_rb.group
     mode client_rb.mode
-    variables client_rb.variables
+    variables knife_config
   end
 end
 
