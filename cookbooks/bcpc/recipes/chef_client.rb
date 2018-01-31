@@ -68,7 +68,8 @@ if node[:bcpc][:bootstrap][:proxy]
   # bcpc/templates/default/client.rb.erb will render the original
   # upstream template, then append proxy environment variables.
   #
-  chef_templates = ["#{node['chef_client']['conf_dir']}/client.rb", knife_rb]
+  chef_templates = ["#{node['chef_client']['conf_dir']}/client.rb"]
+  chef_templates << knife_rb if node['fqdn'] == get_bootstrap
   chef_templates.each do |chef_template|
     edit_resource!(:template, chef_template) do
       source 'client.rb.erb'
