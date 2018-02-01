@@ -43,6 +43,7 @@ graphite_password = get_config!('password', 'mysql-graphite', 'os')
   python-memcache
   python-pyparsing
   python-scandir
+  python-cachetools
   libcairo2-dev
   libffi-dev
 ).each do |pkg|
@@ -56,14 +57,20 @@ package 'python-django' do
   version node['bcpc']['graphite']['django']['version']
 end
 
-%w(
-  python-whisper
-  python-carbon
-  python-graphite-web
-).each do |pkg|
-  package pkg do
-    action :upgrade
-  end
+package 'python-whisper' do
+  action :upgrade
+end
+
+package 'python-carbon' do
+  action :upgrade
+  notifies :restart, 'service[carbon-relay]', :delayed
+  notifies :restart, 'service[carbon-aggregator]', :delayed
+  notifies :restart, 'service[carbon-cache]', :delayed
+end
+
+package 'python-graphite-web' do
+  action :upgrade
+  notifies :reload, 'service[apache2]', :delayed
 end
 
 %w(
