@@ -321,3 +321,5 @@ locking_resource 'hadoop-hdfs-nodemanager-restart' do
   subscribes :serialize, 'log[jdk-version-changed]', :delayed
   subscribes :serialize, node['bcpc']['hadoop']['jmxtrans_agent']['nodemanager']['xml'], :delayed
 end
+
+include_recipe 'bcpc-hadoop::slider'
