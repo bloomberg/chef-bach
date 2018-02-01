@@ -1,56 +1,60 @@
-default['spark']['hdfs_url'] = node['bcpc']['hadoop']['hdfs_url']
-default['spark']['bin']['dir'] = '/usr/hdp/current/spark2-client'
-default['spark']['conf']['dir'] = '/etc/spark2/conf'
+user = node['bcpc']['bootstrap']['admin']['user']
+
+default[:spark][:download][:url] = 'http://d3kbcqa49mib13.cloudfront.net'
+default[:spark][:download][:file][:name] = 'spark-2.1.0-bin-hadoop2.7'
+default[:spark][:download][:file][:type] = 'tgz'
+default[:spark][:download][:dir] = "/home/#{user}/chef-bcpc/bins"
+default[:spark][:package][:install_meta] = false
+default[:spark][:package][:base] = '/usr/spark'
+default[:spark][:package][:prefix] = 'spark'
+default[:spark][:package][:version] = '2.1.0'
+default[:spark][:hdfs_url] = node['bcpc']['hadoop']['hdfs_url']
+default[:spark][:bin][:dir] = "#{node[:spark][:package][:base]}/"\
+    "#{node[:spark][:package][:version]}"
 
 ## Spark Configuration
-default['bach_spark']['config'].tap do |spark_defaults|
-  spark_defaults['spark.driver.extraLibraryPath'] = '/usr/hdp/current'\
+default.bach_spark.config.spark.driver.extraLibraryPath = '/usr/hdp/current'\
     '/hadoop-client/lib/native:/usr/hdp/current'\
     '/hadoop-client/lib/native/Linux-amd64-64'
-  spark_defaults['spark.executor.extraLibraryPath'] = '/usr/hdp/current'\
+default.bach_spark.config.spark.executor.extraLibraryPath = '/usr/hdp/current'\
     '/hadoop-client/lib/native:/usr/hdp/current/hadoop-client/lib'\
     '/native/Linux-amd64-64'
-  spark_defaults['spark.executor.extraJavaOptions'] =
+default.bach_spark.config.spark.executor.extraJavaOptions =
     '-verbose:gc -XX:+PrintHeapAtGC -XX:+PrintGCDetails '\
     '-XX:+PrintGCTimeStamps -XX:+PrintGCDateStamps '\
     '-XX:+PrintTenuringDistribution -XX:+UseNUMA '\
     '-XX:+PrintGCApplicationStoppedTime -XX:+UseCompressedOops '\
     '-XX:+PrintClassHistogram -XX:+PrintGCApplicationConcurrentTime'
-  spark_defaults['spark.shuffle.consolidateFiles'] = true
-  spark_defaults['spark.shuffle.io.numConnectionsPerPeer'] = 2
-  spark_defaults['spark.history.fs.logDirectory'] =
+default.bach_spark.config.spark.shuffle.consolidateFiles = true
+default.bach_spark.config.spark.shuffle.io.numConnectionsPerPeer = 2
+default.bach_spark.config.spark.history.fs.logDirectory =
     "#{node['spark']['hdfs_url']}/spark-history"
-  spark_defaults['spark.eventLog.dir'] =
+default.bach_spark.config.spark.eventLog.dir =
     "#{node['spark']['hdfs_url']}/spark-history"
-  spark_defaults['spark.eventLog.enabled'] = true
-  spark_defaults['spark.logConf'] = true
-  spark_defaults['spark.dynamicAllocation.enabled'] = true
-  spark_defaults['spark.shuffle.service.enabled'] = true
-  spark_defaults['spark.yarn.archive'] = "#{node['spark']['hdfs_url']}"\
-    '/apps/spark/'\
-    "#{node['bcpc']['hadoop']['distribution']['active_release']}"\
-    '/spark_jars.tgz'
-  spark_defaults['spark.master'] = 'yarn-client'
-end
+default.bach_spark.config.spark.eventLog.enabled = true
+default.bach_spark.config.spark.logConf = true
+default.bach_spark.config.spark.dynamicAllocation.enabled = true
+default.bach_spark.config.spark.shuffle.service.enabled = true
+default.bach_spark.config.spark.yarn.archive = "#{node['spark']['hdfs_url']}"\
+    "/apps/spark/#{node[:spark][:package][:version]}/spark_jars.tgz"
+default.bach_spark.config.spark.master = 'yarn-client'
 
 # Spark environment configuration
-default['bach_spark']['environment'].tap do |spark_env|
-  spark_env['SPARK_LOCAL_IP'] = node[:ipaddress]
-  spark_env['SPARK_PUBLIC_DNS'] = node[:fqdn]
-  spark_env['SPARK_LOCAL_DIRS'] = '${HOME}/.spark_logs'
-  spark_env['HADOOP_CONF_DIR'] = '/etc/hadoop/conf'
-  spark_env['HADOOP_HOME'] = '/usr/hdp'\
-    "/#{node['bcpc']['hadoop']['distribution']['active_release']}/hadoop"
-  spark_env['HIVE_CONF_DIR'] = '/etc/hive/conf'
-  spark_env['SPARK_DIST_CLASSPATH'] =
-    '${HIVE_CONF_DIR}:${SPARK_LIBRARY_PATH}:$(for i in $(export IFS=":"; '\
-    'for i in $(hadoop classpath); do find $i -maxdepth 1 -name "*.jar"; '\
-    'done | egrep -v "jackson-databind-.*.jar|jackson-core.jar|'\
-    'jackson-core-.*.jar|jackson-annotations-.*.jar"); '\
+default.bach_spark.environment.SPARK_LOCAL_IP = node[:ipaddress]
+default.bach_spark.environment.SPARK_PUBLIC_DNS = node[:fqdn]
+default.bach_spark.environment.SPARK_LOCAL_DIRS = "${HOME}/.spark_logs"
+default.bach_spark.environment.HADOOP_CONF_DIR = '/etc/hadoop/conf'
+default.bach_spark.environment.HADOOP_HOME = '/usr/hdp'\
+    "/#{node['bcpc']['hadoop']['distribution']['release']}/hadoop"
+default.bach_spark.environment.HIVE_CONF_DIR = '/etc/hive/conf'
+default.bach_spark.environment.SPARK_DIST_CLASSPATH =
+    "${HIVE_CONF_DIR}:${SPARK_LIBRARY_PATH}:$(for i in $(export IFS=\":\"; "\
+    "for i in $(hadoop classpath); do find $i -maxdepth 1 -name \"*.jar\"; "\
+    "done | egrep -v \"jackson-databind-.*.jar|jackson-core.jar|"\
+    "jackson-core-.*.jar|jackson-annotations-.*.jar\"); "\
     "do echo -n \"${i}:\"; done | sed 's/:$//')"
-  spark_env['SPARK_CLASSPATH'] =
+default.bach_spark.environment.SPARK_CLASSPATH =
     '$SPARK_DIST_CLASSPATH:$SPARK_CLASSPATH'
-  spark_env['LD_LIBRARY_PATH'] = '/usr/hdp/current'\
+default.bach_spark.environment.LD_LIBRARY_PATH = '/usr/hdp/current'\
     '/hadoop-client/lib/native:/usr/hdp/current'\
     '/hadoop-client/lib/native/Linux-amd64-64:$LD_LIBRARY_PATH'
-end

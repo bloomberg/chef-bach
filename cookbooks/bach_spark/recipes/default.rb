@@ -23,32 +23,20 @@
 # the fpm invocation that creates the debian package.
 #
 
-spark_bin_dir = node['spark']['bin']['dir']
-spark_conf_dir = node['spark']['conf']['dir']
-spark_active_release = node[:bcpc][:hadoop][:distribution][:active_release]
+spark_pkg_version = node[:spark][:package][:version]
+spark_bin_dir = node[:spark][:bin][:dir]
 
-directory "/etc/spark2/conf.#{node.chef_environment}" do
-  owner 'root'
-  group 'root'
-  mode '00755'
-  recursive true
-  action :create
+if node[:spark][:package][:install_meta] == true
+  package 'spark' do
+    action :upgrade
+  end
+else
+  package "spark-#{spark_pkg_version}" do
+    action :install
+  end
 end
 
-bash 'update-spark2-conf-alternatives' do
-  code 'update-alternatives --install /etc/spark2/conf spark2-conf ' \
-  "/etc/spark2/conf.#{node.chef_environment} 50\n" \
-  'update-alternatives --set spark2-conf ' \
-  "/etc/spark2/conf.#{node.chef_environment}\n"
-end
-
-package 'spark2' do
-  action :upgrade
-end
-
-hdp_select('spark2-client', spark_active_release)
-
-template "#{spark_conf_dir}/spark-env.sh" do
+template "#{spark_bin_dir}/conf/spark-env.sh" do
   source 'spark-env.sh.erb'
   mode 0o0755
   helper :config do
@@ -57,20 +45,17 @@ template "#{spark_conf_dir}/spark-env.sh" do
   helpers(Spark::Configuration)
 end
 
-template "#{spark_conf_dir}/spark-defaults.conf" do
+template "#{spark_bin_dir}/conf/spark-defaults.conf" do
   source 'spark-defaults.conf.erb'
-  mode '00755'
+  mode 0o0755
   helper :config do
     node[:bach_spark][:config].sort_by(&:first)
   end
   helpers(Spark::Configuration)
 end
 
-# For backward compatibility
-
-directory '/usr/spark' do
-  action :create
-  mode '00755'
+link "/#{spark_bin_dir}/yarn/spark-yarn-shuffle.jar" do
+  to "#{spark_bin_dir}/yarn/spark-#{spark_pkg_version}-yarn-shuffle.jar"
 end
 
 link '/usr/spark/current' do

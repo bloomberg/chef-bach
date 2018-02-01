@@ -1,7 +1,7 @@
 # vim: tabstop=2:shiftwidth=2:softtabstop=2
 
-spark_pkg_version = node['bcpc']['hadoop']['distribution']['active_release']
-spark_bin_dir = node['spark']['bin']['dir']
+spark_pkg_version = node[:spark][:package][:version]
+spark_bin_dir = node[:spark][:bin][:dir]
 hdfs_url = node['spark']['hdfs_url']
 
 bash 'create-hdfs-spark-history-dir' do
