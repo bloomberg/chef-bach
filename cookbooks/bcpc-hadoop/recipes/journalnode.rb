@@ -2,6 +2,7 @@ require 'base64'
 include_recipe 'bcpc-hadoop::hadoop_config'
 ::Chef::Recipe.send(:include, Bcpc_Hadoop::Helper)
 ::Chef::Resource::Bash.send(:include, Bcpc_Hadoop::Helper)
+include_recipe 'bcpc-hadoop::journalnode_queries'
 
 hdprel=node[:bcpc][:hadoop][:distribution][:active_release]
 hdppath="/usr/hdp/#{hdprel}"
