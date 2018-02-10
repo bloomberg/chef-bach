@@ -12,7 +12,6 @@ hdp_select('slider-client', node[:bcpc][:hadoop][:distribution][:active_release]
 
 set_hosts
 
-site_xml = node.default[:bcpc][:hadoop][:yarn][:site_xml]
 zk_hosts = node[:bcpc][:hadoop][:zookeeper][:servers]
 
 slider_properties = {
@@ -22,7 +21,8 @@ slider_properties = {
     .join(','),
   'hadoop.registry.rm.enabled' => true
 }
-site_xml.merge!(slider_properties)
+
+node.run_state[:yarn_site_generated_values].merge!(slider_properties)
 
 
 node.default['bcpc']['hadoop']['slider']['env'] = {}
