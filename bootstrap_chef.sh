@@ -5,11 +5,6 @@
 # $2 is the IP address of the bootstrap node
 # $3 is the optional knife recipe name, default "Test-Laptop"
 
-if [[ $OSTYPE == msys || $OSTYPE == cygwin ]]; then
-  # try to fix permission mismatch between windows and real unix
-  RSYNCEXTRA="--perms --chmod=a=rwx,Da+x"
-fi
-
 set -e
 
 if [[ $# -gt 1 ]]; then
