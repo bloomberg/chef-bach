@@ -69,7 +69,7 @@ include_recipe 'java::oracle_jce'
 include_recipe 'bcpc-hadoop::jvmkill'
 
 %w(zookeeper).each do |pkg|
-  package hwx_pkg_str(pkg, node[:bcpc][:hadoop][:distribution][:release]) do
+  package hwx_pkg_str(pkg, node[:bcpc][:hadoop][:distribution][:active_release]) do
     action :upgrade
   end
 end
