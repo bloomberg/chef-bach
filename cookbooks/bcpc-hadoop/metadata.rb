@@ -8,6 +8,7 @@ version          '3.0.46'
 
 depends 'bcpc', '= 3.0.46'
 depends 'bach_krb5', '= 3.0.46'
+depends 'bach_opentsdb', '= 3.0.46'
 depends 'database'
 depends 'java'
 depends 'maven'
