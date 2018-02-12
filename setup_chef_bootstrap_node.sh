@@ -16,20 +16,18 @@ CHEF_SERVER=$1
 CHEF_ENVIRONMENT=$2
 
 # Assume we are running in the chef-bcpc directory
-sudo /opt/chefdk/bin/chef-client -E "$CHEF_ENVIRONMENT" -c .chef/knife.rb
+sudo chown $(whoami):root /etc/chef/client.pem
+sudo chmod 550 /etc/chef/client.pem
 PEM_RELATIVE_PATH=.chef/$(hostname -f).pem
-sudo chown $(whoami):root $PEM_RELATIVE_PATH
-sudo chmod 550 $PEM_RELATIVE_PATH
-[ ! -L /etc/chef/client.pem ] && \
-  sudo ln -s $(readlink -f $PEM_RELATIVE_PATH) /etc/chef/client.pem
-[ ! -L ~/.chef ] && \
-  sudo ln -s $(readlink -f .chef) ~/.chef
-
-admin_val=`sudo knife client show $(hostname -f) -c .chef/knife.rb | grep ^admin: | sed "s/admin:[^a-z]*//"`
-if [[ "$admin_val" != "true" ]]; then
-  # Make this client an admin user before proceeding.
-  echo -e "/\"admin\": false\ns/false/true\nw\nq\n" | EDITOR=ed sudo -E knife client edit `hostname -f` -c .chef/knife.rb -k /etc/chef-server/admin.pem -u admin
-fi
+[ ! -L $PEM_RELATIVE_PATH ] && \
+  sudo ln -s /etc/chef/client.pem $(readlink -f $PEM_RELATIVE_PATH)
+# It looks like knife fetch fails if the .chef directory is a symlink
+# One gets:
+# ERROR: Errno::EEXIST: File exists @ dir_s_mkdir - /home/vagrant/.chef
+[ ! -L ~/.chef/$(hostname -f).pem ] && \
+  sudo ln -s /etc/chef/client.pem ~/.chef/$(hostname -f).pem
+[ ! -L ~/.chef/knife.rb ] && \
+  sudo ln -s $(readlink -f .chef/knife.rb) ~/.chef/knife.rb
 
 #
 # build_bins.sh has already built the BCPC local repository, but we

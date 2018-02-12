@@ -32,7 +32,6 @@ default['chef_client']['config'].tap do |config|
     else
       "https://#{node['bcpc']['bootstrap']['vip']}"
     end
-
   if node['bcpc']['bootstrap']['proxy']
     config['http_proxy'] = node['bcpc']['bootstrap']['proxy']
     config['https_proxy'] = node['bcpc']['bootstrap']['proxy']
@@ -40,9 +39,18 @@ default['chef_client']['config'].tap do |config|
   end
 
   #
+  # External cookbooks may require arbitrary Gems, do not force the bootstrap
+  # to use the gem mirror intended for cluster nodes
+  #
+  unless node['fqdn'] == get_bootstrap
+    config['rubygems_url'] = \
+      "http://#{node['bach']['repository']['gem_server']}/"
+  end
+
+  #
   # All configuration past this point only applies to the bootstrap node.
   #
-  # Non-bootstrap nodes will never require knife or proxy configurations.
+  # Non-bootstrap nodes will never require knife configurations.
   #
   if node['fqdn'] == get_bootstrap
     config['syntax_check_cache_path'] =

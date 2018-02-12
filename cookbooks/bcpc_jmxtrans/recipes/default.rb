@@ -7,7 +7,7 @@
 # All rights reserved
 #
 
-bcpc_chef_gem 'chef-rewind' do
+chef_gem 'chef-rewind' do
   version '>0.0'
   compile_time true
 end

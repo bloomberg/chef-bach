@@ -15,6 +15,11 @@ package 'libkrb5-dev'
 
 user = node['bach']['repository']['build']['user']
 
+file '/etc/gemrc' do
+  content 'http_proxy: :no_proxy'
+  mode 0444
+end
+
 directory "#{node['bach']['repository']['repo_directory']}/vendor" do
   owner "#{user}"
   mode 0755

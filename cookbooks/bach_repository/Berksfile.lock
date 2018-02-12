@@ -1,0 +1,115 @@
+DEPENDENCIES
+  apt
+  bach_common
+    path: ../bach_common
+  bach_repository
+    path: .
+    metadata: true
+  bach_repository_test
+    path: test/cookbooks/bach_repository_test
+  bfd
+    git: https://github.com/bloomberg/openbfdd-cookbook
+    revision: 0b951af724b0ff6c111ad81671e711327a796dd7
+  chef-client
+  chef-sugar
+  cobblerd
+    git: https://github.com/bloomberg/cobbler-cookbook
+    revision: 07f14e4b779ce3203358d2aae3283e0f508fa1e8
+  database
+  export-node
+  java
+  jmxtrans
+    git: https://github.com/jmxtrans/jmxtrans-cookbook
+    revision: 8ab006bb985c8f94e85af9ed783d8e19b64d0dda
+    branch: ver-2.0
+  kafka
+    git: https://github.com/mthssdrbrg/kafka-cookbook.git
+    revision: 11420f008815b9f125bfa28f99220863b26ae357
+    tag: v2.2.2
+  locking_resource
+    git: https://github.com/bloomberg/locking_resource-cookbook
+    revision: a9d3ba0df92cfdfd88da07c756fd6dd15d934ce1
+  maven
+  ntp
+  openssl
+  pam
+  pdns
+    git: https://github.com/http-418/pdns
+    revision: b1ace26b32334c35332eb6613d27122393486adc
+  postgresql
+  resolvconf
+  ubuntu
+
+GRAPH
+  apt (6.1.4)
+  ark (3.1.0)
+    build-essential (>= 0.0.0)
+    seven_zip (>= 0.0.0)
+    windows (>= 0.0.0)
+  bach_common (0.1.0)
+  bach_repository (0.1.0)
+    ark (>= 0.0.0)
+    build-essential (>= 0.0.0)
+    cobblerd (>= 0.0.0)
+    java (>= 0.0.0)
+    ubuntu (>= 0.0.0)
+  bach_repository_test (0.1.0)
+    bach_repository (>= 0.0.0)
+  bfd (0.2.0)
+    apt (>= 0.0.0)
+    poise (>= 0.0.0)
+  build-essential (8.0.4)
+    mingw (>= 1.1)
+    seven_zip (>= 0.0.0)
+  chef-client (9.0.2)
+    cron (>= 4.2.0)
+    logrotate (>= 1.9.0)
+    windows (>= 2.0.0)
+  chef-sugar (3.6.0)
+  cobblerd (0.4.0)
+    apt (>= 0.0.0)
+    poise (>= 0.0.0)
+    yum-epel (>= 0.0.0)
+  compat_resource (12.19.0)
+  cron (5.0.1)
+  database (6.1.1)
+    postgresql (>= 1.0.0)
+  export-node (1.0.1)
+  homebrew (4.2.0)
+  java (1.50.0)
+    apt (>= 0.0.0)
+    homebrew (>= 0.0.0)
+    windows (>= 0.0.0)
+  jmxtrans (2.0.0)
+    ark (>= 0.0.0)
+  kafka (2.2.2)
+  locking_resource (0.1.0)
+    poise (>= 0.0.0)
+  logrotate (2.2.0)
+  maven (5.1.0)
+    ark (>= 1.0)
+  mingw (2.0.1)
+    seven_zip (>= 0.0.0)
+  ntp (3.5.4)
+  ohai (5.2.0)
+  openssl (8.1.0)
+  pam (1.0.3)
+  pdns (1.0.5)
+    apt (>= 0.0.0)
+    build-essential (>= 0.0.0)
+    database (>= 0.0.0)
+    resolvconf (>= 0.0.0)
+  poise (2.8.1)
+  postgresql (6.1.1)
+    build-essential (>= 2.0.0)
+    compat_resource (>= 12.16.3)
+    openssl (>= 4.0)
+  resolvconf (1.0.0)
+  seven_zip (2.0.2)
+    windows (>= 1.2.2)
+  ubuntu (2.0.1)
+    apt (>= 0.0.0)
+  windows (3.4.2)
+    ohai (>= 4.0.0)
+  yum-epel (2.1.2)
+    compat_resource (>= 12.16.3)

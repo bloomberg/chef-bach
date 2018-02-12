@@ -100,8 +100,7 @@
       "cache_path": "/var/chef/cache",
       "config": {
          "verify_api_cert": false,
-         "ssl_verify_mode": "verify_none",
-         "rubygems_url": "http://10.0.101.3/"
+         "ssl_verify_mode": "verify_none"
       },
       "backup_path": "/var/chef/backup",
       "validation_client_name": "chef-validator",

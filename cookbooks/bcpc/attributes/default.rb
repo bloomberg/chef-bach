@@ -201,7 +201,8 @@ default['bcpc']['no_proxy'] = [
    node['bcpc']['bootstrap']['server'],
    node['bcpc']['management']['vip'],
    node['domain'] ? "*#{node['domain']}" : nil,
-   node['bcpc']['additional_no_proxy']
+   node['bcpc']['additional_no_proxy'],
+   ENV['no_proxy']
 ].compact.flatten.uniq
 
 ###########################################
@@ -232,10 +233,10 @@ default['bcpc']['ha_oozie']['port'] = '11010'
 #  attributes for chef vault download and install
 #################################################
 default['bcpc']['chefvault']['filename'] =
-  'chef-vault-2.2.4.gem'
+  'chef-vault-2.9.2.gem'
 
 default['bcpc']['chefvault']['checksum'] =
-  '8d89c96554f614ec2a80ef20e98b0574c355a6ea119a30bd49aa9cfdcde15b4a'
+  'e3ff0bbad6b3a59e150cfb0f510c5a67f98ef7794ba6871cc9f8af563bfd06ef '
 
 # bcpc binary server pathnames
 default['bcpc']['bin_dir']['path'] = "/home/#{user}/chef-bcpc/bins/"

@@ -22,9 +22,9 @@ mkdir -p $DIR/bins
 pushd $DIR/bins/ > /dev/null
 apt-get update
 
-chefdk_vers='1.2.22'
+chefdk_vers='1.6.11'
 chefdk_dpkg="chefdk_${chefdk_vers}-1_amd64.deb"
-chefdk_sha256='518ecf308764c08a647ddabc6511af231affd2bf3e6526e60ef581926c8e7105'
+chefdk_sha256='a89f0ef2a8edbefbbf4cb14d8d97f83e9227fff35f2d80fb45b03604c91a207b'
 if [ ! -f ${chefdk_dpkg} ] || ! sha256sum ${chefdk_dpkg} | grep -q ${chefdk_sha256}; then
     rm -f ${chefdk_dpkg}
     # $CURL is defined in proxy_setup.sh
@@ -47,8 +47,10 @@ pushd lib/cluster-def-gem  > /dev/null
 sudo /opt/chefdk/embedded/bin/gem install cluster_def
 popd > /dev/null
 
-if pgrep 'chef-client' > /dev/null; then
-    echo 'A chef-client run is already underway, aborting build_bins.sh' 1>&2
+chef_client_run=$(pgrep -u root -a -f 'chef-client worker' || true)
+if [ -n "${chef_client_run}" ]; then
+    echo -e 'A chef-client run is already underway, aborting build_bins.sh:\n' \
+            "${chef_client_run}" 1>&2
     exit
 fi
 
