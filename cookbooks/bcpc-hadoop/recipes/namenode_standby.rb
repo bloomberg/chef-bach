@@ -139,7 +139,7 @@ if node['bcpc']['hadoop']['hdfs']['HA'] == true then
   end
 
   link "/etc/init.d/hadoop-hdfs-namenode" do
-    to "/usr/hdp/#{node[:bcpc][:hadoop][:distribution][:release]}/hadoop-hdfs/etc/init.d/hadoop-hdfs-namenode"
+    to "/usr/hdp/#{node[:bcpc][:hadoop][:distribution][:active_release]}/hadoop-hdfs/etc/init.d/hadoop-hdfs-namenode"
     notifies :run, 'bash[kill hdfs-namenode]', :immediate
   end
 

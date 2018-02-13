@@ -45,7 +45,7 @@ default.bach_spark.environment.SPARK_PUBLIC_DNS = node[:fqdn]
 default.bach_spark.environment.SPARK_LOCAL_DIRS = "${HOME}/.spark_logs"
 default.bach_spark.environment.HADOOP_CONF_DIR = '/etc/hadoop/conf'
 default.bach_spark.environment.HADOOP_HOME = '/usr/hdp'\
-    "/#{node['bcpc']['hadoop']['distribution']['release']}/hadoop"
+    "/#{node['bcpc']['hadoop']['distribution']['active_release']}/hadoop"
 default.bach_spark.environment.HIVE_CONF_DIR = '/etc/hive/conf'
 default.bach_spark.environment.SPARK_DIST_CLASSPATH =
     "${HIVE_CONF_DIR}:${SPARK_LIBRARY_PATH}:$(for i in $(export IFS=\":\"; "\

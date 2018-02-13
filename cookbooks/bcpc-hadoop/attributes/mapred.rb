@@ -10,7 +10,7 @@ default["bcpc"]["hadoop"]["yarn"]["app"]["mapreduce"]["am"]["staging-dir"] = "/u
 default[:bcpc][:hadoop][:mapreduce][:site_xml].tap do |site_xml|
   site_xml['mapreduce.admin.map.child.java.opts'] =
     '-server -Djava.net.preferIPv4Stack=true -Dhdp.version=' +
-    node[:bcpc][:hadoop][:distribution][:release].to_s
+    node[:bcpc][:hadoop][:distribution][:active_release].to_s
 
   hdp_path =
     File.join('/usr/hdp',
