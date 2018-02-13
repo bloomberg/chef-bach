@@ -1,0 +1,261 @@
+# get all views
+curl --user admin:admin -i -H 'X-Requested-By: ambari' -X GET http://localhost:8080/api/v1/views/
+
+# get files view only
+curl --user admin:admin -i -H 'X-Requested-By: ambari' -X GET http://localhost:8080/api/v1/views/FILES
+
+# get all versions of FILES view
+curl --user admin:admin -i -H 'X-Requested-By: ambari' -X GET http://localhost:8080/api/v1/views/FILES/versions
+
+# get specific version of FILES view
+curl --user admin:admin -i -H 'X-Requested-By: ambari' -X GET http://localhost:8080/api/v1/views/FILES/versions/1.0.0
+
+# create an instance of FILES view
+curl --user admin:admin -i -H 'X-Requested-By: ambari' -X POST http://localhost:8080/api/v1/views/FILES/versions/1.0.0/instances/FILES_NEW_INSTANCE
+
+# delete an instance of FILES view
+curl --user admin:admin -i -H 'X-Requested-By: ambari' -X DELETE http://localhost:8080/api/v1/views/FILES/versions/1.0.0/instances/FILES_NEW_INSTANCE
+
+# get specific instance of FILES view
+curl --user admin:admin -i -H 'X-Requested-By: ambari' -X GET http://localhost:8080/api/v1/views/FILES/versions/1.0.0/instances/FILES_NEW_INSTANCE
+
+# create a Files view instance with new properties
+curl --user admin:admin -i -H 'X-Requested-By: ambari' -X POST http://localhost:8080/api/v1/views/FILES/versions/1.0.0/instances/FILES_NEW_INSTANCE \
+--data '{
+  "ViewInstanceInfo" : {
+      "description" : "Files API",
+      "label" : "Files View",
+      "properties" : {
+      "webhdfs.client.failover.proxy.provider" : "org.apache.hadoop.hdfs.server.namenode.ha.ConfiguredFailoverProxyProvider",
+      "webhdfs.ha.namenode.http-address.nn1" : "u1201.ambari.apache.org:50070",
+      "webhdfs.ha.namenode.http-address.nn2" : "u1201.ambari.apache.org:50070",
+      "webhdfs.ha.namenode.https-address.nn1" : "u1201.ambari.apache.org:50470",
+      "webhdfs.ha.namenode.https-address.nn2" : "u1202.ambari.apache.org:50470",
+      "webhdfs.ha.namenode.rpc-address.nn1" : "u1201.ambari.apache.org:8020",
+      "webhdfs.ha.namenode.rpc-address.nn2" : "u1202.ambari.apache.org:8020",
+      "webhdfs.ha.namenodes.list" : "nn1,nn2",
+      "webhdfs.nameservices" : "hacluster",
+      "webhdfs.url" : "webhdfs://hacluster"
+      }
+    }
+}'
+
+# update properties in view (view must exist)
+# create a Files view instance with new properties
+curl --user admin:admin -i -H 'X-Requested-By: ambari' -X PUT http://localhost:8080/api/v1/views/FILES/versions/1.0.0/instances/FILES_NEW_INSTANCE \
+--data '{
+  "ViewInstanceInfo" : {
+      "description" : "Files API",
+      "label" : "Files View",
+      "properties" : {
+      "webhdfs.client.failover.proxy.provider" : "org.apache.hadoop.hdfs.server.namenode.ha.ConfiguredFailoverProxyProvider",
+      "webhdfs.ha.namenode.http-address.nn1" : "u1201.ambari.apache.org:50070",
+      "webhdfs.ha.namenode.http-address.nn2" : "u1201.ambari.apache.org:50070",
+      "webhdfs.ha.namenode.https-address.nn1" : "u1201.ambari.apache.org:50470",
+      "webhdfs.ha.namenode.https-address.nn2" : "u1202.ambari.apache.org:50470",
+      "webhdfs.ha.namenode.rpc-address.nn1" : "u1201.ambari.apache.org:8020",
+      "webhdfs.ha.namenode.rpc-address.nn2" : "u1202.ambari.apache.org:8020",
+      "webhdfs.ha.namenodes.list" : "nn1,nn2",
+      "webhdfs.nameservices" : "hacluster",
+      "webhdfs.url" : "webhdfs://hacluster"
+      }
+    }
+}'
+
+
+# create instance of Hive view
+curl --user admin:admin -i -H 'X-Requested-By: ambari' -X POST http://localhost:8080/api/v1/views/HIVE/versions/1.0.0/instances/HIVE_NEW_INSTANCE \
+--data '{
+  "ViewInstanceInfo" : {
+      "description" : "Hive View",
+      "label" : "Hive View",
+      "properties" : {
+      "webhdfs.client.failover.proxy.provider" : "org.apache.hadoop.hdfs.server.namenode.ha.ConfiguredFailoverProxyProvider",
+      "webhdfs.ha.namenode.http-address.nn1" : "u1201.ambari.apache.org:50070",
+      "webhdfs.ha.namenode.http-address.nn2" : "u1201.ambari.apache.org:50070",
+      "webhdfs.ha.namenode.https-address.nn1" : "u1201.ambari.apache.org:50470",
+      "webhdfs.ha.namenode.https-address.nn2" : "u1202.ambari.apache.org:50470",
+      "webhdfs.ha.namenode.rpc-address.nn1" : "u1201.ambari.apache.org:8020",
+      "webhdfs.ha.namenode.rpc-address.nn2" : "u1202.ambari.apache.org:8020",
+      "webhdfs.ha.namenodes.list" : "nn1,nn2",
+      "webhdfs.nameservices" : "hacluster",
+      "webhdfs.url" : "webhdfs://hacluster",
+      "hive.host" : "u1203.ambari.apache.org",
+      "hive.http.path" : "cliservice",
+      "hive.http.port" : "10001",
+      "hive.metastore.warehouse.dir" : "/apps/hive/warehouse",
+      "hive.port" : "10000",
+      "hive.transport.mode" : "binary",
+      "yarn.ats.url" : "http://u1202.ambari.apache.org:8188",
+      "yarn.resourcemanager.url" : "u1202.ambari.apache.org:8088"
+      }
+    }
+}'
+
+
+
+# call specific instance of FILES view
+curl --user admin:admin -i -H 'X-Requested-By: ambari' -X GET http://localhost:8080/api/v1/views/FILES/versions/1.0.0/instances/FILES_NEW_INSTANCE/resources/files/fileops/listdir?path=%2F
+
+# output of viewing your newly created instance
+
+curl --user admin:admin -i -H 'X-Requested-By: ambari' -X GET http://localhost:8080/api/v1/
+iews/FILES/versions/1.0.0/                                                                                    
+
+{                                                                                                             
+  "href" : "http://localhost:8080/api/v1/views/FILES/versions/1.0.0/",                                        
+  "ViewVersionInfo" : {                                                                                       
+    "archive" : "/var/lib/ambari-server/resources/views/work/FILES{1.0.0}",                                   
+    "build_number" : "161",                                                                                   
+    "cluster_configurable" : true,                                                                            
+    "description" : null,                                                                                     
+    "label" : "Files",                                                                                        
+    "masker_class" : null,                                                                                    
+    "max_ambari_version" : null,                                                                              
+    "min_ambari_version" : "2.0.*",                                                                           
+    "parameters" : [                                                                                          
+      {                                                                                                       
+        "name" : "webhdfs.url",                                                                               
+        "description" : "Enter the WebHDFS FileSystem URI. Typically this is the dfs.namenode.http-address\n  
+          property in the hdfs-site.xml configuration. URL must be accessible from Ambari Server.",           
+        "label" : "WebHDFS FileSystem URI",                                                                   
+        "placeholder" : null,                                                                                 
+        "defaultValue" : null,                                                                                
+        "clusterConfig" : "core-site/fs.defaultFS",                                                           
+        "required" : true,                                                                                    
+        "masked" : false                                                                                      
+      },                                                                                                      
+      {                                                                                                       
+        "name" : "webhdfs.nameservices",                                                                      
+        "description" : "Comma-separated list of nameservices. Value of hdfs-site/dfs.nameservices property", 
+        "label" : "Logical name of the NameNode cluster",                                                     
+        "placeholder" : null,                                                                                 
+        "defaultValue" : null,                                                                                
+        "clusterConfig" : "hdfs-site/dfs.nameservices",                                                       
+        "required" : false,                                                                                   
+        "masked" : false                                                                                      
+      },                                                                                                      
+      {                                                                                                       
+        "name" : "webhdfs.ha.namenodes.list",                                                                 
+        "description" : "Comma-separated list of namenodes for a given nameservice.\n            Value of hdfs
+-site/dfs.ha.namenodes.[nameservice] property",                                                               
+        "label" : "List of NameNodes",                                                                        
+        "placeholder" : null,                                                                                 
+        "defaultValue" : null,                                                                                
+        "clusterConfig" : "fake",                                                                             
+        "required" : false,                                                                                   
+        "masked" : false                                                                                      
+      },                                                                                                      
+      {                                                                                                       
+        "name" : "webhdfs.ha.namenode.rpc-address.nn1",                                                       
+        "description" : "RPC address for first name node.\n            Value of hdfs-site/dfs.namenode.rpc-add
+ress.[nameservice].[namenode1] property",                                                                     
+        "label" : "First NameNode RPC Address",                                                               
+        "placeholder" : null,                                                                                 
+        "defaultValue" : null,                                                                                
+        "clusterConfig" : "fake",                                                                             
+        "required" : false,                                                                                   
+        "masked" : false                                                                                      
+      },                                                                                                      
+      {                                                                                                       
+        "name" : "webhdfs.ha.namenode.rpc-address.nn2",                                                       
+        "description" : "RPC address for second name node.\n            Value of hdfs-site/dfs.namenode.rpc-ad
+dress.[nameservice].[namenode2] property",                                                                    
+        "label" : "Second NameNode RPC Address",                                                              
+        "placeholder" : null,                                                                                 
+        "defaultValue" : null,                                                                                
+        "clusterConfig" : "fake",                                                                             
+        "required" : false,                                                                                   
+        "masked" : false                                                                                      
+      },                                                                                                      
+      {                                                                                                       
+        "name" : "webhdfs.ha.namenode.http-address.nn1",                                                      
+        "description" : "WebHDFS address for first name node.\n            Value of hdfs-site/dfs.namenode.htt
+p-address.[nameservice].[namenode1] property",                                                                
+        "label" : "First NameNode HTTP (WebHDFS) Address",                                                    
+        "placeholder" : null,                                                                                 
+        "defaultValue" : null,                                                                                
+        "clusterConfig" : "fake",                                                                             
+        "required" : false,                                                                                   
+        "masked" : false                                                                                      
+      },                                                                                                      
+      {                                                                                                       
+        "name" : "webhdfs.ha.namenode.http-address.nn2",                                                      
+        "description" : "WebHDFS address for second name node.\n            Value of hdfs-site/dfs.namenode.ht
+tp-address.[nameservice].[namenode2] property",                                                               
+        "label" : "Second NameNode HTTP (WebHDFS) Address",                                                   
+        "placeholder" : null,                                                                                 
+        "defaultValue" : null,                                                                                
+        "clusterConfig" : "fake",                                                                             
+        "required" : false,                                                                                   
+        "masked" : false                                                                                      
+      },                                                                                                      
+      {                                                                                                       
+        "name" : "webhdfs.client.failover.proxy.provider",                                                    
+        "description" : "The Java class that HDFS clients use to contact the Active NameNode\n            Valu
+e of hdfs-site/dfs.client.failover.proxy.provider.[nameservice] property",                                    
+        "label" : "Failover Proxy Provider",                                                                  
+        "placeholder" : null,                                                                                 
+        "defaultValue" : null,                                                                                
+        "clusterConfig" : "fake",                                                                             
+        "required" : false,                                                                                   
+        "masked" : false                                                                                      
+      },                                                                                                      
+      {                                                                                                       
+        "name" : "hdfs.auth_to_local",                                                                        
+        "description" : "Auth to Local Configuration",                                                        
+        "label" : "Auth To Local",                                                                            
+        "placeholder" : null,                                                                                 
+        "defaultValue" : null,                                                                                
+        "clusterConfig" : "core-site/hadoop.security.auth_to_local",                                          
+        "required" : false,                                                                                   
+        "masked" : false                                                                                      
+      },                                                                                                      
+      {                                                                                                       
+        "name" : "webhdfs.username",                                                                          
+        "description" : "doAs for proxy user for HDFS. By default, uses the currently logged-in Ambari user.",
+        "label" : "WebHDFS Username",                                                                         
+        "placeholder" : null,                                                                                 
+        "defaultValue" : "${username}",                                                                       
+        "clusterConfig" : null,                                                                               
+        "required" : false,                                                                                   
+        "masked" : false                                                                                      
+      },                                                                                                      
+      {                                                                                                       
+        "name" : "webhdfs.auth",                                                                              
+        "description" : "Semicolon-separated authentication configs.",                                        
+        "label" : "WebHDFS Authorization",                                                                    
+        "placeholder" : "auth=SIMPLE",                                                                        
+        "defaultValue" : null,                                                                                
+        "clusterConfig" : null,                                                                               
+        "required" : false,                                                                                   
+        "masked" : false                                                                                      
+      }                                                                                                       
+    ],                                                                                                        
+    "status" : "DEPLOYED",                                                                                    
+    "status_detail" : "Deployed /var/lib/ambari-server/resources/views/work/FILES{1.0.0}.",                   
+    "system" : false,                                                                                         
+    "version" : "1.0.0",                                                                                      
+    "view_name" : "FILES"                                                                                     
+  },                                                                                                          
+  "permissions" : [                                                                                           
+    {                                                                                                         
+      "href" : "http://localhost:8080/api/v1/views/FILES/versions/1.0.0/permissions/4",                       
+      "PermissionInfo" : {                                                                                    
+        "permission_id" : 4,                                                                                  
+        "version" : "1.0.0",                                                                                  
+        "view_name" : "FILES"                                                                                 
+      }                                                                                                       
+    }                                                                                                         
+  ],                                                                                                          
+  "instances" : [                                                                                             
+    {                                                                                                         
+      "href" : "http://localhost:8080/api/v1/views/FILES/versions/1.0.0/instances/Files",                     
+      "ViewInstanceInfo" : {                                                                                  
+        "instance_name" : "Files",                                                                            
+        "version" : "1.0.0",                                                                                  
+        "view_name" : "FILES"                                                                                 
+      }                                                                                                       
+    }                                                                                                         
+  ]                                                                                                           
+
