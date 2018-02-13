@@ -1,4 +1,4 @@
-# Kerberos settings 
+# Kerberos settings
 default[:bcpc][:hadoop][:kerberos][:enable] = true
 default[:bcpc][:hadoop][:kerberos][:realm] = "BCPC.EXAMPLE.COM"
 default['bcpc']['hadoop']['kerberos']['data'] = {
@@ -127,7 +127,16 @@ default['bcpc']['hadoop']['kerberos']['data'] = {
     princhost: '_HOST',
     perms: '0440',
     spnego_keytab: 'spnego.service.keytab'
-  }
+  },
+  ambari: {
+      principal: 'ambari',
+      keytab: 'ambari.service.keytab',
+      owner: 'ambari',
+      group: 'root',
+      princhost: '_HOST',
+      perms: '0440',
+      spnego_keytab: 'spnego.service.keytab'
+     }
 }
 default[:bcpc][:hadoop][:kerberos][:keytab][:dir] = "/etc/security/keytabs"
 default[:bcpc][:hadoop][:kerberos][:keytab][:recreate] = false

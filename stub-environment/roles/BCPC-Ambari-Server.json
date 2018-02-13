@@ -1,0 +1,13 @@
+{
+  "name": "BCPC-Ambari-Server",
+  "json_class": "Chef::Role",
+  "run_list": [
+    "recipe[bach_ambari_wrapper::default]"
+  ],
+  "description": "A role to install and configure Ambari server and Ambari views",
+  "chef_type": "role",
+  "default_attributes": {
+  },
+  "override_attributes": {
+  }
+}
