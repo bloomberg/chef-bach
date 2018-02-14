@@ -45,8 +45,13 @@ include_recipe 'chef-client::config'
 knife_rb = "/home/#{user}/chef-bcpc/.chef/knife.rb"
 
 if node[:fqdn] == get_bootstrap
-  # Clone client.rb that is managed by the chef-client cookbook so that knife.rb
-  # can be managed by chef-client::config as well
+  # Manage knife.rb through chef-client::config (except the log location) as
+  # well.  Allows the following:
+  #   * Remove the need for running `sudo knife ...` in the bootstrap.
+  #   * Upload failures in `knife cookbook upload ...` will be in STDOUT instead
+  #     of being written in /var/log/chef/client.log.
+  #   * Prevent a pet configuration of knife.rb in our physical cluster's
+  #     bootstrap machines.
   client_rb = resources("template[#{node['chef_client']['conf_dir']}/client.rb]")
   knife_config = client_rb.variables
   knife_config[:chef_config] = knife_config[:chef_config].to_hash
