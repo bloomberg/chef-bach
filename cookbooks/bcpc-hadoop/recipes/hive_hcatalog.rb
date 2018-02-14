@@ -18,7 +18,22 @@ package 'mysql-connector-java' do
   action :upgrade
 end
   
-(["hive-webhcat", "hive-metastore", "hive-server2"]).each do |pkg|
+# from hadooplzo
+symlinks = %w(hadoop-client spark2-client spark-client zookeeper-client
+zookeeper-server)
+# from hadooplzo-native
+symlinks += %w(hadoop-client spark2-client spark-client zookeeper-client
+zookeeper-server)
+# from hive-hcatalog
+symlinks += %w(hadoop-client hadoop-hdfs-client hadoop-hdfs-datanode
+hadoop-hdfs-journalnode hadoop-hdfs-namenode hadoop-hdfs-nfs3
+hadoop-hdfs-portmap hadoop-hdfs-secondarynamenode hadoop-mapreduce-client
+hadoop-mapreduce-historyserver hadoop-yarn-client hadoop-yarn-nodemanager
+hadoop-yarn-resourcemanager hadoop-yarn-timelineserver hive-client
+hive-metastore hive-server2 hive-webhcat spark2-client spark-client tez-client
+zookeeper-client zookeeper-server)
+
+symlinks.each do |pkg|
   hdp_select(pkg, node[:bcpc][:hadoop][:distribution][:active_release])
 end
 

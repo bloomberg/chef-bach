@@ -45,15 +45,40 @@ end
 
 # list hdp packages to install
 yarn_packages = %w{hadoop-yarn-resourcemanager hadoop-client hadoop-mapreduce-historyserver}
+
+# from hadoop-yarn-resourcemanager
+symlinks = %w(hadoop-client hadoop-yarn-client hadoop-yarn-nodemanager
+hadoop-yarn-resourcemanager hadoop-yarn-timelineserver spark2-client
+spark-client zookeeper-client zookeeper-server)
+# from hadoop-client
+symlinks += %w(hadoop-client hadoop-hdfs-client hadoop-hdfs-datanode
+hadoop-hdfs-journalnode hadoop-hdfs-namenode hadoop-hdfs-nfs3
+hadoop-hdfs-portmap hadoop-hdfs-secondarynamenode hadoop-mapreduce-client
+hadoop-mapreduce-historyserver hadoop-yarn-client hadoop-yarn-nodemanager
+hadoop-yarn-resourcemanager hadoop-yarn-timelineserver spark2-client
+spark-client zookeeper-client zookeeper-server)
+# from hadoop-mapreduce-historyserver
+symlinks += %w(hadoop-client hadoop-hdfs-client hadoop-hdfs-datanode
+hadoop-hdfs-journalnode hadoop-hdfs-namenode hadoop-hdfs-nfs3
+hadoop-hdfs-portmap hadoop-hdfs-secondarynamenode hadoop-mapreduce-client
+hadoop-mapreduce-historyserver hadoop-yarn-client hadoop-yarn-nodemanager
+hadoop-yarn-resourcemanager hadoop-yarn-timelineserver spark2-client
+spark-client zookeeper-client zookeeper-server)
+
 if node.roles.include?("BCPC-Hadoop-Head-YarnTimeLineServer")
   yarn_packages.push("hadoop-yarn-timelineserver")
+  symlinks += %w(hadoop-client hadoop-yarn-client hadoop-yarn-nodemanager
+hadoop-yarn-resourcemanager hadoop-yarn-timelineserver spark2-client
+spark-client zookeeper-client zookeeper-server)
 end
 
 yarn_packages.each do |pkg|
   package hwx_pkg_str(pkg, node[:bcpc][:hadoop][:distribution][:release]) do
     action :install
   end
-  hdp_select(pkg, node[:bcpc][:hadoop][:distribution][:active_release])
+end
+symlinks.uniq.each do |symlink|
+  hdp_select(symlink, node[:bcpc][:hadoop][:distribution][:active_release])
 end
 
 package hwx_pkg_str("tez", node[:bcpc][:hadoop][:distribution][:release]) do
