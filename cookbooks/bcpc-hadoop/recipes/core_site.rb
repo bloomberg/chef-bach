@@ -27,7 +27,8 @@ if node[:bcpc][:hadoop][:kerberos][:enable]
      'hadoop.security.authentication' => 'kerberos',
      'hadoop.security.authorization' => true,
      'hadoop.security.auth_to_local' =>
-       node[:bcpc][:hadoop][:kerberos][:data].map { |ke,va|
+       node[:bcpc][:hadoop][:kerberos][:data].reject { |ke, va|
+         va['principal'] == 'HTTP' }.map { |ke,va|
        'RULE:[2:$1@$0](' +
          va['principal'] + '@.*' + node[:bcpc][:hadoop][:kerberos][:realm] +
          ')s/.*/' + va['owner'] + '/'

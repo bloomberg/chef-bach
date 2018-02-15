@@ -3,7 +3,9 @@
   "json_class": "Chef::Role",
   "run_list": [
     "role[Basic]",
+    "recipe[bcpc-hadoop::phoenixqs_hbase_site]",
     "recipe[bcpc-hadoop::hbase_master]",
+    "recipe[bcpc-hadoop::phoenix_query_server]",
     "recipe[bcpc-hadoop::hbase_repl]",
     "recipe[bcpc::diamond]"
   ],
