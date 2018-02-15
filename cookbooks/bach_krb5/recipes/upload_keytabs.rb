@@ -2,7 +2,7 @@ require 'base64'
 # Upload keytabs to chef-server
 
 viphost = node[:bcpc][:management][:viphost]
-host_list = get_cluster_nodes() + [viphost]
+host_list = cluster_nodes() + [viphost]
 
 host_list.each do |h|
   node[:bcpc][:hadoop][:kerberos][:data].each do |srvc, srvdat|

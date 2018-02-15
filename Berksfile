@@ -18,6 +18,7 @@ cookbook 'bach_hannibal', path: './cookbooks/bach_hannibal'
 cookbook 'hdfsdu', path: './cookbooks/hdfsdu'
 cookbook 'bcpc_kafka', path: './cookbooks/bcpc_kafka'
 cookbook 'smoke-tests', path: './cookbooks/smoke-tests'
+cookbook 'bach_opentsdb', path: './cookbooks/bach_opentsdb'
 
 #
 # Top-level requirements and transitive dependencies outside the

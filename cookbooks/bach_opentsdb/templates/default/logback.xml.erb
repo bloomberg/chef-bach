@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+###############################################
+##   WARNING - THIS FILE IS MANAGED BY CHEF  ##
+## DO NOT MODIFY BY HAND, OR YOU'LL BE SORRY ##
+###############################################
+-->
+<configuration>
+  <!--<jmxConfigurator/>-->
+  <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+    <encoder>
+      <pattern>
+        %d{ISO8601} %-5level [%thread] %logger{0}: %msg%n
+      </pattern>
+    </encoder>
+  </appender>
+  
+  <!-- This appender is responsible for the /logs endpoint. It maintains MaxSize 
+       lines of the log file in memory. If you don't need the endpoint, disable
+       this appender (by removing the line "<appender-ref ref="CYCLIC"/>" in
+       the "root" section below) to save some cycles and memory. -->
+  <appender name="CYCLIC" class="ch.qos.logback.core.read.CyclicBufferAppender">
+    <MaxSize>1024</MaxSize>
+  </appender>
+  
+  <!-- Appender to write OpenTSDB data to a set of rotating log files -->
+  <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <file><%= @logdir %>/opentsdb.log</file>
+    <append>true</append>
+    
+    <rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
+      <fileNamePattern><%= @logdir %>/opentsdb.log.%i</fileNamePattern>
+      <minIndex>1</minIndex>
+      <maxIndex>3</maxIndex>
+    </rollingPolicy>
+
+    <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+      <maxFileSize>128MB</maxFileSize>
+    </triggeringPolicy>
+
+    <encoder>
+      <pattern>%d{HH:mm:ss.SSS} %-5level [%logger{0}.%M] - %msg%n</pattern>
+    </encoder>
+  </appender>
+  
+  <!-- Appender for writing full and completed queries to a log file. To use it, make
+       sure to set the "level" to "INFO" in QueryLog below. -->
+  <appender name="QUERY_LOG" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <file><%= @logdir %>/queries.log</file>
+    <append>true</append>
+
+    <rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
+        <fileNamePattern><%= @logdir %>/queries.log.%i</fileNamePattern>
+        <minIndex>1</minIndex>
+        <maxIndex>4</maxIndex>
+    </rollingPolicy>
+
+    <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+        <maxFileSize>128MB</maxFileSize>
+    </triggeringPolicy>
+    <encoder>
+        <pattern>%date{ISO8601} [%logger.%M] %msg%n</pattern>
+    </encoder>
+  </appender>
+
+  <!-- Per class logger levels -->
+<% if node['bach_opentsdb']['query_log_enable'] -%>
+  <logger name="QueryLog" level="INFO" additivity="false">
+<% else -%>
+  <logger name="QueryLog" level="OFF" additivity="false">
+<% end -%>
+    <appender-ref ref="QUERY_LOG"/>
+  </logger>
+  <logger name="org.apache.zookeeper" level="INFO"/>
+  <logger name="org.hbase.async" level="INFO"/>
+  <logger name="com.stumbleupon.async" level="INFO"/>
+  
+  <!-- Fallthrough root logger and router -->
+  <root level="INFO">
+    <!-- <appender-ref ref="STDOUT"/> -->
+    <appender-ref ref="CYCLIC"/>
+    <appender-ref ref="FILE"/>
+  </root>
+</configuration>

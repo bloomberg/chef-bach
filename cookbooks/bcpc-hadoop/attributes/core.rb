@@ -15,8 +15,6 @@ default[:bcpc][:hadoop][:core][:site_xml].tap do |site_xml|
   site_xml['hadoop.proxyuser.hive.groups'] = '*'
   site_xml['hadoop.proxyuser.httpfs.hosts'] = '*'
   site_xml['hadoop.proxyuser.httpfs.groups'] = '*'
-  site_xml['hadoop.proxyuser.hue.hosts'] = '*'
-  site_xml['hadoop.proxyuser.hue.groups'] = '*'
   site_xml['hadoop.proxyuser.oozie.hosts'] = '*'
   site_xml['hadoop.proxyuser.oozie.groups'] = '*'
   

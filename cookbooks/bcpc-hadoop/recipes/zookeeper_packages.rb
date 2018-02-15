@@ -27,9 +27,12 @@
 include_recipe 'bcpc-hadoop::hdp_repo'
 
 package hwx_pkg_str('zookeeper-server',
-                    node[:bcpc][:hadoop][:distribution][:release]) do
+                    node['bcpc']['hadoop']['distribution']['release']) do
   action :upgrade
 end
 
 hdp_select('zookeeper-server',
-           node[:bcpc][:hadoop][:distribution][:active_release])
+           node['bcpc']['hadoop']['distribution']['active_release'])
+
+hdp_select('zookeeper-client',
+           node['bcpc']['hadoop']['distribution']['active_release'])

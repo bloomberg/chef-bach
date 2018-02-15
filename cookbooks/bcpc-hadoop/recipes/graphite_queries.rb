@@ -70,7 +70,7 @@ triggers = {
 def monitor_disk(triggers_host, host, disk, size, triggers_sensitivity)
   if triggers_host["#{host}.diskspace.#{disk}.byte_avail"].nil?
     triggers_host["#{host}.diskspace.#{disk}.byte_avail"] = {
-      'query' => 'servers.*.diskspace.*.byte_avail',
+      'query' => "servers.#{node.chef_environment.gsub(/[\-_]/, '')}.*.diskspace.*.byte_avail",
       'trigger_val' => "max(#{triggers_sensitivity})",
       'trigger_cond' => '=0',
       'trigger_name' => "#{host}_#{disk}_Availability",
@@ -84,7 +84,7 @@ def monitor_disk(triggers_host, host, disk, size, triggers_sensitivity)
 
   if triggers_host["#{host}.diskspace.#{disk}.byte_used"].nil?
     triggers_host["#{host}.diskspace.#{disk}.byte_used"] = {
-      'query' => 'servers.*.diskspace.*.byte_used',
+      'query' => "servers.#{node.chef_environment.gsub(/[\-_]/, '')}.*.diskspace.*.byte_used",
       'trigger_val' => "max(#{triggers_sensitivity})",
       'trigger_cond' => ">#{(size * 0.90).ceil}G",
       'trigger_name' => "#{host}_#{disk}_SpaceUsed",
@@ -121,7 +121,7 @@ cluster_nodes_objs.each do |node_obj|
   # Selectively add defaults
   if triggers[host]["memory_active_#{host}"].nil?
     triggers[host]["#{host}.memory.Active"] = {
-      'query' => 'servers.*.memory.Active',
+      'query' => "servers.#{node.chef_environment.gsub(/[\-_]/, '')}.*.memory.Active",
       'trigger_val' => "max(#{triggers_sensitivity})",
       'trigger_cond' => '=0',
       'trigger_name' => "#{host}_NodeAvailability",

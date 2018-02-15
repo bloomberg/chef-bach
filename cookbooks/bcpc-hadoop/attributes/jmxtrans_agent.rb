@@ -1,7 +1,20 @@
 default['bcpc']['hadoop']['jmxtrans_agent']['collect_interval_in_seconds'] = 15
-default['bcpc']['hadoop']['jmxtrans_agent']['output_writer']['class'] = 'org.jmxtrans.agent.GraphitePlainTextTcpOutputWriter'
-default['bcpc']['hadoop']['jmxtrans_agent']['output_writer']['host'] = node['bcpc']['management']['vip']
-default['bcpc']['hadoop']['jmxtrans_agent']['output_writer']['port'] = node['bcpc']['graphite']['relay_port']
+
+ default['bcpc']['hadoop']['jmxtrans_agent']['output_writers'] = %w(graphite)
+
+default['bcpc']['hadoop']['jmxtrans_agent']['graphite'].tap do |graphite|
+  graphite['class'] = 'org.jmxtrans.agent.GraphitePlainTextTcpOutputWriter'
+  graphite['host'] = node['bcpc']['management']['vip']
+  graphite['port'] = node['bcpc']['graphite']['relay_port']
+end
+
+default['bcpc']['hadoop']['jmxtrans_agent']['statsd'].tap do |statsd|
+  statsd['class'] = 'org.jmxtrans.agent.StatsDOutputWriter'
+  statsd['host'] = node['bcpc']['management']['vip']
+  statsd['port'] = 8125
+end
+
+# TODO OpenTSDB when it becomes available
 
 jvm_metrics = 'GcCount,' \
   'GcTimeMillis,' \

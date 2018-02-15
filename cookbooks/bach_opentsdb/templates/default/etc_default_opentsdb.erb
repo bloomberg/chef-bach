@@ -1,0 +1,18 @@
+###############################################
+##   WARNING - THIS FILE IS MANAGED BY CHEF  ##
+## DO NOT MODIFY BY HAND, OR YOU'LL BE SORRY ##
+###############################################
+
+<% if node['bach_opentsdb']['tsd_user'] -%>
+TSD_USER=<%= node['bach_opentsdb']['tsd_user'] %>
+<% end -%>
+<% if node['bach_opentsdb']['tsd_group'] -%>
+TSD_GROUP=<%= node['bach_opentsdb']['tsd_group'] %>
+<% end -%>
+<% if node['bach_opentsdb']['daemon_opts'] -%>
+DAEMON_OPTS="<%= node['bach_opentsdb']['daemon_opts'] %>"
+<% end -%>
+<% if node['bach_opentsdb']['max_open_files'] -%>
+MAX_OPEN_FILES=<%= node['bach_opentsdb']['max_open_files'] %>
+<% end -%>
+JAVA_HOME=<%= node['bach_opentsdb']['java_home'] %>

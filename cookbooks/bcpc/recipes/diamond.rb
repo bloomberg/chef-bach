@@ -19,7 +19,7 @@
 
 include_recipe 'bcpc::default'
 
-%w(python-support python-configobj python-pip python-httplib2).each do |pkg|
+%w(python-support python-configobj python-pip python-httplib2 python-statsd).each do |pkg|
   package pkg do
     action :upgrade
   end
@@ -53,8 +53,6 @@ bash 'diamond-set-user' do
   notifies :restart, 'service[diamond]', :delayed
 end
 
-has_mysql = get_nodes_for('mysql', 'bcpc').include?(node)
-
 package 'smartmontools' do
   action :upgrade
 end if node['virtualization']['role'] != 'guest'
@@ -64,7 +62,11 @@ template '/etc/diamond/diamond.conf' do
   owner 'diamond'
   group 'root'
   mode 00600
-  variables(:servers => get_head_node_names, :has_mysql => has_mysql)
+  settings =  node['bcpc']['diamond'].dup
+  settings['servers'] = get_head_node_names
+  # FIXME Will not be needed if upstream Diamond is fixed
+  settings['cluster'] = node.chef_environment.gsub(/[\-_]/, '')
+  variables settings
   notifies :restart, 'service[diamond]', :delayed
 end
 

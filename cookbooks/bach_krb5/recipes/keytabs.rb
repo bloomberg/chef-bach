@@ -2,7 +2,7 @@ keytab_dir = node[:bcpc][:hadoop][:kerberos][:keytab][:dir]
 realm = node[:bcpc][:hadoop][:kerberos][:realm]
 viphost = node[:bcpc][:management][:viphost]
 
-host_list = get_cluster_nodes() + [viphost]
+host_list = cluster_nodes() + [viphost]
 host_list.each do |h|
   include_recipe 'bach_krb5::keytab_directory'
 
