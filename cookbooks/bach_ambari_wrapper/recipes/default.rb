@@ -4,9 +4,8 @@
 #
 # Copyright:: 2018, The Authors, All Rights Reserved.
 
-user "#{node['bach_ambari']['proxyuser']}" do
-  comment 'ambari user is created to download ambari keytab'
-end
+mysql_hosts = node['bcpc']['hadoop']['mysql_hosts'].map { |m| m[:hostname] }
+node.default['bach_ambari']['databasehost'] = mysql_hosts
 
 configure_kerberos 'ambari_kerb' do
   service_name 'ambari'

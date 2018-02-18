@@ -21,7 +21,20 @@ node.default['bach_ambari']['webhdfs.url'] = "webhdfs://#{node.chef_environment}
 node.default['bach_ambari']['proxyuser'] = 'ambari'
 
 if node[:bcpc][:hadoop][:kerberos][:enable]
-   node.default['bach_ambari']['webhdfs.auth'] = "auth=KERBEROS;proxyuser=#{node['bach_ambari']['proxyuser']}"
+   node.default['bach_ambari']['webhdfs.auth'] = "auth=KERBEROS;proxyuser=ambari"
    node.default['bach_ambari']['kerberos']['enabled'] = true
-   node.default['bach_ambari']['kerberos']['principal'] = "#{node['bach_ambari']['proxyuser']}/#{float_host(node[:fqdn])}@#{node[:bcpc][:hadoop][:kerberos][:realm]}"
+   node.default['bach_ambari']['kerberos']['principal'] = "ambari/#{float_host(node[:fqdn])}@#{node[:bcpc][:hadoop][:kerberos][:realm]}"
 end
+
+
+# Ambari external database attributes
+# Ambari External Database attributes
+node.default['bach_ambari']['db_type'] = 'mysql'
+
+mysql_port = node['bcpc']['hadoop']['mysql_port'] || 3306
+
+node.default['bach_ambari']['databaseport'] = "#{mysql_port}"
+# node.default['bach_ambari']['databasehost'] = mysql_hosts
+node.default['bach_ambari']['databasename'] = 'ambari'
+node.default['bach_ambari']['databaseusername'] = 'ambari'
+node.default['bach_ambari']['databasepassword'] = 'ambari'

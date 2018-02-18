@@ -32,8 +32,21 @@ node.default['bach_ambari']['admin']['user'] = 'admin'
 node.default['bach_ambari']['admin']['password'] = 'admin'
 
 node.default['bach_ambari']['kerberos']['enabled'] = false
-node.default['bach_ambari']['kerberos']['principal'] = 'ABC@EXAMPLE.COM'
+node.default['bach_ambari']['kerberos']['principal'] = 'ambari@EXAMPLE.COM'
 node.default['bach_ambari']['kerberos']['keytab']['location'] = '/etc/security/keytabs/ambari.service.keytab'
+
+
+# Ambari External Database attributes
+node.default['bach_ambari']['embeddeddbhost'] = 'localhost'
+node.default['bach_ambari']['db_type'] = 'embedded'
+node.default['bach_ambari']['databaseport'] = '3306'
+node.default['bach_ambari']['databasehost'] = ['localhost']
+# node.default['bach_ambari']['databasehost'] = '10.0.100.11'
+node.default['bach_ambari']['databasename'] = 'ambari'
+node.default['bach_ambari']['databaseusername'] = 'ambari'
+node.default['bach_ambari']['databasepassword'] = 'bigdata'
+
+
 
 # FILES view attributes
 node.default['bach_ambari']['webhdfs.client.failover.proxy.provider'] = 'org.apache.hadoop.hdfs.server.namenode.ha.ConfiguredFailoverProxyProvider'

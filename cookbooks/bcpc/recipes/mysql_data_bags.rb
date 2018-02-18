@@ -31,7 +31,8 @@ vault_admins =
   graphite: 'graphite',
   oozie: 'oozie',
   root: 'root',
-  zabbix: 'zabbix'
+  zabbix: 'zabbix',
+  ambari: 'ambari'
 }.each do |category, username|
   unless get_config("mysql-#{category}-user")
     make_config("mysql-#{category}-user", username)
@@ -55,7 +56,7 @@ vault_admins =
   if get_config!("mysql-#{category}-user").nil?
     raise "mysql-#{category}-user should not be nil!"
   end
-  
+
   if get_config!('password', "mysql-#{category}", 'os').nil?
     raise "get_config(password, mysql-#{category}, os) should not be nil!"
   end
