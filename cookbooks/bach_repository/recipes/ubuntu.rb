@@ -9,6 +9,6 @@ remote_file "#{bins_dir}/ubuntu-14.04-hwe44-mini.iso" do
   source 'http://archive.ubuntu.com/ubuntu/dists/trusty-updates/main/' +
          'installer-amd64/current/images/xenial-netboot/mini.iso'
   mode 0444
-  checksum 'db7a4116570ab4b9697ad5912aa5762e0d2b313ca712fabcd4dbfc6eaf300650'
+  checksum '28b11928cd8bd63ee522f2e9b0a2f3bfd0dd1d826471e8f7726d65d583b32154'
 end
 
