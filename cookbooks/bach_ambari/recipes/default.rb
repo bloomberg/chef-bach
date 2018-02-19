@@ -7,7 +7,7 @@
 include_recipe 'bach_ambari::setattr'
 
 # dependencies
-%w(openssh-client wget curl unzip tar python2.7 openssl libpq5 postgresql postgresql-client-common postgresql-common ssl-cert).each do |pkg|
+%w(openssh-client wget curl unzip tar python2.7 openssl libpq5 postgresql postgresql-client-common postgresql-common ssl-cert mysql-client).each do |pkg|
   package pkg do
   end
 end

@@ -33,8 +33,9 @@ node.default['bach_ambari']['db_type'] = 'mysql'
 
 mysql_port = node['bcpc']['hadoop']['mysql_port'] || 3306
 
+node.default['bach_ambari']['mysql_root_password'] = get_config('mysql-root-password') || get_config('password', 'mysql-root', 'os')
 node.default['bach_ambari']['databaseport'] = "#{mysql_port}"
 # node.default['bach_ambari']['databasehost'] = mysql_hosts
 node.default['bach_ambari']['databasename'] = 'ambari'
 node.default['bach_ambari']['databaseusername'] = 'ambari'
-node.default['bach_ambari']['databasepassword'] = 'ambari'
+node.default['bach_ambari']['databasepassword'] = get_config('mysql-ambari-password') || get_config('password', 'mysql-ambari', 'os')

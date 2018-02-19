@@ -37,6 +37,7 @@ node.default['bach_ambari']['kerberos']['keytab']['location'] = '/etc/security/k
 
 
 # Ambari External Database attributes
+node.default['bach_ambari']['mysql_root_password'] = ''
 node.default['bach_ambari']['embeddeddbhost'] = 'localhost'
 node.default['bach_ambari']['db_type'] = 'embedded'
 node.default['bach_ambari']['databaseport'] = '3306'
@@ -45,7 +46,7 @@ node.default['bach_ambari']['databasehost'] = ['localhost']
 node.default['bach_ambari']['databasename'] = 'ambari'
 node.default['bach_ambari']['databaseusername'] = 'ambari'
 node.default['bach_ambari']['databasepassword'] = 'bigdata'
-
+node.default['bach_ambari']['mysql_schema_path'] = '/var/lib/ambari-server/resources/Ambari-DDL-MySQL-CREATE.sql'
 
 
 # FILES view attributes

@@ -11,4 +11,6 @@ version '0.3.0'
 # depends "java"
 #depends "apt", '~> 6.1.4'
 depends 'java_properties', '~> 0.1.3'
+# depends 'database'
+# depends 'mysql2_chef_gem', '~> 2.0.1'
 # depends "mysql_connector"

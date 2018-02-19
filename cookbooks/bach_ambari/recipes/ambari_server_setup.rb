@@ -27,7 +27,64 @@ end
 set_hosts
 
 
+String dbhostname = node['bach_ambari']['databasehost'].map { |m| m.to_s }.first
 
+if node['bach_ambari']['db_type'] == 'mysql'
+  execute 'execute create ambari database' do
+    command "mysql -u root -p#{node['bach_ambari']['mysql_root_password']} -h #{dbhostname} -e 'CREATE DATABASE IF NOT EXISTS #{node['bach_ambari']['databasename']}'"
+  end
+
+  # execute 'execute create ambari user' do
+  #   command "mysql -u root -p#{node['bach_ambari']['mysql_root_password']} -h #{dbhostname} -e 'CREATE USER \"#{node['bach_ambari']['databaseusername']}\"@ IDENTIFIED BY \"#{node['bach_ambari']['databasepassword']}\" '"
+  # end
+
+  execute 'execute grant all PRIVILEGES' do
+    command "mysql -u root -p#{node['bach_ambari']['mysql_root_password']} -h #{dbhostname} -e 'GRANT ALL ON #{node['bach_ambari']['databasename']}.* TO \"#{node['bach_ambari']['databaseusername']}\"@ IDENTIFIED BY \"#{node['bach_ambari']['databasepassword']}\"'"
+  end
+  execute 'execute FLUSH PRIVILEGES' do
+    command "mysql -u root -p#{node['bach_ambari']['mysql_root_password']} -h #{dbhostname} -e 'FLUSH PRIVILEGES'"
+  end
+
+  # mysql2_chef_gem 'default' do
+  #   action :install
+  # end
+
+  # mysql_connection_info = {
+  #   :host => "#{dbhostname}",
+  #   :username => 'root',
+  #   :password => node['bach_ambari']['mysql_root_password']
+  # }
+  #
+  # mysql_database "#{node['bach_ambari']['databasename']}" do
+  #   connection   mysql_connection_info
+  #   action   :create
+  # end
+  #
+  # mysql_database_user "#{node['bach_ambari']['databaseusername']}" do
+  #   connection   mysql_connection_info
+  #   password   node['bach_ambari']['databasepassword']
+  #   action   :create
+  # end
+  #
+  # mysql_database_user "#{node['bach_ambari']['databaseusername']}" do
+  #   connection   mysql_connection_info
+  #   database_name   "#{node['bach_ambari']['databasename']}"
+  #   host   '%'
+  #   privileges   ['ALL PRIVILEGES']
+  #   action   :grant
+  # end
+
+end
+
+if node['bach_ambari']['db_type'] == 'mysql'
+  execute 'execute mysql schema script' do
+    command "mysql -u #{node['bach_ambari']['databaseusername']} -p#{node['bach_ambari']['databasepassword']} #{node['bach_ambari']['databasename']} -h #{dbhostname} <#{node['bach_ambari']['mysql_schema_path']}"
+    not_if { c = Mixlib::ShellOut.new("mysql -u #{node['bach_ambari']['databaseusername']} -p#{node['bach_ambari']['databasepassword']} #{node['bach_ambari']['databasename']} -h #{dbhostname} --skip-column-names -e 'SELECT count(*) FROM clusters'")
+        c.run_command
+        c.status.success?
+    }
+  end
+end
 
 db_opts = ''
 mysql_jdbc_url = "jdbc:mysql://"
