@@ -226,14 +226,25 @@ ruby_block 'update sharelib checksum' do
   end
   action :nothing
 
-  notifies :run, 'ruby_block[oozie sharelib sqoop-action '\
-                 'workaround for 2.6.1]', :immediately
+  notifies :run, 'ruby_block[notify sharelib update]', :immediately
 end
 
-ruby_block 'oozie sharelib sqoop-action workaround for 2.6.1' do
+ruby_block 'notify sharelib update' do
+  block do
+    node['bcpc']['hadoop']['oozie_hosts'].each do |oozie_host|
+      update_oozie_sharelib(float_host(oozie_host['hostname']))
+    end
+  end
+  action :nothing
+  # Run so that we update the sharelib for this version
+  notifies :run, 'ruby_block[oozie sharelib sqoop-action '\
+                 'workaround for 2.6.3]', :immediately
+end
+
+ruby_block 'oozie sharelib sqoop-action workaround for 2.6.3' do
   block do
     active_release = node['bcpc']['hadoop']['distribution']['active_release']
-    if active_release == '2.6.1.17-1'
+    if active_release == '2.6.3.0-235'
       node['bcpc']['hadoop']['oozie_hosts'].each do |oozie_host|
         next unless oozie_running?(float_host(oozie_host['hostname']))
         instrumentation = shell_out! "#{OOZIE_CLIENT_PATH}/bin/oozie admin "\
@@ -243,18 +254,9 @@ ruby_block 'oozie sharelib sqoop-action workaround for 2.6.1' do
         shell_out! "hdfs dfs -cp -p #{libpath}/hive #{libpath}/sqoop-hive",
                    user: 'hdfs'
         shell_out! "hdfs dfs -rm #{libpath}/sqoop-hive/"\
-                   'hive-cli-1.2.1000.2.6.1.17-1.jar', user: 'hdfs'
+                   'hive-cli-1.2.1000.2.6.3.0-235.jar', user: 'hdfs'
+        update_oozie_sharelib(float_host(oozie_host['hostname']))
       end
-    end
-  end
-  action :nothing
-  notifies :run, 'ruby_block[notify sharelib update]', :immediately
-end
-
-ruby_block 'notify sharelib update' do
-  block do
-    node['bcpc']['hadoop']['oozie_hosts'].each do |oozie_host|
-      update_oozie_sharelib(float_host(oozie_host['hostname']))
     end
   end
   action :nothing
