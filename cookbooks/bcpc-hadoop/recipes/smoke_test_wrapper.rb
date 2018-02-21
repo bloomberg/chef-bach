@@ -55,11 +55,10 @@ hbase_namespace hbase_ns do
 end
 
 # Permissions test user to access HBase and get DTs
-bash "HBASE permission for #{test_user}" do
-  code <<-EOH
-  echo "grant '#{test_user}', 'RWCAX', @#{hbase_ns}" | hbase shell
-  EOH
-  user 'hbase'
+hbase_user test_user do
+  permissions 'RWCAX'
+  scope "@#{hbase_ns}"
+  action :grant
 end
 
 # init test_user credentials 
