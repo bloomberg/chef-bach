@@ -238,25 +238,24 @@ ruby_block 'notify sharelib update' do
   action :nothing
   # Run so that we update the sharelib for this version
   notifies :run, 'ruby_block[oozie sharelib sqoop-action '\
-                 'workaround for 2.6.3]', :immediately
+                 'workaround for 2.6]', :immediately
 end
 
-ruby_block 'oozie sharelib sqoop-action workaround for 2.6.3' do
+# FIXME please remove this someday
+ruby_block 'oozie sharelib sqoop-action workaround for 2.6' do
   block do
     active_release = node['bcpc']['hadoop']['distribution']['active_release']
-    if active_release == '2.6.3.0-235'
-      node['bcpc']['hadoop']['oozie_hosts'].each do |oozie_host|
-        next unless oozie_running?(float_host(oozie_host['hostname']))
-        instrumentation = shell_out! "#{OOZIE_CLIENT_PATH}/bin/oozie admin "\
-          "-oozie http://#{float_host(oozie_host['hostname'])}:11000/oozie "\
-          '-instrumentation | grep libs.sharelib.system.libpath', user: 'oozie'
-        libpath = instrumentation.stdout.match(%r{hdfs:\/\/.*$})
-        shell_out! "hdfs dfs -cp -p #{libpath}/hive #{libpath}/sqoop-hive",
-                   user: 'hdfs'
-        shell_out! "hdfs dfs -rm #{libpath}/sqoop-hive/"\
-                   'hive-cli-1.2.1000.2.6.3.0-235.jar', user: 'hdfs'
-        update_oozie_sharelib(float_host(oozie_host['hostname']))
-      end
+    node['bcpc']['hadoop']['oozie_hosts'].each do |oozie_host|
+      next unless oozie_running?(float_host(oozie_host['hostname']))
+      instrumentation = shell_out! "#{OOZIE_CLIENT_PATH}/bin/oozie admin "\
+        "-oozie http://#{float_host(oozie_host['hostname'])}:11000/oozie "\
+        '-instrumentation | grep libs.sharelib.system.libpath', user: 'oozie'
+      libpath = instrumentation.stdout.match(%r{hdfs:\/\/.*$})
+      shell_out! "hdfs dfs -cp -p #{libpath}/hive #{libpath}/sqoop-hive",
+                 user: 'hdfs'
+      shell_out! "hdfs dfs -rm #{libpath}/sqoop-hive/"\
+                 "hive-cli-1.2.1000.#{active_release}.jar", user: 'hdfs'
+      update_oozie_sharelib(float_host(oozie_host['hostname']))
     end
   end
   action :nothing
