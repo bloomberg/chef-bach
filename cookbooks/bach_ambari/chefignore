@@ -55,7 +55,6 @@ examples/*
 Guardfile
 Procfile
 .kitchen*
-.kitchen/logs
 .rubocop.yml
 spec/*
 Rakefile
@@ -82,6 +81,11 @@ Berksfile
 Berksfile.lock
 cookbooks/*
 tmp
+
+# Policyfile #
+##############
+Policyfile.rb
+Policyfile.lock.json
 
 # Cookbooks #
 #############

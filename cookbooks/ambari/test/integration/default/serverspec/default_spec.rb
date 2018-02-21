@@ -2,7 +2,7 @@ require 'spec_helper'
 
 set :os , :family => 'ubuntu' , :release => 14.04
 
-describe 'bach_ambari::default' do
+describe 'ambari::default' do
  it 'ambari-server is installed' do
    expect(package 'ambari-server').to be_installed
  end

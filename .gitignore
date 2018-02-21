@@ -24,8 +24,8 @@ cookbooks/*/
 !cookbooks/bach_krb5
 !cookbooks/bach_opentsdb
 !cookbooks/smoke-tests
+!cookbooks/ambari
 !cookbooks/bach_ambari
-!cookbooks/bach_ambari_wrapper
 cookbooks/*/coverage
 cookbooks/*/vendor
 cookbooks/bcpc/attributes/repos.rb

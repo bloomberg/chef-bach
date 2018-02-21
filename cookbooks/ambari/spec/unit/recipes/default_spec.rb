@@ -1,12 +1,12 @@
 #
-# Cookbook:: bach_ambari_wrapper
+# Cookbook Name:: ambari-views-chef
 # Spec:: default
 #
-# Copyright:: 2018, The Authors, All Rights Reserved.
+# Copyright (c) 2016 The Authors, All Rights Reserved.
 
 require 'spec_helper'
 
-describe 'bach_ambari_wrapper::default' do
+describe 'ambari-views-chef::default' do
   context 'When all attributes are default, on an unspecified platform' do
     let(:chef_run) do
       runner = ChefSpec::ServerRunner.new

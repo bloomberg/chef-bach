@@ -1,16 +1,21 @@
 name 'bach_ambari'
-maintainer 'Artem Ervits'
-maintainer_email 'generic13 at gmail dot com'
-license 'Apache'
-description 'Installs/Configures ambari-views-chef'
-long_description 'Installs/Configures ambari-views-chef'
-version '0.3.0'
-# source_url 'https://github.com/dbist/ambari-views-chef' if respond_to?(:source_url)
-# issues_url 'https://github.com/dbist/ambari-views-chef' if respond_to?(:issues_url)
+maintainer 'The Authors'
+maintainer_email 'rali43@bloomberg.com'
+license 'all_rights'
+description 'Installs/Configures bach_ambari'
+long_description 'Installs/Configures bach_ambari'
+version '0.1.0'
 
-# depends "java"
-#depends "apt", '~> 6.1.4'
-depends 'java_properties', '~> 0.1.3'
-# depends 'database'
-# depends 'mysql2_chef_gem', '~> 2.0.1'
-# depends "mysql_connector"
+# The `issues_url` points to the location where issues for this cookbook are
+# tracked.  A `View Issues` link will be displayed on this cookbook's page when
+# uploaded to a Supermarket.
+#
+# issues_url 'https://github.com/<insert_org_here>/bach_ambari/issues' if respond_to?(:issues_url)
+
+# The `source_url` points to the development reposiory for this cookbook.  A
+# `View Source` link will be displayed on this cookbook's page when uploaded to
+# a Supermarket.
+#
+# source_url 'https://github.com/<insert_org_here>/bach_ambari' if respond_to?(:source_url)
+depends 'ambari'
+depends 'bcpc-hadoop'
