@@ -1,0 +1,215 @@
+DEPENDENCIES
+  apt
+  bach_common
+    path: cookbooks/bach_common
+  bach_krb5
+    path: cookbooks/bach_krb5
+  bach_opentsdb
+    path: cookbooks/bach_opentsdb
+  bach_repository
+    path: cookbooks/bach_repository
+  bach_spark
+    path: cookbooks/bach_spark
+  bach_wrapper
+    path: .
+    metadata: true
+  bcpc
+    path: cookbooks/bcpc
+  bcpc-hadoop
+    path: cookbooks/bcpc-hadoop
+  bcpc_jmxtrans
+    path: cookbooks/bcpc_jmxtrans
+  bcpc_kafka
+    path: cookbooks/bcpc_kafka
+  bfd
+    git: https://github.com/bloomberg/openbfdd-cookbook
+    revision: 0b951af724b0ff6c111ad81671e711327a796dd7
+  chef-client
+  chef-sugar
+  cobblerd
+    git: https://github.com/cbaenziger/cobbler-cookbook
+    revision: 18df40f0d9e827514141712e6d0581fca793acc7
+    branch: source_build
+  database
+  hannibal
+    path: cookbooks/hannibal
+  hdfsdu
+    path: cookbooks/hdfsdu
+  java
+  jmxtrans
+    git: https://github.com/jmxtrans/jmxtrans-cookbook
+    revision: 8ab006bb985c8f94e85af9ed783d8e19b64d0dda
+    branch: ver-2.0
+  kafka
+    git: https://github.com/mthssdrbrg/kafka-cookbook.git
+    revision: 11420f008815b9f125bfa28f99220863b26ae357
+    tag: v2.2.2
+  locking_resource
+    git: https://github.com/bloomberg/locking_resource-cookbook
+    revision: a9d3ba0df92cfdfd88da07c756fd6dd15d934ce1
+  maven
+  ntp
+  openssl
+  pam
+  pdns
+    git: https://github.com/http-418/pdns
+    revision: b1ace26b32334c35332eb6613d27122393486adc
+  postgresql
+  resolvconf
+  smoke-tests
+    path: cookbooks/smoke-tests
+  ubuntu
+
+GRAPH
+  apt (6.1.4)
+  ark (3.1.0)
+    build-essential (>= 0.0.0)
+    seven_zip (>= 0.0.0)
+    windows (>= 0.0.0)
+  bach_common (3.3.0)
+  bach_krb5 (3.3.0)
+    bcpc (= 3.3.0)
+    bcpc-hadoop (= 3.3.0)
+    krb5 (>= 0.0.0)
+  bach_opentsdb (3.3.0)
+  bach_repository (3.3.0)
+    ark (>= 0.0.0)
+    bcpc (>= 0.0.0)
+    build-essential (>= 0.0.0)
+    cobblerd (>= 0.0.0)
+    java (>= 0.0.0)
+  bach_spark (3.3.0)
+    bcpc (= 3.3.0)
+    bcpc-hadoop (= 3.3.0)
+  bach_wrapper (3.3.0)
+    bach_common (= 3.3.0)
+    bach_krb5 (= 3.3.0)
+    bach_repository (= 3.3.0)
+    bach_spark (= 3.3.0)
+    bcpc (= 3.3.0)
+    bcpc-hadoop (= 3.3.0)
+    bcpc_jmxtrans (= 3.3.0)
+    bcpc_kafka (= 3.3.0)
+    hannibal (= 3.3.0)
+    smoke-tests (= 3.3.0)
+  bcpc (3.3.0)
+    apt (>= 0.0.0)
+    bach_repository (>= 0.0.0)
+    bfd (>= 0.0.0)
+    build-essential (>= 0.0.0)
+    chef-client (>= 0.0.0)
+    chef-vault (~> 2.0)
+    cobblerd (>= 0.0.0)
+    cron (>= 0.0.0)
+    database (>= 0.0.0)
+    graphite_handler (>= 0.0.0)
+    line (>= 0.0.0)
+    maven (~> 5.0.1)
+    nscd (>= 0.0.0)
+    ntp (>= 0.0.0)
+    pdns (>= 0.0.0)
+    python (>= 0.0.0)
+    sudo (>= 0.0.0)
+    ubuntu (>= 0.0.0)
+  bcpc-hadoop (3.3.0)
+    bach_krb5 (= 3.3.0)
+    bach_opentsdb (= 3.3.0)
+    bcpc (= 3.3.0)
+    database (>= 0.0.0)
+    java (>= 0.0.0)
+    locking_resource (>= 0.0.0)
+    pam (>= 0.0.0)
+    poise (>= 0.0.0)
+    smoke-tests (= 3.3.0)
+    sysctl (>= 0.0.0)
+    ulimit (>= 0.0.0)
+  bcpc_jmxtrans (3.3.0)
+    bcpc-hadoop (>= 0.0.0)
+    jmxtrans (>= 0.0.0)
+  bcpc_kafka (3.3.0)
+    bcpc (>= 0.0.0)
+    bcpc-hadoop (>= 0.0.0)
+    bcpc_jmxtrans (>= 0.0.0)
+    kafka (>= 2.2.2)
+    pam (>= 0.0.0)
+    sysctl (>= 0.0.0)
+    ulimit (>= 0.0.0)
+  bfd (0.2.0)
+    apt (>= 0.0.0)
+    poise (>= 0.0.0)
+  build-essential (8.0.4)
+    mingw (>= 1.1)
+    seven_zip (>= 0.0.0)
+  chef-client (10.0.0)
+    cron (>= 4.2.0)
+    logrotate (>= 1.9.0)
+    windows (>= 2.0.0)
+  chef-sugar (4.0.0)
+  chef-vault (2.1.1)
+  chef_handler (3.0.2)
+  cobblerd (0.4.0)
+    apt (>= 0.0.0)
+    poise (>= 0.0.0)
+    yum-epel (>= 0.0.0)
+  compat_resource (12.19.1)
+  cron (5.0.1)
+  database (6.1.1)
+    postgresql (>= 1.0.0)
+  graphite_handler (0.0.12)
+    chef_handler (>= 0.0.0)
+  hannibal (3.3.0)
+    ark (>= 0.0.0)
+  hdfsdu (3.3.0)
+    ark (>= 0.0.0)
+    maven (>= 0.0.0)
+  homebrew (4.3.0)
+  java (1.50.0)
+    apt (>= 0.0.0)
+    homebrew (>= 0.0.0)
+    windows (>= 0.0.0)
+  jmxtrans (2.0.0)
+    ark (>= 0.0.0)
+  kafka (2.2.2)
+  krb5 (2.2.1)
+    build-essential (>= 0.0.0)
+    ntp (>= 0.0.0)
+  line (1.0.5)
+  locking_resource (0.1.0)
+    poise (>= 0.0.0)
+  logrotate (2.2.0)
+  maven (5.0.3)
+    ark (>= 1.0)
+    java (>= 1.38)
+  mingw (2.0.2)
+    seven_zip (>= 0.0.0)
+  nscd (5.0.1)
+  ntp (3.5.6)
+  ohai (5.2.2)
+  openssl (8.1.2)
+  pam (1.0.3)
+  pdns (1.0.5)
+    apt (>= 0.0.0)
+    build-essential (>= 0.0.0)
+    database (>= 0.0.0)
+    resolvconf (>= 0.0.0)
+  poise (2.8.1)
+  postgresql (6.1.1)
+    build-essential (>= 2.0.0)
+    compat_resource (>= 12.16.3)
+    openssl (>= 4.0)
+  python (1.4.6)
+    build-essential (>= 0.0.0)
+    yum-epel (>= 0.0.0)
+  resolvconf (1.0.0)
+  seven_zip (2.0.2)
+    windows (>= 1.2.2)
+  smoke-tests (3.3.0)
+  sudo (4.0.1)
+  sysctl (1.0.1)
+    ohai (>= 5.0)
+  ubuntu (2.0.1)
+    apt (>= 0.0.0)
+  ulimit (1.0.0)
+  windows (3.4.4)
+    ohai (>= 4.0.0)
+  yum-epel (3.0.0)
