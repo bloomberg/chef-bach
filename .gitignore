@@ -13,6 +13,7 @@ vbox/**
 bins/
 cookbooks/*/
 !cookbooks/bach_common
+!cookbooks/bach_oozie
 !cookbooks/bach_repository
 !cookbooks/bach_spark
 !cookbooks/bcpc
