@@ -21,12 +21,9 @@ module Oozie
   class ClientV1
     attr_accessor :host, :port, :user
 
-    def initialize(host='localhost', port=11000, user='oozie')
-      @host = host
-      @port = port
+    def initialize(oozie_url='http://localhost:11000/oozie', user='oozie')
+      @oozie = oozie_url 
       @user = user
-
-      @oozie = "http://#{host}:#{port}/oozie"
     end
 
     def jobs(filter={}, jobtype='workflow', len=10)
@@ -81,9 +78,9 @@ module Oozie
 
     def execute(subcommand, user=@user, options={})
       require 'mixlib/shellout'
-      command = "sudo -u #{user} oozie #{subcommand} #{options_string(options)}"
+      command = "oozie #{subcommand} #{options_string(options)}"
       # puts command ## print debug command
-      return Mixlib::ShellOut.new(command, timeout: 90).run_command
+      return Mixlib::ShellOut.new(command, user: user, timeout: 90).run_command
     end
 
     def options_string(options)
