@@ -19,13 +19,14 @@
 
 module Oozie
   class ClientV1
-    attr_accessor :host, :port, :user
+    attr_accessor :oozie_url, :user
 
     def initialize(oozie_url='http://localhost:11000/oozie', user='oozie')
       @oozie = oozie_url 
       @user = user
     end
 
+    # list the oozie jobs on the server.
     def jobs(filter={}, jobtype='workflow', len=10)
       execute('jobs', user, {
         oozie: @oozie,
@@ -35,6 +36,7 @@ module Oozie
       })
     end
 
+    # kill the oozie jobs the match the filter.
     def kill_jobs(filter={}, jobtype='workflow', len=1000)
       execute('jobs', user, {
         oozie: @oozie,
@@ -45,6 +47,7 @@ module Oozie
       })
     end
 
+    # run an oozie job.
     def run(config, user=@user)
       execute('job', user, {
         oozie: @oozie,
@@ -53,6 +56,7 @@ module Oozie
       })
     end
 
+    # rerun an oozie action.
     def rerun(action_id, config, user=@user)
       execute('job', user, {
         oozie: @oozie,
@@ -61,6 +65,7 @@ module Oozie
       })
     end
 
+    # kill an oozie job with the given id.
     def kill(job_id, user=@user)
       execute('job', user, {
         oozie: @oozie,
@@ -68,6 +73,7 @@ module Oozie
       })
     end
 
+    # get the id of an oozie job with the given name (if it exists).
     def get_id(job_name, jobtype='workflow', status='RUNNING')
       jobs_cmd = jobs({ name: job_name, status: status }, 'coordinator', 1)
       match = jobs_cmd.stdout.match(/(\S+)\s+#{job_name}/)
