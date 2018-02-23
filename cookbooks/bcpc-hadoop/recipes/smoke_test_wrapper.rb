@@ -50,21 +50,15 @@ node.default['hadoop_smoke_tests']['wf']['hbase_region_princ'] = "hbase/_HOST@#{
 node.default['hadoop_smoke_tests']['wf']['hive_hmeta_princ'] = "hive/_HOST@#{krb_realm}"
 node.default['hadoop_smoke_tests']['wf']['hive_hserver_princ'] = "hive/_HOST@#{krb_realm}"
 
-# create hbase namespace for tester
-bash "HBASE namespace for smoke tests #{hbase_ns}" do
-  code <<-EOH
-  echo "create_namespace '#{hbase_ns}'" | hbase shell
-  EOH
-  user 'hbase'
-  not_if "hbase shell <<< 'list_namespace' | grep '#{hbase_ns}'", user: 'hbase'
+hbase_namespace hbase_ns do
+  action :create
 end
 
 # Permissions test user to access HBase and get DTs
-bash "HBASE permission for #{test_user}" do
-  code <<-EOH
-  echo "grant '#{test_user}', 'RWCAX', @#{hbase_ns}" | hbase shell
-  EOH
-  user 'hbase'
+hbase_user test_user do
+  permissions 'RWCAX'
+  scope "@#{hbase_ns}"
+  action :grant
 end
 
 # init test_user credentials 
