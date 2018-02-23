@@ -94,4 +94,6 @@ default[:bcpc][:hadoop][:hbase][:site_xml].tap do |site_xml|
   site_xml['hbase.master.balancer.stochastic.localityCost']=1000
   site_xml['hbase.region.replica.replication.enabled'] = false
   site_xml['hbase.coprocessor.region.whitelist.paths'] = ''
+  site_xml['phoenix.schema.isNamespaceMappingEnabled'] = true
+  site_xml['phoenix.schema.mapSystemTablesToNamespace'] = true
 end
