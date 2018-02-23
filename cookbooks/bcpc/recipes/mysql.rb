@@ -195,12 +195,19 @@ end
 mysql_nodes = get_nodes_for('mysql', 'bcpc')
 all_nodes = get_all_nodes
 pool_size = node['bcpc']['mysql']['innodb_buffer_pool_size']
+current_ip=node['fqdn']
+if current_ip.include?"vm1"
+        cluster_ip = current_ip.gsub("vm1", "vm2")
+elsif current_ip.include?"vm2"
+        cluster_ip = current_ip.gsub("vm2", "vm1")
+end
 
 template '/etc/mysql/conf.d/wsrep.cnf' do
   source 'mysql/wsrep.cnf.erb'
   mode 00644
   variables(max_connections: node['bcpc']['mysql']['max_connections'],
             innodb_buffer_pool_size: pool_size,
+            cluster_ip_address:cluster_ip,
             servers: mysql_nodes)
   sensitive true if respond_to?(:sensitive)
   notifies :stop, 'service[mysql]', :immediate
