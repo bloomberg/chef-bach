@@ -50,22 +50,13 @@ node.default['hadoop_smoke_tests']['wf']['hbase_region_princ'] = "hbase/_HOST@#{
 node.default['hadoop_smoke_tests']['wf']['hive_hmeta_princ'] = "hive/_HOST@#{krb_realm}"
 node.default['hadoop_smoke_tests']['wf']['hive_hserver_princ'] = "hive/_HOST@#{krb_realm}"
 
-# create hbase namespace for tester
-bash "HBASE namespace for smoke tests #{hbase_ns}" do
-  code <<-EOH
-  echo "create_namespace '#{hbase_ns}'" | hbase shell
-  EOH
-  user 'hbase'
-  not_if "hbase shell <<< 'list_namespace' | grep '#{hbase_ns}'", user: 'hbase'
+include_recipe 'bcpc-hadoop::cluster_policy_wrapper'
+
+node.default['bach_policies']['hbase']['properties'].tap do |hbase|
+  hbase['bach.policies.hbase.tenants'] = "#{hbase_ns}:#{test_user}"
 end
 
-# Permissions test user to access HBase and get DTs
-bash "HBASE permission for #{test_user}" do
-  code <<-EOH
-  echo "grant '#{test_user}', 'RWCAX', @#{hbase_ns}" | hbase shell
-  EOH
-  user 'hbase'
-end
+include_recipe 'bach_cluster_policy::hbase'
 
 # init test_user credentials 
 file "#{node[:bcpc][:hadoop][:kerberos][:keytab][:dir]}/smoke_test.keytab" do
