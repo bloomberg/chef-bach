@@ -1,32 +1,25 @@
-# system attributes
-
 
 # APT repository attributes
 default['apt']['compile_time_update'] = 'true'
 
-node.default['ambari']['ambari_server_version'] = '2.6.1'
+node.default['ambari']['ambari_server_version'] = '2.6.1.0'
+node.default['ambari']['os']['ubuntu_version'] = 14
 
-case node.default['ambari']['ambari_server_version']
-when '2.6.1'
-  node.default['ambari']['ambari_repo_ubuntu_14'] = 'http://public-repo-1.hortonworks.com/ambari/ubuntu14/2.x/updates/2.6.1.0'
-  node.default['ambari']['ambari_repo_ubuntu_16'] = 'http://public-repo-1.hortonworks.com/ambari/ubuntu16/2.x/updates/2.6.1.0'
-else
-  raise "Ambari Server #{node['ambari']['ambari_server_version']} is not supported"
-end
+node.default['ambari']['ambari_ubuntu_repo_url'] = "http://public-repo-1.hortonworks.com/ambari/ubuntu#{node['ambari']['os']['ubuntu_version']}/2.x/updates/#{node['ambari']['ambari_server_version']}"
+
 # Ambari properties
 node.default['ambari']['ambari-server-startup-web-timeout'] = '150'
 node.default['ambari']['ambari_server_host'] = 'servername.ambari.apache.org'
 node.default['ambari']['ambari_server_conf_dir'] = '/etc/ambari-server/conf/'
-node.default['ambari']['ambari_agent_conf_dir'] = '/etc/ambari-agent/conf/'
-node.default['ambari']['ambari_database_password'] = 'bigdata'
+node.default['ambari']['ambari_agent_conf_dir'] = '/etc/ambari-ag/ent/conf/'
 
 
 # node.default['ambari']['java_home'] = "/usr/lib/jvm/java-#{node[:java][:jdk_version]}-#{node[:java][:install_flavor]}-amd64"
-node.default['ambari']['java_home'] = 'embedded'
+node.default['ambari']['java_home'] = "/usr/lib/jvm/java-8-oracle-amd64"
 
 node.default['ambari']['use_local_repo'] = 'false'
-
-node.default['ambari']['ambari_views_url'] = 'http://localhost:8080/api/v1/views'
+node.default['ambari']['ambari_server_base_url'] = 'http://localhost:8080'
+node.default['ambari']['ambari_views_url'] = "#{node['ambari']['ambari_server_base_url']}/api/v1/views"
 
 node.default['ambari']['admin']['user'] = 'admin'
 node.default['ambari']['admin']['password'] = 'admin'
@@ -35,18 +28,18 @@ node.default['ambari']['kerberos']['enabled'] = false
 node.default['ambari']['kerberos']['principal'] = 'ambari@EXAMPLE.COM'
 node.default['ambari']['kerberos']['keytab']['location'] = '/etc/security/keytabs/ambari.service.keytab'
 
+#Ambari internal postgres database attributes
+node.default['ambari']['pg_db_script_path'] = '/var/lib/ambari-server/resources/Ambari-DDL-Postgres-EMBEDDED-CREATE.sql'
+node.default['ambari']['pg_schema_path'] = '/var/lib/ambari-server/resources/Ambari-DDL-Postgres-CREATE.sql'
 
 # Ambari External Database attributes
-node.default['ambari']['mysql_root_password'] = ''
 node.default['ambari']['embeddeddbhost'] = 'localhost'
 node.default['ambari']['db_type'] = 'embedded'
 node.default['ambari']['databaseport'] = '3306'
 node.default['ambari']['databasehost'] = ['localhost']
-# node.default['ambari']['databasehost'] = '10.0.100.11'
 node.default['ambari']['databasename'] = 'ambari'
 node.default['ambari']['databaseusername'] = 'ambari'
 node.default['ambari']['databasepassword'] = 'bigdata'
-node.default['ambari']['mysql_schema_path'] = '/var/lib/ambari-server/resources/Ambari-DDL-MySQL-CREATE.sql'
 
 
 # FILES view attributes
@@ -63,6 +56,7 @@ node.default['ambari']['webhdfs.url'] = 'webhdfs://hacluster'
 node.default['ambari']['webhdfs.auth'] = 'auth=SIMPLE'
 
 
+# Ambari Views Attributes
 node.default['ambari']['hive.host'] =  'u1203.ambari.apache.org'
 node.default['ambari']['hive.http.path'] = 'cliservice'
 node.default['ambari']['hive.http.port'] = '10001'

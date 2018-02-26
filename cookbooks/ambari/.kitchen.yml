@@ -3,6 +3,7 @@ driver:
   name: vagrant
   customize:
     memory: 2500
+#    cableconnected1: 'on'
 
 provisioner:
   name: chef_zero
@@ -10,7 +11,12 @@ provisioner:
 platforms:
   - name: ubuntu-14.04
     run_list:
+       - 'recipe[apt::default]'
+       - 'recipe[java::default]'
        - 'recipe[ambari::default]'
+       - 'recipe[ambari::postgres_server_embedded_setup]'
+       - 'recipe[ambari::ambari_server_setup]'
+       - 'recipe[ambari::ambari_views_setup]'
     attributes: {
       java: {
         oracle: {
@@ -28,8 +34,8 @@ platforms:
     driver:
       box: bento/ubuntu-14.04
       network:
-      - [ "private_network" , { ip : "192.168.33.7" } ]
-#      - [ "forwarded_port" , { guest : 8080, host : 8080 } ]
+      - [ "private_network" , { ip : "10.0.100.31" } ]
+      - [ "forwarded_port" , { guest : 8080, host : 8080 } ]
 suites:
   - name: default
     attributes:

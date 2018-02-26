@@ -1,3 +1,6 @@
+node.force_default['ambari']['install_java'] = false
+node.force_default['ambari']['java_home'] = '/usr/lib/jvm/java-8-oracle-amd64/'
+
 
 # FILES
 namenodes = get_namenodes.select{ |nn| nn[:bcpc][:node_number] }.map{ |nn| "namenode#{nn[:bcpc][:node_number]}" }.join(',')
@@ -33,9 +36,10 @@ node.force_default['ambari']['db_type'] = 'mysql'
 
 mysql_port = node['bcpc']['hadoop']['mysql_port'] || 3306
 
-node.force_default['ambari']['mysql_root_password'] = get_config('mysql-root-password') || get_config('password', 'mysql-root', 'os')
+
 node.force_default['ambari']['databaseport'] = "#{mysql_port}"
 # node.force_default['ambari']['databasehost'] = mysql_hosts
 node.force_default['ambari']['databasename'] = 'ambari'
 node.force_default['ambari']['databaseusername'] = 'ambari'
 node.force_default['ambari']['databasepassword'] = get_config('mysql-ambari-password') || get_config('password', 'mysql-ambari', 'os')
+node.default['ambari']['mysql_schema_path'] = '/var/lib/ambari-server/resources/Ambari-DDL-MySQL-CREATE.sql'
