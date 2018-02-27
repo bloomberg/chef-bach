@@ -30,4 +30,3 @@ cookbooks/*/coverage
 cookbooks/*/vendor
 cookbooks/bcpc/attributes/repos.rb
 cluster.tgz
-Gemfile.lock

@@ -31,8 +31,6 @@ cookbook 'openssl'
 cookbook 'postgresql'
 cookbook 'resolvconf'
 cookbook 'database'
-# cookbook 'mysql'
-# cookbook 'mariadb'
 
 #
 # Transitive dependencies that have been forked for one reason or another.
