@@ -16,10 +16,6 @@ default['bcpc']['bootstrap']['admin']['user'] =
 
 user = node.run_state[:bcpc_admin_user]
 
-default['bcpc']['country'] = 'US'
-default['bcpc']['state'] = 'NY'
-default['bcpc']['location'] = 'New York'
-default['bcpc']['organization'] = 'Bloomberg'
 
 # Region name for this cluster
 default['bcpc']['region_name'] = node.chef_environment

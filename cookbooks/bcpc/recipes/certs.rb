@@ -17,18 +17,15 @@
 # limitations under the License.
 #
 
+# Generates ssh and ssl key-pairs
+# Both key-pairs will be stored in chef vault. e.g. ('ssh-keypair', 'os')
+# Both public key (or certificate) will be stored in data bag as well. e.g. 'ssh-public-key'
+
 require 'openssl'
+require 'net/ssh'
 include_recipe 'bcpc::default'
 include_recipe 'bcpc::chef_vault_install'
 
-template "/tmp/openssl.cnf" do
-    source "openssl.cnf.erb"
-    owner "root"
-    group "root"
-    mode 00644
-end
-
-node.default[:temp][:value] = ""
 bootstrap = get_bootstrap
 key = OpenSSL::PKey::RSA.new 2048;
 
@@ -47,86 +44,126 @@ ruby_block "initialize-ssh-keys" do
     notifies :create, 'ruby_block[chef_vault_secret]', :immediately
 end
 
-ssh_private_key = get_config("ssh-private-key")
-if ssh_private_key.nil?
-  ssh_private_key = key.to_pem
-end
-
-chef_vault_secret 'ssh' do  
-  data_bag 'os'
-  raw_data({ "private-key" => key.to_pem })
-  admins "#{ nodes },#{ bootstrap }"
-  search '*:*'
-  action :create_if_missing
-end
-
-ruby_block "chef_vault_secret" do
+# ----------------------------- SSH ------------------------------
+ruby_block 'generate-ssh-keypair' do
   block do
-    if node[:temp][:value] != ""
-      ssl_certificate = %x[echo "#{node[:temp][:value]}" | openssl x509]
-      ssl_private_key = %x[echo "#{node[:temp][:value]}" | openssl rsa -passin pass:temp_passwd -out /dev/stdout]
-    else
-      ssl_certificate = get_config("ssl-certificate")
-      ssl_private_key = get_config("ssl-private-key")
-    end
-    vault_resource = resources("chef_vault_secret[ssl]")
-    vault_resource.raw_data({ 'private-key' => ssl_private_key, "certificate" => ssl_certificate })
+    Chef::Log.info('Start generate-ssh-keypair.')
+    sshkey = OpenSSL::PKey::RSA.new node['bcpc']['ssh']['key_size']
+
+    # get public key
+    ssh_public_key = "#{sshkey.ssh_type} #{[sshkey.to_blob].pack('m0')}"
+    # Chef::Log.info("ssh_public_key=#{ssh_public_key}")
+
+    # pass to chef-vault
+    node.run_state['new_ssh_public_key'] = ssh_public_key
+
+    # save to data bag for public access
+    make_config('ssh-public-key', ssh_public_key)
+
+    # get private key
+    ssh_private_key = sshkey.to_pem
+    # Chef::Log.info("ssh_private_key = #{node.run_state['new_ssh_private_key']}")
+
+    # pass to chef-vault
+    node.run_state['new_ssh_private_key'] = ssh_private_key
+    Chef::Log.info('Generate-ssh-keypair finished.')
   end
+  only_if { get_config('ssh-public-key').nil? || get_config('ssh-private-key', 'ssh-keypair', 'os').nil? }
+  notifies :create, 'chef_vault_secret[ssh-keypair]', :immediate
+  # regenerate if missing either public or pirvate key
+end
+
+chef_vault_secret 'ssh-keypair' do
+  data_bag 'os'
+  raw_data(lazy { { 'ssh-public-key' => node.run_state['new_ssh_public_key'], 'ssh-private-key' => node.run_state['new_ssh_private_key'] } })
+  admins "#{all_nodes},#{bootstrap}"
+  search '*:*'
   action :nothing
 end
 
-chef_vault_secret "ssl" do
-  if node[:temp][:value] != ""
-    ssl_certificate = %x[echo "#{node[:temp][:value]}" | openssl x509]
-    ssl_private_key = %x[echo "#{node[:temp][:value]}" | openssl rsa -passin pass:temp_passwd -out /dev/stdout]
-  else
-    ssl_certificate = get_config("ssl-certificate")
-    ssl_private_key = get_config("ssl-private-key")
+# ------------------------------- SSL ----------------------------
+
+# the DNS and IP lists includes
+# 1. the global virtual IP and cluster virtual hostname
+# 2. head nodes machine IP and hostnames
+ip_list = [node['bcpc']['management']['vip']]
+dns_list = [node['bcpc']['management']['viphost']]
+headnodes = get_head_nodes
+headnodes.each do |hh|
+  ip = hh['bcpc']['management']['ip']
+  ip_list.push(ip) unless ip.nil?
+  fqdn = hh['fqdn']
+  dns_list.push(fqdn) unless fqdn.nil?
+end
+
+ip_list.sort!
+Chef::Log.info("ssl-keypair: IP list=#{ip_list}")
+dns_list.sort!
+Chef::Log.info("ssl-keypair: DNS list=#{dns_list}")
+
+# construct the config file for generating the ssl keypair
+template node['bcpc']['ssl']['conf_file'] do
+  source 'bach_openssl.cnf.erb'
+  owner 'root'
+  group 'root'
+  mode 0o0644
+  variables(ip_list: ip_list, dns_list: dns_list)
+end
+
+# generate the ssl keypair
+ruby_block 'generate-ssl-keypair' do
+  block do
+    Chef::Log.info('Start generate-ssl-keypair.')
+    subj_str = "/C=#{node['bcpc']['country']}" \
+               "/ST=#{node['bcpc']['state']}" \
+               "/L=#{node['bcpc']['location']}" \
+               "/O=#{node['bcpc']['organization']}" \
+               "/OU=#{node['bcpc']['region_name']}" \
+               "/CN=#{node['bcpc']['domain_name']}" \
+               "/emailAddress=#{node['bcpc']['admin_email']}"
+    ssl_key_gen_cmd = Mixlib::ShellOut.new(
+      "openssl req -config #{node['bcpc']['ssl']['conf_file']} -extensions v3_req -new -x509 " \
+      "-passout pass:temp_passwd -newkey rsa:#{node['bcpc']['ssl']['key_size']} " \
+      "-out /dev/stdout -keyout /dev/stdout -days 1095 -subj \"#{subj_str}\""
+    )
+    ssl_key_gen_cmd.run_command
+    raise "Generate ssl-private-key failed, #{ssl_key_gen_cmd.error}" if ssl_key_gen_cmd.error!
+    # Chef::Log.info("ssl keypair generated. keypair = #{ssl_key_gen_cmd.stdout}")
+    ssl_keypair = ssl_key_gen_cmd.stdout
+
+    # Get the certificate (public key)
+    ssl_certificate_cmd = Mixlib::ShellOut.new("echo \"#{ssl_keypair}\" | openssl x509")
+    ssl_certificate_cmd.run_command
+    raise "Obtain ssl-certificate failed, #{ssl_certificate_cmd.error}" if ssl_certificate_cmd.error!
+    ssl_certificate = ssl_certificate_cmd.stdout
+    # Chef::Log.info("ssl certificate generated. certificate = #{ssl_certificate}")
+
+    # pass to chef-vault
+    node.run_state['new_ssl_certificate'] = ssl_certificate
+
+    # save certificate to data bag for public access
+    make_config('ssl-certificate', ssl_certificate)
+
+    # Get the private key
+    ssl_private_key_cmd = Mixlib::ShellOut.new("echo \"#{ssl_keypair}\" | openssl rsa -passin pass:temp_passwd -out /dev/stdout")
+    ssl_private_key_cmd.run_command
+    raise "Obtain ssl-private-key failed, #{ssl_private_key_cmd.error}" if ssl_private_key_cmd.error!
+    ssl_private_key = ssl_private_key_cmd.stdout
+    # Chef::Log.info("ssl private key generated. key = #{ssl_private_key}")
+
+    # pass to chef-vault
+    node.run_state['new_ssl_private_key'] = ssl_private_key
+
+    Chef::Log.info('Generate-ssh-keypair finished.')
   end
+  only_if { get_config('ssl-certificate').nil? || get_config('ssl-private-key', 'ssl-keypair', 'os').nil? }
+  notifies :create, 'chef_vault_secret[ssl-keypair]', :immediate
+end
+
+chef_vault_secret 'ssl-keypair' do
   data_bag 'os'
-  raw_data ({ 'private-key' => ssl_private_key, 'certificate' => ssl_certificate })
-  admins "#{ nodes },#{ bootstrap }"
+  raw_data(lazy { { 'ssl-certificate' => node.run_state['new_ssl_certificate'], 'ssl-private-key' => node.run_state['new_ssl_private_key'] } })
+  admins "#{all_nodes},#{bootstrap}"
   search '*:*'
-  action :create_if_missing
+  action :nothing
 end
-
-directory "/root/.ssh" do
-    owner "root"
-    group "root"
-    mode 00700
-end
-
-template "/root/.ssh/authorized_keys" do
-    source "authorized_keys.erb"
-    owner "root"
-    group "root"
-    mode 00644
-end
-
-template "/root/.ssh/id_rsa" do
-    source "id_rsa.erb"
-    owner "root"
-    group "root"
-    mode 00600
-end
-
-template "/etc/ssl/certs/ssl-bcpc.pem" do
-    source "ssl-bcpc.pem.erb"
-    owner "root"
-    group "root"
-    mode 00644
-end
-
-directory "/etc/ssl/private" do
-    owner "root"
-    group "root"
-    mode 00700
-end
-
-template "/etc/ssl/private/ssl-bcpc.key" do
-    source "ssl-bcpc.key.erb"
-    owner "root"
-    group "root"
-    mode 00600
-end
-
