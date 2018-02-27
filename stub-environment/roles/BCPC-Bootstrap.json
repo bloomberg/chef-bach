@@ -13,6 +13,7 @@
       "role[HDFSDU-Build]",
       "recipe[bcpc::cobbler]",
       "recipe[bach_krb5::krb5_server]",
+      "recipe[bcpc-hadoop::phoenixqs_kerberos]",
       "recipe[bach_krb5::keytabs]",
       "recipe[bcpc::rotate_chef_nginx_access_log]",
       "recipe[bcpc-hadoop::smoke_test_principal]",

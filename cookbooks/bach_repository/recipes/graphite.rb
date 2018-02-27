@@ -64,22 +64,28 @@ epoch = Time.now.strftime('%s')
     checksum: '8ba99b861270c56fa0e574ef1c9a1eb86b72464470617976fcd2669af0e6b23e'
   },
   {
+    name: 'cachetools',
+    version: '1.1.6',
+    url: 'https://github.com/tkem/cachetools/archive/v1.1.6.tar.gz',
+    checksum: 'bf9bab07c548e6e422be18b43d145a38ba744bc5c60ce38712e55e2e9da70283'
+  },
+  {
     name: 'carbon',
-    version: '1.0.2',
-    url: 'https://github.com/graphite-project/carbon/archive/1.0.2.zip',
-    checksum: 'c93b18051403c0fd19b805fc0a185ca82623187e9e1a6ca6c4e84c9c5239e404'
+    version: '1.1.1',
+    url: 'https://github.com/graphite-project/carbon/archive/1.1.1.tar.gz',
+    checksum: '913d0f1d1e8c69176c85c9b85b89c51333906da1280a1550efa013a55b5c2d72'
   },
   {
     name: 'whisper',
-    version: '1.0.2',
-    url: 'https://github.com/graphite-project/whisper/archive/1.0.2.zip',
-    checksum: 'e8d27c236a064d532d6fe921be89dd63e6166cdc8e31cc8ea85b692b750d20d4'
+    version: '1.1.1',
+    url: 'https://github.com/graphite-project/whisper/archive/1.1.1.tar.gz',
+    checksum: '729a38c7794e0b4a34b40b4afb61703364905befcd2bcb5f8f48a4b79ea32667'
   },
   {
     name: 'graphite-web',
-    version: '1.0.2',
-    url: 'https://github.com/graphite-project/graphite-web/archive/1.0.2.zip',
-    checksum: 'a72ade2cb0ee261ac8dbbdd5f432b835606c9ddd13948659f7977feb4b13b244'
+    version: '1.1.1',
+    url: 'https://github.com/graphite-project/graphite-web/archive/1.1.1.tar.gz',
+    checksum: '6dfae92e0d0ef94e22934d7a0ddecc38b118015cbb20041a72cbe4ed98908a2a'
   }
 ].each do |package|
 

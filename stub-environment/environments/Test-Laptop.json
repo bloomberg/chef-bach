@@ -55,6 +55,15 @@
         }
       },
       "hadoop" : {
+        "hbase": {
+          "superusers": ["hbase", "ubuntu"]
+        },
+        "core": {
+          "site_xml": {
+            "hadoop.proxyuser.HTTP.hosts": "*",
+            "hadoop.proxyuser.HTTP.users": "*"
+           }
+        },
         "yarn" : {
           "nodemanager": {
             "avail_memory": {

@@ -338,7 +338,7 @@ def process_restarted_after_failure?(restart_failure_time, process_identifier)
   require 'time'
   begin
     start_time = process_start_time(process_identifier)
-    if start_time.nil? && (Time.parse(restart_failure_time).to_i < Time.parse(start_time).to_i)
+    if not start_time.nil? && (Time.parse(restart_failure_time).to_i < Time.parse(start_time).to_i)
       Chef::Log.info("#{process_identifier} seem to be started at #{start_time} after last restart failure at #{restart_failure_time}")
       return true
     end

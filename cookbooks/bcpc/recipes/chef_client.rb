@@ -19,14 +19,9 @@
 user = ENV['SUDO_USER'] || ENV['USER'] || 'vagrant'
 
 if node[:fqdn] == get_bootstrap
-  # Symlink configuration for chef-client, chef-shell, and knife.
   link '/etc/chef/client.rb' do
-    to "/home/#{user}/chef-bcpc/.chef/knife.rb"
-  end
-
-  # Remove the existing client.d directory, if present.
-  execute 'rm -rf /etc/chef/client.d' do
-    only_if{ File.directory?('/etc/chef/client.d') }
+    action :delete
+    only_if { ::File.symlink?('/etc/chef/client.rb') }
   end
 
   directory "/home/#{user}/.chef/client.d" do
@@ -36,7 +31,8 @@ if node[:fqdn] == get_bootstrap
   end
 
   link '/etc/chef/client.d' do
-    to "/home/#{user}/.chef/client.d"
+    action :delete
+    only_if { ::File.symlink?('/etc/chef/client.d') }
   end
 
   link '/etc/chef/client.pem' do
@@ -45,6 +41,31 @@ if node[:fqdn] == get_bootstrap
 end
 
 include_recipe 'chef-client::config'
+
+knife_rb = "/home/#{user}/chef-bcpc/.chef/knife.rb"
+
+if node[:fqdn] == get_bootstrap
+  # Manage knife.rb through chef-client::config (except the log location) as
+  # well.  Allows the following:
+  #   * Remove the need for running `sudo knife ...` in the bootstrap.
+  #   * Upload failures in `knife cookbook upload ...` will be in STDOUT instead
+  #     of being written in /var/log/chef/client.log.
+  #   * Prevent a pet configuration of knife.rb in our physical cluster's
+  #     bootstrap machines.
+  client_rb = resources("template[#{node['chef_client']['conf_dir']}/client.rb]")
+  knife_config = client_rb.variables
+  knife_config[:chef_config] = knife_config[:chef_config].to_hash
+  knife_config[:chef_config].delete('log_location')
+  template knife_rb do
+    source client_rb.source
+    cookbook 'chef-client'
+    owner user
+    group client_rb.group
+    mode client_rb.mode
+    variables knife_config
+  end
+end
+
 
 if node[:bcpc][:bootstrap][:proxy]
   #
@@ -55,9 +76,13 @@ if node[:bcpc][:bootstrap][:proxy]
   # bcpc/templates/default/client.rb.erb will render the original
   # upstream template, then append proxy environment variables.
   #
-  edit_resource!(:template, "#{node['chef_client']['conf_dir']}/client.rb") do
-    source 'client.rb.erb'
-    cookbook 'bcpc'
+  chef_templates = ["#{node['chef_client']['conf_dir']}/client.rb"]
+  chef_templates << knife_rb if node['fqdn'] == get_bootstrap
+  chef_templates.each do |chef_template|
+    edit_resource!(:template, chef_template) do
+      source 'client.rb.erb'
+      cookbook 'bcpc'
+    end
   end
 end
 

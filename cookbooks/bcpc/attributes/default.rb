@@ -164,7 +164,7 @@ default['bcpc']['repos_for']['trusty'].tap do |trusty_repos|
     repo[:distribution] = 'HDP'
     repo[:key] = 'hortonworks.key'
     repo[:uri] =
-      'http://private-repo-1.hortonworks.com/HDP/ubuntu14/2.x/updates/2.6.1.17-1'
+      'http://private-repo-1.hortonworks.com/HDP/ubuntu14/2.x/updates/2.6.3.22-1'
   end
 
   trusty_repos['hdp-utils'].tap do |repo|
