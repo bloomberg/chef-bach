@@ -2,6 +2,7 @@ require 'base64'
 ::Chef::Recipe.send(:include, Bcpc_Hadoop::Helper)
 
 include_recipe 'bcpc-hadoop::default'
+include_recipe 'sysctl::default'
 
 # disable IPv6 (e.g. for HADOOP-8568)
 case node['platform_family']
