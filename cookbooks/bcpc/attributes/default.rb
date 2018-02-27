@@ -3,10 +3,18 @@
 #  General configuration for this cluster
 #
 ###########################################
-default['bcpc']['country'] = 'US'
-default['bcpc']['state'] = 'NY'
-default['bcpc']['location'] = 'New York'
-default['bcpc']['organization'] = 'Bloomberg'
+
+#
+# bach_repository and bcpc constitute a recursive dependency set, so
+# we have to set this value in both places so both load orders work.
+#
+node.run_state[:bcpc_admin_user] ||=
+  ENV['SUDO_USER'] || ENV['USER'] || 'vagrant'
+
+default['bcpc']['bootstrap']['admin']['user'] =
+  node.run_state[:bcpc_admin_user]
+
+user = node.run_state[:bcpc_admin_user]
 
 # Region name for this cluster
 default['bcpc']['region_name'] = node.chef_environment
