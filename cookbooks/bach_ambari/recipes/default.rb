@@ -14,7 +14,6 @@ user 'ambari' do
   comment 'ambari user'
 end
 
-
 configure_kerberos 'ambari_kerb' do
   service_name 'ambari'
 end
