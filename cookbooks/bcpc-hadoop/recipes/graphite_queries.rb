@@ -5,7 +5,7 @@ graphite_query_time = "#{node["bcpc"]["hadoop"]["zabbix"]["graphite_query_time"]
 triggers_sensitivity = "#{node["bcpc"]["hadoop"]["zabbix"]["triggers_sensitivity"]}m"
 
 head_nodes_objs = get_head_nodes
-bootstrap_hostname = node['bcpc']['bootstrap']['hostname']
+bootstrap_hostname = get_bootstrap
 
 # Graphite queries which specify property to query and alarming trigger,
 # severity(maps to zabbix's api -> trigger -> priority)and owner who the
