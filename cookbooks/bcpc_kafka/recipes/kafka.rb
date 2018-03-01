@@ -89,7 +89,7 @@ include_recipe 'kafka::default'
 
 user_ulimit 'kafka' do
   filehandle_limit node[:kafka][:ulimit_file]
-  notifies :restart, 'service[kafka-broker]', :immediately
+  notifies :restart, 'service[kafka]', :immediately
 end
 
 #
