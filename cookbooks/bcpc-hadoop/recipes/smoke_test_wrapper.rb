@@ -53,7 +53,7 @@ node.default['hadoop_smoke_tests']['wf']['hive_hserver_princ'] = "hive/_HOST@#{k
 include_recipe 'bcpc-hadoop::cluster_policy_wrapper'
 
 node.default['bach_policies']['hbase']['properties'].tap do |hbase|
-  hbase['bach.policies.hbase.tenants'] = "#{hbase_ns}:#{test_user}"
+  hbase['tenants'] = "#{hbase_ns}:#{test_user}"
 end
 
 include_recipe 'bach_cluster_policy::hbase'

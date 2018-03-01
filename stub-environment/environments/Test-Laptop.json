@@ -56,7 +56,7 @@
       },
       "hadoop" : {
         "hbase": {
-          "superusers": ["hbase", "ubuntu"]
+          "superusers": ["hbase", "ubuntu", "bach_policy"]
         },
         "core": {
           "site_xml": {

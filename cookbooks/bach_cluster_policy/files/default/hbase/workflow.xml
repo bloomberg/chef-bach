@@ -49,6 +49,7 @@
       <job-tracker>${jobTracker}</job-tracker>
       <name-node>${nameNode}</name-node>
       <exec>tenant_namespaces.sh</exec>
+      <argument>${tenants}</argument>
     </shell>
     <ok to="end"/>
     <error to="fail"/>
