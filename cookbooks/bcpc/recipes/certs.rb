@@ -18,8 +18,8 @@
 #
 
 # Generates ssh and ssl key-pairs
-# Both key-pairs will be stored in chef vault. e.g. ('ssh-keypair', 'os')
-# Both public key (or certificate) will be stored in data bag as well. e.g. 'ssh-public-key'
+# 1. key-pairs will be stored in chef vault. e.g. ('ssh-keypair', 'os')
+# 2. public key (or certificate) will be stored in data bag as well. e.g. 'ssh-public-key'
 
 require 'openssl'
 require 'net/ssh'
@@ -73,6 +73,7 @@ ruby_block 'generate-ssh-keypair' do
   # regenerate if missing either public or pirvate key
 end
 
+# save to chef-vault after new keypair is generated.
 chef_vault_secret 'ssh-keypair' do
   data_bag 'os'
   raw_data(lazy { { 'ssh-public-key' => node.run_state['new_ssh_public_key'], 'ssh-private-key' => node.run_state['new_ssh_private_key'] } })
@@ -160,6 +161,7 @@ ruby_block 'generate-ssl-keypair' do
   notifies :create, 'chef_vault_secret[ssl-keypair]', :immediate
 end
 
+# save to chef-vault after new keypair is generated.
 chef_vault_secret 'ssl-keypair' do
   data_bag 'os'
   raw_data(lazy { { 'ssl-certificate' => node.run_state['new_ssl_certificate'], 'ssl-private-key' => node.run_state['new_ssl_private_key'] } })
