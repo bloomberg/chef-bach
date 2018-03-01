@@ -20,28 +20,57 @@
 # Get ssh and ssl key pairs and deploy
 
 # ------------------------ SSH -----------------------
-#directory '/root/.ssh' do
-#  owner 'root'
-#  group 'root'
-#  mode 0o0700
-#end
-#
-## add the ssh public key to allow passwordless login
-#template '/root/.ssh/authorized_keys' do
-#  source 'authorized_keys.erb'
-#  owner 'root'
-#  group 'root'
-#  mode 0o0644
-#  variables('ssh-public-key' => get_config('ssh-public-key'))
-#end
-#
-## save the private key
-#template '/root/.ssh/id_rsa' do
-#  source 'id_rsa.erb'
-#  owner 'root'
-#  group 'root'
-#  mode 0o0600
-#  variables('ssh-private-key' => get_config('ssh-private-key', 'ssh', 'os'))
-#end
+#get_config('ssh-public-key')
+#get_config('ssh-private-key', 'ssh-keypair', 'os')
+
+# public key
+directory '/root/.ssh' do
+  owner 'root'
+  group 'root'
+  mode 0o0700
+end
+
+template '/root/.ssh/authorized_keys' do
+  source 'authorized_keys.erb'
+  owner 'root'
+  group 'root'
+  mode 0o0644
+  variables('ssh_public_key' => get_config('ssh-public-key'))
+end
+
+# private key
+template '/root/.ssh/id_rsa' do
+  source 'id_rsa.erb'
+  owner 'root'
+  group 'root'
+  mode 0o0600
+  variables('ssh_private_key' => get_config('ssh-private-key', 'ssh-keypair', 'os'))
+end
 
 # ------------------------ SSL -----------------------
+#get_config('ssl-certificate')
+#get_config('ssl-private-key', 'ssl-keypair', 'os')
+
+# certificate (public key)
+template "/etc/ssl/certs/ssl-bcpc.pem" do
+    source "ssl-bcpc.pem.erb"
+    owner "root"
+    group "root"
+    mode 00644
+  variables('ssl_certificate' => get_config('ssl-certificate'))
+end
+
+# private key
+directory "/etc/ssl/private" do
+    owner "root"
+    group "root"
+    mode 00700
+end
+
+template "/etc/ssl/private/ssl-bcpc.key" do
+    source "ssl-bcpc.key.erb"
+    owner "root"
+    group "root"
+    mode 00600
+  variables('ssl_private_key' => get_config('ssl-private-key', 'ssl-keypair', 'os'))
+end
