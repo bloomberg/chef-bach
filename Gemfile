@@ -45,7 +45,9 @@ source 'https://rubygems.org' do
 end
 
 # Pull in the other Gemfiles from our cookbooks
-Dir.glob(File.join(File.dirname(__FILE__), 'cookbooks',
-    '**', "Gemfile")) do |gemfile|
-  eval(IO.read(gemfile), binding)
+group :cookbooks do
+  Dir.glob(File.join(File.dirname(__FILE__), 'cookbooks',
+      '**', "Gemfile")) do |gemfile|
+    eval(IO.read(gemfile), binding)
+  end
 end
