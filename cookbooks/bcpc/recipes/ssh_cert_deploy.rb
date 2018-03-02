@@ -1,6 +1,6 @@
 #
 # Cookbook Name:: bcpc
-# Recipe:: certs_depoly
+# Recipe:: certs_deploy
 #
 # Copyright 2013, Bloomberg Finance L.P.
 #
@@ -20,9 +20,6 @@
 # Get ssh and ssl key pairs and deploy
 
 # ------------------------ SSH -----------------------
-#get_config('ssh-public-key')
-#get_config('ssh-private-key', 'ssh-keypair', 'os')
-
 # public key
 directory '/root/.ssh' do
   owner 'root'
@@ -44,33 +41,6 @@ template '/root/.ssh/id_rsa' do
   owner 'root'
   group 'root'
   mode 0o0600
-  variables('ssh_private_key' => get_config('ssh-private-key', 'ssh-keypair', 'os'))
+  variables('ssh_private_key' => get_config('private-key', 'ssh', 'os'))
 end
 
-# ------------------------ SSL -----------------------
-#get_config('ssl-certificate')
-#get_config('ssl-private-key', 'ssl-keypair', 'os')
-
-# certificate (public key)
-template "/etc/ssl/certs/ssl-bcpc.pem" do
-    source "ssl-bcpc.pem.erb"
-    owner "root"
-    group "root"
-    mode 00644
-  variables('ssl_certificate' => get_config('ssl-certificate'))
-end
-
-# private key
-directory "/etc/ssl/private" do
-    owner "root"
-    group "root"
-    mode 00700
-end
-
-template "/etc/ssl/private/ssl-bcpc.key" do
-    source "ssl-bcpc.key.erb"
-    owner "root"
-    group "root"
-    mode 00600
-  variables('ssl_private_key' => get_config('ssl-private-key', 'ssl-keypair', 'os'))
-end

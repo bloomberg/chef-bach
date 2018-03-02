@@ -18,8 +18,8 @@
 #
 
 # Generates ssh and ssl key-pairs
-# 1. key-pairs will be stored in chef vault. e.g. ('ssh-keypair', 'os')
-# 2. public key (or certificate) will be stored in data bag as well. e.g. 'ssh-public-key'
+# 1. public key (or certificate) will be stored in data bag. e.g. 'ssh-public-key'
+# 2. private key will be stored in chef vault. e.g. ('private-key', 'ssh', 'os')
 
 require 'openssl'
 require 'net/ssh'
@@ -39,9 +39,6 @@ ruby_block 'generate-ssh-keypair' do
     ssh_public_key = "#{sshkey.ssh_type} #{[sshkey.to_blob].pack('m0')}"
     # Chef::Log.info("ssh_public_key=#{ssh_public_key}")
 
-    # pass to chef-vault
-    node.run_state['new_ssh_public_key'] = ssh_public_key
-
     # save to data bag for public access
     make_config('ssh-public-key', ssh_public_key)
 
@@ -53,15 +50,15 @@ ruby_block 'generate-ssh-keypair' do
     node.run_state['new_ssh_private_key'] = ssh_private_key
     Chef::Log.info('Generate-ssh-keypair finished.')
   end
-  only_if { get_config('ssh-public-key').nil? || get_config('ssh-private-key', 'ssh-keypair', 'os').nil? }
-  notifies :create, 'chef_vault_secret[ssh-keypair]', :immediate
+  only_if { get_config('ssh-public-key').nil? || get_config('private-key', 'ssh', 'os').nil? }
+  notifies :create, 'chef_vault_secret[ssh]', :immediate
   # regenerate if missing either public or pirvate key
 end
 
 # save to chef-vault after new keypair is generated.
-chef_vault_secret 'ssh-keypair' do
+chef_vault_secret 'ssh' do
   data_bag 'os'
-  raw_data(lazy { { 'ssh-public-key' => node.run_state['new_ssh_public_key'], 'ssh-private-key' => node.run_state['new_ssh_private_key'] } })
+  raw_data(lazy { { 'private-key' => node.run_state['new_ssh_private_key'] } })
   admins "#{all_nodes},#{bootstrap}"
   search '*:*'
   action :nothing
@@ -124,9 +121,6 @@ ruby_block 'generate-ssl-keypair' do
     ssl_certificate = ssl_certificate_cmd.stdout
     # Chef::Log.info("ssl certificate generated. certificate = #{ssl_certificate}")
 
-    # pass to chef-vault
-    node.run_state['new_ssl_certificate'] = ssl_certificate
-
     # save certificate to data bag for public access
     make_config('ssl-certificate', ssl_certificate)
 
@@ -142,14 +136,14 @@ ruby_block 'generate-ssl-keypair' do
 
     Chef::Log.info('Generate-ssh-keypair finished.')
   end
-  only_if { get_config('ssl-certificate').nil? || get_config('ssl-private-key', 'ssl-keypair', 'os').nil? }
-  notifies :create, 'chef_vault_secret[ssl-keypair]', :immediate
+  only_if { get_config('ssl-certificate').nil? || get_config('private-key', 'ssl', 'os').nil? }
+  notifies :create, 'chef_vault_secret[ssl]', :immediate
 end
 
 # save to chef-vault after new keypair is generated.
-chef_vault_secret 'ssl-keypair' do
+chef_vault_secret 'ssl' do
   data_bag 'os'
-  raw_data(lazy { { 'ssl-certificate' => node.run_state['new_ssl_certificate'], 'ssl-private-key' => node.run_state['new_ssl_private_key'] } })
+  raw_data(lazy { { 'private-key' => node.run_state['new_ssl_private_key'] } })
   admins "#{all_nodes},#{bootstrap}"
   search '*:*'
   action :nothing
