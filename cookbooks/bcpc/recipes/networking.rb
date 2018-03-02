@@ -18,7 +18,6 @@
 #
 
 include_recipe 'bcpc::default'
-include_recipe 'bcpc::certs_deploy'
 include_recipe 'bcpc::ssh'
 
 template '/etc/hosts' do
