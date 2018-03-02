@@ -17,6 +17,7 @@
       "recipe[bach_krb5::keytabs]",
       "recipe[bcpc::rotate_chef_nginx_access_log]",
       "recipe[bcpc-hadoop::smoke_test_principal]",
+      "recipe[bcpc-hadoop::cluster_policy_principal]",
       "recipe[bcpc::diamond]"
     ],
     "description": "A bootstrap node in a BCPC cluster",

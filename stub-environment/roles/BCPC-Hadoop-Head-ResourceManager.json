@@ -4,7 +4,8 @@
   "run_list": [
     "role[Basic]",
     "recipe[bcpc-hadoop::resource_manager]",
-    "recipe[bcpc-hadoop::smoke_test_user]"
+    "recipe[bcpc-hadoop::smoke_test_user]",
+    "recipe[bcpc-hadoop::cluster_policy_user]"
   ],
   "description": "A highly-available head node in a BCPC Hadoop cluster",
   "chef_type": "role",
