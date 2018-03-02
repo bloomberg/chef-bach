@@ -15,8 +15,8 @@
     ServerAlias <%="#{node[:bcpc][:management][:ip]}"%>
 
     SSLEngine on
-    SSLCertificateFile /etc/ssl/certs/ssl-bcpc.pem
-    SSLCertificateKeyFile /etc/ssl/private/ssl-bcpc.key
+    SSLCertificateFile <%= "#{node[:bcpc][:ssl][:pem_file]}" %>
+    SSLCertificateKeyFile <%= "#{node[:bcpc][:ssl][:key_file]}" %>
 
     Include vhost-root.d/*.conf
     Include vhost-ssl-root.d/*.conf

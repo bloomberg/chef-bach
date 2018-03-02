@@ -170,15 +170,15 @@ auth_tls = "none"
 
 # Override the default server key file path
 #
-key_file = "/etc/ssl/private/ssl-bcpc.key"
+key_file = <%= "#{node[:bcpc][:ssl][:key_file]}" %>
 
 # Override the default server certificate file path
 #
-cert_file = "/etc/ssl/certs/ssl-bcpc.pem"
+cert_file = <%= "#{node[:bcpc][:ssl][:pem_file]}" %>
 
 # Override the default CA certificate path
 #
-ca_file = "/etc/ssl/certs/ssl-bcpc.pem"
+ca_file = <%= "#{node[:bcpc][:ssl][:pem_file]}" %>
 
 # Specify a certificate revocation list.
 #
