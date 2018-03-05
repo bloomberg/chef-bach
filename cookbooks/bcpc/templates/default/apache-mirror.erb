@@ -83,4 +83,13 @@
             allow from all
         </IfModule>
     </Directory>
+
+    Alias "/cluster-def/" "/home/<%= @user %>/cluster/cluster.txt"
+    <Directory "/home/<%= @user %>/cluster">
+       AllowOverride None
+       Require all granted
+       <Files "cluster.txt">
+       </Files>
+   </Directory>
+
 </VirtualHost>

@@ -4,7 +4,7 @@ cluster_nodes_objs = get_all_nodes.compact
 graphite_query_time = "#{node["bcpc"]["hadoop"]["zabbix"]["graphite_query_time"]}m"
 triggers_sensitivity = "#{node["bcpc"]["hadoop"]["zabbix"]["triggers_sensitivity"]}m"
 
-head_nodes_objs = get_head_nodes
+head_nodes_objs = get_head_nodes(true)
 bootstrap_hostname = get_bootstrap
 
 # Graphite queries which specify property to query and alarming trigger,
@@ -190,7 +190,7 @@ end # End of 'monitored_nodes_objs.each do |node_obj|'
 
 # monitor all disks on head nodes
 head_nodes_objs.each do |head_node_obj|
-  host = head_node_obj.hostname
+  host = head_node_obj[:hostname]
 
   disk_size_hash = head_node_obj.filesystem
                                 .map { |_fs, props| [props['mount'], props['kb_size']] }.compact.uniq

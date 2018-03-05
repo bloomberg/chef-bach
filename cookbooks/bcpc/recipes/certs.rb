@@ -32,8 +32,8 @@ node.default[:temp][:value] = ""
 bootstrap = get_bootstrap
 key = OpenSSL::PKey::RSA.new 2048;
 
-results = get_all_nodes.map!{ |x| x['fqdn'] }.join(",")
-nodes = results == "" ? node['fqdn'] : results
+results = get_all_nodes.map!{ |x| x[:fqdn] }.join(",")
+nodes = results == "" ? node[:fqdn] : results
 
 ruby_block "initialize-ssh-keys" do
     block do

@@ -14,6 +14,7 @@ elsif File.exist?('/opt/chefdk/Gemfile')
     instance_eval(opscode_gem_data, "/opt/chefdk/Gemfile")
 else
   source 'https://rubygems.org' do
+    gem 'faraday'
     gem 'parallel'
     gem 'chef-vault'
     gem 'ipaddress'
@@ -31,6 +32,7 @@ else
 end
 
 gem 'fpm'
+gem 'cluster_def', :path => 'lib/cluster-def-gem'
 
 source 'https://rubygems.org' do
   gem 'faker'
