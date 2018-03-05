@@ -1,0 +1,18 @@
+language: ruby
+sudo: false
+rvm:
+  - 2.0
+  - 2
+bundler_args: --without cookbooks
+cache: bundler
+gemfile: Gemfile
+before_install:
+  - chef --version &> /dev/null || curl -L https://www.getchef.com/chef/install.sh | sudo bash -s -- -P chefdk -v 1.2.22
+  - eval "$(/opt/chefdk/bin/chef shell-init bash)"
+  - bundle config --local PATH vendor/bundle
+  - bundle config --local DISABLE_SHARED_GEMS true
+before_script:
+  - chef --version
+  - cookstyle --version
+  - foodcritic --version
+script: rake style:diff
