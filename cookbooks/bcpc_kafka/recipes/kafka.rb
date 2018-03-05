@@ -19,6 +19,7 @@
 
 include_recipe 'bcpc_kafka::default'
 
+node.force_override[:bcpc][:jolokia][:enable] = true
 #
 # We need node search to set a reasonable value for num.partitions, so
 # the value from the attributes file must be overriden.
