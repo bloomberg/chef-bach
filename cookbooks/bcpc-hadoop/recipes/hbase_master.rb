@@ -86,26 +86,36 @@ directory '/var/log/hbase/gc' do
   group 'hbase'
   mode '0755'
   action :create
-  notifies :restart, "service[hbase-master]", :delayed
 end
 
-hbase_master_dep = ["template[/etc/hbase/conf/hadoop-metrics2-hbase.properties]",
-                    "template[/etc/hbase/conf/hbase-site.xml]",
-                    "template[/etc/hbase/conf/hbase-env.sh]",
-                    "template[/etc/hbase/conf/hbase-policy.xml]",
-                    "template[/etc/hadoop/conf/log4j.properties]",
-                    "file[/etc/hadoop/conf/ldap-conn-pass.txt]",
-                    "template[/etc/hadoop/conf/hdfs-site.xml]",
-                    "template[/etc/hadoop/conf/core-site.xml]",
-                    "bash[hdp-select hbase-regionserver]",
-                    "user_ulimit[hbase]",
-                    "log[jdk-version-changed]",
-                    "bash[hdp-select hbase-master]"]
-
-hadoop_service "hbase-master" do
-  dependencies hbase_master_dep
-  process_identifier "org.apache.hadoop.hbase.master.HMaster"
+service 'hbase-master' do
+  supports :status => true, :restart => true, :reload => false
+  action [:enable, :start]
 end
+
+locking_resource 'hbase-master' do
+  process_identifier = 'org.apache.hadoop.hbase.master.HMaster'
+  resource 'service[hbase-master]'
+  process_pattern {command_string process_identifier
+                   user 'hbase'
+                   full_cmd true}
+  perform :restart
+  action :serialize_process
+  subscribes :serialize, 'link[/etc/init.d/hbase-master]', :delayed
+  subscribes :serialize, 'template[/etc/hbase/conf/hadoop-metrics2-hbase.properties]', :delayed
+  subscribes :serialize, 'template[/etc/hbase/conf/hbase-site.xml]', :delayed
+  subscribes :serialize, 'template[/etc/hbase/conf/hbase-env.sh]', :delayed
+  subscribes :serialize, 'template[/etc/hbase/conf/hbase-policy.xml]', :delayed
+  subscribes :serialize, 'template[/etc/hadoop/conf/log4j.properties]', :delayed
+  subscribes :serialize, 'file[/etc/hadoop/conf/ldap-conn-pass.txt]', :delayed
+  subscribes :serialize, 'template[/etc/hadoop/conf/hdfs-site.xml]', :delayed
+  subscribes :serialize, 'template[/etc/hadoop/conf/core-site.xml]', :delayed
+  subscribes :serialize, 'directory[/var/log/hbase/gc]', :delayed
+  subscribes :serialize, 'user_ulimit[hbase]', :delayed
+  subscribes :serialize, 'log[jdk-version-changed]', :delayed
+  subscribes :serialize, 'bash[hdp-select hbase-master]', :delayed
+end
+
 
 if node["bcpc"]["hadoop"]["phoenix"]["tracing"]["enabled"]
 
