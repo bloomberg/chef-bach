@@ -25,6 +25,11 @@ link "/usr/bin/zookeeper-server-initialize" do
   to "/usr/hdp/current/zookeeper-client/bin/zookeeper-server-initialize"
 end
 
+#Install jolokia's jvm agent to node['bcpc']['jolokia']['path']
+if node[:bcpc][:jolokia][:enable] == true
+  include_recipe 'bcpc-hadoop::jolokia'
+end
+
 template "#{node[:bcpc][:hadoop][:zookeeper][:conf_dir]}/zookeeper-env.sh" do
   source "zk_zookeeper-env.sh.erb"
   mode 0644

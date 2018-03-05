@@ -71,10 +71,12 @@ node.default[:kafka][:broker][:log][:dirs] = data_volumes.map do |dd|
 end
 
 # Install jolokia's jvm agent to node['bcpc']['jolokia']['path']
-include_recipe 'bcpc-hadoop::jolokia'
+if node[:bcpc][:jolokia][:enable] == true
+  include_recipe 'bcpc-hadoop::jolokia'
 
-# Add the jolokia agent to the Kafka broker's launch options
-node.default[:kafka][:generic_opts] = node[:bcpc][:jolokia][:jvm_args]
+  # Add the jolokia agent to the Kafka broker's launch options
+  node.default[:kafka][:generic_opts] = node[:bcpc][:jolokia][:jvm_args]
+end
 
 #
 # Increase the default ZK client message maximum via jute.maxbuffer
