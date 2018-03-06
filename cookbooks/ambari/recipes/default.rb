@@ -2,9 +2,8 @@
 # Cookbook Name:: ambari-views-chef
 # Recipe:: default
 #
-# Copyright (c) 2016 Artem Ervits, All Rights Reserved.
 
-# include_recipe 'ambari::setattr'
+
 # dependencies
 %w(openssh-client wget curl unzip tar python2.7 openssl libpq5 ssl-cert mysql-client).each do |pkg|
   package pkg do
@@ -18,8 +17,8 @@ when 'ubuntu'
       components ['main']
       distribution 'Ambari'
       action :add
-      keyserver 'keyserver.ubuntu.com'
-      key 'B9733A7A07513CAD'
+      keyserver node['ambari']['repo_keyserver']
+      key node['ambari']['repo_key']
     end
 else
   raise "Platform #{node['platform']} is not supported"
