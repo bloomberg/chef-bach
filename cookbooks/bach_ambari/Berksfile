@@ -1,17 +1,21 @@
+#
+# Cookbook :: bach_ambari
+# Berksfile 
+# Copyright 2018, Bloomberg Finance L.P.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
 source 'https://supermarket.chef.io'
-
-cookbook 'bcpc-hadoop', path: '../bcpc-hadoop'
-cookbook 'ambari', path: '../ambari'
-cookbook 'bcpc', path: '../bcpc'
-cookbook 'bach_krb5', path: '../bach_krb5'
-cookbook 'smoke-tests', path: '../smoke-tests'
-#cookbook 'locking_resource', path: '../locking_resource'
-cookbook 'bach_opentsdb', path: '../bach_opentsdb'
-group :integration do
-  instance_eval(File.read('../../Berksfile.common'))
-
-  cookbook 'bcpc', path: File.expand_path('../bcpc')
-  cookbook 'bach_repository', path: File.expand_path('../bach_repository')
-end
 
 metadata

@@ -1,3 +1,21 @@
+#
+# Cookbook :: ambari
+# Spec :: default
+# Copyright 2018, Bloomberg Finance L.P.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
 require 'spec_helper'
 
 set :os , :family => 'ubuntu' , :release => 14.04
@@ -51,20 +69,6 @@ describe 'ambari::default' do
    expect(package 'postgresql').to be_installed
  end
 
- # it 'dependency postgresql-9.1 is installed' do
- #   expect(package 'postgresql-9.1').to be_installed
- # end
-
- # it 'dependency postgresql-client-9.1 is installed' do
- #   expect(package 'postgresql-client-9.1').to be_installed
- # end
-
-# tests whether oracle java 8 is installed
- # describe file('/usr/lib/jvm/java-8-oracle-amd64') do
- #   it { should be_directory }
- #   it { should exist }
- # end
-
  describe file('/etc/ambari-server/conf/ambari.properties') do
    it { should exist }
  end
@@ -77,20 +81,4 @@ describe 'ambari::default' do
    its(:stdout) { should contain('Ambari Server running') }
  end
 
-# it 'ambari server responds on port 8080' do
-#   expect(port 8080).to be_listening 'tcp'
-# end
-
- # agent specific tests
- # describe command('ambari-agent start') do
- #  its(:stdout) { should contain('Ambari Agent successfully started') }
- # end
-
-# it 'ambari-agent responds on port 8440' do
-#   expect(port 8440).to be_listening 'tcp'
-# end
-
- # describe file('/etc/ambari-agent/conf/ambari-agent.ini') do
- #   it { should exist }
- # end
 end

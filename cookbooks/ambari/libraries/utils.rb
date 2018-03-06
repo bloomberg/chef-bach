@@ -1,6 +1,6 @@
 #
-# Cookbook :: bach_ambari
-# Spec :: helper
+# Cookbook :: ambari
+# Libarary :: utils
 # Copyright 2018, Bloomberg Finance L.P.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,5 +16,12 @@
 # limitations under the License.
 #
 
-require 'chefspec'
-require 'chefspec/berkshelf'
+
+def isViewInstalled(viewUrl, headers)
+  Chef::Log.info("View URL:"+viewUrl)
+  res = Chef::HTTP.new("#{node['ambari']['ambari_views_url']}").get(viewUrl, headers)
+  return true
+rescue Net::HTTPServerException
+    Chef::Log.info("View seems not created")
+    return false
+end

@@ -1,8 +1,27 @@
+#
+# Cookbook :: ambari
+# Attribute :: default
+# Copyright 2018, Bloomberg Finance L.P.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
 
 # APT repository attributes
 default['apt']['compile_time_update'] = 'true'
 
-node.default['ambari']['ambari_server_version'] = '2.6.1.0'
+default['ambari']['repo_keyserver'] = 'keyserver.ubuntu.com'
+default['ambari']['repo_key'] = 'hortonworks.key'#'B9733A7A07513CAD'
+node.default['ambari']['ambari_server_version'] = '2.6.1.5'
 node.default['ambari']['os']['ubuntu_version'] = 14
 
 node.default['ambari']['ambari_ubuntu_repo_url'] = "http://public-repo-1.hortonworks.com/ambari/ubuntu#{node['ambari']['os']['ubuntu_version']}/2.x/updates/#{node['ambari']['ambari_server_version']}"
@@ -20,6 +39,8 @@ node.default['ambari']['java_home'] = "/usr/lib/jvm/java-8-oracle-amd64"
 node.default['ambari']['use_local_repo'] = 'false'
 node.default['ambari']['ambari_server_base_url'] = 'http://localhost:8080'
 node.default['ambari']['ambari_views_url'] = "#{node['ambari']['ambari_server_base_url']}/api/v1/views"
+
+node.default['ambari']['proxyuser'] = 'ambari'
 
 node.default['ambari']['admin']['user'] = 'admin'
 node.default['ambari']['admin']['password'] = 'admin'
@@ -43,6 +64,7 @@ node.default['ambari']['databasepassword'] = 'bigdata'
 
 
 # FILES view attributes
+node.default['ambari']['files_path'] = "FILES/versions/1.0.0/instances/FILES_NEW_INSTANCE"
 node.default['ambari']['webhdfs.client.failover.proxy.provider'] = 'org.apache.hadoop.hdfs.server.namenode.ha.ConfiguredFailoverProxyProvider'
 node.default['ambari']['webhdfs.ha.namenode.http-address.nn1'] = 'namenode1:50070'
 node.default['ambari']['webhdfs.ha.namenode.http-address.nn2'] = 'namenode2:50070'
@@ -56,18 +78,27 @@ node.default['ambari']['webhdfs.url'] = 'webhdfs://hacluster'
 node.default['ambari']['webhdfs.auth'] = 'auth=SIMPLE'
 
 
+# Hive View Attributes
+node.default['ambari']['hive20_view_path'] = 'HIVE/versions/2.0.0/instances/HIVE_NEW_INSTANCE'
+node.default['ambari']['hive.jdbc.url'] = 'jdbc:hive2://127.0.0.1:10000'
+node.default['ambari']['yarn.ats.url'] = 'http://localhost:8188'
+node.default['ambari']['yarn.resourcemanager.url'] = 'http://localhost:8088'
+node.default['ambari']['hive20_proxy_user'] = 'hive.server2.proxy.user=${username}'
+
+#WorkflowManager_view Attributes
+node.default['ambari']['oozie.service.uri'] = 'http://localhost:11000/oozie'
+node.default['ambari']['hadoop.security.authentication'] = 'simple'
+node.default['ambari']['wfmanager_view_path'] = 'WORKFLOW_MANAGER/versions/1.0.0/instances/WFM_NEW_INSTANCE'
+node.default['ambari']['yarn.resourcemanager.address'] = 'http://localhost:8032'
+
+#Tez views
+node.default['ambari']['tez_view_path'] = 'TEZ/versions/0.7.0.2.6.4.0-91/instances/TEZ_NEW_INSTANCE'
+node.default['ambari']['timeline.http.auth.type'] = 'simple'
+node.default['ambari']['hadoop.http.auth.type'] = 'simple'
+
+
 # Ambari Views Attributes
-node.default['ambari']['hive.host'] =  'u1203.ambari.apache.org'
-node.default['ambari']['hive.http.path'] = 'cliservice'
-node.default['ambari']['hive.http.port'] = '10001'
-node.default['ambari']['hive.metastore.warehouse.dir'] = '/apps/hive/warehouse'
-node.default['ambari']['hive.port'] = '10000'
-node.default['ambari']['hive.transport.mode'] = 'binary'
-node.default['ambari']['yarn.ats.url'] = 'http://u1202.ambari.apache.org:8188'
-node.default['ambari']['yarn.resourcemanager.url'] = 'u1202.ambari.apache.org:8088'
 node.default['ambari']['webhcat.hostname'] = 'u1203.ambari.apache.org'
 node.default['ambari']['webhcat.port'] = '50111'
-node.default['ambari']['oozie.service.uri'] = 'http://u1203.ambari.apache.org:11000/oozie'
-node.default['ambari']['hadoop.security.authentication'] = 'simple'
 node.default['ambari']['webhcat.hostname'] = 'u1203.ambari.apache.org'
 node.default['ambari']['webhcat.port'] = '50111'

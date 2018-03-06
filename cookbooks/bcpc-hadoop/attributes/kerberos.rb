@@ -129,14 +129,14 @@ default['bcpc']['hadoop']['kerberos']['data'] = {
     spnego_keytab: 'spnego.service.keytab'
   },
   ambari: {
-      principal: 'ambari',
+      principal: "#{node['bcpc']['hadoop']['proxyuser']['ambari']}",
       keytab: 'ambari.service.keytab',
-      owner: 'ambari',
+      owner: "#{node['bcpc']['hadoop']['proxyuser']['ambari']}",
       group: 'root',
       princhost: '_HOST',
       perms: '0440',
       spnego_keytab: 'spnego.service.keytab'
-     }
+  }
 }
 default[:bcpc][:hadoop][:kerberos][:keytab][:dir] = "/etc/security/keytabs"
 default[:bcpc][:hadoop][:kerberos][:keytab][:recreate] = false

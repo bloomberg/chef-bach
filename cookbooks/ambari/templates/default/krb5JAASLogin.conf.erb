@@ -4,7 +4,7 @@ com.sun.security.jgss.krb5.initiate {
     doNotPrompt=true
     useKeyTab=true
     keyTab="<%= node['ambari']['kerberos']['keytab']['location']%>"
-    principal="<%= node['ambari']['kerberos']['principal']%>"
+    principal="<%= @ambari_principal %>"
     storeKey=true
     useTicketCache=false;
 };
