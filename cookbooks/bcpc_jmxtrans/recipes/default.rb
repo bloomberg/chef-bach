@@ -65,10 +65,7 @@ end
 #
 # Get an array of hosts which are graphite heads
 #
-graphite_hosts = get_nodes_for('graphite','bcpc').map do
-  |hh| hh[:bcpc][:management][:ip]
-end
-
+graphite_hosts_ips = get_head_nodes.map{|x| x[:ip_address]}
 #
 # Array to store the list of services on which jxmtrans dependent on i.e. collects data from
 # If any of the services gets restarted jmxtrans process need to be restarted
@@ -78,7 +75,7 @@ jmx_service_cmds = Hash.new
 #
 # If the current host is a graphite head add the carbon processes to the list of services array
 #
-graphite_hosts.each do |host|
+graphite_hosts_ips.each do |host|
   if host == node['bcpc']['management']['ip']
     jmx_services.push("carbon-relay")
     jmx_services.push("carbon-cache")

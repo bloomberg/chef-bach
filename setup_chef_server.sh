@@ -30,7 +30,14 @@ apt-get -o Dir::Etc::SourceList=/etc/apt/sources.list.d/bcpc.list \
 	-o APT::Get::List-Cleanup="0" \
 	update
 
+# Faraday will be required in libs, so we will not have a chance to recipe this away
+/opt/chefdk/embedded/bin/gem install faraday
+pushd /home/vagrant/chef-bcpc/lib/cluster-def-gem > /dev/null
+sudo /opt/chefdk/embedded/bin/gem install cluster_def
+popd > /dev/null
+
 if dpkg -s chef-server 2>/dev/null | grep -q ^Status.*installed; then 
+# Faraday will be required in libs, so we will not have a chance to recipe this away
   chef-server-ctl restart
   echo 'chef-server is installed and the server has been restarted'
 else

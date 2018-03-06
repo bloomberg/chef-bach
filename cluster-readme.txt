@@ -11,7 +11,11 @@ Cluster definition file : cluster.txt
 
   The expected fields are :
 
-  hostname mac-address IP-address ILO-IP-Address Cobbler-Profile domain role
+  nodeid hostname mac-address IP-address ILO-IP-Address Cobbler-Profile domain role
+  
+  numeric nodeid is only required for nodes with BCPC-Hadoop-Head role asigned
+  For numeric id range is 1 through 255 
+  For BCPC-Hadoop-Worker machines use `-` in the ID field  
 
   "ILO" stands for Integrated Lights-Out - a management console.
   It's not important for VMs.

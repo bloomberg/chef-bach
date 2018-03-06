@@ -87,43 +87,34 @@ hive_site_vars[:server_princ] = \
   end
 
 generated_values = {
-    'javax.jdo.option.ConnectionURL' =>
-      'jdbc:mysql:loadbalance://' +
-      hive_site_vars[:mysql_hosts].join(',') +
-      "/#{node['bcpc']['hadoop']['hive']['mysql_db']}?loadBalanceBlacklistTimeout=5000",
+  'javax.jdo.option.ConnectionURL' =>
+    'jdbc:mysql:loadbalance://' +
+    hive_site_vars[:mysql_hosts].join(',') +
+    "/#{node['bcpc']['hadoop']['hive']['mysql_db']}?loadBalanceBlacklistTimeout=5000",
 
-    'javax.jdo.option.ConnectionPassword' =>
-      hive_site_vars[:hive_sql_password],
+  'javax.jdo.option.ConnectionPassword' =>
+    hive_site_vars[:hive_sql_password],
 
-    'hive.metastore.uris' =>
-      hive_site_vars[:hive_hosts]
-      .map { |s| 'thrift://' + float_host(s[:hostname]) + ':9083' }
-      .join(','),
-
-    'hive.zookeeper.quorum' =>
-      hive_site_vars[:zk_hosts].map { |s| float_host(s[:hostname]) }.join(','),
-
-    'hive.server2.support.dynamic.service.discovery' => 'true',
-
-    'hive.server2.zookeeper.namespace' =>
-      "HS2-#{node.chef_environment}-#{hive_site_vars[:hs2_auth]}",
-
-    'hive.server2.thrift.bind.host' => float_host(node['fqdn']).to_s,
-
-    'hive.server2.thrift.port' =>
-      node['bcpc']['hadoop']['hive']['server2']['port'],
-
-    'hive.metastore.warehouse.dir' =>
-      hive_site_vars[:warehouse],
-
-    'hive.exec.scratchdir' => hive_site_vars[:scratch],
-
-    'hive.stats.dbconnectionstring' =>
-      'jdbc:mysql:loadbalance://' + hive_site_vars[:mysql_hosts].join(',') +
-      '/hive_table_stats?useUnicode=true' \
-      '&characterEncoding=UTF-8' \
-      '&user=' + hive_site_vars[:stats_user] +
-      '&password=' + hive_site_vars[:stats_sql_password]
+  'hive.metastore.uris' =>
+    hive_site_vars[:hive_hosts]
+    .map { |s| 'thrift://' + float_host(s[:hostname]) + ':9083' }
+    .join(','),
+  'hive.zookeeper.quorum' =>
+    get_head_nodes.map{ |s| float_host(s[:fqdn]) }.join(","),
+  'hive.server2.support.dynamic.service.discovery' => 'true',
+  'hive.server2.zookeeper.namespace' => 
+    "HS2-#{node.chef_environment}-#{hive_site_vars[:hs2_auth]}",
+  'hive.server2.thrift.bind.host' => "#{float_host(node[:fqdn])}",
+  'hive.server2.thrift.port' =>
+    node['bcpc']['hadoop']['hive']['server2']['port'],
+  'hive.metastore.warehouse.dir' => hive_site_vars[:warehouse],
+  'hive.exec.scratchdir' => hive_site_vars[:scratch],
+  'hive.stats.dbconnectionstring' =>
+    'jdbc:mysql:loadbalance://' + hive_site_vars[:mysql_hosts].join(',') +
+    ':3306/hive_table_stats?useUnicode=true' +
+    '&characterEncoding=UTF-8' +
+    '&user=' + hive_site_vars[:stats_user] +
+    '&password=' + hive_site_vars[:stats_sql_password]
 }
 
 if hive_site_vars[:kerberos_enabled] && hive_site_vars[:hs2_auth] == 'KERBEROS'

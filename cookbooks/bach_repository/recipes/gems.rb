@@ -4,6 +4,7 @@
 #
 include_recipe 'bach_repository::directory'
 include_recipe 'bach_repository::tools'
+repo_dir =  node['bach']['repository']['repo_directory']
 bins_dir = node['bach']['repository']['bins_directory']
 gems_dir = node['bach']['repository']['gems_directory']
 gem_binary = node['bach']['repository']['gem_bin']
@@ -115,6 +116,12 @@ end
 
 link "#{bins_dir}/gems" do
   to "#{gems_dir}"
+end
+
+# HACK to install cluster_def if it exists
+# since bundler will not do it for us
+execute 'copy cluster_def gem' do
+  command "cp #{repo_dir}/lib/cluster-def-gem/cluster_def-*.gem #{bins_dir}/gems"
 end
 
 execute 'gem-generate-index' do

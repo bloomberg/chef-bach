@@ -1,8 +1,8 @@
 #
 # Cookbook Name:: bcpc
-# Recipe:: apache-mirror
+# Recipe:: chef_faraday_install
 #
-# Copyright 2013, Bloomberg Finance L.P.
+# Copyright 2017, Bloomberg Finance L.P.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,21 +16,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-package "apache2"
 
-template '/etc/apache2/sites-available/default.conf' do
-    source 'apache-mirror.erb'
-    variables ({ user: node['bcpc']['bootstrap']['admin']['user']})
-    owner 'root'
-    group 'root'
-    mode 00644
-    notifies :restart, 'service[apache2]', :delayed
-end
-
-service 'apache2' do
-    action [ :enable, :start ]
-end
-
-link '/etc/apache2/sites-enabled/000-default.conf' do
-  to '/etc/apache2/sites-available/default.conf'
+bcpc_chef_gem 'faraday' do
+  compile_time true
 end

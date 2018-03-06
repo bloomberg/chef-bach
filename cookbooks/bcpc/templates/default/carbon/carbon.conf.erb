@@ -385,7 +385,7 @@ REPLICATION_FACTOR = <%="#{@min_quorum}"%>
 # If using RELAY_METHOD = rules, all destinations used in relay-rules.conf
 # must be defined in this list
 # DESTINATIONS = 127.0.0.1:2004
-DESTINATIONS = <%= "#{@servers.map{|x| x['mgmt_ip']+':2024'}.sort.join(', ')}" %>
+DESTINATIONS = <%= "#{@servers.map{|hst| "#{hst}:2024"}.sort.join(', ')}" %>
 
 # This define the protocol to use to contact the destination. It can be
 # set to one of "line", "pickle", "udp" and "protobuf". This list can be

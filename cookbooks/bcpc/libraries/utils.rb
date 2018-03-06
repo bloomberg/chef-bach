@@ -21,6 +21,7 @@ require 'openssl'
 require 'base64'
 require 'thread'
 require 'ipaddr'
+require 'cluster_def'
 
 # create databag if missing
 def create_databag(name)
@@ -182,6 +183,16 @@ def get_config!(key,item=node.chef_environment,bag="configs")
   return value
 end
 
+# Get all nodes without search
+# Currently cannot rewrite get_all_nodes as some clients rely on real chef node objects
+def fetch_all_nodes
+  if node.run_state['cluster_def'] == nil then
+    node.run_state['cluster_def'] = BACH::ClusterDef.new(node_obj: node)
+  end
+  cd = node.run_state['cluster_def']
+  cd.fetch_cluster_def
+end
+
 # Get all nodes for this Chef environment
 def get_all_nodes
   results = Chef::Search::Query.new.search(:node, "chef_environment:#{node.chef_environment}").first
@@ -210,12 +221,16 @@ def get_cached_head_node_names
   return headnodes.sort
 end
 
-def get_head_nodes
+def get_head_nodes(node_objs=false)
   #
   # Zookeeper nodes are the de facto heads for a Kafka cluster, since
   # they run Zabbix, Graphite, MySQL et al.
   #
-  Chef::Search::Query.new.search(:node, 'role:BCPC-Hadoop-Head OR role:BCPC-Kafka-Head-Zookeeper').first
+  if node_objs == true then
+    Chef::Search::Query.new.search(:node, 'role:BCPC-Hadoop-Head OR role:BCPC-Kafka-Head-Zookeeper').first
+  else
+    fetch_all_nodes.select { |hst| hst[:runlist].include? "role[BCPC-Hadoop-Head]" or hst[:runlist].include? "role[BCPC-Kafka-Head-Zookeeper]" }
+  end
 end
 
 def get_head_node_names

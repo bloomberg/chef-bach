@@ -86,7 +86,7 @@ if File.basename(__FILE__) == File.basename($PROGRAM_NAME)
       virtualbox_bios(e[:hostname]).eql?('EFI') ? \
       EFI_COBBLER_PROFILE : BIOS_COBBLER_PROFILE
 
-    [e[:hostname], mac, ip, e[:ilo_address], profile, e[:dns_domain], e[:runlist]]
+    [e[:node_id], e[:hostname], mac, ip, e[:ilo_address], profile, e[:dns_domain], e[:runlist]]
   end
 
   # check to see if we should raise an error

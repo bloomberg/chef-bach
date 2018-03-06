@@ -4,3 +4,10 @@ default['bcpc']['mysql']['innodb_buffer_pool_size'] =
 
 # Maximum connections per MySQL host. The MySQL default is 151.
 default['bcpc']['mysql']['max_connections'] = 500
+
+# This attribute controls if chef will reissue a bootstrap-pxc in case none of
+# heads return with a positive response from the xinetd service
+# This is used to facilitate the automated build, and will be overridden 
+# to true in the environment file in production an operator may want to
+# first examine grastate before choosing where to bootstrap-pxc
+default['bcpc']['mysql']['bootstrap_on_error'] = false
