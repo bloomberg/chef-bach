@@ -2,8 +2,11 @@ node {
     stage('Lint') {
         checkout scm
         withDockerContainer(image: 'chef/chefdk:1') {
-            sh script: 'chef exec rubocop -D --out rubocop.log', returnStatus: true
+            sh script: 'chef exec rake style', returnStatus: true
+            echo 'BACH: rubocop preview'
             sh 'tail rubocop.log'
+            echo 'BACH: foodcritic preview'
+            sh 'tail foodcritic.log'
         }
         warnings parserConfigurations: [[pattern: 'rubocop.log', parserName: 'Rubocop']]
         if (currentBuild.rawBuild.project.name =~ /^PR-/) {
