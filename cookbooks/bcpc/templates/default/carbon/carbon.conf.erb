@@ -11,6 +11,23 @@ ENABLE_LOGROTATION = True
 MAX_CACHE_SIZE = inf
 MAX_UPDATES_PER_SECOND = <%= node['bcpc']['graphite']['carbon']['cache']['MAX_UPDATES_PER_SECOND'] %>
 MAX_CREATES_PER_MINUTE = inf
+
+# Set the minimum timestamp resolution supported by this instance. This allows
+# internal optimisations by overwriting points with equal truncated timestamps
+# in order to limit the number of updates to the database. It defaults to one
+# second.
+MIN_TIMESTAMP_RESOLUTION = 1
+
+# Set the minimum lag in seconds for a point to be written to the database
+# in order to optimize batching. This means that each point will wait at least
+# the duration of this lag before being written. Setting this to 0 disable the feature.
+# This currently only works when using the timesorted write strategy.
+# MIN_TIMESTAMP_LAG = 0
+
+# Set the interface and port for the line (plain text) listener.  Setting the
+# interface to 0.0.0.0 listens on all interfaces.  Port can be set to 0 to
+# disable this listener if it is not required.
+# LINE_RECEIVER_INTERFACE = 0.0.0.0
 LINE_RECEIVER_INTERFACE = <%="#{node[:bcpc][:management][:ip]}"%>
 LINE_RECEIVER_PORT = 2003
 ENABLE_UDP_LISTENER = False
@@ -22,6 +39,14 @@ USE_INSECURE_UNPICKLER = False
 CACHE_QUERY_INTERFACE = <%="#{node[:bcpc][:management][:ip]}"%>
 CACHE_QUERY_PORT = 7002
 USE_FLOW_CONTROL = True
+
+# If enabled this setting is used to timeout metric client connection if no
+# metrics have been sent in specified time in seconds
+#METRIC_CLIENT_IDLE_TIMEOUT = None
+
+# By default, carbon-cache will log every whisper update and cache hit.
+# This can be excessive and degrade performance if logging on the same
+# volume as the whisper data is stored.
 LOG_UPDATES = False
 LOG_CREATES = True
 LOG_CACHE_HITS = True
@@ -64,6 +89,155 @@ CACHE_WRITE_STRATEGY = sorted
 # shift the onus of buffering writes from the kernel into carbon's cache.
 WHISPER_AUTOFLUSH = False
 
+# By default new Whisper files are created pre-allocated with the data region
+# filled with zeros to prevent fragmentation and speed up contiguous reads and
+# writes (which are common). Enabling this option will cause Whisper to create
+# the file sparsely instead. Enabling this option may allow a large increase of
+# MAX_CREATES_PER_MINUTE but may have longer term performance implications
+# depending on the underlying storage configuration.
+# WHISPER_SPARSE_CREATE = False
+
+# Only beneficial on linux filesystems that support the fallocate system call.
+# It maintains the benefits of contiguous reads/writes, but with a potentially
+# much faster creation speed, by allowing the kernel to handle the block
+# allocation and zero-ing. Enabling this option may allow a large increase of
+# MAX_CREATES_PER_MINUTE. If enabled on an OS or filesystem that is unsupported
+# this option will gracefully fallback to standard POSIX file access methods.
+WHISPER_FALLOCATE_CREATE = True
+
+# Enabling this option will cause Whisper to lock each Whisper file it writes
+# to with an exclusive lock (LOCK_EX, see: man 2 flock). This is useful when
+# multiple carbon-cache daemons are writing to the same files.
+# WHISPER_LOCK_WRITES = False
+
+# On systems which has a large number of metrics, an amount of Whisper write(2)'s
+# pageback sometimes cause disk thrashing due to memory shortage, so that abnormal
+# disk reads occur. Enabling this option makes it possible to decrease useless
+# page cache memory by posix_fadvise(2) with POSIX_FADVISE_RANDOM option.
+# WHISPER_FADVISE_RANDOM = False
+
+# By default all nodes stored in Ceres are cached in memory to improve the
+# throughput of reads and writes to underlying slices. Turning this off will
+# greatly reduce memory consumption for databases with millions of metrics, at
+# the cost of a steep increase in disk i/o, approximately an extra two os.stat
+# calls for every read and write. Reasons to do this are if the underlying
+# storage can handle stat() with practically zero cost (SSD, NVMe, zRAM).
+# Valid values are:
+#       all - all nodes are cached
+#      none - node caching is disabled
+# CERES_NODE_CACHING_BEHAVIOR = all
+
+# Ceres nodes can have many slices and caching the right ones can improve
+# performance dramatically. Note that there are many trade-offs to tinkering
+# with this, and unless you are a ceres developer you *really* should not
+# mess with this. Valid values are:
+#    latest - only the most recent slice is cached
+#       all - all slices are cached
+#      none - slice caching is disabled
+# CERES_SLICE_CACHING_BEHAVIOR = latest
+
+# If a Ceres node accumulates too many slices, performance can suffer.
+# This can be caused by intermittently reported data. To mitigate
+# slice fragmentation there is a tolerance for how much space can be
+# wasted within a slice file to avoid creating a new one. That tolerance
+# level is determined by MAX_SLICE_GAP, which is the number of consecutive
+# null datapoints allowed in a slice file.
+# If you set this very low, you will waste less of the *tiny* bit disk space
+# that this feature wastes, and you will be prone to performance problems
+# caused by slice fragmentation, which can be pretty severe.
+# If you set this really high, you will waste a bit more disk space (each
+# null datapoint wastes 8 bytes, but keep in mind your filesystem's block
+# size). If you suffer slice fragmentation issues, you should increase this or
+# run the ceres-maintenance defrag plugin more often. However you should not
+# set it to be huge because then if a large but allowed gap occurs it has to
+# get filled in, which means instead of a simple 8-byte write to a new file we
+# could end up doing an (8 * MAX_SLICE_GAP)-byte write to the latest slice.
+# CERES_MAX_SLICE_GAP = 80
+
+# Enabling this option will cause Ceres to lock each Ceres file it writes to
+# to with an exclusive lock (LOCK_EX, see: man 2 flock). This is useful when
+# multiple carbon-cache daemons are writing to the same files.
+# CERES_LOCK_WRITES = False
+
+# Set this to True to enable whitelisting and blacklisting of metrics in
+# CONF_DIR/whitelist.conf and CONF_DIR/blacklist.conf. If the whitelist is
+# missing or empty, all metrics will pass through
+# USE_WHITELIST = False
+
+# By default, carbon itself will log statistics (such as a count,
+# metricsReceived) with the top level prefix of 'carbon' at an interval of 60
+# seconds. Set CARBON_METRIC_INTERVAL to 0 to disable instrumentation
+# CARBON_METRIC_PREFIX = carbon
+# CARBON_METRIC_INTERVAL = 60
+
+# Enable AMQP if you want to receve metrics using an amqp broker
+# ENABLE_AMQP = False
+
+# Verbose means a line will be logged for every metric received
+# useful for testing
+# AMQP_VERBOSE = False
+
+# AMQP_HOST = localhost
+# AMQP_PORT = 5672
+# AMQP_VHOST = /
+# AMQP_USER = guest
+# AMQP_PASSWORD = guest
+# AMQP_EXCHANGE = graphite
+# AMQP_METRIC_NAME_IN_BODY = False
+
+# The manhole interface allows you to SSH into the carbon daemon
+# and get a python interpreter. BE CAREFUL WITH THIS! If you do
+# something like time.sleep() in the interpreter, the whole process
+# will sleep! This is *extremely* helpful in debugging, assuming
+# you are familiar with the code. If you are not, please don't
+# mess with this, you are asking for trouble :)
+#
+# ENABLE_MANHOLE = False
+# MANHOLE_INTERFACE = 127.0.0.1
+# MANHOLE_PORT = 7222
+# MANHOLE_USER = admin
+# MANHOLE_PUBLIC_KEY = ssh-rsa AAAAB3NzaC1yc2EAAAABiwAaAIEAoxN0sv/e4eZCPpi3N3KYvyzRaBaMeS2RsOQ/cDuKv11dlNzVeiyc3RFmCv5Rjwn/lQ79y0zyHxw67qLyhQ/kDzINc4cY41ivuQXm2tPmgvexdrBv5nsfEpjs3gLZfJnyvlcVyWK/lId8WUvEWSWHTzsbtmXAF2raJMdgLTbQ8wE=
+
+# Patterns for all of the metrics this machine will store. Read more at
+# http://en.wikipedia.org/wiki/Advanced_Message_Queuing_Protocol#Bindings
+#
+# Example: store all sales, linux servers, and utilization metrics
+# BIND_PATTERNS = sales.#, servers.linux.#, #.utilization
+#
+# Example: store everything
+# BIND_PATTERNS = #
+
+# URL of graphite-web instance, this is used to add incoming series to the tag database
+# GRAPHITE_URL = http://127.0.0.1:8000
+
+# Tag support, when enabled carbon will make HTTP calls to graphite-web to update the tag index
+ENABLE_TAGS = False
+
+# Tag update interval, this specifies how frequently updates to existing series will trigger
+# an update to the tag index, the default setting is once every 100 updates
+# TAG_UPDATE_INTERVAL = 100
+
+# Tag batch size, this specifies the maximum number of series to be sent to graphite-web in a single batch
+# TAG_BATCH_SIZE = 100
+
+# Tag queue size, this specifies the maximum number of series to be queued for sending to graphite-web
+# There are separate queues for new series and for updates to existing series
+# TAG_QUEUE_SIZE = 10000
+
+# To configure special settings for the carbon-cache instance 'b', uncomment this:
+#[cache:b]
+#LINE_RECEIVER_PORT = 2103
+#PICKLE_RECEIVER_PORT = 2104
+#CACHE_QUERY_PORT = 7102
+# and any other settings you want to customize, defaults are inherited
+# from the [cache] section.
+# You can then specify the --instance=b option to manage this instance
+#
+# In order to turn off logging of successful connections for the line
+# receiver, set this to False
+# LOG_LISTENER_CONN_SUCCESS = True
+LOG_LISTENER_CONN_SUCCESS = False
+
 [relay]
 LOG_LISTENER_CONN_SUCCESS = False
 LINE_RECEIVER_INTERFACE = <%="#{node[:bcpc][:graphite][:ip]}"%>
@@ -71,13 +245,56 @@ LINE_RECEIVER_PORT = 2013
 PICKLE_RECEIVER_INTERFACE = <%="#{node[:bcpc][:graphite][:ip]}"%>
 PICKLE_RECEIVER_PORT = 2014
 RELAY_METHOD = consistent-hashing
-REPLICATION_FACTOR = <%="#{@min_quorum}"%>
-DESTINATIONS = <%= "#{@servers.map{|x| x['mgmt_ip']+':2024'}.sort.join(', ')}" %>
+
+# If you use consistent-hashing you can add redundancy by replicating every
+# datapoint to more than one machine.
+# REPLICATION_FACTOR = 1
+# TODO: set REPLICATION_FACTOR to min_quorum if > 2 is needed.
+# REPLICATION_FACTOR = <%="#{@min_quorum}"%>
+REPLICATION_FACTOR = 2
+
+# For REPLICATION_FACTOR >=2, set DIVERSE_REPLICAS to True to guarantee replicas
+# across distributed hosts. With this setting disabled, it's possible that replicas
+# may be sent to different caches on the same host. This has been the default
+# behavior since introduction of 'consistent-hashing' relay method.
+# Note that enabling this on an existing pre-0.9.14 cluster will require rebalancing
+# your metrics across the cluster nodes using a tool like Carbonate.
+#DIVERSE_REPLICAS = True
+
+# This is a list of carbon daemons we will send any relayed or
+# generated metrics to. The default provided would send to a single
+# carbon-cache instance on the default port. However if you
+# use multiple carbon-cache instances then it would look like this:
+#
+# DESTINATIONS = 127.0.0.1:2004:a, 127.0.0.1:2104:b
+#
+# The general form is IP:PORT:INSTANCE where the :INSTANCE part is
+# optional and refers to the "None" instance if omitted.
+#
+# Note that if the destinations are all carbon-caches then this should
+# exactly match the webapp's CARBONLINK_HOSTS setting in terms of
+# instances listed (order matters!).
+#
+# If using RELAY_METHOD = rules, all destinations used in relay-rules.conf
+# must be defined in this list
+# DESTINATIONS = 127.0.0.1:2004
+DESTINATIONS = <%= "#{@servers.map{|hst| "#{hst}:2024"}.sort.join(', ')}" %>
 
 # This define the protocol to use to contact the destination. It can be
 # set to one of "line", "pickle", "udp" and "protobuf". This list can be
 # extended with CarbonClientFactory plugins and defaults to "pickle".
 # DESTINATION_PROTOCOL = pickle
+
+# When using consistent hashing it sometime makes sense to make
+# the ring dynamic when you don't want to loose points when a
+# single destination is down. Replication is an answer to that
+# but it can be quite expensive.
+# DYNAMIC_ROUTER = False
+
+# Controls the number of connection attempts before marking a
+# destination as down. We usually do one connection attempt per
+# second.
+# DYNAMIC_ROUTER_MAX_RETRIES = 5
 
 # This is the maximum number of datapoints that can be queued up
 # for a single destination. Once this limit is hit, we will
@@ -93,6 +310,33 @@ MAX_DATAPOINTS_PER_MESSAGE = 500
 QUEUE_LOW_WATERMARK_PCT = 0.8
 TIME_TO_DEFER_SENDING = 0.0001
 USE_FLOW_CONTROL = True
+
+# If enabled this setting is used to timeout metric client connection if no
+# metrics have been sent in specified time in seconds
+#METRIC_CLIENT_IDLE_TIMEOUT = None
+METRIC_CLIENT_IDLE_TIMEOUT = <%="#{node[:bcpc][:graphite][:carbon][:relay][:idle_timeout]}"%> 
+
+# Set this to True to enable whitelisting and blacklisting of metrics in
+# CONF_DIR/whitelist.conf and CONF_DIR/blacklist.conf. If the whitelist is
+# missing or empty, all metrics will pass through
+# USE_WHITELIST = False
+
+# By default, carbon itself will log statistics (such as a count,
+# metricsReceived) with the top level prefix of 'carbon' at an interval of 60
+# seconds. Set CARBON_METRIC_INTERVAL to 0 to disable instrumentation
+# CARBON_METRIC_PREFIX = carbon
+# CARBON_METRIC_INTERVAL = 60
+#
+# In order to turn off logging of successful connections for the line
+# receiver, set this to False
+# LOG_LISTENER_CONN_SUCCESS = True
+LOG_LISTENER_CONN_SUCCESS = False
+
+# If you're connecting from the relay to a destination that's over the
+# internet or similarly iffy connection, a backlog can develop because
+# of internet weather conditions, e.g. acks getting lost or similar issues.
+# To deal with that, you can enable USE_RATIO_RESET which will let you
+# re-set the connection to an individual destination.  Defaults to being off.
 USE_RATIO_RESET=False
 MIN_RESET_STAT_FLOW=1000
 MIN_RESET_RATIO=0.9
@@ -119,6 +363,13 @@ MAX_QUEUE_SIZE = 100000
 # default) then sockets over which metrics are received will temporarily stop accepting
 # data until the send queues fall below 80% MAX_QUEUE_SIZE.
 USE_FLOW_CONTROL = True
+
+# If enabled this setting is used to timeout metric client connection if no
+# metrics have been sent in specified time in seconds
+#METRIC_CLIENT_IDLE_TIMEOUT = None
+
+# This defines the maximum "message size" between carbon daemons.
+# You shouldn't need to tune this unless you really know what you're doing.
 MAX_DATAPOINTS_PER_MESSAGE = 500
 MAX_AGGREGATION_INTERVALS = 5
 
@@ -159,3 +410,12 @@ LOG_AGGREGATOR_MISSES = False
 # Specify the user to drop privileges to
 # If this is blank carbon-aggregator runs as the user that invokes it
 # USER =
+
+# Part of the code, and particularly aggregator rules, need
+# to cache metric names. To avoid leaking too much memory you
+# can tweak the size of this cache. The default allow for 1M
+# different metrics per rule (~200MiB).
+# CACHE_METRIC_NAMES_MAX=1000000
+
+# You can optionally set a ttl to this cache.
+# CACHE_METRIC_NAMES_TTL=600
