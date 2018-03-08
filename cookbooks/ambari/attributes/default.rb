@@ -49,6 +49,7 @@ node.default['ambari']['databasepassword'] = 'bigdata'
 
 
 # FILES view attributes
+node.default['ambari']['files_path'] = "FILES/versions/1.0.0/instances/FILES_NEW_INSTANCE"
 node.default['ambari']['webhdfs.client.failover.proxy.provider'] = 'org.apache.hadoop.hdfs.server.namenode.ha.ConfiguredFailoverProxyProvider'
 node.default['ambari']['webhdfs.ha.namenode.http-address.nn1'] = 'namenode1:50070'
 node.default['ambari']['webhdfs.ha.namenode.http-address.nn2'] = 'namenode2:50070'
@@ -63,9 +64,11 @@ node.default['ambari']['webhdfs.auth'] = 'auth=SIMPLE'
 
 
 # Hive View Attributes
+node.default['ambari']['hive20_view_path'] = 'HIVE/versions/2.0.0/instances/HIVE_NEW_INSTANCE'
 node.default['ambari']['hive.jdbc.url'] = 'jdbc:hive2://127.0.0.1:10000'
 node.default['ambari']['yarn.ats.url'] = 'http://localhost:8188'
 node.default['ambari']['yarn.resourcemanager.url'] = 'http://localhost:8088'
+node.default['ambari']['hive20_proxy_user'] = 'hive.server2.proxy.user=${username}'
 
 # Ambari Views Attributes
 node.default['ambari']['webhcat.hostname'] = 'u1203.ambari.apache.org'

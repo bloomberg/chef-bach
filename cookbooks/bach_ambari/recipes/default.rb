@@ -9,7 +9,7 @@ include_recipe 'ambari::default'
 # creates user, database and database schema for ambari server.
 include_recipe 'bach_ambari::mysql_server_external_setup'
 
-include_recipe 'bach_ambari::ambari_kerberos'
+#include_recipe 'bach_ambari::ambari_kerberos'
 
 # It is required to download ambari kerberos file.
 user 'ambari' do

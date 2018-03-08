@@ -97,6 +97,17 @@ def get_hadoop_heads
   results.sort
 end
 
+def get_timeline_servers
+  results = Chef::Search::Query.new.search(:node, "roles:BCPC-Hadoop-Head-YarnTimeLineServer AND chef_environment:#{node.chef_environment}").first
+  if results.any? { |x| x['hostname'] == node['hostname'] }
+    results.map! { |x| x['hostname'] == node['hostname'] ? node : x }
+  elsif node['roles'].include? 'BCPC-Hadoop-Head-YarnTimeLineServer'
+    results.push(node)
+  end
+  results.sort
+end
+
+
 def get_quorum_hosts
   results = Chef::Search::Query.new.search(:node, "(roles:BCPC-Hadoop-Quorumnode or role:BCPC-Hadoop-Head) AND chef_environment:#{node.chef_environment}").first
   if results.any? { |x| x['hostname'] == node['hostname'] }
