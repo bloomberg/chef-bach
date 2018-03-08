@@ -111,6 +111,7 @@ if node[:bcpc][:hadoop][:kerberos][:enable] == true then
   generated_values['hbase.regionserver.keytab.file'] =
     "#{node[:bcpc][:hadoop][:kerberos][:keytab][:dir]}/#{node[:bcpc][:hadoop][:kerberos][:data][:hbase][:keytab]}"
   generated_values['hbase.rpc.engine'] = 'org.apache.hadoop.hbase.ipc.SecureRpcEngine'
+  generated_values['phoenix.acls.enabled'] = 'true'
 end
 
 #
