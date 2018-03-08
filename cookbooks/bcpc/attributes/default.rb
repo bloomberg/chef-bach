@@ -233,10 +233,10 @@ default['bcpc']['ha_oozie']['port'] = '11010'
 #  attributes for chef vault download and install
 #################################################
 default['bcpc']['chefvault']['filename'] =
-  'chef-vault-2.9.2.gem'
+  'chef-vault-3.3.0.gem'
 
 default['bcpc']['chefvault']['checksum'] =
-  'e3ff0bbad6b3a59e150cfb0f510c5a67f98ef7794ba6871cc9f8af563bfd06ef '
+  '90c38490c1af7436ccdb4a3824c212a28c6695b9d75e842de0498f862122424f'
 
 # bcpc binary server pathnames
 default['bcpc']['bin_dir']['path'] = "/home/#{user}/chef-bcpc/bins/"

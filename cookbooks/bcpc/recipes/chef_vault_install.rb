@@ -18,6 +18,6 @@
 #
 
 bcpc_chef_gem 'chef-vault' do
-  version '>=2.8.0'
+  version '>=3.3.0'
   compile_time true
 end

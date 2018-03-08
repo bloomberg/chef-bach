@@ -25,9 +25,9 @@ PEM_RELATIVE_PATH=.chef/$(hostname -f).pem
 # One gets:
 # ERROR: Errno::EEXIST: File exists @ dir_s_mkdir - /home/vagrant/.chef
 [ ! -L ~/.chef/$(hostname -f).pem ] && \
-  sudo ln -s /etc/chef/client.pem ~/.chef/$(hostname -f).pem
+  sudo ln -s /etc/chef/client.pem $(readlink -f ~/.chef/$(hostname -f).pem)
 [ ! -L ~/.chef/knife.rb ] && \
-  sudo ln -s $(readlink -f .chef/knife.rb) ~/.chef/knife.rb
+  sudo ln -s $(readlink -f .chef/knife.rb) $(readlink -f ~/.chef/knife.rb)
 
 #
 # build_bins.sh has already built the BCPC local repository, but we

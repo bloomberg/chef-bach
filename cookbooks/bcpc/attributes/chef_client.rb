@@ -28,8 +28,9 @@ default['chef_client']['config'].tap do |config|
   config['ssl_verify_mode'] = ':verify_none'
   config['chef_server_url'] =
     if node['fqdn'] == get_bootstrap
-      "https://#{node['bcpc']['bootstrap']['server']}"
+      "https://#{node['bcpc']['bootstrap']['server']}/organizations/#{node.environment.downcase}"
     else
+      # XXX need to configure Chef-Server for VIP (and add DNS attribute)
       "https://#{node['bcpc']['bootstrap']['vip']}"
     end
   if node['bcpc']['bootstrap']['proxy']

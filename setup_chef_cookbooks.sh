@@ -29,7 +29,7 @@ o.all_plugins(['hostname','ipaddress'])
 log_level                :info
 node_name                o[:fqdn]
 client_key               "$(pwd)/.chef/#{o[:fqdn]}.pem"
-chef_server_url          'https://${BOOTSTRAP_IP}/organizations/${ENVIRONMENT,,}'
+chef_server_url          'https://$(hostname -f)/organizations/${ENVIRONMENT,,}'
 syntax_check_cache_path  '$(pwd)/.chef/syntax_check_cache'
 cookbook_path '$(pwd)/vendor/cookbooks'
 

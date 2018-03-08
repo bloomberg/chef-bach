@@ -95,6 +95,6 @@ $SSH_CMD "cd $BCPC_DIR && sudo knife role from file roles/*.json -u admin -k /et
 $SSH_CMD "cd $BCPC_DIR && sudo knife cookbook upload -a -o vendor/cookbooks -u admin -k /etc/chef-server/admin.pem"
 
 echo "Enrolling local bootstrap node into chef"
-$SSH_CMD "cd $BCPC_DIR && ./setup_chef_bootstrap_node.sh ${IP} ${CHEF_ENVIRONMENT}"
+$SSH_CMD "cd $BCPC_DIR && source ./proxy_setup.sh && ./setup_chef_bootstrap_node.sh ${IP} ${CHEF_ENVIRONMENT}"
 
 popd

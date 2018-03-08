@@ -3,9 +3,13 @@ require 'rubygems'
 require 'chef/knife'
 require 'chef/rest'
 
-Chef::Config.from_file(File.join('/tmp/', 'knife.rb'))
+Chef::Config.from_file(ENV['HOME'], '.chef', 'knife.rb'))
+options = {
+  client_name: 'admin',
+  raw_key: File.open('/etc/chef-server/admin.pem').read
+}
 
-rest = Chef::REST.new(Chef::Config[:chef_server_url])
+rest = Chef::ServerAPI.new(Chef::Config[:chef_server_url], options)
 
 Chef::Node.list.each do |node|
   %w{read update delete grant}.each do |perm|

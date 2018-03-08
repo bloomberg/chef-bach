@@ -62,7 +62,6 @@ ruby_block 'read in keytab' do
 end
 
 chef_vault_secret 'test_user_keytab' do
-  provider ChefVaultCookbook::Provider::ChefVaultSecret
   data_bag 'os'
   raw_data ( lazy {{ 'keytab' => node.run_state['test_user_base64_keytab']}})
   search '*:*'
