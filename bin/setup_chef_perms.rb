@@ -3,7 +3,7 @@ require 'rubygems'
 require 'chef/knife'
 require 'chef/rest'
 
-Chef::Config.from_file(ENV['HOME'], '.chef', 'knife.rb'))
+Chef::Config.from_file(ENV['HOME'], '.chef', 'knife.rb')
 options = {
   client_name: 'admin',
   raw_key: File.open('/etc/chef-server/admin.pem').read
