@@ -214,14 +214,14 @@ if node.roles.include?("BCPC-Hadoop-Head-YarnTimeLineServer")
     kerberos_data[:resourcemanager][:principal] + '/' + kerberos_host + '@' +
     node[:bcpc][:hadoop][:kerberos][:realm]
 
-  yts_properties = 
+  yts_properties =
     {
       'yarn.timeline-service.version' => 1.5,
       'yarn.timeline-service.store-class' => 'org.apache.hadoop.yarn.server.timeline.EntityGroupFSTimelineStore',
       'yarn.timeline-service.entity-group-fs-store.active-dir' => "/var/log/ats/active",
       'yarn.timeline-service.entity-group-fs-store.done-dir' => "/var/log/ats/done",
       'yarn.timeline-service.entity-group-fs-store.group-id-plugin-classes' => "org.apache.tez.dag.history.logging.ats.TimelineCachePluginImpl",
-      'yarn.timeline-service.entity-group-fs-store.summary-store' => "org.apache.hadoop.yarn.server.timeline.RollingLevelDBTimelineStore", 
+      'yarn.timeline-service.entity-group-fs-store.summary-store' => "org.apache.hadoop.yarn.server.timeline.RollingLevelDBTimelineStore",
       'yarn.timeline-service.hostname' => "#{float_host(node.fqdn)}",
       'yarn.timeline-service.address' => "#{float_host(node.fqdn)}:10200",
       'yarn.timeline-service.webapp.address' =>  "#{float_host(node.fqdn)}:8188",
@@ -234,13 +234,13 @@ if node.roles.include?("BCPC-Hadoop-Head-YarnTimeLineServer")
       'yarn.timeline-service.principal' => rm_kerberos_principal,
       'yarn.timeline-service.keytab' =>
         node[:bcpc][:hadoop][:kerberos][:keytab][:dir] + '/' +
-        node[:bcpc][:hadoop][:kerberos][:data][:resourcemanager][:keytab], 
+        node[:bcpc][:hadoop][:kerberos][:data][:resourcemanager][:keytab],
       'yarn.timeline-service.http-authentication.type' => "kerberos",
       'yarn.timeline-service.http-authentication.kerberos.principal' => "HTTP/#{kerberos_host}@#{node["bcpc"]["hadoop"]["kerberos"]["realm"] }",
-      'yarn.timeline-service.http-authentication.kerberos.keytab' => 
+      'yarn.timeline-service.http-authentication.kerberos.keytab' =>
         node[:bcpc][:hadoop][:kerberos][:keytab][:dir] + '/' +
         node[:bcpc][:hadoop][:kerberos][:data][:resourcemanager][:spnego_keytab],
-   } 
+   }
   node.run_state[:yarn_site_generated_values].merge!(yts_properties)
 end
 

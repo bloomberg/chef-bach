@@ -73,6 +73,54 @@ bash 'create_Hive20_view' do
   not_if { isViewInstalled("#{node['ambari']['hive20_view_path']}", req_headers)}
 end
 
+bash 'create_WorkflowManager_view' do
+  code <<-EOH
+  curl --user #{node['ambari']['admin']['user']}:#{node['ambari']['admin']['password']} -i -H 'X-Requested-By: ambari' -X POST #{node['ambari']['ambari_views_url'] }/#{node['ambari']['wfmanager_view_path']} \
+  --data '{
+    "ViewInstanceInfo" : {
+        "description" : "Workflow Manager View",
+        "label" : "Workflow Manager",
+        "properties" : {
+        "webhdfs.client.failover.proxy.provider" : "#{node['ambari']['webhdfs.client.failover.proxy.provider']}",
+        "webhdfs.ha.namenode.http-address.nn1" : "#{node['ambari']['webhdfs.ha.namenode.http-address.nn1']}",
+        "webhdfs.ha.namenode.http-address.nn2" : "#{node['ambari']['webhdfs.ha.namenode.http-address.nn2']}",
+        "webhdfs.ha.namenode.https-address.nn1" : "#{node['ambari']['webhdfs.ha.namenode.https-address.nn1']}",
+        "webhdfs.ha.namenode.https-address.nn2" : "#{node['ambari']['webhdfs.ha.namenode.https-address.nn2']}",
+        "webhdfs.ha.namenode.rpc-address.nn1" : "#{node['ambari']['webhdfs.ha.namenode.rpc-address.nn1']}",
+        "webhdfs.ha.namenode.rpc-address.nn2" : "#{node['ambari']['webhdfs.ha.namenode.rpc-address.nn2']}",
+        "webhdfs.ha.namenodes.list" : "#{node['ambari']['webhdfs.ha.namenodes.list']}",
+        "webhdfs.nameservices" : "#{node['ambari']['webhdfs.nameservices']}",
+        "webhdfs.url" : "#{node['ambari']['webhdfs.url']}",
+        "webhdfs.auth" : "#{node['ambari']['webhdfs.auth']}",
+        "oozie.service.uri" : "#{node['ambari']['oozie.service.uri']}",
+        "hadoop.security.authentication" : "#{node['ambari']['hadoop.security.authentication']}",
+        "yarn.resourcemanager.address" : "#{node['ambari']['yarn.resourcemanager.address']}"
+        }
+      }
+  }'
+  EOH
+  not_if { isViewInstalled("#{node['ambari']['wfmanager_view_path']}", req_headers)}
+end
+
+bash 'create_TEZ_view' do
+  code <<-EOH
+  curl --user #{node['ambari']['admin']['user']}:#{node['ambari']['admin']['password']} -i -H 'X-Requested-By: ambari' -X POST #{node['ambari']['ambari_views_url'] }/#{node['ambari']['tez_view_path']} \
+  --data '{
+    "ViewInstanceInfo" : {
+        "description" : "Tez View",
+        "label" : "Tez",
+        "properties" : {
+          "yarn.ats.url" : "#{node['ambari']['yarn.ats.url']}",
+          "timeline.http.auth.type" : "#{node['ambari']['timeline.http.auth.type']}",
+          "hadoop.http.auth.type" : "#{node['ambari']['hadoop.http.auth.type']}",
+          "yarn.resourcemanager.url" : "#{node['ambari']['yarn.resourcemanager.url']}"
+        }
+      }
+  }'
+  EOH
+  not_if { isViewInstalled("#{node['ambari']['tez_view_path']}", req_headers)}
+end
+
 # node['ambari']['ambari_views_props'].each do |key, val|
 #   Chef::Log.info('settting up view '+key)
 #   http_request "#{key}" do

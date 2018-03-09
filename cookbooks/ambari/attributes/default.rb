@@ -23,9 +23,7 @@ node.default['ambari']['use_local_repo'] = 'false'
 node.default['ambari']['ambari_server_base_url'] = 'http://localhost:8080'
 node.default['ambari']['ambari_views_url'] = "#{node['ambari']['ambari_server_base_url']}/api/v1/views"
 
-
-
-
+node.default['ambari']['proxyuser'] = 'ambari'
 
 node.default['ambari']['admin']['user'] = 'admin'
 node.default['ambari']['admin']['password'] = 'admin'
@@ -70,10 +68,20 @@ node.default['ambari']['yarn.ats.url'] = 'http://localhost:8188'
 node.default['ambari']['yarn.resourcemanager.url'] = 'http://localhost:8088'
 node.default['ambari']['hive20_proxy_user'] = 'hive.server2.proxy.user=${username}'
 
+#WorkflowManager_view Attributes
+node.default['ambari']['oozie.service.uri'] = 'http://localhost:11000/oozie'
+node.default['ambari']['hadoop.security.authentication'] = 'simple'
+node.default['ambari']['wfmanager_view_path'] = 'WORKFLOW_MANAGER/versions/1.0.0/instances/WFM_NEW_INSTANCE'
+node.default['ambari']['yarn.resourcemanager.address'] = 'http://localhost:8032'
+
+#Tez views
+node.default['ambari']['tez_view_path'] = 'TEZ/versions/0.7.0.2.6.4.0-91/instances/TEZ_NEW_INSTANCE'
+node.default['ambari']['timeline.http.auth.type'] = 'simple'
+node.default['ambari']['hadoop.http.auth.type'] = 'simple'
+
+
 # Ambari Views Attributes
 node.default['ambari']['webhcat.hostname'] = 'u1203.ambari.apache.org'
 node.default['ambari']['webhcat.port'] = '50111'
-node.default['ambari']['oozie.service.uri'] = 'http://u1203.ambari.apache.org:11000/oozie'
-node.default['ambari']['hadoop.security.authentication'] = 'simple'
 node.default['ambari']['webhcat.hostname'] = 'u1203.ambari.apache.org'
 node.default['ambari']['webhcat.port'] = '50111'

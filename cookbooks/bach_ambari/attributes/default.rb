@@ -21,12 +21,15 @@ node.force_default['ambari']['webhdfs.ha.namenodes.list'] = "#{namenodes}"
 node.force_default['ambari']['webhdfs.nameservices'] = node.chef_environment
 node.force_default['ambari']['webhdfs.url'] = "webhdfs://#{node.chef_environment}"
 
-node.force_default['ambari']['proxyuser'] = 'ambari'
+ambari_proxy_user = "#{node['bcpc']['hadoop']['proxyuser']['ambari']}"
 
 if node[:bcpc][:hadoop][:kerberos][:enable]
-   node.force_default['ambari']['webhdfs.auth'] = "auth=KERBEROS;proxyuser=ambari"
+   node.force_default['ambari']['webhdfs.auth'] = "auth=KERBEROS;proxyuser=#{ambari_proxy_user}"
    node.force_default['ambari']['kerberos']['enabled'] = true
-   node.force_default['ambari']['kerberos']['principal'] = "ambari/#{float_host(node[:fqdn])}@#{node[:bcpc][:hadoop][:kerberos][:realm]}"
+   node.force_default['ambari']['kerberos']['principal'] = "#{ambari_proxy_user}/#{float_host(node[:fqdn])}@#{node[:bcpc][:hadoop][:kerberos][:realm]}"
+   node.force_default['ambari']['hadoop.security.authentication'] = 'kerberos'
+   node.force_default['ambari']['timeline.http.auth.type'] = 'kerberos'
+   node.force_default['ambari']['hadoop.http.auth.type'] = 'kerberos'
 end
 
 set_hosts
@@ -55,11 +58,26 @@ node.force_default['ambari']['yarn.resourcemanager.url'] = "#{resource_manager_u
 timeline_server = get_timeline_servers.map { |e| "http://"+ float_host(e[:hostname])+ ":#{ts_port}" }.first
 
 node.force_default['ambari']['yarn.ats.url'] = "#{timeline_server}"
+
+oozie_port = node['bcpc']['hadoop']['oozie_port']
+
+oozie_hosts = node.default['bcpc']['hadoop']['oozie_hosts']
+
+oozie_url = oozie_hosts.map { |e| 'http://'+float_host(e['hostname'])+":#{oozie_port}"  }.first
+
+if oozie_hosts.length >= 2
+  oozie_url = oozie_hosts.map { |e| 'http://'+"#{node['bcpc']['management']['vip']}"+":#{oozie_port}" }.first
+end
+
+rm_nport = node["bcpc"]["hadoop"]["yarn"]["resourcemanager"]["port"]
+rm_address = node[:bcpc][:hadoop][:rm_hosts].map{ |r| 'http://'+float_host(r[:hostname]+":#{rm_nport}")}.join(',')
+node.default['ambari']['oozie.service.uri'] = "#{oozie_url}/oozie"
+node.default['ambari']['yarn.resourcemanager.address'] = "#{rm_address}"
+
 # Ambari External Database attributes
 node.force_default['ambari']['db_type'] = 'mysql'
 
 mysql_port = node['bcpc']['hadoop']['mysql_port'] || 3306
-
 
 node.force_default['ambari']['databaseport'] = "#{mysql_port}"
 # node.force_default['ambari']['databasehost'] = mysql_hosts

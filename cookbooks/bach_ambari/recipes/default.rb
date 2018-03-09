@@ -12,7 +12,7 @@ include_recipe 'bach_ambari::mysql_server_external_setup'
 #include_recipe 'bach_ambari::ambari_kerberos'
 
 # It is required to download ambari kerberos file.
-user 'ambari' do
+user "#{node['bcpc']['hadoop']['proxyuser']['ambari']}" do
   comment 'ambari user'
 end
 
