@@ -2,7 +2,7 @@ triggers_sensitivity = '10m'
 txid_threshold = node['bcpc']['hadoop']['journalnode']['alarm']['trigger_cond']['LastWrittenTxId']
 epoch_threshold = node['bcpc']['hadoop']['journalnode']['alarm']['trigger_cond']['LastWriterEpoch']
 
-node.default['bcpc']['hadoop']['graphite']['service_queries']['journalnode'] = {
+node.set['bcpc']['hadoop']['graphite']['service_queries']['journalnode'] = {
   'journalnode.LastWrittenTxId' => {
     'query' => "rangeOfSeries(jmx.journalnode.#{node.chef_environment}.*.journal_node.Journal-#{node.chef_environment}.LastWrittenTxId)",
     'trigger_val' => "min(#{triggers_sensitivity})",
