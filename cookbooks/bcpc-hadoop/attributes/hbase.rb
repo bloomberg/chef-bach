@@ -19,6 +19,7 @@ default["bcpc"]["hadoop"]["hbase"]["dfs"]["client"]["read"]["shortcircuit"]["buf
 default["bcpc"]["hadoop"]["hbase"]["regionserver"]["handler"]["count"] = 128
 # Interval in milli seconds when HBase major compaction need to be run. Disabled by default
 default["bcpc"]["hadoop"]["hbase"]["major_compact"]["time"] = 0
+default["bcpc"]["hadoop"]["hbase"]["rsgroup"]["enabled"] = false
 default["bcpc"]["hadoop"]["hbase"]["bucketcache"]["enabled"] = false
 default["bcpc"]["hadoop"]["hbase_rs"]["coprocessor"]["abortonerror"] = true
 default["bcpc"]["hadoop"]["hbase"]["blockcache"]["size"] = 0.4
