@@ -76,6 +76,15 @@ if node[:bcpc][:hadoop][:hdfs][:ldap][:integration]
   node.run_state[:core_site_generated_values].merge!(ldap_properties)
 end
 
+subnet = node["bcpc"]["management"]["subnet"]
+network_properties = {
+  'hadoop.security.dns.interface' =>
+      node["bcpc"]["networks"][subnet]["floating"]["interface"]
+}
+
+node.run_state[:core_site_generated_values].merge!(network_properties)
+
+
 ruby_block 'node.run_state[:core_site_generated_values]' do
   block do
     mounts = node.run_state['bcpc_hadoop_disks']['mounts']
