@@ -120,11 +120,10 @@ class ClusterAssignRoles
         break
       else
         if (ii % 60).zero?
-          reindex_chef_server if ii.zero?
           puts "Waiting for nodes to appear in search results (#{search})..."
         elsif ii == (timeout - 1)
           raise "Did not find indexed roles for #{fqdn_list} " \
-                "after #{timeout} secs!"
+                "after #{timeout} secs! Reindex by hand or wait again"
         end
         sleep 1
       end
