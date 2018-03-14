@@ -108,11 +108,11 @@ module BACH
             puts "Found #{entry[:fqdn]} in search index"
             return
           else
-            if i % 61 == 0
+            if i % 60 == 0
               puts "Waiting for #{entry[:fqdn]} to appear in Chef index..."
             # the #times method counts up, not down, so i == 179 on the 180th
             # iteration.
-            elsif ii == 179
+            elsif i == 179
               raise "Did not find indexed node for #{entry[:fqdn]} " \
                 "after #{timeout} secs! Reindex by hand or wait again"
             end
