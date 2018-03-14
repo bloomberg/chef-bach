@@ -1,5 +1,3 @@
-node.default['bcpc']['hadoop']['hbase']['env'] = {}
-
 # Chef Attributes for hbase-env.sh file
 cpu_total = node['cpu']['total']
 cpu_ratio = node['bcpc']['hadoop']['hbase_rs']['gc_thread']['cpu_ratio']
@@ -38,18 +36,18 @@ node.default['bcpc']['hadoop']['hbase']['env'].tap do |hbase_env|
 
   hbase_env['HBASE_MASTER_OPTS'] =
     '$HBASE_MASTER_OPTS' + common_opts +
-    ' -Xmn' + node['bcpc']['hadoop']['hbase_master']['xmn']['size'].to_s + 'm' +
-    ' -Xms' + node['bcpc']['hadoop']['hbase_master']['xms']['size'].to_s + 'm' +
-    ' -Xmx' + node['bcpc']['hadoop']['hbase_master']['xmx']['size'].to_s + 'm' +
+    ' -Xmn' + node['bcpc']['hadoop']['hbase_master']['xmn']['size'].to_s + 'm' \
+    ' -Xms' + node['bcpc']['hadoop']['hbase_master']['xms']['size'].to_s + 'm' \
+    ' -Xmx' + node['bcpc']['hadoop']['hbase_master']['xmx']['size'].to_s + 'm' \
     ' -XX:CMSInitiatingOccupancyFraction=' + node['bcpc']['hadoop']['hbase_master']['cmsinitiatingoccupancyfraction'].to_s +
     ' -XX:HeapDumpPath=${HBASE_LOG_DIR}/heap-dump-hm-$$-$(hostname)-$(date +\'%Y%m%d%H%M\').hprof' \
     ' -XX:PretenureSizeThreshold=' + node['bcpc']['hadoop']['hbase_master']['PretenureSizeThreshold'].to_s
 
   hbase_env['HBASE_REGIONSERVER_OPTS'] =
     '$HBASE_REGION_SERVER_OPTS' + common_opts +
-    ' -Xmn' + node['bcpc']['hadoop']['hbase_rs']['xmn']['size'].to_s + 'm' +
-    ' -Xms' + node['bcpc']['hadoop']['hbase_rs']['xms']['size'].to_s + 'm' +
-    ' -Xmx' + node['bcpc']['hadoop']['hbase_rs']['xmx']['size'].to_s + 'm' +
+    ' -Xmn' + node['bcpc']['hadoop']['hbase_rs']['xmn']['size'].to_s + 'm' \
+    ' -Xms' + node['bcpc']['hadoop']['hbase_rs']['xms']['size'].to_s + 'm' \
+    ' -Xmx' + node['bcpc']['hadoop']['hbase_rs']['xmx']['size'].to_s + 'm' \
     ' -XX:CMSInitiatingOccupancyFraction=' + node['bcpc']['hadoop']['hbase_rs']['cmsinitiatingoccupancyfraction'].to_s +
     ' -XX:HeapDumpPath=${HBASE_LOG_DIR}/heap-dump-rs-$$-$(hostname)-$(date +\'%Y%m%d%H%M\').hprof' \
     ' -XX:PretenureSizeThreshold=' + node['bcpc']['hadoop']['hbase_rs']['PretenureSizeThreshold'].to_s
@@ -90,20 +88,36 @@ if node[:bcpc][:hadoop].attribute?(:jmx_enabled) && node[:bcpc][:hadoop][:jmx_en
     ' -Dcom.sun.management.jmxremote.port=' + node[:bcpc][:hadoop][:hbase_rs][:jmx][:port].to_s
 end
 
+node.run_state['hbase_master_generated_java_agents'] = [] 
+node.run_state['hbase_rs_generated_java_agents'] = [] 
 if node[:bcpc][:hadoop][:jmx_agent_enabled]
-  node.default['bcpc']['hadoop']['hbase']['env']['HBASE_MASTER_OPTS'].concat(
-    " -javaagent:#{node['bcpc']['jmxtrans_agent']['lib_file']}=" \
-    "#{node['bcpc']['hadoop']['jmxtrans_agent']['hbase_master']['xml']}"
+  # master
+  node.run_state['hbase_master_generated_java_agents'].push(
+    "#{node['bcpc']['jmxtrans_agent']['lib_file']}=#{node['bcpc']['hadoop']['jmxtrans_agent']['hbase_master']['xml']}"
   )
 
-  node.default['bcpc']['hadoop']['hbase']['env']['HBASE_REGIONSERVER_OPTS'].concat(
-    " -javaagent:#{node['bcpc']['jmxtrans_agent']['lib_file']}" \
-    "=#{node['bcpc']['hadoop']['jmxtrans_agent']['hbase_rs']['xml']}"
+  # region server
+  node.run_state['hbase_rs_generated_java_agents'].push(
+    "#{node['bcpc']['jmxtrans_agent']['lib_file']}=#{node['bcpc']['hadoop']['jmxtrans_agent']['hbase_rs']['xml']}"
   )
 end
 
+node.run_state['hbase_master_generated_java_agents'] += node['bcpc']['hadoop']['hbase']['env']['master_java_agents']
+node.run_state['hbase_rs_generated_java_agents'] += node['bcpc']['hadoop']['hbase']['env']['regionserver_java_agents']
+
 template '/etc/hbase/conf/hbase-env.sh' do
-  source 'generic_env.sh.erb'
+  source 'hdp_hbase-env.sh.erb'
   mode 0o0644
-  variables(options: node['bcpc']['hadoop']['hbase']['env'])
+  variables ({
+    java_home: node['bcpc']['hadoop']['hbase']['env']['JAVA_HOME'],
+    hbase_pid_dir: node['bcpc']['hadoop']['hbase']['env']['HBASE_PID_DIR'],
+    hbase_log_dir: node['bcpc']['hadoop']['hbase']['env']['HBASE_LOG_DIR'],
+    hbase_manages_zk: node['bcpc']['hadoop']['hbase']['env']['HBASE_MANAGES_ZK'],
+    hbase_jmx_base: node['bcpc']['hadoop']['hbase']['env']['HBASE_JMX_BASE'],
+    hbase_opts: node['bcpc']['hadoop']['hbase']['env']['HBASE_OPTS'],
+    hbase_master_opts: node['bcpc']['hadoop']['hbase']['env']['HBASE_MASTER_OPTS'],
+    hbase_regionserver_opts: node['bcpc']['hadoop']['hbase']['env']['HBASE_REGIONSERVER_OPTS'],
+    master_java_agents: node.run_state['hbase_master_generated_java_agents'].uniq,
+    regionserver_java_agents: node.run_state['hbase_rs_generated_java_agents'].uniq
+  })
 end

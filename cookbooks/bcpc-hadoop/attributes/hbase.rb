@@ -98,3 +98,8 @@ default[:bcpc][:hadoop][:hbase][:site_xml].tap do |site_xml|
   site_xml['phoenix.schema.isNamespaceMappingEnabled'] = true
   site_xml['phoenix.schema.mapSystemTablesToNamespace'] = true
 end
+
+# hbase_env attributes
+default['bcpc']['hadoop']['hbase']['env'] = {}
+default['bcpc']['hadoop']['hbase']['env']['master_java_agents'] = []
+default['bcpc']['hadoop']['hbase']['env']['regionserver_java_agents'] = []
