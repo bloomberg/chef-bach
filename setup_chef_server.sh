@@ -46,6 +46,10 @@ else
   printf "chef_server_webui['enable'] = false\n" >> /etc/chef-server/chef-server.rb
   printf "nginx['enable_non_ssl'] = false\n" >> /etc/chef-server/chef-server.rb
   printf "nginx['non_ssl_port'] = 4000\n" >> /etc/chef-server/chef-server.rb
+  # Configure Solr to index right away when we a new node.  
+  # Reference: https://docs.chef.io/config_rb_server.html#opscode-solr4
+  # Called opscode_solr4 in chef-server 12+
+  printf "chef_solr['max_commit_docs'] = 1\n" >> /etc/chef-server/chef-server.rb
   # we can take about 45 minutes to Chef the first machine when running on VMs
   # so follow tuning from CHEF-4253
   printf "erchef['s3_url_ttl'] = 3600\n" >> /etc/chef-server/chef-server.rb
