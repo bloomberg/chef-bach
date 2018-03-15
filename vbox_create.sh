@@ -56,11 +56,6 @@ if (( ${#environments[*]} > 1 )); then
   exit 1
 fi
 
-if !hash vagrant 2> /dev/null ; then
-  echo 'Vagrant not detected - we need Vagrant!' >&2
-  exit 1
-fi
-
 # The root drive on cluster nodes must allow for a RAM-sized swap volume.
 CLUSTER_VM_ROOT_DRIVE_SIZE=$((CLUSTER_VM_DRIVE_SIZE + CLUSTER_VM_MEM - 2048))
 
