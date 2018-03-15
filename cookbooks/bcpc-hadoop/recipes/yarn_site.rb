@@ -43,7 +43,7 @@ if rm_hosts.length >= 2
      'yarn.resourcemanager.cluster-id' => node.chef_environment,
      'yarn.resourcemanager.ha.enabled' => true,
      'yarn.resourcemanager.ha.rm-ids' =>
-       rm_hosts.map{ |h| "rm#{node.chef_environment}#{h[:node_id]}" }
+       rm_hosts.map{ |h| "rm#{node.chef_environment}#{h[:node_number]}" }
        .join(","),
      'yarn.resourcemanager.recovery.enabled' => true,
      'yarn.resourcemanager.store.class' =>
@@ -57,7 +57,7 @@ if rm_hosts.length >= 2
   # Using 'map', a hash is built for each host.
   # Using 'reduce', all host hashes are consolidated into a single hash.
   rm_nodes = rm_hosts.map{ |h|
-    rm_name = "rm#{node.chef_environment}#{h[:node_id]}"
+    rm_name = "rm#{node.chef_environment}#{h[:node_number]}"
     rm_target = float_host(h[:hostname])
     {
       'yarn.resourcemanager.hostname.' + rm_name =>
