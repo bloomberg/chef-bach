@@ -8,7 +8,8 @@
       "recipe[bcpc::graphite_handler]",
       "recipe[ubuntu]",
       "recipe[ntp]",
-      "recipe[bcpc::chef_client]"
+      "recipe[bcpc::chef_client]",
+      "recipe[bcpc::ssh_cert_deploy]"
     ],
     "description": "Basic server",
     "chef_type": "role",

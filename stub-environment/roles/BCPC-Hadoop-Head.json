@@ -17,7 +17,6 @@
     "recipe[bcpc::graphite]",
     "recipe[bcpc::diamond]",
     "recipe[bcpc::zabbix-head]",
-    "recipe[bcpc::ssh_cert_deploy]",
     "recipe[bcpc::ssl_cert_deploy]",
     "recipe[bcpc-hadoop::hdp_repo]",
     "recipe[bach_krb5::krb5_client]",
