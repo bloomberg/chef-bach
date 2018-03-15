@@ -4,7 +4,7 @@ default['apt']['compile_time_update'] = 'true'
 
 default['ambari']['repo_keyserver'] = 'keyserver.ubuntu.com'
 default['ambari']['repo_key'] = 'B9733A7A07513CAD'
-node.default['ambari']['ambari_server_version'] = '2.6.1.0'
+node.default['ambari']['ambari_server_version'] = '2.6.1.5'
 node.default['ambari']['os']['ubuntu_version'] = 14
 
 node.default['ambari']['ambari_ubuntu_repo_url'] = "http://public-repo-1.hortonworks.com/ambari/ubuntu#{node['ambari']['os']['ubuntu_version']}/2.x/updates/#{node['ambari']['ambari_server_version']}"
