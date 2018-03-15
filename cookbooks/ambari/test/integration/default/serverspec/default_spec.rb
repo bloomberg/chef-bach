@@ -51,20 +51,6 @@ describe 'ambari::default' do
    expect(package 'postgresql').to be_installed
  end
 
- # it 'dependency postgresql-9.1 is installed' do
- #   expect(package 'postgresql-9.1').to be_installed
- # end
-
- # it 'dependency postgresql-client-9.1 is installed' do
- #   expect(package 'postgresql-client-9.1').to be_installed
- # end
-
-# tests whether oracle java 8 is installed
- # describe file('/usr/lib/jvm/java-8-oracle-amd64') do
- #   it { should be_directory }
- #   it { should exist }
- # end
-
  describe file('/etc/ambari-server/conf/ambari.properties') do
    it { should exist }
  end
@@ -77,20 +63,4 @@ describe 'ambari::default' do
    its(:stdout) { should contain('Ambari Server running') }
  end
 
-# it 'ambari server responds on port 8080' do
-#   expect(port 8080).to be_listening 'tcp'
-# end
-
- # agent specific tests
- # describe command('ambari-agent start') do
- #  its(:stdout) { should contain('Ambari Agent successfully started') }
- # end
-
-# it 'ambari-agent responds on port 8440' do
-#   expect(port 8440).to be_listening 'tcp'
-# end
-
- # describe file('/etc/ambari-agent/conf/ambari-agent.ini') do
- #   it { should exist }
- # end
 end
