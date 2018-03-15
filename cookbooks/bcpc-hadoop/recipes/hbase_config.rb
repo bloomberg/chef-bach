@@ -137,6 +137,18 @@ if node["bcpc"]["hadoop"]["hbase"]["bucketcache"]["enabled"] == true then
   end
 end
 
+# If HBASE RS group is enabled the properties from this section will be included in hbase-site.xml
+#
+if node["bcpc"]["hadoop"]["hbase"]["rsgroup"]["enabled"] == true then
+  if generated_values['hbase.coprocessor.master.classes'].nil?
+    generated_values['hbase.coprocessor.master.classes'] = 'org.apache.hadoop.hbase.rsgroup.RSGroupAdminEndpoint'
+  else
+    generated_values['hbase.coprocessor.master.classes'] = generated_values['hbase.coprocessor.master.classes'] +
+                                                           ',org.apache.hadoop.hbase.rsgroup.RSGroupAdminEndpoint'
+  end
+  generated_values['hbase.master.loadbalancer.class'] = 'org.apache.hadoop.hbase.rsgroup.RSGroupBasedLoadBalancer'
+end
+
 #
 # if HBASE region replication is enabled the properties in this section will be included in hbase-site.xml
 #
