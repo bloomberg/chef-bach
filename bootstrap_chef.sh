@@ -97,4 +97,5 @@ $SSH_CMD "cd $BCPC_DIR && sudo knife cookbook upload -a -o vendor/cookbooks -u a
 echo "Enrolling local bootstrap node into chef"
 $SSH_CMD "cd $BCPC_DIR && source ./proxy_setup.sh && ./setup_chef_bootstrap_node.sh ${IP} ${CHEF_ENVIRONMENT}"
 
+echo "End of bootstrap_chef.sh"
 popd
