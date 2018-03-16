@@ -65,6 +65,7 @@ else
   chown root:adm /etc/chef-server/admin.pem
   chmod 550 /etc/chef-server/admin.pem
   chef-server-ctl grant-server-admin-permissions admin
+  # Do not use the org. validator PEM
   chef-server-ctl org-create ${ENVIRONMENT,,} "Chef-BACH ${ENVIRONMENT} Environment" --association_user admin > /etc/chef-server/${ENVIRONMENT,,}-validator.pem
   chef-server-ctl org-user-add ${ENVIRONMENT,,} admin
 
@@ -84,11 +85,10 @@ else
   knife node environment set $(hostname -f) ${ENVIRONMENT} -u admin \
     -k /etc/chef-server/admin.pem \
     --server-url https://$(hostname -f)/organizations/${ENVIRONMENT,,}
-  knife group create test-laptop_global_admins -u admin -k /etc/chef-server/admin.pem --server-url https://$(hostname -f)/organizations/${ENVIRONMENT,,}
+  knife group create ${ENVIRONMENT,,}_global_admins -u admin -k /etc/chef-server/admin.pem --server-url https://$(hostname -f)/organizations/${ENVIRONMENT,,}
 #  knife group add client $(hostname -f) public_key_read_access -u admin -k /etc/chef-server/admin.pem --server-url https://$(hostname -f)/organizations/${ENVIRONMENT,,}
-  knife group add client $(hostname -f) test-laptop_global_admins -u admin -k /etc/chef-server/admin.pem --server-url https://$(hostname -f)/organizations/${ENVIRONMENT,,}
+  knife group add client $(hostname -f) ${ENVIRONMENT,,}_global_admins -u admin -k /etc/chef-server/admin.pem --server-url https://$(hostname -f)/organizations/${ENVIRONMENT,,}
   knife group add client $(hostname -f) clients -u admin -k /etc/chef-server/admin.pem --server-url https://$(hostname -f)/organizations/${ENVIRONMENT,,}
-  knife exec bin/setup_chef_perms.rb
 fi
 
 # copy our ssh-key to be authorized for root

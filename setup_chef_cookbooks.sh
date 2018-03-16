@@ -62,5 +62,10 @@ ENV['GIT_SSL_NO_VERIFY'] = 'true'
 EOF
 fi # end of [[ ! -f .chef/knife.rb ]]
 
+# we do not want any knife.rb in our current directory
+pushd /
+sudo knife exec /home/vagrant/chef-bcpc/bin/setup_chef_perms.rb
+popd
+
 mkdir -p ./vendor
 /opt/chefdk/bin/berks vendor ./vendor/cookbooks

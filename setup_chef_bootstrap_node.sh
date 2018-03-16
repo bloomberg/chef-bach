@@ -18,9 +18,6 @@ CHEF_ENVIRONMENT=$2
 # Assume we are running in the chef-bcpc directory
 sudo chown $(whoami):root /etc/chef/client.pem
 sudo chmod 550 /etc/chef/client.pem
-PEM_RELATIVE_PATH=.chef/$(hostname -f).pem
-[ ! -L $PEM_RELATIVE_PATH ] && \
-  sudo ln -s /etc/chef/client.pem $(readlink -f $PEM_RELATIVE_PATH)
 # It looks like knife fetch fails if the .chef directory is a symlink
 # One gets:
 # ERROR: Errno::EEXIST: File exists @ dir_s_mkdir - /home/vagrant/.chef
@@ -28,6 +25,12 @@ PEM_RELATIVE_PATH=.chef/$(hostname -f).pem
   sudo ln -s /etc/chef/client.pem $(readlink -f ~/.chef/$(hostname -f).pem)
 [ ! -L ~/.chef/knife.rb ] && \
   sudo ln -s $(readlink -f .chef/knife.rb) $(readlink -f ~/.chef/knife.rb)
+
+# Knife explodes for root if knife.rb is missing for root
+[ ! -L /root/.chef/$(hostname -f).pem ] && \
+  sudo ln -s /etc/chef/client.pem /root/.chef/(hostname -f).pem
+[ ! -L /root/.chef/knife.rb ] && \
+  sudo ln -s $(readlink -f .chef/knife.rb) /root/.chef/knife.rb
 
 #
 # build_bins.sh has already built the BCPC local repository, but we
