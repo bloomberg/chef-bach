@@ -59,7 +59,7 @@ end
 chef_vault_secret 'ssh' do
   data_bag 'os'
   raw_data(lazy { { 'private-key' => node.run_state['new_ssh_private_key'] } })
-  admins "#{all_nodes},#{bootstrap}"
+  admins "#{all_nodes},#{bootstrap},admin"
   search '*:*'
   action :nothing
 end
@@ -143,7 +143,7 @@ end
 chef_vault_secret 'ssl' do
   data_bag 'os'
   raw_data(lazy { { 'private-key' => node.run_state['new_ssl_private_key'] } })
-  admins "#{all_nodes},#{bootstrap}"
+  admins "#{all_nodes},#{bootstrap},admin"
   search '*:*'
   action :nothing
 end

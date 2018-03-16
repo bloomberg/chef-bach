@@ -38,7 +38,7 @@ chef_vault_secret 'cobbler' do
   raw_data('web-password' => web_password,
            'root-password' => root_password,
            'root-password-salted' => root_password_salted)
-  admins node[:fqdn]
+  admins [node[:fqdn], 'admin']
   search '*:*'
   action :create_if_missing
 end
