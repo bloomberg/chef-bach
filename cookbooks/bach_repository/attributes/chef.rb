@@ -1,8 +1,8 @@
 default['bach']['repository']['chefdk']['url'] = \
-  'https://packages.chef.io/files/stable/chefdk/2.4.17/ubuntu/' \
-  '14.04/chefdk_1.6.11-1_amd64.deb'
+  'https://packages.chef.io/files/stable/chefdk/2.5.3/ubuntu/' \
+  '14.04/chefdk_2.5.3-1_amd64.deb'
 default['bach']['repository']['chefdk']['sha256'] = \
-  'a89f0ef2a8edbefbbf4cb14d8d97f83e9227fff35f2d80fb45b03604c91a207b'
+  'b6cd2c84e2ecbf35238dd6c360eadbab89f44e1c5a7b54430828529fa403204f'
 default['bach']['repository']['chef']['url'] = \
   'https://packages.chef.io/repos/apt/stable/ubuntu/' \
   '14.04/chef_12.21.31-1_amd64.deb'

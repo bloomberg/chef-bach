@@ -17,8 +17,15 @@ sudo_user = node['bcpc']['bootstrap']['admin']['user']
 # XXX the below keeps breaking Chef12
 # knife default['ohai']['disabled_plugins'] = [ 'passwd' ]
 
+# The bootstrap's Vagrant box comes installed with Chef 11; do not use it
+if node['fqdn'] == get_bootstrap
+  default['chef_client']['bin'] = '/opt/chefdk/bin/chef-client'
+end
 # FIXME No longer needed in chef-client 13.2+
 default['chef_client']['log_rotation']['postrotate'] = '/etc/init.d/chef-client restart >/dev/null || :'
+# Support validatorless bootstrap
+node.rm('chef_client', 'config', 'validation_client_name')
+
 default['chef_client']['config'].tap do |config|
   config['log_level'] = ':info'
   config['log_location'] = 'STDOUT'

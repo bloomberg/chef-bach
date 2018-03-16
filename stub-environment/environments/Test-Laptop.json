@@ -103,7 +103,6 @@
          "ssl_verify_mode": "verify_none"
       },
       "backup_path": "/var/chef/backup",
-      "validation_client_name": "chef-validator",
       "run_path": "/var/chef"
     }
   },
