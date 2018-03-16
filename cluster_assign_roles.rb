@@ -337,6 +337,8 @@ class ClusterAssignRoles
                            '--no-node-verify-api-cert',
                            '--no-host-key-verify',
                            '-N', node[:fqdn],
+                           '-u', 'admin',
+                           '-k', '/etc/chef-server/admin.pem',
                            '--bootstrap-vault-json', vault_json,
                            node[:ip_address])
     cc.run_command
