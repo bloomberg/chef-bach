@@ -114,7 +114,9 @@ module BACH
             # iteration.
             elsif i == 179
               raise "Did not find indexed node for #{entry[:fqdn]} " \
-                "after #{timeout} secs! Reindex by hand or wait again"
+                "after #{timeout} secs! Reindex by hand or wait again.\n" \
+                'WARNING: Reindex is a dangerous cluster operation. Refer '\
+                'to runbooks for details.'
             end
             sleep 1
           end

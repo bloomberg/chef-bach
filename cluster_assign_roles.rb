@@ -123,7 +123,9 @@ class ClusterAssignRoles
           puts "Waiting for nodes to appear in search results (#{search})..."
         elsif ii == (timeout - 1)
           raise "Did not find indexed roles for #{fqdn_list} " \
-                "after #{timeout} secs! Reindex by hand or wait again"
+                "after #{timeout} secs! Reindex by hand or wait again\n" \
+                'WARNING: Reindex is a dangerous cluster operation. Refer '\
+                'to runbooks for details.'
         end
         sleep 1
       end
