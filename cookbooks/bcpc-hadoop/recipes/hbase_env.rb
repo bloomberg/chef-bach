@@ -88,8 +88,8 @@ if node[:bcpc][:hadoop].attribute?(:jmx_enabled) && node[:bcpc][:hadoop][:jmx_en
     ' -Dcom.sun.management.jmxremote.port=' + node[:bcpc][:hadoop][:hbase_rs][:jmx][:port].to_s
 end
 
-node.run_state['hbase_master_generated_java_agents'] = [] 
-node.run_state['hbase_rs_generated_java_agents'] = [] 
+node.run_state['hbase_master_generated_java_agents'] = []
+node.run_state['hbase_rs_generated_java_agents'] = []
 if node[:bcpc][:hadoop][:jmx_agent_enabled]
   # master
   node.run_state['hbase_master_generated_java_agents'].push(
@@ -108,16 +108,18 @@ node.run_state['hbase_rs_generated_java_agents'] += node['bcpc']['hadoop']['hbas
 template '/etc/hbase/conf/hbase-env.sh' do
   source 'hdp_hbase-env.sh.erb'
   mode 0o0644
-  variables ({
-    java_home: node['bcpc']['hadoop']['hbase']['env']['JAVA_HOME'],
-    hbase_pid_dir: node['bcpc']['hadoop']['hbase']['env']['HBASE_PID_DIR'],
-    hbase_log_dir: node['bcpc']['hadoop']['hbase']['env']['HBASE_LOG_DIR'],
-    hbase_manages_zk: node['bcpc']['hadoop']['hbase']['env']['HBASE_MANAGES_ZK'],
-    hbase_jmx_base: node['bcpc']['hadoop']['hbase']['env']['HBASE_JMX_BASE'],
-    hbase_opts: node['bcpc']['hadoop']['hbase']['env']['HBASE_OPTS'],
-    hbase_master_opts: node['bcpc']['hadoop']['hbase']['env']['HBASE_MASTER_OPTS'],
-    hbase_regionserver_opts: node['bcpc']['hadoop']['hbase']['env']['HBASE_REGIONSERVER_OPTS'],
-    master_java_agents: node.run_state['hbase_master_generated_java_agents'].uniq,
-    regionserver_java_agents: node.run_state['hbase_rs_generated_java_agents'].uniq
-  })
+  variables (
+    {
+      java_home: node['bcpc']['hadoop']['hbase']['env']['JAVA_HOME'],
+      hbase_pid_dir: node['bcpc']['hadoop']['hbase']['env']['HBASE_PID_DIR'],
+      hbase_log_dir: node['bcpc']['hadoop']['hbase']['env']['HBASE_LOG_DIR'],
+      hbase_manages_zk: node['bcpc']['hadoop']['hbase']['env']['HBASE_MANAGES_ZK'],
+      hbase_jmx_base: node['bcpc']['hadoop']['hbase']['env']['HBASE_JMX_BASE'],
+      hbase_opts: node['bcpc']['hadoop']['hbase']['env']['HBASE_OPTS'],
+      hbase_master_opts: node['bcpc']['hadoop']['hbase']['env']['HBASE_MASTER_OPTS'],
+      hbase_regionserver_opts: node['bcpc']['hadoop']['hbase']['env']['HBASE_REGIONSERVER_OPTS'],
+      master_java_agents: node.run_state['hbase_master_generated_java_agents'].uniq,
+      regionserver_java_agents: node.run_state['hbase_rs_generated_java_agents'].uniq
+    }
+  )
 end
