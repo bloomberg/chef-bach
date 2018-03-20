@@ -76,6 +76,14 @@ include_recipe 'bcpc-hadoop::jolokia'
 # Add the jolokia agent to the Kafka broker's launch options
 node.default[:kafka][:generic_opts] = node[:bcpc][:jolokia][:jvm_args]
 
+#
+# Increase the default ZK client message maximum via jute.maxbuffer
+# system property.  Large topic/partition counts require >1MB
+# messages.
+#
+node.default[:kafka][:generic_opts] +=
+  " -Djute.maxbuffer=#{node[:bcpc][:hadoop][:jute][:maxbuffer] rescue 0xfffff}"
+
 # Increase the default FD limit -- kafka opens a lot of sockets.
 node.default[:kafka][:ulimit_file] = 32_768
 
