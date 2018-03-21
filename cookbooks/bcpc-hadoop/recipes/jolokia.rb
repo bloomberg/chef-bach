@@ -25,6 +25,9 @@
 #
 
 include_recipe 'bcpc-hadoop::maven_config'
+lib_file = node['bcpc']['jolokia']['jar_path']
+lib_file_name = Pathname.new(lib_file).basename.to_s
+src_file_url = File.join(get_binary_server_url, lib_file_name)
 
 directory File.dirname(node['bcpc']['jolokia']['jar_path']) do
   mode 0555
@@ -34,13 +37,11 @@ directory File.dirname(node['bcpc']['jolokia']['jar_path']) do
   action :create
 end
 
-maven 'jolokia-jvm' do
-  group_id 'org.jolokia'
-  version  '1.3.7'
-  dest File.dirname(node['bcpc']['jolokia']['jar_path'])
-  classifier 'agent'
-  action :put
-  timeout 1800
+remote_file lib_file.to_s do
+  source src_file_url
+  owner 'ubuntu'
+  group 'ubuntu'
+  mode '0755'
 end
 
 directory File.dirname(node['bcpc']['jolokia']['policy_path']) do

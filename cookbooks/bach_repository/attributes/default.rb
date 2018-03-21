@@ -76,6 +76,9 @@ default['bcpc']['hadoop']['java'] = "/usr/lib/jvm/java-8-oracle-amd64"
 default['bach']['repository']['jmxtrans_agent']['download_url'] = 'https://github.com/jmxtrans/jmxtrans-agent/releases/download/jmxtrans-agent-1.2.5/jmxtrans-agent-1.2.5.jar'
 default['bach']['repository']['jmxtrans_agent']['checksum'] = 'd351ac0b863ffb2742477001296f65cbca6f8e9bb5bec3dc2194c447d838ae17'
 
+# jolokia-agent (https://github.com/rhuss/jolokia)
+default['bach']['repository']['jolokia_agent']['download_url'] = 'https://github.com/rhuss/jolokia/releases/download/v1.5.0/jolokia-1.5.0-bin.tar.gz'
+
 # OpenTSDB deb package details
 default['bach']['repository']['opentsdb']['version'] = '2.3.0'
 default['bach']['repository']['opentsdb']['package_name'] = "opentsdb-#{node['bach']['repository']['opentsdb']['version']}_all.deb"
