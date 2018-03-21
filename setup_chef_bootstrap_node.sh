@@ -21,16 +21,18 @@ sudo chmod 550 /etc/chef/client.pem
 # It looks like knife fetch fails if the .chef directory is a symlink
 # One gets:
 # ERROR: Errno::EEXIST: File exists @ dir_s_mkdir - /home/vagrant/.chef
-[ ! -L ~/.chef/$(hostname -f).pem ] && \
-  sudo ln -s /etc/chef/client.pem $(readlink -f ~/.chef/$(hostname -f).pem)
-[ ! -L ~/.chef/knife.rb ] && \
-  sudo ln -s $(readlink -f .chef/knife.rb) $(readlink -f ~/.chef/knife.rb)
+[ ! -L $(pwd)/.chef/$(hostname -f).pem ] && \
+  sudo ln -s /etc/chef/client.pem $(pwd)/.chef/$(hostname -f).pem
+[ ! -L /home/vagrant/.chef/knife.rb ] && \
+  sudo ln -s $(pwd)/.chef/knife.rb /home/vagrant/.chef/knife.rb
 
 # Knife explodes for root if knife.rb is missing for root
-[ ! -L /root/.chef/$(hostname -f).pem ] && \
-  sudo ln -s /etc/chef/client.pem /root/.chef/(hostname -f).pem
-[ ! -L /root/.chef/knife.rb ] && \
-  sudo ln -s $(readlink -f .chef/knife.rb) /root/.chef/knife.rb
+sudo mkdir -p /root/.chef
+sudo chmod -R 700 /root/.chef
+[ ! sudo test -L /root/.chef/$(hostname -f).pem ] && \
+  sudo ln -s /etc/chef/client.pem /root/.chef/$(hostname -f).pem
+[ ! sudo test -L /root/.chef/knife.rb ] && \
+  sudo ln -s $(pwd)/.chef/knife.rb /root/.chef/knife.rb
 
 #
 # build_bins.sh has already built the BCPC local repository, but we
