@@ -408,7 +408,7 @@ index d844783..9a9e53a 100644
 +      "include_source_packages": false
 +    },
      "chef_client": {
-       "server_url": "http://10.0.100.3:4000",
+       "server_url": "http://bcpc-bootstrap.bcpc.example.com:4000",
        "cache_path": "/var/chef/cache",
 ```
 
