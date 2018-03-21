@@ -34,7 +34,6 @@ default['bcpc']['hadoop']['hdfs']['dfs_blocksize'] = '128m'
 default['bcpc']['hadoop']['hdfs_url'] = "hdfs://#{node.chef_environment}"
 default['bcpc']['hadoop']['jmx_enabled'] = false
 default['bcpc']['hadoop']['jmx_agent_enabled'] = true
-default['bcpc']['hadoop']['java_https_keystore'] = '/usr/local/maven/conf/keystore'
 
 # for jvmkill library
 default['bcpc-hadoop']['jvmkill']['lib_file'] = '/var/lib/jvmkill/libjvmkill.so'
@@ -171,3 +170,7 @@ default['java']['oracle']['jce']['8']['url'] = get_binary_server_url + jce_tgz_n
 
 # Set the JAVA_HOME for Hadoop components
 default['bcpc']['hadoop']['java'] = '/usr/lib/jvm/java-8-oracle-amd64'
+
+# See bcpc-hadoop::ssl_configuration
+default['bcpc']['hadoop']['java_ssl']['keystore'] = '/etc/bach/tls/keystore'
+default['bcpc']['hadoop']['java_ssl']['password'] = 'changeit'
