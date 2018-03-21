@@ -63,6 +63,6 @@ NameVirtualHost <%="#{node[:bcpc][:management][:ip]}"%>:443
     </Location>
 
     SSLEngine on
-    SSLCertificateFile /etc/ssl/certs/ssl-bcpc.pem
-    SSLCertificateKeyFile /etc/ssl/private/ssl-bcpc.key
+    SSLCertificateFile <%= "#{node[:bcpc][:ssl][:pem_file]}" %>
+    SSLCertificateKeyFile <%= "#{node[:bcpc][:ssl][:key_file]}" %>
 </VirtualHost>
