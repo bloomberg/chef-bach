@@ -20,6 +20,11 @@ else
     exit 1
 fi
 
+# Add in our Chef-Server's hostname to /etc/hosts if we can not resolve it
+if ! getent hosts <%= @chef_server_fqdn %>; then
+  echo "<%= "#{@chef_server_ip}\t#{@chef_server_fqdn}" %>" >> /etc/hosts
+fi
+
 # Remove rubygems and install only our gemserver
 /opt/chef/embedded/bin/gem sources --add http://<%= node['bach']['repository']['gem_server'] %>/ || (echo "Failed to add local Gem repo")
 /opt/chef/embedded/bin/gem sources --remove http://rubygems.org/ || true

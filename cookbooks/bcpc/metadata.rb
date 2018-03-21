@@ -8,7 +8,6 @@ version          '0.1.0'
 
 depends 'apt'
 depends 'bfd'
-depends 'bach_repository'
 depends 'build-essential'
 depends 'chef-client'
 depends 'chef-vault', '~>3.0'

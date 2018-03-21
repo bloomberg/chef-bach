@@ -110,7 +110,7 @@ end
 default['bcpc']['bootstrap']['interface'] = 'eth0'
 default['bcpc']['bootstrap']['pxe_interface'] = 'eth1'
 default['bcpc']['bootstrap']['server'] = '10.0.100.3'
-default['bcpc']['bootstrap']['vip'] = node['bcpc']['bootstrap']['server']
+default['bcpc']['bootstrap']['vip'] = "#{node['bcpc']['bootstrap']['hostname']}.#{node['bcpc']['domain_name']}"
 default['bcpc']['bootstrap']['dhcp_range'] = '10.0.100.14 10.0.100.250'
 default['bcpc']['bootstrap']['dhcp_subnet'] = '10.0.100.0'
 default['bcpc']['bootstrap']['cluster_def_path'] = '/cluster-def/'

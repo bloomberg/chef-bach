@@ -15,3 +15,5 @@ default['bach']['repository']['chef_server']['url'] = \
 default['bach']['repository']['chef_server']['sha256'] = \
   '2800962092ead67747ed2cd2087b0e254eb5e1a1b169cdc162c384598e4caed5'
 default['bach']['repository']['chef_url_base'] = 'https://packages.chef.io/repos/apt/stable/ubuntu/14.04/'
+default['bach']['repository']['chef_server_ip'] = '127.0.0.1'
+default['bach']['repository']['chef_server_fqdn'] = 'localhost'

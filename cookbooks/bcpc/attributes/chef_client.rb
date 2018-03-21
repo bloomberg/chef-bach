@@ -35,10 +35,10 @@ default['chef_client']['config'].tap do |config|
   config['ssl_verify_mode'] = ':verify_none'
   config['chef_server_url'] =
     if node['fqdn'] == get_bootstrap
-      "https://#{node['bcpc']['bootstrap']['server']}/organizations/#{node.environment.downcase}"
+      "https://#{[node['bcpc']['bootstrap']['hostname'], node['bcpc']['domain_name']].join('.')}/organizations/#{node.environment.downcase}"
     else
       # XXX need to configure Chef-Server for VIP (and add DNS attribute)
-      "https://#{node['bcpc']['bootstrap']['vip']}"
+      "https://#{node['bcpc']['bootstrap']['vip']}/organizations/#{node.environment.downcase}"
     end
   if node['bcpc']['bootstrap']['proxy']
     config['http_proxy'] = node['bcpc']['bootstrap']['proxy']
