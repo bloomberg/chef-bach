@@ -277,7 +277,7 @@ end
 bash 'create-hdfs-temp' do
   code "#{hdfs_cmd} dfs -mkdir /tmp; #{hdfs_cmd} dfs -chmod -R 1777 /tmp"
   user 'hdfs'
-  not_if 'sudo -u hdfs #{hdfs_cmd} dfs -test -d /tmp'
+  not_if "sudo -u hdfs #{hdfs_cmd} dfs -test -d /tmp"
 end
 
 bash 'create-hdfs-applogs' do
