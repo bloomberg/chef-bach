@@ -30,19 +30,7 @@ bootstrap = get_bootstrap
 key = OpenSSL::PKey::RSA.new 2048;
 
 results = get_all_nodes.map!{ |x| x['fqdn'] }.join(",")
-nodes = results == "" ? node['fqdn'] : results
-
-ruby_block "initialize-ssh-keys" do
-    block do
-        require 'net/ssh'
-        pubkey = "#{key.ssh_type} #{[ key.to_blob ].pack('m0')}"
-        make_config('ssh-public-key', pubkey)
-        if get_config('ssl-certificate').nil? && get_config('certificate','ssl','os').nil? then
-            node.set[:temp][:value] = %x[openssl req -config /tmp/openssl.cnf -extensions v3_req -new -x509 -passout pass:temp_passwd -newkey rsa:4096 -out /dev/stdout -keyout /dev/stdout -days 1095 -subj "/C=#{node['bcpc']['country']}/ST=#{node['bcpc']['state']}/L=#{node['bcpc']['location']}/O=#{node['bcpc']['organization']}/OU=#{node['bcpc']['region_name']}/CN=#{node['bcpc']['domain_name']}/emailAddress=#{node['bcpc']['admin_email']}"]
-        end
-    end
-    notifies :create, 'ruby_block[chef_vault_secret]', :immediately
-end
+all_nodes = results == "" ? node['fqdn'] : results
 
 # ----------------------------- SSH ------------------------------
 ruby_block 'generate-ssh-keypair' do
