@@ -32,7 +32,7 @@ end
 ruby_block 'update-cacertificate-list' do
   block do
     Chef::Log.info('Updating ca-certificate list')
-    ca_certs_update_cmd = Mixlib::ShellOut.new('sudo update-ca-certificates')
+    ca_certs_update_cmd = Mixlib::ShellOut.new('sudo update-ca-certificates --fresh')
     ca_certs_update_cmd.run_command
     raise "Updating ca-certificate list failed, #{ca_certs_update_cmd.error}" if ca_certs_update_cmd.error!
     Chef::Log.info('Updating ca-certificate returned #{ca_certs_update_cmd.stdout')
