@@ -285,6 +285,56 @@ class ClusterAssignRoles
     end
   end
 
+  def permission_host(node)
+    puts "#{node[:fqdn]}: Permissioning node #{node[:fqdn]}"
+
+    # Allow node to modify nodes
+    cc =
+      Mixlib::ShellOut.new('/usr/bin/knife', 'exec',
+                           '/home/vagrant/chef-bcpc/bin/setup_chef_perms.rb',
+                           '-k', '/etc/chef-server/admin.pem',
+                           '-u', 'admin')
+    cc.run_command
+
+    if !cc.status.success?
+      puts cc.stdout
+      $stderr.puts cc.stderr
+      cc.error!
+    end
+
+    # Allow node to create databags
+    cc =
+      Mixlib::ShellOut.new('/usr/bin/knife', 'acl',
+                           'add', 'client', node[:fqdn],
+                           'containers', 'data', 'create,update,delete,grant',
+                           '-k', '/etc/chef-server/admin.pem',
+                           '-u', 'admin')
+    cc.run_command
+
+    if !cc.status.success?
+      puts cc.stdout
+      $stderr.puts cc.stderr
+      cc.error!
+    end
+
+    # Allow node to modify existing databags
+    cc =
+      Mixlib::ShellOut.new('/usr/bin/knife', 'acl', '-y',
+                           'bulk', 'add', 'client', node[:fqdn],
+                           'data', '.*', 'create,update,delete,grant',
+                           '-k', '/etc/chef-server/admin.pem',
+                           '-u', 'admin')
+    cc.run_command
+
+    if !cc.status.success?
+      puts cc.stdout
+      $stderr.puts cc.stderr
+      cc.error!
+    end
+    puts "#{node[:fqdn]}: Chef permissioning successful"
+
+  end
+
   #
   #
   # install_stub uses knife bootstrap to configure chef-client,
@@ -298,6 +348,9 @@ class ClusterAssignRoles
   #
   # Calling install_stub on an already-installed node may upgrade chef
   # and re-set its runlist, but is otherwise harmless.
+  #
+  # Raises: on error
+  # Returns: nothing
   #
   def install_stub(node:, runlist: 'recipe[bcpc::ssh]')
     puts "#{node[:fqdn]}: Installing and configuring chef"
@@ -326,7 +379,7 @@ class ClusterAssignRoles
       Mixlib::ShellOut.new('sudo', '/opt/chefdk/bin/knife', 'bootstrap',
                            '-y',
                            '-E', chef_environment_name,
-                           '-r', runlist,
+                           '-r', 'recipe[bcpc::default]',
                            '-x', 'ubuntu',
                            '-P', cobbler_root_password,
                            '--bootstrap-wget-options', '-e use_proxy=no',
@@ -350,8 +403,10 @@ class ClusterAssignRoles
       $stderr.puts cc.stderr
       cc.error!
     end
+ 
+    permission_host(node)
 
-    cc.status
+    chef_node_with_runlist(node: node, runlist: runlist, override: false)
   end
 
   def install_stubs(target_nodes)
