@@ -1,6 +1,6 @@
 default['bcpc']['hadoop']['jmxtrans_agent']['collect_interval_in_seconds'] = 15
 
- default['bcpc']['hadoop']['jmxtrans_agent']['output_writers'] = %w(graphite)
+default['bcpc']['hadoop']['jmxtrans_agent']['output_writers'] = %w(graphite)
 
 default['bcpc']['hadoop']['jmxtrans_agent']['graphite'].tap do |graphite|
   graphite['class'] = 'org.jmxtrans.agent.GraphitePlainTextTcpOutputWriter'
@@ -819,6 +819,16 @@ default['bcpc']['hadoop']['jmxtrans_agent']['hbase_master']['queries'] = default
   }
 ]
 
+# HBase region server regions
+default['bcpc']['hadoop']['jmxtrans_agent']['hbase_rs_regions']['xml'] = '/etc/hadoop/conf/jmxtrans_agent_hbase_rs_regions.xml'
+default['bcpc']['hadoop']['jmxtrans_agent']['hbase_rs_regions']['name_prefix'] = 'jmx.hbase_regions'
+default['bcpc']['hadoop']['jmxtrans_agent']['hbase_rs_regions']['queries'] = [
+  {
+    'objectName' => 'Hadoop:service=HBase,name=RegionServer,sub=Regions,*',
+    'resultAlias' => 'hb_regions.%name%.#attribute#',
+    'attributes' => ''
+  }
+]
 # HBase region server
 default['bcpc']['hadoop']['jmxtrans_agent']['hbase_rs']['xml'] = '/etc/hadoop/conf/jmxtrans_agent_hbase_rs.xml'
 default['bcpc']['hadoop']['jmxtrans_agent']['hbase_rs']['name_prefix'] = 'jmx.hbase_rs'
@@ -832,11 +842,6 @@ default['bcpc']['hadoop']['jmxtrans_agent']['hbase_rs']['queries'] = default['bc
     'objectName' => 'Hadoop:name=RegionServer,service=HBase,sub=IPC',
     'resultAlias' => 'hb_ipc.%name%.#attribute#',
     'attributes' => hbase_ipc_metrics
-  },
-  {
-    'objectName' => 'Hadoop:service=HBase,name=RegionServer,sub=Regions,*',
-    'resultAlias' => 'hb_regions.%name%.#attribute#',
-    'attributes' => ''
   },
   {
     'objectName' => 'Hadoop:service=HBase,name=RegionServer,sub=Replication,*',
