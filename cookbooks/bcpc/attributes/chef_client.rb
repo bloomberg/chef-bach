@@ -51,8 +51,7 @@ default['chef_client']['config'].tap do |config|
   # to use the gem mirror intended for cluster nodes
   #
   unless node['fqdn'] == get_bootstrap
-    config['rubygems_url'] = \
-      "http://#{node['bach']['repository']['gem_server']}/"
+    config['rubygems_url'] = node['bach']['repository']['gem_server']
   end
 
   #

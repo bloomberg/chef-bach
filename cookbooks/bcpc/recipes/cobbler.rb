@@ -160,7 +160,7 @@ end
 template '/etc/cobbler/dhcp.template' do
   source 'cobbler/dhcp.template.erb'
   mode 0644
-  variables(subnets: node[:bcpc][:networks])
+  variables(subnets: node[:bcpc][:networks], bootstrap_vip_ip: node['bcpc']['bootstrap']['vip'])
   notifies :run, 'bash[cobbler-sync]', :delayed
 end
 

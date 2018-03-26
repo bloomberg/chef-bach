@@ -223,7 +223,9 @@ manage_reverse_zones: []
 # if you do not set this correctly, this will be manifested in TFTP open timeouts.
 next_server: <%=
   require 'socket'
-  IPSocket.getaddress(node['bcpc']['bootstrap']['vip'])
+  server = IPSocket.getaddress(node['bcpc']['bootstrap']['vip'])
+  server = node['bcpc']['bootstrap']['server'] if server == '127.0.0.1'
+  server
 %>
 
 # settings for power management features.  optional.
