@@ -43,6 +43,13 @@ if node['ambari']['kerberos']['enabled']
     owner 'root'
     group 'root'
     mode '0755'
+    variables(
+      lazy {
+        {
+          ambari_principal: node['ambari']['kerberos']['principal']
+        }
+      }
+    )
   end
 end
 

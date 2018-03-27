@@ -1,6 +1,6 @@
 #
 # Cookbook :: bach_ambari
-# Spec :: mysql_server_external_setup
+# Recipe :: mysql_server_external_setup
 # Copyright 2018, Bloomberg Finance L.P.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
