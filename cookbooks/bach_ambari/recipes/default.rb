@@ -16,6 +16,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+
 namenodes_cach = get_namenodes
 # FILES
 namenodes = namenodes_cach.select{ |nn| nn[:bcpc][:node_number] }.map{ |nn| "namenode#{nn[:bcpc][:node_number]}" }.join(',')
@@ -88,6 +89,11 @@ rm_nport = node["bcpc"]["hadoop"]["yarn"]["resourcemanager"]["port"]
 rm_address = node[:bcpc][:hadoop][:rm_hosts].map{ |r| 'http://'+float_host(r[:hostname]+":#{rm_nport}")}.join(',')
 node.default['ambari']['oozie.service.uri'] = "#{oozie_url}/oozie"
 node.default['ambari']['yarn.resourcemanager.address'] = "#{rm_address}"
+
+# install mysql jdbc driver
+package 'mysql-connector-java' do
+  action :upgrade
+end
 
 # configure ambari-server reposiory and installs ambari server.
 include_recipe 'ambari::default'

@@ -20,7 +20,7 @@
 
 
 # dependencies
-%w(openssh-client wget curl unzip tar python2.7 openssl libpq5 ssl-cert mysql-client).each do |pkg|
+%w(openssh-client wget curl unzip tar python2.7 openssl libpq5 ssl-cert).each do |pkg|
   package pkg do
   end
 end
