@@ -340,7 +340,9 @@ scm_track_mode: "git"
 # of the manpage for how that works.
 server: <%=
   require 'socket'
-  IPSocket.getaddress(node['bcpc']['bootstrap']['vip'])
+  server = IPSocket.getaddress(node['bcpc']['bootstrap']['vip'])
+  server = node['bcpc']['bootstrap']['server'] if server == '127.0.0.1'
+  server
 %>
 
 # this is a directory of files that cobbler uses to make
