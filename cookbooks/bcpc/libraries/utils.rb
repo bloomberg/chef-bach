@@ -224,6 +224,15 @@ def get_head_node_names
   end.compact.sort
 end
 
+# returns a list of head nodes local IPs
+# NOTE: 1. is supposed to obtain from cluster.txt
+#       2. the ip list is sorted
+def get_static_head_node_local_ip_list
+  get_head_nodes.map do |nn|
+    nn[:ip_address]
+  end.compact.sort
+end
+
 def get_nodes_for(recipe, cookbook=cookbook_name)
   results = Chef::Search::Query.new.search(
     :node, "recipes:#{cookbook}\\:\\:#{recipe} AND " \

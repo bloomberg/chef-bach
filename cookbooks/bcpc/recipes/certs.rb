@@ -74,17 +74,16 @@ end
 # 2. head nodes machine IP and hostnames
 ip_list = [node['bcpc']['management']['vip']]
 dns_list = [node['bcpc']['management']['viphost']]
-headnodes = get_head_nodes
-headnodes.each do |hh|
-  ip = hh['bcpc']['management']['ip']
+
+get_static_head_node_local_ip_list.each do |ip|
   ip_list.push(ip) unless ip.nil?
-  fqdn = hh['fqdn']
+end
+
+get_head_node_names.each do |fqdn|
   dns_list.push(fqdn) unless fqdn.nil?
 end
 
-ip_list.sort!
 Chef::Log.info("ssl-keypair: IP list=#{ip_list}")
-dns_list.sort!
 Chef::Log.info("ssl-keypair: DNS list=#{dns_list}")
 
 # construct the config file for generating the ssl keypair
