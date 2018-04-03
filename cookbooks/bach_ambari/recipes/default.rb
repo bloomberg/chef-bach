@@ -76,13 +76,14 @@ timeline_server = get_timeline_servers.map { |e| "http://"+ float_host(e[:hostna
 node.force_default['ambari']['yarn.ats.url'] = "#{timeline_server}"
 
 oozie_port = node['bcpc']['hadoop']['oozie_port']
+oozie_ha_port = node['bcpc']['ha_oozie']['port']
 
 oozie_hosts = node.default['bcpc']['hadoop']['oozie_hosts']
 
 oozie_url = oozie_hosts.map { |e| 'http://'+float_host(e['hostname'])+":#{oozie_port}"  }.first
 
 if oozie_hosts.length >= 2
-  oozie_url = oozie_hosts.map { |e| 'http://'+"#{node['bcpc']['management']['vip']}"+":#{oozie_port}" }.first
+  oozie_url = oozie_hosts.map { |e| 'http://'+"#{node['bcpc']['management']['viphost']}"+":#{oozie_ha_port}" }.first
 end
 
 rm_nport = node["bcpc"]["hadoop"]["yarn"]["resourcemanager"]["port"]
