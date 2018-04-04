@@ -25,7 +25,7 @@ require 'pathname'
 require 'rubygems'
 
 # build requirements for zookeeper
-%w{ruby-dev make patch gcc}.each do |pkg|
+%w{ruby-dev make patch gcc g++}.each do |pkg|
   package pkg do
     action :nothing
   end.run_action(:install)
