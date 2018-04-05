@@ -61,7 +61,7 @@ CLUSTER_VM_ROOT_DRIVE_SIZE=$((CLUSTER_VM_DRIVE_SIZE + CLUSTER_VM_MEM - 2048))
 
 VBOX_DIR="`dirname ${BASH_SOURCE[0]}`/vbox"
 [[ -d $VBOX_DIR ]] || mkdir $VBOX_DIR
-P=`python -c "import os.path; print os.path.abspath(\"${VBOX_DIR}/\")"`
+VBOX_DIR_PATH=`python -c "import os.path; print os.path.abspath(\"${VBOX_DIR}/\")"`
 
 # ensure cluster.txt has CLUSTER_PREFIX prepended before VM names
 # NOTE: somewhat crude we see if any line does not start with the
@@ -85,7 +85,7 @@ export VM_LIST=( $(/usr/bin/env ruby -e "$code_to_produce_vm_list") )
 # Function to download files necessary for VM stand-up
 #
 function download_VM_files {
-  pushd $P
+  pushd $VBOX_DIR_PATH
 
   # Grab the Ubuntu 14.04 installer image
   if [[ ! -f ubuntu-14.04-mini.iso ]]; then
@@ -166,7 +166,7 @@ function remove_DHCPservers {
 # Function to create the bootstrap VM
 #
 function create_bootstrap_VM {
-  pushd $P
+  pushd $VBOX_DIR_PATH
 
   remove_DHCPservers
 
@@ -222,17 +222,16 @@ function create_cluster_VMs {
     current_ipxe=$(vboxmanage list hdds | egrep '^Location:.*ipxe.vdi$')
     # we have an ipxe disk added
     if [[ -n "$current_ipxe" ]]; then
-      current_ipxe=$(vboxmanage list hdds | egrep '^Location:.*ipxe.vdi$')
       ipxe_location=$(echo "$current_ipxe" | sed 's/^Location:[ ]*//')
       # ensure the location is available -- if not blow it away and recreate
       if $VBM showmediuminfo "$ipxe_location" | egrep -q '^State:.*inaccessible'; then
         $VBM closemedium disk "$ipxe_location"
         # update if we changed ipxe_location to the local workspace
-        ipxe_location="$P/ipxe.vdi"
+        ipxe_location="$VBOX_DIR_PATH/ipxe.vdi"
         create_vbox_ipxe_disk "$ipxe_location"
       fi
     else
-      ipxe_location="$P/ipxe.vdi"
+      ipxe_location="$VBOX_DIR_PATH/ipxe.vdi"
       create_vbox_ipxe_disk "$ipxe_location"
     fi
 
@@ -246,7 +245,7 @@ function create_cluster_VMs {
       # Only if VM doesn't exist
       if ! $VBM list vms | grep "^\"${vm}\"" ; then
           $VBM createvm --name $vm --ostype Ubuntu_64 \
-	       --basefolder $P --register
+	       --basefolder $VBOX_DIR_PATH --register
 
           $VBM modifyvm $vm --memory $CLUSTER_VM_MEM
           $VBM modifyvm $vm --cpus $CLUSTER_VM_CPUs
@@ -271,7 +270,7 @@ function create_cluster_VMs {
 	  # (/dev/sda is hardcoded into the preseed file.)
 	  #
 	  port=0
-	  DISK_PATH=$P/$vm/$vm-a.vdi
+	  DISK_PATH=$VBOX_DIR_PATH/$vm/$vm-a.vdi
 	  $VBM createhd --filename $DISK_PATH \
 	       --size $CLUSTER_VM_ROOT_DRIVE_SIZE
           $VBM storageattach $vm --storagectl $DISK_CONTROLLER \
@@ -296,7 +295,7 @@ function create_cluster_VMs {
 	  # environment.
 	  #
           for disk in c d e f; do
-	      DISK_PATH=$P/$vm/$vm-$disk.vdi
+	      DISK_PATH=$VBOX_DIR_PATH/$vm/$vm-$disk.vdi
               $VBM createhd --filename $DISK_PATH \
 		   --size $CLUSTER_VM_DRIVE_SIZE
               $VBM storageattach $vm --storagectl $DISK_CONTROLLER \
