@@ -47,6 +47,7 @@ template node['bcpc']['ssl']['key_file'] do
   source 'ssl-bcpc.key.erb'
   owner 'root'
   group 'root'
+  sensitive true
   mode 0o0600
   variables('ssl_private_key' => get_config('private-key', 'ssl', 'os'))
 end
