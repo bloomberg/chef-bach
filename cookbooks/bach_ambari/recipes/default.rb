@@ -83,7 +83,7 @@ oozie_hosts = node.default['bcpc']['hadoop']['oozie_hosts']
 oozie_url = oozie_hosts.map { |e| 'http://'+float_host(e['hostname'])+":#{oozie_port}"  }.first
 
 if oozie_hosts.length >= 2
-  oozie_url = oozie_hosts.map { |e| 'http://'+"#{node['bcpc']['management']['viphost']}"+":#{oozie_ha_port}" }.first
+  oozie_url = "http://"+float_host(node['bcpc']['management']['viphost'])+":#{oozie_ha_port}"
 end
 
 rm_nport = node["bcpc"]["hadoop"]["yarn"]["resourcemanager"]["port"]
