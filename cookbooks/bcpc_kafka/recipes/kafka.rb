@@ -51,6 +51,10 @@ node.default[:kafka][:broker][:zookeeper][:connect] = get_head_nodes.map do |nn|
   float_host(nn[:fqdn])
 end.sort
 
+if node[:kafka].attribute?(:root_znode) && node[:kafka][:root_znode] != nil
+  node[:kafka][:broker][:zookeeper][:connect] += node[:kafka][:root_znode]
+end
+
 #
 # This is a list of paths for the kafka logs (actual topic data)
 #
