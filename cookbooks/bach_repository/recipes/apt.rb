@@ -149,7 +149,7 @@ if chef_vault_loaded && !Chef::Config[:local_mode]
       require 'chef-vault'
       id = 'bootstrap-gpg'
       vault_item = ChefVault::Item.new('os', id)
-      vault_item.admins(node[:fqdn])
+      vault_item.admins([node[:fqdn], 'admin'].join(','))
       vault_item.search('*:*')
       vault_item['id'] = id
       vault_item['private_key_base64'] =
