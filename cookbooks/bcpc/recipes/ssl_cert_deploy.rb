@@ -19,36 +19,21 @@
 
 # deploy ssl certificate and private key
 
+ssl_cert = get_config('ssl-certificate')
 # certificate
 template node['bcpc']['ssl']['cert_file'] do
   source 'ssl-bcpc.crt.erb'
   owner 'root'
   group 'root'
   mode 0o0644
-  variables('ssl_certificate' => get_config('ssl-certificate'))
-  notifies :run, 'ruby_block[update-cacertificate-list]', :immediately
+  variables('ssl_certificate' => ssl_cert)
+  notifies :run, 'execute[update-ca-certificates --fresh]', :immediately
 end
 
-ruby_block 'update-cacertificate-list' do
-  block do
-    Chef::Log.info('Updating ca-certificate list')
-    ca_certs_update_cmd = Mixlib::ShellOut.new('sudo update-ca-certificates --fresh')
-    ca_certs_update_cmd.run_command
-    raise "Updating ca-certificate list failed, #{ca_certs_update_cmd.error}" if ca_certs_update_cmd.error!
-    Chef::Log.info('Updating ca-certificate returned #{ca_certs_update_cmd.stdout')
-
-    # verify if the certificate is in the list
-    # after update-ca-certificates is called a symb link will be created
-    # /etc/ssl/certs/ssl-bcpc.pem -> /usr/local/share/ca-certificates/ssl-bcpc.crt
-    # TODO: may need more precise grep, e.g. the whole Issuer line, or SubjectAlternativeName
-    cacert_verify_cmd = Mixlib::ShellOut.new('keytool -printcert -file /etc/ssl/certs/ca-certificates.crt ' \
-      "| grep #{node['bcpc']['organization']}")
-    cacert_verify_cmd.run_command
-    raise "verify ca-certificate list failed, #{cacert_verify_cmd.error}" if cacert_verify_cmd.error!
-    Chef::Log.info('Updating ca-certificate list finished.')
-  end
-  notifies :restart, 'service[apache2]', :delayed if File.exist?("/etc/init.d/apache2")
+cert_hash = OpenSSL::X509::Certificate.new(ssl_cert).subject.hash.to_s 16
+execute 'update-ca-certificates --fresh' do
   action :nothing
+  creates "/etc/ssl/certs/#{cert_hash}.0"
 end
 
 # private key
