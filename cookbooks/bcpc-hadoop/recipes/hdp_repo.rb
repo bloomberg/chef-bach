@@ -26,7 +26,15 @@ bcpc_repo 'hortonworks' do
   arch 'amd64'
 end
 
+bcpc_repo 'hortonworks-gpl' do
+  arch 'amd64'
+end
+
 bcpc_repo 'hdp-utils' do
+  arch 'amd64'
+end
+
+bcpc_repo 'hdp-utils-gpl' do
   arch 'amd64'
 end
 
