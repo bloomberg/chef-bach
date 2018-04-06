@@ -16,7 +16,17 @@ default[:use_hadoop_zookeeper_quorum] = false
 default[:kafka][:automatic_start] = true
 default[:kafka][:automatic_restart] = true
 default[:kafka][:jmx_port] = node[:bcpc][:hadoop][:kafka][:jmx][:port]
+
+#
+# ZooKeeper znode in the format /chroot to be used for the Kafka broker
+#
 default[:kafka][:root_znode] = nil
+
+#
+# Mapping of Kafka broker servers in a cluster to a rack id
+# e.g. {'bcpc-vm1' => 'rack1', 'bcpc-vm2' => 'rack2' ...}
+#
+default[:kafka][:node_rack_map] = {}
 
 #
 # Kafka broker settings
