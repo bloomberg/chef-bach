@@ -51,6 +51,14 @@ node.default[:kafka][:broker][:zookeeper][:connect] = get_head_nodes.map do |nn|
   float_host(nn[:fqdn])
 end.sort
 
+
+#
+# Add broker.property property if it is defined for the node in attibute node[:kafka][:node_rack_map]
+#
+if node[:kafka].attribute?(:node_rack_map) && node[:kafka][:node_rack_map]["#{node[:hostname]}"] != nil
+  node[:kafka][:broker][:broker][:rack] += node[:kafka][:node_rack_map]["#{node[:hostname]}"]
+end
+
 #
 # This is a list of paths for the kafka logs (actual topic data)
 #
