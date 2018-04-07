@@ -1,4 +1,4 @@
-# vim: tabstop=2:shiftwidth=2:softtabstop=2 
+# vim: tabstop=2:shiftwidth=2:softtabstop=2
 #
 # Cookbook Name:: bcpc-hadoop
 # Recipe:: smoke_test_wrapper
@@ -67,7 +67,7 @@ bash "HBASE permission for #{test_user}" do
   user 'hbase'
 end
 
-# init test_user credentials 
+# init test_user credentials
 file "#{node[:bcpc][:hadoop][:kerberos][:keytab][:dir]}/smoke_test.keytab" do
   content Base64.decode64(tester_keytab)
   user test_user
@@ -79,6 +79,17 @@ execute "kinit #{tester_princ} credentials" do
   command "kinit -kt #{node[:bcpc][:hadoop][:kerberos][:keytab][:dir]}/smoke_test.keytab #{tester_princ}"
   user test_user
 end
+
+hive_jdbc_url = 'jdbc:hive2://'
+zookeeperQuorum = node[:bcpc][:hadoop][:zookeeper][:servers].map { |s|
+float_host(s[:hostname])+":#{node[:bcpc][:hadoop][:zookeeper][:port]}"}.join(',')
+zookeeperNamespace = "HS2-#{node.chef_environment}-#{node['bcpc']['hadoop']['hive']['server2']['authetication']}"
+
+hive_jdbc_url += zookeeperQuorum
+hive_jdbc_url += "/;serviceDiscoveryMode=zookeeper;zookeeperNamespace="
+hive_jdbc_url += zookeeperNamespace
+
+
 
 chef_env = node.environment
 resource_managers = node[:bcpc][:hadoop][:rm_hosts].map do |rms| float_host(rms.hostname) end
@@ -101,5 +112,6 @@ node.default['hadoop_smoke_tests']['wf']['hbase_master_princ'] = "hbase/_HOST@#{
 node.default['hadoop_smoke_tests']['wf']['hbase_region_princ'] = "hbase/_HOST@#{krb_realm}"
 node.default['hadoop_smoke_tests']['wf']['hive_hmeta_princ'] = "hive/_HOST@#{krb_realm}"
 node.default['hadoop_smoke_tests']['wf']['hive_hserver_princ'] = "hive/_HOST@#{krb_realm}"
+node.default['hadoop_smoke_tests']['wf']['hive_jdbc_url'] = hive_jdbc_url
 
 include_recipe 'smoke-tests::oozie_smoke_test'
