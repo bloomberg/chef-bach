@@ -51,8 +51,18 @@ node.default[:kafka][:broker][:zookeeper][:connect] = get_head_nodes.map do |nn|
   float_host(nn[:fqdn])
 end.sort
 
+#
+# Add znode to the zookeeper.connect property if it is set in attribute 
+#
 if node[:kafka].attribute?(:root_znode) && node[:kafka][:root_znode] != nil
   node[:kafka][:broker][:zookeeper][:connect] += node[:kafka][:root_znode]
+end
+
+#
+# Add broker.property property if it is defined for the node in attibute node[:kafka][:node_rack_map]
+#
+if node[:kafka].attribute?(:node_rack_map) && node[:kafka][:node_rack_map]["#{node[:hostname]}"] != nil
+  node[:kafka][:broker][:broker][:rack] += node[:kafka][:node_rack_map]["#{node[:hostname]}"]
 end
 
 #
