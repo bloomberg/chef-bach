@@ -20,7 +20,7 @@
 default['apt']['compile_time_update'] = 'true'
 
 default['ambari']['repo_keyserver'] = 'keyserver.ubuntu.com'
-default['ambari']['repo_key'] = 'B9733A7A07513CAD'
+default['ambari']['repo_key'] = 'hortonworks.key'#'B9733A7A07513CAD'
 node.default['ambari']['ambari_server_version'] = '2.6.1.5'
 node.default['ambari']['os']['ubuntu_version'] = 14
 

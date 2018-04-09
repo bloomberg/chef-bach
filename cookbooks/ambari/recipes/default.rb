@@ -32,7 +32,6 @@ when 'ubuntu'
       components ['main']
       distribution 'Ambari'
       action :add
-      keyserver node['ambari']['repo_keyserver']
       key node['ambari']['repo_key']
     end
 else
