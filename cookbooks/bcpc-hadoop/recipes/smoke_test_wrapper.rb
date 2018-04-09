@@ -83,10 +83,10 @@ end
 hive_jdbc_url = 'jdbc:hive2://'
 zookeeperQuorum = node[:bcpc][:hadoop][:zookeeper][:servers].map { |s|
 float_host(s[:hostname])+":#{node[:bcpc][:hadoop][:zookeeper][:port]}"}.join(',')
-zookeeperNamespace = "HS2-#{node.chef_environment}-#{node['bcpc']['hadoop']['hive']['server2']['authetication']}"
+zookeeperNamespace = "HS2-#{node.chef_environment}-#{node['bcpc']['hadoop']['hive']['server2']['authentication']}"
 
 hive_jdbc_url += zookeeperQuorum
-hive_jdbc_url += "/;serviceDiscoveryMode=zookeeper;zookeeperNamespace="
+hive_jdbc_url += "/;serviceDiscoveryMode=zooKeeper;zooKeeperNamespace="
 hive_jdbc_url += zookeeperNamespace
 
 
