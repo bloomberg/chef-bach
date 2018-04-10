@@ -135,14 +135,3 @@ bash 'create_TEZ_view' do
   EOH
   not_if { isViewInstalled("#{node['ambari']['tez_view_path']}", req_headers)}
 end
-
-# node['ambari']['ambari_views_props'].each do |key, val|
-#   Chef::Log.info('settting up view '+key)
-#   http_request "#{key}" do
-#     url "#{File.join(node['ambari']['ambari_views_url'], val['url'])}"
-#     action :post
-#     message (val['data'].to_json)
-#     headers (req_headers)
-#    not_if { isViewInstalled("#{val['url']}", req_headers)}
-#   end
-# end

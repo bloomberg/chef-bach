@@ -19,12 +19,10 @@
 # APT repository attributes
 default['apt']['compile_time_update'] = 'true'
 
-default['ambari']['repo_keyserver'] = 'keyserver.ubuntu.com'
 default['ambari']['repo_key'] = 'hortonworks.key'#'B9733A7A07513CAD'
 node.default['ambari']['ambari_server_version'] = '2.6.1.5'
-node.default['ambari']['os']['ubuntu_version'] = 14
-
-node.default['ambari']['ambari_ubuntu_repo_url'] = "http://public-repo-1.hortonworks.com/ambari/ubuntu#{node['ambari']['os']['ubuntu_version']}/2.x/updates/#{node['ambari']['ambari_server_version']}"
+node.default['ambari']['platform_major_version'] = "#{node['platform']}#{node['platform_version'].split('.')[0]}"
+node.default['ambari']['ambari_ubuntu_repo_url'] = "http://public-repo-1.hortonworks.com/ambari/#{node['ambari']['platform_major_version']}/2.x/updates/#{node['ambari']['ambari_server_version']}"
 
 # Ambari properties
 node.default['ambari']['ambari-server-startup-web-timeout'] = '150'
@@ -40,7 +38,6 @@ node.default['ambari']['use_local_repo'] = 'false'
 node.default['ambari']['ambari_server_base_url'] = 'http://localhost:8080'
 node.default['ambari']['ambari_views_url'] = "#{node['ambari']['ambari_server_base_url']}/api/v1/views"
 
-node.default['ambari']['proxyuser'] = 'ambari'
 
 node.default['ambari']['admin']['user'] = 'admin'
 node.default['ambari']['admin']['password'] = 'admin'
