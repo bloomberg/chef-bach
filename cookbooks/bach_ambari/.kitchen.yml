@@ -1,0 +1,50 @@
+#
+# Cookbook :: bach_ambari
+# yml file
+# Copyright 2018, Bloomberg Finance L.P.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+---
+driver:
+  name: vagrant
+
+provisioner:
+  name: chef_zero
+  require_chef_omnibus: "12.19.36"
+  # You may wish to disable always updating cookbooks in CI or other testing environments.
+  # For example:
+  #   always_update_cookbooks: <%= !ENV['CI'] %>
+  always_update_cookbooks: true
+
+verifier:
+  name: inspec
+
+platforms:
+  - name: ubuntu-14.04
+#  - name: centos-7.2
+    driver:
+     box: bento/ubuntu-14.04
+     network:
+     - [ "private_network" , { ip : "10.0.100.27" } ]
+     - [ "forwarded_port" , { guest : 8080, host : 8080 } ]
+
+suites:
+  - name: default
+    run_list:
+      - recipe[bach_ambari::default]
+    verifier:
+      inspec_tests:
+        - test/smoke/default
+    attributes:

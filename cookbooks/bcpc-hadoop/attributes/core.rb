@@ -9,6 +9,8 @@ default[:bcpc][:hadoop][:core].tap do |core|
   core["hadoop"]["security"]["group"]["mapping"]["ldap"]["search"]["attr"]["group"]["name"] = "cn"
 end
 
+ambari_proxy_user = "#{node['bcpc']['hadoop']['proxyuser']['ambari']}"
+
 default[:bcpc][:hadoop][:core][:site_xml].tap do |site_xml|
   site_xml['fs.defaultFS'] = node[:bcpc][:hadoop][:hdfs_url]
   site_xml['hadoop.proxyuser.hive.hosts'] = '*'
@@ -17,7 +19,9 @@ default[:bcpc][:hadoop][:core][:site_xml].tap do |site_xml|
   site_xml['hadoop.proxyuser.httpfs.groups'] = '*'
   site_xml['hadoop.proxyuser.oozie.hosts'] = '*'
   site_xml['hadoop.proxyuser.oozie.groups'] = '*'
-  
+  site_xml["hadoop.proxyuser.#{ambari_proxy_user}.hosts"] = '*'
+  site_xml["hadoop.proxyuser.#{ambari_proxy_user}.groups"] = '*'
+
   site_xml['hadoop.user.group.static.mapping.overrides'] =
     'hdfs=hadoop,hdfs;yarn=mapred,hadoop;mapred=mapred;'
 

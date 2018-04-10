@@ -154,9 +154,9 @@
 
     <property>
       <name>oozie.service.JPAService.jdbc.url</name>
-      <!-- XXX for some reason, this works for hive metastore, but breaks oozie with an error 
-          "No Database Selected"  just connecting to localhost instead 
-       <value>jdbc:mysql:loadbalance://<%=@mysql_hosts.join(',')%>/oozie?loadBalanceBlacklistTimeout=5000</value>  
+      <!-- XXX for some reason, this works for hive metastore, but breaks oozie with an error
+          "No Database Selected"  just connecting to localhost instead
+       <value>jdbc:mysql:loadbalance://<%=@mysql_hosts.join(',')%>/oozie?loadBalanceBlacklistTimeout=5000</value>
       <value>jdbc:mysql://<%=node[:hostname]%>/oozie</value> -->
       <value>jdbc:mysql://<%=node[:bcpc][:management][:vip]%>:3306/oozie</value>
       <description>
@@ -278,7 +278,7 @@
 
     <!-- Default proxyuser configuration for Hue -->
 
-  <% if node[:bcpc][:hadoop][:kerberos][:enable] == true then %> 
+  <% if node[:bcpc][:hadoop][:kerberos][:enable] == true then %>
 
   <property>
     <name>oozie.credentials.credentialclasses</name>
@@ -345,6 +345,15 @@
     </value>
     <description>The kerberos names rules is to resolve kerberos principal names, refer to Hadoop's KerberosName for more details.</description>
   </property>
+  <property>
+     <name>oozie.service.ProxyUserService.proxyuser.<%=node['bcpc']['hadoop']['proxyuser']['ambari'] %>.groups</name>
+     <value>*</value>
+  </property>
+
+  <property>
+     <name>oozie.service.ProxyUserService.proxyuser.<%=node['bcpc']['hadoop']['proxyuser']['ambari']%>.hosts</name>
+     <value>*</value>
+  </property>
   <% end %>
 
   <property>
@@ -381,7 +390,7 @@
     <name>oozie.service.ActionCheckerService.action.check.delay</name>
     <value><%= node['bcpc']['hadoop']['oozie']['check_action_delay'] %></value>
   </property>
-  
+
   <property>
      <name>oozie.services.ext</name>
      <value><%= node["bcpc"]["hadoop"]["oozie"]["service"]["ext"] %></value>
@@ -402,7 +411,7 @@
     <value><%= get_head_nodes.map{ |s| float_host(s[:fqdn])}.join(",") %></value>
   </property>
 
-  <% if node['bcpc']['hadoop']['oozie']['smtp_host'] != nil then %> 
+  <% if node['bcpc']['hadoop']['oozie']['smtp_host'] != nil then %>
 
   <property>
     <name>oozie.email.smtp.host</name>
