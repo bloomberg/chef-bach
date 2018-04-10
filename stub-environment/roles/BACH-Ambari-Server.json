@@ -1,5 +1,5 @@
 {
-  "name": "BCPC-Ambari-Server",
+  "name": "BACH-Ambari-Server",
   "json_class": "Chef::Role",
   "run_list": [
     "recipe[bach_ambari::default]"

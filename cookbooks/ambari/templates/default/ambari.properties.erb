@@ -113,8 +113,8 @@ server.jdbc.user.name=<%= node['ambari']['databaseusername']%>
 
 server.jdbc.user.passwd=<%= File.join(node['ambari']['ambari_server_conf_dir'],'password.dat')%>
 server.jdbc.rca.user.passwd=<%= File.join(node['ambari']['ambari_server_conf_dir'],'password.dat')%>
-server.os_family=ubuntu14
-server.os_type=ubuntu14
+server.os_family=<%= node['ambari']['platform_major_version']%>
+server.os_type=<%= node['ambari']['platform_major_version']%>
 server.python.log.level=INFO
 server.python.log.name=ambari-server-command.log
 server.stages.parallel=true
