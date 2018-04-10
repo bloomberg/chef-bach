@@ -229,7 +229,7 @@ end
 #       2. the ip list is sorted
 def get_static_head_node_local_ip_list
   get_head_nodes.map do |nn|
-    nn[:ip_address]
+    nn['bcpc']['management']['ip']
   end.compact.sort
 end
 
