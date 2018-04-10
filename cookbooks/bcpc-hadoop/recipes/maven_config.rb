@@ -26,57 +26,17 @@ maven_file = Pathname.new(node['maven']['url']).basename
   end
 end
 
-# handling for custom SSL certificates
-cert_dir = '/usr/local/share/ca-certificates'
-custom_certs = ::Find.find(cert_dir).select { |f| ::File.file?(f) } \
-  if ::Dir.exist?(cert_dir)
-
-include_recipe 'bcpc::proxy_configuration' if node['bcpc']['bootstrap']['proxy']
-
-# download Maven only if not already stashed in the bins directory
-if node['fqdn'] == get_bootstrap
-  internet_download_url = node['maven']['url']
-  remote_file "/home/vagrant/chef-bcpc/bins/#{maven_file}" do
-    source internet_download_url
-    action :create
-    mode 0o0555
-    checksum node['maven']['checksum']
-  end
-else
-  node.override['maven']['url'] = File.join(get_binary_server_url, maven_file)
-end
-
+include_recipe 'bcpc-hadoop::ssl_configuration'
+include_recipe 'bcpc::proxy_configuration'
 include_recipe 'maven::default'
 
-file 'keystore file' do
-  path node['bcpc']['hadoop']['java_https_keystore']
-  action :nothing
-end
+keystore_path = node['bcpc']['hadoop']['java_ssl']['keystore']
+keystore_password = node['bcpc']['hadoop']['java_ssl']['password']
 
-unless ::File.exist?(node['bcpc']['hadoop']['java_https_keystore'])
-  custom_certs.map do |cert|
-    execute "create keystore #{::File.basename(cert)}" do
-      command <<-EOH
-        yes | keytool -v -alias #{::File.basename(cert)} -import \
-        -file #{cert} \
-        -keystore #{node['bcpc']['hadoop']['java_https_keystore']} \
-        -storepass changeit \
-        -trustcacerts
-      EOH
-      not_if "keytool -alias #{::File.basename(cert)} -list -file #{cert} \
-        -keystore #{node['bcpc']['hadoop']['java_https_keystore']} \
-        -storepass changeit"
-    end
-  end
-end
-
-unless custom_certs.empty?
-  node.override['maven']['mavenrc']['opts'] = <<-EOH
-    #{node['maven']['mavenrc']['opts']} \
-    -Djavax.net.ssl.trustStore=#{node['bcpc']['hadoop']['java_https_keystore']} \
-    -Djavax.net.ssl.trustStorePassword=changeit
-  EOH
-end
+node.override['maven']['mavenrc']['opts'] =
+    "#{node['maven']['mavenrc']['opts']} " \
+    "-Djavax.net.ssl.trustStore=#{keystore_path} " \
+    "-Djavax.net.ssl.trustStorePassword=#{keystore_password} "
 
 # Setup custom maven config
 directory '/root/.m2' do

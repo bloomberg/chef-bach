@@ -9,11 +9,20 @@ distinguished_name      = req_distinguished_name
 req_extensions          = v3_req
 
 [ v3_req ]
-subjectAltName          = IP:<%="#{node['bcpc']['management']['vip']}"%>, IP:<%="#{node['bcpc']['floating']['vip']}"%>, DNS:<%="#{node['bcpc']['management']['vip']}"%>, DNS:<%="#{node['bcpc']['floating']['vip']}"%>, DNS:openstack.<%="#{node['bcpc']['domain_name']}"%>, DNS:graphite.<%="#{node['bcpc']['domain_name']}"%>, DNS:zabbix.<%="#{node['bcpc']['domain_name']}"%>, DNS:s3.<%="#{node['bcpc']['domain_name']}"%>
-
+subjectAltName          = @alt_names
 
 [ req_distinguished_name ]
 commonName              = Common Name (eg, YOUR name)
 commonName_max          = 64
 emailAddress            = Email Address
 emailAddress_max        = 64
+
+[alt_names]
+<% @ip_list.each_with_index do |ip, index| -%>
+IP.<%= index %> = <%= ip %>
+<% end %>
+# FIXME: Due to an issue that ip addresses are sometimes not looked up,
+#        need to add ip address to DNS names as a temp solution.
+<% [@dns_list, @ip_list].flatten.each_with_index do |dns, index| -%>
+DNS.<%= index %> = <%= dns %>
+<% end %>

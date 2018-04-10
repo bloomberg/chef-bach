@@ -56,8 +56,8 @@ end
 bash 'create-hive-scratch' do
   code <<-EOH
   hdfs dfs -mkdir -p #{node['bcpc']['hadoop']['hive']['scratch']['dir']}
-  hdfs dfs -chmod -R 1777 #{node['bcpc']['hadoop']['hive']['scratch']['dir']}
-  hdfs dfs -chown -R hive:hdfs #{node['bcpc']['hadoop']['hive']['scratch']['dir']}
+  hdfs dfs -chmod 1777 #{node['bcpc']['hadoop']['hive']['scratch']['dir']}
+  hdfs dfs -chown hive:hdfs #{node['bcpc']['hadoop']['hive']['scratch']['dir']}
   EOH
   user 'hdfs'
 end

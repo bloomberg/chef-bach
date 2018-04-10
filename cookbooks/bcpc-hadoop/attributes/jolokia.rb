@@ -26,6 +26,7 @@
 # independent port.
 #
 node.default['bcpc']['jolokia'].tap do |jolokia|
+  jolokia['enable'] = false
   jolokia['policy_path'] = '/etc/bach/jolokia_security_policy.xml'
   jolokia['jar_path'] = '/usr/local/jolokia/lib/jolokia-jvm.jar'
   jolokia['host'] = '0.0.0.0'

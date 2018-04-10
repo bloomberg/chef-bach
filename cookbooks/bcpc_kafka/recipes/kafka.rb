@@ -19,6 +19,7 @@
 
 include_recipe 'bcpc_kafka::default'
 
+node.force_override[:bcpc][:jolokia][:enable] = true
 #
 # We need node search to set a reasonable value for num.partitions, so
 # the value from the attributes file must be overriden.
@@ -51,6 +52,20 @@ node.default[:kafka][:broker][:zookeeper][:connect] = get_head_nodes.map do |nn|
 end.sort
 
 #
+# Add znode to the zookeeper.connect property if it is set in attribute 
+#
+if node[:kafka].attribute?(:root_znode) && node[:kafka][:root_znode] != nil
+  node[:kafka][:broker][:zookeeper][:connect] += node[:kafka][:root_znode]
+end
+
+#
+# Add broker.property property if it is defined for the node in attibute node[:kafka][:node_rack_map]
+#
+if node[:kafka].attribute?(:node_rack_map) && node[:kafka][:node_rack_map]["#{node[:hostname]}"] != nil
+  node[:kafka][:broker][:broker][:rack] += node[:kafka][:node_rack_map]["#{node[:hostname]}"]
+end
+
+#
 # This is a list of paths for the kafka logs (actual topic data)
 #
 # The path for human-readable logs (information about what kafka is
@@ -71,10 +86,20 @@ node.default[:kafka][:broker][:log][:dirs] = data_volumes.map do |dd|
 end
 
 # Install jolokia's jvm agent to node['bcpc']['jolokia']['path']
-include_recipe 'bcpc-hadoop::jolokia'
+if node[:bcpc][:jolokia][:enable] == true
+  include_recipe 'bcpc-hadoop::jolokia'
 
-# Add the jolokia agent to the Kafka broker's launch options
-node.default[:kafka][:generic_opts] = node[:bcpc][:jolokia][:jvm_args]
+  # Add the jolokia agent to the Kafka broker's launch options
+  node.default[:kafka][:generic_opts] = node[:bcpc][:jolokia][:jvm_args]
+end
+
+#
+# Increase the default ZK client message maximum via jute.maxbuffer
+# system property.  Large topic/partition counts require >1MB
+# messages.
+#
+node.default[:kafka][:generic_opts] +=
+  " -Djute.maxbuffer=#{node[:bcpc][:hadoop][:jute][:maxbuffer] rescue 0xfffff}"
 
 # Increase the default FD limit -- kafka opens a lot of sockets.
 node.default[:kafka][:ulimit_file] = 32_768
@@ -89,7 +114,7 @@ include_recipe 'kafka::default'
 
 user_ulimit 'kafka' do
   filehandle_limit node[:kafka][:ulimit_file]
-  notifies :restart, 'service[kafka-broker]', :immediately
+  notifies :restart, 'service[kafka]', :immediately
 end
 
 #
@@ -125,4 +150,13 @@ ruby_block 'kafkaup' do
       raise "Kafka is reported down for more than #{max_time} seconds"
     end
   end
+end
+
+#
+# By default, the upstream cookbook sets server.properties to 600.
+# For internal reasons, we prefer it to be world-readable.
+#
+edit_resource!(:template,
+               ::File.join(node['kafka']['config_dir'], 'server.properties')) do
+  mode 0644
 end

@@ -26,10 +26,15 @@ require 'pry'
 require 'uri'
 require_relative 'lib/cluster_data'
 require_relative 'lib/chef_node'
+require 'cluster_def'
 
 class ClusterAssignRoles
   include BACH::ClusterData
   include BACH::ClusterData::ChefNode
+
+  def initialize
+    @cd = BACH::ClusterDef.new(repo_dir: repo_dir)
+  end
 
   #
   # Takes no arguments.
@@ -38,12 +43,12 @@ class ClusterAssignRoles
   #
   def all_hadoop_head_nodes
     # All head nodes should have this specific role.
-    confirmed_head_nodes = parse_cluster_txt.select do |nn|
+    confirmed_head_nodes = @cd.fetch_cluster_def.select do |nn|
       nn[:runlist].include?('role[BCPC-Hadoop-Head]')
     end
 
     # Any nodes that have something matching "Head"
-    possible_head_nodes = parse_cluster_txt.select do |nn|
+    possible_head_nodes = @cd.fetch_cluster_def.select do |nn|
       nn[:runlist].include?('Head')
     end
 
@@ -55,8 +60,9 @@ class ClusterAssignRoles
       possible_head_nodes - confirmed_head_nodes
 
     if nodes_with_incomplete_runlist.any? && confirmed_head_nodes.any?
-      raise "Aborting cluster assign roles. " \
-        "Found potential head nodes lacking role[BCPC-Hadoop-Head]: " +
+      raise \
+        'Aborting cluster assign roles. \ 
+        Found potential head nodes lacking role[BCPC-Hadoop-Head]: ' + 
         nodes_with_incomplete_runlist.map { |nn| nn[:hostname] || 'null' }.join
     end
 
@@ -65,7 +71,7 @@ class ClusterAssignRoles
 
   # If no runlist is provided, the runlist in cluster.txt will be used.
   # arguments:
-  #   nodes   -  a list of node objects (e.g. from parse_cluster_txt())
+  #   nodes   -  a list of node objects (e.g. from fetch_cluster_def())
   #   runlist -- a string for a Chef run_list
   # returns:
   #   nothing
@@ -80,18 +86,18 @@ class ClusterAssignRoles
       end
 
       target_runlist = if runlist.nil?
-        node[:runlist].split(',')
-      elsif runlist.is_a?(String)
-        runlist.split(',')
-      else
-        raise "No runlist for node #{node[:fqdn]}"
-      end
+                         node[:runlist].split(',')
+                       elsif runlist.is_a?(String)
+                         runlist.split(',')
+                       else
+                         raise "No runlist for node #{node[:fqdn]}"
+                       end
 
       chef_node_object.run_list = target_runlist
       chef_node_object.save
     end
 
-    puts 'Assigned roles for ' + nodes.map{|nn| nn[:hostname]}.join(', ')
+    puts 'Assigned roles for ' + nodes.map { |nn| nn[:hostname] }.join(', ')
   end
 
   #
@@ -113,14 +119,13 @@ class ClusterAssignRoles
         puts "Found index entries for #{found_nodes.length} nodes"
         break
       else
-        if ii % 60 == 0
-          if ii == 0
-            reindex_chef_server
-          end
+        if (ii % 60).zero?
           puts "Waiting for nodes to appear in search results (#{search})..."
         elsif ii == (timeout - 1)
           raise "Did not find indexed roles for #{fqdn_list} " \
-                "after #{timeout} secs!"
+                "after #{timeout} secs! Reindex by hand or wait again\n" \
+                'WARNING: Reindex is a dangerous cluster operation. Refer '\
+                'to runbooks for details.'
         end
         sleep 1
       end
@@ -138,9 +143,7 @@ class ClusterAssignRoles
   # instead of -r, so the node's saved runlist is left intact.
   #
   def chef_node_with_runlist(node:, runlist:, override: false)
-    if runlist.is_a?(Array)
-      runlist = runlist.join(',')
-    end
+    runlist = runlist.join(',') if runlist.is_a?(Array)
 
     #
     # chef-bach recipes often expect to create data bags on the
@@ -164,7 +167,7 @@ class ClusterAssignRoles
     #
     set_chef_admin(node: node, admin: false)
 
-    if result[:status] == 0
+    if result[:status].zero?
       puts "#{node[:fqdn]}: Got status #{result[:status]} from chef run"
     else
       raise "#{node[:fqdn]}: Got failed status #{result[:status]} " \
@@ -259,7 +262,7 @@ class ClusterAssignRoles
 
   def install_kafka(target_nodes)
     # Zookeeper has to come up before Kafka.
-    all_zk_nodes = parse_cluster_txt(cluster_txt).select do |node|
+    all_zk_nodes = @cd.fetch_cluster_def.select do |node|
       node[:runlist].include?('role[BCPC-Kafka-Head-Zookeeper]')
     end
 
@@ -301,7 +304,8 @@ class ClusterAssignRoles
 
     bootstrap_url =
       'http://' +
-      chef_environment[:override_attributes][:bcpc][:bootstrap][:server] +
+      ridley.environment.find(chef_environment_name)\
+            .override_attributes[:bcpc][:bootstrap][:server] +
       '/chef-install.sh'
 
     require 'pry'
@@ -313,7 +317,7 @@ class ClusterAssignRoles
     # The simple workaround is to provide the names in JSON format instead.
     #
     vault_json = if ridley.data_bag.find("ssh_host_keys/#{node[:fqdn]}")
-                   {ssh_host_keys: node[:fqdn]}.to_json.to_s
+                   { ssh_host_keys: node[:fqdn] }.to_json.to_s
                  else
                    '{}'
                  end
@@ -357,9 +361,7 @@ class ClusterAssignRoles
   def set_chef_admin(node:, admin:)
     client = ridley.client.find(node[:fqdn])
 
-    if client.nil?
-      raise "Could not find client object for '#{node[:fqdn]}'"
-    end
+    raise "Could not find client object for '#{node[:fqdn]}'" if client.nil?
 
     client.admin = admin
     client.save
@@ -381,7 +383,7 @@ class ClusterAssignRoles
   # - A hash with keys for status, stdout, and stderr.
   #
   def ssh(host:, username:, password:, command:, streaming: false)
-    Net::SSH.start( host, username, :password => password) do |session|
+    Net::SSH.start(host, username, :password => password) do |session|
       stdout = ''
       stderr = ''
       exit_status = nil
@@ -392,12 +394,12 @@ class ClusterAssignRoles
             raise 'Failed to request pty for ssh, sudo will fail.'
           end
 
-          channel.exec(command) do|_c,exec_success|
+          channel.exec(command) do |_c, exec_success|
             unless exec_success
               raise "Failed to invoke '#{command}' on #{host}!"
             end
 
-            channel.on_data do |_c,data|
+            channel.on_data do |_c, data|
               if data =~ /^\[sudo\] password for #{username}:/
                 channel.send_data(password + "\n")
               end
@@ -406,14 +408,14 @@ class ClusterAssignRoles
               $stdout.print(data) if streaming
             end
 
-            channel.on_extended_data do |_c,data|
+            channel.on_extended_data do |_c, data|
               stderr << data
               $stderr.print(data) if streaming
             end
 
-            channel.on_request('exit-status') do |_c,data|
+            channel.on_request('exit-status') do |_c, data|
               # Working around buggy #read_long method.
-              if(data.available == 4)
+              if (data.available == 4)
                 exit_status = data.read(4).unpack('N').first
               else
                 $stderr.puts "Found #{data.available} bytes in exit-status " \
@@ -426,7 +428,7 @@ class ClusterAssignRoles
         end
       end
       session.loop
-      {stdout: stdout, stderr: stderr, status: exit_status}
+      { stdout: stdout, stderr: stderr, status: exit_status }
     end
   end
 
@@ -444,23 +446,21 @@ class ClusterAssignRoles
       raise "'#{requested_environment}' not found on Chef server!"
     end
 
-    unless %w{stubs basic bootstrap hadoop kafka}.include?(install_type)
-      raise "Install type must be one of stubs, basic, bootstrap, hadoop, kafka. " \
-            "You provided '#{install_type}'."
+    unless %w[ stubs basic bootstrap hadoop kafka ].include?(install_type)
+      raise 'Install type must be one of stubs, basic, bootstrap, hadoop, \
+            "kafka. You provided '#{install_type}'."
     end
 
     target_nodes = if optional_thing.nil?
-                     parse_cluster_txt(cluster_txt)
+                     @cd.fetch_cluster_def
                    else
-                     node_matches = \
-                       parse_cluster_txt(cluster_txt).select do |entry|
-                       entry[:ip_address].include?(optional_thing) ||
-                       entry[:fqdn].include?(optional_thing.downcase)
+                     node_matches = @cd.fetch_cluster_def.select do |entry|
+                       entry[:ip_address].include?(optional_thing) || 
+                         entry[:fqdn].include?(optional_thing.downcase)
                      end
 
                      if node_matches.empty?
-                       node_matches = \
-                         parse_cluster_txt(cluster_txt).select do |entry|
+                       node_matches = @cd.fetch_cluster_def.select do |entry|
                          entry[:runlist]
                            .downcase
                            .include?(optional_thing.downcase)
@@ -489,7 +489,7 @@ class ClusterAssignRoles
     if target_nodes.any?
       send("install_#{install_type}".to_sym, target_nodes)
     else
-      $stderr.puts "No target nodes found matching '#{optional_thing.to_s}'"
+      $stderr.puts "No target nodes found matching '#{optional_thing}'"
       exit 1
     end
   end

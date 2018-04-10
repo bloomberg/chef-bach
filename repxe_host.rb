@@ -54,11 +54,6 @@ require 'pry'
 require 'timeout'
 require 'optparse'
 
-require_relative 'lib/cluster_data'
-require_relative 'lib/chef_node'
-include BACH::ClusterData
-include BACH::ClusterData::ChefNode
-
 def cluster_assign_roles(environment, type, entry=nil)
   types = %w[basic hadoop kafka]
   unless types.include?(type.to_s.downcase)

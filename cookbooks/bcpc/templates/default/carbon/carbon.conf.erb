@@ -95,6 +95,12 @@ MAX_CREATES_PER_MINUTE = inf
 # second.
 MIN_TIMESTAMP_RESOLUTION = 1
 
+# Set the minimum lag in seconds for a point to be written to the database
+# in order to optimize batching. This means that each point will wait at least
+# the duration of this lag before being written. Setting this to 0 disable the feature.
+# This currently only works when using the timesorted write strategy.
+# MIN_TIMESTAMP_LAG = 0
+
 # Set the interface and port for the line (plain text) listener.  Setting the
 # interface to 0.0.0.0 listens on all interfaces.  Port can be set to 0 to
 # disable this listener if it is not required.
@@ -145,7 +151,7 @@ CACHE_QUERY_PORT = 7002
 USE_FLOW_CONTROL = True
 
 # If enabled this setting is used to timeout metric client connection if no
-# metrics have been sent in specified time in seconds 
+# metrics have been sent in specified time in seconds
 #METRIC_CLIENT_IDLE_TIMEOUT = None
 
 # By default, carbon-cache will log every whisper update and cache hit.
@@ -216,7 +222,7 @@ WHISPER_FALLOCATE_CREATE = True
 
 # On systems which has a large number of metrics, an amount of Whisper write(2)'s
 # pageback sometimes cause disk thrashing due to memory shortage, so that abnormal
-# disk reads occur. Enabling this option makes it possible to decrease useless 
+# disk reads occur. Enabling this option makes it possible to decrease useless
 # page cache memory by posix_fadvise(2) with POSIX_FADVISE_RANDOM option.
 # WHISPER_FADVISE_RANDOM = False
 
@@ -311,6 +317,23 @@ WHISPER_FALLOCATE_CREATE = True
 # Example: store everything
 # BIND_PATTERNS = #
 
+# URL of graphite-web instance, this is used to add incoming series to the tag database
+# GRAPHITE_URL = http://127.0.0.1:8000
+
+# Tag support, when enabled carbon will make HTTP calls to graphite-web to update the tag index
+ENABLE_TAGS = False
+
+# Tag update interval, this specifies how frequently updates to existing series will trigger
+# an update to the tag index, the default setting is once every 100 updates
+# TAG_UPDATE_INTERVAL = 100
+
+# Tag batch size, this specifies the maximum number of series to be sent to graphite-web in a single batch
+# TAG_BATCH_SIZE = 100
+
+# Tag queue size, this specifies the maximum number of series to be queued for sending to graphite-web
+# There are separate queues for new series and for updates to existing series
+# TAG_QUEUE_SIZE = 10000
+
 # To configure special settings for the carbon-cache instance 'b', uncomment this:
 #[cache:b]
 #LINE_RECEIVER_PORT = 2103
@@ -358,11 +381,13 @@ RELAY_METHOD = consistent-hashing
 # If you use consistent-hashing you can add redundancy by replicating every
 # datapoint to more than one machine.
 # REPLICATION_FACTOR = 1
-REPLICATION_FACTOR = <%="#{@min_quorum}"%>
+# TODO: set REPLICATION_FACTOR to min_quorum if > 2 is needed.
+# REPLICATION_FACTOR = <%="#{@min_quorum}"%>
+REPLICATION_FACTOR = 2
 
 # For REPLICATION_FACTOR >=2, set DIVERSE_REPLICAS to True to guarantee replicas
 # across distributed hosts. With this setting disabled, it's possible that replicas
-# may be sent to different caches on the same host. This has been the default 
+# may be sent to different caches on the same host. This has been the default
 # behavior since introduction of 'consistent-hashing' relay method.
 # Note that enabling this on an existing pre-0.9.14 cluster will require rebalancing
 # your metrics across the cluster nodes using a tool like Carbonate.
@@ -385,12 +410,23 @@ REPLICATION_FACTOR = <%="#{@min_quorum}"%>
 # If using RELAY_METHOD = rules, all destinations used in relay-rules.conf
 # must be defined in this list
 # DESTINATIONS = 127.0.0.1:2004
-DESTINATIONS = <%= "#{@servers.map{|x| x['mgmt_ip']+':2024'}.sort.join(', ')}" %>
+DESTINATIONS = <%= "#{@servers.map{|hst| "#{hst}:2024"}.sort.join(', ')}" %>
 
 # This define the protocol to use to contact the destination. It can be
 # set to one of "line", "pickle", "udp" and "protobuf". This list can be
 # extended with CarbonClientFactory plugins and defaults to "pickle".
 # DESTINATION_PROTOCOL = pickle
+
+# When using consistent hashing it sometime makes sense to make
+# the ring dynamic when you don't want to loose points when a
+# single destination is down. Replication is an answer to that
+# but it can be quite expensive.
+# DYNAMIC_ROUTER = False
+
+# Controls the number of connection attempts before marking a
+# destination as down. We usually do one connection attempt per
+# second.
+# DYNAMIC_ROUTER_MAX_RETRIES = 5
 
 # This is the maximum number of datapoints that can be queued up
 # for a single destination. Once this limit is hit, we will
@@ -435,7 +471,7 @@ TIME_TO_DEFER_SENDING = 0.0001
 USE_FLOW_CONTROL = True
 
 # If enabled this setting is used to timeout metric client connection if no
-# metrics have been sent in specified time in seconds 
+# metrics have been sent in specified time in seconds
 #METRIC_CLIENT_IDLE_TIMEOUT = None
 METRIC_CLIENT_IDLE_TIMEOUT = <%="#{node[:bcpc][:graphite][:carbon][:relay][:idle_timeout]}"%> 
 
@@ -539,7 +575,7 @@ MAX_QUEUE_SIZE = 100000
 USE_FLOW_CONTROL = True
 
 # If enabled this setting is used to timeout metric client connection if no
-# metrics have been sent in specified time in seconds 
+# metrics have been sent in specified time in seconds
 #METRIC_CLIENT_IDLE_TIMEOUT = None
 
 # This defines the maximum "message size" between carbon daemons.
@@ -588,3 +624,12 @@ LOG_AGGREGATOR_MISSES = False
 # Specify the user to drop privileges to
 # If this is blank carbon-aggregator runs as the user that invokes it
 # USER =
+
+# Part of the code, and particularly aggregator rules, need
+# to cache metric names. To avoid leaking too much memory you
+# can tweak the size of this cache. The default allow for 1M
+# different metrics per rule (~200MiB).
+# CACHE_METRIC_NAMES_MAX=1000000
+
+# You can optionally set a ttl to this cache.
+# CACHE_METRIC_NAMES_TTL=600

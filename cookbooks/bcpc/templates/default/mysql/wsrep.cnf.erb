@@ -69,8 +69,8 @@ max_connections=<%="#{@max_connections}"%>
 ## WSREP options
 ##
 
-<% @other_members = @servers.reject{ |n| n == node } -%>
-wsrep_cluster_address=gcomm://<%="#{@other_members.collect{|x| x['bcpc']['management']['ip']}.join(',')}"%>
+<% @other_members = @servers.reject{ |n| n[:hostname] == node[:hostname] } -%>
+wsrep_cluster_address=gcomm://<%="#{@other_members.collect{|x| x[:ip_address]}.join(',')}"%>
 
 # Full path to wsrep provider library or 'none'
 wsrep_provider=/usr/lib/libgalera_smm.so

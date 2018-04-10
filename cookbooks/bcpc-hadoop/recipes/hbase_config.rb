@@ -81,15 +81,25 @@ end
 if node[:bcpc][:hadoop][:kerberos][:enable] == true then
   generated_values['hbase.security.authorization'] = 'true'
   generated_values['hbase.superuser'] = node[:bcpc][:hadoop][:hbase][:superusers].join(',')
-  generated_values['hbase.coprocessor.region.classes'] =
-    'org.apache.hadoop.hbase.security.token.TokenProvider,' +
-    'org.apache.hadoop.hbase.security.access.SecureBulkLoadEndpoint,' +
-    'org.apache.hadoop.hbase.security.access.AccessController'
+  region_classes = [
+     'org.apache.hadoop.hbase.security.token.TokenProvider',
+     'org.apache.hadoop.hbase.security.access.SecureBulkLoadEndpoint',
+     'org.apache.hadoop.hbase.security.access.AccessController',
+     node['bcpc']['hadoop']['hbase']['site_xml'].fetch('hbase.coprocessor.region.classes', nil)
+  ].select{|c| c}.join(',')
+  regionserver_classes = [
+    'org.apache.hadoop.hbase.security.access.AccessController',
+    node['bcpc']['hadoop']['hbase']['site_xml'].fetch('hbase.coprocessor.regionserver.classes', nil)
+  ].select{|c| c}.join(',')
+  master_classes = [
+    'org.apache.hadoop.hbase.security.access.AccessController',
+    'org.apache.hadoop.hbase.security.access.CoprocessorWhitelistMasterObserver',
+    node['bcpc']['hadoop']['hbase']['site_xml'].fetch('hbase.coprocessor.master.classes', nil)
+  ].select{|c| c}.join(',')
+  generated_values['hbase.coprocessor.region.classes'] = region_classes
+  generated_values['hbase.coprocessor.regionserver.classes'] = regionserver_classes
+  generated_values['hbase.coprocessor.master.classes'] = master_classes
   generated_values['hbase.security.exec.permission.checks'] = 'true'
-  generated_values['hbase.coprocessor.regionserver.classes'] =
-    'org.apache.hadoop.hbase.security.access.AccessController'
-  generated_values['hbase.coprocessor.master.classes'] =
-    'org.apache.hadoop.hbase.security.access.AccessController'
   generated_values['hbase.security.authentication'] = 'kerberos'
   generated_values['hbase.master.kerberos.principal'] =
     "#{node[:bcpc][:hadoop][:kerberos][:data][:hbase][:principal]}/" +
@@ -101,6 +111,7 @@ if node[:bcpc][:hadoop][:kerberos][:enable] == true then
   generated_values['hbase.regionserver.keytab.file'] =
     "#{node[:bcpc][:hadoop][:kerberos][:keytab][:dir]}/#{node[:bcpc][:hadoop][:kerberos][:data][:hbase][:keytab]}"
   generated_values['hbase.rpc.engine'] = 'org.apache.hadoop.hbase.ipc.SecureRpcEngine'
+  generated_values['phoenix.acls.enabled'] = 'true'
 end
 
 #
@@ -124,6 +135,18 @@ if node["bcpc"]["hadoop"]["hbase"]["bucketcache"]["enabled"] == true then
   if node['bcpc']['hadoop']['hbase']['bucketcache.bucket.sizes']
     generated_values['hbase.bucketcache.bucket.sizes'] = node['bcpc']['hadoop']['hbase']['bucketcache.bucket.sizes']
   end
+end
+
+# If HBASE RS group is enabled the properties from this section will be included in hbase-site.xml
+#
+if node["bcpc"]["hadoop"]["hbase"]["rsgroup"]["enabled"] == true then
+  if generated_values['hbase.coprocessor.master.classes'].nil?
+    generated_values['hbase.coprocessor.master.classes'] = 'org.apache.hadoop.hbase.rsgroup.RSGroupAdminEndpoint'
+  else
+    generated_values['hbase.coprocessor.master.classes'] = generated_values['hbase.coprocessor.master.classes'] +
+                                                           ',org.apache.hadoop.hbase.rsgroup.RSGroupAdminEndpoint'
+  end
+  generated_values['hbase.master.loadbalancer.class'] = 'org.apache.hadoop.hbase.rsgroup.RSGroupBasedLoadBalancer'
 end
 
 #

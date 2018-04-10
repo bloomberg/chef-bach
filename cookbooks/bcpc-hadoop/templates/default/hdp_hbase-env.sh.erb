@@ -1,0 +1,28 @@
+# Set HBase-specific environment variables here.
+
+export JAVA_HOME="<%= @java_home %>"
+export HBASE_PID_DIR="<%= @hbase_pid_dir %>"
+export HBASE_LOG_DIR="<%= @hbase_log_dir %>"
+export HBASE_MANAGES_ZK="<%= @hbase_manages_zk %>"
+export HBASE_JMX_BASE="<%= @hbase_jmx_base %>"
+export HBASE_OPTS="<%= @hbase_opts %>"
+export HBASE_MASTER_OPTS="<%= @hbase_master_opts %>"
+export HBASE_REGIONSERVER_OPTS="<%= @hbase_regionserver_opts %>"
+
+# NOTE: add each javaagent only once, otherwise there will be multiple instances running
+# master
+<% (@master_java_agents || {}).each do |agent| %>
+add_str="-javaagent:<%= agent %>"
+if [[ $HBASE_MASTER_OPTS != *"$add_str"* ]]; then
+  export HBASE_MASTER_OPTS="$HBASE_MASTER_OPTS $add_str"
+fi
+<% end %>
+
+# region server
+<% (@regionserver_java_agents || {}).each do |agent| %>
+add_str="-javaagent:<%= agent %>"
+if [[ $HBASE_REGIONSERVER_OPTS != *"$add_str"* ]]; then
+  export HBASE_REGIONSERVER_OPTS="$HBASE_REGIONSERVER_OPTS $add_str"
+fi
+<% end %>
+

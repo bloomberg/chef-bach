@@ -16,11 +16,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-
 package "apache2"
 
 template '/etc/apache2/sites-available/default.conf' do
     source 'apache-mirror.erb'
+    variables ({ user: node['bcpc']['bootstrap']['admin']['user']})
     owner 'root'
     group 'root'
     mode 00644

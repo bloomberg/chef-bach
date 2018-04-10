@@ -256,6 +256,7 @@ ruby_block 'oozie sharelib sqoop-action workaround for 2.6' do
       shell_out! "hdfs dfs -rm #{libpath}/sqoop-hive/"\
                  "hive-cli-1.2.1000.#{active_release}.jar", user: 'hdfs'
       update_oozie_sharelib(float_host(oozie_host['hostname']))
+      break # We only need to delete hive-cli.jar once
     end
   end
   action :nothing

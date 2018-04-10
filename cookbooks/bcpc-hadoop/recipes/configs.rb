@@ -2,6 +2,8 @@ require 'base64'
 ::Chef::Recipe.send(:include, Bcpc_Hadoop::Helper)
 
 include_recipe 'bcpc-hadoop::default'
+# NOTE: This include_recipe is necessary for resource collection
+include_recipe 'sysctl::default'
 
 # disable IPv6 (e.g. for HADOOP-8568)
 case node['platform_family']
@@ -35,6 +37,7 @@ if !node.key?('pam_d') || !node['pam_d'].key?('services') || !node['pam_d']['ser
 end
 
 # set vm.swapiness to 0 (to lessen swapping)
+# NOTE: See above for note about resource collection
 sysctl_param 'vm.swappiness' do
   value 0
 end
