@@ -4,7 +4,7 @@ maintainer_email 'hadoop@bloomberg.net'
 license          'All rights reserved'
 description      'bach_common contains common recipes for the BACH cookbooks'
 long_description 'bach_common contains common recipes for the BACH cookbooks'
-version          '3.3.8'
+version          '3.3.9'
 
 supports 'ubuntu', '12.04'
 supports 'ubuntu', '14.04'
