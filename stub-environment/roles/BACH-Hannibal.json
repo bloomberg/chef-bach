@@ -1,0 +1,13 @@
+{
+    "name": "BACH-Hannibal",
+    "default_attributes": {
+    },
+    "json_class": "Chef::Role",
+    "run_list": [
+      "recipe[bach_hannibal::default]"
+    ],
+    "description": "A hannibal node",
+    "chef_type": "role",
+    "override_attributes": {
+    }
+}
