@@ -48,7 +48,11 @@ end
 # See cookbooks/bcpc/libraries/utils.rb for details.
 #
 node.default[:kafka][:broker][:zookeeper][:connect] = get_head_nodes.map do |nn|
-  float_host(nn[:fqdn])
+  if node[:bcpc][:hadoop][:zookeeper].attribute?(:port) && node[:bcpc][:hadoop][:zookeeper][:port] != nil
+    float_host(nn[:fqdn])+":"+node[:bcpc][:hadoop][:zookeeper][:port].to_s
+  else
+    float_host(nn[:fqdn])
+  end
 end.sort
 
 #
@@ -130,7 +134,7 @@ ruby_block 'kafkaup' do
       node[:kafka][:broker][:zookeeper][:connect]
 
     zk_connection_string =
-      zk_hosts.map { |zkh| "#{zkh}:2181" }.join(',')
+      zk_hosts.map { |zkh| "#{zkh}" }.join(',')
 
     Chef::Log.info("Zookeeper hosts are #{zk_connection_string}")
 
