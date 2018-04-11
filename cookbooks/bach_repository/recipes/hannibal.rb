@@ -1,6 +1,6 @@
 #
 # Cookbook Name:: bach_repository
-# Recipe:: oracle_java
+# Recipe:: hannibal
 #
 require 'pathname'
 include_recipe 'bach_repository::directory'
