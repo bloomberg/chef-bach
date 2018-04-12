@@ -5,11 +5,9 @@ require 'mixlib/shellout'
 require 'pp'
 require 'pry'
 require 'socket'
-
+require 'cluster_def'
 require_relative 'lib/cluster_data'
-require_relative 'lib/chef_node'
 include BACH::ClusterData
-include BACH::ClusterData::ChefNode
 
 def raw_apache_log
   cc = Mixlib::ShellOut.new('sudo cat /var/log/apache2/access.log')
@@ -39,7 +37,7 @@ def parsed_apache_log
   match_data.map do |md|
     {
      hostname: md[1],
-     identd: md[2],
+     indent: md[2],
      user: md[3],
      timestamp: DateTime.strptime(md[4], '%d/%b/%Y:%H:%M:%S %z'),
      request: md[5],
@@ -136,7 +134,7 @@ end
 #   - a list of reachable hosts
 #
 def listening_hosts(target_hosts=installed_hosts)
-  host_entries = parse_cluster_txt(cluster_txt).select do |entry|
+  host_entries = BACH::ClusterDef.new(repo_dir: BACH::ClusterData::repo_dir).fetch_cluster_def.select do |entry|
     target_hosts.include?(entry[:hostname]) ||
     target_hosts.include?(entry[:fqdn])
   end

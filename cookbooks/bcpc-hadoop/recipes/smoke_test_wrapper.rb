@@ -80,4 +80,26 @@ execute "kinit #{tester_princ} credentials" do
   user test_user
 end
 
+chef_env = node.environment
+resource_managers = node[:bcpc][:hadoop][:rm_hosts].map do |rms| float_host(rms.hostname) end
+zookeeper_quorum = node[:bcpc][:hadoop][:zookeeper][:servers].map do |zks| float_host(zks.hostname) end
+fs = "hdfs://#{chef_env}"
+rm = if resource_managers.length > 1 then chef_env else resource_managers[0] end
+thrift_uris = node[:bcpc][:hadoop][:hive_hosts]
+  .map { |s| 'thrift://' + float_host(s[:hostname]) + ':9083' }.join(",")
+node.default['hadoop_smoke_tests']['carbon-line-receiver'] = node[:bcpc][:graphite][:ip]
+node.default['hadoop_smoke_tests']['carbon-line-port'] = node[:bcpc][:graphite][:relay_port]
+node.default['hadoop_smoke_tests']['oozie_hosts'] = node[:bcpc][:hadoop][:oozie_hosts].map do | entry | float_host(entry['hostname']) end
+node.default['hadoop_smoke_tests']['wf_path'] = "hdfs://Test-Laptop/user/#{test_user}/oozie-smoke-tests/wf"
+node.default['hadoop_smoke_tests']['wf']['co_path'] = "hdfs://Test-Laptop/user/#{test_user}/oozie-smoke-tests/co"
+node.default['hadoop_smoke_tests']['wf']['rm'] = rm
+node.default['hadoop_smoke_tests']['wf']['fs'] = fs
+node.default['hadoop_smoke_tests']['wf']['thrift_uris'] = thrift_uris
+node.default['hadoop_smoke_tests']['wf']['krb_realm'] = krb_realm
+node.default['hadoop_smoke_tests']['wf']['zk_quorum'] = zookeeper_quorum.join(",")
+node.default['hadoop_smoke_tests']['wf']['hbase_master_princ'] = "hbase/_HOST@#{krb_realm}"
+node.default['hadoop_smoke_tests']['wf']['hbase_region_princ'] = "hbase/_HOST@#{krb_realm}"
+node.default['hadoop_smoke_tests']['wf']['hive_hmeta_princ'] = "hive/_HOST@#{krb_realm}"
+node.default['hadoop_smoke_tests']['wf']['hive_hserver_princ'] = "hive/_HOST@#{krb_realm}"
+
 include_recipe 'smoke-tests::oozie_smoke_test'

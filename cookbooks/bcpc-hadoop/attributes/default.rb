@@ -5,13 +5,16 @@
 ############################################
 require 'pathname'
 
+
 user = node['bcpc']['bootstrap']['admin']['user']
 default['bcpc']['cluster']['file_path'] = "/home/#{user}/chef-bcpc/cluster.txt"
 
 default['bcpc']['hadoop'] = {}
-default['bcpc']['hadoop']['distribution']['release'] = '2.6.1.17-1'
+default['bcpc']['hadoop']['proxyuser']['ambari'] = 'ambariqa'
+default['bcpc']['hadoop']['distribution']['release'] = '2.6.3.22-1'
 default['bcpc']['hadoop']['distribution']['active_release'] = \
   node['bcpc']['hadoop']['distribution']['release']
+
 default['bcpc']['hadoop']['decommission']['hosts'] = []
 default['bcpc']['hadoop']['hadoop_home_warn_suppress'] = 1
 default['bcpc']['hadoop']['hadoop_log_dir'] = '/var/log/hadoop-hdfs'
@@ -24,6 +27,7 @@ default['bcpc']['hadoop']['hadoop_mapred_pid_dir'] = '/var/run/hadoop-mapreduce'
 default['bcpc']['hadoop']['hadoop_secure_dn_user'] = 'hdfs'
 default['bcpc']['hadoop']['hadoop']['bin']['path'] = '/usr/bin/hadoop'
 default['bcpc']['hadoop']['hadoop']['config']['dir'] = '/etc/hadoop/conf'
+
 # Flag to control whether automatic restarts due to config changes need to be skipped
 # for e.g. if ZK quorum is down or if the recipes need to be run in a non ZK env
 default['bcpc']['hadoop']['skip_restart_coordination'] = false
@@ -34,7 +38,9 @@ default['bcpc']['hadoop']['hdfs']['dfs_blocksize'] = '128m'
 default['bcpc']['hadoop']['hdfs_url'] = "hdfs://#{node.chef_environment}"
 default['bcpc']['hadoop']['jmx_enabled'] = false
 default['bcpc']['hadoop']['jmx_agent_enabled'] = true
-default['bcpc']['hadoop']['java_https_keystore'] = '/usr/local/maven/conf/keystore'
+
+
+
 
 # for jvmkill library
 default['bcpc-hadoop']['jvmkill']['lib_file'] = '/var/lib/jvmkill/libjvmkill.so'
@@ -171,3 +177,7 @@ default['java']['oracle']['jce']['8']['url'] = get_binary_server_url + jce_tgz_n
 
 # Set the JAVA_HOME for Hadoop components
 default['bcpc']['hadoop']['java'] = '/usr/lib/jvm/java-8-oracle-amd64'
+
+# See bcpc-hadoop::ssl_configuration
+default['bcpc']['hadoop']['java_ssl']['keystore'] = '/etc/bach/tls/keystore'
+default['bcpc']['hadoop']['java_ssl']['password'] = 'changeit'

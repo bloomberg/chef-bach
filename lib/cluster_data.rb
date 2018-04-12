@@ -130,6 +130,7 @@ module BACH
 
     def parse_cluster_txt(entries)
       fields = [
+        :node_id,
         :hostname,
         :mac_address,
         :ip_address,

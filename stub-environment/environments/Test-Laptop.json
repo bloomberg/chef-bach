@@ -46,6 +46,7 @@
         "pxe_interface" : "eth1",
         "hostname" : "bcpc-bootstrap",
         "server" : "10.0.100.3",
+        "cluster_def_path": "/cluster-def/",
         "dhcp_subnet" : "10.0.100.0",
         "dhcp_range" : "10.0.100.14 10.0.100.250",
         "preseed": {
@@ -54,7 +55,19 @@
                                    "virtualbox-guest-utils" ]
         }
       },
+      "mysql": {
+        "bootstrap_on_error": true
+      },
       "hadoop" : {
+        "hbase": {
+          "superusers": ["hbase", "ubuntu"]
+        },
+        "core": {
+          "site_xml": {
+            "hadoop.proxyuser.HTTP.hosts": "*",
+            "hadoop.proxyuser.HTTP.users": "*"
+           }
+        },
         "yarn" : {
           "nodemanager": {
             "avail_memory": {

@@ -226,28 +226,6 @@ ruby_block 'update sharelib checksum' do
   end
   action :nothing
 
-  notifies :run, 'ruby_block[oozie sharelib sqoop-action '\
-                 'workaround for 2.6.1]', :immediately
-end
-
-ruby_block 'oozie sharelib sqoop-action workaround for 2.6.1' do
-  block do
-    active_release = node['bcpc']['hadoop']['distribution']['active_release']
-    if active_release == '2.6.1.17-1'
-      node['bcpc']['hadoop']['oozie_hosts'].each do |oozie_host|
-        next unless oozie_running?(float_host(oozie_host['hostname']))
-        instrumentation = shell_out! "#{OOZIE_CLIENT_PATH}/bin/oozie admin "\
-          "-oozie http://#{float_host(oozie_host['hostname'])}:11000/oozie "\
-          '-instrumentation | grep libs.sharelib.system.libpath', user: 'oozie'
-        libpath = instrumentation.stdout.match(%r{hdfs:\/\/.*$})
-        shell_out! "hdfs dfs -cp -p #{libpath}/hive #{libpath}/sqoop-hive",
-                   user: 'hdfs'
-        shell_out! "hdfs dfs -rm #{libpath}/sqoop-hive/"\
-                   'hive-cli-1.2.1000.2.6.1.17-1.jar', user: 'hdfs'
-      end
-    end
-  end
-  action :nothing
   notifies :run, 'ruby_block[notify sharelib update]', :immediately
 end
 
@@ -255,6 +233,30 @@ ruby_block 'notify sharelib update' do
   block do
     node['bcpc']['hadoop']['oozie_hosts'].each do |oozie_host|
       update_oozie_sharelib(float_host(oozie_host['hostname']))
+    end
+  end
+  action :nothing
+  # Run so that we update the sharelib for this version
+  notifies :run, 'ruby_block[oozie sharelib sqoop-action '\
+                 'workaround for 2.6]', :immediately
+end
+
+# FIXME please remove this someday
+ruby_block 'oozie sharelib sqoop-action workaround for 2.6' do
+  block do
+    active_release = node['bcpc']['hadoop']['distribution']['active_release']
+    node['bcpc']['hadoop']['oozie_hosts'].each do |oozie_host|
+      next unless oozie_running?(float_host(oozie_host['hostname']))
+      instrumentation = shell_out! "#{OOZIE_CLIENT_PATH}/bin/oozie admin "\
+        "-oozie http://#{float_host(oozie_host['hostname'])}:11000/oozie "\
+        '-instrumentation | grep libs.sharelib.system.libpath', user: 'oozie'
+      libpath = instrumentation.stdout.match(%r{hdfs:\/\/.*$})
+      shell_out! "hdfs dfs -cp -p #{libpath}/hive #{libpath}/sqoop-hive",
+                 user: 'hdfs'
+      shell_out! "hdfs dfs -rm #{libpath}/sqoop-hive/"\
+                 "hive-cli-1.2.1000.#{active_release}.jar", user: 'hdfs'
+      update_oozie_sharelib(float_host(oozie_host['hostname']))
+      break # We only need to delete hive-cli.jar once
     end
   end
   action :nothing

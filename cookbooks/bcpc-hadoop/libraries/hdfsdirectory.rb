@@ -65,14 +65,6 @@ class Chef
       end
     end
 
-    def get_namenodes( string )
-      results = []
-      Chef::Search::Query.new.search(:node, string) { |o| results << o }
-      results.map! { |node| float_host(node.hostname) }
-      Chef::Log.debug "Chef metadata search returned #{results}"
-      return results
-    end
-
     def dir_exists?(dirname)
       dirfound = false
         begin
@@ -91,7 +83,7 @@ class Chef
 
     def set_active_namenode?
       nnfound = false
-      nn_hosts = get_namenodes("recipes:*namenode*")
+      nn_hosts = get_namenodes
       Chef::Log.debug "Namenode hosts are #{nn_hosts}"
       nn_hosts.each do | nn |
         @client = WebHDFS::Client.new(nn, 50070, 'hdfs')

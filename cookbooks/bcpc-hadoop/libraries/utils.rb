@@ -19,47 +19,43 @@
 
 require 'openssl'
 require 'thread'
+require 'cluster_def'
 
 #
-# Constant string which defines the default attributes which need to be retrieved from node objects
+# Constant string which defines the default attributes which
+# need to be retrieved from node objects
 # The format is hash { key => value , key => value }
-# Key will be used as the key in the search result which is a hash and the value is the node attribute which needs
-# to be included in the result. Attribute hierarchy can be expressed as a dot seperated string. User the following
+# Key will be used as the key in the search result which is a hash 
+# and the value is the node attribute which needs
+# to be included in the result. Attribute hierarchy can be expressed as a 
+# dot seperated string. User the following
 # as an example
 #
 
 # For Kerberos to work we need FQDN for each host. Changing "HOSTNAME" to "FQDN".
 # Hadoop breaks principal into 3 parts  (Service, FQDN and REALM)
 
-HOSTNAME_ATTR_SRCH_KEYS = { 'hostname' => 'fqdn' }.freeze
-HOSTNAME_NODENO_ATTR_SRCH_KEYS = { 'hostname' => 'fqdn',
-                                   'node_number' => 'bcpc.node_number',
-                                   'zookeeper_myid' => 'bcpc.hadoop.zookeeper.myid' }.freeze
-MGMT_IP_ATTR_SRCH_KEYS = { 'mgmt_ip' => 'bcpc.management.ip' }.freeze
+HOSTNAME_ATTR_SRCH_KEYS = {'hostname' => 'fqdn'}
+HOSTNAME_NODENO_ATTR_SRCH_KEYS = {
+  'hostname' => 'fqdn',
+  'node_number' => 'bcpc.node_number',
+  'zookeeper_myid' => 'bcpc.hadoop.zookeeper.myid'}
+MGMT_IP_ATTR_SRCH_KEYS = {'mgmt_ip' => 'bcpc.management.ip'}
 
 def init_config
   begin
-    unless Chef::DataBag.list.key?('configs')
-      puts '************ Creating data_bag "configs"'
-      bag = Chef::DataBag.new
-      bag.name('configs')
-      bag.create
-    end
-  rescue nil
-    puts 'rescued nil in init_config'
-  end
-
-  begin
-    $dbi = Chef::DataBagItem.load('configs', node.chef_environment)
-    $edbi = Chef::EncryptedDataBagItem.load('configs', node.chef_environment) if node['bcpc']['encrypt_data_bag']
-    puts "============ Loaded existing data_bag_item \"configs/#{node.chef_environment}\""
+     $dbi = Chef::DataBagItem.load('configs', node.chef_environment)
+     $edbi = Chef::EncryptedDataBagItem.load(
+       'configs', node.chef_environment) if node['bcpc']['encrypt_data_bag']
+     puts "============ Loaded existing data_bag_item \"configs/#{node.chef_environment}\""
   rescue
-    $dbi = Chef::DataBagItem.new
-    $dbi.data_bag('configs')
-    $dbi.raw_data = { 'id' => node.chef_environment }
-    $dbi.save
-    $edbi = Chef::EncryptedDataBagItem.load('configs', node.chef_environment) if node['bcpc']['encrypt_data_bag']
-    puts "++++++++++++ Created new data_bag_item \"configs/#{node.chef_environment}\""
+     $dbi = Chef::DataBagItem.new
+     $dbi.data_bag('configs')
+     $dbi.raw_data = { 'id' => node.chef_environment }
+     $dbi.save
+     $edbi = Chef::EncryptedDataBagItem.load(
+       'configs', node.chef_environment) if node['bcpc']['encrypt_data_bag']
+     puts "++++++++++++ Created new data_bag_item \"configs/#{node.chef_environment}\""
   end
 end
 
@@ -87,49 +83,55 @@ def make_config!(key, value)
 end
 
 def get_hadoop_heads
-  results = Chef::Search::Query.new.search(:node, "role:BCPC-Hadoop-Head AND chef_environment:#{node.chef_environment}").first
+  results = fetch_all_nodes.select { |hst| hst[:runlist].include? "role[BCPC-Hadoop-Head]" }
+  if results.any?{|x| x['hostname'] == node[:hostname]}
+    results.map!{|x| x['hostname'] == node[:hostname] ? node : x}
+  else
+    results.push(node) if node[:roles].include? "BCPC-Hadoop-Head"
+  end
+  return results.sort_by{ |h| h[:node_id]}
+end
+
+def get_timeline_servers
+  results = Chef::Search::Query.new.search(:node, "roles:BCPC-Hadoop-Head-YarnTimeLineServer AND chef_environment:#{node.chef_environment}").first
   if results.any? { |x| x['hostname'] == node['hostname'] }
     results.map! { |x| x['hostname'] == node['hostname'] ? node : x }
-  elsif node['roles'].include? 'BCPC-Hadoop-Head'
+  elsif node['roles'].include? 'BCPC-Hadoop-Head-YarnTimeLineServer'
     results.push(node)
   end
-
   results.sort
 end
 
-def get_quorum_hosts
-  results = Chef::Search::Query.new.search(:node, "(roles:BCPC-Hadoop-Quorumnode or role:BCPC-Hadoop-Head) AND chef_environment:#{node.chef_environment}").first
-  if results.any? { |x| x['hostname'] == node['hostname'] }
-    results.map! { |x| x['hostname'] == node['hostname'] ? node : x }
-  elsif node['roles'].include? 'BCPC-Hadoop-Quorumnode'
-    results.push(node)
-  end
 
-  results.sort
+def get_quorum_hosts
+  results = fetch_all_nodes.select { |hst| hst[:runlist].include? "role[BCPC-Hadoop-Quorumnode]" or hst[:runlist].include? "role[BCPC-Hadoop-Head]" }
+  if results.any?{|x| x['hostname'] == node[:hostname]}
+    results.map!{|x| x['hostname'] == node[:hostname] ? node : x}
+  else
+    results.push(node) if node[:roles].include? "BCPC-Hadoop-Quorumnode"
+  end
+  return results.sort_by{ |h| h[:node_id]}
 end
 
 def get_hadoop_workers
-  results = Chef::Search::Query.new.search(:node, "role:BCPC-Hadoop-Worker AND chef_environment:#{node.chef_environment}").first
-  if results.any? { |x| x['hostname'] == node['hostname'] }
-    results.map! { |x| x['hostname'] == node['hostname'] ? node : x }
-  elsif node['roles'].include? 'BCPC-Hadoop-Worker'
-    results.push(node)
+  results = fetch_all_nodes.select { |hst| hst[:runlist].include? "role[BCPC-Hadoop-Worker]" }
+  if results.any?{|x| x['hostname'] == node[:hostname]}
+    results.map!{|x| x['hostname'] == node[:hostname] ? node : x}
+  else
+    results.push(node) if node[:roles].include? "BCPC-Hadoop-Worker"
   end
-
-  results.sort
+  return results.sort_by{ |h| h[:fqdn]}
 end
 
 def get_namenodes
   # Logic to get all namenodes if running in HA
   # or to get only the master namenode if not running in HA
   if node['bcpc']['hadoop']['hdfs']['HA']
-    nnrole = Chef::Search::Query.new.search(:node, "role:BCPC-Hadoop-Head-Namenode* AND chef_environment:#{node.chef_environment}").first
-    nnroles = Chef::Search::Query.new.search(:node, "roles:BCPC-Hadoop-Head-Namenode* AND chef_environment:#{node.chef_environment}").first
-    nn_hosts = nnrole.concat nnroles
+    nn_hosts = fetch_all_nodes.select { |hst| hst[:runlist].include? "role[BCPC-Hadoop-Head-Namenode]" or hst[:runlist].include? "role[BCPC-Hadoop-Head-Namenode-Standby]" }
   else
-    nn_hosts = get_nodes_for('namenode_no_HA')
+    nn_hosts = fetch_all_nodes.select { |hst| hst[:runlist].include? "role[BCPC-Hadoop-Head-Namenode-NoHA]" }
   end
-  nn_hosts.uniq { |x| float_host(x['hostname']) }.sort
+  return nn_hosts.uniq{ |x| float_host(x[:hostname]) }.sort_by{ |h| h[:node_id]}
 end
 
 def get_nodes_for(recipe, cookbook = cookbook_name)
@@ -182,21 +184,78 @@ def znode_exists?(znode_path, zk_host = 'localhost:2181')
   raise "get znode #{znode_path} failed with rc = #{rc}, zk_host=#{zk_host}"
 end
 
+  
 #
 # Function to retrieve commonly used node attributes so that the call to chef server is minimized
 #
 def set_hosts
-  node.default['bcpc']['hadoop']['zookeeper']['servers'] = get_node_attributes(HOSTNAME_NODENO_ATTR_SRCH_KEYS, 'zookeeper_server', 'bcpc-hadoop')
-  node.default['bcpc']['hadoop']['jn_hosts'] = get_node_attributes(HOSTNAME_ATTR_SRCH_KEYS, 'journalnode', 'bcpc-hadoop')
-  node.default['bcpc']['hadoop']['rm_hosts'] = get_node_attributes(HOSTNAME_NODENO_ATTR_SRCH_KEYS, 'resource_manager', 'bcpc-hadoop')
-  node.default['bcpc']['hadoop']['hs_hosts'] = get_node_attributes(HOSTNAME_ATTR_SRCH_KEYS, 'historyserver', 'bcpc-hadoop')
-  node.default['bcpc']['hadoop']['dn_hosts'] = get_node_attributes(HOSTNAME_ATTR_SRCH_KEYS, 'datanode', 'bcpc-hadoop')
-  node.default['bcpc']['hadoop']['hb_hosts'] = get_node_attributes(HOSTNAME_ATTR_SRCH_KEYS, 'hbase_master', 'bcpc-hadoop')
-  node.default['bcpc']['hadoop']['hive_hosts'] = get_node_attributes(HOSTNAME_ATTR_SRCH_KEYS, 'hive_hcatalog', 'bcpc-hadoop')
-  node.default['bcpc']['hadoop']['oozie_hosts']  = get_node_attributes(HOSTNAME_ATTR_SRCH_KEYS, 'oozie', 'bcpc-hadoop')
-  node.default['bcpc']['hadoop']['httpfs_hosts'] = get_node_attributes(HOSTNAME_ATTR_SRCH_KEYS, 'httpfs', 'bcpc-hadoop')
-  node.default['bcpc']['hadoop']['rs_hosts'] = get_node_attributes(HOSTNAME_ATTR_SRCH_KEYS, 'region_server', 'bcpc-hadoop')
-  node.default['bcpc']['hadoop']['mysql_hosts'] = get_node_attributes(HOSTNAME_ATTR_SRCH_KEYS, 'mysql', 'bcpc')
+  # Hadoop service to chef role mapping used by set_hosts to perform lookups
+  srvc2role = {
+    'zookeeper'=> 'role[BCPC-Hadoop-Head]',
+    'journal_node' => 'role[BCPC-Hadoop-Head]',
+    'resource_manager' => 'role[BCPC-Hadoop-Head-ResourceManager]',
+    'job_history_server' =>  'role[BCPC-Hadoop-Head-MapReduce]',
+    'oozie_server' => 'role[BCPC-Hadoop-Head-MapReduce]',
+    'hadoop_worker' => 'role[BCPC-Hadoop-Worker]',
+    'hadoop_datanode' => 'role[BCPC-Hadoop-Worker]', 
+    'hadoop_head' => 'role[BCPC-Hadoop-Head]',
+    'hive_server' => 'role[BCPC-Hadoop-Head-Hive',
+    'hbase_head' => 'role[BCPC-Hadoop-Head-HBase]'
+  }
+
+  if node.run_state['cluster_def'].nil? then
+    node.run_state['cluster_def'] = BACH::ClusterDef.new(node_obj: node)
+  end
+  cd = node.run_state['cluster_def']
+  
+  node.default[:bcpc][:hadoop][:zookeeper][:servers] = 
+    cd.fetch_cluster_def.select { |hst| hst[:runlist].include? srvc2role['zookeeper'] }.map {
+      |hst| { 'hostname' => hst[:fqdn], 'node_number' => hst[:node_id], 'zookeeper_myid' => nil } }
+
+  node.default[:bcpc][:hadoop][:jn_hosts] = 
+    cd.fetch_cluster_def.select { |hst| hst[:runlist].include? srvc2role['journal_node'] }.map {
+      |hst| { 'hostname' => hst[:fqdn]} }
+
+  node.default[:bcpc][:hadoop][:rm_hosts] = 
+    cd.fetch_cluster_def.select { |hst| hst[:runlist].include? srvc2role['resource_manager'] }.map {
+      |hst| { 'hostname' => hst[:fqdn], 'node_number' => hst[:node_id], 'zookeeper_myid' => nil } }
+
+  node.default[:bcpc][:hadoop][:hs_hosts] = 
+    cd.fetch_cluster_def.select { |hst| hst[:runlist].include? srvc2role['job_history_server'] }.map {
+      |hst| { 'hostname' => hst[:fqdn]} }
+
+  node.default[:bcpc][:hadoop][:dn_hosts] = 
+    cd.fetch_cluster_def.select { |hst| hst[:runlist].include? srvc2role['hadoop_worker'] }.map {
+      |hst| { 'hostname' => hst[:fqdn]} }
+
+  node.default[:bcpc][:hadoop][:hb_hosts] = 
+    cd.fetch_cluster_def.select { |hst| hst[:runlist].include? srvc2role['hbase_head'] }.map {
+      |hst| { 'hostname' => hst[:fqdn]} }
+
+  # different flavors of hive
+  node.default[:bcpc][:hadoop][:hive_hosts] = 
+      cd.fetch_cluster_def.select { |hst| hst[:runlist].include? srvc2role['hive_server'] }.map {
+      |hst| { 'hostname' => hst[:fqdn]} }
+
+  # BCPC-Hadoop-Head-MapReduce
+  node.default[:bcpc][:hadoop][:oozie_hosts]  = 
+    cd.fetch_cluster_def.select { |hst| hst[:runlist].include? srvc2role['oozie_server'] }.map {
+      |hst| { 'hostname' => hst[:fqdn]} }
+  
+  # every datanode
+  node.default[:bcpc][:hadoop][:httpfs_hosts] = 
+    cd.fetch_cluster_def.select { |hst| hst[:runlist].include? srvc2role['hadoop_worker']  }.map {
+      |hst| { 'hostname' => hst[:fqdn]} }
+
+  # Worker
+  node.default[:bcpc][:hadoop][:rs_hosts] = 
+    cd.fetch_cluster_def.select { |hst| hst[:runlist].include? srvc2role['hadoop_worker']  }.map {
+      |hst| { 'hostname' => hst[:fqdn]} }
+
+  # BCPC-Hadoop-Head
+  node.default[:bcpc][:hadoop][:mysql_hosts] = 
+    cd.fetch_cluster_def.select { |hst| hst[:runlist].include? srvc2role['hadoop_head'] }.map {
+      |hst| { 'hostname' => hst[:fqdn]} }
 end
 
 #
@@ -338,7 +397,7 @@ def process_restarted_after_failure?(restart_failure_time, process_identifier)
   require 'time'
   begin
     start_time = process_start_time(process_identifier)
-    if start_time.nil? && (Time.parse(restart_failure_time).to_i < Time.parse(start_time).to_i)
+    if not start_time.nil? && (Time.parse(restart_failure_time).to_i < Time.parse(start_time).to_i)
       Chef::Log.info("#{process_identifier} seem to be started at #{start_time} after last restart failure at #{restart_failure_time}")
       return true
     end
@@ -384,7 +443,8 @@ end
 #   oozie_running?("f-bcpc-vm2.bcpc.example.com")
 #   # => true
 #
-# Returns true if oozie server is operational with 'NORMAL' status, false otherwise.
+# Returns true if oozie server is operational 
+# with 'NORMAL' status, false otherwise.
 def oozie_running?(host)
   oozie_url = "sudo -u oozie oozie admin -oozie http://#{host}:11000/oozie -status"
   cmd = Mixlib::ShellOut.new(
@@ -394,9 +454,12 @@ def oozie_running?(host)
   cmd.exitstatus == 0 && cmd.stdout.include?('NORMAL')
 end
 
-# Internal: Have the specified Oozie host update its ShareLib to the latest lib_<timestamp>
-#           sharelib directory on hdfs:/user/oozie/share/lib/, without having to restart
-#           that Oozie server. Oozie server, by default, uses the latest one when it (re)starts.
+# Internal: Have the specified Oozie host update its ShareLib 
+#           to the latest lib_<timestamp>
+#           sharelib directory on hdfs:/user/oozie/share/lib/,
+#           without having to restart
+#           that Oozie server. Oozie server, by default, uses 
+#           the latest one when it (re)starts.
 #
 # host - Endpoint (FQDN/IP) on which Oozie server is available.
 #
@@ -417,21 +480,4 @@ def update_oozie_sharelib(host)
   else
     Chef::Log.info("Sharelibupdate: Oozie server not running on #{host}")
   end
-end
-
-def cluster_nodes
-  cluster_file = node['bcpc']['cluster']['file_path']
-  unless File.file?(cluster_file)
-    Chef::Log.fatal("File #{cluster_file} does not exist.")
-    raise
-  end
-
-  node_list = []
-  File.open(cluster_file, 'r').each_line do |line|
-    lines = line.split
-    node_list.push("#{lines[0]}.#{lines[5]}")
-  end
-  node_list.push(node['bcpc']['management']['viphost']) unless node['bcpc']['management']['viphost'].nil?
-
-  node_list
 end

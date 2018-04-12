@@ -62,7 +62,7 @@ option tcpka
 
 <% if @oozie_servers.length > 0 -%>
 frontend oozie
-  bind <%="#{node[:bcpc][:floating][:vip]}"%>:11010
+  bind <%="#{node[:bcpc][:floating][:vip]}"%>:<%= node['bcpc']['ha_oozie']['port'] %>
   mode http
   default_backend backend_oozie
 

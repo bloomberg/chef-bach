@@ -42,6 +42,11 @@ fi
 
 popd > /dev/null
 
+pushd lib/cluster-def-gem  > /dev/null
+/opt/chefdk/embedded/bin/gem build cluster_def.gemspec
+sudo /opt/chefdk/embedded/bin/gem install cluster_def
+popd > /dev/null
+
 if pgrep 'chef-client' > /dev/null; then
     echo 'A chef-client run is already underway, aborting build_bins.sh' 1>&2
     exit

@@ -16,10 +16,6 @@ default['bcpc']['bootstrap']['admin']['user'] =
 
 user = node.run_state[:bcpc_admin_user]
 
-default['bcpc']['country'] = 'US'
-default['bcpc']['state'] = 'NY'
-default['bcpc']['location'] = 'New York'
-default['bcpc']['organization'] = 'Bloomberg'
 
 # Region name for this cluster
 default['bcpc']['region_name'] = node.chef_environment
@@ -164,7 +160,7 @@ default['bcpc']['repos_for']['trusty'].tap do |trusty_repos|
     repo[:distribution] = 'HDP'
     repo[:key] = 'hortonworks.key'
     repo[:uri] =
-      'http://private-repo-1.hortonworks.com/HDP/ubuntu14/2.x/updates/2.6.1.17-1'
+      'http://private-repo-1.hortonworks.com/HDP/ubuntu14/2.x/updates/2.6.3.22-1'
   end
 
   trusty_repos['hdp-utils'].tap do |repo|
@@ -228,6 +224,8 @@ default['bcpc']['zabbix_dbname'] = 'zabbix'
 default['bcpc']['zabbix_dbport'] = '3306'
 
 default['bcpc']['admin_email'] = 'admin@example.com'
+
+default['bcpc']['ha_oozie']['port'] = '11010'
 
 #################################################
 #  attributes for chef vault download and install

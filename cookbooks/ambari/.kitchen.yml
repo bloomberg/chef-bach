@@ -1,0 +1,60 @@
+#
+# Cookbook :: ambari
+
+# Copyright 2018, Bloomberg Finance L.P.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+---
+driver:
+  name: vagrant
+  customize:
+    memory: 2500
+#    cableconnected1: 'on'
+
+provisioner:
+  name: chef_zero
+  require_chef_omnibus: 12.19.36
+
+platforms:
+  - name: ubuntu-14.04
+    run_list:
+       - 'recipe[apt::default]'
+       - 'recipe[java::default]'
+       - 'recipe[ambari::default]'
+       - 'recipe[ambari::postgres_server_embedded_setup]'
+       - 'recipe[ambari::ambari_server_setup]'
+       - 'recipe[ambari::ambari_views_setup]'
+    attributes: {
+      java: {
+        oracle: {
+          accept_oracle_download_terms: true,
+          jce: {
+            enabled: true
+          }
+        },
+        jdk_version: 8,
+        install_flavor: oracle,
+        accept_license_agreement: true,
+        set_default: true
+      }
+    }
+    driver:
+      box: bento/ubuntu-14.04
+      network:
+      - [ "private_network" , { ip : "10.0.100.31" } ]
+      - [ "forwarded_port" , { guest : 8080, host : 7777 } ]
+suites:
+  - name: default
+    attributes:

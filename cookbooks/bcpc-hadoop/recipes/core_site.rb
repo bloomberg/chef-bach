@@ -27,7 +27,8 @@ if node[:bcpc][:hadoop][:kerberos][:enable]
      'hadoop.security.authentication' => 'kerberos',
      'hadoop.security.authorization' => true,
      'hadoop.security.auth_to_local' =>
-       node[:bcpc][:hadoop][:kerberos][:data].map { |ke,va|
+       node[:bcpc][:hadoop][:kerberos][:data].reject { |ke, va|
+         va['principal'] == 'HTTP' }.map { |ke,va|
        'RULE:[2:$1@$0](' +
          va['principal'] + '@.*' + node[:bcpc][:hadoop][:kerberos][:realm] +
          ')s/.*/' + va['owner'] + '/'
@@ -74,6 +75,15 @@ if node[:bcpc][:hadoop][:hdfs][:ldap][:integration]
     }
   node.run_state[:core_site_generated_values].merge!(ldap_properties)
 end
+
+subnet = node["bcpc"]["management"]["subnet"]
+network_properties = {
+  'hadoop.security.dns.interface' =>
+      node["bcpc"]["networks"][subnet]["floating"]["interface"]
+}
+
+node.run_state[:core_site_generated_values].merge!(network_properties)
+
 
 ruby_block 'node.run_state[:core_site_generated_values]' do
   block do

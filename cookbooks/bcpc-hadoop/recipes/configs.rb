@@ -2,6 +2,8 @@ require 'base64'
 ::Chef::Recipe.send(:include, Bcpc_Hadoop::Helper)
 
 include_recipe 'bcpc-hadoop::default'
+# NOTE: This include_recipe is necessary for resource collection
+include_recipe 'sysctl::default'
 
 # disable IPv6 (e.g. for HADOOP-8568)
 case node['platform_family']
@@ -35,7 +37,7 @@ if !node.key?('pam_d') || !node['pam_d'].key?('services') || !node['pam_d']['ser
 end
 
 # set vm.swapiness to 0 (to lessen swapping)
-include_recipe 'sysctl::default'
+# NOTE: See above for note about resource collection
 sysctl_param 'vm.swappiness' do
   value 0
 end
@@ -43,8 +45,8 @@ end
 # Populate node attributes for all kind of hosts
 set_hosts
 node.override['locking_resource']['zookeeper_servers'] = \
-  node[:bcpc][:hadoop][:zookeeper][:servers].map do |server|
-    [float_host(server['hostname']), node[:bcpc][:hadoop][:zookeeper][:port]].join(':')
+  node['bcpc']['hadoop']['zookeeper']['servers'].map do |server|
+    [float_host(server['hostname']), node['bcpc']['hadoop']['zookeeper']['port']].join(':')
   end
 
 package 'bigtop-jsvc'
@@ -69,11 +71,13 @@ include_recipe 'java::oracle_jce'
 include_recipe 'bcpc-hadoop::jvmkill'
 
 %w(zookeeper).each do |pkg|
-  package hwx_pkg_str(pkg, node[:bcpc][:hadoop][:distribution][:release]) do
+  package hwx_pkg_str(pkg, node['bcpc']['hadoop']['distribution']['release']) do
     action :upgrade
   end
 end
 
-# incrase max_map_count
-node.default['sysctl']['params']['vm']['max_map_count'] = (node.memory.total.to_i) / 16
-include_recipe 'sysctl::apply'
+# We need more maps!
+max_maps = node['memory']['total'].to_i / 16
+sysctl_param 'vm.max_map_count' do
+  value max_maps
+end

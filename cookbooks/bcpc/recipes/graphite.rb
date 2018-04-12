@@ -27,7 +27,6 @@ include_recipe 'bcpc::mysql_data_bags'
 # These data bags and vault items are pre-populated at compile time by
 # the bcpc::mysql_data_bags recipe.
 #
-
 graphite_user = get_config!('mysql-graphite-user')
 graphite_password = get_config!('password', 'mysql-graphite', 'os')
 
@@ -43,6 +42,7 @@ graphite_password = get_config!('password', 'mysql-graphite', 'os')
   python-memcache
   python-pyparsing
   python-scandir
+  python-cachetools
   libcairo2-dev
   libffi-dev
 ).each do |pkg|
@@ -56,14 +56,20 @@ package 'python-django' do
   version node['bcpc']['graphite']['django']['version']
 end
 
-%w(
-  python-whisper
-  python-carbon
-  python-graphite-web
-).each do |pkg|
-  package pkg do
-    action :upgrade
-  end
+package 'python-whisper' do
+  action :upgrade
+end
+
+package 'python-carbon' do
+  action :upgrade
+  notifies :restart, 'service[carbon-relay]', :delayed
+  notifies :restart, 'service[carbon-aggregator]', :delayed
+  notifies :restart, 'service[carbon-cache]', :delayed
+end
+
+package 'python-graphite-web' do
+  action :upgrade
+  notifies :reload, 'service[apache2]', :delayed
 end
 
 %w(
@@ -85,8 +91,8 @@ end
   end
 end
 
-mysql_servers =
-  get_node_attributes(MGMT_IP_GRAPHITE_WEBPORT_ATTR_SRCH_KEYS, 'mysql', 'bcpc')
+# we need real node objects in order to extract the mgmt ip
+head_nodes = get_head_nodes
 
 # Directory resource sets owner and group only to the leaf directory.
 # All other directories will be owned by root
@@ -126,9 +132,8 @@ template '/opt/graphite/conf/carbon.conf' do
   group 'root'
   mode 0o0644
   variables(
-    'servers' => mysql_servers,
-    'min_quorum' => mysql_servers.length / 2 + 1
-  )
+    'servers' => head_nodes,
+    'min_quorum' => head_nodes.length/2 + 1 )
   notifies :restart, 'service[carbon-cache]', :delayed
   notifies :restart, 'service[carbon-aggregator]', :delayed
   notifies :restart, 'service[carbon-relay]', :delayed
@@ -155,7 +160,7 @@ template '/opt/graphite/conf/relay-rules.conf' do
   owner 'root'
   group 'root'
   mode 0o0644
-  variables('servers' => mysql_servers)
+  variables( 'servers' => head_nodes )
   notifies :restart, 'service[carbon-relay]', :delayed
 end
 
@@ -213,9 +218,9 @@ template '/opt/graphite/webapp/graphite/local_settings.py' do
   group 'www-data'
   mode 0o0440
   variables(
-    'servers' => mysql_servers,
-    'min_quorum' => mysql_servers.length / 2 + 1
-  )
+    'web_port' => node['bcpc']['graphite']['web_port'],
+    'servers' => head_nodes,
+    'min_quorum' => head_nodes.length/2 + 1 )
   notifies :restart, 'service[apache2]', :delayed
 end
 
