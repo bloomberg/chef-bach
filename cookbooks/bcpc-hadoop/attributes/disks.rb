@@ -15,7 +15,7 @@ default[:bcpc][:hadoop][:disks].tap do |disks|
   disks[:role_min_disk] = 2
 
   # We are reserving disks for the following
-  disks[:reservation_requests] = ['graphite_disk']
+  disks[:reservation_requests] = ['graphite_disk', 'zookeeper_disk']
 
   # Reservations will be saved here
   disks[:disk_reserve_roles] = ['BCPC-Hadoop-Head']

@@ -67,7 +67,7 @@ triggers = {
   }
 }
 
-def monitor_disk(triggers_host, host, disk, size, triggers_sensitivity)
+def monitor_disk_space(triggers_host, host, disk, size, triggers_sensitivity)
   if triggers_host["#{host}.diskspace.#{disk}.byte_avail"].nil?
     triggers_host["#{host}.diskspace.#{disk}.byte_avail"] = {
       'query' => "servers.#{node.chef_environment.gsub(/[\-_]/, '')}.*.diskspace.*.byte_avail",
@@ -93,6 +93,22 @@ def monitor_disk(triggers_host, host, disk, size, triggers_sensitivity)
       'trigger_desc' => 'More than 90% of disk space used',
       'severity' => 3,
       'route_to' => 'tenant'
+    }
+  end
+end
+
+def monitor_disk_iostat_await(triggers_host, host, disk_dev, await, triggers_sensitivity)
+  if triggers_host["#{host}.diskiostat.#{disk_dev}.await"].nil?
+    triggers_host["#{host}.diskiostat.#{disk_dev}.await"] = {
+      'query' => "servers.#{host}.iostat.#{disk_dev}.await",
+      'trigger_val' => "max(#{triggers_sensitivity})",
+      'trigger_cond' => ">#{await}",
+      'trigger_name' => "#{host}_zookeeper_#{disk_dev}_await",
+      'trigger_dep' => ["#{host}_NodeAvailability"],
+      'enable' => true,
+      'trigger_desc' => "zookeeper has iostat await > #{await} ms",
+      'severity' => 3,
+      'route_to' => 'admin'
     }
   end
 end
@@ -175,7 +191,7 @@ cluster_nodes_objs.each do |node_obj|
 
   # add to triggers
   disk_size_hash.each do |disk, size|
-    monitor_disk(triggers[host], host, disk, size, triggers_sensitivity)
+    monitor_disk_space(triggers[host], host, disk, size, triggers_sensitivity)
   end
 
   # Copy service specific queries
@@ -203,7 +219,23 @@ head_nodes_objs.each do |head_node_obj|
 
   # add to triggers
   disk_size_hash.each do |disk, size|
-    monitor_disk(triggers[host], host, disk, size, triggers_sensitivity)
+    monitor_disk_space(triggers[host], host, disk, size, triggers_sensitivity)
+  end
+end
+
+# monitor disk io await for zookeeper disk
+reservation_requests = node[:bcpc][:hadoop][:disks][:reservation_requests]
+if !reservation_requests.nil? && reservation_requests.include?("zookeeper_disk")
+  disk_index = reservation_requests.index("zookeeper_disk")
+  await = node['bcpc']['hadoop']['zookeeper']['iostat']['await']
+
+  head_nodes_objs.each do |head_node_obj|
+    disk_dev = head_node_obj.filesystem
+        .select { |key, _| key.to_s.match(/^\/dev\/sd\.*/) } # only /dev/sd*
+        .select { |_, value| value['mount'].to_s.match(/^\/disk\/#{disk_index}$/) } # only mounted to /disk/#{disk_index}
+        .keys[0].match(/^\/dev\/(sd.*)$/)[1] # get sdc1
+    host = head_node_obj.hostname
+    monitor_disk_iostat_await(triggers[host], host, disk_dev, await, triggers_sensitivity)
   end
 end
 

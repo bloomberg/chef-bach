@@ -53,3 +53,6 @@ default[:bcpc][:hadoop][:zookeeper][:snap][:retain_count] = 5
 
 # ZooKeeper snapshot purge interval in hours
 default[:bcpc][:hadoop][:zookeeper][:snap][:purge_interval] = 24
+
+# ZooKeeper max disk io await before triggering an zabbix alarm (in ms)
+default[:bcpc][:hadoop][:zookeeper][:iostat][:await] = 3000
