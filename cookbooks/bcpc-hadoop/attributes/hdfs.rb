@@ -13,10 +13,14 @@ default['bcpc']['hadoop']['namenode']['xmx']['max_size'] = 1024
 # # set to nil to calculate dynamically based on available memory
 default['bcpc']['hadoop']['namenode']['xmn']['max_size'] = 128
 default['bcpc']['hadoop']['namenode']['xmx']['max_ratio'] = 0.25
-default['bcpc']['hadoop']['namenode']['jmx']['port'] = 10111
+default['bcpc']['hadoop']['namenode']['jmx']['port'] = 10_111
 default['bcpc']['hadoop']['namenode']['rpc']['port'] = 8020
-default['bcpc']['hadoop']['namenode']['http']['port'] = 50070
-default['bcpc']['hadoop']['namenode']['https']['port'] = 50470
+default['bcpc']['hadoop']['namenode']['http']['port'] = 50_070
+default['bcpc']['hadoop']['namenode']['https']['port'] = 50_470
+
+default['bcpc']['hadoop']['datanode']['ipc']['port'] = 50_020
+default['bcpc']['hadoop']['datanode']['port'] = 1004
+default['bcpc']['hadoop']['datanode']['http']['port'] = 1006
 
 # JMX port mappings
 default['bcpc']['hadoop'].tap do |jmx|

@@ -211,13 +211,13 @@ ruby_block "hdfs_site_generated_values_jn_properties" do
       jn_properties =
         {
          'dfs.journalnode.rpc-address' =>
-           node[:bcpc][:floating][:ip] + ':8485',
+           node[:bcpc][:floating][:ip] + ':' + node['bcpc']['hadoop']['journalnode']['rpc']['port'].to_s,
 
          'dfs.journalnode.http-address' =>
-           node[:bcpc][:floating][:ip] + ':8480',
+           node[:bcpc][:floating][:ip] + ':' + ['bcpc']['hadoop']['journalnode']['http']['port'].to_s,
 
          'dfs.journalnode.https-address' =>
-           node[:bcpc][:floating][:ip] + ':8481',
+           node[:bcpc][:floating][:ip] + ':' + ['bcpc']['hadoop']['journalnode']['https']['port'].to_s
         }
 
        node.run_state['hdfs_site_generated_values'].merge!(jn_properties)
@@ -234,13 +234,13 @@ ruby_block "hdfs_site_generated_values_dn_properties" do
       dn_properties =
         {
          'dfs.datanode.ipc.address' =>
-           node[:bcpc][:floating][:ip].to_s + ':50020',
+           node[:bcpc][:floating][:ip].to_s + ':' + node['bcpc']['hadoop']['datanode']['ipc']['port'].to_s,
 
          'dfs.datanode.address' =>
-           node[:bcpc][:floating][:ip] + ':1004',
+           node[:bcpc][:floating][:ip].to_s + ':' + node['bcpc']['hadoop']['datanode']['port'].to_s,
 
          'dfs.datanode.http.address' =>
-           node[:bcpc][:floating][:ip] + ':1006',
+           node[:bcpc][:floating][:ip].to_s + ':' + node['bcpc']['hadoop']['datanode']['http']['port'].to_s
         }
 
       node.run_state['hdfs_site_generated_values'].merge!(dn_properties)
@@ -252,7 +252,7 @@ ruby_block "hdfs_site_generated_values_ha_properties" do
   block do
     if node[:bcpc][:hadoop][:hdfs][:HA]
       # This is a cached node search.
-      zk_hosts = get_head_nodes 
+      zk_hosts = get_head_nodes
 
       ha_properties =
         {
@@ -262,8 +262,8 @@ ruby_block "hdfs_site_generated_values_ha_properties" do
 
          'dfs.namenode.shared.edits.dir' =>
            'qjournal://' +
-           zk_hosts.map{ |s| float_host(s[:fqdn]) + ":8485" }.join(";") +
-           '/' + node.chef_environment,
+           zk_hosts.map { |s| float_host(s[:fqdn]) + ':' + node['bcpc']['hadoop']['journalnode']['rpc']['port'].to_s }
+        .join(';') + '/' + node.chef_environment,
 
          # Why is this added twice?
          'dfs.journalnode.edits.dir' =>
