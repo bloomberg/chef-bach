@@ -50,6 +50,10 @@ template "#{cache_dir}/coordinator.xml" do
   # rubocop:enable Layout/IndentHash
 end
 
+template "#{cache_dir}/hive_smoke_test.hql" do
+  source 'hive_smoke_test.hql.erb'
+end
+
 execute "create HDFS coordinator path #{coordinator_path}" do
   command "hdfs dfs -mkdir -p #{coordinator_path}"
   user test_user
@@ -70,21 +74,21 @@ end
 
 execute "upload workflow to #{workflow_path}" do
   command "hdfs dfs -copyFromLocal -f #{cache_dir}/workflow.xml \
-  #{workflow_path}" 
+  #{workflow_path}"
   user test_user
   not_if "hdfs dfs -test -f #{workflow_path}/workflow.xml",
          :user => test_user
 end
 
 template "#{cache_dir}/send_to_graphite.sh" do
-  source "send_to_graphite_sh.erb"
-  variables ({
+  source 'send_to_graphite_sh.erb'
+  variables({
     carbon_receiver: node['hadoop_smoke_tests']['carbon-line-receiver'],
     carbon_port: node['hadoop_smoke_tests']['carbon-line-port']
   })
 end
 
-execute "upload send_to_graphite.sh" do
+execute 'upload send_to_graphite.sh' do
   command "hdfs dfs -copyFromLocal -f #{cache_dir}/send_to_graphite.sh \
   #{workflow_path}"
   user test_user
@@ -92,18 +96,31 @@ execute "upload send_to_graphite.sh" do
     :user => test_user
 end
 
+execute "upload hive_smoke_test to #{workflow_path}" do
+  command "hdfs dfs -copyFromLocal -f #{cache_dir}/hive_smoke_test.hql \
+  #{workflow_path}"
+  user test_user
+end
+
+execute "upload hive-site to #{workflow_path}" do
+  command "hdfs dfs -copyFromLocal -f /etc/hive/conf/hive-site.xml \
+  #{workflow_path}"
+  user test_user
+end
+
 Chef::Resource::RubyBlock.send(:include, HadoopSmokeTests::OozieHelper)
 
 ruby_block 'smoke test coordinator status' do
   block do
     status_query = submit_command_running_host(
-      test_user, "jobs -jobtype coordinator")
-    node.run_state['need_coordinator_submit'] = 
+      test_user, 'jobs -jobtype coordinator'
+    )
+    node.run_state['need_coordinator_submit'] =
       if status_query == nil then
         false
       else
         (status_query.each_line.select {
-         | line | (line.include? app_name) && 
+         | line | (line.include? app_name) &&
            (line.include? 'RUNNING') }).empty?
       end
     end
@@ -113,7 +130,8 @@ ruby_block 'submit oozie smoke test' do
   block do
     submit_workflow_running_host(
       test_user,
-      "#{cache_dir}/smoke_test_coordinator.properties")
+      "#{cache_dir}/smoke_test_coordinator.properties"
+    )
   end
   only_if { node.run_state['need_coordinator_submit'] == true }
 end

@@ -1,5 +1,15 @@
 <workflow-app xmlns="uri:oozie:workflow:0.3" name="Cluster-Smoke-Test">
   <credentials>
+    <credential name="hive2_creds" type="hive2">
+      <property>
+        <name>hive2.server.principal</name>
+        <value>${hMetastorePrinc}</value>
+      </property>
+      <property>
+        <name>hive2.jdbc.url</name>
+        <value>${jdbcUrl}</value>
+      </property>
+    </credential>
     <credential name="hcat_creds" type="hcat">
       <property>
         <name>hcat.metastore.uri</name>
@@ -69,7 +79,7 @@
   <action name="MapReduce-Action">
     <map-reduce>
       <job-tracker>${jobTracker}</job-tracker>
-      <name-node>${nameNode}</name-node>  
+      <name-node>${nameNode}</name-node>
       <prepare>
         <delete path="/user/${wf:user()}/${inputDir}"/>
         <delete path="/user/${wf:user()}/${outputDir}"/>
@@ -138,9 +148,54 @@
         </property>
       </configuration>
     </map-reduce>
-      <ok to="Hive-CLI"/>
+      <ok to="forkNode"/>
       <error to="fail"/>
   </action>
+  <fork name="forkNode">
+    <path start="Hive-Smokes"/>
+    <path start="Hive2-Smokes"/>
+  </fork>
+
+  <action name="Hive-Smokes" cred="hcat_creds">
+    <hive xmlns="uri:oozie:hive-action:0.2">
+      <job-tracker>${jobTracker}</job-tracker>
+      <name-node>${nameNode}</name-node>
+      <job-xml>hive-site.xml</job-xml>
+      <configuration>
+        <property>
+          <name>mapred.job.queue.name</name>
+          <value>${queueName}</value>
+        </property>
+      </configuration>
+      <script>hive_smoke_test.hql</script>
+      <param>HIVE_SMOKE_TEST_DB=smoke_test_db</param>
+      <param>HIVE_SMOKE_TEST_TBL=smoke_test_tbl</param>
+    </hive>
+    <ok to="joiner"/>
+    <error to="fail"/>
+  </action>
+
+  <action name="Hive2-Smokes" cred="hive2_creds">
+    <hive2 xmlns="uri:oozie:hive2-action:0.1">
+      <job-tracker>${jobTracker}</job-tracker>
+      <name-node>${nameNode}</name-node>
+      <job-xml>hive-site.xml</job-xml>
+      <configuration>
+        <property>
+          <name>mapred.job.queue.name</name>
+          <value>${queueName}</value>
+        </property>
+      </configuration>
+      <jdbc-url>${jdbcUrl}</jdbc-url>
+      <script>hive_smoke_test.hql</script>
+      <param>HIVE_SMOKE_TEST_DB=smoke_test_db_v2</param>
+      <param>HIVE_SMOKE_TEST_TBL=smoke_test_tbl_v2</param>
+    </hive2>
+    <ok to="joiner"/>
+    <error to="fail"/>
+  </action>
+  <join name="joiner" to="Hive-CLI"/>
+
   <action name="Hive-CLI" cred="hcat_creds">
     <shell xmlns="uri:oozie:shell-action:0.1">
       <job-tracker>${jobTracker}</job-tracker>
