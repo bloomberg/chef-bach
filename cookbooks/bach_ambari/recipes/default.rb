@@ -19,7 +19,7 @@
 
 namenodes_cach = get_namenodes
 # FILES
-namenodes = namenodes_cach.select{ |nn| nn[:bcpc][:node_number] }.map{ |nn| "namenode#{nn[:bcpc][:node_number]}" }.join(',')
+namenodes = namenodes_cach.map { |nn| "namenode#{nn[:node_id]}" }.join(',')
 
 namenodes_fqdn = namenodes_cach.map { |nn| float_host(nn[:fqdn]) }
 
