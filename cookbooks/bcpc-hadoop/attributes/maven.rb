@@ -19,3 +19,6 @@
 # configured as the default value, so we are obliged to override it.
 #
 default['maven']['repositories'] = ['http://repo1.maven.apache.org/maven2']
+
+# This is used in a maven_settings resource to configure plugin repos.
+default[:bach][:maven][:central_mirror] = nil

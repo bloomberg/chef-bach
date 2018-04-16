@@ -61,6 +61,17 @@ unless node['bcpc']['bootstrap']['proxy'].nil?
   end
 end
 
+if node['bach']['maven']['central_mirror']
+  maven_settings 'settings.mirrors' do
+    value 'mirror' => {
+                       'id' => 'primary-mirror',
+                       'name' => 'Chef-configured primary mirror',
+                       'mirrorOf' => 'central',
+                       'url' => node['bach']['maven']['central_mirror']
+                      }
+  end
+end
+
 # it looks like the Maven cookbook uses the default
 # restrictive umask from Chef-Client
 execute 'chmod maven' do
