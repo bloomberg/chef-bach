@@ -214,10 +214,10 @@ ruby_block "hdfs_site_generated_values_jn_properties" do
            node[:bcpc][:floating][:ip] + ':' + node['bcpc']['hadoop']['journalnode']['rpc']['port'].to_s,
 
          'dfs.journalnode.http-address' =>
-           node[:bcpc][:floating][:ip] + ':' + ['bcpc']['hadoop']['journalnode']['http']['port'].to_s,
+           node[:bcpc][:floating][:ip] + ':' + node['bcpc']['hadoop']['journalnode']['http']['port'].to_s,
 
          'dfs.journalnode.https-address' =>
-           node[:bcpc][:floating][:ip] + ':' + ['bcpc']['hadoop']['journalnode']['https']['port'].to_s
+           node[:bcpc][:floating][:ip] + ':' + node['bcpc']['hadoop']['journalnode']['https']['port'].to_s
         }
 
        node.run_state['hdfs_site_generated_values'].merge!(jn_properties)
