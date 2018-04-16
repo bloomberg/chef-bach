@@ -130,10 +130,19 @@ end
 ruby_block 'Install certs into Java keystore' do
   block do
     require 'mixlib/shellout'
+    require 'fileutils'
+
+    keystore_path = node['bcpc']['hadoop']['java_ssl']['keystore']
+    keystore_password = node['bcpc']['hadoop']['java_ssl']['password']
+
+    if node.run_state[:bcpc_ca_certificate_list].any?
+      if ::File.symlink?(keystore_path)
+        FileUtils.rm(keystore_path)
+      end
+    end
+
     node.run_state[:bcpc_ca_certificate_list].each do |cert|
       cert_alias = ::File.basename(cert)
-      keystore_path = node['bcpc']['hadoop']['java_ssl']['keystore']
-      keystore_password = node['bcpc']['hadoop']['java_ssl']['password']
 
       not_if_command =
         Mixlib::ShellOut.new("keytool -noprompt -v " \
@@ -154,6 +163,23 @@ ruby_block 'Install certs into Java keystore' do
           ee.run_action(:run)
         end
       end
+    end
+  end
+end
+
+#
+# Even if we have no custom certs, we still need a valid keystore
+# located at the custom cert trust store path, for use by Maven et al.
+# The system default trust store is fine, absent any other option.
+#
+ruby_block 'Copy system keystore if necessary' do
+  block do
+    keystore_path = node['bcpc']['hadoop']['java_ssl']['keystore']
+    if node.run_state[:bcpc_ca_certificate_list].empty?
+        require 'fileutils'
+        FileUtils.rm_f(keystore_path)
+        FileUtils.ln_s('/usr/lib/jvm/default-java/jre/lib/security/cacerts',
+                       keystore_path)
     end
   end
 end
