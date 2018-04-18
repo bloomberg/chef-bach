@@ -211,13 +211,13 @@ ruby_block "hdfs_site_generated_values_jn_properties" do
       jn_properties =
         {
          'dfs.journalnode.rpc-address' =>
-           node[:bcpc][:floating][:ip] + ':' + node['bcpc']['hadoop']['journalnode']['rpc']['port'].to_s,
+           "#{node[:bcpc][:floating][:ip]}:#{node['bcpc']['hadoop']['journalnode']['rpc']['port']}",
 
          'dfs.journalnode.http-address' =>
-           node[:bcpc][:floating][:ip] + ':' + node['bcpc']['hadoop']['journalnode']['http']['port'].to_s,
+           "#{node[:bcpc][:floating][:ip]}:#{node['bcpc']['hadoop']['journalnode']['http']['port']}",
 
          'dfs.journalnode.https-address' =>
-           node[:bcpc][:floating][:ip] + ':' + node['bcpc']['hadoop']['journalnode']['https']['port'].to_s
+           "#{node[:bcpc][:floating][:ip]}:#{node['bcpc']['hadoop']['journalnode']['https']['port']}"
         }
 
        node.run_state['hdfs_site_generated_values'].merge!(jn_properties)
@@ -234,13 +234,13 @@ ruby_block "hdfs_site_generated_values_dn_properties" do
       dn_properties =
         {
          'dfs.datanode.ipc.address' =>
-           node[:bcpc][:floating][:ip].to_s + ':' + node['bcpc']['hadoop']['datanode']['ipc']['port'].to_s,
+           "#{node[:bcpc][:floating][:ip]}:#{node['bcpc']['hadoop']['datanode']['ipc']['port']}",
 
          'dfs.datanode.address' =>
-           node[:bcpc][:floating][:ip].to_s + ':' + node['bcpc']['hadoop']['datanode']['port'].to_s,
+           "#{node[:bcpc][:floating][:ip]}:#{node['bcpc']['hadoop']['datanode']['port']}",
 
          'dfs.datanode.http.address' =>
-           node[:bcpc][:floating][:ip].to_s + ':' + node['bcpc']['hadoop']['datanode']['http']['port'].to_s
+           "#{node[:bcpc][:floating][:ip]}:#{node['bcpc']['hadoop']['datanode']['http']['port']}"
         }
 
       node.run_state['hdfs_site_generated_values'].merge!(dn_properties)
