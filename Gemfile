@@ -38,7 +38,6 @@ source 'https://rubygems.org' do
 
   # We rely on chef-provisioning to monitor hosts on SSH.
   gem 'chef-provisioning-ssh'
-  gem 'ridley'
   gem 'hashie'
   gem 'pry'
   gem 'ruby-progressbar'
