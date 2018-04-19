@@ -140,3 +140,25 @@ views.request.connect.timeout.millis=5000
 views.request.read.timeout.millis=10000
 views.skip.home-directory-check.file-system.list=wasb,adls,adl
 webapp.dir=/usr/lib/ambari-server/web
+
+<% if node['ambari']['ambari.ldap.isConfigured'] %>
+
+# Ambari LDAP configuration
+client.security= <%= node['ambari']['client.security'] %>
+ambari.ldap.isConfigured=<%= node['ambari']['ambari.ldap.isConfigured'] %>
+ldap.sync.username.collision.behavior=<%= node['ambari']['ldap.sync.username.collision.behavior'] %>
+authentication.ldap.baseDn=<%= node['ambari']['authentication']['ldap']['basedn']  %>
+authentication.ldap.bindAnonymously=<%= node['ambari']['authentication']['ldap']['bindAnonymously'] %>
+authentication.ldap.dnAttribute=<%= node['ambari']['authentication']['ldap']['dnAttribute'] %>
+authentication.ldap.groupMembershipAttr=<%= node['ambari']['authentication']['ldap']['groupMembershipAttr'] %>
+authentication.ldap.groupNamingAttr=<%= node['ambari']['authentication']['ldap']['groupNamingAttr'] %>
+authentication.ldap.groupObjectClass=<%= node['ambari']['authentication']['ldap']['groupObjectClass'] %>
+authentication.ldap.managerDn=<%= node['ambari']['authentication']['ldap']['managerDn'] %>
+authentication.ldap.managerPassword=<%= node['ambari']['authentication']['ldap']['managerPassword'] %>
+authentication.ldap.primaryUrl=<%= node['ambari']['authentication']['ldap']['primaryUrl'] %>
+authentication.ldap.secondaryUrl=<%= node['ambari']['authentication']['ldap']['secondaryUrl'] %>
+authentication.ldap.useSSL=<%= node['ambari']['authentication']['ldap']['useSSL'] %>
+authentication.ldap.userObjectClass=<%= node['ambari']['authentication']['ldap']['userObjectClass'] %>
+authentication.ldap.usernameAttribute=<%= node['ambari']['authentication']['ldap']['usernameAttribute'] %>
+
+<% end %>

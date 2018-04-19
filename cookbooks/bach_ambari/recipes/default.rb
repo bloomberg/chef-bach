@@ -59,6 +59,12 @@ if node['bcpc']['hadoop']['kerberos']['enable']
   node.force_default['ambari']['hadoop.http.auth.type'] = 'kerberos'
 end
 
+if node['ambari']['ldap_password'].nil?
+  node.force_default['ambari']['ldap_password']=get_config('password', 'ldap', 'os')
+end
+
+node.force_default['ambari']['ambari_server_base_url'] = "http://#{float_host(node['fqdn'])}:8080"
+
 set_hosts
 hive_srvr_auth = node['bcpc']['hadoop']['hive']['server2']['authentication']
 hive_jdbc_url = 'jdbc:hive2://'
@@ -137,5 +143,6 @@ end
 
 include_recipe 'ambari::ambari_server_setup'
 include_recipe 'ambari::ambari_views_setup'
+include_recipe 'ambari::ambari_ldap_sync'
 
 include_recipe 'bach_ambari::remove_sensitive_attributes'

@@ -19,7 +19,8 @@
 #
 
 # /etc/ambari-server/conf/ambari.properties
-template File.join(node['ambari']['ambari_server_conf_dir'],'ambari.properties') do
+template "Creating ambari properties file" do
+  path File.join(node['ambari']['ambari_server_conf_dir'],'ambari.properties')
   source 'ambari.properties.erb'
   owner 'root'
   group 'root'
@@ -55,6 +56,7 @@ end
 service 'ambari-server' do
   supports :status => true, :restart => true
   action [:enable, :start]
+  subscribes :restart, 'template[Creating ambari properties file]', :immediately
 end
 
 ruby_block 'update_default_ambari_admin_password' do
