@@ -65,7 +65,7 @@ else
 end
 
 #
-# Add znode to the zookeeper.connect property if it is set in attribute 
+# Add znode to the zookeeper.connect property if it is set in attribute
 #
 if node[:kafka].attribute?(:root_znode) && node[:kafka][:root_znode] != nil
   node[:kafka][:broker][:zookeeper][:connect] += node[:kafka][:root_znode]
@@ -139,15 +139,8 @@ ruby_block 'kafkaup' do
     zk_path =
       "/brokers/ids/#{node[:kafka][:broker][:broker_id]}"
 
-    zk_hosts =
-      node[:kafka][:broker][:zookeeper][:connect]
-
-    if node[:kafka].attribute?(:zookeeper_connect) && node[:kafka][:zookeeper_connect] != nil
-      zk_connection_string = node[:kafka][:zookeeper_connect]
-    else
-      zk_connection_string =
-        zk_hosts.map { |zkh| "#{zkh}" }.join(',')
-    end
+    # We are using the same connection string that Kafka itself does.
+    zk_connection_string = node[:kafka][:broker][:zookeeper][:connect]
 
     Chef::Log.info("Zookeeper hosts are #{zk_connection_string}")
 
