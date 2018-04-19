@@ -39,30 +39,21 @@ package 'netcat-openbsd' do
 end
 
 #
-# If using non chef-back ZooKeeper quorum set the connection string in
-# attribute default[:kafka][:zookeeper_connect]
+# In a standalone Kafka cluster, get_head_nodes will return the
+# Zookeeper servers.
 #
-if node[:kafka].attribute?(:zookeeper_connect) && node[:kafka][:zookeeper_connect] != nil
-  node.default[:kafka][:broker][:zookeeper][:connect] = node[:kafka][:zookeeper_connect]
-else
-  #
-  # In a standalone Kafka cluster, get_head_nodes will return the
-  # Zookeeper servers.
-  #
-  # In a mixed Hadoop/Kafka cluster, the regular Hadoop head nodes will
-  # be running Zookeeper.
-  #
-  # See cookbooks/bcpc/libraries/utils.rb for details.
-  #
-  node.default[:kafka][:broker][:zookeeper][:connect] = get_head_nodes.map do |nn|
-    if node[:bcpc][:hadoop][:zookeeper].attribute?(:port) && node[:bcpc][:hadoop][:zookeeper][:port] != nil
-      float_host(nn[:fqdn])+":"+node[:bcpc][:hadoop][:zookeeper][:port].to_s
-    else
-      float_host(nn[:fqdn])
-    end
-  end.sort
-
-end
+# In a mixed Hadoop/Kafka cluster, the regular Hadoop head nodes will
+# be running Zookeeper.
+#
+# See cookbooks/bcpc/libraries/utils.rb for details.
+#
+node.default[:kafka][:broker][:zookeeper][:connect] = get_head_nodes.map do |nn|
+  if node[:bcpc][:hadoop][:zookeeper].attribute?(:port) && node[:bcpc][:hadoop][:zookeeper][:port] != nil
+    float_host(nn[:fqdn])+":"+node[:bcpc][:hadoop][:zookeeper][:port].to_s
+  else
+    float_host(nn[:fqdn])
+  end
+end.sort
 
 #
 # Add znode to the zookeeper.connect property if it is set in attribute 
@@ -74,8 +65,8 @@ end
 #
 # Add broker.property property if it is defined for the node in attibute node[:kafka][:node_rack_map]
 #
-if node[:kafka].attribute?(:node_rack_map) && node[:kafka][:node_rack_map][node[:hostname]] != nil
-  node.default[:kafka][:broker][:broker][:rack] = node[:kafka][:node_rack_map][node[:hostname]]
+if node[:kafka].attribute?(:node_rack_map) && node[:kafka][:node_rack_map]["#{node[:hostname]}"] != nil
+  node[:kafka][:broker][:broker][:rack] += node[:kafka][:node_rack_map]["#{node[:hostname]}"]
 end
 
 #
@@ -142,12 +133,8 @@ ruby_block 'kafkaup' do
     zk_hosts =
       node[:kafka][:broker][:zookeeper][:connect]
 
-    if node[:kafka].attribute?(:zookeeper_connect) && node[:kafka][:zookeeper_connect] != nil
-      zk_connection_string = node[:kafka][:zookeeper_connect]
-    else
-      zk_connection_string =
-        zk_hosts.map { |zkh| "#{zkh}" }.join(',')
-    end
+    zk_connection_string =
+      zk_hosts.map { |zkh| "#{zkh}" }.join(',')
 
     Chef::Log.info("Zookeeper hosts are #{zk_connection_string}")
 
