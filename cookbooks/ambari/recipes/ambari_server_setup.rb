@@ -18,7 +18,6 @@
 #
 #
 
-
 # /etc/ambari-server/conf/ambari.properties
 template File.join(node['ambari']['ambari_server_conf_dir'],'ambari.properties') do
   source 'ambari.properties.erb'
@@ -56,4 +55,10 @@ end
 service 'ambari-server' do
   supports :status => true, :restart => true
   action [:enable, :start]
+end
+
+ruby_block 'update_default_ambari_admin_password' do
+  block do
+    update_default_ambari_admin_password
+  end
 end

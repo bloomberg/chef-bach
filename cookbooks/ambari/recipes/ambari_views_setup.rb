@@ -17,19 +17,6 @@
 # limitations under the License.
 #
 
-
-http_request 'Polling Ambari WebUi' do
-  url "#{node['ambari']['ambari_server_base_url']}"
-  retries 24
-  retry_delay 5
-end
-
-# Prepare Headers for Ambari views REST calls
-req_headers = {'AUTHORIZATION' => "Basic #{Base64.encode64("#{node['ambari']['admin']['user']}:#{node['ambari']['admin']['password']}")}}",
-  'Content-Type' => 'application/data',
-  'X-Requested-By' => 'ambari'
-  }
-
 # Ambari views installation
 bash 'create_files_view' do
   code <<-EOH
@@ -54,9 +41,8 @@ bash 'create_files_view' do
       }
   }'
   EOH
-  not_if { isViewInstalled("#{node['ambari']['files_path']}", req_headers)}
+  not_if { view_installed?(node['ambari']['files_path']) }
 end
-
 
 bash 'create_Hive20_view' do
   code <<-EOH
@@ -85,7 +71,7 @@ bash 'create_Hive20_view' do
       }
   }'
   EOH
-  not_if { isViewInstalled("#{node['ambari']['hive20_view_path']}", req_headers)}
+  not_if { view_installed?(node['ambari']['hive20_view_path']) }
 end
 
 bash 'create_WorkflowManager_view' do
@@ -114,7 +100,7 @@ bash 'create_WorkflowManager_view' do
       }
   }'
   EOH
-  not_if { isViewInstalled("#{node['ambari']['wfmanager_view_path']}", req_headers)}
+  not_if { view_installed?(node['ambari']['wfmanager_view_path']) }
 end
 
 bash 'create_TEZ_view' do
@@ -133,5 +119,5 @@ bash 'create_TEZ_view' do
       }
   }'
   EOH
-  not_if { isViewInstalled("#{node['ambari']['tez_view_path']}", req_headers)}
+  not_if { view_installed?(node['ambari']['tez_view_path']) }
 end
