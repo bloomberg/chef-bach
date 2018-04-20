@@ -52,3 +52,9 @@ service 'ambari-server' do
   action [:enable, :start]
   subscribes :restart, 'template[Create ambari properties file]', :immediately
 end
+
+ruby_block 'update_default_ambari_admin_password' do
+  block do
+    update_default_ambari_admin_password
+  end
+end
