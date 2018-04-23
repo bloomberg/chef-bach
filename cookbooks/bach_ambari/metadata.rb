@@ -4,7 +4,7 @@ maintainer_email 'hadoop@bloomberg.net'
 license 'Apache License 2.0'
 description 'Installs/Configures bach_ambari'
 long_description 'Installs/Configures bach_ambari'
-version '0.1.0'
+version '3.4.0'
 
 # The `issues_url` points to the location where issues for this cookbook are
 # tracked.  A `View Issues` link will be displayed on this cookbook's page when
