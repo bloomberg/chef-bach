@@ -3,7 +3,7 @@ maintainer       'Bloomberg Finance L.P.'
 license          'Apache License 2.0'
 description      'Builds, installs and configures hdfsdu'
 long_description IO.read(File.join(File.dirname(__FILE__), 'README.md'))
-version          '3.4.0'
+version          '3.4.1'
 
 depends 'ark'
 depends 'maven'
