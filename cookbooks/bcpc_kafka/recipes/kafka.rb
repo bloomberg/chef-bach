@@ -133,7 +133,8 @@ ruby_block 'kafkaup' do
       "/brokers/ids/#{node[:kafka][:broker][:broker_id]}"
 
     # We are using the same connection string that Kafka itself does.
-    zk_connection_string = node[:kafka][:broker][:zookeeper][:connect]
+    zk_connection_string =
+      node[:kafka][:broker][:zookeeper][:connect].join(',')
 
     Chef::Log.info("Zookeeper hosts are #{zk_connection_string}")
 
