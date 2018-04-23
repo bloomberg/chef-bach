@@ -67,7 +67,7 @@ module BACH
     def validate_node_number?(nn)
       # node number must either be '-' or a positive integer
       # 1..255
-      if nn != '-' && nn.to_i < 1 || nn.to_i > 255 then
+      if nn != '-' && nn.to_i < 1 || nn.to_i > 2_147_483_646 then
         false
       else
         true
@@ -84,7 +84,7 @@ module BACH
         end
         # validate node ids 
         if (cluster_def.select{ |row| validate_node_number?(row[:node_id]) == false }).length.positive?  then
-          fail "Retreived cluster data appears to be invalid -- node IDs must be positive integers between 0 and 256 (1..255)"
+          fail "Retreived cluster data appears to be invalid -- node IDs must be positive integers"
         end 
     end
 
