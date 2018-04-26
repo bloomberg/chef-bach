@@ -85,7 +85,7 @@ end
 ].each do |package_name, min_version|
   execute "new-pip-upgrade-#{package_name}" do
     command '/usr/local/bin/pip ' \
-      "install #{package_name} --upgrade " \
+      "install #{package_name} --no-binary=:all: --upgrade " \
       "#{pip_cert_option} #{pip_cheese_shop_option}"
     environment pip_environment
     not_if do
