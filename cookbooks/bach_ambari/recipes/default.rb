@@ -17,79 +17,102 @@
 # limitations under the License.
 #
 
+ambari_admin_password = make_config('ambari-admin-password', secure_password)
+force_default['ambari']['admin']['password'] = ambari_admin_password
+
 namenodes_cach = get_namenodes
-# FILES
-namenodes = namenodes_cach.map { |nn| "namenode#{nn[:node_id]}" }.join(',')
+namenodes = namenodes_cach.map { |nn| "namenode#{nn['node_id']}" }.join(',')
 
-namenodes_fqdn = namenodes_cach.map { |nn| float_host(nn[:fqdn]) }
+namenodes_fqdn = namenodes_cach.map { |nn| float_host(nn['fqdn']) }
 
-node.force_default['ambari']['webhdfs.ha.namenode.http-address.nn1'] = "#{namenodes_fqdn[0]}:#{node['bcpc']['hadoop']['namenode']['http']['port']}"
-node.force_default['ambari']['webhdfs.ha.namenode.https-address.nn1'] = "#{namenodes_fqdn[0]}:#{node['bcpc']['hadoop']['namenode']['https']['port']}"
-node.force_default['ambari']['webhdfs.ha.namenode.rpc-address.nn1'] = "#{namenodes_fqdn[0]}:#{node['bcpc']['hadoop']['namenode']['rpc']['port']}"
+force_default['ambari']['webhdfs.ha.namenode.http-address.nn1'] =
+  "#{namenodes_fqdn[0]}:#{node['bcpc']['hadoop']['namenode']['http']['port']}"
+force_default['ambari']['webhdfs.ha.namenode.https-address.nn1'] =
+  "#{namenodes_fqdn[0]}:#{node['bcpc']['hadoop']['namenode']['https']['port']}"
+force_default['ambari']['webhdfs.ha.namenode.rpc-address.nn1'] =
+  "#{namenodes_fqdn[0]}:#{node['bcpc']['hadoop']['namenode']['rpc']['port']}"
 
-if node[:bcpc][:hadoop][:hdfs][:HA]
-   node.force_default['ambari']['webhdfs.ha.namenode.http-address.nn2'] = "#{namenodes_fqdn[1]}:#{node['bcpc']['hadoop']['namenode']['http']['port']}"
-   node.force_default['ambari']['webhdfs.ha.namenode.https-address.nn2'] = "#{namenodes_fqdn[1]}:#{node['bcpc']['hadoop']['namenode']['https']['port']}"
-   node.force_default['ambari']['webhdfs.ha.namenode.rpc-address.nn2'] = "#{namenodes_fqdn[1]}:#{node['bcpc']['hadoop']['namenode']['rpc']['port']}"
+if node['bcpc']['hadoop']['hdfs']['HA']
+  force_default['ambari']['webhdfs.ha.namenode.http-address.nn2'] =
+    "#{namenodes_fqdn[1]}:#{node['bcpc']['hadoop']['namenode']['http']['port']}"
+  force_default['ambari']['webhdfs.ha.namenode.https-address.nn2'] =
+    "#{namenodes_fqdn[1]}:#{node['bcpc']['hadoop']['namenode']['https']['port']}"
+  force_default['ambari']['webhdfs.ha.namenode.rpc-address.nn2'] =
+    "#{namenodes_fqdn[1]}:#{node['bcpc']['hadoop']['namenode']['rpc']['port']}"
 end
 
-node.force_default['ambari']['webhdfs.ha.namenodes.list'] = "#{namenodes}"
-node.force_default['ambari']['webhdfs.nameservices'] = node.chef_environment
-node.force_default['ambari']['webhdfs.url'] = "webhdfs://#{node.chef_environment}"
+force_default['ambari']['webhdfs.ha.namenodes.list'] = namenodes.to_s
+force_default['ambari']['webhdfs.nameservices'] = node.chef_environment
+force_default['ambari']['webhdfs.url'] = "webhdfs://#{node.chef_environment}"
 
-ambari_proxy_user = "#{node['bcpc']['hadoop']['proxyuser']['ambari']}"
+ambari_proxy_user = node['bcpc']['hadoop']['proxyuser']['ambari'].to_s
+kerberos_realm = node['bcpc']['hadoop']['kerberos']['realm']
 
-if node[:bcpc][:hadoop][:kerberos][:enable]
-   node.force_default['ambari']['webhdfs.auth'] = "auth=KERBEROS;proxyuser=#{ambari_proxy_user}"
-   node.force_default['ambari']['kerberos']['enabled'] = true
-   node.force_default['ambari']['kerberos']['principal'] = "#{ambari_proxy_user}/#{float_host(node[:fqdn])}@#{node[:bcpc][:hadoop][:kerberos][:realm]}"
-   node.force_default['ambari']['hadoop.security.authentication'] = 'kerberos'
-   node.force_default['ambari']['timeline.http.auth.type'] = 'kerberos'
-   node.force_default['ambari']['hadoop.http.auth.type'] = 'kerberos'
+if node['bcpc']['hadoop']['kerberos']['enable']
+  force_default['ambari']['webhdfs.auth'] =
+    "auth=KERBEROS;proxyuser=#{ambari_proxy_user}"
+  force_default['ambari']['kerberos']['enabled'] = true
+  force_default['ambari']['kerberos']['principal'] =
+    "#{ambari_proxy_user}/#{float_host(node['fqdn'])}@#{kerberos_realm}"
+  force_default['ambari']['hadoop.security.authentication'] = 'kerberos'
+  force_default['ambari']['timeline.http.auth.type'] = 'kerberos'
+  force_default['ambari']['hadoop.http.auth.type'] = 'kerberos'
 end
 
 set_hosts
-#Hive jdbc url consturct
+hive_srvr_auth = node['bcpc']['hadoop']['hive']['server2']['authentication']
 hive_jdbc_url = 'jdbc:hive2://'
-zookeerpQurom = node['bcpc']['hadoop']['zookeeper']['servers'].map{ |s| float_host(s[:hostname])+":#{node[:bcpc][:hadoop][:zookeeper][:port]}" }.join(',')
-zookeeperNamespace = "HS2-#{node.chef_environment}-#{node['bcpc']['hadoop']['hive']['server2']['authentication']}"
-hive_jdbc_url += zookeerpQurom
+zookeeper_servers = node['bcpc']['hadoop']['zookeeper']['servers']
+zookeeper_port = node['bcpc']['hadoop']['zookeeper']['port']
+zookeeper_qurom = zookeeper_servers
+                  .map { |s| "#{float_host(s['hostname'])}:#{zookeeper_port}}" }
+                  .join(',')
+zookeeper_namespace = "HS2-#{node.chef_environment}-#{hive_srvr_auth}"
+hive_jdbc_url += zookeeper_qurom
 hive_jdbc_url += '/;serviceDiscoveryMode=zooKeeper;zooKeeperNamespace='
-hive_jdbc_url += zookeeperNamespace
+hive_jdbc_url += zookeeper_namespace
+hive_pric = node['bcpc']['hadoop']['kerberos']['data']['hive']['principal']
 
-if node['bcpc']['hadoop']['kerberos']['enable'] && node['bcpc']['hadoop']['hive']['server2']['authentication'] == 'KERBEROS'
-  hive_principal = ";#{node['bcpc']['hadoop']['kerberos']['data']['hive']['principal']}/_HOST@#{node['bcpc']['hadoop']['kerberos']['realm']}"
+if node['bcpc']['hadoop']['kerberos']['enable'] && hive_srvr_auth == 'KERBEROS'
+  hive_principal = ";#{hive_pric}/_HOST@#{kerberos_realm}"
   hive_jdbc_url += hive_principal
 end
 
-
-node.force_default['ambari']['hive.jdbc.url'] = "#{hive_jdbc_url}"
+force_default['ambari']['hive.jdbc.url'] = hive_jdbc_url.to_s
 ts_port = node['bcpc']['hadoop']['yarn']['timeline_server']['webapp']['port']
 rm_port = node['bcpc']['hadoop']['yarn']['resourcemanager']['webapp']['port']
 
-resource_manager_url = node[:bcpc][:hadoop][:rm_hosts].map{ |r| 'http://'+float_host(r[:hostname]+":#{rm_port}")}.join(',')
+resource_manager_url = node['bcpc']['hadoop']['rm_hosts']
+                       .map { |r| "http://#{float_host(r['hostname'])}:#{rm_port}" }
+                       .join(',')
 
-node.force_default['ambari']['yarn.resourcemanager.url'] = "#{resource_manager_url}"
+force_default['ambari']['yarn.resourcemanager.url'] = resource_manager_url.to_s
 
-timeline_server = get_timeline_servers.map { |e| "http://"+ float_host(e[:hostname])+ ":#{ts_port}" }.first
+timeline_server = get_timeline_servers
+                  .map { |e| "http://#{float_host(e['hostname'])}:#{ts_port}" }
+                  .first
 
-node.force_default['ambari']['yarn.ats.url'] = "#{timeline_server}"
+force_default['ambari']['yarn.ats.url'] = timeline_server.to_s
 
 oozie_port = node['bcpc']['hadoop']['oozie_port']
 oozie_ha_port = node['bcpc']['ha_oozie']['port']
 
 oozie_hosts = node.default['bcpc']['hadoop']['oozie_hosts']
 
-oozie_url = oozie_hosts.map { |e| 'http://'+float_host(e['hostname'])+":#{oozie_port}"  }.first
+oozie_url = oozie_hosts
+            .map { |e| "http://#{float_host(e['hostname'])}:#{oozie_port}" }
+            .first
 
 if oozie_hosts.length >= 2
-  oozie_url = "http://"+float_host(node['bcpc']['management']['viphost'])+":#{oozie_ha_port}"
+  oozie_url = "http://#{float_host(node['bcpc']['management']['viphost'])}:#{oozie_ha_port}"
 end
 
-rm_nport = node["bcpc"]["hadoop"]["yarn"]["resourcemanager"]["port"]
-rm_address = node[:bcpc][:hadoop][:rm_hosts].map{ |r| 'http://'+float_host(r[:hostname]+":#{rm_nport}")}.join(',')
+rm_nport = node['bcpc']['hadoop']['yarn']['resourcemanager']['port']
+rm_address = node['bcpc']['hadoop']['rm_hosts']
+             .map { |r| "http://#{float_host(r['hostname'])}:#{rm_nport}" }
+             .join(',')
 node.default['ambari']['oozie.service.uri'] = "#{oozie_url}/oozie"
-node.default['ambari']['yarn.resourcemanager.address'] = "#{rm_address}"
+node.default['ambari']['yarn.resourcemanager.address'] = rm_address.to_s
 
 # install mysql jdbc driver
 package 'mysql-connector-java' do
@@ -103,9 +126,9 @@ include_recipe 'ambari::default'
 include_recipe 'bach_ambari::mysql_server_external_setup'
 
 # It is required to download ambari kerberos file.
-user "#{node['bcpc']['hadoop']['proxyuser']['ambari']}" do
+user node['bcpc']['hadoop']['proxyuser']['ambari'].to_s do
   comment 'ambari user'
-  not_if { user_exists?("#{node['bcpc']['hadoop']['proxyuser']['ambari']}") }
+  not_if { user_exists?(node['bcpc']['hadoop']['proxyuser']['ambari'].to_s) }
 end
 
 configure_kerberos 'ambari_kerb' do
