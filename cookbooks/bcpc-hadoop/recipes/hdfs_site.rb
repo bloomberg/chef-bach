@@ -262,7 +262,7 @@ ruby_block "hdfs_site_generated_values_ha_properties" do
 
          'dfs.namenode.shared.edits.dir' =>
            'qjournal://' +
-           zk_hosts.map { |s| float_host(s[:fqdn]) + ':' + node['bcpc']['hadoop']['journalnode']['rpc']['port'].to_s }
+           zk_hosts.map { |s| "#{float_host(s[:fqdn])}:#{node['bcpc']['hadoop']['journalnode']['rpc']['port']}" }
         .join(';') + '/' + node.chef_environment,
 
          # Why is this added twice?
