@@ -41,7 +41,7 @@ if node['bcpc']['hadoop']['hdfs']['HA']
     "#{namenodes_fqdn[1]}:#{node['bcpc']['hadoop']['namenode']['rpc']['port']}"
 end
 
-node.force_default['ambari']['webhdfs.ha.namenodes.list'] = namenodes.to_s
+node.force_default['ambari']['webhdfs.ha.namenodes.list'] = namenodes
 node.force_default['ambari']['webhdfs.nameservices'] = node.chef_environment
 node.force_default['ambari']['webhdfs.url'] = "webhdfs://#{node.chef_environment}"
 
@@ -78,7 +78,7 @@ if node['bcpc']['hadoop']['kerberos']['enable'] && hive_srvr_auth == 'KERBEROS'
   hive_jdbc_url += hive_principal
 end
 
-node.force_default['ambari']['hive.jdbc.url'] = hive_jdbc_url.to_s
+node.force_default['ambari']['hive.jdbc.url'] = hive_jdbc_url
 ts_port = node['bcpc']['hadoop']['yarn']['timeline_server']['webapp']['port']
 rm_port = node['bcpc']['hadoop']['yarn']['resourcemanager']['webapp']['port']
 
@@ -86,13 +86,13 @@ resource_manager_url = node['bcpc']['hadoop']['rm_hosts']
                        .map { |r| "http://#{float_host(r['hostname'])}:#{rm_port}" }
                        .join(',')
 
-node.force_default['ambari']['yarn.resourcemanager.url'] = resource_manager_url.to_s
+node.force_default['ambari']['yarn.resourcemanager.url'] = resource_manager_url
 
 timeline_server = get_timeline_servers
                   .map { |e| "http://#{float_host(e['hostname'])}:#{ts_port}" }
                   .first
 
-node.force_default['ambari']['yarn.ats.url'] = timeline_server.to_s
+node.force_default['ambari']['yarn.ats.url'] = timeline_server
 
 oozie_port = node['bcpc']['hadoop']['oozie_port']
 oozie_ha_port = node['bcpc']['ha_oozie']['port']
@@ -112,7 +112,7 @@ rm_address = node['bcpc']['hadoop']['rm_hosts']
              .map { |r| "http://#{float_host(r['hostname'])}:#{rm_nport}" }
              .join(',')
 node.default['ambari']['oozie.service.uri'] = "#{oozie_url}/oozie"
-node.default['ambari']['yarn.resourcemanager.address'] = rm_address.to_s
+node.default['ambari']['yarn.resourcemanager.address'] = rm_address
 
 # install mysql jdbc driver
 package 'mysql-connector-java' do
@@ -126,9 +126,9 @@ include_recipe 'ambari::default'
 include_recipe 'bach_ambari::mysql_server_external_setup'
 
 # It is required to download ambari kerberos file.
-user node['bcpc']['hadoop']['proxyuser']['ambari'].to_s do
+user node['bcpc']['hadoop']['proxyuser']['ambari'] do
   comment 'ambari user'
-  not_if { user_exists?(node['bcpc']['hadoop']['proxyuser']['ambari'].to_s) }
+  not_if { user_exists?(node['bcpc']['hadoop']['proxyuser']['ambari']) }
 end
 
 configure_kerberos 'ambari_kerb' do
