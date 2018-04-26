@@ -33,6 +33,9 @@ fi
 # Stomp /etc/gemrc to not proxy our local Gem server
 echo 'http_proxy: :no_proxy' > /etc/gemrc
 
+/opt/chef/embedded/bin/gem install faraday || (echo "Failed to install Faraday"; exit 1)
+/opt/chef/embedded/bin/gem install cluster_def || (echo "Failed to install cluster_def"; exit 1)
+
 # Update chef client configuration
 mkdir -p /etc/chef/client.d || (echo "Failed to create /etc/chef/client.d")
 echo "rubygems_url '<%= node['bach']['repository']['gem_server'] %>'" > /etc/chef/client.d/rubygems_url.rb || (echo "Failed to write rubygems_url file in /etc/chef/client.d")
