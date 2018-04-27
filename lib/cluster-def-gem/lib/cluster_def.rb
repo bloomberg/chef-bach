@@ -1,4 +1,4 @@
-# vim: tabstop=2:shiftwidth=2:softtabstop=2 
+# vim: tabstop=2:shiftwidth=2:softtabstop=2
 #
 # This module holds utility methods shared between repxe_host.rb,
 # cluster_assign_roles.rb and Vagrantfile
@@ -82,10 +82,10 @@ module BACH
           faulty_rows.each { |row| puts row }
           fail "Retreived cluster data appears to be invalid -- missing columns"
         end
-        # validate node ids 
+        # validate node ids
         if (cluster_def.select{ |row| validate_node_number?(row[:node_id]) == false }).length.positive?  then
           fail "Retreived cluster data appears to be invalid -- node IDs must be positive integers"
-        end 
+        end
     end
 
     def parse_cluster_def(cluster_def)
@@ -118,26 +118,39 @@ module BACH
         @cluster_def
       end
 
-      begin
-        # This will always fail, unless we have a node object to query
-        @cluster_def = fetch_cluster_def_http
-      rescue Exception => http_e
-        puts http_e
-        puts http_e.backtrace
+      # This will always fail, unless we have a node object to query
+      @cluster_def = fetch_cluster_def_http
+
+      # If @cluster_def is still nil after the http attempt, fall back.
+      unless @cluster_def
+        $stderr.puts 'WARNING: Attempting to read cluster definition from ' \
+          'local disk, after a failed HTTP request'
         @cluster_def = fetch_cluster_def_local
       end
-
-      @cluster_def
     end
 
     # fetch cluster definition via http
     def fetch_cluster_def_http
-      cluster_def_url = "http://#{@node_obj[:bcpc][:bootstrap][:server]}#{@node_obj[:bcpc][:bootstrap][:cluster_def_path]}"
-      response = Faraday.new(proxy: '').get cluster_def_url
-      if response.success? then
-        parse_cluster_def(response.body.split("\n"))
+      unless @node_obj
+        return nil
       else
-        nil
+        begin
+          cluster_def_url = 'http://' \
+            "#{@node_obj[:bcpc][:bootstrap][:server]}" \
+            "#{@node_obj[:bcpc][:bootstrap][:cluster_def_path]}"
+
+          response = Faraday.new(proxy: '').get cluster_def_url
+
+          if response.success? then
+            parse_cluster_def(response.body.split("\n"))
+          else
+            nil
+          end
+        rescue Exception => http_e
+          puts http_e
+          puts http_e.backtrace
+          return nil
+        end
       end
     end
 
