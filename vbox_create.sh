@@ -333,7 +333,7 @@ function install_cluster {
   echo "N.B. This may take approximately 30-45 minutes to complete."
   vagrant ssh -c 'sudo rm -f /var/chef/cache/chef-stacktrace.out'
   ./bootstrap_chef.sh --vagrant-remote $ip $environment
-  if vagrant ssh -c 'sudo grep -i no_lazy_load /var/chef/cache/chef-stacktrace.out'; then
+  if vagrant ssh -c 'sudo egrep -i "LoadError: cannot load such file -- cluster_def|no_lazy_load|404 \"Not Found\"" /var/chef/cache/chef-stacktrace.out'; then
       vagrant ssh -c 'sudo rm /var/chef/cache/chef-stacktrace.out' 
   elif vagrant ssh -c 'test -e /var/chef/cache/chef-stacktrace.out' || \
       ! vagrant ssh -c 'test -d /etc/chef-server'; then
