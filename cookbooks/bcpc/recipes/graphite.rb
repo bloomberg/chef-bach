@@ -274,6 +274,14 @@ bash 'cleanup-old-whisper-files' do
     '-type f -exec rm {} \\;'
 end
 
+bash 'cleanup-old-whisper-directories' do
+  action :run
+  user 'root'
+  code "find #{node['bcpc']['graphite']['local_data_dir']} " \
+    "-ctime +#{node['bcpc']['graphite']['data']['retention']} " \
+    '-type d -empty -exec rmdir {} \\;'
+end 
+
 bash 'cleanup-old-logs' do
   action :run
   user 'root'
