@@ -84,3 +84,15 @@ default[:kafka][:md5_checksum] = ''
 # (/disk/0 is a mount point created by the bcpc-hadoop::disks recipe)
 #
 default[:kafka][:log_dir] = '/disk/0/kafka/logs'
+
+#
+# Kafka GC log settings
+#
+default['kafka']['gc_log_opts'] = %W[
+  -Xloggc:#{::File.join(node['kafka']['log_dir'], 'kafka-gc-pid-$$-$(hostname)-$(date +\'%Y%m%d%H%M\').log')}
+  -XX:+UseGCLogFileRotation
+  -XX:NumberOfGCLogFiles=20
+  -XX:GCLogFileSize=20M
+  -XX:+PrintGCDateStamps
+  -XX:+PrintGCTimeStamps
+].join(' ')
