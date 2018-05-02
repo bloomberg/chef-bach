@@ -40,7 +40,8 @@ node.default['ambari']['ambari_views_url'] = "#{node['ambari']['ambari_server_ba
 
 
 node.default['ambari']['admin']['user'] = 'admin'
-node.default['ambari']['admin']['password'] = 'admin'
+node.default['ambari']['admin']['password'] = 'password'
+default['ambari']['admin']['default_password'] = 'admin'
 
 node.default['ambari']['kerberos']['enabled'] = false
 node.default['ambari']['kerberos']['principal'] = 'ambari@EXAMPLE.COM'
