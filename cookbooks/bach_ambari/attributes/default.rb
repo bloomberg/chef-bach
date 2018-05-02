@@ -1,4 +1,4 @@
-#
+# frozen_string_literal: true
 # Cookbook :: bach_ambari
 # Attributes :: default
 # Copyright 2018, Bloomberg Finance L.P.
@@ -16,18 +16,19 @@
 # limitations under the License.
 #
 
-node.force_default['ambari']['install_java'] = false
-node.force_default['ambari']['java_home'] = "#{node['bcpc']['hadoop']['java']}"
+force_default['ambari']['install_java'] = false
+force_default['ambari']['java_home'] = node['bcpc']['hadoop']['java']
 
-
-# Ambari External Database attributes
-node.force_default['ambari']['db_type'] = 'mysql'
+force_default['ambari']['db_type'] = 'mysql'
 
 mysql_port = node['bcpc']['hadoop']['mysql_port'] || 3306
 
-node.force_default['ambari']['databaseport'] = "#{mysql_port}"
-# node.force_default['ambari']['databasehost'] = mysql_hosts
-node.force_default['ambari']['databasename'] = 'ambari'
-node.force_default['ambari']['databaseusername'] = 'ambari'
-node.force_default['ambari']['databasepassword'] = get_config('mysql-ambari-password') || get_config('password', 'mysql-ambari', 'os')
-node.default['ambari']['mysql_schema_path'] = '/var/lib/ambari-server/resources/Ambari-DDL-MySQL-CREATE.sql'
+force_default['ambari']['databaseport'] = mysql_port
+force_default['ambari']['databasename'] = 'ambari'
+force_default['ambari']['databaseusername'] = 'ambari'
+force_default['ambari']['databasepassword'] = \
+  get_config('mysql-ambari-password') || get_config('password',
+                                                    'mysql-ambari', 'os')
+default['ambari']['mysql_schema_path'] = \
+  '/var/lib/ambari-server/resources/Ambari-DDL-MySQL-CREATE.sql'
+default['ambari']['ldap_password'] = nil
