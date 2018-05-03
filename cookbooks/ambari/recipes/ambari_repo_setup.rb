@@ -1,7 +1,6 @@
 #
-# Cookbook Name:: ambari-views-chef
-# Recipe:: default
-#
+# Cookbook :: ambari
+# Recipe :: ambari_repo_setup
 # Copyright 2018, Bloomberg Finance L.P.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,11 +16,15 @@
 # limitations under the License.
 #
 
-# dependencies
-%w(openssh-client wget curl unzip tar python2.7 openssl libpq5 ssl-cert).each do |pkg|
-  package pkg do
+case node['platform']
+when 'ubuntu'
+  apt_repository 'ambari' do
+    uri node['ambari']['ambari_ubuntu_repo_url']
+    components ['main']
+    distribution 'Ambari'
+    action :add
+    key node['ambari']['repo_key']
   end
+else
+  raise "Platform #{node['platform']} is not supported"
 end
-
-include_recipe 'ambari::ambari_repo_setup'
-include_recipe 'ambari::ambari_server_install'
