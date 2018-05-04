@@ -54,7 +54,7 @@ else
   chef-server-ctl reconfigure
 
   # Create Chef Admin User
-  password="$(dd if=/dev/urandom count=1 status=none | tr -dc '[]{}|\/!,.<>?@#$%^&*()_+=-A-Za-z0-9' | dd count=20 bs=1 status=none)"
+  password="$(dd if=/dev/urandom count=1 status=none | tr -dc '[]{}|\/!,.<>?@#$%^&*()_+=A-Za-z0-9' | dd count=20 bs=1 status=none)"
   # should likely use node['bcpc']['admin_email'] for e-mail
   chef-server-ctl user-create admin Admin User nobody@example.com "$password" --filename /etc/chef-server/admin.pem
   chown root:adm /etc/chef-server/admin.pem
