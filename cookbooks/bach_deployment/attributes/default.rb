@@ -1,6 +1,6 @@
 force_default['bach']['deploy']['appfile']['data'] = {
   appfoo: {
-    repo_url: get_binary_server_url() 
+    repo_url: 'http://bcpc.example.com'
     copy_to: '',
     copy_type: 'file',
     runas: 'root',
