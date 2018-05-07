@@ -890,6 +890,104 @@ default['bcpc']['hadoop']['jmxtrans_agent']['hbase_rs']['queries'] = default['bc
     'objectName' => 'Hadoop:service=HBase,name=RegionServer,sub=Server,*',
     'resultAlias' => 'hb_rs_server.%name%.#attribute#',
     'attributes' => hb_rs_server_metrics
+  },
+  {
+    'objectName' => 'Hadoop:service=HBase,name=RegionServer,sub=IO',
+    'resultAlias' => 'hb_rs_server.%name%.%sub%.#attribute#',
+    'attributes' =>
+      'fsChecksumFailureCount,' \
+      'FsPReadTime_num_ops,' \
+      'FsPReadTime_min,' \
+      'FsPReadTime_max,' \
+      'FsPReadTime_mean,' \
+      'FsPReadTime_median,' \
+      'FsPReadTime_25th_percentile,' \
+      'FsPReadTime_75th_percentile,' \
+      'FsPReadTime_90th_percentile,' \
+      'FsPReadTime_95th_percentile,' \
+      'FsPReadTime_98th_percentile,' \
+      'FsPReadTime_99th_percentile,' \
+      'FsPReadTime_99.9th_percentile,' \
+      'FsWriteTime_num_ops,' \
+      'FsWriteTime_min,' \
+      'FsWriteTime_max,' \
+      'FsWriteTime_mean,' \
+      'FsWriteTime_median,' \
+      'FsWriteTime_25th_percentile,' \
+      'FsWriteTime_75th_percentile,' \
+      'FsWriteTime_90th_percentile,' \
+      'FsWriteTime_95th_percentile,' \
+      'FsWriteTime_98th_percentile,' \
+      'FsWriteTime_99th_percentile,' \
+      'FsWriteTime_99.9th_percentile,' \
+      'FsReadTime_num_ops,' \
+      'FsReadTime_min,' \
+      'FsReadTime_max,' \
+      'FsReadTime_mean,' \
+      'FsReadTime_median,' \
+      'FsReadTime_25th_percentile,' \
+      'FsReadTime_75th_percentile,' \
+      'FsReadTime_90th_percentile,' \
+      'FsReadTime_95th_percentile,' \
+      'FsReadTime_98th_percentile,' \
+      'FsReadTime_99th_percentile,' \
+      'FsReadTime_99.9th_percentile'
+  },
+  {
+    'objectName' => 'Hadoop:service=HBase,name=RegionServer,sub=TableLatencies',
+    'resultAlias' => 'hb_rs_server.%name%.%sub%.#attribute#',
+    'attributes' => ''
+  },
+  {
+    'objectName' => 'Hadoop:service=HBase,name=RegionServer,sub=WAL',
+    'resultAlias' => 'hb_rs_server.%name%.%sub%.#attribute#',
+    'attributes' => ''
+      'AppendSize_num_ops,' \
+      'AppendSize_min,' \
+      'AppendSize_max,' \
+      'AppendSize_mean,' \
+      'AppendSize_median,' \
+      'AppendSize_25th_percentile,' \
+      'AppendSize_75th_percentile,' \
+      'AppendSize_90th_percentile,' \
+      'AppendSize_95th_percentile,' \
+      'AppendSize_98th_percentile,' \
+      'AppendSize_99th_percentile,' \
+      'AppendSize_99.9th_percentile,' \
+      'SyncTime_num_ops,' \
+      'SyncTime_min,' \
+      'SyncTime_max,' \
+      'SyncTime_mean,' \
+      'SyncTime_median,' \
+      'SyncTime_25th_percentile,' \
+      'SyncTime_75th_percentile,' \
+      'SyncTime_90th_percentile,' \
+      'SyncTime_95th_percentile,' \
+      'SyncTime_98th_percentile,' \
+      'SyncTime_99th_percentile,' \
+      'SyncTime_99.9th_percentile,' \
+      'slowAppendCount,' \
+      'rollRequest,' \
+      'writtenBytes,' \
+      'appendCount,' \
+      'lowReplicaRollRequest,' \
+      'AppendTime_num_ops,' \
+      'AppendTime_min,' \
+      'AppendTime_max,' \
+      'AppendTime_mean,' \
+      'AppendTime_median,' \
+      'AppendTime_25th_percentile,' \
+      'AppendTime_75th_percentile,' \
+      'AppendTime_90th_percentile,' \
+      'AppendTime_95th_percentile,' \
+      'AppendTime_98th_percentile,' \
+      'AppendTime_99th_percentile,' \
+      'AppendTime_99.9th_percentile'
+  },
+  {
+    'objectName' => 'Hadoop:service=HBase,name=RegionServer,sub=Tables',
+    'resultAlias' => 'hb_rs_server.%name%.%sub%.#attribute#',
+    'attributes' => ''
   }
 ]
 
