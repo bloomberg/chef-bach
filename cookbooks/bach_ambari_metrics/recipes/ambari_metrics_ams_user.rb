@@ -15,3 +15,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+include_recipe 'ambari_metrics::ambari_metrics_ams_user'
+
+edit_resource(:group, node['ams']['service']['group']) do
+  not_if { group_exists?(node['ams']['service']['group']) }
+end
+
+edit_resource(:user, node['ams']['service']['user']) do
+  not_if { user_exists?(node['ams']['service']['user']) }
+end

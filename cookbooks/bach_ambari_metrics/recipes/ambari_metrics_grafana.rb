@@ -16,4 +16,5 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+include_recipe 'bach_ambari_metrics::ambari_metrics_attribute_setup'
 include_recipe 'ambari_metrics::ambari_metrics_grafana'

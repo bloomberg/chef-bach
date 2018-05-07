@@ -15,11 +15,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-ams_collector_nodes = get_nodes_for('bach_ambari_metrics',
-                                    'ambari_metrics_collector')
+ams_collector_nodes = node.run_state['cluster_def']
+                          .fetch_cluster_def
+                          .select do |h|
+                            h[:runlist].include? 'recipe[bach_ambari_metrics'\
+                            '::ambari_metrics_collector]'
+                          end
 
 if ams_collector_nodes.length.positive?
-  ams_collector_hosts = ams_collector_nodes.map { |n| float_host(n['fqdn']) }
+  ams_collector_hosts = ams_collector_nodes.map { |n| float_host(n[:fqdn]) }
                                            .join(',')
   node.force_default['ams']['metrics_collector']['hosts'] = ams_collector_hosts
 end
@@ -31,3 +35,5 @@ node.force_default['ams']['cluster']['zookeeper_quorum'] =
 
 node.force_default['ams']['cluster']['zookeeper']['client_port'] =
   node['bcpc']['hadoop']['zookeeper']['port'].to_s
+
+include_recipe 'bach_ambari_metrics::ambari_metrics_ams_user'

@@ -4,7 +4,7 @@
 export AMS_INSTANCE_NAME=<%=node['ams']['hostname']%>
 
 # The java implementation to use. Java 1.6 required.
-export JAVA_HOME=<%=['ams']['java_home']%>
+export JAVA_HOME=<%=node['ams']['java_home']%>
 
 # Collector Log directory for log4j
 export AMS_COLLECTOR_LOG_DIR=<%=node['ams']['collector']['log_location']%>

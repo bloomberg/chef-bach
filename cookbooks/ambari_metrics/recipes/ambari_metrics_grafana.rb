@@ -65,6 +65,12 @@ template File.join(grafana_conf_loc, 'ams-grafana.ini') do
 end
 
 execute 'start ambari-metrics-grafana' do
+  command '/usr/sbin/ambari-metrics-grafana stop'
+  returns 0
+  user node['ams']['service']['user']
+end
+
+execute 'start ambari-metrics-grafana' do
   command '/usr/sbin/ambari-metrics-grafana start'
   returns 0
   user node['ams']['service']['user']

@@ -13,7 +13,7 @@
     </property>
     <property>
       <name>hbase.cluster.distributed</name>
-      <value><%=['ams']['hbase']['cluster_distributed']%></value>
+      <value><%=node['ams']['hbase']['cluster_distributed']%></value>
     </property>
     <property>
       <name>hbase.hregion.majorcompaction</name>
@@ -137,7 +137,7 @@
     </property>
     <property>
       <name>hbase.zookeeper.quorum</name>
-      <value><%= node['ams']['hbase']['zookeeper_quorum']%></value>
+      <value><%=node['ams']['hbase']['zookeeper_quorum']%></value>
       <final>true</final>
     </property>
     <property>
