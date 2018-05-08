@@ -40,7 +40,6 @@ module BACH
       # bogus VirtualBox MAC (keep the vendor OUI set to VirtualBox's)
       @node_obj = node_obj
       @repo_dir = repo_dir
-      @cluster_def = nil
     end
 
     # Return the default cluster.txt data
@@ -114,24 +113,13 @@ module BACH
 
     # combines local cluster.txt access with http call to cluster data
     def fetch_cluster_def
-      if @cluster_def != nil then
-        @cluster_def
-      end
-
-      # This will always fail, unless we have a node object to query
-      @cluster_def = fetch_cluster_def_http
-
-      # If @cluster_def is still nil after the http attempt, fall back.
-      unless @cluster_def
-        $stderr.puts 'WARNING: Attempting to read cluster definition from ' \
-          'local disk, after a failed HTTP request'
-        @cluster_def = fetch_cluster_def_local
-      end
+      fetch_cluster_def_http || fetch_cluster_def_local
     end
 
     # fetch cluster definition via http
     def fetch_cluster_def_http
-      unless @node_obj
+      if @node_obj.nil?
+        # Without a node object, we cannot derive an URL for the cluster def.
         return nil
       else
         begin
@@ -156,6 +144,8 @@ module BACH
 
     # locally access cluster.txt
     def fetch_cluster_def_local
+      $stderr.puts 'WARNING: Attempting to read cluster definition from ' \
+          'local disk, presumably after a failed HTTP request'
       parse_cluster_def(File.readlines(File.join(repo_dir, 'cluster.txt')))
     end
 
