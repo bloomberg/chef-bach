@@ -145,6 +145,15 @@ default['bcpc']['hadoop']['kerberos']['data'] = {
       princhost: '_HOST',
       perms: '0440',
       spnego_keytab: 'spnego.service.keytab'
+          },
+  kafka: {
+    principal: 'kafka',
+    keytab: 'kafka.service.keytab',
+    owner: 'kafka',
+    group: 'kafka',
+    princhost: '_HOST',
+    perms: '0440',
+    spnego_keytab: 'spnego.service.keytab'
   }
 }
 default[:bcpc][:hadoop][:kerberos][:keytab][:dir] = "/etc/security/keytabs"
