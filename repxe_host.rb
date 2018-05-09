@@ -54,6 +54,22 @@ require 'pry'
 require 'timeout'
 require 'optparse'
 
+require_relative 'lib/cluster_data'
+require_relative 'lib/chef_node'
+
+# Workaround needed. Otherwhise ohai['fqdn'] becomes nil for some mysterious
+# reason if we just do `include BACH::ClusterData`
+def get_entry(arg)
+  extend BACH::ClusterData
+  get_entry(arg)
+end
+
+def refresh_vault_keys
+  extend BACH::ClusterData::ChefNode
+  refresh_vault_keys
+end
+
+# FIXME we whould encapsulate these in a class or something
 def cluster_assign_roles(environment, type, entry=nil)
   types = %w[basic hadoop kafka]
   unless types.include?(type.to_s.downcase)
@@ -255,7 +271,7 @@ def find_chef_env
   env_command.run_command
 
   env_command.invalid! 'Could not retrieve Chef environment!' \
-      unless env_command.success?
+    unless env_command.status.success?
 
   JSON.parse(env_command.stdout)['chef_environment']
 end
