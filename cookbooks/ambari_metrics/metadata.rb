@@ -8,3 +8,4 @@ long_description 'Installs/Configures ambari_metrics'
 version '0.1.0'
 
 depends 'ambari'
+depends 'grafana'

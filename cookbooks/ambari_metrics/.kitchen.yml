@@ -31,3 +31,7 @@ suites:
         set_default: true
       }
     }
+    driver:
+      box: bento/ubuntu-14.04
+      network:
+      - [ "forwarded_port" , { guest : 3000, host : 3000 } ]

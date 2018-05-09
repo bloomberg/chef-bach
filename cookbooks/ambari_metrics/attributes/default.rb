@@ -26,6 +26,14 @@ default['ams']['hbase']['zookeeper_clientport'] = '61181'
 default['ams']['hbase']['zookeeper_peerport'] = '61288'
 default['ams']['cluster']['zookeeper']['client_port'] = '2181'
 default['ams']['metrics_collector']['hosts'] = 'localhost'
+default['ams']['metrics_grafana']['host'] = 'localhost'
+default['ams']['metrics_grafana']['port'] = 3000
+default['ams']['metrics_collector']['port'] = 6188
+default['ams']['metrics_grafana']['admin_user'] = 'admin'
+default['ams']['metrics_grafana']['admin_password'] = 'admin'
+default['ams']['collector']['url'] =
+  "http://localhost:#{node['ams']['metrics_collector']['port']}"
+
 default['ams']['hostname'] = 'localhost'
 default['ams']['clustername'] = 'ambari'
 default['ams']['']

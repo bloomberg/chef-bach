@@ -15,6 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+set_hosts
 ams_collector_nodes = node.run_state['cluster_def']
                           .fetch_cluster_def
                           .select do |h|
@@ -28,12 +29,18 @@ if ams_collector_nodes.length.positive?
   node.force_default['ams']['metrics_collector']['hosts'] = ams_collector_hosts
 end
 
-set_hosts
 node.force_default['ams']['cluster']['zookeeper_quorum'] =
   node['bcpc']['hadoop']['zookeeper']['servers']
-  .map { |s| float_host(s['hostname']) }
+  .map { |s| float_host(s['hostname']) }.join(',')
 
 node.force_default['ams']['cluster']['zookeeper']['client_port'] =
   node['bcpc']['hadoop']['zookeeper']['port'].to_s
+
+node.force_default['ams']['metrics_grafana']['host'] =
+  float_host(node['fqdn'])
+
+node.default['ams']['collector']['url'] =
+  "http://#{node['ams']['metrics_collector']['hosts']}:"\
+  "#{node['ams']['metrics_collector']['port']}"
 
 include_recipe 'bach_ambari_metrics::ambari_metrics_ams_user'

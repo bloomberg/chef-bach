@@ -101,13 +101,6 @@ directory File.join(collector_lib_loc, 'checkpoint') do
   recursive true
 end
 
-template File.join(collector_conf_loc, 'ams-site.xml') do
-  source 'ams-site.xml.erb'
-  owner node['ams']['service']['user']
-  group node['ams']['service']['group']
-  mode '0755'
-end
-
 template File.join(collector_conf_loc, 'ams-env.sh') do
   source 'ams-env.sh.erb'
   owner node['ams']['service']['user']
@@ -122,21 +115,36 @@ template File.join(collector_conf_loc, 'hbase-site.xml') do
   mode '0755'
 end
 
+template File.join(collector_conf_loc, 'ams-site.xml') do
+  source 'ams-site.xml.erb'
+  owner node['ams']['service']['user']
+  group node['ams']['service']['group']
+  mode '0755'
+end
+
 execute 'stop ambari-metrics-collector' do
   command '/usr/sbin/ambari-metrics-collector ' \
    "--config #{collector_conf_loc} stop"
   returns 0
   user node['ams']['service']['user']
+  action :nothing
+  subscribes :run,
+             "template[#{File.join(collector_conf_loc, 'ams-site.xml')}]",
+             :immediately
+  notifies :run, 'execute[cleanup-tmp-directory]', :immediately
+  notifies :run, 'execute[start-ambari-metrics-collector]', :immediately
 end
 
-execute 'cleanup tmp directory ' do
+execute 'cleanup-tmp-directory' do
   command 'rm -rf /var/lib/ambari-metrics-collector/hbase-tmp/*.tmp'
   returns 0
+  action :nothing
 end
 
-execute 'start ambari-metrics-collector' do
+execute 'start-ambari-metrics-collector' do
   command '/usr/sbin/ambari-metrics-collector ' \
    "--config #{collector_conf_loc} start"
   returns 0
   user node['ams']['service']['user']
+  action :nothing
 end

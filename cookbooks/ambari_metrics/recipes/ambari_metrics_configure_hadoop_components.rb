@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 # Cookbook :: ambari_metrics
-# Recipe :: ambari_metrics_assembly
+# Recipe :: ambari_metrics_configure_ams_components
 # Copyright 2018, Bloomberg Finance L.P.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,7 +15,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-include_recipe 'ambari::ambari_repo_setup'
-package 'ambari-metrics-assembly' do
-  action :install
+template '/etc/hbase/conf/hadoop-metrics2-hbase.properties' do
+  source 'hadoop-metrics2-hbase.properties.erb'
+  mode '0755'
+  only_if { Chef::File.directory?('/etc/hbase/conf') }
+end
+
+template '/etc/hadoop/conf/hadoop-metrics2.properties' do
+  source 'hadoop-metrics2.properties.erb'
+  mode '0755'
+  only_if { Chef::File.directory?('/etc/hadoop/conf') }
 end

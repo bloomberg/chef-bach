@@ -51,13 +51,6 @@ directory monitor_python_build_loc do
   recursive true
 end
 
-template File.join(monitor_conf_loc, 'metric_monitor.ini') do
-  source 'metric_monitor.ini.erb'
-  owner node['ams']['service']['user']
-  group node['ams']['service']['group']
-  mode '0755'
-end
-
 template File.join(monitor_conf_loc, 'metric_groups.conf') do
   source 'metric_groups.conf.erb'
   owner node['ams']['service']['user']
@@ -72,14 +65,29 @@ template File.join(monitor_conf_loc, 'ams-env.sh') do
   mode '0755'
 end
 
+template File.join(monitor_conf_loc, 'metric_monitor.ini') do
+  source 'metric_monitor.ini.erb'
+  owner node['ams']['service']['user']
+  group node['ams']['service']['group']
+  mode '0755'
+end
+
 execute 'stop ambari-metrics-monitor' do
   command "/usr/sbin/ambari-metrics-monitor --config #{monitor_conf_loc} stop"
   returns 0
   user node['ams']['service']['user']
+  action :nothing
+  subscribes :run,
+             "template[#{File.join(monitor_conf_loc, 'metric_monitor.ini')}]",
+             :immediately
+  notifies :run, 'execute[start-ambari-metrics-monitor]', :immediately
 end
 
-execute 'start ambari-metrics-monitor' do
+execute 'start-ambari-metrics-monitor' do
   command "/usr/sbin/ambari-metrics-monitor --config #{monitor_conf_loc} start"
   returns 0
   user node['ams']['service']['user']
+  action :nothing
 end
+
+include_recipe 'ambari_metrics::ambari_metrics_configure_hadoop_components'
