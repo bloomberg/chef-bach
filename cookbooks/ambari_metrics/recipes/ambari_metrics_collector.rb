@@ -55,7 +55,7 @@ template File.join(ams_hbase_conf_loc, 'hbase-env.sh') do
 end
 
 template File.join(ams_hbase_conf_loc, 'hadoop-metrics2-hbase.properties') do
-  source 'hadoop-metrics2-hbase.properties.erb'
+  source 'hadoop-metrics2-ams-hbase.properties.erb'
   owner node['ams']['service']['user']
   group node['ams']['service']['group']
   mode '0755'

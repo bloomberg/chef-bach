@@ -46,6 +46,7 @@ hbase.sink.timeline.sendInterval=60000
 hbase.sink.timeline.collector.hosts=<%=node['ams']['metrics_collector']['hosts']%>
 hbase.sink.timeline.port=6188
 hbase.sink.timeline.protocol=http
+hbase.sink.timeline.serviceName-prefix=ams
 
 # Switch off metrics generation on a per region basis
 *.source.filter.class=org.apache.hadoop.metrics2.filter.RegexFilter

@@ -89,5 +89,3 @@ execute 'start-ambari-metrics-monitor' do
   user node['ams']['service']['user']
   action :nothing
 end
-
-include_recipe 'ambari_metrics::ambari_metrics_configure_hadoop_components'
