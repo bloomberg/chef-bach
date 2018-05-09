@@ -120,8 +120,16 @@ end
 
 # HACK to install cluster_def if it exists
 # since bundler will not do it for us
+
+execute 'build cluster_def.gem' do
+  cwd "#{repo_dir}/lib/cluster-def-gem"
+  command "chef exec gem build cluster_def.gemspec"
+  creates "#{repo_dir}/lib/cluster-def-gem/cluster_def-0.1.0.gem"
+end
+
 execute 'copy cluster_def gem' do
   command "cp #{repo_dir}/lib/cluster-def-gem/cluster_def-*.gem #{bins_dir}/gems"
+  creates "#{bins_dir}/gems/cluster_def-0.1.0.gem"
 end
 
 execute 'gem-generate-index' do

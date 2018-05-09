@@ -1,8 +1,7 @@
 # -*- mode: yaml-mode -*-
 ---
-driver_plugin: vagrant
-driver_config:
-  require_chef_omnibus: 12.19
+driver:
+  name: vagrant
 
 driver:
   customize:
@@ -10,6 +9,8 @@ driver:
 
 provisioner:
   name: chef_zero
+  chef_omnibus_install_options: -P chefdk -v 1.2
+  chef_omnibus_root: /opt/chefdk
   http_proxy: <%= ENV['http_proxy'] %>
   https_proxy: <%= ENV['https_proxy'] %>
   client_rb:
@@ -31,8 +32,8 @@ suites:
       bach: {
         repository: {
           repo_directory: "/test/repo_dir",
-          bundler_bin: "/opt/chef/embedded/bin/bundle",
-          gem_bin: "/opt/chef/embedded/bin/gem"
+          bundler_bin: "/opt/chefdk/embedded/bin/bundle",
+          gem_bin: "/opt/chefdk/embedded/bin/gem"
         }
       }
     }
