@@ -1,4 +1,9 @@
 # -*- mode: enh-ruby -*-
+# This Gemfile represents dependencies needed by the Bootstrap to run various
+# bootstrap-related scripts:
+#   * cluster-assign-roles.sh
+#   * repxe-host.sh
+#   * wait-for-hosts.sh
 ruby RUBY_VERSION
 # These versions are pinned to match Chef --
 # to avoid having different Ruby versions try Chef before ChefDK
