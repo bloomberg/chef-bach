@@ -12,6 +12,9 @@ common_opts =
   ' -XX:+PrintGCDateStamps' \
   ' -XX:+UseParNewGC' \
   ' -Xloggc:${HBASE_LOG_DIR}/gc/gc-pid-$$-$(hostname)-$(date +\'%Y%m%d%H%M\').log' \
+  ' -XX:+UseGCLogFileRotation' \
+  ' -XX:NumberOfGCLogFiles=20' \
+  ' -XX:GCLogFileSize=20M' \
   ' -XX:+ExplicitGCInvokesConcurrent' \
   ' -XX:+PrintTenuringDistribution' \
   ' -XX:+UseNUMA' \
