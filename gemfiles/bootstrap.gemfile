@@ -1,4 +1,9 @@
 # -*- mode: enh-ruby -*-
+# This Gemfile represents dependencies needed by the Bootstrap to run various
+# bootstrap-related scripts:
+#   * cluster-assign-roles.sh
+#   * repxe-host.sh
+#   * wait-for-hosts.sh
 ruby RUBY_VERSION
 # These versions are pinned to match Chef --
 # to avoid having different Ruby versions try Chef before ChefDK
@@ -31,8 +36,10 @@ else
   end
 end
 
+bach_root = File.expand_path(File.join(File.dirname(__FILE__), '../'))
+
 gem 'fpm'
-gem 'cluster_def', :path => 'lib/cluster-def-gem'
+gem 'cluster_def', :path => File.join(bach_root, 'lib/cluster-def-gem')
 
 source 'https://rubygems.org' do
   gem 'faker'
@@ -47,7 +54,7 @@ end
 
 # Pull in the other Gemfiles from our cookbooks
 group :cookbooks do
-  Dir.glob(File.join(File.dirname(__FILE__), 'cookbooks',
+  Dir.glob(File.join(bach_root, 'cookbooks',
       '**', "Gemfile")) do |gemfile|
     eval(IO.read(gemfile), binding)
   end

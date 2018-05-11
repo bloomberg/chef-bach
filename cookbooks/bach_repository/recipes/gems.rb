@@ -29,7 +29,8 @@ end
 file "#{node['bach']['repository']['repo_directory']}/.bundle/config" do
   content <<-EOF.gsub(/^\s+/,'')
     ---
-    BUNDLE_PATH: '#{node['bach']['repository']['repo_directory']}/vendor/bundle'
+    BUNDLE_PATH: '#{node['bach']['repository']['repo_directory']}/vendor/bootstrap'
+    BUNDLE_GEMFILE: '#{node['bach']['repository']['repo_directory']}/gemfiles/bootstrap.gemfile'
     BUNDLE_DISABLE_SHARED_GEMS: 'true'
   EOF
   owner "#{user}"
@@ -37,7 +38,7 @@ file "#{node['bach']['repository']['repo_directory']}/.bundle/config" do
 end
 
 # https://github.com/bloomberg/chef-bach/issues/874
-paths = %w(.bundle chef-bcpc/vendor/bundle chef-bcpc/vendor/cache)
+paths = %w(.bundle chef-bcpc/vendor/bootstrap chef-bcpc/bootstrap/cache)
 
 execute 'Coerce Gem bundle permissions' do
   cwd "/home/#{user}"
@@ -62,7 +63,7 @@ end
 ruby_block 'determine-bundler-command' do
   block do
     gemfile_lock_path = File.join(node['bach']['repository']['repo_directory'],
-                          'Gemfile.lock')
+                                  'gemfiles', 'bootstrap.gemfile.lock')
     gemfile_lock_cmd = Mixlib::ShellOut.new('git', 'diff', '--name-status',
                                             gemfile_lock_path)
     gemfile_lock_cmd.run_command
@@ -73,6 +74,7 @@ ruby_block 'determine-bundler-command' do
       node.run_state[:bcpc_bootstrap_bundler_command] =
         "#{bundler_bin} install"
     end
+    Chef::Log.info "bundler command: #{node.run_state[:bcpc_bootstrap_bundler_command]}"
     Chef::Resource::Log.new('bundler_command', run_context).tap do |ll|
       ll.level :info
       ll.message("Computed bundler command: " +
@@ -81,29 +83,26 @@ ruby_block 'determine-bundler-command' do
   end
 end
 
+# restore system PKG_CONFIG_PATH so mkmf::pkg_config()
+# can find system libraries
+bootstrap_environment =  {
+  'PKG_CONFIG_PATH' => %w(/usr/lib/pkgconfig
+                          /usr/lib/x86_64-linux-gnu/pkgconfig
+                          /usr/share/pkgconfig).join(':'),
+  'PATH' => [::File.dirname(bundler_bin), ENV['PATH']].join(':')
+}
+
 execute 'bundler install' do
   cwd node['bach']['repository']['repo_directory']
   command lazy { node.run_state[:bcpc_bootstrap_bundler_command] }
-  # restore system PKG_CONFIG_PATH so mkmf::pkg_config()
-  # can find system libraries
-  environment \
-    'PKG_CONFIG_PATH' => %w(/usr/lib/pkgconfig
-                            /usr/lib/x86_64-linux-gnu/pkgconfig
-                            /usr/share/pkgconfig).join(':'),
-    'PATH' => [::File.dirname(bundler_bin), ENV['PATH']].join(':')
+  environment bootstrap_environment
   user "#{user}"
 end
 
 execute 'bundler package' do
   cwd node['bach']['repository']['repo_directory']
   command "#{bundler_bin} package"
-  # restore system PKG_CONFIG_PATH so mkmf::pkg_config()
-  # can find system libraries
-  environment \
-    'PKG_CONFIG_PATH' => %w(/usr/lib/pkgconfig
-                            /usr/lib/x86_64-linux-gnu/pkgconfig
-                            /usr/share/pkgconfig).join(':'),
-    'PATH' => [::File.dirname(bundler_bin), ENV['PATH']].join(':')
+  environment bootstrap_environment
   user "#{user}"
 end
 

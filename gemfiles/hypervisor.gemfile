@@ -1,0 +1,6 @@
+# -*- mode: enh-ruby -*-
+# This Gemfile is supposed represent dependencies needed by scripts run inside
+# the Hypervisor.  This should be as small as possible
+#
+# A few scripts include:
+#   * vm-to-cluster.sh

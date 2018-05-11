@@ -1,0 +1,3 @@
+# -*- mode: enh-ruby -*-
+# This Gemfile is supposed to mirror gems in the bootstrap so that it can be
+# downloaded by Chef Nodes
