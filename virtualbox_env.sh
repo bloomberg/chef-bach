@@ -14,9 +14,10 @@ if [[ -z "$VBM" ]]; then
 
     function check_version {
         local MIN_VERSION="4.3"
-        local version=`VBoxManage --version | perl -ne 'm/(\d\.\d)\./; print "$1"'`
+        local MY_VERSION=`VBoxManage --version | perl -ne 'm/(\d\.\d)\./; print "$1"'`
+	local VERSION_CHECK=`ruby -e "puts Gem::Version.new($MY_VERSION) > Gem::Version.new($MIN_VERSION)"`
 
-        if ! echo "$version >= $MIN_VERSION" | bc | grep 1 > /dev/null
+        if ! $VERSION_CHECK
         then
             echo "ERROR: VirtualBox $version is less than $MIN_VERSION.x!" >&2
             echo "  Only VirtualBox >= $MIN_VERSION.x is officially supported." >&2
