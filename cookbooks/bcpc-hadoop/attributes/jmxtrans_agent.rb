@@ -936,7 +936,7 @@ default['bcpc']['hadoop']['jmxtrans_agent']['hbase_rs']['queries'] = default['bc
   {
     'objectName' => 'Hadoop:service=HBase,name=RegionServer,sub=WAL',
     'resultAlias' => 'hb_rs_server.%name%.%sub%.#attribute#',
-    'attributes' => ''
+    'attributes' =>
       'AppendSize_num_ops,' \
       'AppendSize_min,' \
       'AppendSize_max,' \
