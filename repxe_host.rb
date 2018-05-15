@@ -118,7 +118,7 @@ def cobbler_enroll(entry)
                            '--profile', entry[:cobbler_profile],
                            '--ip-address', entry[:ip_address],
                            '--interface=eth0',
-                           '--mac', empirical_mac(entry))
+                           '--mac', corrected_mac(entry))
 
   c.run_command
   c.invalid! "Failed to enroll #{entry[:hostname]}!" unless c.status.success?
