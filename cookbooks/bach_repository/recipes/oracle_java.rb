@@ -33,10 +33,19 @@ end
 java_tgz_name = Pathname.new(node['bach']['repository']['java']['jdk_url'])\
                         .basename.to_s
 
-remote_file "#{bins_dir}/#{java_tgz_name}" do
+jdk_local_path = "#{bins_dir}/#{java_tgz_name}"
+
+remote_file jdk_local_path do
   source node['bach']['repository']['java']['jdk_url']
   user 'root'
   group 'root'
   mode 0444
   checksum node['bach']['repository']['java']['jdk_checksum']
+end
+
+ruby_block 'Copy JDK to file cache' do
+  block do
+    require 'fileutils'
+    ::FileUtils.cp(jdk_local_path, Chef::Config[:file_cache_path])
+  end
 end

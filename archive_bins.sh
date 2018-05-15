@@ -16,7 +16,7 @@ set -x
 
 vagrant ssh -c "tar cvpzf ~/${tarball_name} -C ~/chef-bcpc \
     --exclude=bins/apt_key.*  \
-    bins vendor/bootstrap vendor/cache gemfiles/*.gemfile.lock" | log_pretty
+    bins vendor/bootstrap vendor/cache gemfiles" | log_pretty
 vagrant ssh -c "cp -fv  ~/${tarball_name} \
     /chef-bcpc-host/${tarball_name}" | log_pretty
 mv -v ${tarball_name} ../${tarball_name} | log_pretty
