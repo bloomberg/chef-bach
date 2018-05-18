@@ -6,11 +6,16 @@ node['bcpc']['hadoop']['jmxtrans_agent'].tap do |agent|
 
   statsd = agent['statsd'].dup
   def statsd.with_prefix(component)
-    self.merge('metricName' => "bach.#{component['name_prefix']}")
+    if component['name_prefix'] == 'jmx.hbase_regions'
+      self.merge('metricName' => "bachHbaseRegion.#{component['name_prefix']}")
+    else
+      self.merge('metricName' => "bach.#{component['name_prefix']}")
+    end
   end
   
-  %w(namenode datanode journalnode hbase_master hbase_rs nodemanager
-    resourcemanager zookeeper kafka).each do |component|
+  %w(namenode datanode journalnode hbase_master hbase_rs
+     hbase_rs_regions nodemanager resourcemanager
+     zookeeper kafka).each do |component|
     template agent[component]['xml'] do
       source 'jmxtrans_agent.xml.erb'
       mode 0o644

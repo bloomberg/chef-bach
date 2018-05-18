@@ -103,6 +103,9 @@ if node[:bcpc][:hadoop][:jmx_agent_enabled]
   node.run_state['hbase_rs_generated_java_agents'].push(
     "#{node['bcpc']['jmxtrans_agent']['lib_file']}=#{node['bcpc']['hadoop']['jmxtrans_agent']['hbase_rs']['xml']}"
   )
+  node.run_state['hbase_rs_generated_java_agents'].push(
+    "#{node['bcpc']['jmxtrans_agent']['lib_file']}=#{node['bcpc']['hadoop']['jmxtrans_agent']['hbase_rs_regions']['xml']}"
+  )
 end
 
 node.run_state['hbase_master_generated_java_agents'] += node['bcpc']['hadoop']['hbase']['env']['master_java_agents']
