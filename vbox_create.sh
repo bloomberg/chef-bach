@@ -63,13 +63,6 @@ VBOX_DIR="`dirname ${BASH_SOURCE[0]}`/vbox"
 [[ -d $VBOX_DIR ]] || mkdir $VBOX_DIR
 VBOX_DIR_PATH=`python -c "import os.path; print os.path.abspath(\"${VBOX_DIR}/\")"`
 
-# ensure cluster.txt has CLUSTER_PREFIX prepended before VM names
-# NOTE: somewhat crude we see if any line does not start with the
-# cluster name and if so all lines have it prepended
-if [[ -n "$(grep -v "^${CLUSTER_PREFIX}" ./cluster.txt)" ]]; then
-  sed -i "s/^/${CLUSTER_PREFIX}-/" cluster.txt
-fi
-
 # Populate the VM list array from cluster.txt
 code_to_produce_vm_list="
 require './lib/cluster_data.rb';
