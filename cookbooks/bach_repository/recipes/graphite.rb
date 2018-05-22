@@ -71,21 +71,22 @@ epoch = Time.now.strftime('%s')
   },
   {
     name: 'carbon',
-    version: '1.1.1',
-    url: 'https://github.com/graphite-project/carbon/archive/1.1.1.tar.gz',
-    checksum: '913d0f1d1e8c69176c85c9b85b89c51333906da1280a1550efa013a55b5c2d72'
+    version: '1.1.2',
+    url: 'https://github.com/graphite-project/carbon/archive/1.1.2.tar.gz',
+
+    checksum: 'f0fa61ff9fb3f3c20a802ecbf2da2f11abcc04c41ec2139bfc3192b79b82bf7e'
   },
   {
     name: 'whisper',
-    version: '1.1.1',
-    url: 'https://github.com/graphite-project/whisper/archive/1.1.1.tar.gz',
-    checksum: '729a38c7794e0b4a34b40b4afb61703364905befcd2bcb5f8f48a4b79ea32667'
+    version: '1.1.2',
+    url: 'https://github.com/graphite-project/whisper/archive/1.1.2.tar.gz',
+    checksum: 'ad03a25f4d71ba5942c55b82267ece3b0b2881bbd7a84b513d78b15b5de9a8ba'
   },
   {
     name: 'graphite-web',
-    version: '1.1.1',
-    url: 'https://github.com/graphite-project/graphite-web/archive/1.1.1.tar.gz',
-    checksum: '6dfae92e0d0ef94e22934d7a0ddecc38b118015cbb20041a72cbe4ed98908a2a'
+    version: '1.1.2',
+    url: 'https://github.com/graphite-project/graphite-web/archive/1.1.2.tar.gz',
+    checksum: '8a36221db5a17d9cbee11e85be5c346024a6229d28e9d8c2417d1660bf9cfe8e'
   }
 ].each do |package|
 

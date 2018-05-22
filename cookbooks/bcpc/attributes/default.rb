@@ -175,7 +175,7 @@ default['bcpc']['repos_for']['trusty'].tap do |trusty_repos|
     repo[:components] = ['main']
     repo[:distribution] = 'trusty'
     repo[:key] = 'zabbix-official-repo.key'
-    repo[:uri] = 'http://repo.zabbix.com/zabbix/2.4/ubuntu/'
+    repo[:uri] = 'http://repo.zabbix.com/zabbix/3.0/ubuntu/'
   end
 end
 
