@@ -3,6 +3,11 @@ source 'https://supermarket.chef.io'
 
 metadata
 
+# Set to "ruby" to debug and attempt fixing circular dependencies
+# FIXME: Remove this guard someday. Currently we need :gecode to be able to cut
+# releases.
+solver ENV.fetch('BERKS_SOLVER', :gecode)
+
 #
 # Local cookbooks, inside our repository.
 #
