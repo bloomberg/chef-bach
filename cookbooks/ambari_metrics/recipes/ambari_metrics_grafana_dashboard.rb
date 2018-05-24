@@ -15,6 +15,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+include_recipe 'ambari::ambari_server_install'
+
 grafana_datasource 'bach-ams-collector' do
   host node['ams']['metrics_grafana']['host']
   port node['ams']['metrics_grafana']['port']
@@ -28,167 +30,13 @@ grafana_datasource 'bach-ams-collector' do
   )
 end
 
-grafana_dashboard 'ams-hbase-home' do
-  host node['ams']['metrics_grafana']['host']
-  port node['ams']['metrics_grafana']['port']
-  admin_user node['ams']['metrics_grafana']['admin_user']
-  admin_password node['ams']['metrics_grafana']['admin_password']
-  dashboard(
-    source: 'grafana-ams-hbase-home',
-    overwrite: true
-  )
-end
-
-grafana_dashboard 'ams-hbase-misc' do
-  host node['ams']['metrics_grafana']['host']
-  port node['ams']['metrics_grafana']['port']
-  admin_user node['ams']['metrics_grafana']['admin_user']
-  admin_password node['ams']['metrics_grafana']['admin_password']
-  dashboard(
-    source: 'grafana-ams-hbase-misc',
-    overwrite: true
-  )
-end
-
-grafana_dashboard 'ams-hbase-regionservers' do
-  host node['ams']['metrics_grafana']['host']
-  port node['ams']['metrics_grafana']['port']
-  admin_user node['ams']['metrics_grafana']['admin_user']
-  admin_password node['ams']['metrics_grafana']['admin_password']
-  dashboard(
-    source: 'grafana-ams-hbase-regionservers',
-    overwrite: true
-  )
-end
-
-grafana_dashboard 'hbase-home' do
-  host node['ams']['metrics_grafana']['host']
-  port node['ams']['metrics_grafana']['port']
-  admin_user node['ams']['metrics_grafana']['admin_user']
-  admin_password node['ams']['metrics_grafana']['admin_password']
-  dashboard(
-    source: 'grafana-hbase-home',
-    overwrite: true
-  )
-end
-
-grafana_dashboard 'hbase-misc' do
-  host node['ams']['metrics_grafana']['host']
-  port node['ams']['metrics_grafana']['port']
-  admin_user node['ams']['metrics_grafana']['admin_user']
-  admin_password node['ams']['metrics_grafana']['admin_password']
-  dashboard(
-    source: 'grafana-hbase-misc',
-    overwrite: true
-  )
-end
-
-grafana_dashboard 'hbase-regionservers' do
-  host node['ams']['metrics_grafana']['host']
-  port node['ams']['metrics_grafana']['port']
-  admin_user node['ams']['metrics_grafana']['admin_user']
-  admin_password node['ams']['metrics_grafana']['admin_password']
-  dashboard(
-    source: 'grafana-hbase-regionservers',
-    overwrite: true
-  )
-end
-
-grafana_dashboard 'hbase-tables' do
-  host node['ams']['metrics_grafana']['host']
-  port node['ams']['metrics_grafana']['port']
-  admin_user node['ams']['metrics_grafana']['admin_user']
-  admin_password node['ams']['metrics_grafana']['admin_password']
-  dashboard(
-    source: 'grafana-hbase-tables',
-    overwrite: true
-  )
-end
-
-grafana_dashboard 'hbase-users' do
-  host node['ams']['metrics_grafana']['host']
-  port node['ams']['metrics_grafana']['port']
-  admin_user node['ams']['metrics_grafana']['admin_user']
-  admin_password node['ams']['metrics_grafana']['admin_password']
-  dashboard(
-    source: 'grafana-hbase-users',
-    overwrite: true
-  )
-end
-
-grafana_dashboard 'hdfs-datanodes' do
-  host node['ams']['metrics_grafana']['host']
-  port node['ams']['metrics_grafana']['port']
-  admin_user node['ams']['metrics_grafana']['admin_user']
-  admin_password node['ams']['metrics_grafana']['admin_password']
-  dashboard(
-    source: 'grafana-hdfs-datanodes',
-    overwrite: true
-  )
-end
-
-grafana_dashboard 'hdfs-home' do
-  host node['ams']['metrics_grafana']['host']
-  port node['ams']['metrics_grafana']['port']
-  admin_user node['ams']['metrics_grafana']['admin_user']
-  admin_password node['ams']['metrics_grafana']['admin_password']
-  dashboard(
-    source: 'grafana-hdfs-home',
-    overwrite: true
-  )
-end
-
-grafana_dashboard 'hdfs-namenodes' do
-  host node['ams']['metrics_grafana']['host']
-  port node['ams']['metrics_grafana']['port']
-  admin_user node['ams']['metrics_grafana']['admin_user']
-  admin_password node['ams']['metrics_grafana']['admin_password']
-  dashboard(
-    source: 'grafana-hdfs-namenodes',
-    overwrite: true
-  )
-end
-
-grafana_dashboard 'hdfs-topn' do
-  host node['ams']['metrics_grafana']['host']
-  port node['ams']['metrics_grafana']['port']
-  admin_user node['ams']['metrics_grafana']['admin_user']
-  admin_password node['ams']['metrics_grafana']['admin_password']
-  dashboard(
-    source: 'grafana-hdfs-topn',
-    overwrite: true
-  )
-end
-
-grafana_dashboard 'hdfs-users' do
-  host node['ams']['metrics_grafana']['host']
-  port node['ams']['metrics_grafana']['port']
-  admin_user node['ams']['metrics_grafana']['admin_user']
-  admin_password node['ams']['metrics_grafana']['admin_password']
-  dashboard(
-    source: 'grafana-hdfs-users',
-    overwrite: true
-  )
-end
-
-grafana_dashboard 'system-home' do
-  host node['ams']['metrics_grafana']['host']
-  port node['ams']['metrics_grafana']['port']
-  admin_user node['ams']['metrics_grafana']['admin_user']
-  admin_password node['ams']['metrics_grafana']['admin_password']
-  dashboard(
-    source: 'grafana-system-home',
-    overwrite: true
-  )
-end
-
-grafana_dashboard 'system-servers' do
-  host node['ams']['metrics_grafana']['host']
-  port node['ams']['metrics_grafana']['port']
-  admin_user node['ams']['metrics_grafana']['admin_user']
-  admin_password node['ams']['metrics_grafana']['admin_password']
-  dashboard(
-    source: 'grafana-system-servers',
-    overwrite: true
-  )
+node['ams']['grafana']['dashboards'].keys.each do |dashboard_key|
+  grafana_dashboard dashboard_key do
+    host node['ams']['metrics_grafana']['host']
+    port node['ams']['metrics_grafana']['port']
+    admin_user node['ams']['metrics_grafana']['admin_user']
+    admin_password node['ams']['metrics_grafana']['admin_password']
+    dashboard(path: node['ams']['grafana']['dashboards'][dashboard_key],
+              overwrite: true)
+  end
 end

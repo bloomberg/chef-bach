@@ -64,3 +64,54 @@ default['ams']['hbase']['rootdir'] =
 default['ams']['hbase']['tmpdir'] =
   '/var/lib/ambari-metrics-collector/hbase-tmp'
 default['ams']['hbase']['cluster_distributed'] = 'false'
+
+default['ams']['grafana']['dashboard_base_location'] = '/var/lib/ambari-server'\
+'/resources/common-services/AMBARI_METRICS/0.1.0/package/'\
+'files/grafana-dashboards/'
+dashboard_base_location = node['ams']['grafana']['dashboard_base_location']
+
+default['ams']['grafana']['dashboards'] = {
+  'hdfs---namenodes' => File.join(dashboard_base_location,
+                                  'HDP/grafana-hdfs-namenodes.json'),
+  'yarn---applications' => File.join(dashboard_base_location,
+                                     'HDP/grafana-yarn-applications.json'),
+  'hdfs---datanodes' => File.join(dashboard_base_location,
+                                  'HDP/grafana-hdfs-datanodes.json'),
+  'yarn---nodemanagers' => File.join(dashboard_base_location,
+                                     'HDP/grafana-yarn-nodemanagers.json'),
+  'hdfs---home' => File.join(dashboard_base_location,
+                             'HDP/grafana-hdfs-home.json'),
+  'yarn---mr-jobhistoryserver' =>
+  File.join(dashboard_base_location, 'HDP/grafana-yarn-jobhistoryserver.json'),
+  'yarn---home' => File.join(dashboard_base_location,
+                             'HDP/grafana-yarn-home.json'),
+  'hbase---misc' => File.join(dashboard_base_location,
+                              'HDP/grafana-hbase-misc.json'),
+  'yarn---queues' => File.join(dashboard_base_location,
+                               'HDP/grafana-yarn-queues.json'),
+  'hbase---home' => File.join(dashboard_base_location,
+                              'HDP/grafana-hbase-home.json'),
+  'hbase---tables' => File.join(dashboard_base_location,
+                                'HDP/grafana-hbase-tables.json'),
+  'yarn---resourcemanager' =>
+  File.join(dashboard_base_location, 'HDP/grafana-yarn-resourcemanagers.json'),
+  'hdfs---users' => File.join(dashboard_base_location,
+                              'HDP/grafana-hdfs-users.json'),
+  'yarn---timelineserver' => File.join(dashboard_base_location,
+                                       'HDP/grafana-yarn-timelineserver.json'),
+  'hbase---users' => File.join(dashboard_base_location,
+                               'HDP/grafana-hbase-users.json'),
+  'hdfs---topn' => File.join(dashboard_base_location,
+                             'HDP/grafana-hdfs-topn.json'),
+  'ams-hbase---misc' => File.join(dashboard_base_location,
+                                  'default/grafana-ams-hbase-misc.json'),
+  'ams-hbase---home' => File.join(dashboard_base_location,
+                                  'default/grafana-ams-hbase-home.json'),
+  'system---home' => File.join(dashboard_base_location,
+                               'default/grafana-system-home.json'),
+  'ams-hbase---regionservers' =>
+  File.join(dashboard_base_location,
+            'default/grafana-ams-hbase-regionservers.json'),
+  'system---servers' => File.join(dashboard_base_location,
+                                  'default/grafana-system-servers.json')
+}

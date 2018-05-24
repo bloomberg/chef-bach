@@ -19,5 +19,5 @@
 source 'https://supermarket.chef.io'
 
 cookbook 'java'
-
+cookbook 'ambari', path: File.expand_path('../ambari')
 metadata
