@@ -20,7 +20,7 @@ cookbook 'smoke-tests', path: './cookbooks/smoke-tests'
 cookbook 'bach_opentsdb', path: './cookbooks/bach_opentsdb'
 cookbook 'ambari', path: './cookbooks/ambari'
 cookbook 'bach_ambari', path: './cookbooks/bach_ambari'
-
+cookbook 'bach_deployment', path: './cookbooks/bach_deployment'
 
 #
 # Top-level requirements and transitive dependencies outside the
