@@ -16,7 +16,7 @@ depends 'cobblerd'
 depends 'cron'
 depends 'database'
 depends 'graphite_handler'
-depends 'line'
+depends 'line', '< 2.0.0' # 2.0.0 drops Chef 12.0 support
 depends 'maven', '~> 5.0.1'
 depends 'nscd'
 depends 'ntp'
