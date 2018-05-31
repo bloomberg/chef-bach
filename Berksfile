@@ -15,12 +15,14 @@ cookbook 'bcpc-hadoop', path: './cookbooks/bcpc-hadoop'
 cookbook 'bcpc_jmxtrans', path: './cookbooks/bcpc_jmxtrans'
 cookbook 'hannibal', path: './cookbooks/hannibal'
 cookbook 'hdfsdu', path: './cookbooks/hdfsdu'
+cookbook 'bach_hannibal', path: './cookbooks/bach_hannibal'
 cookbook 'bcpc_kafka', path: './cookbooks/bcpc_kafka'
 cookbook 'smoke-tests', path: './cookbooks/smoke-tests'
 cookbook 'bach_opentsdb', path: './cookbooks/bach_opentsdb'
 cookbook 'ambari', path: './cookbooks/ambari'
 cookbook 'bach_ambari', path: './cookbooks/bach_ambari'
-
+cookbook 'bach_deployment', path: './cookbooks/bach_deployment'
+cookbook 'deployment', path: './cookbooks/deployment'
 
 #
 # Top-level requirements and transitive dependencies outside the

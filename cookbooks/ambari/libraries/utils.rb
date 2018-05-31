@@ -16,12 +16,57 @@
 # limitations under the License.
 #
 
+def ambari_request_header
+  admin_password = node['ambari']['admin']['password']
+  admin_user = node['ambari']['admin']['user']
+  headers = { 'AUTHORIZATION' =>
+    "Basic #{Base64.encode64("#{admin_user}:#{admin_password}")}",
+              'Content-Type' => 'application/data',
+              'X-Requested-By' => 'ambari' }
+  headers
+end
 
-def isViewInstalled(viewUrl, headers)
-  Chef::Log.info("View URL:"+viewUrl)
-  res = Chef::HTTP.new("#{node['ambari']['ambari_views_url']}").get(viewUrl, headers)
+def view_installed?(view_url)
+  Chef::Log.info("View URL:#{view_url}")
+  Chef::HTTP.new(node['ambari']['ambari_views_url']).get(view_url, ambari_request_header)
   return true
 rescue Net::HTTPServerException
-    Chef::Log.info("View seems not created")
-    return false
+  Chef::Log.info('View seems not created')
+  return false
+end
+
+def update_default_ambari_admin_password(number_retry: 0, max_retries: 24, delay: 5)
+  number_retry += 1
+  ambari_base_url = node['ambari']['ambari_server_base_url']
+  view_list_url = 'api/v1/views'
+  password_update_url = 'api/v1/users/username'
+  default_password = node['ambari']['admin']['default_password']
+  admin_password = node['ambari']['admin']['password']
+  admin_user = node['ambari']['admin']['user']
+
+  password_update_json = { 'Users' =>
+    { 'user_name' => admin_user, 'old_password' => default_password,
+      'password' => admin_password } }.to_json
+  Chef::HTTP.new(ambari_base_url).get(view_list_url, ambari_request_header)
+rescue Net::HTTPServerException => e
+  case e.response.code
+  when '403'
+    headers = ambari_request_header
+    headers['AUTHORIZATION'] =
+      "Basic #{Base64.encode64("#{admin_user}:#{default_password}")}"
+
+    Chef::HTTP.new(ambari_base_url).put(password_update_url, password_update_json,
+                                        headers)
+  else
+    unless number_retry >= max_retries
+      sleep delay
+      retry
+    end
+  end
+rescue => e
+  Chef::Log.warn("password update error #{e}")
+  unless number_retry >= max_retries
+    sleep delay
+    retry
+  end
 end

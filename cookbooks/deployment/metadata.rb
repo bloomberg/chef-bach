@@ -1,7 +1,7 @@
-name             'bach_opentsdb'
+name             'deployment'
 maintainer       'Bloomberg Finance L.P.'
 maintainer_email 'hadoop@bloomberg.net'
-license          'Apache 2.0'
-description      'Installs/Configures OpenTSDB'
+license          'Apache License 2.0'
+description      'Deploy custom files/jars'
 long_description IO.read(File.join(File.dirname(__FILE__), 'README.md'))
-version          '3.3.15'
+version          '0.1.0'
