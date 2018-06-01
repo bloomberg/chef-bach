@@ -16,9 +16,6 @@ default['ambari']['ambari_server_host'] = 'servername.ambari.apache.org'
 default['ambari']['ambari_server_conf_dir'] = '/etc/ambari-server/conf/'
 default['ambari']['ambari_agent_conf_dir'] = '/etc/ambari-ag/ent/conf/'
 
-default['ambari']['java_home'] = '/usr/lib/jvm/java-' \
- "#{node[:java][:jdk_version]}-#{node[:java][:install_flavor]}-amd64"
-
 default['ambari']['java_home'] = '/usr/lib/jvm/java-8-oracle-amd64'
 
 default['ambari']['use_local_repo'] = 'false'
