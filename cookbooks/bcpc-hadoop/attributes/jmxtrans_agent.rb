@@ -708,6 +708,83 @@ default['bcpc']['hadoop']['jmxtrans_agent']['datanode']['queries'] = default['bc
     'resultAlias' => 'dn_data_node_info.%name%.#attribute#',
     'type' => 'gauge',
     'attributes' => 'RpcPort,XceiverCount'
+  },
+  {
+    'objectName' => 'Hadoop:service=DataNode,name=*',
+    'resultAlias' => 'dn_data_node_activity.DataNodeActivity.#attribute#',
+    'attributes' =>
+      'BlockChecksumOpAvgTime, ' \
+      'BlockChecksumOpNumOps, ' \
+      'BlockReportsAvgTime, ' \
+      'BlockReportsNumOps, ' \
+      'BlockVerificationFailures, ' \
+      'BlocksCached, ' \
+      'BlocksDeletedInPendingIBR, ' \
+      'BlocksGetLocalPathInfo, ' \
+      'BlocksInPendingIBR, ' \
+      'BlocksRead, ' \
+      'BlocksReceivedInPendingIBR, ' \
+      'BlocksReceivingInPendingIBR, ' \
+      'BlocksRemoved, ' \
+      'BlocksReplicated, ' \
+      'BlocksUncached, ' \
+      'BlocksVerified, ' \
+      'BlocksWritten, ' \
+      'BytesRead, ' \
+      'BytesWritten, ' \
+      'CacheReportsAvgTime, ' \
+      'CacheReportsNumOps, ' \
+      'CopyBlockOpAvgTime, ' \
+      'CopyBlockOpNumOps, ' \
+      'DataNodeActiveXceiversCount, ' \
+      'DatanodeNetworkErrors, ' \
+      'FlushNanosAvgTime, ' \
+      'FlushNanosNumOps, ' \
+      'FsyncCount, ' \
+      'FsyncNanosAvgTime, ' \
+      'FsyncNanosNumOps, ' \
+      'HeartbeatsAvgTime, ' \
+      'HeartbeatsNumOps, ' \
+      'HeartbeatsTotalAvgTime, ' \
+      'HeartbeatsTotalNumOps, ' \
+      'IncrementalBlockReportsAvgTime, ' \
+      'IncrementalBlockReportsNumOps, ' \
+      'LifelinesAvgTime, ' \
+      'LifelinesNumOps, ' \
+      'PacketAckRoundTripTimeNanosAvgTime, ' \
+      'PacketAckRoundTripTimeNanosNumOps, ' \
+      'RamDiskBlocksDeletedBeforeLazyPersisted, ' \
+      'RamDiskBlocksEvicted, ' \
+      'RamDiskBlocksEvictedWithoutRead, ' \
+      'RamDiskBlocksEvictionWindowMsAvgTime, ' \
+      'RamDiskBlocksEvictionWindowMsNumOps, ' \
+      'RamDiskBlocksLazyPersistWindowMsAvgTime, ' \
+      'RamDiskBlocksLazyPersistWindowMsNumOps, ' \
+      'RamDiskBlocksLazyPersisted, ' \
+      'RamDiskBlocksReadHits, ' \
+      'RamDiskBlocksWrite, ' \
+      'RamDiskBlocksWriteFallback, ' \
+      'RamDiskBytesLazyPersisted, ' \
+      'RamDiskBytesWrite, ' \
+      'ReadBlockOpAvgTime, ' \
+      'ReadBlockOpNumOps, ' \
+      'ReadsFromLocalClient, ' \
+      'ReadsFromRemoteClient, ' \
+      'RemoteBytesRead, ' \
+      'RemoteBytesWritten, ' \
+      'ReplaceBlockOpAvgTime, ' \
+      'ReplaceBlockOpNumOps, ' \
+      'SendDataPacketBlockedOnNetworkNanosAvgTime, ' \
+      'SendDataPacketBlockedOnNetworkNanosNumOps, ' \
+      'SendDataPacketTransferNanosAvgTime, ' \
+      'SendDataPacketTransferNanosNumOps, ' \
+      'TotalReadTime, ' \
+      'TotalWriteTime, ' \
+      'VolumeFailures, ' \
+      'WriteBlockOpAvgTime, ' \
+      'WriteBlockOpNumOps, ' \
+      'WritesFromLocalClient, ' \
+      'WritesFromRemoteClient'
   }
 ]
 
