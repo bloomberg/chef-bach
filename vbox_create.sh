@@ -3,16 +3,17 @@
 # bash imports
 source ./virtualbox_env.sh
 
-set -x
-
 if !hash ruby 2> /dev/null ; then
   echo 'No ruby in path!'
   exit 1
 fi
 
 if [[ -f ./proxy_setup.sh ]]; then
-  . ./proxy_setup.sh
+  source ./proxy_setup.sh
+  echo "The http proxy is: $http_proxy"
+  echo "The https proxy is: $https_proxy"
 fi
+
 # CURL is exported by proxy_setup.sh
 if [[ -z "$CURL" ]]; then
   echo 'CURL is not defined'
@@ -28,6 +29,7 @@ fi
 # Bootstrap VM Defaults (these need to be exported for Vagrant's Vagrantfile)
 export BOOTSTRAP_VM_MEM=${BOOTSTRAP_VM_MEM-2048}
 export BOOTSTRAP_VM_CPUs=${BOOTSTRAP_VM_CPUs-1}
+
 # Use this if you intend to make an apt-mirror in this VM (see the
 # instructions on using an apt-mirror towards the end of bootstrap.md)
 # -- Vagrant VMs do not use this size --
@@ -43,8 +45,9 @@ export CLUSTER_VM_CPUs=${CLUSTER_VM_CPUs-1}
 export CLUSTER_VM_EFI=${CLUSTER_VM_EFI:-true}
 export CLUSTER_VM_DRIVE_SIZE=${CLUSTER_VM_DRIVE_SIZE-20480}
 
-if !hash vagrant 2> /dev/null ; then
-  echo 'Vagrant not detected - we need Vagrant!' >&2
+if !hash vagrant 2>/dev/null ; then
+  echo 'Vagrant not detected!' >/dev/stderr
+  echo 'Install the latest version from vagrantup.com' >/dev/stderr
   exit 1
 fi
 
@@ -52,16 +55,15 @@ fi
 environments=( ./environments/*.json )
 if (( ${#environments[*]} > 1 )); then
   echo 'Need one and only one environment in environments/*.json; got: ' \
-       "${environments[*]}" >&2
+       "${environments[*]}" >/dev/stderr
   exit 1
 fi
 
 # The root drive on cluster nodes must allow for a RAM-sized swap volume.
 CLUSTER_VM_ROOT_DRIVE_SIZE=$((CLUSTER_VM_DRIVE_SIZE + CLUSTER_VM_MEM - 2048))
 
-VBOX_DIR="`dirname ${BASH_SOURCE[0]}`/vbox"
-[[ -d $VBOX_DIR ]] || mkdir $VBOX_DIR
-VBOX_DIR_PATH=`python -c "import os.path; print os.path.abspath(\"${VBOX_DIR}/\")"`
+VBOX_DIR="$(git rev-parse --show-toplevel)/vbox"
+mkdir -p $VBOX_DIR
 
 # Populate the VM list array from cluster.txt
 code_to_produce_vm_list="
@@ -69,8 +71,10 @@ require './lib/cluster_data.rb';
 include BACH::ClusterData;
 cp=ENV.fetch('BACH_CLUSTER_PREFIX', '');
 cp += '-' unless cp.empty?;
-vms = parse_cluster_txt(File.readlines('cluster.txt'))
-puts vms.map{|e| cp + e[:hostname]}.join(' ')
+vms = parse_cluster_txt(File.readlines('cluster.txt')).map do |e|
+  (e[:hostname] !~ /^#{cp}/) ? (cp + e[:hostname]) : e[:hostname]
+end.join(' ')
+puts vms
 "
 export VM_LIST=( $(/usr/bin/env ruby -e "$code_to_produce_vm_list") )
 
@@ -78,18 +82,20 @@ export VM_LIST=( $(/usr/bin/env ruby -e "$code_to_produce_vm_list") )
 # Function to download files necessary for VM stand-up
 #
 function download_VM_files {
-  pushd $VBOX_DIR_PATH
+  UBUNTU_URL=http://archive.ubuntu.com/ubuntu/dists/trusty-updates/main/installer-amd64/current/images/trusty-netboot/mini.iso
+  VAGRANT_URL=http://cloud-images.ubuntu.com/vagrant/trusty/current/trusty-server-cloudimg-amd64-vagrant-disk1.box
 
+  pushd $VBOX_DIR >/dev/null
   # Grab the Ubuntu 14.04 installer image
   if [[ ! -f ubuntu-14.04-mini.iso ]]; then
-     $CURL -o ubuntu-14.04-mini.iso http://archive.ubuntu.com/ubuntu/dists/trusty-updates/main/installer-amd64/current/images/trusty-netboot/mini.iso
+    $CURL -o ubuntu-14.04-mini.iso $UBUNTU_URL
   fi
 
   # Can we create the bootstrap VM via Vagrant
   if [[ ! -f trusty-server-cloudimg-amd64-vagrant-disk1.box ]]; then
-    $CURL -o trusty-server-cloudimg-amd64-vagrant-disk1.box http://cloud-images.ubuntu.com/vagrant/trusty/current/trusty-server-cloudimg-amd64-vagrant-disk1.box
+    $CURL -o trusty-server-cloudimg-amd64-vagrant-disk1.box $VAGRANT_URL
   fi
-  popd
+  popd >/dev/null
 }
 
 ################################################################################
@@ -107,28 +113,28 @@ function snapshotVMs {
   wait && printf "Done Snapshotting\n"
 }
 
-################################################################################
-# Function to enumerate VirtualBox hostonly interfaces
-# in use from VM's.
-# Argument: name of an associative array defined in calling context
-# Post-Condition: Updates associative array provided by name with keys being
-#                 all interfaces in use and values being the number of VMs on
-#                 each network
-function discover_VBOX_hostonly_ifs {
-  # make used_ifs a typeref to the passed-in associative array
-  local -n used_ifs=$1
-  for net in $($VBM list hostonlyifs | grep '^Name:' | sed 's/^Name:[ ]*//'); do
-    used_ifs[$net]=0
-  done
-  for vm in $($VBM list vms | sed -e 's/^[^{]*{//' -e 's/}$//'); do
-    ifs=$($VBM showvminfo --machinereadable $vm | \
-      egrep '^hostonlyadapter[0-9]*' | \
-      sed -e 's/^hostonlyadapter[0-9]*="//' -e 's/"$//')
-    for interface in $ifs; do
-      used_ifs[$interface]=$((${used_ifs[$interface]} + 1))
-    done
-  done
-}
+# ################################################################################
+# # Function to enumerate VirtualBox hostonly interfaces
+# # in use from VM's.
+# # Argument: name of an associative array defined in calling context
+# # Post-Condition: Updates associative array provided by name with keys being
+# #                 all interfaces in use and values being the number of VMs on
+# #                 each network
+# function discover_VBOX_hostonly_ifs {
+#   # make used_ifs a typeref to the passed-in associative array
+#   local -n used_ifs=$1
+#   for net in $($VBM list hostonlyifs | grep '^Name:' | sed 's/^Name:[ ]*//'); do
+#     used_ifs[$net]=0
+#   done
+#   for vm in $($VBM list vms | sed -e 's/^[^{]*{//' -e 's/}$//'); do
+#     ifs=$($VBM showvminfo --machinereadable $vm | \
+#       egrep '^hostonlyadapter[0-9]*' | \
+#       sed -e 's/^hostonlyadapter[0-9]*="//' -e 's/"$//')
+#     for interface in $ifs; do
+#       used_ifs[$interface]=$((${used_ifs[$interface]} + 1))
+#     done
+#   done
+# }
 
 ################################################################################
 # Function to remove VirtualBox DHCP servers
@@ -140,9 +146,9 @@ function discover_VBOX_hostonly_ifs {
 function remove_DHCPservers {
   local network_name=${1-}
   if [[ -z "$network_name" ]]; then
-    local vms=$($VBM list vms|sed 's/^.*{\([0-9a-f-]*\)}/\1/')
+    local vms=$($VBM list vms | sed 's/^.*{\([0-9a-f-]*\)}/\1/')
     # will produce a list of networks like ^vboxnet0$|^vboxnet1$ which are in use by VMs
-    local existing_nets_reg_ex=$(sed -e 's/^/^/' -e '/$/$/' -e 's/ /$|^/g' <<< $(for vm in $vms; do $VBM showvminfo --details --machinereadable $vm | grep -i 'adapter[2-9]=' | sed -e 's/^.*=//' -e 's/"//g'; done | sort -u))
+    local existing_nets_reg_ex=$(sed -e 's/^/^/' -e 's/$/$/' -e 's/ /$|^/g' <<< $(for vm in $vms; do $VBM showvminfo --details --machinereadable $vm | grep -i 'adapter[2-9]=' | sed -e 's/^.*=//' -e 's/"//g'; done | sort -u))
 
     $VBM list dhcpservers | grep -E "^NetworkName:\s+HostInterfaceNetworking" | sed 's/^.*-//' |
     while read -r network_name; do
@@ -155,16 +161,17 @@ function remove_DHCPservers {
   fi
 }
 
-###################################################################
+#########################################
 # Function to create the bootstrap VM
 #
 function create_bootstrap_VM {
-  pushd $VBOX_DIR_PATH
+  pushd $VBOX_DIR >/dev/null
 
   remove_DHCPservers
 
-  echo "Vagrant detected - using Vagrant to initialize bcpc-bootstrap VM"
-  cp ../Vagrantfile .
+  if [[ -f ../Vagrantfile ]]; then
+    cp ../Vagrantfile .
+  fi
 
   if [[ -f ../Vagrantfile.local.rb ]]; then
       cp ../Vagrantfile.local.rb .
@@ -172,11 +179,14 @@ function create_bootstrap_VM {
 
   if [[ ! -f insecure_private_key ]]; then
     # Ensure that the private key has been created by running vagrant at least once
-    vagrant status
     cp $HOME/.vagrant.d/insecure_private_key .
   fi
-  vagrant up --provision
-  popd
+
+  if ! vagrant status | grep "running (virtualbox)"; then 
+    echo "Using Vagrant to initialize bcpc-bootstrap VM"
+    vagrant up --provision
+  fi
+  popd >/dev/null
 }
 
 
@@ -195,24 +205,24 @@ function create_vbox_ipxe_disk {
 #
 function create_cluster_VMs {
   # Gather VirtualBox networks in use by bootstrap VM
-  oifs="$IFS"
-  IFS=$'\n'
-  bootstrap_interfaces=($($VBM showvminfo ${BOOTSTRAP_NAME} \
-    --machinereadable | \
-    egrep '^hostonlyadapter[0-9]=' | \
-    sort | \
-    sed -e 's/.*=//' -e 's/"//g'))
+  oifs="$IFS"; IFS=$'\n'
+  bootstrap_interfaces=($(
+    $VBM showvminfo ${BOOTSTRAP_NAME} --machinereadable |
+    egrep '^hostonlyadapter[0-9]=' |
+    sort |
+    sed -e 's/.*=//' -e 's/"//g'
+  ))
   IFS="$oifs"
+
   VBN0="${bootstrap_interfaces[0]?Need a Virtualbox network 1 for the bootstrap}"
   VBN1="${bootstrap_interfaces[1]?Need a Virtualbox network 2 for the bootstrap}"
   VBN2="${bootstrap_interfaces[2]?Need a Virtualbox network 3 for the bootstrap}"
 
   if [[ $CLUSTER_VM_EFI == true ]]; then
-    #
-    # Add the ipxe USB key to the vbox storage registry as an immutable
-    # disk, so we can share it between several VMs.
-    #
+    # Add the ipxe USB key to the vbox storage registry as an immutable disk.
+    # we can share it between several VMs.
     current_ipxe=$(vboxmanage list hdds | egrep '^Location:.*ipxe.vdi$')
+
     # we have an ipxe disk added
     if [[ -n "$current_ipxe" ]]; then
       ipxe_location=$(echo "$current_ipxe" | sed 's/^Location:[ ]*//')
@@ -220,94 +230,87 @@ function create_cluster_VMs {
       if $VBM showmediuminfo "$ipxe_location" | egrep -q '^State:.*inaccessible'; then
         $VBM closemedium disk "$ipxe_location"
         # update if we changed ipxe_location to the local workspace
-        ipxe_location="$VBOX_DIR_PATH/ipxe.vdi"
+        ipxe_location="$VBOX_DIR/ipxe.vdi"
         create_vbox_ipxe_disk "$ipxe_location"
       fi
     else
-      ipxe_location="$VBOX_DIR_PATH/ipxe.vdi"
+      ipxe_location="$VBOX_DIR/ipxe.vdi"
       create_vbox_ipxe_disk "$ipxe_location"
     fi
 
-    # provide the IPXE disk location so we know if it is from
-    # another cluster
+    # provide the IPXE disk location so we know if it is from another cluster
     echo "NOTE: Using IPXE volume at: $ipxe_location"
   fi
 
   # Create each VM
   for vm in ${VM_LIST[*]}; do
-      # Only if VM doesn't exist
-      if ! $VBM list vms | grep "^\"${vm}\"" ; then
-          $VBM createvm --name $vm --ostype Ubuntu_64 \
-	       --basefolder $VBOX_DIR_PATH --register
+    # Only if VM doesn't exist
+    if ! $VBM list vms | grep "^\"${vm}\"" ; then
+      $VBM createvm --name $vm --ostype Ubuntu_64 \
+        --basefolder $VBOX_DIR --register
 
-          $VBM modifyvm $vm --memory $CLUSTER_VM_MEM
-          $VBM modifyvm $vm --cpus $CLUSTER_VM_CPUs
+      $VBM modifyvm $vm --memory $CLUSTER_VM_MEM
+      $VBM modifyvm $vm --cpus $CLUSTER_VM_CPUs
 
-	  if [[ $CLUSTER_VM_EFI == true ]]; then
-	      # Force UEFI firmware.
-	      $VBM modifyvm $vm --firmware efi
-	  fi
-
-          # Add the network interfaces
-          $VBM modifyvm $vm --nic1 hostonly --hostonlyadapter1 "$VBN0"
-          $VBM modifyvm $vm --nic2 hostonly --hostonlyadapter2 "$VBN1"
-          $VBM modifyvm $vm --nic3 hostonly --hostonlyadapter3 "$VBN2"
-
-	  # Create a disk controller to hang disks off of.
-	  DISK_CONTROLLER="SATA_Controller"
-	  $VBM storagectl $vm --name $DISK_CONTROLLER --add sata
-
-	  #
-	  # Create the root disk, /dev/sda.
-	  #
-	  # (/dev/sda is hardcoded into the preseed file.)
-	  #
-	  port=0
-	  DISK_PATH=$VBOX_DIR_PATH/$vm/$vm-a.vdi
-	  $VBM createhd --filename $DISK_PATH \
-	       --size $CLUSTER_VM_ROOT_DRIVE_SIZE
-          $VBM storageattach $vm --storagectl $DISK_CONTROLLER \
-	       --device 0 --port $port --type hdd --medium $DISK_PATH
-	  port=$((port+1))
-
-	  if [[ $CLUSTER_VM_EFI == true ]]; then
-	      # Attach the iPXE boot medium as /dev/sdb.
-              $VBM storageattach $vm --storagectl $DISK_CONTROLLER \
-		   --device 0 --port $port --type hdd --medium $ipxe_location
-	      port=$((port+1))
-	  else
-	      # If we're not using EFI, force the BIOS to boot net.
-	      $VBM modifyvm $vm --boot1 net
-	  fi
-
-	  #
-	  # Create our data disks
-	  #
-	  # For these to be used properly, we will need to override
-	  # the attribute default[:bcpc][:hadoop][:disks] in a role or
-	  # environment.
-	  #
-          for disk in c d e f; do
-	      DISK_PATH=$VBOX_DIR_PATH/$vm/$vm-$disk.vdi
-              $VBM createhd --filename $DISK_PATH \
-		   --size $CLUSTER_VM_DRIVE_SIZE
-              $VBM storageattach $vm --storagectl $DISK_CONTROLLER \
-		   --device 0 --port $port --type hdd --medium $DISK_PATH
-              port=$((port+1))
-          done
-
-          # Set hardware acceleration options
-          $VBM modifyvm $vm \
-	       --largepages on \
-	       --vtxvpid on \
-	       --hwvirtex on \
-	       --nestedpaging on \
-	       --ioapic on
-
-          # Add serial ports
-          $VBM modifyvm $vm --uart1 0x3F8 4
-          $VBM modifyvm $vm --uartmode1 server /tmp/serial-${vm}-ttyS0
+      if [[ $CLUSTER_VM_EFI == true ]]; then
+          # Force UEFI firmware.
+          $VBM modifyvm $vm --firmware efi
       fi
+
+      # Add the network interfaces
+      $VBM modifyvm $vm --nic1 hostonly --hostonlyadapter1 "$VBN0"
+      $VBM modifyvm $vm --nic2 hostonly --hostonlyadapter2 "$VBN1"
+      $VBM modifyvm $vm --nic3 hostonly --hostonlyadapter3 "$VBN2"
+
+      # Create a disk controller to hang disks off of.
+      DISK_CONTROLLER="SATA_Controller"
+      $VBM storagectl $vm --name $DISK_CONTROLLER --add sata
+      port=0
+
+      # Create the root disk, /dev/sda.
+      # (/dev/sda is hardcoded into the preseed file.)
+      DISK_PATH=$VBOX_DIR/$vm/$vm-a.vdi
+      $VBM createhd --filename $DISK_PATH \
+        --size $CLUSTER_VM_ROOT_DRIVE_SIZE
+      $VBM storageattach $vm --storagectl $DISK_CONTROLLER \
+        --device 0 --port $port --type hdd --medium $DISK_PATH
+      port=$((port+1))
+
+      if [[ $CLUSTER_VM_EFI == true ]]; then
+        # Attach the iPXE boot medium as /dev/sdb.
+        $VBM storageattach $vm --storagectl $DISK_CONTROLLER \
+          --device 0 --port $port --type hdd --medium $ipxe_location
+        port=$((port+1))
+      else
+        # If we're not using EFI, force the BIOS to boot net.
+        echo "Using BIOS for $vm"
+        $VBM modifyvm $vm --boot1 net
+      fi
+
+      # Create our data disks
+      # For these to be used properly, we will need to override
+      # the attribute default[:bcpc][:hadoop][:disks] in a role or environment.
+      for disk in {c..f}; do
+        DISK_PATH=$VBOX_DIR/$vm/$vm-$disk.vdi
+        $VBM createhd --filename $DISK_PATH \
+          --size $CLUSTER_VM_DRIVE_SIZE
+        $VBM storageattach $vm --storagectl $DISK_CONTROLLER \
+          --device 0 --port $port --type hdd --medium $DISK_PATH
+        port=$((port+1))
+      done
+
+      # Set hardware acceleration options
+      $VBM modifyvm $vm \
+        --largepages on \
+        --vtxvpid on \
+        --hwvirtex on \
+        --nestedpaging on \
+        --ioapic on
+
+      # Add serial ports
+      $VBM modifyvm $vm --uart1 0x3F8 4
+      $VBM modifyvm $vm --uartmode1 server /tmp/serial-${vm}-ttyS0
+    fi
   done
   # update cluster.txt to match VirtualBox MAC's
   ./vm-to-cluster.sh
@@ -320,11 +323,12 @@ function create_cluster_VMs {
 function install_cluster {
   environment=${1-Test-Laptop}
   ip=${2-10.0.100.3}
-  # N.B. As of Aug 2013, grub-pc gets confused and wants to prompt re: 3-way
-  # merge.  Sigh.
+
+  # N.B. As of Aug 2013, grub-pc gets confused and wants to prompt re: 3-way merge (sigh).
   #vagrant ssh -c "sudo ucf -p /etc/default/grub"
   #vagrant ssh -c "sudo ucfr -p grub-pc /etc/default/grub"
   vagrant ssh -c "test -f /etc/default/grub.ucf-dist && sudo mv /etc/default/grub.ucf-dist /etc/default/grub" || true
+
   # Duplicate what d-i's apt-setup generators/50mirror does when set in preseed
   if [ -n "$http_proxy" ]; then
     proxy_found=true
@@ -333,6 +337,7 @@ function install_cluster {
       vagrant ssh -c "echo 'Acquire::http::Proxy \"$http_proxy\";' | sudo tee -a /etc/apt/apt.conf"
     fi
   fi
+
   echo "Bootstrap complete - setting up Chef server"
   echo "N.B. This may take approximately 30-45 minutes to complete."
   vagrant ssh -c 'sudo rm -f /var/chef/cache/chef-stacktrace.out'
