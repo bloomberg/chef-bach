@@ -2,7 +2,7 @@
 # Set environment variables here.
 
 # AMS UI Server Home Dir
-export AMS_GRAFANA_HOME_DIR=/usr/lib/ambari-metrics-grafana
+export AMS_GRAFANA_HOME_DIR=<%=node['ams']['grafana']['home_dir']%>
 
 # AMS UI Server Data Dir
 export AMS_GRAFANA_DATA_DIR=<%=node['ams']['grafana']['lib_location']%>

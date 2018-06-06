@@ -25,7 +25,7 @@ export AMS_HBASE_PID_DIR=<%=node['ams']['collector']['run_location']%>
 export AMS_COLLECTOR_HEAPSIZE=<%=node['ams']['collector']['heapsize']%>
 
 # HBase Tables Initialization check enabled
-export AMS_HBASE_INIT_CHECK_ENABLED=True
+export AMS_HBASE_INIT_CHECK_ENABLED=<%=node['ams']['hbase']['init_check']%>
 
 # AMS Collector options
 export AMS_COLLECTOR_OPTS="-Djava.library.path=/usr/lib/ams-hbase/lib/hadoop-native"

@@ -29,6 +29,7 @@ default['ams']['metrics_collector']['hosts'] = 'localhost'
 default['ams']['metrics_grafana']['host'] = 'localhost'
 default['ams']['metrics_grafana']['port'] = 3000
 default['ams']['metrics_collector']['port'] = 6188
+default['ams']['metrics']['extendedperiod'] = 3600
 default['ams']['metrics_grafana']['admin_user'] = 'admin'
 default['ams']['metrics_grafana']['admin_password'] = 'admin'
 default['ams']['collector']['url'] =
@@ -38,8 +39,10 @@ default['ams']['hostname'] = 'localhost'
 default['ams']['clustername'] = 'ambari'
 default['ams']['']
 default['ams']['hbase']['regionservers'] = 'localhost'
+default['ams']['metrics']['period'] = '30'
 default['ams']['collector']['heapsize'] = '512m'
 default['ams']['number_open_files'] = '32768'
+default['ams']['number_process'] = '65536'
 default['ams']['hbase_conf']['location'] = '/etc/ams-hbase/conf'
 default['ams']['collector']['lib_location'] =
   '/var/lib/ambari-metrics-collector'
@@ -64,7 +67,23 @@ default['ams']['hbase']['rootdir'] =
 default['ams']['hbase']['tmpdir'] =
   '/var/lib/ambari-metrics-collector/hbase-tmp'
 default['ams']['hbase']['cluster_distributed'] = 'false'
-
+default['ams']['hbase']['init_check'] = 'True'
+default['ams']['hbase']['home'] = '/usr/lib/ams-hbase/'
+default['ams']['timeline']['sink']['period'] = 10
+default['ams']['timeline']['sink']['send_interval'] = 60_000
+default['ams']['timeline']['rpc_client_port'] = 8020
+default['ams']['metrics']['enable_time_threshold'] = 'false'
+default['ams']['metrics']['enable_value_threshold'] = 'false'
+default['ams']['metrics']['skip_disk_patterns'] = 'True'
+default['ams']['metrics']['set_instance_id'] = 'false'
+default['ams']['metrics']['emitter']['send_interval'] = 60
+default['ams']['collector']['sleep_interval'] = 10
+default['ams']['collector']['max_queue_size'] = 5000
+default['ams']['collector']['failover_strategy'] = 'round-robin'
+default['ams']['collector']['failover_strategy_blacklisted_interval_seconds'] =
+  300
+default['ams']['collector']['https_enabled'] = 'False'
+default['ams']['grafana']['home_dir'] = '/usr/lib/ambari-metrics-grafana'
 default['ams']['grafana']['dashboard_base_location'] = '/var/lib/ambari-server'\
 '/resources/common-services/AMBARI_METRICS/0.1.0/package/'\
 'files/grafana-dashboards/'

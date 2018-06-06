@@ -3,19 +3,19 @@
 debug_level = INFO
 hostname = <%=node['ams']['hostname']%>
 metrics_servers = <%=node['ams']['metrics_collector']['hosts']%>
-enable_time_threshold = false
-enable_value_threshold = false
-skip_disk_patterns = True
+enable_time_threshold = <%=node['ams']['metrics']['enable_time_threshold']%>
+enable_value_threshold = <%=node['ams']['metrics']['enable_value_threshold']%>
+skip_disk_patterns = <%=node['ams']['metrics']['skip_disk_patterns']%>
 instanceId=<%=node['ams']['clustername']%>
-set.instanceId=false
+set.instanceId=<%=node['ams']['metrics']['set_instance_id']%>
 
 [emitter]
-send_interval = 60
+send_interval = <%=node['ams']['metrics']['emitter']['send_interval']%>
 
 [collector]
-collector_sleep_interval = 10
-max_queue_size = 5000
-failover_strategy = round-robin
-failover_strategy_blacklisted_interval_seconds = 300
-port = 6188
-https_enabled = False
+collector_sleep_interval = <%=node['ams']['collector']['sleep_interval']%>
+max_queue_size = <%=node['ams']['collector']['max_queue_size']%>
+failover_strategy = <%=node['ams']['collector']['failover_strategy']%>
+failover_strategy_blacklisted_interval_seconds = <%=node['ams']['collector']['failover_strategy_blacklisted_interval_seconds']%>
+port = <%=node['ams']['metrics_collector']['port']%>
+https_enabled = <%=node['ams']['collector']['https_enabled']%>

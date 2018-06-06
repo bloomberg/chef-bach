@@ -41,10 +41,13 @@ directory File.join(collector_lib_loc, 'hbase') do
 end
 
 template File.join(ams_hbase_conf_loc, 'hbase-site.xml') do
-  source 'hbase-site.xml.erb'
+  source 'generic_site.xml.erb'
   owner node['ams']['service']['user']
   group node['ams']['service']['group']
   mode '0755'
+  variables(lazy {
+    { options: node['ams']['metrics']['hbase']['site_xml'] }
+  })
 end
 
 template File.join(ams_hbase_conf_loc, 'hbase-env.sh') do
@@ -109,17 +112,23 @@ template File.join(collector_conf_loc, 'ams-env.sh') do
 end
 
 template File.join(collector_conf_loc, 'hbase-site.xml') do
-  source 'hbase-site.xml.erb'
+  source 'generic_site.xml.erb'
   owner node['ams']['service']['user']
   group node['ams']['service']['group']
   mode '0755'
+  variables(lazy {
+    { options: node['ams']['metrics']['hbase']['site_xml'] }
+  })
 end
 
 template File.join(collector_conf_loc, 'ams-site.xml') do
-  source 'ams-site.xml.erb'
+  source 'generic_site.xml.erb'
   owner node['ams']['service']['user']
   group node['ams']['service']['group']
   mode '0755'
+  variables(lazy {
+    { options: node['ams']['metrics']['site_xml'] }
+  })
 end
 
 execute 'stop ambari-metrics-collector' do

@@ -32,4 +32,4 @@
 # limitations under the License.
 
 <%=node['ams']['service']['user']%>   - nofile <%=node['ams']['number_open_files']%>
-<%=node['ams']['service']['user']%>   - nproc  65536
+<%=node['ams']['service']['user']%>   - nproc  <%=node['ams']['number_process']%>

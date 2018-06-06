@@ -21,11 +21,11 @@
 
 
 
-*.period=10
+*.period=<%=node['ams']['metrics']['period']%>
 *.sink.timeline.plugin.urls=file:///usr/lib/ambari-metrics-hadoop-sink/ambari-metrics-hadoop-sink.jar
 *.sink.timeline.class=org.apache.hadoop.metrics2.sink.timeline.HadoopTimelineMetricsSink
-*.sink.timeline.period=10
-*.sink.timeline.sendInterval=60000
+*.sink.timeline.period=<%=node['ams']['timeline']['sink']['period']%>
+*.sink.timeline.sendInterval=<%=node['ams']['timeline']['sink']['send_interval']%>
 *.sink.timeline.slave.host.name=<%=node['ams']['hostname']%>
 *.sink.timeline.zookeeper.quorum=<%=node['ams']['cluster']['zookeeper_quorum']%>
 *.sink.timeline.protocol=http
@@ -45,4 +45,4 @@ resourcemanager.sink.timeline.tagsForPrefix.yarn=Queue
 
 
 # Namenode rpc ports customization
-namenode.sink.timeline.metric.rpc.client.port=8020
+namenode.sink.timeline.metric.rpc.client.port=<%=node['ams']['timeline']['rpc_client_port']%>

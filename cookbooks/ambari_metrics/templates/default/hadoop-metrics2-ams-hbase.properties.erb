@@ -18,33 +18,33 @@
 
 # HBase-specific configuration to reset long-running stats (e.g. compactions)
 # If this variable is left out, then the default is no expiration.
-hbase.extendedperiod = 3600
+hbase.extendedperiod = <%=node['ams']['metrics']['extendedperiod']%>
 
 hbase.class=org.apache.hadoop.metrics2.sink.timeline.HadoopTimelineMetricsSink
-hbase.period=30
+hbase.period=<%=node['ams']['metrics']['period']%>
 hbase.collector.hosts=<%=node['ams']['metrics_collector']['hosts']%>
-hbase.port=6188
+hbase.port=<%=node['ams']['metrics_collector']['port']%>
 hbase.protocol=http
 
 jvm.class=org.apache.hadoop.metrics2.sink.timeline.HadoopTimelineMetricsSink
-jvm.period=30
+jvm.period=<%=node['ams']['metrics']['period']%>
 jvm.collector.hosts=<%=node['ams']['metrics_collector']['hosts']%>
-jvm.port=6188
+jvm.port=<%=node['ams']['metrics_collector']['port']%>
 jvm.protocol=http
 
 rpc.class=org.apache.hadoop.metrics2.sink.timeline.HadoopTimelineMetricsSink
-rpc.period=30
+rpc.period=<%=node['ams']['metrics']['period']%>
 rpc.collector.hosts=<%=node['ams']['metrics_collector']['hosts']%>
-rpc.port=6188
+rpc.port=<%=node['ams']['metrics_collector']['port']%>
 rpc.protocol=http
 
 *.timeline.plugin.urls=file:///usr/lib/ambari-metrics-hadoop-sink/ambari-metrics-hadoop-sink.jar
 *.sink.timeline.slave.host.name=<%=node['ams']['hostname']%>
 hbase.sink.timeline.class=org.apache.hadoop.metrics2.sink.timeline.HadoopTimelineMetricsSink
-hbase.sink.timeline.period=10
-hbase.sink.timeline.sendInterval=60000
+hbase.sink.timeline.period=<%=node['ams']['timeline']['sink']['period']%>
+hbase.sink.timeline.sendInterval=<%=node['ams']['timeline']['sink']['send_interval']%>
 hbase.sink.timeline.collector.hosts=<%=node['ams']['metrics_collector']['hosts']%>
-hbase.sink.timeline.port=6188
+hbase.sink.timeline.port=<%=node['ams']['metrics_collector']['port']%>
 hbase.sink.timeline.protocol=http
 hbase.sink.timeline.serviceName-prefix=ams
 
