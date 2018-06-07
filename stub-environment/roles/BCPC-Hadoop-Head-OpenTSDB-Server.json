@@ -3,7 +3,6 @@
   "json_class": "Chef::Role",
   "run_list": [
     "recipe[bcpc-hadoop::opentsdb]",
-    "recipe[bach_opentsdb]"
   ],
   "description": "A role to install and configure OpenTSDB",
   "chef_type": "role",

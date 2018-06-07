@@ -8,6 +8,7 @@ version          '0.1.0'
 
 depends 'bcpc', '= 0.1.0'
 depends 'smoke-tests', '=0.1.0'
+depends 'bach_opentsdb', '= 0.1.0' 
 depends 'database'
 depends 'java'
 depends 'poise'
