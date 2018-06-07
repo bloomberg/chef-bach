@@ -128,15 +128,6 @@ default['bcpc']['hadoop']['kerberos']['data'] = {
     perms: '0440',
     spnego_keytab: 'spnego.service.keytab'
   },
-  backup: {
-    principal: node[:bcpc][:hadoop][:backup][:user],
-    keytab: 'backup.service.keytab',
-    owner: node[:bcpc][:hadoop][:backup][:user],
-    group: node[:bcpc][:hadoop][:backup][:user],
-    princhost: '_HOST',
-    perms: '0440',
-    spnego_keytab: 'spnego.service.keytab'
-  },
   ambari: {
       principal: "#{node['bcpc']['hadoop']['proxyuser']['ambari']}",
       keytab: 'ambari.service.keytab',
