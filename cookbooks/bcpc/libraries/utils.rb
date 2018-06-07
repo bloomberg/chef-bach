@@ -190,7 +190,7 @@ def fetch_all_nodes
     node.run_state['cluster_def'] = BACH::ClusterDef.new(node_obj: node)
   end
   cd = node.run_state['cluster_def']
-  cd.fetch_cluster_def
+  cd.fetch_cluster_def || []
 end
 
 # Get all nodes for this Chef environment
