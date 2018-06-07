@@ -70,7 +70,7 @@ if File.basename(__FILE__) == File.basename($PROGRAM_NAME)
     # HACK: We have not edited cluster.txt yet, but may have 
     # forced the VMs to have a ${BACH_CLUSTER_PREFIX}-
     # when we generated VM_LIST in vbox_create.sh
-    if /^#{ENV['BACH_CLUSTER_PREFIX']}/ !~ e[:hostname] then
+    if ENV['BACH_CLUSTER_PREFIX'] != '' then
       e[:hostname] = "#{ENV['BACH_CLUSTER_PREFIX']}-#{e[:hostname]}"
     end
     # use a bogus MAC for not yet created VMs in case it gets handed to Cobbler
