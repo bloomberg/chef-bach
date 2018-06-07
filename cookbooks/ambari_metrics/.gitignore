@@ -1,0 +1,5 @@
+.kitchen/
+.kitchen/*
+.kitchen.local.yml
+Berksfile.lock
+Vagrantfile

@@ -21,6 +21,8 @@ cookbook 'smoke-tests', path: './cookbooks/smoke-tests'
 cookbook 'bach_opentsdb', path: './cookbooks/bach_opentsdb'
 cookbook 'ambari', path: './cookbooks/ambari'
 cookbook 'bach_ambari', path: './cookbooks/bach_ambari'
+cookbook 'ambari_metrics', path: './cookbooks/ambari_metrics'
+cookbook 'bach_ambari_metrics', path: './cookbooks/bach_ambari_metrics'
 
 
 #

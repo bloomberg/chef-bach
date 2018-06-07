@@ -1,7 +1,6 @@
-#
-# Cookbook Name:: ambari-views-chef
-# Recipe:: default
-#
+# frozen_string_literal: true
+# Cookbook :: ambari_metrics
+# Recipe :: ambari_metrics_ams_user
 # Copyright 2018, Bloomberg Finance L.P.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,11 +16,9 @@
 # limitations under the License.
 #
 
-# dependencies
-%w(openssh-client wget curl unzip tar python2.7 openssl libpq5 ssl-cert).each do |pkg|
-  package pkg do
-  end
-end
+group node['ams']['service']['group']
 
-include_recipe 'ambari::ambari_repo_setup'
-include_recipe 'ambari::ambari_server_install'
+user node['ams']['service']['user'] do
+  comment 'ambari_metrics service user'
+  gid node['ams']['service']['group']
+end
