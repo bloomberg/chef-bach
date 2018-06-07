@@ -104,9 +104,7 @@ mysql_database node[:bcpc][:zabbix_dbname] do
   connection mysql_local_connection_info
   encoding 'UTF8'
   action :create
-  notifies :run, 'execute[zabbix-run-schema-sql]', :immediately
-  notifies :run, 'execute[zabbix-run-images-sql]', :immediately
-  notifies :run, 'execute[zabbix-run-data-sql]', :immediately
+  notifies :run, 'execute[zabbix-create-database]', :immediately
 end
 
 [
@@ -129,21 +127,12 @@ end
   end
 end
 
-[
-  'schema.sql',
-  'images.sql',
-  'data.sql'
-].each do |file_name|
-  resource_name = "zabbix-run-#{file_name.gsub(/\./,'-')}"
-
-  execute resource_name do
-    command "mysql -u #{root_user} " \
-      "--password=#{root_password} " \
-      "#{node[:bcpc][:zabbix_dbname]} " \
-      "< #{::File.join('/usr/share/zabbix-server-mysql', file_name)}"
-    sensitive true if respond_to?(:sensitive)
-    action :nothing
-  end
+execute 'zabbix-create-database' do
+  command "gunzip -c /usr/share/doc/zabbix-server-mysql/create.sql.gz | mysql -u #{root_user} " \
+    "--password=#{root_password} " \
+    "#{node[:bcpc][:zabbix_dbname]}"
+  sensitive true if respond_to?(:sensitive)
+  action :nothing
 end
 
 mysql_database 'zabbix-set-admin-password' do

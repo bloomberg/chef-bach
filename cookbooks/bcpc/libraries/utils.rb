@@ -248,6 +248,10 @@ def get_static_head_node_local_ip_list
   end.compact.sort
 end
 
+def get_static_head_nodes_count
+  get_head_nodes.length
+end
+
 def get_nodes_for(recipe, cookbook=cookbook_name)
   results = Chef::Search::Query.new.search(
     :node, "recipes:#{cookbook}\\:\\:#{recipe} AND " \
