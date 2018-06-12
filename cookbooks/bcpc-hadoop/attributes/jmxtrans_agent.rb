@@ -514,25 +514,21 @@ default['bcpc']['hadoop']['jmxtrans_agent']['basic']['queries'] = [
   {
     'objectName' => 'java.lang:type=Memory',
     'resultAlias' => 'memory.#attribute#_#key#',
-    'type' => 'gauge',
     'attributes' => 'HeapMemoryUsage,NonHeapMemoryUsage'
   },
   {
     'objectName' => 'java.lang:type=MemoryPool,name=*',
     'resultAlias' => 'memorypool.%name%.#attribute#_#key#',
-    'type' => 'gauge',
     'attributes' => 'Usage'
   },
   {
     'objectName' => 'java.lang:type=GarbageCollector,name=*',
     'resultAlias' => 'gc.%name%.#attribute#',
-    'type' => 'gauge',
     'attributes' => 'CollectionCount,CollectionTime'
   },
   {
     'objectName' => 'java.lang:type=Threading',
     'resultAlias' => 'threads.#attribute#',
-    'type' => 'gauge',
     'attributes' => 'DaemonThreadCount,PeakThreadCount,ThreadCount,TotalStartedThreadCount'
   }
 ]
@@ -544,13 +540,11 @@ default['bcpc']['hadoop']['jmxtrans_agent']['namenode']['queries'] = default['bc
   {
     'objectName' => 'Hadoop:name=JvmMetrics,service=NameNode',
     'resultAlias' => 'nn_jvm_metrics.%name%.#attribute#',
-    'type' => 'gauge',
     'attributes' => jvm_metrics
   },
   {
     'objectName' => 'Hadoop:name=FSNamesystem,service=NameNode',
     'resultAlias' => 'nn_fs_name_system.%name%.#attribute#',
-    'type' => 'gauge',
     'attributes' =>
       'BlockCapacity,' \
       'BlocksTotal,' \
@@ -592,7 +586,6 @@ default['bcpc']['hadoop']['jmxtrans_agent']['namenode']['queries'] = default['bc
   {
     'objectName' => 'Hadoop:name=FSNamesystemState,service=NameNode',
     'resultAlias' => 'nn_fs_name_system_state.%name%.#attribute#',
-    'type' => 'gauge',
     'attributes' =>
       'BlockDeletionStartTime,' \
       'BlocksTotal,' \
@@ -671,7 +664,6 @@ default['bcpc']['hadoop']['jmxtrans_agent']['namenode']['queries'] = default['bc
   {
     'objectName' => 'Hadoop:name=NameNodeInfo,service=NameNode',
     'resultAlias' => 'nn_name_node_info.%name%.#attribute#',
-    'type' => 'gauge',
     'attributes' =>
       'BlockPoolUsedSpace,' \
       'CacheCapacity,' \
@@ -700,13 +692,11 @@ default['bcpc']['hadoop']['jmxtrans_agent']['datanode']['queries'] = default['bc
   {
     'objectName' => 'Hadoop:name=JvmMetrics,service=DataNode',
     'resultAlias' => 'dn_jvm_metrics.%name%.#attribute#',
-    'type' => 'gauge',
     'attributes' => jvm_metrics
   },
   {
     'objectName' => 'Hadoop:name=DataNodeInfo,service=DataNode',
     'resultAlias' => 'dn_data_node_info.%name%.#attribute#',
-    'type' => 'gauge',
     'attributes' => 'RpcPort,XceiverCount'
   }
 ]
@@ -718,7 +708,6 @@ default['bcpc']['hadoop']['jmxtrans_agent']['journalnode']['queries'] = default[
   {
     'objectName' => 'Hadoop:service=JournalNode,name=RpcDetailedActivityForPort*',
     'resultAlias' => 'journal_node.%name%.#attribute#',
-    'type' => 'gauge',
     'attributes' =>
       'FinalizeLogSegmentAvgTime,' \
       'FinalizeLogSegmentNumOps,' \
@@ -736,7 +725,6 @@ default['bcpc']['hadoop']['jmxtrans_agent']['journalnode']['queries'] = default[
   {
     'objectName' => 'Hadoop:service=JournalNode,name=RpcActivityForPort8485',
     'resultAlias' => 'journal_node.%name%.#attribute#',
-    'type' => 'gauge',
     'attributes' =>
       'CallQueueLength,' \
       'NumOpenConnections,' \
@@ -756,7 +744,6 @@ default['bcpc']['hadoop']['jmxtrans_agent']['journalnode']['queries'] = default[
   {
     'objectName' => 'Hadoop:service=JournalNode,name=UgiMetrics',
     'resultAlias' => 'journal_node.%name%.#attribute#',
-    'type' => 'gauge',
     'attributes' =>
       'GetGroupsAvgTime,' \
       'GetGroupsNumOps,' \
@@ -770,7 +757,6 @@ default['bcpc']['hadoop']['jmxtrans_agent']['journalnode']['queries'] = default[
   {
     'objectName' => 'Hadoop:service=JournalNode,name=Journal-*',
     'resultAlias' => 'journal_node.%name%.#attribute#',
-    'type' => 'gauge',
     'attributes' =>
       'BatchesWritten,' \
       'BatchesWrittenWhileLagging,' \
@@ -808,13 +794,11 @@ default['bcpc']['hadoop']['jmxtrans_agent']['hbase_master']['queries'] = default
   {
     'objectName' => 'Hadoop:name=JvmMetrics,service=HBase',
     'resultAlias' => 'hbm_jvm_metrics.%name%.#attribute#',
-    'type' => 'gauge',
     'attributes' => jvm_metrics
   },
   {
     'objectName' => 'Hadoop:name=Master,service=HBase,sub=Server',
     'resultAlias' => 'hbm_server.%name%.#attribute#',
-    'type' => 'gauge',
     'attributes' =>
       'averageLoad,' \
       'clusterRequests,' \
@@ -826,13 +810,11 @@ default['bcpc']['hadoop']['jmxtrans_agent']['hbase_master']['queries'] = default
   {
     'objectName' => 'Hadoop:name=Master,service=HBase,sub=AssignmentManger',
     'resultAlias' => 'hbm_am.%name%.#attribute#',
-    'type' => 'gauge',
     'attributes' => 'ritCount,ritCountOverThreshold,ritOldestAge'
   },
   {
     'objectName' => 'Hadoop:name=Master,service=HBase,sub=IPC',
     'resultAlias' => 'hbm_ipc.%name%.#attribute#',
-    'type' => 'gauge',
     'attributes' => hbase_ipc_metrics
   }
 ]
@@ -844,7 +826,6 @@ default['bcpc']['hadoop']['jmxtrans_agent']['hbase_rs_regions']['queries'] = [
   {
     'objectName' => 'Hadoop:service=HBase,name=RegionServer,sub=Regions,*',
     'resultAlias' => 'hb_regions.%name%.#attribute#',
-    'type' => 'gauge',
     'attributes' => ''
   }
 ]
@@ -855,19 +836,16 @@ default['bcpc']['hadoop']['jmxtrans_agent']['hbase_rs']['queries'] = default['bc
   {
     'objectName' => 'Hadoop:name=JvmMetrics,service=HBase',
     'resultAlias' => 'hb_rs_jvm_metrics.%name%.#attribute#',
-    'type' => 'gauge',
     'attributes' => jvm_metrics
   },
   {
     'objectName' => 'Hadoop:name=RegionServer,service=HBase,sub=IPC',
     'resultAlias' => 'hb_ipc.%name%.#attribute#',
-    'type' => 'gauge',
     'attributes' => hbase_ipc_metrics
   },
   {
     'objectName' => 'Hadoop:service=HBase,name=RegionServer,sub=Replication,*',
     'resultAlias' => 'hb_replication.%name%.#attribute#',
-    'type' => 'gauge',
     'attributes' =>
       'sink.ageOfLastAppliedOp,' \
       'sink.appliedBatches,' \
@@ -911,7 +889,6 @@ default['bcpc']['hadoop']['jmxtrans_agent']['hbase_rs']['queries'] = default['bc
   {
     'objectName' => 'Hadoop:service=HBase,name=RegionServer,sub=Server,*',
     'resultAlias' => 'hb_rs_server.%name%.#attribute#',
-    'type' => 'gauge',
     'attributes' => hb_rs_server_metrics
   },
   {
@@ -1021,7 +998,6 @@ default['bcpc']['hadoop']['jmxtrans_agent']['nodemanager']['queries'] = default[
   {
     'objectName' => 'Hadoop:service=NodeManager,name=NodeManagerMetrics',
     'resultAlias' => 'NodeManager.%name%.#attribute#',
-    'type' => 'gauge',
     'attributes' =>
       'AllocatedContainers,' \
       'AllocatedGB,' \
@@ -1050,13 +1026,11 @@ default['bcpc']['hadoop']['jmxtrans_agent']['resourcemanager']['queries'] = defa
   {
     'objectName' => 'Hadoop:service=ResourceManager,name=ClusterMetrics*',
     'resultAlias' => 'ResourceManager.%name%.#attribute#',
-    'type' => 'gauge',
     'attributes' => 'NumActiveNMs'
   },
   {
     'objectName' => 'Hadoop:service=ResourceManager,name=QueueMetrics,*',
     'resultAlias' => 'ResourceManager.%name%.%q0%_%q1%_%q2%.%user%.#attribute#',
-    'type' => 'gauge',
     'attributes' =>
       'AppsRunning,' \
       'AppsPending,' \
@@ -1081,13 +1055,11 @@ default['bcpc']['hadoop']['jmxtrans_agent']['zookeeper']['queries'] = default['b
   {
     'objectName' => 'org.apache.ZooKeeperService:name0=ReplicatedServer_id*',
     'resultAlias' => 'zookeeper.#attribute#',
-    'type' => 'gauge',
     'attributes' => 'QuorumSize'
   },
   {
     'objectName' => 'org.apache.ZooKeeperService:name0=ReplicatedServer_id*,name1=replica.*,name2=Follower,name3=InMemoryDataTree',
     'resultAlias' => 'zookeeper.#attribute#',
-    'type' => 'gauge',
     'attributes' => 'NodeCount'
   }
 ]
@@ -1099,7 +1071,6 @@ default['bcpc']['hadoop']['jmxtrans_agent']['kafka']['queries'] = default['bcpc'
   {
     'objectName' => '\\\'kafka.server\\\':type=\\\'BrokerTopicMetrics\\\',name=*',
     'resultAlias' => 'kafka.BrokerTopicMetrics.%name%.#attribute#',
-    'type' => 'gauge',
     'attributes' =>
       'Count,' \
       'MeanRate,' \
@@ -1110,7 +1081,6 @@ default['bcpc']['hadoop']['jmxtrans_agent']['kafka']['queries'] = default['bcpc'
   {
     'objectName' => '\\\'kafka.server\\\':type=\\\'DelayedFetchRequestMetrics\\\',name=*',
     'resultAlias' => 'kafka.server.DelayedFetchRequestMetrics.%name%.#attribute#',
-    'type' => 'gauge',
     'attributes' =>
       'Count,' \
       'MeanRate,' \

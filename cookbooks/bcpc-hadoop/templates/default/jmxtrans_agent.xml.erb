@@ -3,7 +3,7 @@
 <jmxtrans-agent>
   <queries>
     <% (@queries || {}).each do |query| %>
-      <query objectName="<%= query['objectName'] %>" attributes="<%= query['attributes'] %>" resultAlias="<%= query['resultAlias'] %>" type="<%= query['type'] %>">
+      <query objectName="<%= query['objectName'] %>" attributes="<%= query['attributes'] %>" resultAlias="<%= query['resultAlias'] %>"/>
     <% end %>
   </queries>
 
