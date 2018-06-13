@@ -1,0 +1,48 @@
+
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements. See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License. You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# syntax: [prefix].[source|sink|jmx].[instance].[options]
+# See package.html for org.apache.hadoop.metrics2 for details
+
+
+
+
+
+*.period=<%=node['ams']['metrics']['period']%>
+*.sink.timeline.plugin.urls=file:///usr/lib/ambari-metrics-hadoop-sink/ambari-metrics-hadoop-sink.jar
+*.sink.timeline.class=org.apache.hadoop.metrics2.sink.timeline.HadoopTimelineMetricsSink
+*.sink.timeline.period=<%=node['ams']['timeline']['sink']['period']%>
+*.sink.timeline.sendInterval=<%=node['ams']['timeline']['sink']['send_interval']%>
+*.sink.timeline.slave.host.name=<%=node['ams']['hostname']%>
+*.sink.timeline.zookeeper.quorum=<%=node['ams']['cluster']['zookeeper_quorum']%>
+*.sink.timeline.protocol=http
+*.sink.timeline.port=<%=node['ams']['metrics_collector']['port']%>
+
+datanode.sink.timeline.collector.hosts=<%=node['ams']['metrics_collector']['hosts']%>
+namenode.sink.timeline.collector.hosts=<%=node['ams']['metrics_collector']['hosts']%>
+resourcemanager.sink.timeline.collector.hosts=<%=node['ams']['metrics_collector']['hosts']%>
+nodemanager.sink.timeline.collector.hosts=<%=node['ams']['metrics_collector']['hosts']%>
+jobhistoryserver.sink.timeline.collector.hosts=<%=node['ams']['metrics_collector']['hosts']%>
+journalnode.sink.timeline.collector.hosts=<%=node['ams']['metrics_collector']['hosts']%>
+maptask.sink.timeline.collector.hosts=<%=node['ams']['metrics_collector']['hosts']%>
+reducetask.sink.timeline.collector.hosts=<%=node['ams']['metrics_collector']['hosts']%>
+applicationhistoryserver.sink.timeline.collector.hosts=<%=node['ams']['metrics_collector']['hosts']%>
+
+resourcemanager.sink.timeline.tagsForPrefix.yarn=Queue
+
+
+# Namenode rpc ports customization
+namenode.sink.timeline.metric.rpc.client.port=<%=node['ams']['timeline']['rpc_client_port']%>

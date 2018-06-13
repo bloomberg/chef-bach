@@ -1,0 +1,21 @@
+
+[default]
+debug_level = INFO
+hostname = <%=node['ams']['hostname']%>
+metrics_servers = <%=node['ams']['metrics_collector']['hosts']%>
+enable_time_threshold = <%=node['ams']['metrics']['enable_time_threshold']%>
+enable_value_threshold = <%=node['ams']['metrics']['enable_value_threshold']%>
+skip_disk_patterns = <%=node['ams']['metrics']['skip_disk_patterns']%>
+instanceId=<%=node['ams']['clustername']%>
+set.instanceId=<%=node['ams']['metrics']['set_instance_id']%>
+
+[emitter]
+send_interval = <%=node['ams']['metrics']['emitter']['send_interval']%>
+
+[collector]
+collector_sleep_interval = <%=node['ams']['collector']['sleep_interval']%>
+max_queue_size = <%=node['ams']['collector']['max_queue_size']%>
+failover_strategy = <%=node['ams']['collector']['failover_strategy']%>
+failover_strategy_blacklisted_interval_seconds = <%=node['ams']['collector']['failover_strategy_blacklisted_interval_seconds']%>
+port = <%=node['ams']['metrics_collector']['port']%>
+https_enabled = <%=node['ams']['collector']['https_enabled']%>

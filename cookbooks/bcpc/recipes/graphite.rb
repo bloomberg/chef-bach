@@ -91,9 +91,6 @@ end
   end
 end
 
-# we need real node objects in order to extract the mgmt ip
-head_nodes = get_head_nodes
-
 # Directory resource sets owner and group only to the leaf directory.
 # All other directories will be owned by root
 directory node['bcpc']['graphite']['local_storage_dir'].to_s do
@@ -132,8 +129,8 @@ template '/opt/graphite/conf/carbon.conf' do
   group 'root'
   mode 0o0644
   variables(
-    'servers' => head_nodes,
-    'min_quorum' => head_nodes.length/2 + 1 )
+    'servers' => get_static_head_node_local_ip_list,
+    'min_quorum' => get_static_head_nodes_count/2 + 1 )
   notifies :restart, 'service[carbon-cache]', :delayed
   notifies :restart, 'service[carbon-aggregator]', :delayed
   notifies :restart, 'service[carbon-relay]', :delayed
@@ -160,7 +157,7 @@ template '/opt/graphite/conf/relay-rules.conf' do
   owner 'root'
   group 'root'
   mode 0o0644
-  variables( 'servers' => head_nodes )
+  variables( 'servers' => get_static_head_node_local_ip_list)
   notifies :restart, 'service[carbon-relay]', :delayed
 end
 
@@ -219,8 +216,8 @@ template '/opt/graphite/webapp/graphite/local_settings.py' do
   mode 0o0440
   variables(
     'web_port' => node['bcpc']['graphite']['web_port'],
-    'servers' => head_nodes,
-    'min_quorum' => head_nodes.length/2 + 1 )
+    'servers' => get_static_head_node_local_ip_list,
+    'min_quorum' => get_static_head_nodes_count/2 + 1 )
   notifies :restart, 'service[apache2]', :delayed
 end
 
