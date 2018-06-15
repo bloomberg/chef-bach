@@ -161,15 +161,31 @@ default['bcpc']['repos_for']['trusty'].tap do |trusty_repos|
     repo[:distribution] = 'HDP'
     repo[:key] = 'hortonworks.key'
     repo[:uri] =
-      'http://private-repo-1.hortonworks.com/HDP/ubuntu14/2.x/updates/2.6.3.22-1'
+      'http://public-repo-1.hortonworks.com/HDP/ubuntu14/2.x/updates/2.6.5.0'
   end
+
+  trusty_repos['hortonworks-gpl'].tap do |repo|
+    repo[:components] = ['main']
+    repo[:distribution] = 'HDP-GPL'
+    repo[:key] = 'hortonworks.key'
+    repo[:uri] =
+      'http://public-repo-1.hortonworks.com/HDP-GPL/ubuntu14/2.x/updates/2.6.5.0'
+   end
 
   trusty_repos['hdp-utils'].tap do |repo|
     repo[:components] = ['main']
     repo[:distribution] = 'HDP-UTILS'
     repo[:key] = 'hortonworks.key'
     repo[:uri] =
-      'http://private-repo-1.hortonworks.com/HDP-UTILS-1.1.0.21/repos/ubuntu14'
+      'http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.21/repos/ubuntu14'
+  end
+
+  trusty_repos['hdp-utils-gpl'].tap do |repo|
+    repo[:components] = ['main']
+    repo[:distribution] = 'HDP-UTILS-GPL'
+    repo[:key] = 'hortonworks.key'
+    repo[:uri] =
+      'http://public-repo-1.hortonworks.com/HDP-UTILS-GPL-1.1.0.21/repos/ubuntu14'
   end
 
   trusty_repos['zabbix'].tap do |repo|
