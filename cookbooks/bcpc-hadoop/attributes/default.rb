@@ -11,7 +11,7 @@ default['bcpc']['cluster']['file_path'] = "/home/#{user}/chef-bcpc/cluster.txt"
 
 default['bcpc']['hadoop'] = {}
 default['bcpc']['hadoop']['proxyuser']['ambari'] = 'ambariqa'
-default['bcpc']['hadoop']['distribution']['release'] = '2.6.3.22-1'
+default['bcpc']['hadoop']['distribution']['release'] = '2.6.5.0-292'
 default['bcpc']['hadoop']['distribution']['active_release'] = \
   node['bcpc']['hadoop']['distribution']['release']
 
