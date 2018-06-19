@@ -18,12 +18,6 @@ bash "update-hbase-conf-alternatives" do
   })
 end
 
-if get_nodes_for("powerdns", "bcpc").length > 0
- dns_server = node[:bcpc][:management][:vip]
-else
- dns_server = node[:bcpc][:dns_servers][0]
-end
-
 template '/etc/hbase/conf/hadoop-metrics2-hbase.properties' do
   source 'hb_hadoop-metrics2-hbase.properties.erb'
   mode 0644
@@ -75,7 +69,8 @@ generated_values = {
   'hbase.regionserver.ipc.address' =>
     node['bcpc']['floating']['ip'],
   'hbase.master.ipc.address' =>
-    node['bcpc']['floating']['ip']
+    node['bcpc']['floating']['ip'],
+  'hbase.regionserver.hostname' => float_host(node[:fqdn])
 }
 
 # this configuration parameter only belongs in master
