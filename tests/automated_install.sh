@@ -103,31 +103,6 @@ for vm in ${VM_LIST[*]} ${BOOTSTRAP_NAME}; do
     VBoxManage startvm $vm --type headless
 done
 
-if hash screen; then
-  if [ "$(uname)" == "Darwin" ]; then
-    brew install coreutils
-    pushd $(greadlink -f $(dirname $0)) > /dev/null
-  else
-    pushd $(readlink -f $(dirname $0)) > /dev/null
-  fi
-
-  # Create a new screenrc with our VM list in it
-  cp ./screenrc ../../cluster/screenrc
-
-  echo "cd `pwd`; cd .." >> ../../cluster/screenrc
-
-  ii=1
-  for vm in ${VM_LIST[*]}; do
-    echo "screen -t \"$vm serial console\" $ii" \
-         "./tests/virtualbox_serial_console.sh $vm" >> ../../cluster/screenrc
-    ((ii++))
-  done
-  popd > /dev/null
-  echo "  Enter this command to view VM serial consoles:"
-  echo "    screen -S 'BACH serial consoles' `readlink -f ../cluster/screenrc`"
-  echo
-fi
-
 vagrant ssh -c "cd chef-bcpc; source proxy_setup.sh; ./wait-for-hosts.sh ${VM_LIST[*]}"
 snapshotVMs "${SNAP_POST_PXE}"
 

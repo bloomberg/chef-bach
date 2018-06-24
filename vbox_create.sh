@@ -303,10 +303,6 @@ function create_cluster_VMs {
 	       --hwvirtex on \
 	       --nestedpaging on \
 	       --ioapic on
-
-          # Add serial ports
-          $VBM modifyvm $vm --uart1 0x3F8 4
-          $VBM modifyvm $vm --uartmode1 server /tmp/serial-${vm}-ttyS0
       fi
   done
   # update cluster.txt to match VirtualBox MAC's
