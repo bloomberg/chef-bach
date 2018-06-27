@@ -55,7 +55,15 @@
       </property>
     </credential>
   </credentials>
-  <start to="Shell-Action"/>
+  <start to="Smoke-Test-Fork"/>
+  <fork name="Smoke-Test-Fork">
+    <path start="Shell-Action"/>
+    <path start="MapReduce-Action"/>
+    <path start="Hive-Smokes"/>
+    <path start="Hive2-Smokes"/>
+    <path start="Hive-CLI"/>
+    <path start="HBASE-Shell"/>
+  </fork>
   <action name="Shell-Action">
     <shell xmlns="uri:oozie:shell-action:0.1">
       <job-tracker>${jobTracker}</job-tracker>
@@ -63,13 +71,13 @@
       <exec>sleep</exec>
       <argument>10</argument>
     </shell>
-      <ok to="MapReduce-Action"/>
-      <error to="fail"/>
+      <ok to="join-smokes"/>
+      <error to="join-smokes"/>
   </action>
   <action name="MapReduce-Action">
     <map-reduce>
       <job-tracker>${jobTracker}</job-tracker>
-      <name-node>${nameNode}</name-node>  
+      <name-node>${nameNode}</name-node>
       <prepare>
         <delete path="/user/${wf:user()}/${inputDir}"/>
         <delete path="/user/${wf:user()}/${outputDir}"/>
@@ -138,8 +146,45 @@
         </property>
       </configuration>
     </map-reduce>
-      <ok to="Hive-CLI"/>
-      <error to="fail"/>
+      <ok to="join-smokes"/>
+      <error to="join-smokes"/>
+  </action>
+  <action name="Hive-Smokes" cred="hcat_creds">
+    <hive xmlns="uri:oozie:hive-action:0.2">
+      <job-tracker>${jobTracker}</job-tracker>
+      <name-node>${nameNode}</name-node>
+      <job-xml>hive-site.xml</job-xml>
+      <configuration>
+        <property>
+          <name>mapred.job.queue.name</name>
+          <value>${queueName}</value>
+        </property>
+      </configuration>
+      <script>hive_smoke_test.hql</script>
+      <param>HIVE_SMOKE_TEST_DB=smoke_test_db</param>
+      <param>HIVE_SMOKE_TEST_TBL=smoke_test_tbl</param>
+    </hive>
+    <ok to="join-smokes"/>
+    <error to="join-smokes"/>
+  </action>
+  <action name="Hive2-Smokes" cred="hive2_creds">
+    <hive2 xmlns="uri:oozie:hive2-action:0.1">
+      <job-tracker>${jobTracker}</job-tracker>
+      <name-node>${nameNode}</name-node>
+      <job-xml>hive-site.xml</job-xml>
+      <configuration>
+        <property>
+          <name>mapred.job.queue.name</name>
+          <value>${queueName}</value>
+        </property>
+      </configuration>
+      <jdbc-url>${jdbcUrl}</jdbc-url>
+      <script>hive_smoke_test.hql</script>
+      <param>HIVE_SMOKE_TEST_DB=smoke_test_db_v2</param>
+      <param>HIVE_SMOKE_TEST_TBL=smoke_test_tbl_v2</param>
+    </hive2>
+    <ok to="join-smokes"/>
+    <error to="join-smokes"/>
   </action>
   <action name="Hive-CLI" cred="hcat_creds">
     <shell xmlns="uri:oozie:shell-action:0.1">
@@ -149,8 +194,8 @@
       <argument>-e</argument>
       <argument>"show databases"</argument>
     </shell>
-      <ok to="HBASE-Shell"/>
-      <error to="fail"/>
+      <ok to="join-smokes"/>
+      <error to="join-smokes"/>
   </action>
   <action name="HBASE-Shell" cred="hbase_creds">
     <shell xmlns="uri:oozie:shell-action:0.1">
@@ -163,9 +208,18 @@
       <argument>shell</argument>
       <argument>-n</argument>
     </shell>
-      <ok to="report-success-zabbix"/>
-      <error to="fail"/>
+      <ok to="join-smokes"/>
+      <error to="join-smokes"/>
   </action>
+  <join name="join-smokes" to="status-decision"/>
+  <decision name="status-decision">
+    <switch>
+     <case to="report-success-zabbix">
+       ${wf:lastErrorNode() eq null}
+     </case>
+     <default to="fail"/>
+    </switch>
+  </decision>
   <action name="report-success-zabbix">
     <shell xmlns="uri:oozie:shell-action:0.1">
       <job-tracker>${jobTracker}</job-tracker>
