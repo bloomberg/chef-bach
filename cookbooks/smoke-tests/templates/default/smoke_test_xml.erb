@@ -65,7 +65,20 @@
       </property>
     </credential>
   </credentials>
-  <start to="Shell-Action"/>
+  
+  <start to="Smoke-Test-Fork"/>
+
+  <fork name="Smoke-Test-Fork">
+    <path start="Shell-Action"/>
+    <path start="MapReduce-Action"/>
+    <path start="Hive-Smokes"/>
+    <path start="Hive2-Smokes"/>
+    <path start="Hive-CLI"/>
+    <path start="HBASE-Shell"/> 
+  </fork>
+  
+  
+
   <action name="Shell-Action">
     <shell xmlns="uri:oozie:shell-action:0.1">
       <job-tracker>${jobTracker}</job-tracker>
@@ -73,8 +86,8 @@
       <exec>sleep</exec>
       <argument>10</argument>
     </shell>
-      <ok to="MapReduce-Action"/>
-      <error to="fail"/>
+      <ok to="join-smokes"/>
+      <error to="join-smokes"/>
   </action>
   <action name="MapReduce-Action">
     <map-reduce>
@@ -148,14 +161,10 @@
         </property>
       </configuration>
     </map-reduce>
-      <ok to="forkNode"/>
-      <error to="fail"/>
+      <ok to="join-smokes"/>
+      <error to="join-smokes"/>
   </action>
-  <fork name="forkNode">
-    <path start="Hive-Smokes"/>
-    <path start="Hive2-Smokes"/>
-  </fork>
-
+  
   <action name="Hive-Smokes" cred="hcat_creds">
     <hive xmlns="uri:oozie:hive-action:0.2">
       <job-tracker>${jobTracker}</job-tracker>
@@ -171,8 +180,8 @@
       <param>HIVE_SMOKE_TEST_DB=smoke_test_db</param>
       <param>HIVE_SMOKE_TEST_TBL=smoke_test_tbl</param>
     </hive>
-    <ok to="joiner"/>
-    <error to="fail"/>
+    <ok to="join-smokes"/>
+    <error to="join-smokes"/>
   </action>
 
   <action name="Hive2-Smokes" cred="hive2_creds">
@@ -191,10 +200,9 @@
       <param>HIVE_SMOKE_TEST_DB=smoke_test_db_v2</param>
       <param>HIVE_SMOKE_TEST_TBL=smoke_test_tbl_v2</param>
     </hive2>
-    <ok to="joiner"/>
-    <error to="fail"/>
+    <ok to="join-smokes"/>
+    <error to="join-smokes"/>
   </action>
-  <join name="joiner" to="Hive-CLI"/>
 
   <action name="Hive-CLI" cred="hcat_creds">
     <shell xmlns="uri:oozie:shell-action:0.1">
@@ -204,8 +212,8 @@
       <argument>-e</argument>
       <argument>"show databases"</argument>
     </shell>
-      <ok to="HBASE-Shell"/>
-      <error to="fail"/>
+      <ok to="join-smokes"/>
+      <error to="join-smokes"/>
   </action>
   <action name="HBASE-Shell" cred="hbase_creds">
     <shell xmlns="uri:oozie:shell-action:0.1">
@@ -218,9 +226,19 @@
       <argument>shell</argument>
       <argument>-n</argument>
     </shell>
-      <ok to="report-success-zabbix"/>
-      <error to="fail"/>
+      <ok to="join-smokes"/>
+      <error to="join-smokes"/>
   </action>
+  <join name="join-smokes" to="status-decision"/>
+  <decision name="status-decision">
+    <switch>
+     <case to="report-success-zabbix">
+       ${wf:lastErrorNode() eq null}
+     </case>
+     <default to="fail"/>
+    </switch>
+  </decision>
+
   <action name="report-success-zabbix">
     <shell xmlns="uri:oozie:shell-action:0.1">
       <job-tracker>${jobTracker}</job-tracker>
