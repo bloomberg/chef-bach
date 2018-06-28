@@ -62,6 +62,13 @@ bash "kill zookeeper-org-apache-zookeeper-server-quorum-QuorumPeerMain" do
   returns [0, 1]
 end
 
+directory '/var/log/zookeeper/gc/' do
+  user 'zookeeper'
+  group 'zookeeper'
+  action :create
+  notifies :restart, 'service[zookeeper-server]', :delayed
+end
+
 bash 'init-zookeeper' do
   code "service zookeeper-server init " +
     "--myid=#{bcpc_8bit_node_number}"
