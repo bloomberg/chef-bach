@@ -7,7 +7,7 @@ include_recipe 'bcpc-hadoop::zookeeper_packages'
 include_recipe 'bach_krb5::keytab_directory'
 
 user_ulimit 'zookeeper' do
-  filehandle_limit 65536
+  filehandle_limit 65_536
 end
 
 configure_kerberos 'zookeeper_kerb' do
@@ -22,15 +22,17 @@ directory '/var/run/zookeeper' do
 end
 
 link '/usr/bin/zookeeper-server-initialize' do
-  to '/usr/hdp/current/zookeeper-client/bin/zookeeper-server-initialize'
+  to "/usr/hdp/#{node['bcpc']['hadoop']['distribution']['active_release']}/zookeeper-client/bin/zookeeper-server-initialize"
 end
 
-#Install jolokia's jvm agent to node['bcpc']['jolokia']['path']
+# Install jolokia's jvm agent to node['bcpc']['jolokia']['path']
 if node['bcpc']['jolokia']['enable'] == true
   include_recipe 'bcpc-hadoop::jolokia'
 end
 
-template "#{node['bcpc']['hadoop']['zookeeper']['conf_dir']}/zookeeper-env.sh" do
+zk_env_path = \
+  "#{node['bcpc']['hadoop']['zookeeper']['conf_dir']}/zookeeper-env.sh"
+template zk_env_path do
   source 'zk_zookeeper-env.sh.erb'
   mode 0644
   variables(
@@ -47,7 +49,8 @@ directory node['bcpc']['hadoop']['zookeeper']['data_dir'] do
   mode 0755
 end
 
-template "/usr/hdp/#{node['bcpc']['hadoop']['distribution']['active_release']}/zookeeper/bin/zkServer.sh" do
+zkServer_path = "/usr/hdp/#{node['bcpc']['hadoop']['distribution']['active_release']}/zookeeper/bin/zkServer.sh"
+template zkServer_path do
   source 'zk_zkServer.sh.erb'
 end
 
@@ -63,24 +66,25 @@ bash 'kill zookeeper-org-apache-zookeeper-server-quorum-QuorumPeerMain' do
 end
 
 directory '/var/log/hadoop-hdfs/gc/' do
-  user 'zookeeper'
-  group 'zookeeper'
+  user node['bcpc']['hadoop']['zookeeper']['owner']
+  group node['bcpc']['hadoop']['zookeeper']['group']
   action :create
 end
 
+my_id_path = "#{node['bcpc']['hadoop']['zookeeper']['data_dir']}/myid"
 bash 'init-zookeeper' do
   code 'service zookeeper-server init ' +
     "--myid=#{bcpc_8bit_node_number}"
 
   not_if do
-    ::File.exists?("#{node['bcpc']['hadoop']['zookeeper']['data_dir']}/myid")
+    ::File.exists?(my_id_path)
   end
 
   # race immediate run of restarting ZK on initial stand-up
   subscribes :run, 'link[/etc/init.d/zookeeper-server]', :immediate
 end
 
-file "#{node['bcpc']['hadoop']['zookeeper']['data_dir']}/myid" do
+file my_id_path do
   content bcpc_8bit_node_number.to_s
   owner node['bcpc']['hadoop']['zookeeper']['owner']
   group node['bcpc']['hadoop']['zookeeper']['group']
@@ -98,15 +102,15 @@ locking_resource 'zookeeper-server' do
   process_identifier = 'org.apache.zookeeper.server.quorum.QuorumPeerMain'
   resource 'service[zookeeper-server]'
   process_pattern {command_string process_identifier
-                   user 'zookeeper'
+                   user node['bcpc']['hadoop']['zookeeper']['owner']
                    full_cmd true}
   perform :restart
   action :serialize_process
   subscribes :serialize, 'link[/etc/init.d/zookeeper-server]', :immediate
-  subscribes :serialize, 'template[#{node['bcpc']['hadoop']['zookeeper']['conf_dir']}/zoo.cfg]', :delayed
-  subscribes :serialize, 'template[#{node['bcpc']['hadoop']['zookeeper']['conf_dir']}/zookeeper-env.sh]', :delayed
-  subscribes :serialize, 'link[/usr/lib/zookeeper/bin/zkServer.sh]', :delayed
-  subscribes :serialize, 'file[#{node['bcpc']['hadoop']['zookeeper']['data_dir']}/myid]', :delayed
+  subscribes :serialize, "template[#{node['bcpc']['hadoop']['zookeeper']['conf_dir']}/zoo.cfg]", :delayed
+  subscribes :serialize, "template[#{zk_env_path}]", :delayed
+  subscribes :serialize, "link[#{zkServer_path}]", :delayed
+  subscribes :serialize, "file[#{my_id_path}]", :delayed
   subscribes :serialize, 'user_ulimit[zookeeper]', :delayed
   subscribes :serialize, 'bash[hdp-select zookeeper-server]', :delayed
   subscribes :serialize, 'log[jdk-version-changed]', :delayed
