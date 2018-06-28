@@ -59,6 +59,9 @@ default['bcpc']['hadoop']['zookeeper']['xmx']['max_size'] = 4_096
 default['bcpc']['hadoop']['zookeeper']['xmx']['max_ratio'] = 0.10
 
 common_opts =
+  '-XX:+UseGCLogFileRotation ' \
+  '-XX:GCLogFileSize=20M ' \
+  '-XX:NumberOfGCLogFiles=20 ' \
   '-XX:+UseParNewGC ' \
   '-XX:+UseConcMarkSweepGC ' \
   '-verbose:gc -XX:+PrintHeapAtGC ' \
@@ -71,7 +74,6 @@ common_opts =
   '-XX:+PrintClassHistogram ' \
   '-XX:+PrintGCApplicationConcurrentTime ' \
   '-XX:+UseCMSInitiatingOccupancyOnly ' \
-  '-XX:CMSInitiatingOccupancyFraction=70 ' \
   '-XX:+HeapDumpOnOutOfMemoryError ' \
   '-XX:+PrintTenuringDistribution ' \
   '-XX:+ExitOnOutOfMemoryError ' \
@@ -80,9 +82,7 @@ common_opts =
 # GC Options for DataNode
 default['bcpc']['hadoop']['zookeeper']['gc_opts'] =
   '-server -XX:ParallelGCThreads=4 ' \
-  '-XX:+UseGCLogFileRotation' \
-  '-XX:GCLogFileSize=20M' \
-  '-XX:NumberOfGCLogFiles=20' \
+  '-XX:CMSInitiatingOccupancyFraction=70 ' \
   '-Xloggc:/var/log/zookeeper/gc/gc.log-$$-$(hostname)-$(date +\'%Y%m%d%H%M\').log ' \
   '-XX:HeapDumpPath=/var/log/zookeeper/heap-dump-$$-$(hostname)-$(date +\'%Y%m%d%H%M\').hprof ' +
   common_opts
