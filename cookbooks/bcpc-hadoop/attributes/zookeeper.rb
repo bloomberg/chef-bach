@@ -81,7 +81,7 @@ common_opts =
 default['bcpc']['hadoop']['zookeeper']['gc_opts'] =
   '-server -XX:ParallelGCThreads=4 ' \
   '-XX:+UseGCLogFileRotation' \
-  '-XX:GCLogFileSize=256M' \
+  '-XX:GCLogFileSize=20M' \
   '-XX:NumberOfGCLogFiles=20' \
   '-Xloggc:/var/log/zookeeper/gc/gc.log-$$-$(hostname)-$(date +\'%Y%m%d%H%M\').log ' \
   '-XX:HeapDumpPath=/var/log/zookeeper/heap-dump-$$-$(hostname)-$(date +\'%Y%m%d%H%M\').hprof ' +
