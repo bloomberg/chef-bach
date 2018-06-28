@@ -7,7 +7,11 @@
 ################################################
 
 export JAVA_HOME=<%= node['bcpc']['hadoop']['java'] %>
-export ZOO_LOG_DIR=<%= node['bcpc']['hadoop']['zookeeper']['log_dir'] %>
+if [ $(whoami) == 'zookeeper' ]; then
+  export ZOO_LOG_DIR=<%= node['bcpc']['hadoop']['zookeeper']['log_dir'] %>
+else
+  export ZOO_LOG_DIR=~/
+fi
 export ZOO_PID_DIR=/var/run/zookeeper
 export ZOOPIDFILE=$ZOO_PID_DIR/zookeeper-server
 export ZOOCFGDIR=<%= node['bcpc']['hadoop']['zookeeper']['conf_dir'] %>
