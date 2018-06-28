@@ -66,7 +66,6 @@ directory '/var/log/zookeeper/gc/' do
   user 'zookeeper'
   group 'zookeeper'
   action :create
-  notifies :restart, 'service[zookeeper-server]', :delayed
 end
 
 bash 'init-zookeeper' do
@@ -93,12 +92,23 @@ end
 service "zookeeper-server" do
   supports :status => true, :restart => true, :reload => false
   action [:enable, :start]
-  subscribes :restart, "link[/etc/init.d/zookeeper-server]", :immediate
-  subscribes :restart, "template[#{node[:bcpc][:hadoop][:zookeeper][:conf_dir]}/zoo.cfg]", :delayed
-  subscribes :restart, "template[#{node[:bcpc][:hadoop][:zookeeper][:conf_dir]}/zookeeper-env.sh]", :delayed
-  subscribes :restart, "link[/usr/lib/zookeeper/bin/zkServer.sh]", :delayed
-  subscribes :restart, "file[#{node[:bcpc][:hadoop][:zookeeper][:data_dir]}/myid]", :delayed
-  subscribes :restart, "user_ulimit[zookeeper]", :delayed
-  subscribes :restart, "bash[hdp-select zookeeper-server]", :delayed
-  subscribes :restart, "log[jdk-version-changed]", :delayed
+end
+
+locking_resource 'zookeeper-server' do
+  process_identifier = 'org.apache.zookeeper.server.quorum.QuorumPeerMain'
+  resource 'service[zookeeper-server]'
+  process_pattern {command_string process_identifier
+                   user 'zookeeper'
+                   full_cmd true}
+  perform :restart
+  action :serialize_process
+  subscribes :serialize, 'link[/etc/init.d/zookeeper-server]', :immediate
+  subscribes :serialize, 'template[#{node['bcpc']['hadoop']['zookeeper']['conf_dir']}/zoo.cfg]', :delayed
+  subscribes :serialize, 'template[#{node['bcpc']['hadoop']['zookeeper']['conf_dir']}/zookeeper-env.sh]', :delayed
+  subscribes :serialize, 'link[/usr/lib/zookeeper/bin/zkServer.sh]', :delayed
+  subscribes :serialize, 'file[#{node['bcpc']['hadoop']['zookeeper']['data_dir']}/myid]', :delayed
+  subscribes :serialize, 'user_ulimit[zookeeper]', :delayed
+  subscribes :serialize, 'bash[hdp-select zookeeper-server]', :delayed
+  subscribes :serialize, 'log[jdk-version-changed]', :delayed
+  subscribes :serialize, 'directory[/var/log/zookeeper/gc]', :delayed
 end
