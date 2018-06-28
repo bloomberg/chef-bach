@@ -36,5 +36,16 @@ SERVER_JVMFLAGS="$SERVER_JVMFLAGS -Djava.security.auth.login.config=/etc/zookeep
 CLIENT_JVMFLAGS="$CLIENT_JVMFLAGS -Djava.security.auth.login.config=/etc/zookeeper/conf/zookeeper-client.jaas"
 <% end %>
 
+<%
+  auto_size = (node['memory']['total'].to_i *
+               node['bcpc']['hadoop']['zookeeper']['xmx']['max_ratio']/1024)
+  heap = [node['bcpc']['hadoop']['zookeeper']['xmx']['max_size'],
+          auto_size.floor].min
+  newsize = [(0.125*heap).ceil, 3072].min
+-%>
+SERVER_JVMFLAGS="$SERVER_JVMFLAGS -Xms<%= heap %>m -Xmx<%= heap %>m " \
+                "-Xmn<%= newsize %>m " \
+                "<%= node['bcpc']['hadoop']['zookeeper']['gc_opts'] %>"
+
 export SERVER_JVMFLAGS
 export CLIENT_JVMFLAGS
