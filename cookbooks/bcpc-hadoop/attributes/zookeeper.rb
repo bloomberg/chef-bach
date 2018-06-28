@@ -80,6 +80,9 @@ common_opts =
 # GC Options for DataNode
 default['bcpc']['hadoop']['zookeeper']['gc_opts'] =
   '-server -XX:ParallelGCThreads=4 ' \
-  '-Xloggc:/var/log/hadoop-hdfs/gc/gc.log-dn-$$-$(hostname)-$(date +\'%Y%m%d%H%M\').log ' \
-  '-XX:HeapDumpPath=/var/log/hadoop-hdfs/heap-dump-dn-$$-$(hostname)-$(date +\'%Y%m%d%H%M\').hprof ' +
+  '-XX:+UseGCLogFileRotation' \
+  '-XX:GCLogFileSize=256M' \
+  '-XX:NumberOfGCLogFiles=20' \
+  '-Xloggc:/var/log/zookeeper/gc/gc.log-$$-$(hostname)-$(date +\'%Y%m%d%H%M\').log ' \
+  '-XX:HeapDumpPath=/var/log/zookeeper/heap-dump-$$-$(hostname)-$(date +\'%Y%m%d%H%M\').hprof ' +
   common_opts
