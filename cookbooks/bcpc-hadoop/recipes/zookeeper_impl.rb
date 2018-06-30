@@ -33,12 +33,20 @@ end
 zk_env_path = \
   "#{node['bcpc']['hadoop']['zookeeper']['conf_dir']}/zookeeper-env.sh"
 template zk_env_path do
+  auto_size = (node['memory']['total'].to_i *
+                node['bcpc']['hadoop']['zookeeper']['xmx']['max_ratio']/1024)
+  heap = [node['bcpc']['hadoop']['zookeeper']['xmx']['max_size'],
+          auto_size.floor].min
+  newsize = [(0.125*heap).ceil, 3072].min
   source 'zk_zookeeper-env.sh.erb'
   mode 0644
   variables(
     zk_jmx_port: node['bcpc']['hadoop']['zookeeper']['jmx']['port'],
     jmxtrans_agent_lib: node['bcpc']['jmxtrans_agent']['lib_file'],
-    jmxtrans_agent_xml: node['bcpc']['hadoop']['jmxtrans_agent']['zookeeper']['xml']
+    jmxtrans_agent_xml: node['bcpc']['hadoop']['jmxtrans_agent']['zookeeper']['xml'],
+    auto_size: auto_size,
+    heap: heap,
+    newsize: newsize
   )
 end
 
@@ -65,7 +73,7 @@ bash 'kill zookeeper-org-apache-zookeeper-server-quorum-QuorumPeerMain' do
   returns [0, 1]
 end
 
-directory '/var/log/hadoop-hdfs/gc/' do
+directory '/var/log/zookeeper/gc/' do
   user node['bcpc']['hadoop']['zookeeper']['owner']
   group node['bcpc']['hadoop']['zookeeper']['group']
   action :create
@@ -106,13 +114,13 @@ locking_resource 'zookeeper-server' do
                    full_cmd true}
   perform :restart
   action :serialize_process
-  subscribes :serialize, 'link[/etc/init.d/zookeeper-server]', :immediate
-  subscribes :serialize, "template[#{node['bcpc']['hadoop']['zookeeper']['conf_dir']}/zoo.cfg]", :delayed
-  subscribes :serialize, "template[#{zk_env_path}]", :delayed
-  subscribes :serialize, "link[#{zkServer_path}]", :delayed
-  subscribes :serialize, "file[#{my_id_path}]", :delayed
-  subscribes :serialize, 'user_ulimit[zookeeper]', :delayed
-  subscribes :serialize, 'bash[hdp-select zookeeper-server]', :delayed
-  subscribes :serialize, 'log[jdk-version-changed]', :delayed
-  subscribes :serialize, 'directory[/var/log/zookeeper/gc]', :delayed
+  subscribes :serialize_process, 'link[/etc/init.d/zookeeper-server]', :immediate
+  subscribes :serialize_process, "template[#{node['bcpc']['hadoop']['zookeeper']['conf_dir']}/zoo.cfg]", :delayed
+  subscribes :serialize_process, "template[#{zk_env_path}]", :delayed
+  subscribes :serialize_process, "link[#{zkServer_path}]", :delayed
+  subscribes :serialize_process, "file[#{my_id_path}]", :delayed
+  subscribes :serialize_process, 'user_ulimit[zookeeper]', :delayed
+  subscribes :serialize_process, 'bash[hdp-select zookeeper-server]', :delayed
+  subscribes :serialize_process, 'log[jdk-version-changed]', :delayed
+  subscribes :serialize_process, 'directory[/var/log/zookeeper/gc]', :delayed
 end
