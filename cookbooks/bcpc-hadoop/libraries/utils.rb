@@ -186,35 +186,18 @@ end
 
   
 #
-# Function to retrieve commonly used node attributes so that the call to chef server is minimized
+# Function to retrieve commonly used node attributes.
+# Minimizes calls to the chef server.
 #
 def set_hosts
-  # Hadoop service to chef role mapping used by set_hosts to perform lookups
-  service_role = {
-    'zookeeper'=> 'role[BCPC-Hadoop-Head]',
-    'journal_node' => 'role[BCPC-Hadoop-Head]',
-    'resource_manager' => 'role[BCPC-Hadoop-Head-ResourceManager]',
-    'job_history_server' =>  'role[BCPC-Hadoop-Head-MapReduce]',
-    'oozie_server' => 'role[BCPC-Hadoop-Head-MapReduce]',
-    'hadoop_worker' => 'role[BCPC-Hadoop-Worker]',
-    'hadoop_datanode' => 'role[BCPC-Hadoop-Worker]', 
-    'hadoop_head' => 'role[BCPC-Hadoop-Head]',
-    'hive_server' => 'role[BCPC-Hadoop-Head-Hive',
-    'hbase_head' => 'role[BCPC-Hadoop-Head-HBase]'
-  }
-
-  service_recipe = {
-    'oozie_server' => 'recipe[bcpc-hadoop::oozie]'
-  }
-
   if node.run_state['cluster_def'].nil? then
     node.run_state['cluster_def'] = BACH::ClusterDef.new(node_obj: node)
   end
-  nodes = node.run_state['cluster_def'].fetch_cluster_def
+  hosts = node.run_state['cluster_def'].fetch_cluster_def
 
   # host search helper lambdas
-  runs_role = Proc.new { |host, role| host[:runlist].include? service_role[role] }
-  runs_recipe = Proc.new { |host, recipe| host[:runlist].include? service_recipe[recipe] }
+  runs_role = Proc.new { |host, role| host[:runlist].include? role }
+  runs_recipe = Proc.new { |host, recipe| host[:runlist].include? recipe }
 
   # mapped host objects
   to_host = Proc.new do |host| {
@@ -222,72 +205,46 @@ def set_hosts
     'node_number' => host[:node_id],
     'zookeeper_myid' => nil
   } end
-  
-  node.default[:bcpc][:hadoop][:zookeeper][:servers] = 
-    nodes.select { |n| runs_role.call(n, 'zookeeper') }.map { |n| to_host.call(n) }
 
-  node.default[:bcpc][:hadoop][:jn_hosts] = 
-    nodes.select { |n| runs_role.call(n, 'journal_node') }.map { |n| to_host.call(n) }
-
-  node.default[:bcpc][:hadoop][:rm_hosts] = 
-    nodes.select { |n| runs_role.call(n, 'resource_manager') }.map { |n| to_host.call(n) }
-
-  node.default[:bcpc][:hadoop][:hs_hosts] = 
-    nodes.select { |n| runs_role.call(n, 'job_history_server') }.map { |n| to_host.call(n) }
-
-  node.default[:bcpc][:hadoop][:dn_hosts] = 
-    nodes.select { |n| runs_role.call(n, 'hadoop_worker') }.map { |n| to_host.call(n) }
-
-  node.default[:bcpc][:hadoop][:hb_hosts] = 
-    nodes.select { |n| runs_role.call(n, 'hbase_head') }.map { |n| to_host.call(n) }
-
-  # different flavors of hive
-  node.default[:bcpc][:hadoop][:hive_hosts] = 
-    nodes.select { |n| runs_role.call(n, 'hive_server') }.map { |n| to_host.call(n) }
-
-  # (the BCPC-Hadoop-Head-MapReduce role nests the oozie recipe)
-  node.default[:bcpc][:hadoop][:oozie_hosts]  = 
-    nodes.select do |n|
-      runs_role.call(n, 'oozie_server') || runs_recipe.call(n, 'oozie_server')
-    end.map { |n| to_host.call(n) }
-
-  # every datanode
-  node.default[:bcpc][:hadoop][:httpfs_hosts] = 
-    nodes.select { |n| runs_role.call(n, 'hadoop_worker') }.map { |n| to_host.call(n) }
-
-  # every worker
-  node.default[:bcpc][:hadoop][:rs_hosts] = 
-    nodes.select { |n| runs_role.call(n, 'hadoop_worker') }.map { |n| to_host.call(n) }
-
-  # BCPC-Hadoop-Head
-  node.default[:bcpc][:hadoop][:mysql_hosts] = 
-    nodes.select { |n| runs_role.call(n, 'hadoop_head') }.map { |n| to_host.call(n) }
+  node['bcpc']['hadoop']['services'].each do |name, service|
+    node.default[:bcpc][:hadoop].dig(*service[:key]) =
+      hosts.select do |h|
+        runs_role.call(h, service[name][:role]) ||
+        runs_recipe.call(h, service[name][:recipe])
+      end.map do |h|
+        to_host.call(h)
+      end
+  end
 
   # set the oozie_url
   oozie_hosts = node[:bcpc][:hadoop][:oozie_hosts]
-  if oozie_hosts.length > 1
-    # high-availability
-    node.default[:bcpc][:hadoop][:oozie_url] =
-      "http://#{float_host(node[:bcpc][:management][:viphost])}:" +
-      "#{node[:bcpc][:ha_oozie][:port]}/oozie"
-  elsif oozie_hosts.length == 1
-    # single oozie host
-    node.default[:bcpc][:hadoop][:oozie_url] =
-      "http://#{float_host(oozie_hosts.first[:hostname])}:" +
-      "#{node[:bcpc][:hadoop][:oozie_port]}/oozie"
-  end
+  vip_host = float_host(node[:bcpc][:management][:viphost])
+  first_host = float_host(oozie_hosts.first[:hostname])
+  oozie_ha_port = node[:bcpc][:ha_oozie][:port]
+  oozie_port = node[:bcpc][:hadoop][:oozie_port]
+
+  node.default[:bcpc][:hadoop][:oozie_url] =
+    if oozie_hosts.length > 1
+      # high-availability
+      "http://#{vip_host}:#{oozie_ha_port}/oozie"
+    elsif oozie_hosts.length == 1
+      # single oozie host
+      "http://#{first_host}/#{oozie_port}/oozie"
+    end
 
   # set the resourcemanager_url (rm_address)
   rm_hosts = node[:bcpc][:hadoop][:rm_hosts]
-  if rm_hosts.length > 1
-    # high-availability
-    node.default[:bcpc][:hadoop][:rm_address] = node.chef_environment
-  else
-    node.default[:bcpc][:hadoop][:rm_address] =
-      "http://#{float_host(rm_hosts.first[:hostname])}:" +
-      "#{node[:bcpc][:hadoop][:yarn][:resourcemanager][:port]}"
-  end
+  first_host = float_host(rm_hosts.first[:hostname])
+  rm_port = node[:bcpc][:hadoop][:yarn][:resourcemanager][:port]
 
+  node.default[:bcpc][:hadoop][:rm_address] =
+    if rm_hosts.length > 1
+      # high-availability
+      node.chef_environment
+    elsif rm_hosts.length == 1
+      # single resourcemanager host
+      "#{first_host}:#{rm_port}"
+    end
 end
 
 #
