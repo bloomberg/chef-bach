@@ -269,17 +269,24 @@ def set_hosts
     # high-availability
     node.default[:bcpc][:hadoop][:oozie_url] =
       "http://#{float_host(node[:bcpc][:management][:viphost])}:" +
-        "#{node[:bcpc][:ha_oozie][:port]}/oozie"
+      "#{node[:bcpc][:ha_oozie][:port]}/oozie"
   elsif oozie_hosts.length == 1
     # single oozie host
     node.default[:bcpc][:hadoop][:oozie_url] =
       "http://#{float_host(oozie_hosts.first[:hostname])}:" +
-        "#{node[:bcpc][:hadoop][:oozie_port]}/oozie"
+      "#{node[:bcpc][:hadoop][:oozie_port]}/oozie"
   end
 
-  # set the HA resourcemanager_url (rm_address)
+  # set the resourcemanager_url (rm_address)
   rm_hosts = node[:bcpc][:hadoop][:rm_hosts]
-  node.default[:bcpc][:hadoop][:rm_address] = node.chef_environment
+  if rm_hosts.length > 1
+    # high-availability
+    node.default[:bcpc][:hadoop][:rm_address] = node.chef_environment
+  else
+    node.default[:bcpc][:hadoop][:rm_address] =
+      "http://#{float_host(rm_hosts.first[:hostname])}:" +
+      "#{node[:bcpc][:hadoop][:yarn][:resourcemanager][:port]}"
+  end
 
 end
 
