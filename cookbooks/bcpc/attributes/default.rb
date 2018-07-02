@@ -180,14 +180,6 @@ default['bcpc']['repos_for']['trusty'].tap do |trusty_repos|
       'http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.21/repos/ubuntu14'
   end
 
-  trusty_repos['hdp-utils-gpl'].tap do |repo|
-    repo[:components] = ['main']
-    repo[:distribution] = 'HDP-UTILS-GPL'
-    repo[:key] = 'hortonworks.key'
-    repo[:uri] =
-      'http://public-repo-1.hortonworks.com/HDP-UTILS-GPL-1.1.0.21/repos/ubuntu14'
-  end
-
   trusty_repos['zabbix'].tap do |repo|
     repo[:components] = ['main']
     repo[:distribution] = 'trusty'
