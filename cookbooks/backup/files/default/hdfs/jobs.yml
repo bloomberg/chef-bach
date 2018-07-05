@@ -1,0 +1,24 @@
+# hdfs_jobs.yaml
+# YAML model of backup jobs.
+# Disclaimer: This is an example.
+# All keys should be preceded with a ':' s.t. they're read as ruby symbols.
+#
+# :group_name:
+#   :hdfs: valid hdfs source uri (string)
+#   :start: ISO datetime start (string)
+#   :end: ISO datetime end (string)
+#   :jobs:
+#     - :path: hdfs path to backup target (string)
+#       :hdfs: (OPTIONAL) override top-level hdfs uri (string)
+#       :period: period in minutes between backup actions (integer)
+---
+:group:
+  :hdfs: 'hdfs://localhost:9000'
+  :start: '2018-01-01T12:00Z'
+  :end: '2019-12-25T06:00Z'
+  :jobs:
+    - :path: '/tmp'
+      :period: 360
+    - :path: '/user'
+      :hdfs: 'hdfs://localhost:9000' # optional override
+      :period: 480

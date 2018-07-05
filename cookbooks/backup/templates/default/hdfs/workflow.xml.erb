@@ -1,0 +1,53 @@
+<!--
+workflow.xml
+workflow configuration for an oozie backup job
+
+Copyright 2018, Bloomberg Finance L.P.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+
+<workflow-app xmlns="uri:oozie:workflow:0.4" name="backup.hdfs.${jobname}">
+
+  <start to="distcp"/>
+
+  <!-- distcp backup -->
+  <action name="distcp">
+    <distcp xmlns="uri:oozie:distcp-action:0.2">
+      <job-tracker>${jobtracker}</job-tracker>
+      <name-node>${namenode}</name-node>
+
+      <!-- JVM Arguments -->
+      <java-opts>-Dmapred.job.queue.name=${queue}</java-opts>
+
+      <!-- preserve metadata -->
+      <arg>-ppugbtxc</arg>
+      <arg>-update</arg>
+      <arg>-bandwidth</arg>
+      <arg>${bandwidth}</arg>
+      <arg>-i</arg>
+
+      <!-- source and destination -->
+      <arg>${wf:conf("hdfs.src.namenode")}/${target}</arg>
+      <arg>${wf:conf("hdfs.backup.root")}/${group}/${basename}</arg>
+    </distcp>
+      <ok to="end"/>
+      <error to="fail"/>
+  </action>
+
+  <kill name="fail">
+    <message>[${wf:errorMessage(wf:lastErrorNode())}]</message>
+  </kill>
+
+  <end name="end"/>
+</workflow-app>

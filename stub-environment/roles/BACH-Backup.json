@@ -1,0 +1,19 @@
+{
+    "name": "BACH-Backup",
+    "description": "Configures the backup service on a backup cluster leader.",
+    "chef_type": "role",
+    "json_class": "Chef::Role",
+    "run_list": [
+      "recipe[bach_backup::default]",
+      "recipe[backup::default]",
+      "recipe[backup::bootstrap]",
+      "recipe[backup::properties]",
+      "recipe[backup::hdfs]",
+      "recipe[backup::scheduler]",
+      "recipe[backup::cleanup]"
+    ],
+    "default_attributes": {
+    },
+    "override_attributes": {
+    }
+}
