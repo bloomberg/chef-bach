@@ -196,8 +196,8 @@ def set_hosts
   hosts = node.run_state['cluster_def'].fetch_cluster_def
 
   # host search helper lambdas
-  runs_role = Proc.new { |host, role| host[:runlist].include? role }
-  runs_recipe = Proc.new { |host, recipe| host[:runlist].include? recipe }
+  runs_role = Proc.new { |host, role| role && host[:runlist].include?(role) }
+  runs_recipe = Proc.new { |host, recipe| recipe && host[:runlist].include?(recipe) }
 
   # mapped host objects
   to_host = Proc.new do |host| {
@@ -207,10 +207,11 @@ def set_hosts
   } end
 
   node['bcpc']['hadoop']['services'].each do |name, service|
-    node.default[:bcpc][:hadoop].dig(*service[:key]) =
+    *keys, last = [:bcpc, :hadoop, *service[:key]]
+    keys.inject(node.default, :fetch)[last] =
       hosts.select do |h|
-        runs_role.call(h, service[name][:role]) ||
-        runs_recipe.call(h, service[name][:recipe])
+        runs_role.call(h, service[:role]) ||
+        runs_recipe.call(h, service[:recipe])
       end.map do |h|
         to_host.call(h)
       end
