@@ -207,24 +207,24 @@ def set_hosts
   } end
 
   node['bcpc']['hadoop']['services'].each do |name, service|
-    *keys, last = [:bcpc, :hadoop, *service[:key]]
+    *keys, last = ['bcpc', 'hadoop', *service['key']]
     keys.inject(node.default, :fetch)[last] =
       hosts.select do |h|
-        runs_role.call(h, service[:role]) ||
-        runs_recipe.call(h, service[:recipe])
+        runs_role.call(h, service['role']) ||
+        runs_recipe.call(h, service['recipe'])
       end.map do |h|
         to_host.call(h)
       end
   end
 
   # set the oozie_url
-  oozie_hosts = node[:bcpc][:hadoop][:oozie_hosts]
-  vip_host = float_host(node[:bcpc][:management][:viphost])
-  first_host = float_host(oozie_hosts.first[:hostname])
-  oozie_ha_port = node[:bcpc][:ha_oozie][:port]
-  oozie_port = node[:bcpc][:hadoop][:oozie_port]
+  oozie_hosts = node['bcpc']['hadoop']['oozie_hosts']
+  vip_host = float_host(node['bcpc']['management']['viphost'])
+  first_host = float_host(oozie_hosts.first['hostname'])
+  oozie_ha_port = node['bcpc']['ha_oozie']['port']
+  oozie_port = node['bcpc']['hadoop']['oozie_port']
 
-  node.default[:bcpc][:hadoop][:oozie_url] =
+  node.default['bcpc']['hadoop']['oozie_url'] =
     if oozie_hosts.length > 1
       # high-availability
       "http://#{vip_host}:#{oozie_ha_port}/oozie"
@@ -234,11 +234,11 @@ def set_hosts
     end
 
   # set the resourcemanager_url (rm_address)
-  rm_hosts = node[:bcpc][:hadoop][:rm_hosts]
-  first_host = float_host(rm_hosts.first[:hostname])
-  rm_port = node[:bcpc][:hadoop][:yarn][:resourcemanager][:port]
+  rm_hosts = node['bcpc']['hadoop']['rm_hosts']
+  first_host = float_host(rm_hosts.first['hostname'])
+  rm_port = node['bcpc']['hadoop']['yarn']['resourcemanager']['port']
 
-  node.default[:bcpc][:hadoop][:rm_address] =
+  node.default['bcpc']['hadoop']['rm_address'] =
     if rm_hosts.length > 1
       # high-availability
       node.chef_environment
