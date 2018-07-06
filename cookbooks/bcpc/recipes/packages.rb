@@ -24,6 +24,8 @@
   git
   htop
   iotop
+  ldap-utils
+  libsasl2-modules-gssapi-mit
   lzop
   p7zip-full
   pcp
