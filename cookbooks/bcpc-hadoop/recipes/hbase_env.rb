@@ -32,10 +32,12 @@ node.default['bcpc']['hadoop']['hbase']['env'].tap do |hbase_env|
     ' -Dcom.sun.management.jmxremote.authenticate=false'
 
   hbase_env['HBASE_OPTS'] = '$HBASE_OPTS -Djava.net.preferIPv4Stack=true' \
+    " -Djute.maxbuffer=#{node['bcpc']['hadoop']['jute']['maxbuffer']}" \
     ' -XX:+UseConcMarkSweepGC'
 
   hbase_env['HBASE_MASTER_OPTS'] =
     '$HBASE_MASTER_OPTS' + common_opts +
+    " -Djute.maxbuffer=#{node['bcpc']['hadoop']['jute']['maxbuffer']}" \
     ' -Xmn' + node['bcpc']['hadoop']['hbase_master']['xmn']['size'].to_s + 'm' \
     ' -Xms' + node['bcpc']['hadoop']['hbase_master']['xms']['size'].to_s + 'm' \
     ' -Xmx' + node['bcpc']['hadoop']['hbase_master']['xmx']['size'].to_s + 'm' \
@@ -45,6 +47,7 @@ node.default['bcpc']['hadoop']['hbase']['env'].tap do |hbase_env|
 
   hbase_env['HBASE_REGIONSERVER_OPTS'] =
     '$HBASE_REGION_SERVER_OPTS' + common_opts +
+    " -Djute.maxbuffer=#{node['bcpc']['hadoop']['jute']['maxbuffer']}" \
     ' -Xmn' + node['bcpc']['hadoop']['hbase_rs']['xmn']['size'].to_s + 'm' \
     ' -Xms' + node['bcpc']['hadoop']['hbase_rs']['xms']['size'].to_s + 'm' \
     ' -Xmx' + node['bcpc']['hadoop']['hbase_rs']['xmx']['size'].to_s + 'm' \

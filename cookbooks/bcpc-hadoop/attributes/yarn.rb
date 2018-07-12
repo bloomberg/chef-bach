@@ -13,7 +13,6 @@ default['bcpc']['hadoop']['yarn']['resourcemanager']['jmx']['port'] = 3131
 default['bcpc']['hadoop']['yarn']['scheduler']['fair']['min-vcores'] = 2
 default['bcpc']['hadoop']['yarn']['min-free-space-per-disk-mb'] = 100
 default['bcpc']['hadoop']['yarn']['min_user_id'] = 1000
-default['bcpc']['hadoop']['jute']['maxbuffer'] = 6_291_456
 default['bcpc']['hadoop']['yarn']['timeline_server']['webapp']['port'] = 8188
 default['bcpc']['hadoop']['yarn']['resourcemanager']['webapp']['port'] = 8088
 

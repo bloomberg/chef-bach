@@ -38,7 +38,7 @@ default['bcpc']['hadoop']['hdfs']['dfs_blocksize'] = '128m'
 default['bcpc']['hadoop']['hdfs_url'] = "hdfs://#{node.chef_environment}"
 default['bcpc']['hadoop']['jmx_enabled'] = false
 default['bcpc']['hadoop']['jmx_agent_enabled'] = true
-
+default['bcpc']['hadoop']['jute']['maxbuffer'] = 20_291_456
 
 
 
