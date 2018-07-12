@@ -53,3 +53,36 @@ default[:bcpc][:hadoop][:zookeeper][:snap][:retain_count] = 5
 
 # ZooKeeper snapshot purge interval in hours
 default[:bcpc][:hadoop][:zookeeper][:snap][:purge_interval] = 24
+
+# ZooKeeper memory controls
+default['bcpc']['hadoop']['zookeeper']['xmx']['max_size'] = 4_096
+default['bcpc']['hadoop']['zookeeper']['xmx']['max_ratio'] = 0.10
+
+common_opts =
+  '-XX:+UseGCLogFileRotation ' \
+  '-XX:GCLogFileSize=20M ' \
+  '-XX:NumberOfGCLogFiles=20 ' \
+  '-XX:+UseParNewGC ' \
+  '-XX:+UseConcMarkSweepGC ' \
+  '-verbose:gc -XX:+PrintHeapAtGC ' \
+  '-XX:+PrintGCDetails ' \
+  '-XX:+PrintGCTimeStamps ' \
+  '-XX:+PrintGCDateStamps ' \
+  '-XX:+UseNUMA ' \
+  '-XX:+PrintGCApplicationStoppedTime ' \
+  '-XX:+UseCompressedOops ' \
+  '-XX:+PrintClassHistogram ' \
+  '-XX:+PrintGCApplicationConcurrentTime ' \
+  '-XX:+UseCMSInitiatingOccupancyOnly ' \
+  '-XX:+HeapDumpOnOutOfMemoryError ' \
+  '-XX:+PrintTenuringDistribution ' \
+  '-XX:+ExitOnOutOfMemoryError ' \
+  "-agentpath:#{node['bcpc-hadoop']['jvmkill']['lib_file']}"
+
+# GC Options for DataNode
+default['bcpc']['hadoop']['zookeeper']['gc_opts'] =
+  '-server -XX:ParallelGCThreads=4 ' \
+  '-XX:CMSInitiatingOccupancyFraction=70 ' \
+  '-Xloggc:/var/log/zookeeper/gc/gc.log-$$-$(hostname)-$(date +\'%Y%m%d%H%M\').log ' \
+  '-XX:HeapDumpPath=/var/log/zookeeper/heap-dump-$$-$(hostname)-$(date +\'%Y%m%d%H%M\').hprof ' +
+  common_opts

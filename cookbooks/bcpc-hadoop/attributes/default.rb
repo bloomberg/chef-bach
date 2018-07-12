@@ -62,6 +62,9 @@ common_opts =
   '-XX:+HeapDumpOnOutOfMemoryError ' \
   '-XX:+PrintTenuringDistribution ' \
   '-XX:+ExitOnOutOfMemoryError ' \
+  '-XX:+UseGCLogFileRotation ' \
+  '-XX:GCLogFileSize=20M ' \
+  '-XX:NumberOfGCLogFiles=20 ' \
   "-agentpath:#{node['bcpc-hadoop']['jvmkill']['lib_file']}"
 
 # GC Options for DataNode

@@ -1152,7 +1152,7 @@ default['bcpc']['hadoop']['jmxtrans_agent']['resourcemanager']['queries'] = defa
 ]
 
 # zookeeper
-default['bcpc']['hadoop']['jmxtrans_agent']['zookeeper']['xml'] = '/etc/hadoop/conf/jmxtrans_agent_zookeeper.xml'
+default['bcpc']['hadoop']['jmxtrans_agent']['zookeeper']['xml'] = '/etc/zookeeper/conf/jmxtrans_agent_zookeeper.xml'
 default['bcpc']['hadoop']['jmxtrans_agent']['zookeeper']['name_prefix'] = 'jmx.zookeeper'
 default['bcpc']['hadoop']['jmxtrans_agent']['zookeeper']['queries'] = default['bcpc']['hadoop']['jmxtrans_agent']['basic']['queries'] + [
   {
@@ -1162,10 +1162,25 @@ default['bcpc']['hadoop']['jmxtrans_agent']['zookeeper']['queries'] = default['b
     'attributes' => 'QuorumSize'
   },
   {
-    'objectName' => 'org.apache.ZooKeeperService:name0=ReplicatedServer_id*,name1=replica.*,name2=Follower,name3=InMemoryDataTree',
+    'objectName' => 'org.apache.ZooKeeperService:name0=ReplicatedServer_id*,name1=replica.*',
     'resultAlias' => 'zookeeper.#attribute#',
     'type' => 'gauge',
-    'attributes' => 'NodeCount'
+    'attributes' =>
+      'AvgRequestLatency,' \
+      'MaxRequestLatency,' \
+      'MinRequestLatency,' \
+      'NumAliveConnections,' \
+      'OutstandingRequests,' \
+      'PacketsReceived,' \
+      'PacketsSent'
+  },
+  {
+    'objectName' => 'org.apache.ZooKeeperService:name0=ReplicatedServer_id*,name1=replica.*,name2=*,name3=InMemoryDataTree',
+    'resultAlias' => 'zookeeper.#attribute#',
+    'type' => 'gauge',
+    'attributes' =>
+      'NodeCount,' \
+      'WatchCount'
   }
 ]
 

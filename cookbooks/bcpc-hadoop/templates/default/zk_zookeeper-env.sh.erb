@@ -7,7 +7,11 @@
 ################################################
 
 export JAVA_HOME=<%= node['bcpc']['hadoop']['java'] %>
-export ZOO_LOG_DIR=<%= node['bcpc']['hadoop']['zookeeper']['log_dir'] %>
+if [ $(whoami) == 'zookeeper' ]; then
+  export ZOO_LOG_DIR=<%= node['bcpc']['hadoop']['zookeeper']['log_dir'] %>
+else
+  export ZOO_LOG_DIR=~/
+fi
 export ZOO_PID_DIR=/var/run/zookeeper
 export ZOOPIDFILE=$ZOO_PID_DIR/zookeeper-server
 export ZOOCFGDIR=<%= node['bcpc']['hadoop']['zookeeper']['conf_dir'] %>
@@ -31,6 +35,10 @@ export JMXTRANS_AGENT_OPTS=-javaagent:<%= @jmxtrans_agent_lib %>=<%= @jmxtrans_a
 SERVER_JVMFLAGS="$SERVER_JVMFLAGS -Djava.security.auth.login.config=/etc/zookeeper/conf/zookeeper-server.jaas"
 CLIENT_JVMFLAGS="$CLIENT_JVMFLAGS -Djava.security.auth.login.config=/etc/zookeeper/conf/zookeeper-client.jaas"
 <% end %>
+
+SERVER_JVMFLAGS="$SERVER_JVMFLAGS -Xms<%= @heap %>m -Xmx<%= @heap %>m " \
+                "-Xmn<%= @newsize %>m " \
+                "<%= node['bcpc']['hadoop']['zookeeper']['gc_opts'] %>"
 
 export SERVER_JVMFLAGS
 export CLIENT_JVMFLAGS
