@@ -16,7 +16,7 @@ depends 'cobblerd'
 depends 'cron'
 depends 'database'
 depends 'graphite_handler'
-depends 'line', '< 2.0.0' # 2.0.0 drops Chef 12.0 support
+depends 'line', '= 1.0.6' # 1.0.6 is the last to not use BSD Tar
 depends 'maven', '~> 5.0.1'
 depends 'nscd'
 depends 'ntp'

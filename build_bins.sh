@@ -22,9 +22,9 @@ mkdir -p $DIR/bins
 pushd $DIR/bins/ > /dev/null
 apt-get update
 
-chefdk_vers='2.5.3'
+chefdk_vers='2.4.17'
 chefdk_dpkg="chefdk_${chefdk_vers}-1_amd64.deb"
-chefdk_sha256='b6cd2c84e2ecbf35238dd6c360eadbab89f44e1c5a7b54430828529fa403204f'
+chefdk_sha256='15c40af26358ba6b1be23d5255b49533fd8e5421f7afbc716dcb94384b92e1b0'
 if [ ! -f ${chefdk_dpkg} ] || ! sha256sum ${chefdk_dpkg} | grep -q ${chefdk_sha256}; then
     rm -f ${chefdk_dpkg}
     # $CURL is defined in proxy_setup.sh
