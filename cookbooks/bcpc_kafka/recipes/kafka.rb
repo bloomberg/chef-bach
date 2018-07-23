@@ -107,8 +107,68 @@ end
 node.default[:kafka][:generic_opts] +=
   " -Djute.maxbuffer=#{node[:bcpc][:hadoop][:jute][:maxbuffer] rescue 0xfffff}"
 
-# Increase the default FD limit -- kafka opens a lot of sockets.
+# Increase the default FD limit -- Kafka opens a lot of sockets.
 node.default[:kafka][:ulimit_file] = 32_768
+
+#
+# This is the canned setup from bcpc-hadoop for Kerberos. The
+# implementation is smeared across bcpc-hadoop, bcpc, and bach_krb5.
+#
+# Scroll down for the kafka-specific material.
+#
+include_recipe 'bach_krb5::keytab_directory'
+include_recipe 'bach_krb5::krb5_client'
+
+#
+# Pre-create the Kafka user.  This is normally done by the upstream
+# kafka cookbook, but Kerberos configuration requires the keytab owner
+# to exist before it can proceed.
+#
+user 'dummy_kafka_user' do
+  action :create
+  username 'kafka'
+  home '/var/empty/kafka'
+  shell '/sbin/nologin'
+  #
+  # Chef does not have a :create_if_missing for the user resource, so
+  # we avoid trying to alter an existing user by refusing to converge
+  # if a kafka user exists.
+  #
+  not_if 'id kafka'
+end
+
+configure_kerberos 'kafka_kerb' do
+  service_name 'kafka'
+end
+
+#
+# Here is the Kafka-specific Kerberos material: we create a JAAS
+# configuration for Kafka, and add it to the Kafka command line.
+#
+# The configuration is in /etc/bach because the final configuration
+# directory created by the upstream Kafka cookbook isn't available
+# before the service starts.
+#
+kafka_jaas_path = '/etc/bach/kafka_jaas.conf'
+
+directory File.dirname(kafka_jaas_path) do
+  action :create
+  mode 0755
+  recursive true
+end
+
+template kafka_jaas_path do
+  source 'kafka/jaas.conf.erb'
+  mode 0444
+  variables ({
+              principal: "kafka/#{float_host(node[:fqdn])}",
+              keytab_path: '/etc/security/keytabs/kafka.service.keytab'
+             })
+end
+
+node.default[:kafka][:generic_opts] +=
+  ' -Djava.security.krb5.conf=/etc/krb5.conf' \
+  " -Djava.security.auth.login.config=#{kafka_jaas_path}"
 
 #
 # On internet-connected hosts, kafka::default will need a proxy to

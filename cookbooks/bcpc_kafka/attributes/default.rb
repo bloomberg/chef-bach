@@ -34,9 +34,6 @@ default[:kafka][:node_rack_map] = {}
 #
 default[:kafka][:broker].tap do |broker|
   broker[:host_name] = node[:fqdn]
-  broker[:advertised_host_name] = node[:fqdn]
-  broker[:port] = 6667
-  broker[:advertised_port] = 6667
   broker[:broker_id] = node[:bcpc][:node_number]
   broker[:reserved_broker_max_id] = (2 ** 31) - 1
   broker[:controlled][:shutdown][:enable] = true
@@ -52,9 +49,9 @@ default[:kafka][:broker].tap do |broker|
   broker[:dual][:commit][:enabled] = false
   broker[:offsets][:storage] = 'kafka'
 
-  # Default to a 0.10.0 protocol for 0.11.x upgrades.
-  broker[:inter][:broker][:protocol][:version] = '0.10.0'
-  broker[:log][:message][:format][:version] = '0.10.0'
+  # Default to a 1.1.0 protocol.
+  broker[:inter][:broker][:protocol][:version] = '1.1.0'
+  broker[:log][:message][:format][:version] = '1.1.0'
 
   # Defaults for new topics
   broker[:num][:partitions] = 3
@@ -66,16 +63,46 @@ default[:kafka][:broker].tap do |broker|
   # many?
   #
   broker[:num][:replica][:fetchers] = 8
+
+  # Kerberos config.
+  broker[:sasl][:kerberos][:service][:name] = 'kafka'
+  broker[:authorizor][:class][:name]='kafka.security.auth.SimpleAclAuthorizer'
+  broker[:allow][:everyone][:if][:no][:acl][:found] = true
+  broker[:super][:users] = 'kafka'
+
+  #
+  # We default to using PLAINTEXT for inter-broker communication, then
+  # migrate to SASL after the cluster is up.
+  #
+  broker[:security][:inter][:broker][:protocol] = 'PLAINTEXT'
+
+  #
+  # Deprecated values used to generate listeners in the past.  Still
+  # required by the upstream cookbook, but largely ignored by Kafka itself.
+  #
+  broker[:advertised_host_name] = node[:fqdn] # Deprecated.
+  broker[:port] = 6667 # Deprecated.
+  broker[:advertised_port] = 6667 # Deprecated.
+
+  #
+  # A more useful set of listeners.
+  #
+  # 6667 has no authentication.
+  # 6668 is authenticated, but lacks SSL.
+  #
+  broker[:listeners] =
+    "PLAINTEXT://#{float_host(node[:fqdn])}:6667," \
+    "SASL_PLAINTEXT://#{float_host(node[:fqdn])}:6668"
 end
 
 #
 # These attributes are normally overriden in the Chef environment.
 #
-default[:kafka][:version] = '0.11.0.0'
+default[:kafka][:version] = '1.1.1'
 default[:kafka][:scala_version] = '2.11'
 
 default[:kafka][:checksum] =
-  '63209e820598ec11c0a6634ea16d92bdd2c27013525ee260627349c0cbf4bd5c'
+  '93b6f926b10b3ba826266272e3bd9d0fe8b33046da9a2688c58d403eb0a43430'
 
 default[:kafka][:md5_checksum] = ''
 
