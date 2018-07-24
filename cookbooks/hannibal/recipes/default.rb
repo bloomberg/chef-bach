@@ -81,7 +81,7 @@ end
 
 template "hannibal_service" do
    path "/etc/init.d/hannibal"
-   source "hannibal_init.rb"
+   source "hannibal_init.erb"
    owner owner
    group group
    mode 0755
