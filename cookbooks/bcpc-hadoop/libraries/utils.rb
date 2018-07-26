@@ -186,76 +186,66 @@ end
 
   
 #
-# Function to retrieve commonly used node attributes so that the call to chef server is minimized
+# Function to retrieve commonly used node attributes.
+# Minimizes calls to the chef server.
 #
 def set_hosts
-  # Hadoop service to chef role mapping used by set_hosts to perform lookups
-  srvc2role = {
-    'zookeeper'=> 'role[BCPC-Hadoop-Head]',
-    'journal_node' => 'role[BCPC-Hadoop-Head]',
-    'resource_manager' => 'role[BCPC-Hadoop-Head-ResourceManager]',
-    'job_history_server' =>  'role[BCPC-Hadoop-Head-MapReduce]',
-    'oozie_server' => 'role[BCPC-Hadoop-Head-MapReduce]',
-    'hadoop_worker' => 'role[BCPC-Hadoop-Worker]',
-    'hadoop_datanode' => 'role[BCPC-Hadoop-Worker]', 
-    'hadoop_head' => 'role[BCPC-Hadoop-Head]',
-    'hive_server' => 'role[BCPC-Hadoop-Head-Hive',
-    'hbase_head' => 'role[BCPC-Hadoop-Head-HBase]'
-  }
-
   if node.run_state['cluster_def'].nil? then
     node.run_state['cluster_def'] = BACH::ClusterDef.new(node_obj: node)
   end
-  cd = node.run_state['cluster_def']
-  
-  node.default[:bcpc][:hadoop][:zookeeper][:servers] = 
-    cd.fetch_cluster_def.select { |hst| hst[:runlist].include? srvc2role['zookeeper'] }.map {
-      |hst| { 'hostname' => hst[:fqdn], 'node_number' => hst[:node_id], 'zookeeper_myid' => nil } }
+  hosts = node.run_state['cluster_def'].fetch_cluster_def
 
-  node.default[:bcpc][:hadoop][:jn_hosts] = 
-    cd.fetch_cluster_def.select { |hst| hst[:runlist].include? srvc2role['journal_node'] }.map {
-      |hst| { 'hostname' => hst[:fqdn]} }
+  # host search helper lambdas
+  runs_role = Proc.new { |host, role| role && host[:runlist].include?(role) }
+  runs_recipe = Proc.new { |host, recipe| recipe && host[:runlist].include?(recipe) }
 
-  node.default[:bcpc][:hadoop][:rm_hosts] = 
-    cd.fetch_cluster_def.select { |hst| hst[:runlist].include? srvc2role['resource_manager'] }.map {
-      |hst| { 'hostname' => hst[:fqdn], 'node_number' => hst[:node_id], 'zookeeper_myid' => nil } }
+  # mapped host objects
+  to_host = Proc.new do |host| {
+    'hostname' => host[:fqdn],
+    'node_number' => host[:node_id],
+    'zookeeper_myid' => nil
+  } end
 
-  node.default[:bcpc][:hadoop][:hs_hosts] = 
-    cd.fetch_cluster_def.select { |hst| hst[:runlist].include? srvc2role['job_history_server'] }.map {
-      |hst| { 'hostname' => hst[:fqdn]} }
+  node['bcpc']['hadoop']['services'].each do |name, service|
+    *keys, last = ['bcpc', 'hadoop', *service['key']]
+    keys.inject(node.default, :fetch)[last] =
+      hosts.select do |h|
+        runs_role.call(h, service['role']) ||
+        runs_recipe.call(h, service['recipe'])
+      end.map do |h|
+        to_host.call(h)
+      end
+  end
 
-  node.default[:bcpc][:hadoop][:dn_hosts] = 
-    cd.fetch_cluster_def.select { |hst| hst[:runlist].include? srvc2role['hadoop_worker'] }.map {
-      |hst| { 'hostname' => hst[:fqdn]} }
+  # set the oozie_url
+  oozie_hosts = node['bcpc']['hadoop']['oozie_hosts']
+  vip_host = float_host(node['bcpc']['management']['viphost'])
+  first_host = float_host(oozie_hosts.first['hostname'])
+  oozie_ha_port = node['bcpc']['ha_oozie']['port']
+  oozie_port = node['bcpc']['hadoop']['oozie_port']
 
-  node.default[:bcpc][:hadoop][:hb_hosts] = 
-    cd.fetch_cluster_def.select { |hst| hst[:runlist].include? srvc2role['hbase_head'] }.map {
-      |hst| { 'hostname' => hst[:fqdn]} }
+  node.default['bcpc']['hadoop']['oozie_url'] =
+    if oozie_hosts.length > 1
+      # high-availability
+      "http://#{vip_host}:#{oozie_ha_port}/oozie"
+    elsif oozie_hosts.length == 1
+      # single oozie host
+      "http://#{first_host}/#{oozie_port}/oozie"
+    end
 
-  # different flavors of hive
-  node.default[:bcpc][:hadoop][:hive_hosts] = 
-      cd.fetch_cluster_def.select { |hst| hst[:runlist].include? srvc2role['hive_server'] }.map {
-      |hst| { 'hostname' => hst[:fqdn]} }
+  # set the resourcemanager_url (rm_address)
+  rm_hosts = node['bcpc']['hadoop']['rm_hosts']
+  first_host = float_host(rm_hosts.first['hostname'])
+  rm_port = node['bcpc']['hadoop']['yarn']['resourcemanager']['port']
 
-  # BCPC-Hadoop-Head-MapReduce
-  node.default[:bcpc][:hadoop][:oozie_hosts]  = 
-    cd.fetch_cluster_def.select { |hst| hst[:runlist].include? srvc2role['oozie_server'] }.map {
-      |hst| { 'hostname' => hst[:fqdn]} }
-  
-  # every datanode
-  node.default[:bcpc][:hadoop][:httpfs_hosts] = 
-    cd.fetch_cluster_def.select { |hst| hst[:runlist].include? srvc2role['hadoop_worker']  }.map {
-      |hst| { 'hostname' => hst[:fqdn]} }
-
-  # Worker
-  node.default[:bcpc][:hadoop][:rs_hosts] = 
-    cd.fetch_cluster_def.select { |hst| hst[:runlist].include? srvc2role['hadoop_worker']  }.map {
-      |hst| { 'hostname' => hst[:fqdn]} }
-
-  # BCPC-Hadoop-Head
-  node.default[:bcpc][:hadoop][:mysql_hosts] = 
-    cd.fetch_cluster_def.select { |hst| hst[:runlist].include? srvc2role['hadoop_head'] }.map {
-      |hst| { 'hostname' => hst[:fqdn]} }
+  node.default['bcpc']['hadoop']['rm_address'] =
+    if rm_hosts.length > 1
+      # high-availability
+      node.chef_environment
+    elsif rm_hosts.length == 1
+      # single resourcemanager host
+      "#{first_host}:#{rm_port}"
+    end
 end
 
 #

@@ -111,9 +111,63 @@ default['bcpc']['hadoop']['hb_hosts'] = []
 default['bcpc']['hadoop']['hive_hosts'] = []
 default['bcpc']['hadoop']['oozie_hosts'] = []
 default['bcpc']['hadoop']['httpfs_hosts'] = []
-default['bcpc']['hadoop']['httpfs_hosts'] = []
 default['bcpc']['hadoop']['rs_hosts'] = []
 default['bcpc']['hadoop']['mysql_hosts'] = []
+
+# logical mapping of services to runlist details.
+default['bcpc']['hadoop']['services'] = {
+  zookeeper: {
+    key: [:zookeeper, :servers],
+    role: 'role[BCPC-Hadoop-Head]',
+  },
+  journal_node: {
+    key: :jn_hosts,
+    role: 'role[BCPC-Hadoop-Head]',
+  },
+
+  resource_manager: {
+    key: :rm_hosts,
+    role: 'role[BCPC-Hadoop-Head-ResourceManager]',
+  },
+  job_history_server: {
+    key: :jh_hosts,
+    role: 'role[BCPC-Hadoop-Head-MapReduce]',
+  },
+
+  oozie_server: {
+    key: :oozie_hosts,
+    role: 'role[BCPC-Hadoop-Head-MapReduce]',
+    recipe: 'recipe[bcpc-hadoop::oozie]',
+  },
+  mysql: {
+    key: :mysql_hosts,
+    role: 'role[BCPC-Hadoop-Head]',
+  },
+
+  hadoop_datanode: {
+    key: :dn_hosts,
+    role: 'role[BCPC-Hadoop-Worker]', 
+  },
+
+  hbase_master: {
+    key: :hb_hosts,
+    role: 'role[BCPC-Hadoop-Head-HBase]',
+  },
+  hbase_regionserver: {
+    key: :rs_hosts,
+    role: 'role[BCPC-Hadoop-Worker]',
+  },
+
+  hive_server: {
+    key: :hive_hosts,
+    role: 'role[BCPC-Hadoop-Head-Hive]',
+  },
+
+  httpfs_server: {
+    key: :httpfs_hosts,
+    role: 'role[BCPC-Hadoop-Worker]',
+  },
+}
 
 default['bcpc']['keepalived']['config_template'] = 'keepalived.conf_hadoop'
 
