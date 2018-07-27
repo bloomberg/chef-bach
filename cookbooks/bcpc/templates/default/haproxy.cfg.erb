@@ -10,6 +10,8 @@ global
   group  haproxy
   pidfile  /var/run/haproxy.pid
   log /dev/log local0 info
+  # jmx page that is used for httpchk is more than the default size 16384 bytes
+  tune.chksize <%= @haproxy_tune_chksize %>
 
 defaults
   log  global
@@ -35,7 +37,7 @@ listen stats <%= @local_management_ip%>:1936
   stats uri /
   stats hide-version
   stats realm Haproxy\ Statistics
-  stats auth <%="#{get_config('haproxy-stats-user')}"%>:<%="#{get_config!('password',"haproxy-stats","os")}"%>
+  stats auth <%= "#{@haproxy_stats_user}:#{@haproxy_stats_pwd}" %>
 
 listen stats-vip <%= @management_vip%>:1936
   mode http
@@ -53,10 +55,10 @@ listen mysql-galera <%= @management_vip %>:3306
   mode tcp
   balance leastconn
   option  tcplog
-option tcpka
+  option tcpka
   option httpchk
 <% @mysql_servers.each do |server| -%>
-  <%= "server #{server['hostname']} #{server['bcpc']['management']['ip']}:3306 check port 3307 inter 1s rise 1 fall 1 observe layer4 backup" %>
+  <%= "server #{server['fqdn']} #{server['ip']}:3306 check port 3307 inter 1s rise 1 fall 1 observe layer4 backup" %>
 <% end -%>
 <% end -%>
 

@@ -116,3 +116,22 @@ default['bcpc']['bach_web']['services']['hbase'] = {
   }
 }
 
+default['bcpc']['bach_web']['conn_lib']['hbase_conn_lib_blacklist'] = []
+default['bcpc']['bach_web']['files']['hbase_conn_lib_blacklist'] = {
+  'desc' => 'HBase conn lib blacklist file',
+  'path' => 'files/hbase/blacklist.conf'
+}
+
+# haproxy
+default['bcpc']['haproxy']['ha_services'] += [{
+  'name' => 'hbase_master',
+  'port' => node['bcpc']['hadoop']['hbase_master']['http']['port'],
+  'http_check_url' => '/jmx',
+  'http_check_expect_str' => 'tag.isActiveMaster"\ :\ "true',
+  # FIXME: should be replaced by static parsing of cluster.txt
+  #        but before the node search is eliminated, use the target recipe to find servers
+  #'servers' => [ { 'fqdn' => 'xxx', 'ip' => 'xxx', 'port' => 'xxx' }, ...]
+  'servers_recipe' => 'hbase_master',
+  'servers_cookbook' => 'bcpc-hadoop',
+  'servers_port' => node['bcpc']['hadoop']['hbase_master']['http']['port']
+}]

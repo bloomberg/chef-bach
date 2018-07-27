@@ -197,17 +197,62 @@ end
 # Function to retrieve commonly used node attributes so that the call to chef server is minimized
 #
 def set_hosts
-  node.default['bcpc']['hadoop']['zookeeper']['servers'] = get_node_attributes(HOSTNAME_NODENO_ATTR_SRCH_KEYS, 'zookeeper_server', 'bcpc-hadoop')
-  node.default['bcpc']['hadoop']['jn_hosts'] = get_node_attributes(HOSTNAME_ATTR_SRCH_KEYS, 'journalnode', 'bcpc-hadoop')
-  node.default['bcpc']['hadoop']['rm_hosts'] = get_node_attributes(HOSTNAME_NODENO_ATTR_SRCH_KEYS, 'resource_manager', 'bcpc-hadoop')
-  node.default['bcpc']['hadoop']['hs_hosts'] = get_node_attributes(HOSTNAME_ATTR_SRCH_KEYS, 'historyserver', 'bcpc-hadoop')
-  node.default['bcpc']['hadoop']['dn_hosts'] = get_node_attributes(HOSTNAME_ATTR_SRCH_KEYS, 'datanode', 'bcpc-hadoop')
-  node.default['bcpc']['hadoop']['hb_hosts'] = get_node_attributes(HOSTNAME_ATTR_SRCH_KEYS, 'hbase_master', 'bcpc-hadoop')
-  node.default['bcpc']['hadoop']['hive_hosts'] = get_node_attributes(HOSTNAME_ATTR_SRCH_KEYS, 'hive_hcatalog', 'bcpc-hadoop')
-  node.default['bcpc']['hadoop']['oozie_hosts']  = get_node_attributes(HOSTNAME_ATTR_SRCH_KEYS, 'oozie', 'bcpc-hadoop')
-  node.default['bcpc']['hadoop']['httpfs_hosts'] = get_node_attributes(HOSTNAME_ATTR_SRCH_KEYS, 'httpfs', 'bcpc-hadoop')
-  node.default['bcpc']['hadoop']['rs_hosts'] = get_node_attributes(HOSTNAME_ATTR_SRCH_KEYS, 'region_server', 'bcpc-hadoop')
-  node.default['bcpc']['hadoop']['mysql_hosts'] = get_node_attributes(HOSTNAME_ATTR_SRCH_KEYS, 'mysql', 'bcpc')
+  if node.run_state['cluster_def'].nil? then
+    node.run_state['cluster_def'] = BACH::ClusterDef.new(node_obj: node)
+  end
+  hosts = node.run_state['cluster_def'].fetch_cluster_def
+
+  # host search helper lambdas
+  runs_role = Proc.new { |host, role| role && host[:runlist].include?(role) }
+  runs_recipe = Proc.new { |host, recipe| recipe && host[:runlist].include?(recipe) }
+
+  # mapped host objects
+  to_host = Proc.new do |host| {
+    'hostname' => host[:fqdn],
+    'node_number' => host[:node_id],
+    'zookeeper_myid' => nil
+  } end
+
+  node['bcpc']['hadoop']['services'].each do |name, service|
+    *keys, last = ['bcpc', 'hadoop', *service['key']]
+    keys.inject(node.default, :fetch)[last] =
+      hosts.select do |h|
+        runs_role.call(h, service['role']) ||
+        runs_recipe.call(h, service['recipe'])
+      end.map do |h|
+        to_host.call(h)
+      end
+  end
+
+  # set the oozie_url
+  oozie_hosts = node['bcpc']['hadoop']['oozie_hosts']
+  vip_host = float_host(node['bcpc']['management']['viphost'])
+  first_host = float_host(oozie_hosts.first['hostname'])
+  oozie_ha_port = node['bcpc']['hadoop']['oozie_ha_port']
+  oozie_port = node['bcpc']['hadoop']['oozie_port']
+
+  node.default['bcpc']['hadoop']['oozie_url'] =
+    if oozie_hosts.length > 1
+      # high-availability
+      "http://#{vip_host}:#{oozie_ha_port}/oozie"
+    elsif oozie_hosts.length == 1
+      # single oozie host
+      "http://#{first_host}/#{oozie_port}/oozie"
+    end
+
+  # set the resourcemanager_url (rm_address)
+  rm_hosts = node['bcpc']['hadoop']['rm_hosts']
+  first_host = float_host(rm_hosts.first['hostname'])
+  rm_port = node['bcpc']['hadoop']['yarn']['resourcemanager']['port']
+
+  node.default['bcpc']['hadoop']['rm_address'] =
+    if rm_hosts.length > 1
+      # high-availability
+      node.chef_environment
+    elsif rm_hosts.length == 1
+      # single resourcemanager host
+      "#{first_host}:#{rm_port}"
+    end
 end
 
 #
