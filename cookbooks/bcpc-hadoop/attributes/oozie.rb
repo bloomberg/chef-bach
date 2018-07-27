@@ -18,6 +18,7 @@ default['bcpc']['hadoop']['cataline_tmpdir'] = '/tmp'
 default['bcpc']['hadoop']['catalina_pid'] = '/var/run/oozie/oozie.pid'
 default['bcpc']['hadoop']['oozie_https_port'] = 11443
 default['bcpc']['hadoop']['oozie_port'] = 11000
+default['bcpc']['hadoop']['oozie_ha_port'] = '11010'
 default['bcpc']['hadoop']['oozie']['smtp_host'] = nil
 default['bcpc']['hadoop']['oozie']['smtp_port'] = 25
 default['bcpc']['hadoop']['oozie']['from_email'] = "oozie@localhost.com"
@@ -39,3 +40,17 @@ default['bcpc']['hadoop']['oozie']['service']['ext'] =
   'org.apache.oozie.service.ZKJobsConcurrencyService,' \
   'org.apache.oozie.service.ZKUUIDService'
 default['bcpc']['hadoop']['oozie']['check_action_delay'] = 90
+
+# haproxy
+default['bcpc']['haproxy']['ha_services'] += [{
+  'name' => 'oozie',
+  'port' => node['bcpc']['hadoop']['oozie_ha_port'],
+  'http_check_url' => nil,
+  'http_check_expect_str' => nil,
+  # FIXME: should be replaced by static parsing of cluster.txt
+  #        but before the node search is eliminated, use the target recipe to find servers in recipe
+  #'servers' => [ { 'hostname' => 'xxx', 'ip' => 'xxx', 'port' => 'xxx' }, ...]
+  'servers_recipe' => 'oozie',
+  'servers_cookbook' => 'bcpc-hadoop',
+  'servers_port' => node['bcpc']['hadoop']['oozie_port']
+}]

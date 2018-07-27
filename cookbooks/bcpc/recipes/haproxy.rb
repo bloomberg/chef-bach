@@ -50,11 +50,39 @@ bash "enable-defaults-haproxy" do
   not_if "grep -e '^ENABLED=1' /etc/default/haproxy"
 end
 
+# FIXME: use the servers_recipe and servers_cookbook to find the servers on which the backend service
+#        should be running. This should be replaced by static parse of cluster.txt in the attribute file
+#        and passed to here directly via 'servers'
+modified_ha_services = node['bcpc']['haproxy']['ha_services'].map{ |service|
+  service.merge({
+    'servers' => get_nodes_for(service['servers_recipe'], service['servers_cookbook']).map { |hst|
+      {
+        'fqdn' => float_host(hst['fqdn']),
+        'ip' => hst['bcpc']['floating']['ip'],
+        'port' => service['servers_port']
+      }
+    }
+  })
+}
+
+mysql_servers = get_nodes_for("mysql","bcpc").collect { |hst|
+  {
+    'fqdn' => float_host(hst['fqdn']),
+    'ip' => hst['bcpc']['floating']['ip']
+  }
+}
+
 template "/etc/haproxy/haproxy.cfg" do
   source "haproxy.cfg.erb"
   mode 00644
-  variables(:mysql_servers => get_nodes_for("mysql","bcpc"),
-    :oozie_servers => get_nodes_for("oozie", "bcpc-hadoop"))
+  variables(:mysql_servers => mysql_servers,
+            :cluster_vip => node['bcpc']['floating']['vip'],
+            :local_ip => node['bcpc']['floating']['ip'],
+            :haproxy_stats_user => get_config('haproxy-stats-user'),
+            :haproxy_stats_pwd => get_config!('password',"haproxy-stats","os"),
+            :haproxy_tune_chksize => node['bcpc']['haproxy']['tune_chksize'],
+            :ha_services => modified_ha_services
+           )
   notifies :restart, "service[haproxy]", :immediately
 end
 

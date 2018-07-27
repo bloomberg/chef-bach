@@ -221,7 +221,7 @@ def set_hosts
   oozie_hosts = node['bcpc']['hadoop']['oozie_hosts']
   vip_host = float_host(node['bcpc']['management']['viphost'])
   first_host = float_host(oozie_hosts.first['hostname'])
-  oozie_ha_port = node['bcpc']['ha_oozie']['port']
+  oozie_ha_port = node['bcpc']['hadoop']['oozie_ha_port']
   oozie_port = node['bcpc']['hadoop']['oozie_port']
 
   node.default['bcpc']['hadoop']['oozie_url'] =
