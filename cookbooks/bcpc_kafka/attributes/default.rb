@@ -91,8 +91,8 @@ default[:kafka][:broker].tap do |broker|
   # 6668 is authenticated, but lacks SSL.
   #
   broker[:listeners] =
-    "PLAINTEXT://#{float_host(node[:fqdn])}:6667," \
-    "SASL_PLAINTEXT://#{float_host(node[:fqdn])}:6668"
+    "PLAINTEXT://#{node[:fqdn]}:6667," \
+    "SASL_PLAINTEXT://#{node[:fqdn]}:6668"
 end
 
 #
