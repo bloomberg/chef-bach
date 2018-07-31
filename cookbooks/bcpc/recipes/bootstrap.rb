@@ -115,23 +115,17 @@ if node[:bcpc][:management][:ip] != node[:bcpc][:management][:vip]
   end
   end
 end
+
+#
+# Admin users have not been (intentionally) active on BACH bootstraps
+# in several years.  Delete them if found.
+#
 node[:bcpc][:bootstrap][:admin_users].each do |user_name|
   user user_name do
-    action :create
-    home "/home/#{user_name}"
-    group "#{user}"
-    supports :manage_home => true
+    action :remove
+    only_if "id #{user_name}"
+    ignore_failure true
   end
-  bash 'set group permission on homedir' do
-    code "chmod 775 /home/#{user_name}"
-  end
-end
-
-sudo 'cluster-interaction' do
-  user      node[:bcpc][:bootstrap][:admin_users] * ','
-  runas     "#{user}"
-  commands  ["/home/#{user}/chef-bcpc/cluster-assign-roles.sh','/home/#{user}/chef-bcpc/nodessh.sh",'/usr/bin/knife']
-  only_if { node[:bcpc][:bootstrap][:admin_users].length >= 1 }
 end
 
 package 'acl'
