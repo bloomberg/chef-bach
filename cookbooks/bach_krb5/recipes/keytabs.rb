@@ -12,22 +12,22 @@ host_list.each do |h|
   # Generate all the principals
   node[:bcpc][:hadoop][:kerberos][:data].each do |_ke, va|
     service_principal = va['principal']
-    host_fqdn = float_host(h)
+    host_fqdn = h
     keytab_file = va['keytab']
 
     # Delete the existing kerberos principal if principal is being recreated
     krb5_principal "#{service_principal}/#{host_fqdn}@#{realm}" do
       action :delete
-      only_if do 
+      only_if do
         principal_exists?("#{service_principal}/#{host_fqdn}@#{realm}") &&
           node[:bcpc][:hadoop][:kerberos][:keytab][:recreate] == true
-      end 
+      end
     end
 
     # Delete the existing Keytab file if principal is being recreated
     file "#{keytab_dir}/#{host_fqdn}/#{keytab_file}" do
       action :delete
-      only_if do 
+      only_if do
         File.exist?("#{keytab_dir}/#{host_fqdn}/#{keytab_file}") &&
           node[:bcpc][:hadoop][:kerberos][:keytab][:recreate] == true
       end
@@ -43,7 +43,7 @@ host_list.each do |h|
 end
 
 host_list.each do |h|
-  host_fqdn = float_host(h)
+  host_fqdn = h
   # Create a subdirectory for each host.
   directory File.join(keytab_dir, host_fqdn) do
     action :create
@@ -58,7 +58,7 @@ host_list.each do |h|
     keytab_file = va['keytab']
     keytab_path = ::File.join(keytab_dir, host_fqdn, keytab_file)
     regular_principal = "#{service_principal}/#{host_fqdn}@#{realm}"
-    vip_principal = "#{service_principal}/#{float_host(viphost)}@#{realm}"
+    vip_principal = "#{service_principal}/#{viphost}@#{realm}"
 
     # Variable to hold all principals for a single keytab
     keytab_principals = "#{regular_principal} #{vip_principal}"

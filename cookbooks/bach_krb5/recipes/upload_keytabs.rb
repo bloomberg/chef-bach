@@ -6,8 +6,8 @@ host_list = BACH::ClusterDef.new.fetch_cluster_def().map { |hst| hst[:fqdn] }. +
 host_list.each do |h|
   node[:bcpc][:hadoop][:kerberos][:data].each do |srvc, srvdat|
     # Set host based on configuration
-    config_host=srvdat['princhost'] == '_HOST' ? float_host(h.split('.')[0]) : srvdat['princhost'].split('.')[0]
-    keytab_host=srvdat['princhost'] == '_HOST' ? float_host(h) : srvdat['princhost']
+    config_host=srvdat['princhost'] == '_HOST' ? h.split('.')[0] : srvdat['princhost'].split('.')[0]
+    keytab_host=srvdat['princhost'] == '_HOST' ? h : srvdat['princhost']
 
     # Delete existing configuration item (if requested)
     config_key = "#{config_host}-#{srvc}"
