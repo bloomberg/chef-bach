@@ -22,7 +22,7 @@ ruby_block "hdfs_site_generated_values_common" do
        File.join('/disk', node.run_state['bcpc_hadoop_disks']['mounts'][0].to_s, 'dfs', 'jn'),
 
      'dfs.client.local.interfaces' =>
-       node['bcpc']['floating']['ip'] + '/32'
+       node['bcpc']['management']['ip'] + '/32'
     }
   end
 end
@@ -61,17 +61,17 @@ ruby_block "hdfs_site_generated_values_nn_properties" do
       {
        'dfs.namenode.rpc-address.' + node.chef_environment +
          '.namenode' + host[:node_id].to_s =>
-         float_host(host[:fqdn]) + ':' +
+         host[:fqdn] + ':' +
          node[:bcpc][:hadoop][:namenode][:rpc][:port].to_s,
 
        'dfs.namenode.http-address.' + node.chef_environment +
          '.namenode' + host[:node_id].to_s =>
-         float_host(host[:fqdn]) + ':' +
+         host[:fqdn] + ':' +
          node[:bcpc][:hadoop][:namenode][:http][:port].to_s,
 
        'dfs.namenode.https-address.' + node.chef_environment +
          '.namenode' + host[:node_id].to_s =>
-         float_host(host[:fqdn]) + ':' +
+         host[:fqdn] + ':' +
          node[:bcpc][:hadoop][:namenode][:https][:port].to_s,
       }
     end.reduce({},:merge)
@@ -115,7 +115,7 @@ ruby_block "hdfs_site_generated_values_krb_properties" do
       if kerberos_data[:datanode][:princhost] == '_HOST'
         dn_host = if node.run_list.expand(node.chef_environment).recipes
                       .include?('bcpc-hadoop::datanode')
-                    float_host(node[:fqdn])
+                    node[:fqdn]
                   else
                     kerberos_data[:datanode][:princhost]
                   end
@@ -211,13 +211,13 @@ ruby_block "hdfs_site_generated_values_jn_properties" do
       jn_properties =
         {
          'dfs.journalnode.rpc-address' =>
-           "#{node[:bcpc][:floating][:ip]}:#{node['bcpc']['hadoop']['journalnode']['rpc']['port']}",
+           "#{node[:bcpc][:management][:ip]}:#{node['bcpc']['hadoop']['journalnode']['rpc']['port']}",
 
          'dfs.journalnode.http-address' =>
-           "#{node[:bcpc][:floating][:ip]}:#{node['bcpc']['hadoop']['journalnode']['http']['port']}",
+           "#{node[:bcpc][:management][:ip]}:#{node['bcpc']['hadoop']['journalnode']['http']['port']}",
 
          'dfs.journalnode.https-address' =>
-           "#{node[:bcpc][:floating][:ip]}:#{node['bcpc']['hadoop']['journalnode']['https']['port']}"
+           "#{node[:bcpc][:management][:ip]}:#{node['bcpc']['hadoop']['journalnode']['https']['port']}"
         }
 
        node.run_state['hdfs_site_generated_values'].merge!(jn_properties)
@@ -234,13 +234,13 @@ ruby_block "hdfs_site_generated_values_dn_properties" do
       dn_properties =
         {
          'dfs.datanode.ipc.address' =>
-           "#{node[:bcpc][:floating][:ip]}:#{node['bcpc']['hadoop']['datanode']['ipc']['port']}",
+           "#{node[:bcpc][:management][:ip]}:#{node['bcpc']['hadoop']['datanode']['ipc']['port']}",
 
          'dfs.datanode.address' =>
-           "#{node[:bcpc][:floating][:ip]}:#{node['bcpc']['hadoop']['datanode']['port']}",
+           "#{node[:bcpc][:management][:ip]}:#{node['bcpc']['hadoop']['datanode']['port']}",
 
          'dfs.datanode.http.address' =>
-           "#{node[:bcpc][:floating][:ip]}:#{node['bcpc']['hadoop']['datanode']['http']['port']}"
+           "#{node[:bcpc][:management][:ip]}:#{node['bcpc']['hadoop']['datanode']['http']['port']}"
         }
 
       node.run_state['hdfs_site_generated_values'].merge!(dn_properties)
@@ -257,12 +257,12 @@ ruby_block "hdfs_site_generated_values_ha_properties" do
       ha_properties =
         {
          'ha.zookeeper.quorum' =>
-           zk_hosts.map{ |s| float_host(s[:fqdn]) +
+           zk_hosts.map{ |s| s[:fqdn] +
              ":#{node[:bcpc][:hadoop][:zookeeper][:port]}" }.join(','),
 
          'dfs.namenode.shared.edits.dir' =>
            'qjournal://' +
-           zk_hosts.map { |s| "#{float_host(s[:fqdn])}:#{node['bcpc']['hadoop']['journalnode']['rpc']['port']}" }
+           zk_hosts.map { |s| "#{s[:fqdn]}:#{node['bcpc']['hadoop']['journalnode']['rpc']['port']}" }
         .join(';') + '/' + node.chef_environment,
 
          # Why is this added twice?

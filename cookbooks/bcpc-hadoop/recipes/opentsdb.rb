@@ -18,7 +18,7 @@
 # limitations under the License.
 #
 krb_realm = node['bcpc']['hadoop']['kerberos']['realm']
-zk_quorum = node['bcpc']['hadoop']['zookeeper']['servers'].map { |s| float_host(s[:hostname]) + ":#{node['bcpc']['hadoop']['zookeeper']['port']}" }.join(',')
+zk_quorum = node['bcpc']['hadoop']['zookeeper']['servers'].map { |s| s[:hostname] + ":#{node['bcpc']['hadoop']['zookeeper']['port']}" }.join(',')
 
 # Overrides for OpenTSDB
 node.force_default['bach_opentsdb']['package_version'] =

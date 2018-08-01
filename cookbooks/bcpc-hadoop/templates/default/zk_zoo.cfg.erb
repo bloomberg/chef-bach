@@ -34,7 +34,7 @@ dataLogDir=<%= node[:bcpc][:hadoop][:zookeeper][:data_log_dir] %>
 
 # the port at which the clients will connect
 clientPort=<%= node[:bcpc][:hadoop][:zookeeper][:port] %>
-clientPortAddress=<%= float_host(node[:hostname]) %>
+clientPortAddress=<%= node[:hostname] %>
 
 <% if @zk_hosts.length > 3 %>
 <%= "# more than three ZK servers, so leader will not serve client connections" %>
@@ -42,7 +42,7 @@ clientPortAddress=<%= float_host(node[:hostname]) %>
 <% end %>
 
 <% @zk_hosts.sort{ |aa,bb| aa[:fqdn] <=> bb[:fqdn] }.each do |ss| %>
-<%="server.#{bcpc_8bit_node_number(ss)}=#{float_host(ss[:fqdn])}:#{node[:bcpc][:hadoop][:zookeeper][:leader_connect][:port]}:#{node[:bcpc][:hadoop][:zookeeper][:leader_elect][:port]}" %>
+<%="server.#{bcpc_8bit_node_number(ss)}=#{ss[:fqdn]}:#{node[:bcpc][:hadoop][:zookeeper][:leader_connect][:port]}:#{node[:bcpc][:hadoop][:zookeeper][:leader_elect][:port]}" %>
 <% end %>
 
 <% if node[:bcpc][:hadoop][:kerberos][:enable] == true then %>

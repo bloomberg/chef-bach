@@ -31,8 +31,9 @@ if node[:bcpc][:hadoop][:hdfs][:ldap][:integration]
 end
 
 file '/etc/hadoop/conf/slaves' do
-  mode 0o0644
-  content 'localhost\n' + node[:bcpc][:hadoop][:dn_hosts].map { |h| float_host(h) }.join('\n')
+  mode 0644
+  content "localhost\n" +
+    node[:bcpc][:hadoop][:dn_hosts].map{ |h| h }.join("\n")
 end
 
 # These files have no <%= %> blocks.

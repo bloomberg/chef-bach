@@ -218,7 +218,7 @@ ruby_block 'update sharelib checksum' do
   block do
     require 'digest'
     node['bcpc']['hadoop']['oozie_hosts'].each do |oozie_host|
-      next unless oozie_running?(float_host(oozie_host['hostname']))
+      next unless oozie_running?(oozie_host['hostname'])
       node.set['bcpc']['hadoop']['oozie']['sharelib_checksum'] =
         Digest::MD5.hexdigest(File.read(OOZIE_SHARELIB_TARBALL_PATH))
       break
@@ -232,7 +232,7 @@ end
 ruby_block 'notify sharelib update' do
   block do
     node['bcpc']['hadoop']['oozie_hosts'].each do |oozie_host|
-      update_oozie_sharelib(float_host(oozie_host['hostname']))
+      update_oozie_sharelib(oozie_host['hostname'])
     end
   end
   action :nothing
@@ -246,16 +246,16 @@ ruby_block 'oozie sharelib sqoop-action workaround for 2.6' do
   block do
     active_release = node['bcpc']['hadoop']['distribution']['active_release']
     node['bcpc']['hadoop']['oozie_hosts'].each do |oozie_host|
-      next unless oozie_running?(float_host(oozie_host['hostname']))
+      next unless oozie_running?(oozie_host['hostname'])
       instrumentation = shell_out! "#{OOZIE_CLIENT_PATH}/bin/oozie admin "\
-        "-oozie http://#{float_host(oozie_host['hostname'])}:11000/oozie "\
+        "-oozie http://#{oozie_host['hostname']}:11000/oozie "\
         '-instrumentation | grep libs.sharelib.system.libpath', user: 'oozie'
       libpath = instrumentation.stdout.match(%r{hdfs:\/\/.*$})
       shell_out! "hdfs dfs -cp -p #{libpath}/hive #{libpath}/sqoop-hive",
                  user: 'hdfs'
       shell_out! "hdfs dfs -rm #{libpath}/sqoop-hive/"\
                  "hive-cli-1.2.1000.#{active_release}.jar", user: 'hdfs'
-      update_oozie_sharelib(float_host(oozie_host['hostname']))
+      update_oozie_sharelib(oozie_host['hostname'])
       break # We only need to delete hive-cli.jar once
     end
   end
@@ -347,7 +347,7 @@ end
 ruby_block 'check if oozie running' do
   i = 0
   block do
-    until oozie_running?(float_host(node['fqdn']))
+    until oozie_running?(node['fqdn'])
       if i < 10
         sleep(0.5)
         i += 1
@@ -361,5 +361,5 @@ ruby_block 'check if oozie running' do
     end
     Chef::Log.debug('Oozie is up')
   end
-  not_if { oozie_running?(float_host(node['fqdn'])) }
+  not_if { oozie_running?(node['fqdn']) }
 end

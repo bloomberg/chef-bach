@@ -16,7 +16,7 @@ zk_hosts = node[:bcpc][:hadoop][:zookeeper][:servers]
 
 slider_properties = {
   'hadoop.registry.zk.quorum' =>
-    zk_hosts.map{ |h| float_host(h[:hostname]) +
+    zk_hosts.map{ |h| h[:hostname] +
       ":#{node[:bcpc][:hadoop][:zookeeper][:port]}"}
     .join(','),
   'hadoop.registry.rm.enabled' => true

@@ -294,7 +294,7 @@
     <% if @ooz_hosts.length >= 2 %>
       <value>*</value>
     <% else %>
-      <value><%=node[:bcpc][:hadoop][:kerberos][:data][:spnego][:principal]%>/<%=node[:bcpc][:hadoop][:kerberos][:data][:spnego][:princhost]=="_HOST" ? float_host(node[:fqdn]) : node[:bcpc][:hadoop][:kerberos][:data][:spnego][:princhost]%>@<%=node[:bcpc][:hadoop][:kerberos][:realm]%></value>
+      <value><%=node[:bcpc][:hadoop][:kerberos][:data][:spnego][:principal]%>/<%=node[:bcpc][:hadoop][:kerberos][:data][:spnego][:princhost]=="_HOST" ? node[:fqdn] : node[:bcpc][:hadoop][:kerberos][:data][:spnego][:princhost]%>@<%=node[:bcpc][:hadoop][:kerberos][:realm]%></value>
     <% end %>
     <description>Indicates the Kerberos principal to be used for HTTP endpoint. The principal MUST start with 'HTTP/' as per Kerberos HTTP SPNEGO specification.</description>
   </property>
@@ -331,7 +331,7 @@
 
   <property>
     <name>oozie.service.HadoopAccessorService.kerberos.principal</name>
-    <value><%=node[:bcpc][:hadoop][:kerberos][:data][:oozie][:principal]%>/<%=node[:bcpc][:hadoop][:kerberos][:data][:oozie][:princhost]=="_HOST" ? float_host(node[:fqdn]) : node[:bcpc][:hadoop][:kerberos][:data][:oozie][:princhost]%>@<%= node[:bcpc][:hadoop][:kerberos][:realm] %></value>
+    <value><%=node[:bcpc][:hadoop][:kerberos][:data][:oozie][:principal]%>/<%=node[:bcpc][:hadoop][:kerberos][:data][:oozie][:princhost]=="_HOST" ? node[:fqdn] : node[:bcpc][:hadoop][:kerberos][:data][:oozie][:princhost]%>@<%= node[:bcpc][:hadoop][:kerberos][:realm] %></value>
     <description>Kerberos principal for Oozie service.</description>
   </property>
 
@@ -403,12 +403,12 @@
 
   <property>
      <name>oozie.instance.id</name>
-     <value><%= float_host(node['fqdn']) %></value>
+     <value><%= node[:fqdn] %></value>
   </property>
 
   <property>
     <name>oozie.zookeeper.connection.string</name>
-    <value><%= get_head_nodes.map{ |s| float_host(s[:fqdn])}.join(",") %></value>
+    <value><%= get_head_nodes.map{ |s| s[:fqdn] }.join(",") %></value>
   </property>
 
   <% if node['bcpc']['hadoop']['oozie']['smtp_host'] != nil then %>

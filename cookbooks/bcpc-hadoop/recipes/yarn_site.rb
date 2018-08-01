@@ -49,7 +49,7 @@ if rm_hosts.length >= 2
      'yarn.resourcemanager.store.class' =>
        'org.apache.hadoop.yarn.server.resourcemanager.recovery.ZKRMStateStore',
      'yarn.resourcemanager.zk-address' =>
-       zk_hosts.map{ |h| float_host(h[:hostname]) +
+       zk_hosts.map{ |h| h[:hostname] +
          ":#{node[:bcpc][:hadoop][:zookeeper][:port]}"}
        .join(',')
     }
@@ -58,7 +58,7 @@ if rm_hosts.length >= 2
   # Using 'reduce', all host hashes are consolidated into a single hash.
   rm_nodes = rm_hosts.map{ |h|
     rm_name = "rm#{node.chef_environment}#{h[:node_number]}"
-    rm_target = float_host(h[:hostname])
+    rm_target = h[:hostname]
     {
       'yarn.resourcemanager.hostname.' + rm_name =>
         rm_target,
@@ -97,7 +97,7 @@ elsif rm_hosts.empty?
 
   # If we have fewer than two RMs, but more than none, insert non-HA properties.
 else
-  rm_target = float_host(rm_hosts.first[:hostname])
+  rm_target = rm_hosts.first[:hostname]
   rm_properties =
     {
      'yarn.resourcemanager.address' =>
@@ -125,14 +125,14 @@ if node.run_list.expand(node.chef_environment).recipes
      'yarn.nodemanager.recovery.enabled' => true,
 
      'yarn.nodemanager.address' =>
-       float_host(node[:hostname]) + ':' +
+       node[:hostname] + ':' +
        node["bcpc"]["hadoop"]["yarn"]["nodemanager"]["port"].to_s,
 
      'yarn.nodemanager.bind-host' =>
-       float_host(node[:fqdn]),
+       node[:fqdn],
 
      'yarn.nodemanager.hostname' =>
-       float_host(node[:fqdn]),
+       node[:fqdn],
     }
 
 
@@ -145,7 +145,7 @@ if node.run_list.expand(node.chef_environment).recipes
   rm_properties =
     {
      'yarn.resourcemanager.bind-host' =>
-       float_host(node[:fqdn]),
+       node[:fqdn],
     }
 
   node.run_state[:yarn_site_generated_values].merge!(rm_properties)
@@ -171,7 +171,7 @@ if node[:bcpc][:hadoop][:kerberos][:enable]
   if kerberos_data[:nodemanager][:princhost] == '_HOST'
     kerberos_host = if node.run_list.expand(node.chef_environment).recipes
                         .include?('bcpc-hadoop::datanode')
-                      float_host(node[:fqdn])
+                      node[:fqdn]
                     else
                       '_HOST'
                     end
@@ -222,10 +222,10 @@ if node.roles.include?("BCPC-Hadoop-Head-YarnTimeLineServer")
       'yarn.timeline-service.entity-group-fs-store.done-dir' => "/var/log/ats/done",
       'yarn.timeline-service.entity-group-fs-store.group-id-plugin-classes' => "org.apache.tez.dag.history.logging.ats.TimelineCachePluginImpl",
       'yarn.timeline-service.entity-group-fs-store.summary-store' => "org.apache.hadoop.yarn.server.timeline.RollingLevelDBTimelineStore",
-      'yarn.timeline-service.hostname' => "#{float_host(node.fqdn)}",
-      'yarn.timeline-service.address' => "#{float_host(node.fqdn)}:10200",
-      'yarn.timeline-service.webapp.address' =>  "#{float_host(node.fqdn)}:8188",
-      'yarn.timeline-service.bind-host' => "#{float_host(node.fqdn)}",
+      'yarn.timeline-service.hostname' => "#{node.fqdn}",
+      'yarn.timeline-service.address' => "#{node.fqdn}:10200",
+      'yarn.timeline-service.webapp.address' =>  "#{node.fqdn}:8188",
+      'yarn.timeline-service.bind-host' => "#{node.fqdn}",
       'yarn.timeline-service.handler-thread-count' => 10,
       'yarn.resourcemanager.system-metrics-publisher.enabled' => true,
       'yarn.timeline-service.generic-application-history.enabled' => true,
@@ -248,7 +248,7 @@ end
 hs_hosts = node[:bcpc][:hadoop][:hs_hosts]
 if not hs_hosts.empty?
   yarn_log_server_url =    'http://' +
-    float_host(hs_hosts.map{ |h| h[:hostname] }.sort.first) +
+    hs_hosts.map{ |h| h[:hostname] }.sort.first +
     ':19888' + '/jobhistory/logs'
 
   node.run_state[:yarn_site_generated_values].merge!({'yarn.log.server.url' =>

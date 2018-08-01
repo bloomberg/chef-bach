@@ -25,9 +25,9 @@ require 'cluster_def'
 # Constant string which defines the default attributes which
 # need to be retrieved from node objects
 # The format is hash { key => value , key => value }
-# Key will be used as the key in the search result which is a hash 
+# Key will be used as the key in the search result which is a hash
 # and the value is the node attribute which needs
-# to be included in the result. Attribute hierarchy can be expressed as a 
+# to be included in the result. Attribute hierarchy can be expressed as a
 # dot seperated string. User the following
 # as an example
 #
@@ -131,7 +131,7 @@ def get_namenodes
   else
     nn_hosts = fetch_all_nodes.select { |hst| hst[:runlist].include? "role[BCPC-Hadoop-Head-Namenode-NoHA]" }
   end
-  return nn_hosts.uniq{ |x| float_host(x[:hostname]) }.sort_by{ |h| h[:node_id]}
+  return nn_hosts.uniq{ |x| x[:hostname] }.sort_by{ |h| h[:node_id]}
 end
 
 def get_nodes_for(recipe, cookbook = cookbook_name)
@@ -155,16 +155,6 @@ def secure_password(len = 20)
   pw
 end
 
-def float_host(*args)
-  return ('f-' + args.join('.')) if node['bcpc']['management']['ip'] != node['bcpc']['floating']['ip']
-  args.join('.')
-end
-
-def storage_host(*args)
-  return ('s-' + args.join('.')) if node['bcpc']['management']['ip'] != node['bcpc']['floating']['ip']
-  args.join('.')
-end
-
 def znode_exists?(znode_path, zk_host = 'localhost:2181')
   require 'rubygems'
   require 'zookeeper'
@@ -184,7 +174,7 @@ def znode_exists?(znode_path, zk_host = 'localhost:2181')
   raise "get znode #{znode_path} failed with rc = #{rc}, zk_host=#{zk_host}"
 end
 
-  
+
 #
 # Function to retrieve commonly used node attributes.
 # Minimizes calls to the chef server.
@@ -219,8 +209,8 @@ def set_hosts
 
   # set the oozie_url
   oozie_hosts = node['bcpc']['hadoop']['oozie_hosts']
-  vip_host = float_host(node['bcpc']['management']['viphost'])
-  first_host = float_host(oozie_hosts.first['hostname'])
+  vip_host = node['bcpc']['management']['viphost']
+  first_host = oozie_hosts.first['hostname']
   oozie_ha_port = node['bcpc']['hadoop']['oozie_ha_port']
   oozie_port = node['bcpc']['hadoop']['oozie_port']
 
@@ -235,7 +225,7 @@ def set_hosts
 
   # set the resourcemanager_url (rm_address)
   rm_hosts = node['bcpc']['hadoop']['rm_hosts']
-  first_host = float_host(rm_hosts.first['hostname'])
+  first_host = rm_hosts.first['hostname']
   rm_port = node['bcpc']['hadoop']['yarn']['resourcemanager']['port']
 
   node.default['bcpc']['hadoop']['rm_address'] =
@@ -433,7 +423,7 @@ end
 #   oozie_running?("f-bcpc-vm2.bcpc.example.com")
 #   # => true
 #
-# Returns true if oozie server is operational 
+# Returns true if oozie server is operational
 # with 'NORMAL' status, false otherwise.
 def oozie_running?(host)
   oozie_url = "sudo -u oozie oozie admin -oozie http://#{host}:11000/oozie -status"
@@ -444,11 +434,11 @@ def oozie_running?(host)
   cmd.exitstatus == 0 && cmd.stdout.include?('NORMAL')
 end
 
-# Internal: Have the specified Oozie host update its ShareLib 
+# Internal: Have the specified Oozie host update its ShareLib
 #           to the latest lib_<timestamp>
 #           sharelib directory on hdfs:/user/oozie/share/lib/,
 #           without having to restart
-#           that Oozie server. Oozie server, by default, uses 
+#           that Oozie server. Oozie server, by default, uses
 #           the latest one when it (re)starts.
 #
 # host - Endpoint (FQDN/IP) on which Oozie server is available.

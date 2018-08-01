@@ -2,7 +2,7 @@ mapred_site_values = node[:bcpc][:hadoop][:mapreduce][:site_xml]
 
 mapred_site_generated_values =
 {
-   
+
 }
 
 hs_hosts = node[:bcpc][:hadoop][:hs_hosts]
@@ -10,10 +10,10 @@ if not hs_hosts.empty?
   hs_properties =
     {
      'mapreduce.jobhistory.address' =>
-       "#{float_host(hs_hosts.map{|i| i[:hostname] }.sort.first)}:10020",
-     
+       "#{hs_hosts.map{|i| i[:hostname] }.sort.first}:10020",
+
      'mapreduce.jobhistory.webapp.address' =>
-       "#{float_host(hs_hosts.map{|i| i[:hostname] }.sort.first)}:19888",
+       "#{hs_hosts.map{|i| i[:hostname] }.sort.first}:19888",
     }
   mapred_site_generated_values.merge!(hs_properties)
 end
@@ -24,7 +24,7 @@ if node[:bcpc][:hadoop][:kerberos][:enable]
   if kerberos_data[:historyserver][:princhost] == '_HOST'
     kerberos_host = if node.run_list.expand(node.chef_environment).recipes
                       .include?('bcpc-hadoop::historyserver')
-                      float_host(node[:fqdn])
+                      node[:fqdn]
                     else
                       '_HOST'
                     end
@@ -41,7 +41,7 @@ if node[:bcpc][:hadoop][:kerberos][:enable]
      'mapreduce.jobhistory.keytab' =>
        node[:bcpc][:hadoop][:kerberos][:keytab][:dir] + '/' +
        kerberos_data[:historyserver][:keytab],
-     
+
      'mapreduce.jobhistory.principal' =>
        jobhistory_principal,
     }
