@@ -24,20 +24,20 @@ ams_collector_nodes = node.run_state['cluster_def']
                           end
 
 if ams_collector_nodes.length.positive?
-  ams_collector_hosts = ams_collector_nodes.map { |n| float_host(n[:fqdn]) }
+  ams_collector_hosts = ams_collector_nodes.map { |n| n[:fqdn] }
                                            .join(',')
   node.force_default['ams']['metrics_collector']['hosts'] = ams_collector_hosts
 end
 
 node.force_default['ams']['cluster']['zookeeper_quorum'] =
   node['bcpc']['hadoop']['zookeeper']['servers']
-  .map { |s| float_host(s['hostname']) }.join(',')
+  .map { |s| s['hostname'] }.join(',')
 
 node.force_default['ams']['cluster']['zookeeper']['client_port'] =
   node['bcpc']['hadoop']['zookeeper']['port'].to_s
 
 node.force_default['ams']['metrics_grafana']['host'] =
-  float_host(node['fqdn'])
+  node['fqdn']
 
 node.default['ams']['collector']['url'] =
   "http://#{node['ams']['metrics_collector']['hosts']}:"\

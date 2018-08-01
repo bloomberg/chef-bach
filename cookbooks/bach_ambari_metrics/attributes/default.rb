@@ -15,7 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-force_default['ams']['hostname'] = float_host(node['fqdn'])
+force_default['ams']['hostname'] = node['fqdn']
 force_default['ams']['clustername'] = node.chef_environment
 force_default['ams']['java_home'] = node['bcpc']['hadoop']['java']
-force_default['ams']['hbase']['zookeeper_quorum'] = float_host(node['fqdn'])
+force_default['ams']['hbase']['zookeeper_quorum'] = node['fqdn']
