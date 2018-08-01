@@ -60,10 +60,6 @@ rack = chef_env['override_attributes']['bcpc']['networks'].keys.first
 network_json = chef_env['override_attributes']['bcpc']['networks'][rack]
 management_net =
   IPAddr.new(network_json['management']['cidr'] || '10.0.100.0/24')
-float_net =
-  IPAddr.new(network_json['floating']['cidr'] || '192.168.100.0/24')
-storage_net =
-  IPAddr.new(network_json['storage']['cidr'] || '172.16.100.0/24')
 
 # We rely on global variables to deal with Vagrantfile scoping rules.
 # rubocop:disable Style/GlobalVars
@@ -77,27 +73,11 @@ Vagrant.configure('2') do |config|
     # Awaiting https://github.com/ruby/ruby/pull/1269 to properly retrieve mask
     mgmt_mask = IPAddr.new(management_net.instance_variable_get('@mask_addr'),
                            Socket::AF_INET).to_s
-    storage_mask = IPAddr.new(storage_net.instance_variable_get('@mask_addr'),
-                              Socket::AF_INET).to_s
-    float_mask = IPAddr.new(float_net.instance_variable_get('@mask_addr'),
-                            Socket::AF_INET).to_s
 
     bootstrap.vm.network(:private_network,
                          ip: management_net.succ.succ.succ.to_s,
                          netmask: mgmt_mask,
                          adapter_ip: management_net.succ.succ.to_s,
-                         type:     :static)
-
-    bootstrap.vm.network(:private_network,
-                         ip: storage_net.succ.succ.succ.to_s,
-                         netmask: storage_mask,
-                         adapter_ip: storage_net.succ.succ.to_s,
-                         type:     :static)
-
-    bootstrap.vm.network(:private_network,
-                         ip: float_net.succ.succ.succ.to_s,
-                         netmask: float_mask,
-                         adapter_ip: float_net.succ.succ.to_s,
                          type:     :static)
 
     if File.basename(File.expand_path('.')) == 'vbox'
