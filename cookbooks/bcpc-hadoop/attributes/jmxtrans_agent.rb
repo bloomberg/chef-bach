@@ -10,7 +10,7 @@ end
 
 default['bcpc']['hadoop']['jmxtrans_agent']['statsd'].tap do |statsd|
   statsd['class'] = 'org.jmxtrans.agent.StatsDOutputWriter'
-  statsd['host'] = node['bcpc']['management']['vip']
+  statsd['host'] = 'localhost'
   statsd['port'] = 8125
 end
 
