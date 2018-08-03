@@ -3,7 +3,12 @@ bins
 vendor/**
 .vagrant
 vbox
+gemfiles
 gemfiles/**
 */gemfiles/*
+ruby
 ruby/**
 */ruby/*
+src
+src/**
+*/src/*
