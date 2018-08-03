@@ -52,7 +52,7 @@ require 'rubygems'
 gem_path = Pathname.new(Gem.ruby).dirname.join('gem').to_s
 local_gem_source = 'file:' + node[:bach][:repository][:bins_directory]
 
-bcpc_chef_gem 'ruby-augeas' do
+chef_gem 'ruby-augeas' do
   version '>= 0.0.0'
   compile_time true
 end

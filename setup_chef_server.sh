@@ -57,7 +57,7 @@ else
   password="$(dd if=/dev/urandom count=1 status=none | tr -dc '[]{}|\/!,.<>?@#$%^&*()_+=A-Za-z0-9' | dd count=20 bs=1 status=none)"
   # should likely use node['bcpc']['admin_email'] for e-mail
   chef-server-ctl user-create admin Admin User nobody@example.com "$password" --filename /etc/chef-server/admin.pem
-  chown root:adm /etc/chef-server/admin.pem
+  chown vagrant:root /etc/chef-server/admin.pem
   chmod 550 /etc/chef-server/admin.pem
   chef-server-ctl grant-server-admin-permissions admin
   # Do not use the org. validator PEM
@@ -86,6 +86,10 @@ else
   knife group add client $(hostname -f) clients -u admin -k /etc/chef-server/admin.pem --server-url https://$(hostname -f)/organizations/${ENVIRONMENT,,}
 fi
 
+# last time we should run Chef as root
+sudo chown -R vagrant:root /home/vagrant/.chef
+sudo chmod 770 -R /home/vagrant/.chef
+
 # copy our ssh-key to be authorized for root
 if [[ -f $HOME/.ssh/authorized_keys && ! -f /root/.ssh/authorized_keys ]]; then
   if [[ ! -d /root/.ssh ]]; then
@@ -94,4 +98,8 @@ if [[ -f $HOME/.ssh/authorized_keys && ! -f /root/.ssh/authorized_keys ]]; then
   cp $HOME/.ssh/authorized_keys /root/.ssh/authorized_keys
 fi
 
-
+# ensure the vendor directory remains owned by a non-root user
+if [[ ! -z "$SUDO_USER" ]]; then
+  chown -R ${SUDO_USER}:root ./vendor
+  chmod -R 774 ./vendor
+fi

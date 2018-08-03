@@ -80,7 +80,9 @@ end
 #
 file "overwrite from vault #{gpg_private_key_path}" do
   path gpg_private_key_path
-  mode 0400
+  mode 0440
+  owner 'vagrant'
+  group 'root'
   content lazy { Base64.decode64(gpg_private_key_base64) }
   only_if { node.run_state['bach']['repository']['regen_gpg_keys'] == false }
 end
@@ -88,6 +90,8 @@ end
 file "overwrite from vault #{gpg_public_key_path}" do
   path gpg_public_key_path
   mode 0444
+  owner 'vagrant'
+  group 'root'
   content lazy { Base64.decode64(gpg_public_key_base64) }
   only_if { node.run_state['bach']['repository']['regen_gpg_keys'] == false }
 end
@@ -110,12 +114,15 @@ end
 execute 'generate local bach keys' do
   command "cat #{gpg_conf_path} | gpg --batch --gen-key"
   only_if { node.run_state['bach']['repository']['regen_gpg_keys'] == true }
-  notifies :touch, "file[#{gpg_private_key_path}]", :immediate
+  notifies :touch, "file[#{gpg_private_key_path} permission setting]", :immediate
 end
 
 # Set perms.
-file gpg_private_key_path do
-  mode 0400
+file "#{gpg_private_key_path} permission setting" do
+  path gpg_private_key_path
+  mode 0440
+  owner 'vagrant'
+  group 'root'
   action :nothing
 end
 

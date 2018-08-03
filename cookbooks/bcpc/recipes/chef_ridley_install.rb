@@ -17,6 +17,6 @@
 # limitations under the License.
 #
 
-bcpc_chef_gem 'ridley' do
+chef_gem 'ridley' do
   compile_time true
 end

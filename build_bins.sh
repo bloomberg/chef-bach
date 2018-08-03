@@ -75,6 +75,9 @@ if [[ ! -z "$SUDO_USER" ]]; then
     chown -R $SUDO_USER $DIR/vendor
     chown $SUDO_USER $DIR/Berksfile.lock
     chown -R $SUDO_USER $HOME/.berkshelf
+else
+    echo 'Can not chown berks vendor to a reasonable user!' >> /dev/stderr
+    exit 1
 fi
 
 #

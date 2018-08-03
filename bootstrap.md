@@ -224,8 +224,7 @@ from the hypervisor running VirtualBox:
 $ ./bootstrap_chef.sh ubuntu 10.0.100.3
 ```
 
-This will bring up the chef-server on http://10.0.100.3:4040.
-The Web UI will be at http://10.0.100.3:4000 with defaults admin/p@ssw0rd1
+This will bring up the chef-server on http://bcpc-bootstrap.bcpc.example.com:4000.
 
 At this point, your bcpc-bootstrap node should be appropriately provisioned.
 
