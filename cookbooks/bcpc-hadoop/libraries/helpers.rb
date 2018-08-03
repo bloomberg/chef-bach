@@ -37,42 +37,5 @@ module Bcpc_Hadoop # TODO: CamelCase this name to make rubocop happy
         not_if { ::File.readlink("/usr/hdp/current/#{package}").start_with?("/usr/hdp/#{version}/") }
       end
     end
-
-    # Verify an HDFS directory exists or create it
-    #
-    # hdfs - String HDFS URI (e.g. hdfs://FOO1)
-    # path - String path of directory
-    # owner - String of owner to own directory
-    #
-    # Raises RuntimeError on any unspecified error
-    # Raises Mixlib::ShellOut::CommandTimeout on a hung command
-    #
-    def new_dir_creation(hdfs, path, user, perms, run_context)
-      Chef::Log.info("HDFS dir #{path} creation")
-      hdfs_mkdir_cmds = "sudo -u hdfs hdfs dfs -mkdir -p #{hdfs}/#{path} && " \
-                        "sudo -u hdfs hdfs dfs -chown #{user} #{hdfs}/#{path}"
-      so = Mixlib::ShellOut.new(hdfs_mkdir_cmds, timeout: 90)
-      so.run_command
-      so.error!
-    end
-
-    # Verify a Group Matches Business Rules
-    #
-    # group - String of group to verify
-    # users - Array of users who are members of the group
-    # prohibited_groups - Array of group reg. ex.'s to filter
-    #
-    # Returns - false if the group does not match business criteria
-    #         - true  if the group does meet business criteria
-    #
-    def filter_nonproject_groups(group, users, prohibited_groups)
-      # weed out groups which have fewer than two users
-      return false if users.length < 2
-      # weed out groups which failed name resolution (so we get the GID)
-      return false if group.to_i.to_s == group
-
-      prohibited_regexs = prohibited_groups.map { |regex_str| Regexp.new(regex_str) }
-      prohibited_regexs.map! { |r| r.match(group) }.none?
-    end
   end
 end

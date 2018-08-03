@@ -42,17 +42,6 @@ default[:bcpc][:hadoop][:hdfs][:dfs].tap do |dfs|
   dfs[:dfs][:ha]['automatic-failover'][:enabled] = true
 end
 
-default[:bcpc][:hadoop][:hdfs][:ldap].tap do |ldap|
-  ldap[:integration] = false
-  ldap[:user] = "" #must be LDAP DN
-  ldap[:domain] = "BCPC.EXAMPLE.COM"
-  ldap[:port] = 389
-  ldap[:password] =  nil
-  ldap[:search][:depth] = 0
-  ldap[:search][:filter][:user]="(&(objectclass=user)(sAMAccountName={0}))"
-  ldap[:search][:filter][:group]="(objectClass=group)"
-end
-
 default[:bcpc][:hadoop][:hdfs][:site_xml].tap do |site_xml|
   dfs = node[:bcpc][:hadoop][:hdfs][:dfs]
 
@@ -123,4 +112,10 @@ default[:bcpc][:hadoop][:hdfs][:site_xml].tap do |site_xml|
 
   site_xml['dfs.client.socket-timeout'] =
     '30000'
+end
+
+# Default HDFS Directory Quotas
+default['bcpc']['hadoop']['hdfs'].tap do |hdfs|
+  hdfs['user']['space_quota'] = '30G'
+  hdfs['groups']['space_quota'] = '50G'
 end

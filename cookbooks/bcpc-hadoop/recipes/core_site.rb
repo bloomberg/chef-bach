@@ -51,11 +51,11 @@ if node[:bcpc][:hadoop][:hdfs][:ldap][:integration]
        node[:bcpc][:hadoop][:hdfs][:ldap][:user],
 
      'hadoop.security.group.mapping.ldap.url' =>
-       'ldap://' + node[:bcpc][:hadoop][:hdfs][:ldap][:domain] +
-       ':' + node[:bcpc][:hadoop][:hdfs][:ldap][:port].to_s,
+       'ldap://' + node[:bcpc][:hadoop][:ldap][:domain] +
+       ':' + node[:bcpc][:hadoop][:ldap][:port].to_s,
 
      'hadoop.security.group.mapping.ldap.base' =>
-       node[:bcpc][:hadoop][:hdfs][:ldap][:domain].split('.')
+       node[:bcpc][:hadoop][:ldap][:domain].split('.')
        .map{ |s| "DC=#{s}" }.join(','),
 
      'hadoop.security.group.mapping.ldap.search.filter.user' =>
