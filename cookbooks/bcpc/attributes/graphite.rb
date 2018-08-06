@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 # vim: tabstop=2:shiftwidth=2:softtabstop=2
 default['bcpc']['graphite_dbname'] = 'graphite'
 default['bcpc']['graphite']['relay_port'] = 2013
@@ -25,5 +26,5 @@ default['bcpc']['graphite']['carbon']['relay']['idle_timeout'] = 1800
 default['bcpc']['graphite']['carbon']['cache']['MAX_UPDATES_PER_SECOND'] = 3000
 
 default['bcpc']['graphite']['ip'] = node['bcpc']['management']['vip']
-default['bcpc']['graphite']['use_whitelist'] = False
-default['bcpc']['graphite']['blacklist'] = [ ]
+default['bcpc']['graphite']['use_whitelist'] = false
+default['bcpc']['graphite']['blacklist'] = []

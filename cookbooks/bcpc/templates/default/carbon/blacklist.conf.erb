@@ -3,8 +3,8 @@
 # match one of these expressions will be dropped
 # This file is reloaded automatically when changes are made
 
-<% (@graphite_blacklist || {}).each do |description, regex| %>
-# <%= description %>
-<%= regex %>
-<% end %>
+<% (@graphite_blacklist || {}).each do |kv_pair| %>
+# <%= kv_pair['description'] %>
+<%= kv_pair['regex']  %>
 
+<% end %>

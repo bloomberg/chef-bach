@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 # vim: tabstop=2:shiftwidth=2:softtabstop=2
 #
 # Cookbook Name:: bcpc
@@ -123,6 +124,8 @@ end
   end
 end
 
+use_whitelist_str = node['bcpc']['graphite']['use_whitelist'] ? 'True' : 'False'
+
 template '/opt/graphite/conf/carbon.conf' do
   source 'carbon/carbon.conf.erb'
   owner 'root'
@@ -130,8 +133,8 @@ template '/opt/graphite/conf/carbon.conf' do
   mode 0o0644
   variables(
     'servers' => get_static_head_node_local_ip_list,
-    'min_quorum' => get_static_head_nodes_count/2 + 1,
-    'use_whitelist' => node['bcpc']['graphite']['use_whitelist']
+    'min_quorum' => get_static_head_nodes_count / 2 + 1,
+    'use_whitelist' => use_whitelist_str
   )
   notifies :restart, 'service[carbon-cache]', :delayed
   notifies :restart, 'service[carbon-aggregator]', :delayed
@@ -159,7 +162,7 @@ template '/opt/graphite/conf/relay-rules.conf' do
   owner 'root'
   group 'root'
   mode 0o0644
-  variables( 'servers' => get_static_head_node_local_ip_list)
+  variables('servers' => get_static_head_node_local_ip_list)
   notifies :restart, 'service[carbon-relay]', :delayed
 end
 
@@ -189,7 +192,7 @@ template '/opt/graphite/conf/blacklist.conf' do
   notifies :restart, 'service[carbon-cache]', :delayed
   notifies :restart, 'service[carbon-aggregator]', :delayed
   notifies :restart, 'service[carbon-relay]', :delayed
-  only_if { node['bcpc']['graphite']['use_whitelist']
+  only_if { node['bcpc']['graphite']['use_whitelist'] }
 end
 
 #
@@ -233,7 +236,8 @@ template '/opt/graphite/webapp/graphite/local_settings.py' do
   variables(
     'web_port' => node['bcpc']['graphite']['web_port'],
     'servers' => get_static_head_node_local_ip_list,
-    'min_quorum' => get_static_head_nodes_count/2 + 1 )
+    'min_quorum' => get_static_head_nodes_count / 2 + 1
+  )
   notifies :restart, 'service[apache2]', :delayed
 end
 
@@ -293,7 +297,7 @@ bash 'cleanup-old-whisper-directories' do
   code "find #{node['bcpc']['graphite']['local_data_dir']} " \
     "-ctime +#{node['bcpc']['graphite']['data']['retention']} " \
     '-type d -empty -exec rmdir {} \\;'
-end 
+end
 
 bash 'cleanup-old-logs' do
   action :run
