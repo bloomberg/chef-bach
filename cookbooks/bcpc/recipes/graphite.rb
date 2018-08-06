@@ -130,7 +130,9 @@ template '/opt/graphite/conf/carbon.conf' do
   mode 0o0644
   variables(
     'servers' => get_static_head_node_local_ip_list,
-    'min_quorum' => get_static_head_nodes_count/2 + 1 )
+    'min_quorum' => get_static_head_nodes_count/2 + 1,
+    'use_whitelist' => node['bcpc']['graphite']['use_whitelist']
+  )
   notifies :restart, 'service[carbon-cache]', :delayed
   notifies :restart, 'service[carbon-aggregator]', :delayed
   notifies :restart, 'service[carbon-relay]', :delayed
@@ -174,6 +176,20 @@ template '/opt/graphite/conf/rewrite-rules.conf' do
   owner 'root'
   group 'root'
   mode 0o0644
+end
+
+template '/opt/graphite/conf/blacklist.conf' do
+  source 'carbon/blacklist.conf.erb'
+  owner 'root'
+  group 'root'
+  mode 0o0644
+  variables(
+    'graphite_blacklist' => node['bcpc']['graphite']['blacklist']
+  )
+  notifies :restart, 'service[carbon-cache]', :delayed
+  notifies :restart, 'service[carbon-aggregator]', :delayed
+  notifies :restart, 'service[carbon-relay]', :delayed
+  only_if { node['bcpc']['graphite']['use_whitelist']
 end
 
 #
