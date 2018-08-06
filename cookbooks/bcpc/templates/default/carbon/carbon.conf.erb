@@ -272,7 +272,7 @@ WHISPER_FALLOCATE_CREATE = True
 # Set this to True to enable whitelisting and blacklisting of metrics in
 # CONF_DIR/whitelist.conf and CONF_DIR/blacklist.conf. If the whitelist is
 # missing or empty, all metrics will pass through
-# USE_WHITELIST = False
+USE_WHITELIST = <%= @use_whitelist %>
 
 # By default, carbon itself will log statistics (such as a count,
 # metricsReceived) with the top level prefix of 'carbon' at an interval of 60
@@ -480,7 +480,7 @@ METRIC_CLIENT_IDLE_TIMEOUT = <%="#{node[:bcpc][:graphite][:carbon][:relay][:idle
 # Set this to True to enable whitelisting and blacklisting of metrics in
 # CONF_DIR/whitelist.conf and CONF_DIR/blacklist.conf. If the whitelist is
 # missing or empty, all metrics will pass through
-# USE_WHITELIST = False
+USE_WHITELIST = <%= @use_whitelist %>
 
 # By default, carbon itself will log statistics (such as a count,
 # metricsReceived) with the top level prefix of 'carbon' at an interval of 60
@@ -609,7 +609,7 @@ MAX_AGGREGATION_INTERVALS = 5
 # Set this to True to enable whitelisting and blacklisting of metrics in
 # CONF_DIR/whitelist.conf and CONF_DIR/blacklist.conf. If the whitelist is
 # missing or empty, all metrics will pass through
-# USE_WHITELIST = False
+USE_WHITELIST = <%= @use_whitelist %>
 
 # By default, carbon itself will log statistics (such as a count,
 # metricsReceived) with the top level prefix of 'carbon' at an interval of 60
