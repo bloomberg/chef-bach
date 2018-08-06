@@ -233,7 +233,7 @@ template '/opt/graphite/webapp/graphite/local_settings.py' do
   mode 0o0440
   variables(
     'servers' => get_static_head_node_local_ip_list,
-    'min_quorum' => get_static_head_nodes_count/ 2 + 1
+    'min_quorum' => get_static_head_nodes_count/2 + 1
   )
   notifies :restart, 'service[apache2]', :delayed
 end
