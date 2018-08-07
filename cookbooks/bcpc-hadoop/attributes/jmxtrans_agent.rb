@@ -994,6 +994,7 @@ default['bcpc']['hadoop']['jmxtrans_agent']['hbase_rs']['queries'] = default['bc
   {
     'objectName' => 'Hadoop:service=HBase,name=RegionServer,sub=IO',
     'resultAlias' => 'hb_rs_server.%name%.%sub%.#attribute#',
+    'type' => 'gauge',
     'attributes' =>
       'fsChecksumFailureCount,' \
       'FsPReadTime_num_ops,' \
@@ -1036,11 +1037,13 @@ default['bcpc']['hadoop']['jmxtrans_agent']['hbase_rs']['queries'] = default['bc
   {
     'objectName' => 'Hadoop:service=HBase,name=RegionServer,sub=TableLatencies',
     'resultAlias' => 'hb_rs_server.%name%.%sub%.#attribute#',
+    'type' => 'gauge',
     'attributes' => ''
   },
   {
     'objectName' => 'Hadoop:service=HBase,name=RegionServer,sub=WAL',
     'resultAlias' => 'hb_rs_server.%name%.%sub%.#attribute#',
+    'type' => 'gauge',
     'attributes' =>
       'AppendSize_num_ops,' \
       'AppendSize_min,' \
@@ -1087,6 +1090,7 @@ default['bcpc']['hadoop']['jmxtrans_agent']['hbase_rs']['queries'] = default['bc
   {
     'objectName' => 'Hadoop:service=HBase,name=RegionServer,sub=Tables',
     'resultAlias' => 'hb_rs_server.%name%.%sub%.#attribute#',
+    'type' => 'gauge',
     'attributes' => ''
   }
 ]
