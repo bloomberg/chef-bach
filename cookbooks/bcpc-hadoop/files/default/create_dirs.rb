@@ -88,12 +88,13 @@ File.open(config['dir_file']) do |f|
 
     # set space quota
     if quotas[dir]
-      max_quota = HdfsConstants::QUOTA_DONT_SET
-      quota = if quotas[dir] == 'NO_QUOTA'
-                max_quota - 1
-              else
-                string2long(quotas[dir])
-              end
+      max_quota = HdfsConstants::QUOTA_RESET
+      quota =
+        if quotas[dir] == 'NO_QUOTA'
+          max_quota
+        else
+          string2long(quotas[dir])
+        end
       fs.setQuota(path, max_quota, quota)
     end
   end
