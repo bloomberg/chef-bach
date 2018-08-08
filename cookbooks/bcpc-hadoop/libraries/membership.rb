@@ -2,7 +2,7 @@
 # Routines for querying cluster and group membership
 
 module Bcpc_Hadoop::Helper
-	require 'set'
+  require 'set'
 
   # Fetch the valid members with cluster access
   # Return a tuple of [[users], [role_accounts]]

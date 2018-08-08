@@ -11,7 +11,7 @@ module Bcpc_Hadoop
       )
 
       # path to creation script and caches
-      jruby_script = File.join(file_cache, 'dirs.rb')
+      jruby_script = File.join(file_cache, 'create_dirs.rb')
       dir_cache = File.join(file_cache, "#{mode}_list")
       quota_cache = File.join(file_cache, "#{mode}_quotas.yml")
 
