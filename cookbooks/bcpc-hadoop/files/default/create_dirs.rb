@@ -1,10 +1,16 @@
-# dirs.rb
-# creates hdfs dirs
-# run this in an hbase jruby shell
-
-# usage: hbase shell dirs.rb [user|groups] dir_file quota_yml home_dir perms
-# user ex. hbase shell dirs.rb user /tmp/user_dirs /tmp/user_quotas.yml /user 0700
-# group ex. hbase shell dirs.rb groups /tmp/group_dirs /tmp/group_quotas.yml /groups 0770
+# create_dirs.rb
+# -------
+# Creates HDFS directories and manages quota (if applicable)
+# Run this in an HBase jruby shell
+# -------
+# General usage:
+# hbase shell create_dirs.rb [user|groups] dir_file quota_yml home_dir perms
+#
+# User example:
+# hbase shell create_dirs.rb user /tmp/user_dirs /tmp/user_quotas.yml /user 0700
+#
+# Group example:
+# hbase shell create_dirs.rb groups /tmp/group_dirs /tmp/group_quotas.yml /groups 0770
 
 include Java
 
@@ -16,8 +22,8 @@ import org.apache.hadoop.fs.Path
 import org.apache.hadoop.fs.permission.FsPermission
 import org.apache.hadoop.hdfs.protocol.HdfsConstants
 
-usage = "hbase shell "\
-  "dirs.rb [user|groups] dir_file quota_yml home_dir perms"
+usage = 'hbase shell '\
+  'create_dirs.rb [user|groups] dir_file quota_yml home_dir perms'
 banner = "usage: #{usage}\n  -- need "
 
 config = {
@@ -25,7 +31,7 @@ config = {
   'dir_file' => (ARGV[1] or raise "#{banner} dir_file"),
   'quota_file' => (ARGV[2] or raise "#{banner} quota_yml"),
   'home' => (ARGV[3] or raise "#{banner} home_dir"),
-  'perms' => (ARGV[4] or raise "#{banner} perms"),
+  'perms' => (ARGV[4] or raise "#{banner} perms")
 }
 
 # hdfs file system handle
@@ -64,7 +70,7 @@ File.open(config['dir_file']) do |f|
     #   string2long('1k') => 1024
     #   string2long('30T') => 32985348833280
     def string2long(s)
-      s = s.to_s
+      s = s.to_s.downcase
       prefixes = {
         ''  => 1,
         'k' => 1024,
@@ -74,17 +80,20 @@ File.open(config['dir_file']) do |f|
         'p' => 1024**5
       }
 
-      base = s.sub(/[kmgtp]/, '').to_i
-      prefix = prefixes[s.sub(/[0-9.]*/,'').downcase]
+      base = s[/[0-9.]*/].to_i
+      prefix = prefixes[s[/[kmgtp]/]]
 
-      return base * prefix
+      base * prefix
     end
 
     # set space quota
     if quotas[dir]
       max_quota = HdfsConstants::QUOTA_DONT_SET
-      quota = quotas[dir] == "NO_QUOTA" ?
-        (max_quota - 1) : string2long(quotas[dir])
+      quota = if quotas[dir] == 'NO_QUOTA'
+                max_quota - 1
+              else
+                string2long(quotas[dir])
+              end
       fs.setQuota(path, max_quota, quota)
     end
   end
