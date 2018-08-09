@@ -133,8 +133,8 @@ template '/opt/graphite/conf/carbon.conf' do
   group 'root'
   mode 0o0644
   variables(
-    'servers' => get_static_head_node_local_ip_list,
-    'min_quorum' => get_static_head_nodes_count / 2 + 1,
+    'servers' => mysql_servers,
+    'min_quorum' => mysql_servers.length / 2 + 1,
     'use_whitelist' => use_whitelist_str
   )
   notifies :restart, 'service[carbon-cache]', :delayed
@@ -163,7 +163,7 @@ template '/opt/graphite/conf/relay-rules.conf' do
   owner 'root'
   group 'root'
   mode 0o0644
-  variables('servers' => get_static_head_node_local_ip_list)
+  variables('servers' => mysql_servers)
   notifies :restart, 'service[carbon-relay]', :delayed
 end
 
@@ -236,8 +236,8 @@ template '/opt/graphite/webapp/graphite/local_settings.py' do
   mode 0o0440
   variables(
     'web_port' => node['bcpc']['graphite']['web_port'],
-    'servers' => get_static_head_node_local_ip_list,
-    'min_quorum' => get_static_head_nodes_count / 2 + 1
+    'servers' => mysql_servers,
+    'min_quorum' => mysql_servers.length / 2 + 1
   )
   notifies :restart, 'service[apache2]', :delayed
 end
