@@ -34,8 +34,8 @@ module Bcpc_Hadoop::Helper
         role: "'(&" \
           "(objectClass=user)" \
           "(!(objectClass=computer))" \
-          "(memberOf=#{@roles_dn})" \
           "(memberOf=%{group})" \
+          "(|(memberOf=#{@roles_dn})(!(employeeID=*)))" \
         ")'",
         user: "'(&" \
           "(objectClass=user)" \
