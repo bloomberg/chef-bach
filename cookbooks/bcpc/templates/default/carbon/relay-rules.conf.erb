@@ -6,4 +6,4 @@
 
 [default]
 default = true
-destinations = <%= "#{@servers.map{|hst| "#{hst}:2004"}.join(', ')}" %>
+destinations = <%= @relay_rules_dests %>
