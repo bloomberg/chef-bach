@@ -119,3 +119,23 @@ default['bcpc']['hadoop']['hdfs'].tap do |hdfs|
   hdfs['user']['space_quota'] = '30G'
   hdfs['groups']['space_quota'] = '50G'
 end
+
+# Default HDFS Projects Configuration
+default['bcpc']['hadoop']['hdfs']['projects'].tap do |projects|
+  projects['owner'] = 'hdfs'
+  projects['group'] = 'supergroup'
+  projects['perms'] = '1771'
+  projects['space_quota'] =
+    node['bcpc']['hadoop']['hdfs']['groups']['space_quota']
+  projects['ns_quota'] = 'NO_QUOTA'
+  projects['dirinfo'] = {
+    ### EXAMPLE:
+    # project: {
+    #   owner: 'user',
+    #   group: 'group',
+    #   perms: '1710',
+    #   space_quota: '300T',
+    #   ns_quota: '10000000'
+    # }
+  }
+end
