@@ -6,4 +6,4 @@
 
 [default]
 default = true
-destinations = <%= "#{@servers.map{|x| x['mgmt_ip']+':2004'}.join(', ')}" %>
+destinations = <%= @relay_rules_dests %>

@@ -34,8 +34,8 @@
 #   PID_DIR        = /var/run/
 #
 # LOCAL_DATA_DIR = /opt/graphite/storage/whisper/
-LOCAL_DATA_DIR = <%= node['bcpc']['graphite']['local_data_dir'] %> 
-LOG_DIR =  <%= node['bcpc']['graphite']['local_log_dir'] %>
+LOCAL_DATA_DIR = <%= @local_data_dir %>
+LOG_DIR =  <%= @log_dir %>
 
 # Specify the database library used to store metric data on disk. Each database
 # may have configurable options to change the behaviour of how it writes to
@@ -70,7 +70,7 @@ MAX_CACHE_SIZE = inf
 # When the rate of required updates exceeds this, then carbon's caching will
 # take effect and increase the overall throughput accordingly.
 # MAX_UPDATES_PER_SECOND = 500
-MAX_UPDATES_PER_SECOND = <%= node['bcpc']['graphite']['carbon']['cache']['MAX_UPDATES_PER_SECOND'] %>
+MAX_UPDATES_PER_SECOND = <%= @cache_max_updates_per_sec %>
 
 # If defined, this changes the MAX_UPDATES_PER_SECOND in Carbon when a
 # stop/shutdown is initiated.  This helps when MAX_UPDATES_PER_SECOND is
@@ -105,7 +105,7 @@ MIN_TIMESTAMP_RESOLUTION = 1
 # interface to 0.0.0.0 listens on all interfaces.  Port can be set to 0 to
 # disable this listener if it is not required.
 # LINE_RECEIVER_INTERFACE = 0.0.0.0
-LINE_RECEIVER_INTERFACE = <%="#{node[:bcpc][:management][:ip]}"%>
+LINE_RECEIVER_INTERFACE = <%= @cache_recv_nic %>
 LINE_RECEIVER_PORT = 2003
 
 # Set this to True to enable the UDP listener. By default this is off
@@ -113,14 +113,14 @@ LINE_RECEIVER_PORT = 2003
 # another (rarely used) port for every carbon instance is not fun.
 ENABLE_UDP_LISTENER = False
 # UDP_RECEIVER_INTERFACE = 0.0.0.0
-UDP_RECEIVER_INTERFACE = <%="#{node[:bcpc][:management][:ip]}"%>
+UDP_RECEIVER_INTERFACE = <%= @cache_recv_nic %>
 UDP_RECEIVER_PORT = 2003
 
 # Set the interface and port for the pickle listener.  Setting the interface to
 # 0.0.0.0 listens on all interfaces.  Port can be set to 0 to disable this
 # listener if it is not required.
 # PICKLE_RECEIVER_INTERFACE = 0.0.0.0
-PICKLE_RECEIVER_INTERFACE = <%="#{node[:bcpc][:management][:ip]}"%>
+PICKLE_RECEIVER_INTERFACE = <%= @cache_recv_nic %>
 PICKLE_RECEIVER_PORT = 2004
 
 # Set the interface and port for the protobuf listener.  Setting the interface to
@@ -141,7 +141,7 @@ PICKLE_RECEIVER_PORT = 2004
 USE_INSECURE_UNPICKLER = False
 
 # CACHE_QUERY_INTERFACE = 0.0.0.0
-CACHE_QUERY_INTERFACE = <%="#{node[:bcpc][:management][:ip]}"%>
+CACHE_QUERY_INTERFACE = <%= @cache_query_nic %>
 CACHE_QUERY_PORT = 7002
 
 # Set this to False to drop datapoints received after the cache
@@ -353,11 +353,11 @@ LOG_LISTENER_CONN_SUCCESS = False
 
 [relay]
 # LINE_RECEIVER_INTERFACE = 0.0.0.0
-LINE_RECEIVER_INTERFACE = <%="#{node[:bcpc][:graphite][:ip]}"%>
+LINE_RECEIVER_INTERFACE = <%= @relay_recv_nic %>
 # LINE_RECEIVER_PORT = 2013
 LINE_RECEIVER_PORT = 2013
 # PICKLE_RECEIVER_INTERFACE = 0.0.0.0
-PICKLE_RECEIVER_INTERFACE = <%="#{node[:bcpc][:graphite][:ip]}"%>
+PICKLE_RECEIVER_INTERFACE = <%= @relay_recv_nic %>
 PICKLE_RECEIVER_PORT = 2014
 
 # Carbon-relay has several options for metric routing controlled by RELAY_METHOD
@@ -385,7 +385,7 @@ RELAY_METHOD = consistent-hashing
 # datapoint to more than one machine.
 # REPLICATION_FACTOR = 1
 # TODO: set REPLICATION_FACTOR to min_quorum if > 2 is needed.
-# REPLICATION_FACTOR = <%="#{@min_quorum}"%>
+# REPLICATION_FACTOR = <%= @min_quorum %>
 REPLICATION_FACTOR = 2
 
 # For REPLICATION_FACTOR >=2, set DIVERSE_REPLICAS to True to guarantee replicas
@@ -413,7 +413,7 @@ REPLICATION_FACTOR = 2
 # If using RELAY_METHOD = rules, all destinations used in relay-rules.conf
 # must be defined in this list
 # DESTINATIONS = 127.0.0.1:2004
-DESTINATIONS = <%= "#{@servers.map{|x| x['mgmt_ip']+':2024'}.sort.join(', ')}" %>
+DESTINATIONS = <%= @relay_dests %>
 
 # This define the protocol to use to contact the destination. It can be
 # set to one of "line", "pickle", "udp" and "protobuf". This list can be
@@ -476,7 +476,7 @@ USE_FLOW_CONTROL = True
 # If enabled this setting is used to timeout metric client connection if no
 # metrics have been sent in specified time in seconds
 #METRIC_CLIENT_IDLE_TIMEOUT = None
-METRIC_CLIENT_IDLE_TIMEOUT = <%="#{node[:bcpc][:graphite][:carbon][:relay][:idle_timeout]}"%> 
+METRIC_CLIENT_IDLE_TIMEOUT = <%= @relay_idle_timeout %>
 
 # Set this to True to enable whitelisting and blacklisting of metrics in
 # CONF_DIR/whitelist.conf and CONF_DIR/blacklist.conf. If the whitelist is
@@ -530,12 +530,12 @@ MIN_RESET_INTERVAL=121
 
 [aggregator]
 # LINE_RECEIVER_INTERFACE = 0.0.0.0
-LINE_RECEIVER_INTERFACE = <%="#{node[:bcpc][:management][:ip]}"%>
+LINE_RECEIVER_INTERFACE = <%= @aggr_recv_nic %>
 # LINE_RECEIVER_PORT = 2023
 LINE_RECEIVER_PORT = 2023
 
 # PICKLE_RECEIVER_INTERFACE = 0.0.0.0
-PICKLE_RECEIVER_INTERFACE = <%="#{node[:bcpc][:management][:ip]}"%>
+PICKLE_RECEIVER_INTERFACE = <%= @aggr_recv_nic %>
 PICKLE_RECEIVER_PORT = 2024
 
 # If set true, metric received will be forwarded to DESTINATIONS in addition to
@@ -563,7 +563,7 @@ FORWARD_ALL = True
 # exactly match the webapp's CARBONLINK_HOSTS setting in terms of
 # instances listed (order matters!).
 # DESTINATIONS = 127.0.0.1:2004
-DESTINATIONS = <%="#{node[:bcpc][:management][:ip]+':2004'}"%>
+DESTINATIONS = <%= @aggr_dests %>
 
 # If you want to add redundancy to your data by replicating every
 # datapoint to more than one machine, increase this.
