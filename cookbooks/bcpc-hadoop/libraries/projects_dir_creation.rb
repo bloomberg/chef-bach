@@ -18,29 +18,19 @@ module Bcpc_Hadoop
       # -------------------
       # use default space/ns quota if dir-specific quota unset
       dirinfo_hash = dirinfo.map do |dir, info|
-        owner =
-          info['owner'] ||
-          node['bcpc']['hadoop']['hdfs']['projects']['owner']
-        group =
-          info['group'] ||
-          node['bcpc']['hadoop']['hdfs']['projects']['group']
-        perms =
-          info['perms'] ||
-          node['bcpc']['hadoop']['hdfs']['projects']['perms']
-        space_quota =
-          info['space_quota'] ||
-          node['bcpc']['hadoop']['hdfs']['projects']['space_quota']
-        ns_quota =
-          info['ns_quota'] ||
-          node['bcpc']['hadoop']['hdfs']['projects']['ns_quota']
         [
           dir,
           {
-            owner: owner,
-            group: group,
-            perms: perms,
-            space_quota: space_quota,
-            ns_quota: ns_quota
+            owner: info['owner'] ||
+              node['bcpc']['hadoop']['hdfs']['projects']['owner'],
+            group: info['group'] ||
+              node['bcpc']['hadoop']['hdfs']['projects']['group'],
+            perms: info['perms'] ||
+              node['bcpc']['hadoop']['hdfs']['projects']['perms'],
+            space_quota: info['space_quota'] ||
+              node['bcpc']['hadoop']['hdfs']['projects']['space_quota'],
+            ns_quota: info['ns_quota'] ||
+              node['bcpc']['hadoop']['hdfs']['projects']['ns_quota']
           }
         ]
       end.to_h
