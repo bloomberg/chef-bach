@@ -66,7 +66,7 @@ if node['bach']['maven']['central_mirror']
     value 'mirror' => {
                        'id' => 'primary-mirror',
                        'name' => 'Chef-configured primary mirror',
-                       'mirrorOf' => 'central',
+                       'mirrorOf' => '*',
                        'url' => node['bach']['maven']['central_mirror']
                       }
   end
