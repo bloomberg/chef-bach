@@ -50,9 +50,9 @@ end
 unless (node[:kafka][:broker][:zookeeper][:connect] rescue nil)
   node.default[:kafka][:broker][:zookeeper][:connect] = get_head_nodes.map do |nn|
     if node[:bcpc][:hadoop][:zookeeper].attribute?(:port) && node[:bcpc][:hadoop][:zookeeper][:port] != nil
-      float_host(nn[:fqdn])+":"+node[:bcpc][:hadoop][:zookeeper][:port].to_s
+      nn[:fqdn] + ":"+node[:bcpc][:hadoop][:zookeeper][:port].to_s
     else
-      float_host(nn[:fqdn])
+      nn[:fqdn]
     end
   end.sort
 end
@@ -161,7 +161,7 @@ template kafka_jaas_path do
   source 'kafka/jaas.conf.erb'
   mode 0444
   variables ({
-              principal: "kafka/#{float_host(node[:fqdn])}",
+              principal: "kafka/#{node[:fqdn]}",
               keytab_path: '/etc/security/keytabs/kafka.service.keytab'
              })
 end
