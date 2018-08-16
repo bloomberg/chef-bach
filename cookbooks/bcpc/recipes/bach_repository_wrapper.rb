@@ -33,6 +33,8 @@ node.override['bach']['repository']['chef_server_fqdn'] = chef_server_fqdn
 node.override['bach']['repository']['chef_server_ip'] = chef_server_ip
 node.override['bach']['repository']['chef_url_base'] = URI::HTTP.new(*uri_parts)
 
+# expect a proxy URL
+node.override['bach']['repository']['proxy'] = node['bcpc']['bootstrap']['proxy']
 node.override['bach']['repository']['gem_server'] = "http://#{node['bcpc']['bootstrap']['vip']}/"
 
 # Setup node.run_state hashes for the Apt repos

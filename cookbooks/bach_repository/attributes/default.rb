@@ -28,6 +28,7 @@ default[:bach][:repository][:src_directory] = \
 #
 default[:bach][:repository][:apt_repo_version] = '0.5.0'
 
+default['bach']['repository']['proxy'] = nil
 default['bach']['repository']['bundler_bin'] = '/opt/chefdk/embedded/bin/bundle'
 default['bach']['repository']['gem_bin'] = '/opt/chefdk/embedded/bin/gem'
 default['bach']['repository']['fpm_bin'] = \
