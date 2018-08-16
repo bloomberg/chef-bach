@@ -12,7 +12,6 @@
     "recipe[bcpc-hadoop::hdp_repo]",
     "recipe[bach_krb5::krb5_client]",
     "recipe[hdfsdu::create_user]",
-    "recipe[bcpc-hadoop::bach_backup_wrapper]",
     "recipe[bcpc-hadoop::configs]",
     "recipe[pam::default]",
     "recipe[bach_spark::default]",

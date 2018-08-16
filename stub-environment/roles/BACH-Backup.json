@@ -4,6 +4,7 @@
     "chef_type": "role",
     "json_class": "Chef::Role",
     "run_list": [
+      "recipe[bcpc-hadoop::bach_backup_wrapper]",
       "recipe[bach_backup::default]",
       "recipe[backup::default]",
       "recipe[backup::bootstrap]",
