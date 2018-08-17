@@ -19,6 +19,8 @@
 
 package "apache2"
 
+# This config is only applied to bootstrap node, for providing packages in ~/chef-bcpc/bins/
+# It is not for cluster nodes.
 template '/etc/apache2/sites-available/default.conf' do
     source 'apache-mirror.erb'
     owner 'root'

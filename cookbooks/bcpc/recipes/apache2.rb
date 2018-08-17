@@ -107,3 +107,53 @@ template "/var/www/index.html" do
     group "root"
     mode 00644
 end
+
+# for providing information on services, links, and config files
+directory "#{node['bcpc']['bach_web']['document_root']}" do
+  owner "root"
+  group "root"
+  mode 00755
+  action :create
+end
+
+directory "#{node['bcpc']['bach_web']['document_root']}/files" do
+  owner "root"
+  group "root"
+  mode 00755
+  action :create
+end
+
+template "#{node['bcpc']['bach_web']['document_root']}/index.html" do
+  source "bach.html.erb"
+  owner "root"
+  group "root"
+  mode 00644
+  variables(
+    'cluster_name'  => node.chef_environment,
+    'service_ports' => node['bcpc']['bach_web']['service_ports'],
+    'links'         => node['bcpc']['bach_web']['links'],
+    'files'         => node['bcpc']['bach_web']['files']
+  )
+  notifies :restart, "service[apache2]", :delayed
+end
+
+template "/etc/apache2/sites-available/bach-web.conf" do
+  source 'bach-web.conf.erb'
+  owner 'root'
+  group 'root'
+  mode 0o0644
+  variables(
+    'host_ip'       => node['bcpc']['floating']['ip'],
+    'host_port'     => node['bcpc']['bach_web']['port'],
+    'document_root' => node['bcpc']['bach_web']['document_root'],
+    'files'         => node['bcpc']['bach_web']['files']
+  )
+  notifies :restart, 'service[apache2]', :delayed
+end
+
+bash 'enable_bach_web' do
+  user 'root'
+  code 'a2ensite bach-web'
+  not_if 'test -r /etc/apache2/sites-enabled/bach-web.conf'
+  notifies :restart, 'service[apache2]', :delayed
+end
