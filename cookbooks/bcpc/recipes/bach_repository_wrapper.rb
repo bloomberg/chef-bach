@@ -13,10 +13,13 @@ rescue SocketError => e
   Chef::Log.error("Got: #{e.message}\nTrying to parse: #{uri_parts[2]}\n")
 end
 
-if uri_parts.nil? or uri_parts[2] == '127.0.0.1'
+if uri_parts.nil? or uri_parts[2].start_with? '127'
   uri_parts[2] = node['bcpc']['bootstrap']['server']
 end
 
+chef_server_ip = nil
+
+# see if we are configured to know about the VIP (e.g. it is in DNS or /etc/hosts)
 begin
   chef_server_ip = IPSocket.getaddress(node['bcpc']['bootstrap']['vip'])
 rescue SocketError => e
@@ -25,8 +28,8 @@ rescue SocketError => e
   Chef::Log.error("Got: #{e.message}\nTrying to parse: #{node['bcpc']['bootstrap']['vip']}\n")
 end
 
-if !defined? chef_server_ip or chef_server_ip == '127.0.0.1'
-  chef_server_ip = node['bcpc']['bootstrap']['server'] if chef_server_ip == '127.0.0.1'
+if chef_server_ip.nil? or chef_server_ip.start_with? '127'
+  chef_server_ip = node['bcpc']['bootstrap']['server']
 end
 
 node.override['bach']['repository']['chef_server_fqdn'] = chef_server_fqdn
