@@ -224,7 +224,7 @@ manage_reverse_zones: []
 next_server: <%=
   require 'socket'
   server = IPSocket.getaddress(node['bcpc']['bootstrap']['vip'])
-  server = node['bcpc']['bootstrap']['server'] if server == '127.0.0.1'
+  server = node['bcpc']['bootstrap']['server'] if server.start_with? '127'
   server
 %>
 
@@ -341,7 +341,7 @@ scm_track_mode: "git"
 server: <%=
   require 'socket'
   server = IPSocket.getaddress(node['bcpc']['bootstrap']['vip'])
-  server = node['bcpc']['bootstrap']['server'] if server == '127.0.0.1'
+  server = node['bcpc']['bootstrap']['server'] if server.start_with? '127'
   server
 %>
 
