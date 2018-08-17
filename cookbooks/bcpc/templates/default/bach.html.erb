@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en">
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title><%= @cluster_name %> web page</title>
+  </head>
+  <body>
+    <h2>Cluster: <%= @cluster_name %></h2>
+
+    <% if @service_ports.length > 0 -%>
+    <h3>Ports</h3>
+      <% (@service_ports || {}).each do |service, values| %>
+      <div class="block">
+        <label><%= values['desc'] %>: <%= values['port'] %></label>
+      </div>
+      <% end %>
+    <% end %>
+
+    <% if @links.length > 0 -%>
+    <h3>Links</h3>
+      <% (@links || {}).each do |link, values| %>
+      <div class="block">
+        <label><%= values['desc'] %>: </label>
+        <a href="<%= values['url'] %>"><%= values['url'] %></a>
+      </div>
+      <% end %>
+    <% end %>
+
+    <% if @files.length > 0 -%>
+    <h3>Files</h3>
+      <% (@files || {}).each do |file, values| %>
+      <div class="block">
+        <label><%= values['desc'] %>: </label>
+        <a href="<%= values['path'] %>"><%= values['path'] %></a>
+      </div>
+      <% end %>
+    <% end %>
+  </body>
+</html>

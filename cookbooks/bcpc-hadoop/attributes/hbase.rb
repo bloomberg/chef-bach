@@ -100,3 +100,19 @@ end
 default['bcpc']['hadoop']['hbase']['env'] = {}
 default['bcpc']['hadoop']['hbase']['env']['master_java_agents'] = []
 default['bcpc']['hadoop']['hbase']['env']['regionserver_java_agents'] = []
+
+# hbase bach web attributes
+default['bcpc']['bach_web']['service_ports']['hbase_master_ui'] = {
+  'desc' => 'HBase Master UI port',
+  'port' => '16010'
+}
+default['bcpc']['bach_web']['service_ports']['hbase_rs_ui'] = {
+  'desc' => 'HBase RS UI port',
+  'port' => '60300'
+}
+
+default['bcpc']['bach_web']['conn_lib']['hbase_conn_lib_blacklist'] = []
+default['bcpc']['bach_web']['files']['hbase_conn_lib_blacklist'] = {
+  'desc' => 'HBase conn lib blacklist file',
+  'path' => 'files/hbase/blacklist.conf'
+}
