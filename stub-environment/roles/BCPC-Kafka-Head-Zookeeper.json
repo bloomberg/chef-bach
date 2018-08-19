@@ -15,6 +15,7 @@
   "run_list": [
     "role[Basic]",
     "recipe[bach_krb5::keytab_directory]",
+    "recipe[bach_krb5::krb5_client]",
     "recipe[bcpc_kafka::zookeeper_server]"
   ],
   "description": "Zookeeper Role for Kafka Machines",

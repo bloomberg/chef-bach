@@ -7,6 +7,7 @@ description      'Recipes to setup prerequisites for Kafka cluster'
 long_description IO.read(File.join(File.dirname(__FILE__), 'README.md'))
 version          '0.1.0'
 
+depends 'bach_krb5'
 depends 'bcpc'
 depends 'bcpc-hadoop'
 depends 'bcpc_jmxtrans'
