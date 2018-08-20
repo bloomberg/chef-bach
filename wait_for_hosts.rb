@@ -152,7 +152,8 @@ minutes = 120
 
   target_hosts = ARGV.compact.uniq.sort
   all_installed = installed_hosts.sort & target_hosts
-  contacted_hosts = listening_hosts(all_installed).sort & target_hosts
+  # query all hosts as Apache logs will roll
+  contacted_hosts = listening_hosts(target_hosts).sort & target_hosts
   missing_hosts = (target_hosts - contacted_hosts).sort
 
   booted_hosts_string = booted_hosts[:hosts].map do |host, state|

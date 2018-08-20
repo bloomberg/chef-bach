@@ -48,23 +48,26 @@ RSpec.configure do |config|
 
 end
 
-berks = Berkshelf::Berksfile.from_file('Berksfile').install()
+Berkshelf.ui.mute do
+  berksfile = Berkshelf::Berksfile.from_file('Berksfile')
+  berksfile.vendor('../../vendor/cookbooks')
+end
 
 at_exit { ChefSpec::Coverage.report! }
 
 # Helper function to set all the currently required attributes
 # for the painful default attribute calculations we do
 SET_ATTRIBUTES = Proc.new do |node|
-  node.set['memory']['total'] = 1024
-  node.set['cpu']['total'] = 1
-  node.set[:bcpc] = {}
+  node.automatic['memory']['total'] = 1024
+  node.automatic['cpu']['total'] = 1
+  node.automatic[:bcpc] = {}
   # for bcpc/attributes/default.rb
-  node.set[:lsb][:codename] = 'trusty'
+  node.automatic[:lsb][:codename] = 'trusty'
   # for bcpc-hadoop/attributes/disks.rb
-  node.set[:dmi][:system][:product_name] = 'Not VirtualBox'
+  node.automatic[:dmi][:system][:product_name] = 'Not VirtualBox'
   # for bcpc/attributes/default.rb
-  node.set[:network][:default_interface] = 'eth0'
-  node.set[:network][:interfaces][:eth0] = {'addresses' => {
+  node.automatic[:network][:default_interface] = 'eth0'
+  node.automatic[:network][:interfaces][:eth0] = {'addresses' => {
       '08:00:27:1A:E9:1A' => {
         'family' => 'lladdr'
       },
@@ -78,22 +81,27 @@ SET_ATTRIBUTES = Proc.new do |node|
     }
   }
   # for bcpc-hadoop/attributes/disks.rb
-  node.set[:block_device]
+  node.automatic[:block_device]
   # for bcpc-hadoop/attributes/hbase.rb
-  node.set['bcpc']['floating']['ip'] = '0.0.0.0'
+  node.automatic['bcpc']['floating']['ip'] = '0.0.0.0'
+  node
 end
 
 RSpec.shared_context 'recipe tests', type: :recipe do
 
   let(:chef_run) do
-    ChefSpec::SoloRunner.new(node_attributes){ |n| SET_ATTRIBUTES.call(n) }\
-      .converge(described_recipe)
+    # ensure we do not search when instantiating a search object
+    # https://github.com/chefspec/chefspec/issues/237
+    Chef::Search::Query.any_instance.stub(:search).and_return([])
+    ChefSpec::SoloRunner.new(node_attributes) do |node|
+      SET_ATTRIBUTES.call(node)
+    end.converge(described_recipe)
   end
 
   def node_attributes
     {
       platform: 'ubuntu',
-      version: '12.04',
+      version: '14.04',
     }
   end
 end

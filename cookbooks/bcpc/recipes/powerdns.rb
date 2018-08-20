@@ -24,7 +24,7 @@ if mysql_pdns_password.nil?
   mysql_pdns_password = secure_password
 end
 
-pdns_admins = (get_head_node_names + [get_bootstrap]).join(',')
+pdns_admins = (get_head_node_names + [get_bootstrap] + ['admin']).join(',')
 
 chef_vault_secret "mysql-pdns" do
   data_bag 'os'

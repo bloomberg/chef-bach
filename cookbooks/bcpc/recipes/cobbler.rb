@@ -38,7 +38,7 @@ chef_vault_secret 'cobbler' do
   raw_data('web-password' => web_password,
            'root-password' => root_password,
            'root-password-salted' => root_password_salted)
-  admins node[:fqdn]
+  admins [node[:fqdn], 'admin']
   search '*:*'
   action :create_if_missing
 end
@@ -160,7 +160,7 @@ end
 template '/etc/cobbler/dhcp.template' do
   source 'cobbler/dhcp.template.erb'
   mode 0644
-  variables(subnets: node[:bcpc][:networks])
+  variables(subnets: node[:bcpc][:networks], bootstrap_vip_ip: node['bcpc']['bootstrap']['vip'])
   notifies :run, 'bash[cobbler-sync]', :delayed
 end
 

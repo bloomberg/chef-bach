@@ -18,12 +18,6 @@ bash "update-hbase-conf-alternatives" do
   })
 end
 
-if get_nodes_for("powerdns", "bcpc").length > 0
- dns_server = node[:bcpc][:management][:vip]
-else
- dns_server = node[:bcpc][:dns_servers][0]
-end
-
 template '/etc/hbase/conf/hadoop-metrics2-hbase.properties' do
   source 'hb_hadoop-metrics2-hbase.properties.erb'
   mode 0644
@@ -57,17 +51,26 @@ subnet = node["bcpc"]["management"]["subnet"]
 # Add common hbase-site.xml properties
 #
 generated_values = {
-  'dfs.client.read.shortcircuit' => node["bcpc"]["hadoop"]["hbase"]["shortcircuit"]["read"].to_s,
-  'hbase.master.dns.interface' => node["bcpc"]["networks"][subnet]["floating"]["interface"],
+  'dfs.client.read.shortcircuit' =>
+    node["bcpc"]["hadoop"]["hbase"]["shortcircuit"]["read"].to_s,
+  'hbase.master.dns.interface' =>
+    node["bcpc"]["networks"][subnet]["floating"]["interface"],
+  'hbase.zookeeper.quorum' =>
+    node[:bcpc][:hadoop][:zookeeper][:servers].map do |s|
+      float_host(s[:hostname])
+    end.join(","),
+  'hbase.zookeeper.property.clientPort' =>
+    "#{node[:bcpc][:hadoop][:zookeeper][:port]}",
   'hbase.master.hostname' => float_host(node[:fqdn]),
-  'hbase.master.ipc.address' => node['bcpc']['floating']['ip'],
-  'hbase.master.info.bindAddress' => node['bcpc']['floating']['ip'],
-  'hbase.regionserver.dns.interface' => node["bcpc"]["networks"][subnet]["floating"]["interface"],
-  'hbase.regionserver.hostname' => float_host(node[:fqdn]),
-  'hbase.regionserver.ipc.address' => node['bcpc']['floating']['ip'],
-  'hbase.regionserver.info.bindAddress' => node['bcpc']['floating']['ip'],
-  'hbase.zookeeper.property.clientPort' => "#{node[:bcpc][:hadoop][:zookeeper][:port]}",
-  'hbase.zookeeper.quorum' => node[:bcpc][:hadoop][:zookeeper][:servers].map{ |s| float_host(s[:hostname])}.join(",")
+  'hbase.master.info.bindAddress' =>
+    node['bcpc']['floating']['ip'],
+  'hbase.regionserver.dns.interface' =>
+    node["bcpc"]["networks"][subnet]["floating"]["interface"],
+  'hbase.regionserver.ipc.address' =>
+    node['bcpc']['floating']['ip'],
+  'hbase.master.ipc.address' =>
+    node['bcpc']['floating']['ip'],
+  'hbase.regionserver.hostname' => float_host(node[:fqdn])
 }
 
 # this configuration parameter only belongs in master

@@ -180,6 +180,7 @@ class ClusterAssignRoles
       unless ridley.node.find(node[:fqdn]) && ridley.client.find(node[:fqdn])
         install_stub(node: node)
       end
+      permission_host(node)
 
       #
       # After installing chef-vault in install_stub, we need to
@@ -221,6 +222,8 @@ class ClusterAssignRoles
                            search: 'role:BCPC-Hadoop-Head')
 
     target_head_nodes.each do |node|
+      puts "#{node[:fqdn]}: Permissioning head node"
+      permission_host(node)
       puts "#{node[:fqdn]}: Cheffing head node with partial runlist"
       chef_node_with_runlist(node: node, runlist: partial_runlist)
     end
@@ -250,6 +253,8 @@ class ClusterAssignRoles
                            search: 'role:BCPC-Hadoop-Head*')
 
     target_head_nodes.each do |node|
+      puts "#{node[:fqdn]}: Permissioning head node"
+      permission_host(node)
       puts "#{node[:fqdn]}: Cheffing head node with full runlist"
       chef_node_with_runlist(node: node, runlist: node[:runlist])
     end
@@ -275,6 +280,9 @@ class ClusterAssignRoles
                            search: 'role:BCPC-Kafka-Head-Zookeeper')
 
     target_zk_nodes.each do |node|
+      puts "#{node[:fqdn]}: Permissioning Zookeeper node"
+      permission_host(node)
+
       puts "#{node[:fqdn]}: Cheffing Zookeeper node with full runlist"
       chef_node_with_runlist(node: node, runlist: node[:runlist])
     end
@@ -283,6 +291,58 @@ class ClusterAssignRoles
       puts "#{node[:fqdn]}: Cheffing Kafka node with full runlist"
       chef_node_with_runlist(node: node, runlist: node[:runlist])
     end
+  end
+
+  def permission_host(node)
+    puts "#{node[:fqdn]}: Permissioning node #{node[:fqdn]}"
+
+    # Allow node to modify nodes
+    Bundler.with_clean_env do
+      cc =
+        Mixlib::ShellOut.new('/usr/bin/knife', 'exec',
+                             '/home/vagrant/chef-bcpc/bin/setup_chef_perms.rb',
+                             '-k', '/etc/chef-server/admin.pem',
+                             '-u', 'admin')
+      cc.run_command
+
+      if !cc.status.success?
+        puts cc.stdout
+        $stderr.puts cc.stderr
+        cc.error!
+      end
+
+      # Allow node to create databags
+      cc =
+        Mixlib::ShellOut.new('/usr/bin/knife', 'acl',
+                             'add', 'client', node[:fqdn],
+                             'containers', 'data', 'create,update,delete,grant',
+                             '-k', '/etc/chef-server/admin.pem',
+                             '-u', 'admin')
+      cc.run_command
+
+      if !cc.status.success?
+        puts cc.stdout
+        $stderr.puts cc.stderr
+        cc.error!
+      end
+
+      # Allow node to modify existing databags
+      cc =
+        Mixlib::ShellOut.new('/usr/bin/knife', 'acl', '-y',
+                             'bulk', 'add', 'client', node[:fqdn],
+                             'data', '.*', 'create,update,delete,grant',
+                             '-k', '/etc/chef-server/admin.pem',
+                             '-u', 'admin')
+      cc.run_command
+
+      if !cc.status.success?
+        puts cc.stdout
+        $stderr.puts cc.stderr
+        cc.error!
+      end
+      puts "#{node[:fqdn]}: Chef permissioning successful"
+    end
+
   end
 
   #
@@ -298,6 +358,9 @@ class ClusterAssignRoles
   #
   # Calling install_stub on an already-installed node may upgrade chef
   # and re-set its runlist, but is otherwise harmless.
+  #
+  # Raises: on error
+  # Returns: nothing
   #
   def install_stub(node:, runlist: 'recipe[bcpc::ssh]')
     puts "#{node[:fqdn]}: Installing and configuring chef"
@@ -326,7 +389,7 @@ class ClusterAssignRoles
       Mixlib::ShellOut.new('sudo', '/opt/chefdk/bin/knife', 'bootstrap',
                            '-y',
                            '-E', chef_environment_name,
-                           '-r', runlist,
+                           '-r', 'recipe[bcpc::default]',
                            '-x', 'ubuntu',
                            '-P', cobbler_root_password,
                            '--bootstrap-wget-options', '-e use_proxy=no',
@@ -337,6 +400,8 @@ class ClusterAssignRoles
                            '--no-node-verify-api-cert',
                            '--no-host-key-verify',
                            '-N', node[:fqdn],
+                           '-u', 'admin',
+                           '-k', '/etc/chef-server/admin.pem',
                            '--bootstrap-vault-json', vault_json,
                            node[:ip_address])
     cc.run_command
@@ -348,8 +413,10 @@ class ClusterAssignRoles
       $stderr.puts cc.stderr
       cc.error!
     end
+ 
+    permission_host(node)
 
-    cc.status
+    chef_node_with_runlist(node: node, runlist: runlist, override: false)
   end
 
   def install_stubs(target_nodes)

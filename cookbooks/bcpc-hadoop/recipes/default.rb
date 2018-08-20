@@ -25,7 +25,7 @@ require 'pathname'
 require 'rubygems'
 
 # build requirements for zookeeper
-%w{ruby-dev make patch gcc}.each do |pkg|
+%w{ruby-dev make patch gcc g++}.each do |pkg|
   package pkg do
     action :nothing
   end.run_action(:install)
@@ -36,32 +36,32 @@ package 'libaugeas-dev' do
   action :upgrade
 end
 
-bcpc_chef_gem 'ruby-augeas' do
+chef_gem 'ruby-augeas' do
   compile_time false
 end
 
-bcpc_chef_gem 'poise' do
+chef_gem 'poise' do
   version '~>2.0'
   compile_time true
 end
 
-bcpc_chef_gem 'json' do
+chef_gem 'json' do
   # Due to Zabbixapi #64 otherwise could use 2.0+
   version '~>1.6'
   compile_time true
 end
 
-bcpc_chef_gem 'zookeeper' do
+chef_gem 'zookeeper' do
   version '>0.0'
   compile_time true
 end
 
-bcpc_chef_gem 'webhdfs' do
+chef_gem 'webhdfs' do
   version '>=0.0.0'
   compile_time true
 end
 
-bcpc_chef_gem 'zabbixapi' do
+chef_gem 'zabbixapi' do
   version '>=2.4'
   compile_time true
 end
@@ -79,7 +79,7 @@ end
 # The "--use-system-libraries" switch is intended to force nokogiri
 # extconf.rb to compile against system libraries.
 #
-bcpc_chef_gem 'nokogiri' do
+chef_gem 'nokogiri' do
   options  '-- --use-system-libraries'
   version '>=1.6.2'
   compile_time true

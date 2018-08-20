@@ -13,7 +13,7 @@ bundler_bin = node['bach']['repository']['bundler_bin']
 package 'libaugeas-dev'
 package 'libkrb5-dev'
 
-user = node['bcpc']['bootstrap']['admin']['user']
+user = node['bach']['repository']['build']['user']
 
 directory "#{node['bach']['repository']['repo_directory']}/vendor" do
   owner "#{user}"
@@ -38,12 +38,12 @@ file "#{node['bach']['repository']['repo_directory']}/.bundle/config" do
 end
 
 # https://github.com/bloomberg/chef-bach/issues/874
-paths = %w(.bundle chef-bcpc/vendor/bootstrap chef-bcpc/bootstrap/cache)
+paths = %W(.bundle chef-bcpc/vendor/bootstrap chef-bcpc/bootstrap/cache #{gems_dir} #{bins_dir})
 
-execute 'Coerce Gem bundle permissions' do
+execute 'Coerce Gem and Bins Pre-Run Permissions' do
   cwd "/home/#{user}"
-  command "chown -Rf #{user}:#{user} #{paths.join(' ')}; " \
-    "chmod -Rf u+rw #{paths.join(' ')}"
+  command "chown -Rf #{user}:root #{paths.join(' ')}; " \
+    "chmod -Rf ug+rw #{paths.join(' ')}"
   # Some paths may not exist yet, and that's ok.
   ignore_failure true
 end
@@ -92,16 +92,26 @@ bootstrap_environment =  {
   'PATH' => [::File.dirname(bundler_bin), ENV['PATH']].join(':')
 }
 
+proxy = node['bach']['repository']['proxy']
+if ! proxy.nil?
+  bootstrap_environment['http_proxy'] = proxy
+  bootstrap_environment['https_proxy'] = proxy
+end
+
 execute 'bundler install' do
   cwd node['bach']['repository']['repo_directory']
-  command lazy { node.run_state[:bcpc_bootstrap_bundler_command] }
+  # although implicit we need to be explicit with --path to
+  # work around bundler #4571
+  command lazy { node.run_state[:bcpc_bootstrap_bundler_command] + ' --path #{repo_dir}' }
   environment bootstrap_environment
   user "#{user}"
 end
 
 execute 'bundler package' do
   cwd node['bach']['repository']['repo_directory']
-  command "#{bundler_bin} package"
+  # although implicit we need to be explicit with --path to
+  # work around bundler #4571
+  command "#{bundler_bin} package --path #{repo_dir}"
   environment bootstrap_environment
   user "#{user}"
 end
@@ -110,6 +120,7 @@ end
 # that we can't open a (non-existant) gem in the directory
 directory gems_dir do
   owner "#{user}"
+  group "root"
   mode 0555
 end
 
@@ -127,8 +138,8 @@ execute 'build cluster_def.gem' do
 end
 
 execute 'copy cluster_def gem' do
-  command "cp #{repo_dir}/lib/cluster-def-gem/cluster_def-*.gem #{bins_dir}/gems"
-  creates "#{bins_dir}/gems/cluster_def-0.1.0.gem"
+  command "cp #{repo_dir}/lib/cluster-def-gem/cluster_def-*.gem #{gems_dir}"
+  creates "#{gems_dir}/cluster_def-0.1.0.gem"
 end
 
 execute 'gem-generate-index' do
@@ -150,3 +161,12 @@ execute 'gem-generate-index' do
     end
   end
 end
+
+execute 'Coerce Gem and Bins Update Permissions' do
+  cwd "/home/#{user}"
+  command "chown -Rf #{user}:root #{paths.join(' ')}; " \
+    "chmod -Rf ug+rw #{paths.join(' ')}"
+  ignore_failure true
+end
+
+#

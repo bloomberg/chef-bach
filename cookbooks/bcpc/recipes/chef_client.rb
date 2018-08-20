@@ -35,8 +35,8 @@ if node[:fqdn] == get_bootstrap
     only_if { ::File.symlink?('/etc/chef/client.d') }
   end
 
-  link '/etc/chef/client.pem' do
-    to "/home/#{user}/chef-bcpc/.chef/#{node[:fqdn]}.pem"
+  link "/home/#{user}/chef-bcpc/.chef/#{node[:fqdn]}.pem" do
+    to '/etc/chef/client.pem'
   end
 end
 

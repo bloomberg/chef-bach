@@ -17,6 +17,10 @@
 # limitations under the License.
 #
 
+require 'socket'
+puts node['bcpc']['bootstrap']['vip']
+bootstrap_vip_ip = IPSocket.getaddress(node['bcpc']['bootstrap']['vip'])
+
 user = node['bcpc']['bootstrap']['admin']['user']
 node.default['bcpc']['bootstrap']['is_bootstrap'] = true
 
@@ -48,7 +52,7 @@ require 'rubygems'
 gem_path = Pathname.new(Gem.ruby).dirname.join('gem').to_s
 local_gem_source = 'file:' + node[:bach][:repository][:bins_directory]
 
-bcpc_chef_gem 'ruby-augeas' do
+chef_gem 'ruby-augeas' do
   version '>= 0.0.0'
   compile_time true
 end
@@ -79,8 +83,8 @@ if node[:bcpc][:management][:ip] != node[:bcpc][:management][:vip]
     aug.set("/augeas/load/Interfaces/incl", "/etc/network/interfaces.d/*")
     aug.load
     # Check if an interface file defines the VIP address already -- ifconfig seems a bit loose in its checks
-    if aug.match("/files/etc/network/interfaces.d/*/iface/address[. = '#{node[:bcpc][:bootstrap][:vip]}']").length == 0
-      ifconfig node[:bcpc][:bootstrap][:vip] do
+    if aug.match("/files/etc/network/interfaces.d/*/iface/address[. = '#{bootstrap_vip_ip}']").length == 0
+      ifconfig bootstrap_vip_ip do
         device "#{node[:bcpc][:bootstrap][:pxe_interface]}:0"
         mask "255.255.255.255"
         action [:add]
@@ -91,8 +95,8 @@ if node[:bcpc][:management][:ip] != node[:bcpc][:management][:vip]
   # create a hash of ipaddresses -- skip interfaces without addresses
   ips = ifs.map{ |a| node[:network][:interfaces][a].attribute?(:addresses) and
                      node[:network][:interfaces][a][:addresses] or {}}.reduce({}, :merge)
-  if not ips.keys.include?(node[:bcpc][:bootstrap][:vip])
-    ifconfig node[:bcpc][:bootstrap][:vip] do
+  if not ips.keys.include?(bootstrap_vip_ip)
+    ifconfig bootstrap_vip_ip do
       device "#{node[:bcpc][:bootstrap][:pxe_interface]}:0"
       mask "255.255.255.255"
       action [:enable]

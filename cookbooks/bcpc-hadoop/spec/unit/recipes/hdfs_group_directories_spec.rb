@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe Bcpc_Hadoop::Helper do
+describe_recipe 'recipe[bcpc-hadoop::hdfs_group_directories]' do
   describe '#filter_nonproject_groups & bcpc-hadoop::hdfs_group_directories' do
     let(:dummy_class) do
       Class.new do
@@ -8,13 +8,8 @@ describe Bcpc_Hadoop::Helper do
       end
     end
 
-    # load a bcpc-hadoop recipe to test cookbook attributes cover business rules
-    let(:chef_run) do
-      ChefSpec::SoloRunner.new do |node|
-        Fauxhai.mock(platform: 'ubuntu', version: '12.04')
-        SET_ATTRIBUTES.call(node)
-        node.set[:bcpc][:hadoop][:group_dir_prohibited_groups] = ['^users$', '^svn.*$', '^git.*$', 'dba']
-      end.converge("recipe[bcpc-hadoop::hdfs_group_directories]")
+    before do
+      chef_run.node.default[:bcpc][:hadoop][:group_dir_prohibited_groups] = ['^users$', '^svn.*$', '^git.*$', 'dba']
     end
     let(:node) { chef_run.node }
 

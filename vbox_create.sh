@@ -40,7 +40,7 @@ export CLUSTER_TYPE=${CLUSTER_TYPE:-Hadoop}
 # Cluster VM Defaults
 export CLUSTER_VM_MEM=${CLUSTER_VM_MEM-2048}
 export CLUSTER_VM_CPUs=${CLUSTER_VM_CPUs-1}
-export CLUSTER_VM_EFI=${CLUSTER_VM_EFI:-true}
+export CLUSTER_VM_EFI=${CLUSTER_VM_EFI:-false}
 export CLUSTER_VM_DRIVE_SIZE=${CLUSTER_VM_DRIVE_SIZE-20480}
 
 if !hash vagrant 2> /dev/null ; then
@@ -101,7 +101,7 @@ function snapshotVMs {
   local snapshot_name="$1"
   printf "Snapshotting ${snapshot_name}\n"
   for vm in ${VM_LIST[*]} ${BOOTSTRAP_NAME}; do
-    $VBM snapshot $vm list --machinereadable | grep -q "^SnapshotName=\"${snapshot_name}\"\$" || \
+    $VBM snapshot $vm list --machinereadable | grep -q "^SnapshotName.*=\"${snapshot_name}\"\$" || \
       $VBM snapshot $vm take "${snapshot_name}" &
   done
   wait && printf "Done Snapshotting\n"
@@ -333,7 +333,7 @@ function install_cluster {
   echo "N.B. This may take approximately 30-45 minutes to complete."
   vagrant ssh -c 'sudo rm -f /var/chef/cache/chef-stacktrace.out'
   ./bootstrap_chef.sh --vagrant-remote $ip $environment
-  if vagrant ssh -c 'sudo grep -i no_lazy_load /var/chef/cache/chef-stacktrace.out'; then
+  if vagrant ssh -c 'sudo egrep -i "LoadError: cannot load such file -- cluster_def|no_lazy_load|404 \"Not Found\"" /var/chef/cache/chef-stacktrace.out'; then
       vagrant ssh -c 'sudo rm /var/chef/cache/chef-stacktrace.out' 
   elif vagrant ssh -c 'test -e /var/chef/cache/chef-stacktrace.out' || \
       ! vagrant ssh -c 'test -d /etc/chef-server'; then

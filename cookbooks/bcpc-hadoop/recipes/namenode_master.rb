@@ -249,7 +249,7 @@ ruby_block 'upload-format-UUID-File' do
 
     if ( get_config("jn_txn_fmt").nil? ) || ( cmd.stdout.to_i < node_layout_version )
       make_config!("jn_txn_fmt", Base64.encode64(IO.read("#{Chef::Config[:file_cache_path]}/jn_fmt.tgz")));
-      node.set[:bcpc][:hadoop][:hdfs][:layoutVersion] = cmd.stdout.to_i
+      node.override[:bcpc][:hadoop][:hdfs][:layoutVersion] = cmd.stdout.to_i
       node.save
     elsif cmd.stdout.to_i > node_layout_version
       raise('New HDFS layoutVersion is lower than old HDFS layoutVersion: '\

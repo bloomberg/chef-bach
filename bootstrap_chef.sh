@@ -5,11 +5,6 @@
 # $2 is the IP address of the bootstrap node
 # $3 is the optional knife recipe name, default "Test-Laptop"
 
-if [[ $OSTYPE == msys || $OSTYPE == cygwin ]]; then
-  # try to fix permission mismatch between windows and real unix
-  RSYNCEXTRA="--perms --chmod=a=rwx,Da+x"
-fi
-
 set -e
 
 if [[ $# -gt 1 ]]; then
@@ -95,11 +90,13 @@ echo "Setting up chef cookbooks"
 $SSH_CMD "cd $BCPC_DIR && ./setup_chef_cookbooks.sh ${IP} ${SSH_USER} ${CHEF_ENVIRONMENT}"
 set -x
 echo "Setting up chef environment, roles, and uploading cookbooks"
-$SSH_CMD "cd $BCPC_DIR && sudo knife environment from file environments/${CHEF_ENVIRONMENT}.json -u admin -k /etc/chef-server/admin.pem"
-$SSH_CMD "cd $BCPC_DIR && sudo knife role from file roles/*.json -u admin -k /etc/chef-server/admin.pem; r=\$? && sudo knife role from file roles/*.rb -u admin -k /etc/chef-server/admin.pem; r=\$((r & \$? )) && [[ \$r -lt 1 ]]"
-$SSH_CMD "cd $BCPC_DIR && sudo knife cookbook upload -a -o vendor/cookbooks -u admin -k /etc/chef-server/admin.pem"
+$SSH_CMD "sudo chown vagrant:root /etc/chef-server/admin.pem && sudo chmod 550 /etc/chef-server/admin.pem"
+$SSH_CMD "cd $BCPC_DIR && knife environment from file environments/${CHEF_ENVIRONMENT}.json -u admin -k /etc/chef-server/admin.pem"
+$SSH_CMD "cd $BCPC_DIR && knife role from file roles/*.json -u admin -k /etc/chef-server/admin.pem; r=\$? && knife role from file roles/*.rb -u admin -k /etc/chef-server/admin.pem; r=\$((r & \$? )) && [[ \$r -lt 1 ]]"
+$SSH_CMD "cd $BCPC_DIR && knife cookbook upload -a -o vendor/cookbooks -u admin -k /etc/chef-server/admin.pem"
 
 echo "Enrolling local bootstrap node into chef"
-$SSH_CMD "cd $BCPC_DIR && ./setup_chef_bootstrap_node.sh ${IP} ${CHEF_ENVIRONMENT}"
+$SSH_CMD "cd $BCPC_DIR && source ./proxy_setup.sh && ./setup_chef_bootstrap_node.sh ${IP} ${CHEF_ENVIRONMENT}"
 
+echo "End of bootstrap_chef.sh"
 popd

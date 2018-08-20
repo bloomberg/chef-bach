@@ -11,14 +11,10 @@ elsif File.exist?('/opt/chefdk/Gemfile')
     instance_eval(opscode_gem_data, "/opt/chefdk/Gemfile")
 end
 source 'https://rubygems.org' do
-  gem 'rack'
   gem 'chef'
-  gem 'cheffish'
-  gem 'poise'
-  gem 'nokogiri'
-  gem 'webhdfs'
-  gem 'zookeeper'
-  gem 'equivalent-xml', :require => false, :group => :test
+  gem 'berkshelf'
+  gem 'chefspec'
+  gem 'fauxhai'
   gem 'simplecov', :require => false, :group => :test
   gem 'simplecov-json', :require => false, :group => :test
   gem 'simplecov-rcov', :require => false, :group => :test

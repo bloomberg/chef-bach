@@ -76,7 +76,7 @@ include_recipe 'bcpc-hadoop::jvmkill'
   end
 end
 
-# We need more maps!
+# increase max_map_count -- found Java threads will consume these
 max_maps = node['memory']['total'].to_i / 16
 sysctl_param 'vm.max_map_count' do
   value max_maps

@@ -17,7 +17,7 @@
 # limitations under the License.
 #
 
-bcpc_chef_gem 'chef-vault' do
-  version '>=2.8.0'
+chef_gem 'chef-vault' do
+  version '>=3.3.0'
   compile_time true
 end

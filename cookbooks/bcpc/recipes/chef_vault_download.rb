@@ -25,5 +25,5 @@ log 'vault-download-noop' do
   level :info
 end
 
+include_recipe 'bcpc::bach_repository_wrapper'
 include_recipe 'bach_repository::gems'
-

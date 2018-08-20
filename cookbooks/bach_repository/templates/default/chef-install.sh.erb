@@ -20,14 +20,27 @@ else
     exit 1
 fi
 
-# Remove rubygems and install only our gemserver
-/opt/chef/embedded/bin/gem sources --add http://<%= node['bcpc']['bootstrap']['server'] %>/ || (echo "Failed to add local Gem repo")
-/opt/chef/embedded/bin/gem sources --remove http://rubygems.org/ || true
-/opt/chef/embedded/bin/gem sources --remove https://rubygems.org/ || true
-/opt/chef/embedded/bin/gem sources | grep -q "^http://<%= node['bcpc']['bootstrap']['server'] %>/$" || (echo "Failed to add bootstrap to gem sources")
+# Add in our Chef-Server's hostname to /etc/hosts if we can not resolve it
+if ! getent hosts <%= @chef_server_fqdn %>; then
+  echo "<%= "#{@chef_server_ip}\t#{@chef_server_fqdn}" %>" >> /etc/hosts
+fi
+
+# Stomp /etc/gemrc to not proxy our local Gem server
+# Remove rubygems and install only our gemserver source
+cat > /etc/gemrc << EOH
+:sources:
+- <%= node['bach']['repository']['gem_server'] %>/
+EOH
+
+# Ensure the Chef gem/bundler know where to look too
+mkdir /opt/chef/embedded/etc
+ln -s /etc/gemrc /opt/chef/embedded/etc/gemrc
+
+export "RUBYGEMS_HOST=<%= node['bach']['repository']['gem_server'] %>"
+export "NO_PROXY=<%= node['chef_client']['config']['no_proxy'] %>"
 /opt/chef/embedded/bin/gem install faraday || (echo "Failed to install Faraday"; exit 1)
 /opt/chef/embedded/bin/gem install cluster_def || (echo "Failed to install cluster_def"; exit 1)
 
 # Update chef client configuration
 mkdir -p /etc/chef/client.d || (echo "Failed to create /etc/chef/client.d")
-echo "rubygems_url 'http://<%= node['bcpc']['bootstrap']['server'] %>/'" > /etc/chef/client.d/rubygems_url.rb || (echo "Failed to write rubygems_url file in /etc/chef/client.d")
+echo "rubygems_url '<%= node['bach']['repository']['gem_server'] %>'" > /etc/chef/client.d/rubygems_url.rb || (echo "Failed to write rubygems_url file in /etc/chef/client.d"; exit 1)

@@ -1,0 +1,2 @@
+https://github.com/chef-cookbooks/windows/pull/108
+https://docs.chef.io/deprecations_chef_rest.html

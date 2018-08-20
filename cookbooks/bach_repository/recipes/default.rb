@@ -20,7 +20,6 @@ include_recipe 'bach_repository::diamond'
 include_recipe 'bach_repository::graphite'
 include_recipe 'bach_repository::opentsdb'
 include_recipe 'bach_repository::oracle_java'
-include_recipe 'bach_repository::python_sources'
 include_recipe 'bach_repository::spark'
 include_recipe 'bach_repository::ubuntu'
 

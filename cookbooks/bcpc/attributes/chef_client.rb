@@ -17,8 +17,15 @@ sudo_user = node['bcpc']['bootstrap']['admin']['user']
 # XXX the below keeps breaking Chef12
 # knife default['ohai']['disabled_plugins'] = [ 'passwd' ]
 
+# The bootstrap's Vagrant box comes installed with Chef 11; do not use it
+if node['fqdn'] == get_bootstrap
+  default['chef_client']['bin'] = '/opt/chefdk/bin/chef-client'
+end
 # FIXME No longer needed in chef-client 13.2+
 default['chef_client']['log_rotation']['postrotate'] = '/etc/init.d/chef-client restart >/dev/null || :'
+# Support validatorless bootstrap
+node.rm('chef_client', 'config', 'validation_client_name')
+
 default['chef_client']['config'].tap do |config|
   config['log_level'] = ':info'
   config['log_location'] = 'STDOUT'
@@ -28,11 +35,11 @@ default['chef_client']['config'].tap do |config|
   config['ssl_verify_mode'] = ':verify_none'
   config['chef_server_url'] =
     if node['fqdn'] == get_bootstrap
-      "https://#{node['bcpc']['bootstrap']['server']}"
+      "https://#{[node['bcpc']['bootstrap']['hostname'], node['bcpc']['domain_name']].join('.')}/organizations/#{node.environment.downcase}"
     else
-      "https://#{node['bcpc']['bootstrap']['vip']}"
+      # XXX need to configure Chef-Server for VIP (and add DNS attribute)
+      "https://#{node['bcpc']['bootstrap']['vip']}/organizations/#{node.environment.downcase}"
     end
-
   if node['bcpc']['bootstrap']['proxy']
     config['http_proxy'] = node['bcpc']['bootstrap']['proxy']
     config['https_proxy'] = node['bcpc']['bootstrap']['proxy']
@@ -40,9 +47,17 @@ default['chef_client']['config'].tap do |config|
   end
 
   #
+  # External cookbooks may require arbitrary Gems, do not force the bootstrap
+  # to use the gem mirror intended for cluster nodes
+  #
+  unless node['fqdn'] == get_bootstrap
+    config['rubygems_url'] = node['bach']['repository']['gem_server']
+  end
+
+  #
   # All configuration past this point only applies to the bootstrap node.
   #
-  # Non-bootstrap nodes will never require knife or proxy configurations.
+  # Non-bootstrap nodes will never require knife configurations.
   #
   if node['fqdn'] == get_bootstrap
     config['syntax_check_cache_path'] =

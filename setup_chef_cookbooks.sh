@@ -29,9 +29,7 @@ o.all_plugins(['hostname','ipaddress'])
 log_level                :info
 node_name                o[:fqdn]
 client_key               "$(pwd)/.chef/#{o[:fqdn]}.pem"
-validation_client_name   'chef-validator'
-validation_key           '/etc/chef-server/chef-validator.pem'
-chef_server_url          'https://${BOOTSTRAP_IP}'
+chef_server_url          'https://$(hostname -f)/organizations/${ENVIRONMENT,,}'
 syntax_check_cache_path  '$(pwd)/.chef/syntax_check_cache'
 cookbook_path '$(pwd)/vendor/cookbooks'
 
@@ -40,13 +38,12 @@ verify_api_cert false
 no_lazy_load true
 
 knife[:vault_mode] = 'client'
-File.umask(0007)
 EOF
 
 if [[ -n "$http_proxy" ]]; then
   cat << EOF >> .chef/knife.rb
 no_proxy_array = ["localhost", o[:ipaddress], o[:hostname], o[:fqdn], "${BOOTSTRAP_IP}", "${binary_server_host}", ENV['no_proxy']].compact
-no_proxy_array.insert("*#{o[:domain]}") unless o[:domain].nil?
+no_proxy_array.push("*#{o[:domain]}") unless o[:domain].nil?
 no_proxy_string = no_proxy_array.uniq * ","
 ENV['no_proxy'] = no_proxy_string
 
@@ -65,5 +62,9 @@ ENV['GIT_SSL_NO_VERIFY'] = 'true'
 EOF
 fi # end of [[ ! -f .chef/knife.rb ]]
 
-mkdir -p ./vendor
+# we do not want any knife.rb in our current directory
+pushd /
+knife exec /home/vagrant/chef-bcpc/bin/setup_chef_perms.rb
+popd
+
 /opt/chefdk/bin/berks vendor ./vendor/cookbooks

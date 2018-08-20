@@ -125,7 +125,22 @@ module BACH
         raise "Did not find #{entry[:fqdn]} in Chef index after 180 seconds!"
       end
 
+      # If running on a machine with /etc/chef-server/admin.pem
+      # will use that user
       def ridley
+        # use admin account if available
+        if File.readable?('/etc/chef-server/admin.pem')
+          knife_rb_path = File.join(repo_dir, '.chef', 'knife.rb')
+          config = File.open(knife_rb_path).read
+          config.gsub!(/^client_key .*$/, "client_key '/etc/chef-server/admin.pem'")
+          config.gsub!(/^node_name .*$/, "node_name 'admin'")
+          Dir.mktmpdir('cluster_assign_roles') do |tmpdir|
+            conf_file = File.new(File.join(tmpdir, 'knife.rb'), 'w')
+            conf_file.write(config)
+            conf_file.close
+            @ridley ||= Dir.chdir(tmpdir) { Ridley.from_chef_config }
+          end
+        end
         @ridley ||= Dir.chdir(repo_dir) { Ridley.from_chef_config }
       end
     end
