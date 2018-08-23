@@ -1,5 +1,6 @@
 # vim: tabstop=2:shiftwidth=2:softtabstop=2
 default['hadoop_smoke_tests'] = {}
+default['hadoop_smoke_tests']['oozie_submit_enable'] = true
 default['hadoop_smoke_tests']['app_name'] = 'Oozie-Smoke-Test-Coordinator'
 default['hadoop_smoke_tests']['oozie_hosts'] = ['f-bcpc-vm2.bcpc.example.com']
 default['hadoop_smoke_tests']['oozie_user'] = 'ubuntu'

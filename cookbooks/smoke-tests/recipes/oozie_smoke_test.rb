@@ -124,6 +124,9 @@ ruby_block 'smoke test coordinator status' do
            (line.include? 'RUNNING') }).empty?
       end
     end
+    # no need to interact with command line
+    # we do not plan to submit
+    only_if { node['hadoop_smoke_tests']['oozie_submit_enable'] == true }
 end
 
 ruby_block 'submit oozie smoke test' do
@@ -133,5 +136,8 @@ ruby_block 'submit oozie smoke test' do
       "#{cache_dir}/smoke_test_coordinator.properties"
     )
   end
-  only_if { node.run_state['need_coordinator_submit'] == true }
+  only_if { 
+    node['hadoop_smoke_tests']['oozie_submit_enable'] == true && 
+    node.run_state['need_coordinator_submit'] == true 
+  }
 end
