@@ -19,7 +19,7 @@ if [[ "$(pwd)" != "$(git rev-parse --show-toplevel)" ]]; then
   printf '#### WARNING: This should be run in the git top level directory! ####\n' > /dev/stderr
 fi
 
-export BACH_ENVIRONMENT='Test-Laptop'
+export BACH_ENVIRONMENT=${BACH_ENVIRONMENT:-'Test-Laptop'}
 export BACH_CLUSTER_PREFIX=${BACH_CLUSTER_PREFIX:-''}
 export BOOTSTRAP_VM_MEM=${BOOTSTRAP_VM_MEM:-5096}
 export BOOTSTRAP_VM_CPUs=${BOOTSTRAP_VM_CPUS:-2}
