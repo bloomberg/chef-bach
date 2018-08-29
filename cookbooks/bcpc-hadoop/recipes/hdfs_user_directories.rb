@@ -1,8 +1,18 @@
 Chef::Resource::RubyBlock.send(:include, Bcpc_Hadoop::Helper)
+Chef::Resource::RubyBlock.send(:include, Chef::Mixin::DeepMerge)
 
 ruby_block "hdfs_user_directories" do
   block do
-    # create the /user dirs: mode, dirs, home, perms
-    dir_creation('user', cluster_users + cluster_roles, '/user', '0700')
+
+    # Create directories for existing LDAP users and role accounts.
+    (cluster_users + cluster_roles).each do |user|
+      node.default['bcpc']['hadoop']['hdfs']['user']['dirinfo'].default =
+        deep_merge(
+          node['bcpc']['hadoop']['hdfs']['user']['dirinfo'],
+          Hash[user, ['owner', user]]
+        )
+    end
+
+    dir_creation('user')
   end
 end
