@@ -3,7 +3,7 @@ module Bcpc_Hadoop
     require 'yaml'
     include Chef::Mixin::ShellOut
 
-    def dir_creation(mode, dirs, home, perms)
+    def dir_creation(mode)
       file_cache = File.join(
         Chef::Config[:file_cache_path],
         'cookbooks/bcpc-hadoop',
@@ -12,34 +12,47 @@ module Bcpc_Hadoop
 
       # path to creation script and caches
       jruby_script = File.join(file_cache, 'create_dirs.rb')
-      dir_cache = File.join(file_cache, "#{mode}_list")
-      quota_cache = File.join(file_cache, "#{mode}_quotas.yml")
+      dirinfo_cache = File.join(file_cache, "#{mode}_dirinfo.yml")
 
-      # save dir cache
-      File.open(dir_cache, 'w+') { |f| f.puts(dirs) }
-      puts "dir cache(#{dirs.length}): #{dirs}"
+      # dir creation configuration attributes
+      dirinfo = node['bcpc']['hadoop']['hdfs'][mode]['dirinfo']
+      home = node['bcpc']['hadoop']['hdfs'][mode]['home']
+      puts "\n#{mode}_dir_creation(#{dirinfo.size}): #{dirinfo.keys.to_a}"
 
-      # build quota cache
-      quotas = dirs.map do |dir|
-        quota =
-          # use default quota if dir-specific quota unset
-          node['bcpc']['hadoop']['hdfs'][mode]["#{dir}_space_quota"] ||
-          node['bcpc']['hadoop']['hdfs'][mode]['space_quota']
-        [dir, quota]
+      # Build dirinfo cache
+      # -------------------
+      # use default space/ns quota if dir-specific quota unset
+      dirinfo_hash = dirinfo.map do |dir, info|
+        [
+          dir,
+          {
+            owner: info['owner'] ||
+              node['bcpc']['hadoop']['hdfs'][mode]['owner'],
+            group: info['group'] ||
+              node['bcpc']['hadoop']['hdfs'][mode]['group'],
+            perms: info['perms'] ||
+              node['bcpc']['hadoop']['hdfs'][mode]['perms'],
+            space_quota: info['space_quota'] ||
+              node['bcpc']['hadoop']['hdfs']["#{dir}_space_quota"] ||
+              node['bcpc']['hadoop']['hdfs'][mode]['space_quota'],
+            ns_quota: info['ns_quota'] ||
+              node['bcpc']['hadoop']['hdfs']["#{dir}_ns_quota"] ||
+              node['bcpc']['hadoop']['hdfs'][mode]['ns_quota']
+          }
+        ]
       end.to_h
 
-      # save quota cache
-      File.open(quota_cache, 'w+') { |f| f.puts(quotas.to_yaml) }
+      # Save dirinfo cache
+      File.open(dirinfo_cache, 'w+') { |f| f.puts(dirinfo_hash.to_yaml) }
 
       # allow the hdfs user to read them
-      File.chmod(0644, jruby_script)
-      File.chmod(0644, dir_cache)
-      File.chmod(0644, quota_cache)
+      File.chmod(0o0644, jruby_script)
+      File.chmod(0o0644, dirinfo_cache)
 
       # execute the jruby script
-      jruby_shell = "hbase shell #{jruby_script} "\
-        "#{mode} #{dir_cache} #{quota_cache} #{home} #{perms}"
-      jruby_shell = Mixlib::ShellOut.new(jruby_shell, user: 'hdfs', timeout: 120)
+      jruby_shell_cmd = "hbase shell #{jruby_script} #{home} #{dirinfo_cache}"
+      jruby_shell =
+        Mixlib::ShellOut.new(jruby_shell_cmd, user: 'hdfs', timeout: 120)
       jruby_shell.run_command
       jruby_shell.error!
     end
