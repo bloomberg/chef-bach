@@ -5,12 +5,9 @@ ruby_block "hdfs_user_directories" do
   block do
 
     # Create directories for existing LDAP users and role accounts.
+    dirinfo = node.default['bcpc']['hadoop']['hdfs']['user']['dirinfo']
     (cluster_users + cluster_roles).each do |user|
-      node.default['bcpc']['hadoop']['hdfs']['user']['dirinfo'].default =
-        deep_merge(
-          node['bcpc']['hadoop']['hdfs']['user']['dirinfo'],
-          Hash[user, ['owner', user]]
-        )
+      dirinfo[user] = deep_merge(dirinfo[user], { owner: user })
     end
 
     dir_creation('user')
