@@ -16,21 +16,23 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-package "apache2"
+package 'apache2'
 
 # This config is only applied to bootstrap node, for providing packages in ~/chef-bcpc/bins/
 # It is not for cluster nodes.
 template '/etc/apache2/sites-available/default.conf' do
-    source 'apache-mirror.erb'
-    variables ({ user: node['bcpc']['bootstrap']['admin']['user']})
-    owner 'root'
-    group 'root'
-    mode 00644
-    notifies :restart, 'service[apache2]', :delayed
+  source 'apache-mirror.erb'
+  variables(
+    'user' => node['bcpc']['bootstrap']['admin']['user']
+  )
+  owner 'root'
+  group 'root'
+  mode 0o0644
+  notifies :restart, 'service[apache2]', :delayed
 end
 
 service 'apache2' do
-    action [ :enable, :start ]
+  action [:enable, :start]
 end
 
 link '/etc/apache2/sites-enabled/000-default.conf' do
