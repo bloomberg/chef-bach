@@ -5,12 +5,9 @@ ruby_block "hdfs_group_directories" do
   block do
 
     # Create directories for existing LDAP groups.
+    dirinfo = node.default['bcpc']['hadoop']['hdfs']['groups']['dirinfo']
     (cluster_groups).each do |group|
-      node.default['bcpc']['hadoop']['hdfs']['groups']['dirinfo'].default =
-        deep_merge(
-          node['bcpc']['hadoop']['hdfs']['groups']['dirinfo'],
-          Hash[group, ['group', group]]
-        )
+      dirinfo[group] = deep_merge(dirinfo[group], { group: group })
     end
 
     dir_creation('groups')
