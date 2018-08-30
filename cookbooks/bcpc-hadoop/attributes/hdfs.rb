@@ -121,11 +121,11 @@ end
 # hdfs bach web attributes
 default['bcpc']['bach_web']['service_ports']['namenode_ui'] = {
   'desc' => 'HDFS Namenode UI port',
-  'port' => '50070'
+  'port' => node['bcpc']['hadoop']['namenode']['http']['port']
 }
 default['bcpc']['bach_web']['service_ports']['datanode_ui'] = {
   'desc' => 'HDFS Datanode UI port',
-  'port' => '1006'
+  'port' => node['bcpc']['hadoop']['datanode']['http']['port']
 }
 
 default['bcpc']['bach_web']['conn_lib']['hdfs_conn_lib_blacklist'] = []
