@@ -47,13 +47,15 @@ end
 
 # HDFS Projects Directory Configuration
 default['bcpc']['hadoop']['dir_creation']['projects'].tap do |projects|
+  groups = node['bcpc']['hadoop']['dir_creation']['groups']
+
   # default entry values
   projects['defaults'] = {
     owner: 'hdfs',
     group: 'hdfs',
     perms: '1771',
-    space_quota: node['bcpc']['hadoop']['hdfs']['groups']['space_quota'],
-    ns_quota: node['bcpc']['hadoop']['hdfs']['groups']['ns_quota']
+    space_quota: groups['space_quota'],
+    ns_quota: groups['ns_quota']
   }
 
   projects['dirinfo'] = {

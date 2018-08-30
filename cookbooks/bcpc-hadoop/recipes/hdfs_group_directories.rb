@@ -5,11 +5,12 @@ ruby_block "hdfs_group_directories" do
   block do
     # Default configuration for group directory creation
     groups_dir_creation =
-      node.default['bcpc']['hadoop']['dir_creation']['groups']
+      node['bcpc']['hadoop']['dir_creation']['groups']
 
     # Create directories for existing LDAP groups.
-    # Add dirinfo entries for each user returned by LDAP queries.
-    dirinfo = groups_dir_creation['dirinfo']
+    # Add dirinfo entries for each group returned by LDAP queries.
+    dirinfo =
+      node.default['bcpc']['hadoop']['dir_creation']['groups']['dirinfo']
     (cluster_groups).each do |group|
       space_quota = groups_dir_creation["#{group}_space_quota"]
       ns_quota = groups_dir_creation["#{group}_ns_quota"]
@@ -20,6 +21,10 @@ ruby_block "hdfs_group_directories" do
     end
 
     # Create group directories in /groups.
-    dir_creation('/groups', groups_dir_creation['defaults'], dirinfo)
+    dir_creation(
+      '/groups',
+      node['bcpc']['hadoop']['dir_creation']['groups']['defaults'],
+      node['bcpc']['hadoop']['dir_creation']['groups']['dirinfo']
+    )
   end
 end
