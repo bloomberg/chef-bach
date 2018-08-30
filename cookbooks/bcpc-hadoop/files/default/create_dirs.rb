@@ -4,7 +4,7 @@
 # Run this in an HBase jruby shell
 # -------
 # General usage:
-# hbase shell create_dirs.rb home_dir dirinfo_file
+# hbase shell create_dirs.rb base_dir dirinfo_file
 
 include Java
 
@@ -16,19 +16,19 @@ import org.apache.hadoop.fs.Path
 import org.apache.hadoop.fs.permission.FsPermission
 import org.apache.hadoop.hdfs.protocol.HdfsConstants
 
-usage = "hbase shell #{$FILENAME} home_dir dirinfo_file"
+usage = "hbase shell #{$FILENAME} base_dir dirinfo_file"
 banner = "usage: #{usage}\n  -- need "
 
 config = {
-  'home' => (ARGV[0] or raise "#{banner} home_dir"),
+  'base_dir' => (ARGV[0] or raise "#{banner} base_dir"),
   'dirinfo_file' => (ARGV[1] or raise "#{banner} dirinfo_file")
 }
 
 # hdfs file system handle
 fs = FileSystem.newInstance(Configuration.new)
 
-# create home directory
-path = Path.new(config['home'])
+# create base directory
+path = Path.new(config['base_dir'])
 fs.mkdirs(path)
 fs.setOwner(path, 'hdfs', 'hdfs')
 fs.setPermission(path, FsPermission.new(0775))
@@ -36,7 +36,7 @@ fs.setPermission(path, FsPermission.new(0775))
 # load and parse dirinfo from file
 dirinfo = YAML.load_file(config['dirinfo_file'])
 dirinfo.each_pair do |dir, info|
-  path = Path.new("#{config['home']}/#{dir}")
+  path = Path.new("#{config['base_dir']}/#{dir}")
   puts "updating path: #{path}"
 
   # enforce ownership and permissions
