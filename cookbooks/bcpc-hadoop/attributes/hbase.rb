@@ -49,6 +49,8 @@ default['bcpc']['hadoop']['hbase_master']['xmn']['size'] = 256
 default['bcpc']['hadoop']['hbase_master']['xms']['size'] = 1_024
 default['bcpc']['hadoop']['hbase_master']['xmx']['size'] = 1_024
 default['bcpc']['hadoop']['hbase_master']['mx_dir_mem']['size'] = 256
+default['bcpc']['hadoop']['hbase_master']['http']['port'] = 16010
+default['bcpc']['hadoop']['hbase_rs']['http']['port'] = 60300
 default['bcpc']['hadoop']['hbase_rs']['jmx']['port'] = 10102
 default['bcpc']['hadoop']['hbase_rs']['xmn']['size'] = 256
 default['bcpc']['hadoop']['hbase_rs']['xms']['size'] = 1_024
@@ -104,11 +106,11 @@ default['bcpc']['hadoop']['hbase']['env']['regionserver_java_agents'] = []
 # hbase bach web attributes
 default['bcpc']['bach_web']['service_ports']['hbase_master_ui'] = {
   'desc' => 'HBase Master UI port',
-  'port' => '16010'
+  'port' => node['bcpc']['hadoop']['hbase_master']['http']['port']
 }
 default['bcpc']['bach_web']['service_ports']['hbase_rs_ui'] = {
   'desc' => 'HBase RS UI port',
-  'port' => '60300'
+  'port' => node['bcpc']['hadoop']['hbase_rs']['http']['port']
 }
 
 default['bcpc']['bach_web']['conn_lib']['hbase_conn_lib_blacklist'] = []
