@@ -8,7 +8,8 @@
 Port 22
 # Use these options to restrict which interfaces/protocols sshd will bind to
 #ListenAddress ::
-ListenAddress <%= node[:bcpc][:management][:ip] %>
+AddressFamily <%= @address_family %>
+ListenAddress <%= @listen_address %>
 
 Protocol 2
 # HostKeys for protocol version 2
@@ -64,7 +65,7 @@ ChallengeResponseAuthentication no
 #GSSAPIAuthentication no
 #GSSAPICleanupCredentials yes
 
-X11Forwarding yes
+X11Forwarding <%= @x11_forwarding %>
 X11DisplayOffset 10
 PrintMotd no
 PrintLastLog yes

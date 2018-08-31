@@ -57,7 +57,11 @@ template '/etc/ssh/sshd_config' do
   source 'sshd_config.erb'
   mode 00644
   notifies :restart, 'service[ssh]', :immediately
-  variables lazy {{ listen_address: node[:bcpc][:management][:ip] }}
+  variables lazy { {
+    address_family: node['bcpc']['ssh']['address_family'],
+    listen_address: node[:bcpc][:management][:ip],
+    x11_forwarding: (node['bcpc']['ssh']['x11_forwarding'] ? 'yes' : 'no')
+  } }
 
   # Don't rewrite the file unless we know the listen address is valid!
   only_if {
