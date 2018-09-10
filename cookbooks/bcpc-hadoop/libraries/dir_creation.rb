@@ -6,7 +6,7 @@ module Bcpc_Hadoop
     # Writes a spool yaml file of directory creation information.
     # Calls the JRuby directory creation script with the spool file.
     #
-    # @param [String] base_dir 
+    # @param [String] base_dir
     #   parent directory to generate directories in.
     # @param [Hash] default
     #   default dir_creation parameters
@@ -15,7 +15,7 @@ module Bcpc_Hadoop
     #   perms: default permissions for directories
     #   space_quota: default space_quota for directories
     #   ns_quota: default namespace quota for directories
-    # @param [Hash] dirinfo 
+    # @param [Hash] dirinfo
     #   Hash of dir_creation entries
     def dir_creation(base_dir='/tmp', defaults={}, dirinfo={})
       file_cache = File.join(
@@ -52,7 +52,8 @@ module Bcpc_Hadoop
       File.chmod(0o0644, dirinfo_cache)
 
       # execute the jruby script
-      jruby_shell_cmd = "hbase shell #{jruby_script} #{base_dir} #{dirinfo_cache}"
+      jruby_shell_cmd =
+        "hbase shell #{jruby_script} #{base_dir} #{dirinfo_cache}"
       jruby_shell =
         Mixlib::ShellOut.new(jruby_shell_cmd, user: 'hdfs', timeout: 120)
       jruby_shell.run_command
