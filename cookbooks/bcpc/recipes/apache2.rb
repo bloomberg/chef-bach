@@ -107,7 +107,7 @@ template '/var/www/index.html' do
   mode 0o0644
 end
 
-# for providing information on services, links, and config files
+# bach web document root
 directory node['bcpc']['bach_web']['document_root'].to_s do
   owner 'root'
   group 'root'
@@ -115,14 +115,24 @@ directory node['bcpc']['bach_web']['document_root'].to_s do
   action :create
 end
 
-directory "#{node['bcpc']['bach_web']['document_root']}/files" do
+# bach web configs
+template '/etc/apache2/sites-available/bach-web.conf' do
+  source 'bach-web.conf.erb'
   owner 'root'
   group 'root'
-  mode 0o0755
-  action :create
+  mode 0o0644
+  variables(
+    'host_ip'       => node['bcpc']['floating']['ip'],
+    'host_port'     => node['bcpc']['bach_web']['port'],
+    'document_root' => node['bcpc']['bach_web']['document_root'],
+    'json_url'      => node['bcpc']['bach_web']['json_url'],
+    'json_file'     => node['bcpc']['bach_web']['json_file']
+  )
+  notifies :restart, 'service[apache2]', :delayed
 end
 
-template "#{node['bcpc']['bach_web']['document_root']}/index.html" do
+# A portal html pages for useful links
+template "#{node['bcpc']['bach_web']['document_root']}/#{node['bcpc']['bach_web']['html_file']}" do
   source 'bach.html.erb'
   owner 'root'
   group 'root'
@@ -136,20 +146,22 @@ template "#{node['bcpc']['bach_web']['document_root']}/index.html" do
   notifies :restart, 'service[apache2]', :delayed
 end
 
-template '/etc/apache2/sites-available/bach-web.conf' do
-  source 'bach-web.conf.erb'
-  owner 'root'
-  group 'root'
-  mode 0o0644
-  variables(
-    'host_ip'       => node['bcpc']['floating']['ip'],
-    'host_port'     => node['bcpc']['bach_web']['port'],
-    'document_root' => node['bcpc']['bach_web']['document_root'],
-    'files'         => node['bcpc']['bach_web']['files']
-  )
-  notifies :restart, 'service[apache2]', :delayed
+# A json files that expose the configs for easier consumption programatically.
+# NOTE: node['bcpc']['bach_web'] should NOT contain anything sensitive or confidential 
+#       otherwise a dedicated hash should be used
+file "#{node['bcpc']['bach_web']['document_root']}/#{node['bcpc']['bach_web']['json_file']}" do
+  content Chef::JSONCompat.to_json_pretty(node['bcpc']['bach_web'].to_hash)
 end
 
+
+directory "#{node['bcpc']['bach_web']['document_root']}/files" do
+  owner 'root'
+  group 'root'
+  mode 0o0755
+  action :create
+end
+
+# enable bach-web
 bash 'enable_bach_web' do
   user 'root'
   code 'a2ensite bach-web'
