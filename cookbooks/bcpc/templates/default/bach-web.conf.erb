@@ -5,15 +5,11 @@
 ################################################
 <VirtualHost <%= "#{@host_ip}:#{@host_port}" %>>
 
-  DocumentRoot "<%= @document_root %>"
+  DocumentRoot <%= @document_root %>
 
-  Alias /files <%= @document_root %>/files
-  <Directory <%= @document_root %>/files >
+  <Directory <%= @document_root %> >
     Options -Indexes
   </Directory>
 
-  <% (@files || {}).each do |file, values| %>
-  Alias /<%= values['path'] %> <%= @document_root %>/<%= values['path'] %>
-  <% end %>
-
+  Alias /<%= @json_url %> <%= @document_root %>/<%= @json_file %>
 </VirtualHost>
