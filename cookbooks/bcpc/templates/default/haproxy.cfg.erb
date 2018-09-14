@@ -65,7 +65,7 @@ listen mysql-galera <%= @cluster_vip %>:3306
 <% @ha_services.each do |service| -%>
 listen <%= "#{service['name']} #{@cluster_vip}:#{service['port']}" %>
   balance roundrobin
-  <% if !service['http_check_url'].nil? or !service['http_check_expect_str'].nil? -%>
+  <% if !service['http_check_url'].nil? and !service['http_check_expect_str'].nil? -%>
   option httpchk GET <%= service['http_check_url'] %>
   http-check expect string <%= service['http_check_expect_str'] %>
   <% end -%>
