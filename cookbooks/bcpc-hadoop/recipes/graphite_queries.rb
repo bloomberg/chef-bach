@@ -33,33 +33,33 @@ triggers = {
   'graphite-to-zabbix' => {
     'graphite-to-zabbix.QueryResultEmpty' => {
       'query' => 'graphite-to-zabbix.QueryResultEmpty',
-      'trigger_val' => "max(#{triggers_sensitivity})",
-      'trigger_cond' => '=1',
+      'trigger_val' => "avg(#{triggers_sensitivity})",
+      'trigger_cond' => '>0.2',
       'trigger_name' => 'graphite-to-zabbix_QueryResultEmpty',
       'enable' => true,
-      'trigger_desc' => 'Graphite to zabbix query got empty result',
+      'trigger_desc' => 'More than 20% of graphite_to_zabbix queries returned empty',
       'severity' => 4,
       'route_to' => 'admin',
       'is_graphite_query' => false
     },
     'graphite-to-zabbix.QueryResultError' => {
       'query' => 'graphite-to-zabbix.QueryResultError',
-      'trigger_val' => "max(#{triggers_sensitivity})",
-      'trigger_cond' => '=1',
+      'trigger_val' => "avg(#{triggers_sensitivity})",
+      'trigger_cond' => '>0.2',
       'trigger_name' => 'graphite-to-zabbix_QueryResultError',
       'enable' => true,
-      'trigger_desc' => 'Graphite to zabbix query returned an error',
+      'trigger_desc' => 'More than 20% of graphite_to_zabbix queries returned error',
       'severity' => 4,
       'route_to' => 'admin',
       'is_graphite_query' => false
     },
     'graphite-to-zabbix.QueryResultFormatError' => {
       'query' => 'graphite-to-zabbix.QueryResultFormatError',
-      'trigger_val' => "max(#{triggers_sensitivity})",
-      'trigger_cond' => '=1',
+      'trigger_val' => "avg(#{triggers_sensitivity})",
+      'trigger_cond' => '>0.2',
       'trigger_name' => 'graphite-to-zabbix_QueryResultFormatError',
       'enable' => true,
-      'trigger_desc' => 'Graphite to zabbix query result could not be formatted',
+      'trigger_desc' => 'More than 20% of graphite_to_zabbix queries returned wrong format',
       'severity' => 4,
       'route_to' => 'admin',
       'is_graphite_query' => false
