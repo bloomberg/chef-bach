@@ -54,7 +54,14 @@ template "/etc/haproxy/haproxy.cfg" do
   source "haproxy.cfg.erb"
   mode 00644
   variables(:mysql_servers => get_nodes_for("mysql","bcpc"),
-    :oozie_servers => get_nodes_for("oozie", "bcpc-hadoop"))
+            :oozie_servers => get_nodes_for("oozie", "bcpc-hadoop"),
+            :cluster_vip => node['bcpc']['management']['vip'],
+            :ha_hdfs_master_port => node['bcpc']['ha_hdfs_master']['port'],
+            :ha_hbase_master_port => node['bcpc']['ha_hbase_master']['port'],
+            :hdfs_servers => get_nodes_for("namenode_master","bcpc-hadoop").concat(get_nodes_for("namenode_standby", "bcpc-hadoop")),
+            :hbase_servers => get_nodes_for("hbase_master", "bcpc-hadoop"),
+            :haproxy_tune_chksize => node['bcpc']['haproxy']['tune_chksize']
+           )
   notifies :restart, "service[haproxy]", :immediately
 end
 

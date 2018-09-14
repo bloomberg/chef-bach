@@ -228,6 +228,9 @@ default['bcpc']['zabbix_dbport'] = '3306'
 default['bcpc']['admin_email'] = 'admin@example.com'
 
 default['bcpc']['ha_oozie']['port'] = '11010'
+default['bcpc']['ha_hdfs_master']['port'] = '50070'
+default['bcpc']['ha_hbase_master']['port'] = '16010'
+default['bcpc']['haproxy']['tune_chksize'] = '1000000'
 
 #################################################
 #  attributes for chef vault download and install

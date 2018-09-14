@@ -10,6 +10,8 @@ global
   group  haproxy
   pidfile  /var/run/haproxy.pid
   log /dev/log local0 info
+  # jmx page that is used for httpchk is more than the default size 16384 bytes
+  tune.chksize <%= @haproxy_tune_chksize %>
 
 defaults
   log  global
@@ -53,7 +55,7 @@ listen mysql-galera <%="#{node[:bcpc][:management][:vip]}"%>:3306
   mode tcp
   balance leastconn
   option  tcplog
-option tcpka
+  option tcpka
   option httpchk
 <% @mysql_servers.each do |server| -%>
   <%= "server #{server['hostname']} #{server['bcpc']['management']['ip']}:3306 check port 3307 inter 1s rise 1 fall 1 observe layer4 backup" %>
@@ -74,3 +76,23 @@ backend backend_oozie
   <%= "server #{float_host(server[:fqdn])} #{server['bcpc']['floating']['ip']}:11000 check" %>
 <% end -%>
 <% end -%>
+
+# hdfs master
+listen hdfs-master <%= @cluster_vip %>:<%= @ha_hdfs_master_port %>
+  balance roundrobin
+  option httpchk GET /jmx
+  http-check expect string tag.HAState"\ :\ "active
+  source <%= node[:bcpc][:floating][:ip] %>
+  <% @hdfs_servers.each do |server| -%>
+  <%= "server #{server['hostname']} #{server['bcpc']['floating']['ip']}:#{@ha_hdfs_master_port} check" %>
+  <% end -%>
+
+# hbase master
+listen hbase-master <%= @cluster_vip %>:<%= @ha_hbase_master_port %>
+  balance roundrobin
+  option httpchk GET /jmx
+  http-check expect string tag.isActiveMaster"\ :\ "true
+  source <%= node[:bcpc][:floating][:ip] %>
+  <% @hbase_servers.each do |server| -%>
+  <%= "server #{server['hostname']} #{server['bcpc']['floating']['ip']}:#{@ha_hbase_master_port} check" %>
+  <% end -%>
