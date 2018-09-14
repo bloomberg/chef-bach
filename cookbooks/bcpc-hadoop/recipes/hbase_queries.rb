@@ -27,9 +27,9 @@ node.default[:bcpc][:hadoop][:graphite][:service_queries][:hbase_master] = {
 }
 node.default[:bcpc][:hadoop][:graphite][:service_queries][:hbase_rs] = {
   'hbase_rs.GcTimeMillis' => {
-     'query' => "maxSeries(jmx.hbase_rs.#{node.chef_environment}.*.hb_rs_jvm_metrics.JvmMetrics.GcTimeMillis)",
+     'query' => "averageSeries(derivative(jmx.hbase_rs.#{node.chef_environment}.*.hb_rs_jvm_metrics.JvmMetrics.GcTimeMillis))",
      'trigger_val' => "max(#{triggers_sensitivity})",
-     'trigger_cond' => ">60000",
+     'trigger_cond' => ">#{node[:bcpc][:hadoop][:hbase_rs][:gc_alarm_threshold]}",
      'trigger_name' => "HBaseRSGCTime",
      'enable' => true,
      'trigger_dep' => ["HBaseMasterAvailability"],

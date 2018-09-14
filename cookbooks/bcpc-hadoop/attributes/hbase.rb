@@ -64,6 +64,7 @@ default['bcpc']['hadoop']['hbase_rs']['storefile']['refresh']['all'] = false
 default['bcpc']['hadoop']['hbase_rs']['storefile']['refresh']['period'] = 30_000
 default['bcpc']['hadoop']['hbase_rs']['cmsinitiatingoccupancyfraction'] = 70
 default['bcpc']['hadoop']['hbase_rs']['PretenureSizeThreshold'] = '1m'
+default['bcpc']['hadoop']['hbase_rs']['gc_alarm_threshold'] = 6000 # millis
 
 # Apache Phoenix related attributes
 default['bcpc']['hadoop']['phoenix']['tracing']['enabled'] = false

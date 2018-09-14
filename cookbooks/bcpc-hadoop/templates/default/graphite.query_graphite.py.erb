@@ -17,7 +17,7 @@ class GraphiteToZabbix(object):
     self.graphite_url = "<%= @graphite_url %>/render?format=json"
     self.default_query_range = "<%= @default_query_range %>"
     self.threads = threads
-    self.re_strip_function = re.compile("^(.+\()(.+)(\))$")
+    self.re_strip_function = re.compile("^(.+\()(.*?)(\)+)$")
     # On applying "self.re_strip_function", which index(start=1) in match.groups has the result
     self.re_query_field = 2
     self._main()
