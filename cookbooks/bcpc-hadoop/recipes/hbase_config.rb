@@ -192,4 +192,3 @@ template '/etc/hbase/conf/regionservers' do
 end
 
 include_recipe 'bcpc-hadoop::hbase_env'
-include_recipe 'bcpc-hadoop::hbase_web'

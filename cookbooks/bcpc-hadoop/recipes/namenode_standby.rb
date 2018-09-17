@@ -1,4 +1,5 @@
 include_recipe 'bcpc-hadoop::hadoop_config'
+include_recipe 'bcpc-hadoop::hdfs_web'
 require "base64"
 ::Chef::Recipe.send(:include, Bcpc_Hadoop::Helper)
 ::Chef::Resource::Bash.send(:include, Bcpc_Hadoop::Helper)
