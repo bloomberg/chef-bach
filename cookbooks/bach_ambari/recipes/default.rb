@@ -114,7 +114,7 @@ timeline_server = \
 node.force_default['ambari']['yarn.ats.url'] = timeline_server
 
 oozie_port = node['bcpc']['hadoop']['oozie_port']
-oozie_ha_port = node['bcpc']['ha_oozie']['port']
+oozie_ha_port = node['bcpc']['hadoop']['oozie_ha_port']
 
 oozie_hosts = node.default['bcpc']['hadoop']['oozie_hosts']
 

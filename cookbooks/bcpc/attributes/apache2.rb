@@ -14,3 +14,14 @@ default['bcpc']['bach_web'].tap do |bach_web|
   # extra files to be exposed
   bach_web['files_url'] = 'files'
 end
+
+# haproxy
+default['bcpc']['haproxy']['ha_services'] += [{
+  'name' => 'bach_web',
+  'port' => node['bcpc']['bach_web']['port'],
+  'http_check_url' => '/',
+  'http_check_expect_str' => 'Cluster:',
+  'servers_recipe' => 'haproxy',
+  'servers_cookbook' => 'bcpc',
+  'servers_port' => node['bcpc']['bach_web']['port']
+}]
