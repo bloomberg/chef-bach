@@ -36,21 +36,7 @@ package 'openssh-server' do
 end
 
 service 'ssh' do
-  action :enable
-  ignore_failure true
-end
-
-#
-# The Init::Debian provider fails to start an already-started
-# service on Ubuntu 14.04, due to bugs in their sysvinit
-# compatibility scripts.
-#
-execute '/etc/init.d/ssh start' do
-  action :run
-
-  if node[:lsb][:codename] == 'trusty'
-    ignore_failure true
-  end
+  action [:enable, :start]
 end
 
 template '/etc/ssh/sshd_config' do
