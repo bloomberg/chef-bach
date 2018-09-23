@@ -57,8 +57,9 @@ modified_ha_services = node['bcpc']['haproxy']['ha_services'].map{ |service|
   service.merge({
     'servers' => get_nodes_for(service['servers_recipe'], service['servers_cookbook']).map { |hst|
       {
-        'fqdn' => float_host(hst['fqdn']),
-        'ip' => hst['bcpc']['floating']['ip'],
+        'fqdn' => hst['fqdn'],
+        'floating_fqdn' => float_host(hst['fqdn']),
+        'floating_ip' => hst['bcpc']['floating']['ip'],
         'port' => service['servers_port']
       }
     }
@@ -67,8 +68,8 @@ modified_ha_services = node['bcpc']['haproxy']['ha_services'].map{ |service|
 
 mysql_servers = get_nodes_for("mysql","bcpc").collect { |hst|
   {
-    'fqdn' => float_host(hst['fqdn']),
-    'ip' => hst['bcpc']['floating']['ip']
+    'fqdn' => hst['fqdn'],
+    'ip' => hst['bcpc']['management']['ip']
   }
 }
 
@@ -76,8 +77,10 @@ template "/etc/haproxy/haproxy.cfg" do
   source "haproxy.cfg.erb"
   mode 00644
   variables(:mysql_servers => mysql_servers,
-            :cluster_vip => node['bcpc']['floating']['vip'],
-            :local_ip => node['bcpc']['floating']['ip'],
+            :floating_vip => node['bcpc']['floating']['vip'],
+            :management_vip => node['bcpc']['management']['vip'],
+            :local_management_ip => node['bcpc']['management']['ip'],
+            :local_floating_ip => node['bcpc']['floating']['ip'],
             :haproxy_stats_user => get_config('haproxy-stats-user'),
             :haproxy_stats_pwd => get_config!('password',"haproxy-stats","os"),
             :haproxy_tune_chksize => node['bcpc']['haproxy']['tune_chksize'],
