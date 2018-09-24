@@ -42,7 +42,6 @@ end
 template '/etc/ssh/sshd_config' do
   source 'sshd_config.erb'
   mode 00644
-  notifies :restart, 'service[ssh]', :immediately
   variables lazy { {
     address_family: node['bcpc']['ssh']['address_family'],
     listen_address: node[:bcpc][:management][:ip],
@@ -50,6 +49,7 @@ template '/etc/ssh/sshd_config' do
   } }
 
   # Don't rewrite the file unless we know the listen address is valid!
+  notifies :reload, 'service[ssh]'
   only_if {
     bound_addresses = node[:network][:interfaces]
       .map { |_, ii| ii[:addresses] }
@@ -60,118 +60,82 @@ template '/etc/ssh/sshd_config' do
   }
 end
 
-ssh_key_types = %w{dsa ecdsa ed25519 rsa}
+require 'chef-vault'
 
-# First, try to retrieve existing host keys from the server.
-ruby_block 'get-ssh-secrets-from-server' do
-  block do
-    require 'chef-vault'
-    begin
-      node.run_state[:bcpc_ssh_host_keys] =
-        ChefVault::Item.load('ssh_host_keys', node[:fqdn])
-    rescue Exception => ee
-      # If we fail to load the vault, log the failure and create a vault.
-      Chef::Log.warn("Failed to load ssh_host_keys/#{node[:fqdn]}:\n#{ee}")
-
-      begin
-        vault_item = ChefVault::Item.new('ssh_host_keys', node[:fqdn])
-        vault_item.admins([get_bootstrap, node[:fqdn], 'admin'].join(','))
-        vault_item.search("fqdn:#{node[:fqdn]}")
-        vault_item.save
-        node.run_state[:bcpc_ssh_host_keys] = vault_item
-      rescue Exception => eee
-        # If we also fail to create, this node must not be an admin.
-        Chef::Log.warn('Failed to create new vault ' \
-                       "ssh_host_keys/#{node[:fqdn]}. " \
-                       "Is this node an admin?\n#{eee}")
-      end
-    end
-  end
-  not_if { node[:fqdn] == get_bootstrap }
+def load_ssh_keys
+  ChefVault::Item.load('ssh_host_keys', node[:fqdn])
+rescue Exception => ee
+  Chef::Log.warn("Failed to load ssh_host_keys/#{node[:fqdn]}:\n#{ee}")
+  return nil
 end
 
-#
-# If we failed to get host keys, read the files on disk and write them
-# back to the chef server.
-#
-# (This block will also update the server with new key types.)
-#
-ruby_block 'read-ssh-secrets' do
-  block do
-    vault_item = node.run_state[:bcpc_ssh_host_keys]
-
-    if vault_item.is_a?(ChefVault::Item)
-      ssh_key_types.each do |key_type|
-        private_key_path = "/etc/ssh/ssh_host_#{key_type}_key"
-        public_key_path = "/etc/ssh/ssh_host_#{key_type}_key.pub"
-
-        if vault_item[key_type].nil? && ::File.exist?(private_key_path)
-          Chef::Log.info("Saving #{key_type} for #{node[:fqdn]}")
-          vault_item[key_type] = ::File.read(private_key_path)
-          vault_item.save
-        end
-      end
-    else
-      Chef::Log.warn("No vault item found for ssh_host_keys/#{node[:fqdn]}!")
-    end
-  end
-  not_if { node[:fqdn] == get_bootstrap }
+def create_ssh_keys
+  vault_item = ChefVault::Item.new('ssh_host_keys', node[:fqdn])
+  vault_item.admins([get_bootstrap, node[:fqdn], 'admin'].join(','))
+  vault_item.search("fqdn:#{node[:fqdn]}")
+  vault_item.save
+rescue Exception => eee
+  Chef::Log.warn("Failed to create new vault ssh_host_keys/#{node[:fqdn]}")
+  Chef::Log.warn("Is this node an admin?\n#{eee}")
+  return nil
 end
 
-# If we successfully retrieved host keys, write files to disk and reload SSH.
-ruby_block 'write-ssh-secrets' do
-  block do
-    vault_item = node.run_state[:bcpc_ssh_host_keys]
-
-    if vault_item.is_a?(ChefVault::Item)
-      ssh_key_types.each do |key_type|
-        next unless vault_item[key_type]
-
-        private_key_path = "/etc/ssh/ssh_host_#{key_type}_key"
-        public_key_path = "/etc/ssh/ssh_host_#{key_type}_key.pub"
-
-        # This will contain ascii key data, or nil.
-        existing_key =
-          ::File.exist?(private_key_path) &&
-          ::File.read(private_key_path)
-
-        #
-        # If the private key saved on the server doesn't match the one
-        # on disk, replace it and regenerate the public key.
-        #
-        if vault_item[key_type] != existing_key
-          Chef::Log.info("Replacing #{key_type} host key for #{node[:fqdn]} " \
-                         "with version from vault (ssh_keys/#{node[:fqdn]})")
-
-          Chef::Resource::File.new(private_key_path,
-                                   node.run_context).tap do |ff|
-            ff.user 'root'
-            ff.group 'root'
-            ff.mode '0400'
-            ff.content vault_item[key_type]
-            ff.sensitive true if ff.respond_to?(:sensitive)
-            ff.run_action(:create)
-          end
-
-          Chef::Resource::Execute.new("generate-#{key_type}-public-key",
-                                      node.run_context).tap do |ee|
-            ee.umask 0222
-            ee.command "ssh-keygen -y -f #{private_key_path} > #{public_key_path}"
-            ee.run_action(:run)
-          end
-
-          #
-          # Since we have no run collection for our dynamically
-          # generated resources, we have to use the ruby_block itself
-          # to notify the SSH service.
-          #
-          self.notifies :restart, 'service[ssh]', :immediately
-          self.resolve_notification_references
-        end
-      end
-    else
-      Chef::Log.warn("No vault item found for ssh_host_keys/#{node[:fqdn]}!")
-    end
+if node[:fqdn] != get_bootstrap
+  # First, try to retrieve existing host keys from the vault.
+  # If we fail to load from the vault, log the failure and create an item.
+  # If we also fail to create a vault item, this node may not be an admin.
+  vault_item = load_ssh_keys || create_ssh_keys
+  if vault_item.nil?
+    raise 'Failed to load / create vault item for ssh_host_keys'
   end
-  not_if { node[:fqdn] == get_bootstrap }
+
+  ssh_key_types = %w(dsa ecdsa ed25519 rsa)
+  ssh_key_types.each do |key_type|
+    private_key_path = "/etc/ssh/ssh_host_#{key_type}_key"
+    public_key_path = "/etc/ssh/ssh_host_#{key_type}_key.pub"
+
+    # This will contain ascii key data, or nil.
+    existing_key =
+      File.exist?(private_key_path) &&
+      File.read(private_key_path)
+
+    if vault_item[key_type]
+      # Successfully retrieved host keys from vault
+      # If the private key from vault doesn't match the one on disk,
+      # Replace the file on disk, regenerate the public key and reload SSH.
+      Chef::Log.info("Syncing #{private_key_path} with #{key_type} key from vault")
+
+      file private_key_path do
+        user 'root'
+        group 'root'
+        mode '0400'
+        content vault_item[key_type]
+        sensitive true
+      end
+
+      # Generate a new public key when private key is updated
+      execute "generate-#{key_type}-public-key" do
+        umask 0222
+        command "ssh-keygen -y -f #{private_key_path} > #{public_key_path}"
+        subscribes :run, "file[#{private_key_path}]", :immediately
+        notifies :reload, 'service[ssh]'
+        action :nothing
+      end
+
+    elsif !vault_item[key_type] && existing_key
+      # If we failed to get host keys,
+      # read the files on disk and write them back to the chef server.
+      # (This will also update the server with new key types.)
+      Chef::Log.warn("Can't find #{key_type} key in vault!")
+      Chef::Log.warn("Creating #{key_type} key in vault.")
+      vault_item[key_type] = existing_key
+      vault_item.save
+    else
+      # Neither vault item nor node key exists
+      Chef::Log.warn("Can't find ssh_host_keys/#{node[:fqdn]} in vault!")
+      Chef::Log.warn("#{private_key_path} does not exist either!")
+      Chef::Log.warn("Unsupported Key Type: #{key_type}")
+    end
+
+  end
 end
