@@ -134,7 +134,8 @@ end
 # If HBASE bucket cache is enabled the properties from this section will be included in hbase-site.xml
 #
 bucketcache_size = (node['bcpc']['hadoop']['hbase_rs']['mx_dir_mem']['size'] - node['bcpc']['hadoop']['hbase_rs']['hdfs_dir_mem']['size']).floor
-if node['bcpc']['hadoop']['hbase']['bucketcache']['enabled'] == true
+if node['bcpc']['hadoop']['hbase']['bucketcache']['enabled'] == true &&
+   node['bcpc']['hadoop']['rs_hosts'].map { |rs| rs.values[0] }.include?(node['fqdn'])
   generated_values['hbase.regionserver.global.memstore.upperLimit'] = node['bcpc']['hadoop']['hbase_rs']['memstore']['upperlimit'].to_s
   generated_values['hfile.block.cache.size'] = node['bcpc']['hadoop']['hbase']['blockcache']['size'].to_s
   generated_values['hbase.bucketcache.size'] = bucketcache_size
