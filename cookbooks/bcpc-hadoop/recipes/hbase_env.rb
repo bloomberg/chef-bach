@@ -63,10 +63,6 @@ if node['bcpc']['hadoop']['hbase']['bucketcache']['enabled'] == true
   node.default['bcpc']['hadoop']['hbase']['env']['HBASE_REGIONSERVER_OPTS'] =
     node['bcpc']['hadoop']['hbase']['env']['HBASE_REGIONSERVER_OPTS'] +
     ' -XX:MaxDirectMemorySize=' + node['bcpc']['hadoop']['hbase_rs']['mx_dir_mem']['size'].to_s + 'm'
-
-  node.default['bcpc']['hadoop']['hbase']['env']['HBASE_MASTER_OPTS'] =
-    node['bcpc']['hadoop']['hbase']['env']['HBASE_MASTER_OPTS'] +
-    ' -XX:MaxDirectMemorySize=' + node['bcpc']['hadoop']['hbase_master']['mx_dir_mem']['size'].to_s + 'm'
 end
 
 if node[:bcpc][:hadoop][:kerberos][:enable] == true
