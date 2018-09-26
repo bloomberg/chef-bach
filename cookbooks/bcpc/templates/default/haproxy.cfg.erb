@@ -16,7 +16,7 @@ global
 defaults
   log  global
   maxconn  8000
-  source <%= @local_ip %>
+  source <%= @local_management_ip %>
   mode  http
   option abortonclose
   option tcplog
@@ -31,7 +31,7 @@ defaults
   timeout  client 30m
   timeout  server 30m
 
-listen stats <%= @local_ip%>:1936
+listen stats <%= @local_management_ip%>:1936
   mode http
   stats enable
   stats uri /
@@ -39,17 +39,17 @@ listen stats <%= @local_ip%>:1936
   stats realm Haproxy\ Statistics
   stats auth <%= "#{@haproxy_stats_user}:#{@haproxy_stats_pwd}" %>
 
-listen stats-vip <%= @cluster_vip%>:1936
+listen stats-vip <%= @management_vip%>:1936
   mode http
-  server myself <%= @local_ip %>:1936
+  server myself <%= @local_management_ip %>:1936
 
-listen memcached <%= @cluster_vip %>:11211
+listen memcached <%= @management_vip %>:11211
   mode tcp
   option tcpka
   server myself 127.0.0.1:11211
 
 <% if @mysql_servers.length > 0 -%>
-listen mysql-galera <%= @cluster_vip %>:3306
+listen mysql-galera <%= @management_vip %>:3306
   timeout  client 24h
   timeout  server 24h
   mode tcp
@@ -63,15 +63,15 @@ listen mysql-galera <%= @cluster_vip %>:3306
 <% end -%>
 
 <% @ha_services.each do |service| -%>
-listen <%= "#{service['name']} #{@cluster_vip}:#{service['port']}" %>
+listen <%= "#{service['name']} #{@floating_vip}:#{service['port']}" %>
   balance roundrobin
   <% if !service['http_check_url'].nil? and !service['http_check_expect_str'].nil? -%>
   option httpchk GET <%= service['http_check_url'] %>
   http-check expect string <%= service['http_check_expect_str'] %>
   <% end -%>
-  source <%= @local_ip %>
+  source <%= @local_floating_ip %>
   <% service['servers'].each do |server| -%>
-  <%= "server #{server['fqdn']} #{server['ip']}:#{server['port']} check" %>
+  <%= "server #{server['floating_fqdn']} #{server['floating_ip']}:#{server['port']} check" %>
   <% end -%>
 
 <% end -%>
