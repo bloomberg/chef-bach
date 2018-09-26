@@ -86,6 +86,7 @@ if node[:bcpc][:hadoop][:kerberos][:enable] == true then
      'org.apache.hadoop.hbase.security.token.TokenProvider',
      'org.apache.hadoop.hbase.security.access.SecureBulkLoadEndpoint',
      'org.apache.hadoop.hbase.security.access.AccessController',
+     'org.apache.hadoop.hbase.coprocessor.AggregateImplementation',
      node['bcpc']['hadoop']['hbase']['site_xml'].fetch('hbase.coprocessor.region.classes', nil)
   ].select{|c| c}.join(',')
   regionserver_classes = [
