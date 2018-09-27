@@ -121,11 +121,10 @@ default['bcpc']['haproxy']['ha_services'] += [{
   'name' => 'hbase_master',
   'port' => node['bcpc']['hadoop']['hbase_master']['http']['port'],
   'http_check_url' => '/jmx',
-  'http_check_expect_str' => 'tag.isActiveMaster"\ :\ "true',
+  'http_check_expect_str' => '"tag.isActiveMaster"\ :\ "true"',
   # FIXME: should be replaced by static parsing of cluster.txt
   #        but before the node search is eliminated, use the target recipe to find servers
   #'servers' => [ { 'fqdn' => 'xxx', 'ip' => 'xxx', 'port' => 'xxx' }, ...]
-  'servers_recipe' => 'hbase_master',
-  'servers_cookbook' => 'bcpc-hadoop',
+  'servers_recipes_in_cookbooks' => [{'cookbook' => 'bcpc-hadoop', 'recipe' => 'hbase_master'}],
   'servers_port' => node['bcpc']['hadoop']['hbase_master']['http']['port']
 }]

@@ -50,7 +50,6 @@ default['bcpc']['haproxy']['ha_services'] += [{
   # FIXME: should be replaced by static parsing of cluster.txt
   #        but before the node search is eliminated, use the target recipe to find servers in recipe
   #'servers' => [ { 'hostname' => 'xxx', 'ip' => 'xxx', 'port' => 'xxx' }, ...]
-  'servers_recipe' => 'oozie',
-  'servers_cookbook' => 'bcpc-hadoop',
+  'servers_recipes_in_cookbooks' => [{'cookbook' => 'bcpc-hadoop', 'recipe' => 'oozie'}],
   'servers_port' => node['bcpc']['hadoop']['oozie_port']
 }]
