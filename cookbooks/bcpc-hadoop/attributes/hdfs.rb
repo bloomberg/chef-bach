@@ -126,8 +126,6 @@ default['bcpc']['bach_web']['services']['hdfs'] = {
     'blacklist' => [
       'hadoop.security.group.mapping.ldap.bind.password.file'
     ],
-    'whitelist' => [
-      '.*'
-    ]
+    'whitelist' => nil
   }
 }
