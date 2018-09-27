@@ -7,9 +7,9 @@
   <body>
     <h2>Cluster: <%= @cluster_name %></h2>
 
-    <% if @service_ports.length > 0 -%>
+    <% if @services.length > 0 -%>
     <h3>Ports</h3>
-      <% (@service_ports || {}).each do |service, values| %>
+      <% (@services || {}).each do |service, values| %>
       <div class="block">
         <label><%= values['desc'] %>: <%= values['port'] %></label>
       </div>
