@@ -67,10 +67,10 @@ dirinfo.each_pair do |dir, info|
       'p' => 1024**5
     }
 
-    base = s[/[0-9.]*/].to_i
+    base = s[/[0-9.]*/].to_f
     prefix = prefixes[s[/[kmgtp]/] || '']
 
-    base * prefix
+    (base * prefix).ceil.to_i
   end
 
   # set space and namespace quotas
