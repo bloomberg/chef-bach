@@ -112,9 +112,7 @@ default['bcpc']['bach_web']['services']['hbase'] = {
       'hadoop.security.group.mapping.ldap.bind.password.file',
       'hbase.master.hostname'
     ],
-    'whitelist' => [
-      '.*'
-    ],
+    'whitelist' => nil
   }
 }
 
