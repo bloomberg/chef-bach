@@ -13,4 +13,14 @@ default['bcpc']['bach_web'].tap do |bach_web|
 
   # extra files to be exposed
   bach_web['files_url'] = 'files'
+
+  # links to services (an hash of hashes with structure:
+  # <name>=>{'desc':<desc> and 'url':<url>} to be listed)
+  bach_web['links'] = {}
+  # files to be served from nodes
+  # <name>=>{'desc':<desc> and 'path':<file>} to be listed)
+  # note: file needs to be under the document_root/files directory
+  bach_web['files'] = {}
+  # <name>=>{'desc':<desc> and 'port':<port>} to be listed)
+  bach_web['services'] = {}
 end

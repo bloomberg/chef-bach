@@ -115,17 +115,13 @@ default['bcpc']['hadoop']['hdfs']['site_xml'].tap do |site_xml|
 end
 
 # hdfs bach web attributes
-default['bcpc']['bach_web']['service_ports']['namenode_ui'] = {
-  'desc' => 'HDFS Namenode UI port',
-  'port' => node['bcpc']['hadoop']['namenode']['http']['port']
-}
-default['bcpc']['bach_web']['service_ports']['datanode_ui'] = {
-  'desc' => 'HDFS Datanode UI port',
-  'port' => node['bcpc']['hadoop']['datanode']['http']['port']
-}
-
-default['bcpc']['bach_web']['conn_lib']['hdfs_conn_lib_blacklist'] = []
-default['bcpc']['bach_web']['files']['hdfs_conn_lib_blacklist'] = {
-  'desc' => 'HDFS conn lib blacklist file',
-  'path' => 'files/hdfs/blacklist.conf'
+default['bcpc']['bach_web']['services']['hdfs'] = {
+  'desc' => 'HDFS Namenode',
+  'port' => node['bcpc']['hadoop']['namenode']['http']['port'],
+  'conn_lib' => {
+    'blacklist' => [
+      'hadoop.security.group.mapping.ldap.bind.password.file'
+    ],
+    'whitelist' => nil
+  }
 }
