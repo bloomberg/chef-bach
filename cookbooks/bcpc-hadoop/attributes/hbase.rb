@@ -104,19 +104,16 @@ default['bcpc']['hadoop']['hbase']['env']['master_java_agents'] = []
 default['bcpc']['hadoop']['hbase']['env']['regionserver_java_agents'] = []
 
 # hbase bach web attributes
-default['bcpc']['bach_web']['service_ports']['hbase_master_ui'] = {
-  'desc' => 'HBase Master UI port',
-  'port' => node['bcpc']['hadoop']['hbase_master']['http']['port']
-}
-default['bcpc']['bach_web']['service_ports']['hbase_rs_ui'] = {
-  'desc' => 'HBase RS UI port',
-  'port' => node['bcpc']['hadoop']['hbase_rs']['http']['port']
-}
-
-default['bcpc']['bach_web']['conn_lib']['hbase_conn_lib_blacklist'] = []
-default['bcpc']['bach_web']['files']['hbase_conn_lib_blacklist'] = {
-  'desc' => 'HBase conn lib blacklist file',
-  'path' => 'files/hbase/blacklist.conf'
+default['bcpc']['bach_web']['services']['hbase'] = {
+  'desc' => 'HBase Master',
+  'port' => node['bcpc']['hadoop']['hbase_master']['http']['port'],
+  'conn_lib' => {
+    'blacklist' => [
+      'hadoop.security.group.mapping.ldap.bind.password.file',
+      'hbase.master.hostname'
+    ],
+    'whitelist' => nil
+  }
 }
 
 # haproxy

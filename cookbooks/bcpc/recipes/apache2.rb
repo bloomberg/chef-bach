@@ -139,7 +139,7 @@ template "#{node['bcpc']['bach_web']['document_root']}/#{node['bcpc']['bach_web'
   mode 0o0644
   variables(
     'cluster_name'  => node.chef_environment,
-    'service_ports' => node['bcpc']['bach_web']['service_ports'],
+    'services'      => node['bcpc']['bach_web']['services'],
     'links'         => node['bcpc']['bach_web']['links'],
     'files'         => node['bcpc']['bach_web']['files']
   )
@@ -147,7 +147,7 @@ template "#{node['bcpc']['bach_web']['document_root']}/#{node['bcpc']['bach_web'
 end
 
 # A json files that expose the configs for easier consumption programatically.
-# NOTE: node['bcpc']['bach_web'] should NOT contain anything sensitive or confidential 
+# NOTE: node['bcpc']['bach_web'] should NOT contain anything sensitive or confidential
 #       otherwise a dedicated hash should be used
 file "#{node['bcpc']['bach_web']['document_root']}/#{node['bcpc']['bach_web']['json_file']}" do
   content Chef::JSONCompat.to_json_pretty(node['bcpc']['bach_web'].to_hash)

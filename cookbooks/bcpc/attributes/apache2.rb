@@ -22,7 +22,7 @@ default['bcpc']['bach_web'].tap do |bach_web|
   # note: file needs to be under the document_root/files directory
   bach_web['files'] = {}
   # <name>=>{'desc':<desc> and 'port':<port>} to be listed)
-  bach_web['files'] = {}
+  bach_web['services'] = {}
 end
 
 # haproxy
