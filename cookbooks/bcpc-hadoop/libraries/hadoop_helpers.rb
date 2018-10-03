@@ -29,7 +29,7 @@ module Bcpc_Hadoop
           q.parent['name'] = queue_name
           # process minResource, weight, etc. tags under the queue
           queue_definition.select do |k, v|
-            !Set.new(non_render_attributes).include?(k) && !v.nil?
+            !Set.new(non_render_attributes).include?(k.to_sym) && !v.nil?
           end.each do |k,v|
             q.send(k) do |attr|
               attr.text v.to_s
