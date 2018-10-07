@@ -1,7 +1,6 @@
 ::Chef::Recipe.send(:include, Bcpc_Hadoop::Helper)
 ::Chef::Resource::Bash.send(:include, Bcpc_Hadoop::Helper)
 include_recipe 'bcpc-hadoop::hbase_config'
-include_recipe 'bcpc-hadoop::hbase_web'
 include_recipe 'bcpc-hadoop::hbase_queries'
 
 #
