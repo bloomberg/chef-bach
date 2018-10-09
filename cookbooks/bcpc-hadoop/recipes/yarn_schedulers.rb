@@ -12,10 +12,20 @@ fair_share_queue "default" do
 end
 
 file "/etc/hadoop/conf/fair-scheduler.xml" do
-  content lazy {fair_scheduler_xml(node.run_state[:fair_scheduler_queue] || [],
-    node[:bcpc][:hadoop][:yarn][:fairSchedulerOpts],
-    node[:bcpc][:hadoop][:yarn][:queuePlacementPolicy])}
   mode 0644
+  content lazy {
+    # Merge the fair_scheduler_queue environment overrides
+    # into the definitions from fair_scheduler_queue resources.
+    # Definitions in the node attribute take precedence over the resources.
+    queue_defs = node.run_state[:fair_scheduler_queue] || {}
+    queue_overrides = node[:bcpc][:hadoop][:yarn][:fair_scheduler_queue] || {}
+
+    fair_scheduler_xml(
+      queue_defs.merge(queue_overrides),
+      node[:bcpc][:hadoop][:yarn][:fairSchedulerOpts],
+      node[:bcpc][:hadoop][:yarn][:queuePlacementPolicy]
+    )
+  }
 end
 
 template "/etc/hadoop/conf/capacity-scheduler.xml" do
