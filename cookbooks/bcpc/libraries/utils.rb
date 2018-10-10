@@ -257,12 +257,20 @@ def get_nodes_for(recipe, cookbook=cookbook_name)
     :node, "recipes:#{cookbook}\\:\\:#{recipe} AND " \
     "chef_environment:#{node.chef_environment}").first do |x|
       x['hostname'] == node[:hostname] ? node : x
-  end
-  if node.run_list.expand(node.chef_environment).recipes. \
+   end
+   if node.run_list.expand(node.chef_environment).recipes. \
      include?("#{cookbook}::#{recipe}") and not results.include?(node)
-    results.push(node)
+     results.push(node)
+   end
+   return results.sort
+ end
+
+def get_nodes_for_multi(recipes_in_cookbooks)
+  results = []
+  recipes_in_cookbooks.each do |recipe_n_cookbook|
+    results += get_nodes_for(recipe_n_cookbook['recipe'], recipe_n_cookbook['cookbook'])
   end
-  return results.sort
+  return results.uniq.sort
 end
 
 #

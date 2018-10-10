@@ -55,7 +55,7 @@ end
 #        and passed to here directly via 'servers'
 modified_ha_services = node['bcpc']['haproxy']['ha_services'].map{ |service|
   service.merge({
-    'servers' => get_nodes_for(service['servers_recipe'], service['servers_cookbook']).map { |hst|
+    'servers' => get_nodes_for_multi(service['servers_recipes_in_cookbooks']).map { |hst|
       {
         'fqdn' => hst['fqdn'],
         'floating_fqdn' => float_host(hst['fqdn']),

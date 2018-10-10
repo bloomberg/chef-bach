@@ -129,3 +129,19 @@ default['bcpc']['bach_web']['services']['hdfs'] = {
     'whitelist' => nil
   }
 }
+
+# haproxy
+default['bcpc']['haproxy']['ha_services'] += [{
+  'name' => 'hdfs_namenode',
+  'port' => node['bcpc']['hadoop']['namenode']['http']['port'],
+  'http_check_url' => '/jmx',
+  'http_check_expect_str' => '"tag.HAState"\ :\ "active"',
+  # FIXME: should be replaced by static parsing of cluster.txt
+  #        but before the node search is eliminated, use the target recipe to find servers
+  #'servers' => [ { 'fqdn' => 'xxx', 'ip' => 'xxx', 'port' => 'xxx' }, ...]
+  'servers_recipes_in_cookbooks' => [
+    {'cookbook' => 'bcpc-hadoop', 'recipe' => 'namenode_master'},
+    {'cookbook' => 'bcpc-hadoop', 'recipe' => 'namenode_standby'}
+  ],
+  'servers_port' => node['bcpc']['hadoop']['namenode']['http']['port']
+}]
