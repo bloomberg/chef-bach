@@ -129,8 +129,8 @@ default['bcpc']['hadoop']['services'] = {
     key: :rm_hosts,
     role: 'role[BCPC-Hadoop-Head-ResourceManager]',
   },
-  job_history_server: {
-    key: :jh_hosts,
+  history_server: {
+    key: :hs_hosts,
     role: 'role[BCPC-Hadoop-Head-MapReduce]',
   },
 
