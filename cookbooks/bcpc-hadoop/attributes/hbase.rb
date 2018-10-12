@@ -116,12 +116,6 @@ default['bcpc']['bach_web']['services']['hbase'] = {
   }
 }
 
-default['bcpc']['bach_web']['conn_lib']['hbase_conn_lib_blacklist'] = []
-default['bcpc']['bach_web']['files']['hbase_conn_lib_blacklist'] = {
-  'desc' => 'HBase conn lib blacklist file',
-  'path' => 'files/hbase/blacklist.conf'
-}
-
 # haproxy
 default['bcpc']['haproxy']['ha_services'] += [{
   'name' => 'hbase_master',
