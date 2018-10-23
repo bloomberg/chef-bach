@@ -47,7 +47,7 @@ end
 
 # HDFS Projects Directory Configuration
 default['bcpc']['hadoop']['dir_creation']['projects'].tap do |projects|
-  groups = node['bcpc']['hadoop']['dir_creation']['groups']
+  groups = node['bcpc']['hadoop']['dir_creation']['groups']['defaults']
 
   # default entry values
   projects['defaults'] = {
