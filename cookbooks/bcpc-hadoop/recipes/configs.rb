@@ -44,7 +44,7 @@ end
 
 # Reboot on kernel panic
 sysctl_param 'kernel.panic' do
-  value 10
+  value 1800
 end
 
 # Populate node attributes for all kind of hosts
