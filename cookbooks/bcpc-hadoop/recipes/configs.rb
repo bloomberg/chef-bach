@@ -42,6 +42,11 @@ sysctl_param 'vm.swappiness' do
   value 0
 end
 
+# Reboot on kernel panic
+sysctl_param 'kernel.panic' do
+  value 10
+end
+
 # Populate node attributes for all kind of hosts
 set_hosts
 node.override['locking_resource']['zookeeper_servers'] = \
