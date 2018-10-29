@@ -39,7 +39,7 @@ udevadm settle --timeout=30
   end
 
   candidate_disks_glob = driver_globs.join(' ') +
-    '/dev/sd[a-z] /dev/sd[a-z][a-z]'
+    ' /dev/sd[a-z] /dev/sd[a-z][a-z] /dev/nvme*[0-9]n*[0-9]'
 %>
 ##
 ## After creating the symlinks with udev, we create a glob that places
@@ -55,13 +55,16 @@ udevadm settle --timeout=30
 ## shell.  This degenerate example of the 'for' loop will leave the
 ## first value in the $candidate_disk variable.
 ##
-for candidate_disk in <%= candidate_disks_glob %>
-do break; done
+for candidate_disk in <%= candidate_disks_glob %>; do
+  if [ -e \$candidate_disk ]; then
+    break
+  fi
+done
 
 ##
 ## All candidate disk filenames are the original kernel name (the %k
 ## substitution), so we can fulfill the contract with partman-auto by
 ## taking the basename and pre-pending "/dev/" to the front.
 ##
-devname=/dev/`basename \$candidate_disk`
+devname="/dev/\$(basename \$candidate_disk)"
 debconf-set partman-auto/disk \$devname
