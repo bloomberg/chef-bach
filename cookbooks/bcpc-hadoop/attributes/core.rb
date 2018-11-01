@@ -21,6 +21,8 @@ default[:bcpc][:hadoop][:core][:site_xml].tap do |site_xml|
   site_xml['hadoop.proxyuser.oozie.groups'] = '*'
   site_xml["hadoop.proxyuser.#{ambari_proxy_user}.hosts"] = '*'
   site_xml["hadoop.proxyuser.#{ambari_proxy_user}.groups"] = '*'
+  site_xml["hadoop.proxyuser.yarn.hosts"] = '*'
+  site_xml["hadoop.proxyuser.yarn.groups"] = '*'
 
   site_xml['hadoop.user.group.static.mapping.overrides'] =
     'hdfs=hadoop,hdfs;yarn=mapred,hadoop;mapred=mapred;'
