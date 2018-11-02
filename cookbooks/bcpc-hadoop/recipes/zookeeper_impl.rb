@@ -5,6 +5,9 @@
 
 include_recipe 'bcpc-hadoop::zookeeper_packages'
 
+# ensure we do not make polyinstantation directories for the zookeepers
+node.default['bcpc']['pam_namespace']['real_home_dir_users'] += ['zookeepers']
+
 user_ulimit 'zookeeper' do
   filehandle_limit 65_536
 end

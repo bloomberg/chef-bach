@@ -24,6 +24,9 @@ node.default['bcpc']['hadoop']['copylog'].tap do |copylog|
   }
 end
 
+# ensure we do not make polyinstantation directories for hdfs
+node.default['bcpc']['pam_namespace']['real_home_dir_users'] += ['hdfs']
+
 # shortcut to the desired HDFS command version
 hdfs_cmd = "/usr/hdp/#{node[:bcpc][:hadoop][:distribution][:active_release]}/"\
            'hadoop-hdfs/bin/hdfs'

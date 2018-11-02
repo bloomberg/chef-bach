@@ -3,6 +3,9 @@ include_recipe 'bcpc-hadoop::httpfs_config'
 ::Chef::Recipe.send(:include, Bcpc_Hadoop::Helper)
 ::Chef::Resource::Bash.send(:include, Bcpc_Hadoop::Helper)
 
+# ensure we do not make polyinstantation directories for httpfs
+node.default['bcpc']['pam_namespace']['real_home_dir_users'] += ['httpfs']
+
 package hwx_pkg_str("hadoop-httpfs", node[:bcpc][:hadoop][:distribution][:release]) do
   action :install
 end

@@ -6,6 +6,8 @@ include_recipe "bcpc-hadoop::hive_table_stat"
 ::Chef::Recipe.send(:include, Bcpc_Hadoop::Helper)
 ::Chef::Resource::Bash.send(:include, Bcpc_Hadoop::Helper)
 
+# ensure we do not make polyinstantation directories for hive
+node.default['bcpc']['pam_namespace']['real_home_dir_users'] += ['hive']
 %w{hadooplzo hadooplzo-native hive-hcatalog}.map do |pp|
   hwx_pkg_str(pp, node[:bcpc][:hadoop][:distribution][:release])
 end.each do |pkg|

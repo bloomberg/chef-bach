@@ -2,8 +2,6 @@ require 'base64'
 ::Chef::Recipe.send(:include, Bcpc_Hadoop::Helper)
 
 include_recipe 'bcpc-hadoop::default'
-# NOTE: This include_recipe is necessary for resource collection
-include_recipe 'sysctl::default'
 
 # disable IPv6 (e.g. for HADOOP-8568)
 case node['platform_family']
@@ -17,34 +15,6 @@ when 'debian'
   end
 else
   Chef::Log.warn '============ Unable to disable IPv6 for non-Debian systems'
-end
-
-# ensure we use /etc/security/limits.d to allow ulimit overriding
-if !node.key?('pam_d') || !node['pam_d'].key?('services') || !node['pam_d']['services'].key?('common-session')
-  node.default['pam_d']['services'] = {
-    'common-session' => {
-      'main' => {
-        'pam_permit_default' => { 'interface' => 'session', 'control_flag' => '[default=1]', 'name' => 'pam_permit.so' },
-        'pam_deny' => { 'interface' => 'session', 'control_flag' => 'requisite', 'name' => 'pam_deny.so' },
-        'pam_permit_required' => { 'interface' => 'session', 'control_flag' => 'required', 'name' => 'pam_permit.so' },
-        'pam_limits' => { 'interface' => 'session', 'control_flag' => 'required', 'name' => 'pam_limits.so' },
-        'pam_umask' => { 'interface' => 'session', 'control_flag' => 'optional', 'name' => 'pam_umask.so' },
-        'pam_unix' => { 'interface' => 'session', 'control_flag' => 'required', 'name' => 'pam_unix.so' }
-      },
-      'includes' => []
-    }
-  }
-end
-
-# set vm.swapiness to 0 (to lessen swapping)
-# NOTE: See above for note about resource collection
-sysctl_param 'vm.swappiness' do
-  value 0
-end
-
-# Reboot on kernel panic
-sysctl_param 'kernel.panic' do
-  value 1800
 end
 
 # Populate node attributes for all kind of hosts

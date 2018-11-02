@@ -250,3 +250,8 @@ default['bcpc']['jmxtrans_agent']['lib_file_checksum'] = 'd351ac0b863ffb27424770
 # sshd_config
 default['bcpc']['ssh']['address_family'] = 'inet'
 default['bcpc']['ssh']['x11_forwarding'] = false
+
+# pam config
+default['bcpc']['pam_namespace']['real_home_dir_users'] = ['root', 'ubuntu']
+default['bcpc']['pam_namespace']['shm_polyinstantion_dir'] = 'inst-dir'
+default['bcpc']['pam_namespace']['polyinstantion_dir'] = File.join('/', node['bcpc']['pam_namespace']['shm_polyinstantion_dir'])

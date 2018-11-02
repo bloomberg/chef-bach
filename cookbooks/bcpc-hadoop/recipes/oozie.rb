@@ -27,6 +27,9 @@ include_recipe 'bcpc-hadoop::oozie_config'
 ::Chef::Recipe.send(:include, Bcpc_Hadoop::Helper)
 ::Chef::Resource::Bash.send(:include, Bcpc_Hadoop::Helper)
 
+# ensure we do not make polyinstantation directories for oozie
+node.default['bcpc']['pam_namespace']['real_home_dir_users'] += ['oozie']
+
 #
 # These data bags and vault items are pre-populated at compile time by
 # the bcpc::mysql_data_bags recipe.

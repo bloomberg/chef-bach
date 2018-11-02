@@ -10,6 +10,9 @@ node.default['bcpc']['hadoop']['copylog']['datanode'] = {
   'docopy' => true
 }
 
+# ensure we do not make polyinstantation directories for hdfs and yarn
+node.default['bcpc']['pam_namespace']['real_home_dir_users'] += ['hdfs', 'yarn']
+
 hdp_select_pkgs = %w(hadoop-yarn-nodemanager hadoop-hdfs-datanode hadoop-client)
 
 hdp_pkg_strs = (hdp_select_pkgs + %w(

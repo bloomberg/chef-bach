@@ -1,0 +1,11 @@
+# /etc/security/namespace.conf
+#
+#############################
+# This file managed by Chef #
+#############################
+#
+#masked mnt point   real mnt point               isolation-level    excluded users
+/var/tmp            <%= @polyinstantion_dir %>/var_tmp_           user              root
+$HOME               <%= @polyinstantion_dir %>/home_              user              <%= @real_home_dir_users %>
+/tmp                <%= @polyinstantion_dir %>/tmp_               user              root
+/dev/shm            /dev/shm/<%= @shm_polyinstantion_dir %>/inst_      user              root

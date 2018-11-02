@@ -20,6 +20,9 @@
 
 test_user = node['hadoop_smoke_tests']['oozie_user']
 
+# ensure we do not make polyinstantation directories for the Smoke Tests
+node.default['bcpc']['pam_namespace']['real_home_dir_users'] += [test_user]
+
 # create a local user and group if needed
 user test_user do
   manage_home true

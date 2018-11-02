@@ -4,6 +4,9 @@ include_recipe 'bcpc-hadoop::phoenixqs_kerberos'
 
 qs_runas = node['bcpc']['hadoop']['phoenix']['phoenixqs']['username']
 
+# ensure we do not make polyinstantation directories for PQS
+node.default['bcpc']['pam_namespace']['real_home_dir_users'] += [qs_runas]
+
 user qs_runas do
   comment 'Runs phoenix queryserver'
   only_if { node['bcpc']['hadoop']['phoenix']['phoenixqs']['localuser'] }

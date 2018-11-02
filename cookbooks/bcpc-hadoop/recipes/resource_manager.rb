@@ -2,6 +2,9 @@ include_recipe 'bcpc-hadoop::hadoop_config'
 ::Chef::Recipe.send(:include, Bcpc_Hadoop::Helper)
 ::Chef::Resource::Bash.send(:include, Bcpc_Hadoop::Helper)
 
+# ensure we do not make polyinstantation directories for YARN
+node.default['bcpc']['pam_namespace']['real_home_dir_users'] += ['yarn']
+
 ruby_block 'create-yarn-directories' do
   block do
     node.run_state['bcpc_hadoop_disks']['mounts'].each do |disk_number|

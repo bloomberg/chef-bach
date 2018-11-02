@@ -12,8 +12,6 @@ depends 'bcpc'
 depends 'bcpc-hadoop'
 depends 'bcpc_jmxtrans'
 depends 'kafka', '>= 2.2.2'
-depends 'pam'
-depends 'sysctl'
 depends 'ulimit'
 
 %w(ubuntu).each do |os|

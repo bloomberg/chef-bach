@@ -8,6 +8,9 @@ include_recipe 'bcpc-hadoop::hadoop_config'
   end
 end
 
+# ensure we do not make polyinstantation directories for the yarn
+node.default['bcpc']['pam_namespace']['real_home_dir_users'] += ['yarn']
+
 hdp_select('hadoop-mapreduce-historyserver', node[:bcpc][:hadoop][:distribution][:active_release])
 
 service "hadoop-yarn-proxyserver" do 

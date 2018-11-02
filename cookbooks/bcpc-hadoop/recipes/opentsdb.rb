@@ -35,4 +35,7 @@ node.force_default['bach_opentsdb']['hbase_master_princ'] =
 node.force_default['bach_opentsdb']['hbase_region_princ'] =
   "hbase/_HOST@#{krb_realm}"
 
+# ensure we do not make polyinstantation directories for opentsdb
+node.default['bcpc']['pam_namespace']['real_home_dir_users'] += [node['bach_opentsdb']['tsd_user']]
+
 include_recipe 'bach_opentsdb'

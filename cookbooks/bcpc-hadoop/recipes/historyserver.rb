@@ -2,6 +2,9 @@ include_recipe 'bcpc-hadoop::hadoop_config'
 ::Chef::Recipe.send(:include, Bcpc_Hadoop::Helper)
 ::Chef::Resource::Bash.send(:include, Bcpc_Hadoop::Helper)
 
+# ensure we do not make polyinstantation directories for mapred
+node.default['bcpc']['pam_namespace']['real_home_dir_users'] += ['mapred']
+
 %w{hadoop-mapreduce-historyserver}.each do |pkg|
   package hwx_pkg_str(pkg, node[:bcpc][:hadoop][:distribution][:release]) do
     action :install

@@ -42,6 +42,9 @@ node.default['jmxtrans'].tap do |jmxtrans|
     
 end
 
+# ensure we do not make polyinstantation directories for hdfs
+node.default['bcpc']['pam_namespace']['real_home_dir_users'] += ['hdfs']
+
 %w{hadoop-hdfs-namenode hadoop-hdfs-journalnode}.each do |pkg|
   package hwx_pkg_str(pkg, hdprel) do
     action :install

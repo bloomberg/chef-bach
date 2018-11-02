@@ -18,9 +18,12 @@
 
 # Base cronjobs/ pseudo-cronjobs that should be on all machines in the cluster.
 
+polyinstantion_dir = node['bcpc']['pam_namespace']['polyinstantion_dir']
+shm_polyinstantion_dir = node['bcpc']['pam_namespace']['shm_polyinstantion_dir']
+
 clear_tmp = node['bcpc']['cronjobs']['clear_tmp']
-execute 'clear /tmp' do
-  command '/usr/bin/find /tmp -type f '\
+execute 'clear tmp dirs' do
+  command '/usr/bin/find /tmp #{polyinstantion_dir} /dev/shm/#{shm_polyinstantion_dir} -type f '\
           "-atime +#{clear_tmp['atime_age']} -delete && "\
           '/usr/bin/touch /var/lib/clear-temp.run'
   not_if do

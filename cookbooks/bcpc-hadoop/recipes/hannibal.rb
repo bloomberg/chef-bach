@@ -1,5 +1,7 @@
 # Setup hannibal config
 
+# ensure we do not make polyinstantation directories for hannibal
+node.default['bcpc']['pam_namespace']['real_home_dir_users'] += ['hannibal']
 # Populate node attributes for all kind of hosts
 set_hosts
 

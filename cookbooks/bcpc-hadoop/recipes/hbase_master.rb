@@ -3,6 +3,8 @@
 include_recipe 'bcpc-hadoop::hbase_config'
 include_recipe 'bcpc-hadoop::hbase_queries'
 
+# ensure we do not make polyinstantation directories for hbase
+node.default['bcpc']['pam_namespace']['real_home_dir_users'] += ['hbase']
 #
 # Updating node attributes to copy HBase master log file to centralized location (HDFS)
 #

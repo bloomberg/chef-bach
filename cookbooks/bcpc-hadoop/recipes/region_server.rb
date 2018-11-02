@@ -11,6 +11,9 @@ node.default['bcpc']['hadoop']['copylog'].tap do |copylog|
   copylog['region_server_out']['docopy'] = true
 end
 
+# ensure we do not make polyinstantation directories for hbase
+node.default['bcpc']['pam_namespace']['real_home_dir_users'] += ['hbase']
+
 (%w(libsnappy1) + %w(hbase hbase-regionserver phoenix).map do |p|
   hwx_pkg_str(p, node[:bcpc][:hadoop][:distribution][:release])
 end).each do |pkg|

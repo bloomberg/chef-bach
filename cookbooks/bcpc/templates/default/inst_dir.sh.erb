@@ -1,0 +1,20 @@
+#!/bin/bash
+
+# This script is managed by Chef
+# It is designed to setup directories using pam_exec
+# for the pam_namespaces module to isolate user-direcotires
+
+if [ -z "$PAM_TYPE" -o "$PAM_TYPE" == "open_session" ]; then
+  # need to setup the polyinstantation directory for login
+  mkdir -pm 000 "/dev/shm/<%= @shm_polyinstantion_dir %>" \
+                "<%= @polyinstantion_dir %>"
+elif [ -z "$PAM_TYPE" -o "$PAM_TYPE" == "close_session" ]; then
+  # see if user still has any prescence on this machine
+  pgrep -u "$PAM_USER" && exit 0
+  # if no prescense of user, remove all trace of their activity
+  rm -rf "<%= @polyinstantion_dir %>/home_$PAM_USER" \
+         "<%= @polyinstantion_dir %>/tmp_$PAM_USER" \
+         "<%= @polyinstantion_dir %>/var_tmp_$PAM_USER" \
+         "/dev/shm/<%= @shm_polyinstantion_dir %>/inst_$PAM_USER"
+fi
+exit 0
