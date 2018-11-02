@@ -99,10 +99,6 @@ end
   end
 end
 
-directory "#{bins_dir}/python" do
-  mode 0555
-end
-
 execute 'dir2pi' do
   cwd bins_dir
   command 'dir2pi python'

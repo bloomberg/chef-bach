@@ -30,8 +30,18 @@ apt_repo_version = node['bach']['repository']['apt_repo_version']
 gpg_private_key_path = node['bach']['repository']['private_key_path']
 gpg_public_key_path = node['bach']['repository']['public_key_path']
 
-gpg_private_key_base64 = node.run_state.dig(:bach, :repository, :gpg_private_key)
-gpg_public_key_base64 = node.run_state.dig(:bach, :repository, :gpg_public_key)
+#
+# The get_config invocations are different for the public and
+# private keys because we expect to find the public key in the
+# plaintext data bag.  The private key should be in a chef-vault item
+# under os/bootstrap-gpg.
+#
+# TODO: make the get_config API sane.
+#
+gpg_private_key_base64 =
+  get_config('private_key_base64', 'bootstrap-gpg', 'os')
+gpg_public_key_base64 =
+  get_config('bootstrap-gpg-public_key_base64')
 
 gpg_conf_path = Chef::Config[:file_cache_path] + '/bach_repository-gpg.conf'
 
@@ -57,125 +67,78 @@ end
 # If we don't have valid vault items, generate the files by calling
 # gpg, then create vault items.
 #
-ruby_block 'check if gpg keys need to be regenerated' do
-  block do
-    if gpg_private_key_base64.nil? || gpg_public_key_base64.nil?
-      node.run_state['bach'] = node.run_state.fetch('bach', {})
-      node.run_state['bach']['repository'] = node.run_state['bach'].fetch('repository', {})
-      node.run_state['bach']['repository']['regen_gpg_keys'] = true
-      ::Chef::Log.warn('Chef keys need to be regenerated ' \
-                       "#{node.run_state['bach']['repository']['regen_gpg_keys']}")
-    else
-      node.run_state['bach'] = node.run_state.fetch('bach', {})
-      node.run_state['bach']['repository'] = node.run_state['bach'].fetch('repository', {})
-      node.run_state['bach']['repository']['regen_gpg_keys'] = false
-      ::Chef::Log.warn('Chef keys need to be regenerated ' \
-                       "#{node.run_state['bach']['repository']['regen_gpg_keys']}")
+if gpg_private_key_base64 && gpg_public_key_base64
+  file gpg_private_key_path do
+    mode 0400
+    content Base64.decode64(gpg_private_key_base64)
+  end
+
+  file gpg_public_key_path do
+    mode 0444
+    content Base64.decode64(gpg_public_key_base64)
+  end
+else
+  #
+  # If we didn't have vault items, delete any existing keys and
+  # re-generate.  Clients will re-download the public key via chef.
+  #
+  [
+    gpg_private_key_path,
+    gpg_public_key_path
+  ].each do |file_path|
+    file "#{file_path}-removal" do
+      path file_path
+      action :delete
     end
   end
-end
 
-#
-# If we have vault items, deploy existing keys.
-#
-file "overwrite from vault #{gpg_private_key_path}" do
-  path gpg_private_key_path
-  mode 0440
-  owner 'vagrant'
-  group 'root'
-  content lazy { Base64.decode64(gpg_private_key_base64) }
-  only_if { node.run_state['bach']['repository']['regen_gpg_keys'] == false }
-end
-
-file "overwrite from vault #{gpg_public_key_path}" do
-  path gpg_public_key_path
-  mode 0444
-  owner 'vagrant'
-  group 'root'
-  content lazy { Base64.decode64(gpg_public_key_base64) }
-  only_if { node.run_state['bach']['repository']['regen_gpg_keys'] == false }
-end
-
-#
-# If we didn't have vault items, delete any existing keys and
-# re-generate.  Clients will re-download the public key via chef.
-#
-[
-  gpg_private_key_path,
-  gpg_public_key_path
-].each do |file_path|
-  file "#{file_path} removal" do
-    path file_path
-    action :delete
-    only_if { node.run_state['bach']['repository']['regen_gpg_keys'] == true }
+  execute 'generate-local-bach-keys' do
+    command "cat #{gpg_conf_path} | gpg --batch --gen-key"
   end
-end
 
-execute 'generate local bach keys' do
-  command "cat #{gpg_conf_path} | gpg --batch --gen-key"
-  only_if { node.run_state['bach']['repository']['regen_gpg_keys'] == true }
-  notifies :touch, "file[#{gpg_private_key_path} permission setting]", :immediate
-end
+  # Set perms.
+  file gpg_private_key_path do
+    mode 0400
+  end
 
-# Set perms.
-file "#{gpg_private_key_path} permission setting" do
-  path gpg_private_key_path
-  mode 0440
-  owner 'vagrant'
-  group 'root'
-  action :nothing
-end
-
-if chef_vault_loaded && !Chef::Config[:local_mode]
-  # Save the bootstrap-gpg-public_key to the databag
-  ruby_block 'create bootstrap-gpg-public_key_base64' do
+  ruby_block 'bootstrap-gpg-public_key_base64' do
     block do
-      databag_name = 'configs'
-      if !Chef::DataBag.list.key?(databag_name)
-        bag = Chef::DataBag.new
-        bag.name(databag_name)
-        bag.create
-      end
       dbi = begin
-              Chef::DataBagItem.load(databag_name, node.chef_environment)
+              Chef::DataBagItem.load('configs', node.chef_environment)
             rescue Net::HTTPServerException
-              db = Chef::DataBagItem.new
-              db.data_bag(databag_name)
-              db.raw_data = { id => node.chef_environment }
-              db
+              Chef::DataBagItem.new('configs', node.chef_environment)
             end
       dbi['bootstrap-gpg-public_key_base64'] =
         Base64.encode64(::File.read(gpg_public_key_path))
       dbi.save
     end
-    only_if { node.run_state['bach']['repository']['regen_gpg_keys'] == true }
   end
 
-  ruby_block 'bootstrap-gpg-secrets' do
-    block do
-      require 'chef-vault'
-      id = 'bootstrap-gpg'
-      vault_item = ChefVault::Item.new('os', id)
-      vault_item.admins([node[:fqdn], 'admin'].join(','))
-      vault_item.search('*:*')
-      vault_item['id'] = id
-      vault_item['private_key_base64'] =
-        Base64.encode64(::File.read(gpg_private_key_path))
-      vault_item.save
+  if chef_vault_loaded && !Chef::Config[:local_mode]
+    ruby_block 'bootstrap-gpg-secrets' do
+      block do
+        require 'chef-vault'
+        id = 'bootstrap-gpg'
+        vault_item = ChefVault::Item.new('os', id)
+        vault_item.admins(node[:fqdn])
+        vault_item.search('*:*')
+        vault_item['id'] = id
+        vault_item['private_key_base64'] =
+          Base64.encode64(::File.read(gpg_private_key_path))
+        vault_item.save
+      end
     end
-    only_if { node.run_state['bach']['repository']['regen_gpg_keys'] == true }
-  end
-else
-  log "Failed to load chef-vault, can't save private gpg key!" do
-    level :warn
-    only_if { node.run_state['bach']['repository']['regen_gpg_keys'] == true }
+  else
+    log "Failed to load chef-vault, can't save private gpg key!" do
+      level :warn
+    end
   end
 end
 
 #
 # The ascii-armored key is used by apt clients.
 #
-execute 'generate ascii key' do
+execute 'generate-ascii-key' do
   umask 0222
   command "gpg --enarmor < #{gpg_public_key_path} " \
     "> #{node['bach']['repository']['ascii_key_path']}"
@@ -204,7 +167,7 @@ end
 
 temporary_release_file = Tempfile.new('bach_repo_release').path
 release_file_path = apt_directory + '/Release'
-execute 'generate release file' do
+execute 'generate-release-file' do
   cwd bins_path
   command <<-EOM.gsub(/^ {4}/,'')
     apt-ftparchive \
@@ -218,7 +181,7 @@ execute 'generate release file' do
   umask 0222
 end
 
-execute 'sign release file' do
+execute 'sign-release-file' do
   command <<-EOM
   gpg --no-tty -abs \
       --no-default-keyring \
@@ -240,6 +203,6 @@ end
   end
 end
 
-execute 'fix apt repository perms' do
+execute 'apt-fix-repository-perms' do
   command "chmod -R a+r #{apt_directory}"
 end

@@ -45,17 +45,16 @@ end
 # the local bcpc repo, instead of attempting to reach out to the
 # internet for the Omnitruck API.
 #
+download_url = URI.join(get_binary_server_url,
+                        File.basename(chef_packages_hash[:chef][0]))
+
 checksum = chef_packages_hash[:chef][1]
 
 template "#{bins_dir}/chef-install.sh" do
-  download_url = URI.join(node['bach']['repository']['chef_url_base'],
-                          File.basename(chef_packages_hash[:chef][0]))
   source 'chef-install.sh.erb'
   mode 0555
-  variables(
-    chef_server_ip: node['bach']['repository']['chef_server_ip'],
-    chef_server_fqdn: node['bach']['repository']['chef_server_fqdn'],
-    download_url: download_url,
-    sha256sum: checksum
-  )
+  variables({
+             download_url: download_url,
+             sha256sum: checksum
+            })
 end

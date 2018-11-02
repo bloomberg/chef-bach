@@ -7,6 +7,7 @@ group :integration do
   instance_eval(File.read('../../Berksfile.common'))
 
   cookbook 'bach_common', path: '../bach_common'
+  cookbook 'bcpc', path: '../bcpc'
   cookbook 'bach_repository_test', path: 'test/cookbooks/bach_repository_test'
   # to ensure we dump the node object to a file for serverspec                    
   cookbook 'export-node'
@@ -16,4 +17,5 @@ cookbook 'java'
 
 # cobblerd upstream, pending submitting update to supermarket
 cookbook 'cobblerd',
-  git: 'https://github.com/bloomberg/cobbler-cookbook'
+  git: 'https://github.com/cbaenziger/cobbler-cookbook',
+  branch: 'source_build'

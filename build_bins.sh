@@ -22,9 +22,9 @@ mkdir -p $DIR/bins
 pushd $DIR/bins/ > /dev/null
 apt-get update
 
-chefdk_vers='2.4.17'
+chefdk_vers='1.2.22'
 chefdk_dpkg="chefdk_${chefdk_vers}-1_amd64.deb"
-chefdk_sha256='15c40af26358ba6b1be23d5255b49533fd8e5421f7afbc716dcb94384b92e1b0'
+chefdk_sha256='518ecf308764c08a647ddabc6511af231affd2bf3e6526e60ef581926c8e7105'
 if [ ! -f ${chefdk_dpkg} ] || ! sha256sum ${chefdk_dpkg} | grep -q ${chefdk_sha256}; then
     rm -f ${chefdk_dpkg}
     # $CURL is defined in proxy_setup.sh
@@ -47,10 +47,8 @@ pushd lib/cluster-def-gem  > /dev/null
 sudo /opt/chefdk/embedded/bin/gem install cluster_def
 popd > /dev/null
 
-chef_client_run=$(pgrep -u root -a -f 'chef-client worker' || true)
-if [ -n "${chef_client_run}" ]; then
-    echo -e 'A chef-client run is already underway, aborting build_bins.sh:\n' \
-            "${chef_client_run}" 1>&2
+if pgrep 'chef-client' > /dev/null; then
+    echo 'A chef-client run is already underway, aborting build_bins.sh' 1>&2
     exit
 fi
 
@@ -75,9 +73,6 @@ if [[ ! -z "$SUDO_USER" ]]; then
     chown -R $SUDO_USER $DIR/vendor
     chown $SUDO_USER $DIR/Berksfile.lock
     chown -R $SUDO_USER $HOME/.berkshelf
-else
-    echo 'Can not chown berks vendor to a reasonable user!' >> /dev/stderr
-    exit 1
 fi
 
 #
@@ -99,7 +94,7 @@ EOF
 # defaults.
 #
 pushd $DIR/vendor > /dev/null
-/opt/chefdk/bin/chef-client -z -r 'recipe[bcpc::bach_repository_wrapper],recipe[bach_repository]' -c $TMPFILE
+/opt/chefdk/bin/chef-client -z -r 'recipe[bach_repository]' -c $TMPFILE
 rm $TMPFILE
 popd > /dev/null
 

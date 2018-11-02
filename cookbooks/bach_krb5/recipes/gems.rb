@@ -1,6 +1,6 @@
 require 'shellwords'
 
-chef_gem 'rake-compiler' do
+bcpc_chef_gem 'rake-compiler' do
   compile_time true
 end
 
@@ -10,7 +10,7 @@ node['krb5']['devel']['packages'].each do |pkg|
   end.run_action(:install)
 end
 
-chef_gem 'rkerberos' do
+bcpc_chef_gem 'rkerberos' do
   compile_time true
 end
 

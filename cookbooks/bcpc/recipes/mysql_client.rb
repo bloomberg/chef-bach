@@ -31,7 +31,7 @@ package 'libperconaserverclient18-dev' do
 end
 
 %w{mysql2 sequel}.each do |gem_name|
-  chef_gem gem_name.to_s do
+  bcpc_chef_gem gem_name.to_s do
     compile_time false
   end
 end

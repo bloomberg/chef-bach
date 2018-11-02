@@ -17,7 +17,7 @@
 # limitations under the License.
 #
 
-chef_gem 'poise' do
+bcpc_chef_gem 'poise' do
   version '~>2.0'
   compile_time true
 end

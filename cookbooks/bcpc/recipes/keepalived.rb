@@ -27,7 +27,7 @@ if keepalived_password.nil?
   keepalived_password = secure_password
 end
 
-keepalived_admins = (get_head_node_names + [get_bootstrap] + ['admin']).join(',')
+keepalived_admins = (get_head_node_names + [get_bootstrap]).join(',')
 
 chef_vault_secret "keepalived" do
   data_bag 'os'

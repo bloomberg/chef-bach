@@ -18,6 +18,12 @@ bash 'update-hbase-conf-alternatives' do
   EOH
 end
 
+if get_nodes_for("powerdns", "bcpc").length > 0
+ dns_server = node[:bcpc][:management][:vip]
+else
+ dns_server = node[:bcpc][:dns_servers][0]
+end
+
 template '/etc/hbase/conf/hadoop-metrics2-hbase.properties' do
   source 'hb_hadoop-metrics2-hbase.properties.erb'
   mode 0o0644

@@ -19,7 +19,7 @@ node.default['chef_client']['handler']['gem'].tap do |gem|
 end
 
 # Pre-emptively install the correct gem with 'compile_time true'
-chef_gem 'simple-graphite' do
+bcpc_chef_gem 'simple-graphite' do
   version simple_graphite_version
   compile_time true
 end

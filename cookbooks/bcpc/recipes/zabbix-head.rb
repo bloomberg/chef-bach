@@ -35,7 +35,6 @@ bootstrap = get_bootstrap
 admins_list = get_head_node_names
 admins_list.push(node[:fqdn]) unless admins_list.include?(node[:fqdn])
 admins_list.push(bootstrap) unless bootstrap.nil?
-admins_list.push('admin')
 
 zabbix_admin_user = 'Admin'
 make_config('zabbix-admin-user', zabbix_admin_user)
