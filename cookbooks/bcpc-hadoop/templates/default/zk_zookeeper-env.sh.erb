@@ -36,9 +36,9 @@ SERVER_JVMFLAGS="$SERVER_JVMFLAGS -Djava.security.auth.login.config=/etc/zookeep
 CLIENT_JVMFLAGS="$CLIENT_JVMFLAGS -Djava.security.auth.login.config=/etc/zookeeper/conf/zookeeper-client.jaas"
 <% end %>
 
-SERVER_JVMFLAGS="$SERVER_JVMFLAGS -Xms<%= @heap %>m -Xmx<%= @heap %>m " \
-                "-Xmn<%= @newsize %>m " \
-                "<%= node['bcpc']['hadoop']['zookeeper']['gc_opts'] %>"
+SERVER_JVMFLAGS="$SERVER_JVMFLAGS -Xms<%= @heap %>m -Xmx<%= @heap %>m"
+SERVER_JVMFLAGS="$SERVER_JVMFLAGS -Xmn<%= @newsize %>m"
+SERVER_JVMFLAGS="$SERVER_JVMFLAGS <%= node['bcpc']['hadoop']['zookeeper']['gc_opts'] %>"
 
 export SERVER_JVMFLAGS
 export CLIENT_JVMFLAGS
