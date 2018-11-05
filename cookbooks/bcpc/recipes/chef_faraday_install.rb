@@ -17,6 +17,6 @@
 # limitations under the License.
 #
 
-chef_gem 'faraday' do
+bcpc_chef_gem 'faraday' do
   compile_time true
 end

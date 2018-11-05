@@ -17,6 +17,6 @@
 # limitations under the License.
 #
 
-chef_gem 'cluster_def' do
+bcpc_chef_gem 'cluster_def' do
   compile_time true
 end

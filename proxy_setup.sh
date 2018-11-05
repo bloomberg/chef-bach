@@ -23,12 +23,8 @@ if [ -n "$http_proxy" ]; then
     DOMAIN="$(domainname),"
   fi
 
-  # a string like 127.0.0.1, 10.0.100.3, ..."
   local_ips=$(ip addr list |grep 'inet '|sed -e 's/.* inet //' -e 's#/.*#,#')
-  # a string like 10.0.2.*, 10.0.100.*, ..., 10.0.2., 10.0.100., ...
-  local_nets=$(sed -e 's/127[.0-9]*, //' -e 's/\.[0-9]*,/.*,/g' <<< $local_ips)$(sed -e 's/127[.0-9]*, //' -e 's/\.[0-9]*,/.,/g' <<< $local_ips)
-
-  export no_proxy="$(tr -d ' \n' <<< $local_ips)$(hostname),$(hostname -f),$DOMAIN$(tr -d ' \n' <<< $local_nets)$no_proxy"
+  export no_proxy="$(sed 's/ //g' <<< $local_ips)$(hostname),$(hostname -f),$DOMAIN10.0.100.,10.0.100.*,$no_proxy"
   export NO_PROXY="$no_proxy"
   echo "Force Ruby ecosystem to use system SSL certificates"
   export SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt

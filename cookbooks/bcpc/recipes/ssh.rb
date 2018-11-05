@@ -75,7 +75,7 @@ ruby_block 'get-ssh-secrets-from-server' do
 
       begin
         vault_item = ChefVault::Item.new('ssh_host_keys', node[:fqdn])
-        vault_item.admins([get_bootstrap, node[:fqdn], 'admin'].join(','))
+        vault_item.admins([get_bootstrap, node[:fqdn]].join(','))
         vault_item.search("fqdn:#{node[:fqdn]}")
         vault_item.save
         node.run_state[:bcpc_ssh_host_keys] = vault_item

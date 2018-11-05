@@ -35,11 +35,12 @@ require 'cluster_def'
 # For Kerberos to work we need FQDN for each host. Changing "HOSTNAME" to "FQDN".
 # Hadoop breaks principal into 3 parts  (Service, FQDN and REALM)
 
-HOSTNAME_ATTR_SRCH_KEYS = {'hostname' => 'fqdn'}.freeze
-HOSTNAME_NODENO_ATTR_SRCH_KEYS = {'hostname' => 'fqdn',
-                                  'node_number' => 'bcpc.node_number',
-                                  'zookeeper_myid' => 'bcpc.hadoop.zookeeper.myid'}.freeze
-MGMT_IP_ATTR_SRCH_KEYS = {'mgmt_ip' => 'bcpc.management.ip'}.freeze
+HOSTNAME_ATTR_SRCH_KEYS = {'hostname' => 'fqdn'}
+HOSTNAME_NODENO_ATTR_SRCH_KEYS = {
+  'hostname' => 'fqdn',
+  'node_number' => 'bcpc.node_number',
+  'zookeeper_myid' => 'bcpc.hadoop.zookeeper.myid'}
+MGMT_IP_ATTR_SRCH_KEYS = {'mgmt_ip' => 'bcpc.management.ip'}
 
 def init_config
   begin
@@ -144,8 +145,7 @@ def get_nodes_for(recipe, cookbook = cookbook_name)
 end
 
 def get_binary_server_url
-  return("http://#{node['bcpc']['bootstrap']['vip']}/") if node['bcpc']['binary_server_url'].nil?
-#XXX remove?  return("http://#{URI(Chef::Config['chef_server_url']).host}/") if node['bcpc']['binary_server_url'].nil?
+  return("http://#{URI(Chef::Config['chef_server_url']).host}/") if node['bcpc']['binary_server_url'].nil?
   node['bcpc']['binary_server_url']
 end
 

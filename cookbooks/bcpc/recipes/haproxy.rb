@@ -27,7 +27,7 @@ if haproxy_stats_password.nil?
   haproxy_stats_password = secure_password
 end
 
-haproxy_admins = (get_head_node_names + [get_bootstrap] + ['admin']).join(',')
+haproxy_admins = (get_head_node_names + [get_bootstrap]).join(',')
 
 chef_vault_secret "haproxy-stats" do
   data_bag 'os'
