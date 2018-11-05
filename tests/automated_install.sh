@@ -21,19 +21,8 @@ fi
 
 export BACH_ENVIRONMENT=${BACH_ENVIRONMENT:-'Test-Laptop'}
 export BACH_CLUSTER_PREFIX=${BACH_CLUSTER_PREFIX:-''}
-export BOOTSTRAP_VM_MEM=${BOOTSTRAP_VM_MEM:-5096}
-export BOOTSTRAP_VM_CPUs=${BOOTSTRAP_VM_CPUS:-2}
-export CLUSTER_VM_MEM=${CLUSTER_VM_MEM:-7120}
-export CLUSTER_VM_CPUs=${CLUSTER_VM_CPUs:-4}
 export CLUSTER_TYPE=${CLUSTER_TYPE:-Hadoop}
 export PATH=/opt/chefdk/embedded/bin:$PATH
-
-BOOTSTRAP_NAME="bcpc-bootstrap"
-if [ "$BACH_CLUSTER_PREFIX" != "" ]; then
-  BOOTSTRAP_NAME="${BACH_CLUSTER_PREFIX}-bcpc-bootstrap"
-fi
-
-export BOOTSTRAP_NAME
 
 # normalize capitaliztion of CLUSTER_TYPE to lower case
 typeset -l CLUSTER_TYPE="${CLUSTER_TYPE}"

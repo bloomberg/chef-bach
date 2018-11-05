@@ -19,29 +19,9 @@ if [[ -z "$CURL" ]]; then
   exit 1
 fi
 
-# BOOTSTRAP_NAME is exported by automated_install.sh
-if [[ -z "$BOOTSTRAP_NAME" ]]; then
-  echo 'BOOTSTRAP_NAME is not defined'
-  exit 1
-fi
-
-# Bootstrap VM Defaults (these need to be exported for Vagrant's Vagrantfile)
-export BOOTSTRAP_VM_MEM=${BOOTSTRAP_VM_MEM-2048}
-export BOOTSTRAP_VM_CPUs=${BOOTSTRAP_VM_CPUs-1}
-# Use this if you intend to make an apt-mirror in this VM (see the
-# instructions on using an apt-mirror towards the end of bootstrap.md)
-# -- Vagrant VMs do not use this size --
-#BOOTSTRAP_VM_DRIVE_SIZE=120480
-
 # Is this a Hadoop or Kafka cluster?
 # (Kafka clusters, being 6 nodes, will require more RAM.)
 export CLUSTER_TYPE=${CLUSTER_TYPE:-Hadoop}
-
-# Cluster VM Defaults
-export CLUSTER_VM_MEM=${CLUSTER_VM_MEM-2048}
-export CLUSTER_VM_CPUs=${CLUSTER_VM_CPUs-1}
-export CLUSTER_VM_EFI=${CLUSTER_VM_EFI:-true}
-export CLUSTER_VM_DRIVE_SIZE=${CLUSTER_VM_DRIVE_SIZE-20480}
 
 if !hash vagrant 2> /dev/null ; then
   echo 'Vagrant not detected - we need Vagrant!' >&2
@@ -159,24 +139,11 @@ function remove_DHCPservers {
 # Function to create the bootstrap VM
 #
 function create_bootstrap_VM {
-  pushd $VBOX_DIR_PATH
-
-  remove_DHCPservers
-
-  echo "Vagrant detected - using Vagrant to initialize bcpc-bootstrap VM"
-  cp ../Vagrantfile .
-
   if [[ -f ../Vagrantfile.local.rb ]]; then
       cp ../Vagrantfile.local.rb .
   fi
 
-  if [[ ! -f insecure_private_key ]]; then
-    # Ensure that the private key has been created by running vagrant at least once
-    vagrant status
-    cp $HOME/.vagrant.d/insecure_private_key .
-  fi
-  vagrant up --provision
-  popd
+  vagrant up bootstrap
 }
 
 
@@ -194,117 +161,8 @@ function create_vbox_ipxe_disk {
 # Function to create the BCPC cluster VMs
 #
 function create_cluster_VMs {
-  # Gather VirtualBox networks in use by bootstrap VM
-  oifs="$IFS"
-  IFS=$'\n'
-  bootstrap_interfaces=($($VBM showvminfo ${BOOTSTRAP_NAME} \
-    --machinereadable | \
-    egrep '^hostonlyadapter[0-9]=' | \
-    sort | \
-    sed -e 's/.*=//' -e 's/"//g'))
-  IFS="$oifs"
-  VBN0="${bootstrap_interfaces[0]?Need a Virtualbox network 1 for the bootstrap}"
-  VBN1="${bootstrap_interfaces[1]?Need a Virtualbox network 2 for the bootstrap}"
-  VBN2="${bootstrap_interfaces[2]?Need a Virtualbox network 3 for the bootstrap}"
-
-  if [[ $CLUSTER_VM_EFI == true ]]; then
-    #
-    # Add the ipxe USB key to the vbox storage registry as an immutable
-    # disk, so we can share it between several VMs.
-    #
-    current_ipxe=$(vboxmanage list hdds | egrep '^Location:.*ipxe.vdi$')
-    # we have an ipxe disk added
-    if [[ -n "$current_ipxe" ]]; then
-      ipxe_location=$(echo "$current_ipxe" | sed 's/^Location:[ ]*//')
-      # ensure the location is available -- if not blow it away and recreate
-      if $VBM showmediuminfo "$ipxe_location" | egrep -q '^State:.*inaccessible'; then
-        $VBM closemedium disk "$ipxe_location"
-        # update if we changed ipxe_location to the local workspace
-        ipxe_location="$VBOX_DIR_PATH/ipxe.vdi"
-        create_vbox_ipxe_disk "$ipxe_location"
-      fi
-    else
-      ipxe_location="$VBOX_DIR_PATH/ipxe.vdi"
-      create_vbox_ipxe_disk "$ipxe_location"
-    fi
-
-    # provide the IPXE disk location so we know if it is from
-    # another cluster
-    echo "NOTE: Using IPXE volume at: $ipxe_location"
-  fi
-
-  # Create each VM
-  for vm in ${VM_LIST[*]}; do
-      # Only if VM doesn't exist
-      if ! $VBM list vms | grep "^\"${vm}\"" ; then
-          $VBM createvm --name $vm --ostype Ubuntu_64 \
-	       --basefolder $VBOX_DIR_PATH --register
-
-          $VBM modifyvm $vm --memory $CLUSTER_VM_MEM
-          $VBM modifyvm $vm --cpus $CLUSTER_VM_CPUs
-
-	  if [[ $CLUSTER_VM_EFI == true ]]; then
-	      # Force UEFI firmware.
-	      $VBM modifyvm $vm --firmware efi
-	  fi
-
-          # Add the network interfaces
-          $VBM modifyvm $vm --nic1 hostonly --hostonlyadapter1 "$VBN0"
-          $VBM modifyvm $vm --nic2 hostonly --hostonlyadapter2 "$VBN1"
-          $VBM modifyvm $vm --nic3 hostonly --hostonlyadapter3 "$VBN2"
-
-	  # Create a disk controller to hang disks off of.
-	  DISK_CONTROLLER="SATA_Controller"
-	  $VBM storagectl $vm --name $DISK_CONTROLLER --add sata
-
-	  #
-	  # Create the root disk, /dev/sda.
-	  #
-	  # (/dev/sda is hardcoded into the preseed file.)
-	  #
-	  port=0
-	  DISK_PATH=$VBOX_DIR_PATH/$vm/$vm-a.vdi
-	  $VBM createhd --filename $DISK_PATH \
-	       --size $CLUSTER_VM_ROOT_DRIVE_SIZE
-          $VBM storageattach $vm --storagectl $DISK_CONTROLLER \
-	       --device 0 --port $port --type hdd --medium $DISK_PATH
-	  port=$((port+1))
-
-	  if [[ $CLUSTER_VM_EFI == true ]]; then
-	      # Attach the iPXE boot medium as /dev/sdb.
-              $VBM storageattach $vm --storagectl $DISK_CONTROLLER \
-		   --device 0 --port $port --type hdd --medium $ipxe_location
-	      port=$((port+1))
-	  else
-	      # If we're not using EFI, force the BIOS to boot net.
-	      $VBM modifyvm $vm --boot1 net
-	  fi
-
-	  #
-	  # Create our data disks
-	  #
-	  # For these to be used properly, we will need to override
-	  # the attribute default[:bcpc][:hadoop][:disks] in a role or
-	  # environment.
-	  #
-          for disk in c d e f; do
-	      DISK_PATH=$VBOX_DIR_PATH/$vm/$vm-$disk.vdi
-              $VBM createhd --filename $DISK_PATH \
-		   --size $CLUSTER_VM_DRIVE_SIZE
-              $VBM storageattach $vm --storagectl $DISK_CONTROLLER \
-		   --device 0 --port $port --type hdd --medium $DISK_PATH
-              port=$((port+1))
-          done
-
-          # Set hardware acceleration options
-          $VBM modifyvm $vm \
-	       --largepages on \
-	       --vtxvpid on \
-	       --hwvirtex on \
-	       --nestedpaging on \
-	       --ioapic on
-      fi
-  done
+  # FIXME clean this up
+  vagrant up node0 node1 node2 node3 node4 node5
   # update cluster.txt to match VirtualBox MAC's
   ./vm-to-cluster.sh
 }
