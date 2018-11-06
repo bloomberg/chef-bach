@@ -70,6 +70,8 @@ $SSH_CMD "sudo chown -R vagrant $BCPC_DIR; \
 echo "Running rsync of Vagrant install: ~/chef-bcpc and ~/cluster"
 vagrant rsync bootstrap
 
+vagrant provision bootstrap --provision-with deploy-chefdk
+
 echo "Building bins"
 $SSH_CMD "cd $BCPC_DIR && sudo ./build_bins.sh"
 # https://github.com/bloomberg/chef-bach/issues/848
