@@ -60,11 +60,6 @@ export VM_LIST=( $(/usr/bin/env ruby -e "$code_to_produce_vm_list") )
 function download_VM_files {
   pushd $VBOX_DIR_PATH
 
-  # Grab the Ubuntu 14.04 installer image
-  if [[ ! -f ubuntu-14.04-mini.iso ]]; then
-     $CURL -o ubuntu-14.04-mini.iso http://archive.ubuntu.com/ubuntu/dists/trusty-updates/main/installer-amd64/current/images/trusty-netboot/mini.iso
-  fi
-
   # Can we create the bootstrap VM via Vagrant
   if [[ ! -f trusty-server-cloudimg-amd64-vagrant-disk1.box ]]; then
     $CURL -o trusty-server-cloudimg-amd64-vagrant-disk1.box http://cloud-images.ubuntu.com/vagrant/trusty/current/trusty-server-cloudimg-amd64-vagrant-disk1.box
