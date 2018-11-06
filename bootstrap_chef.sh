@@ -67,23 +67,9 @@ $SSH_CMD "sudo chown -R vagrant $BCPC_DIR; \
 	  sudo rm -rf /var/chef/cache/cookbooks; \
           sudo rm -rf $BCPC_DIR/vendor/cookbooks"
 
-# Copy cluster mutable data to bootstrap.
-if [[ -d ../cluster ]]; then
-  # pull back the modified environment so that it can be copied to remote host
-  tar -czf cluster.tgz ../cluster
-  tar -C .. -cf - cluster | vagrant ssh -c 'cd ~; tar -xvf -'
-elif [[ -f ./cluster.tgz ]]; then
-  gunzip -c cluster.tgz | vagrant ssh -c 'cd ~; tar -xvf -'
-else
-  ( echo "############## No cluster data found in ../cluster or ./cluster.tgz! ##############" && exit 1 )
-fi
+echo "Running rsync of Vagrant install: ~/chef-bcpc and ~/cluster"
+vagrant rsync bootstrap
 
-echo "Running rsync of Vagrant install"
-$SSH_CMD "rsync $RSYNCEXTRA -avP --exclude vbox --exclude vendor --exclude Gemfile.lock --exclude .kitchen --exclude .chef /chef-bcpc-host/ /home/vagrant/chef-bcpc/"
-
-# cluster external environment will go here
-#$SSH_CMD "mkdir -p cluster"
-$SSH_CMD "tar -xzf /chef-bcpc-host/cluster.tgz -C /home/vagrant" || (echo '### Vagrant ssh failed to deploy cluster environment returned $? ###'; exit 1)
 echo "Building bins"
 $SSH_CMD "cd $BCPC_DIR && sudo ./build_bins.sh"
 # https://github.com/bloomberg/chef-bach/issues/848

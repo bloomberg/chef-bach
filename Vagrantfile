@@ -11,6 +11,10 @@ Vagrant.configure('2') do |config|
       vb.cpus = ENV.fetch 'BOOTSTRAP_VM_CPUs', 4
       vb.memory = ENV.fetch 'BOOTSTRAP_VM_MEM', 8192
     end
+
+    config.vm.synced_folder '.', '/home/vagrant/chef-bcpc', type: 'rsync',
+        rsync__exclude: %w(vendor Gemfile.lock .kitchen .chef)
+    config.vm.synced_folder '../cluster', '/home/vagrant/cluster', type: 'rsync'
   end
 
   6.times do |idx|
