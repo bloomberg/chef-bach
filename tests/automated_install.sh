@@ -63,10 +63,6 @@ for vm in ${VM_LIST[*]}; do
 done
 
 # VM Snapshot Statemachine:
-# Before PXE boot:
-SNAP_PRE_PXE='Shoe-less'
-# After OS Install:
-SNAP_POST_PXE='Post-Cobble'
 # After cluster-assign-roles Bootstrap Step:
 SNAP_POST_BASIC='Post-Basic'
 # After cluster-assign-roles <cluster> Step:
@@ -83,17 +79,6 @@ BOOTSTRAP_IP=$(python -c "$python_to_find_bootstrap_ip")
 
 create_cluster_VMs || ( echo "############## VBOX CREATE CLUSTER VMs RETURNED $? ##############" && exit 1 )
 install_cluster $BACH_ENVIRONMENT $BOOTSTRAP_IP || ( echo "############## VBOX CREATE INSTALL CLUSTER RETURNED $? ##############" && exit 1 )
-
-printf "#### Cobbler Boot\n"
-printf "  Snapshotting pre-Cobbler and booting (unless already running)\n"
-snapshotVMs "${SNAP_PRE_PXE}"
-for vm in ${VM_LIST[*]} ${BOOTSTRAP_NAME}; do
-  vboxmanage showvminfo $vm --machinereadable | grep -q '^VMState="running"$' || \
-    VBoxManage startvm $vm --type headless
-done
-
-vagrant ssh -c "cd chef-bcpc; source proxy_setup.sh; ./wait-for-hosts.sh ${VM_LIST[*]}"
-snapshotVMs "${SNAP_POST_PXE}"
 
 printf "#### Chef the nodes with Basic role\n"
 vagrant ssh -c "cd chef-bcpc; ./cluster-assign-roles.sh $BACH_ENVIRONMENT Basic"

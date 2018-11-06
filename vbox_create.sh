@@ -79,12 +79,8 @@ function download_VM_files {
 #                 If snapshot previously exists for that VM: Nothing for that VM
 function snapshotVMs {
   local snapshot_name="$1"
-  printf "Snapshotting ${snapshot_name}\n"
-  for vm in ${VM_LIST[*]} ${BOOTSTRAP_NAME}; do
-    $VBM snapshot $vm list --machinereadable | grep -q "^SnapshotName=\"${snapshot_name}\"\$" || \
-      $VBM snapshot $vm take "${snapshot_name}" &
-  done
-  wait && printf "Done Snapshotting\n"
+  vagrant snapshot ${snapshot_name}
+  wait
 }
 
 ################################################################################
