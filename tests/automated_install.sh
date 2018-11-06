@@ -32,13 +32,13 @@ printf "#### Setup configuration files\n"
 $SEDINPLACE 's/vb.gui = true/vb.gui = false/' Vagrantfile
 
 # Prepare the test environment file and inject local settings.
-if hash ruby; then
-  ruby ./tests/edit_environment.rb
-else
+#if hash ruby; then
+  #ruby ./tests/edit_environment.rb
+#else
   printf "#### WARNING: no ruby found -- proceeding without editing environment!\n" > /dev/stderr
   mkdir -p ../cluster
   cp -rv stub-environment/* ../cluster
-fi
+#fi
 
 if [ "${CLUSTER_TYPE,,}" == "kafka" ]; then
   printf "Using kafka_cluster.txt\n"

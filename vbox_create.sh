@@ -151,8 +151,6 @@ function create_vbox_ipxe_disk {
 function create_cluster_VMs {
   # FIXME clean this up
   vagrant up node0 node1 node2 node3 node4 node5
-  # update cluster.txt to match VirtualBox MAC's
-  ./vm-to-cluster.sh
 }
 
 ###################################################################
