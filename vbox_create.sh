@@ -58,13 +58,10 @@ export VM_LIST=( $(/usr/bin/env ruby -e "$code_to_produce_vm_list") )
 # Function to download files necessary for VM stand-up
 #
 function download_VM_files {
-  pushd $VBOX_DIR_PATH
-
   # Can we create the bootstrap VM via Vagrant
-  if [[ ! -f trusty-server-cloudimg-amd64-vagrant-disk1.box ]]; then
-    $CURL -o trusty-server-cloudimg-amd64-vagrant-disk1.box http://cloud-images.ubuntu.com/vagrant/trusty/current/trusty-server-cloudimg-amd64-vagrant-disk1.box
+  if [[ ! -d ~/.vagrant.d/boxes/bento-VAGRANTSLASH-ubuntu-14.04 ]]; then
+    vagrant box add bento/ubuntu-14.04 --provider virtualbox
   fi
-  popd
 }
 
 ################################################################################
