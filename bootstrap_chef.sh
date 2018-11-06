@@ -29,7 +29,7 @@ if [[ $# -gt 1 ]]; then
     VAGRANT="true"
     BCPC_DIR="~vagrant/chef-bcpc"
     SSH_USER="vagrant"
-    SSH_CMD="vagrant ssh -c"
+    SSH_CMD="vagrant ssh bootstrap -c"
   else
     SSH_USER="$1"
     SSH_CMD="ssh -t -i $KEYFILE ${SSH_USER}@${IP}" 

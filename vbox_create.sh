@@ -163,24 +163,24 @@ function install_cluster {
   # Duplicate what d-i's apt-setup generators/50mirror does when set in preseed
   if [ -n "$http_proxy" ]; then
     proxy_found=true
-    vagrant ssh -c "grep Acquire::http::Proxy /etc/apt/apt.conf" || proxy_found=false
+    vagrant ssh bootstrap -c "grep Acquire::http::Proxy /etc/apt/apt.conf" || proxy_found=false
     if [ $proxy_found == "false" ]; then
-      vagrant ssh -c "echo 'Acquire::http::Proxy \"$http_proxy\";' | sudo tee -a /etc/apt/apt.conf"
+      vagrant ssh bootstrap -c "echo 'Acquire::http::Proxy \"$http_proxy\";' | sudo tee -a /etc/apt/apt.conf"
     fi
   fi
   echo "Bootstrap complete - setting up Chef server"
   echo "N.B. This may take approximately 30-45 minutes to complete."
-  vagrant ssh -c 'sudo rm -f /var/chef/cache/chef-stacktrace.out'
+  vagrant ssh bootstrap -c 'sudo rm -f /var/chef/cache/chef-stacktrace.out'
   ./bootstrap_chef.sh --vagrant-remote $ip $environment
-  if vagrant ssh -c 'sudo grep -i no_lazy_load /var/chef/cache/chef-stacktrace.out'; then
-      vagrant ssh -c 'sudo rm /var/chef/cache/chef-stacktrace.out' 
-  elif vagrant ssh -c 'test -e /var/chef/cache/chef-stacktrace.out' || \
-      ! vagrant ssh -c 'test -d /etc/chef-server'; then
+  if vagrant ssh bootstrap -c 'sudo grep -i no_lazy_load /var/chef/cache/chef-stacktrace.out'; then
+      vagrant ssh bootstrap -c 'sudo rm /var/chef/cache/chef-stacktrace.out' 
+  elif vagrant ssh bootstrap -c 'test -e /var/chef/cache/chef-stacktrace.out' || \
+      ! vagrant ssh bootstrap -c 'test -d /etc/chef-server'; then
     echo '========= Failed to Chef!' >&2
     exit 1
   fi
-  vagrant ssh -c 'cd chef-bcpc; ./cluster-enroll-cobbler.sh remove' || true
-  vagrant ssh -c 'cd chef-bcpc; ./cluster-enroll-cobbler.sh add'
+  vagrant ssh bootstrap -c 'cd chef-bcpc; ./cluster-enroll-cobbler.sh remove' || true
+  vagrant ssh bootstrap -c 'cd chef-bcpc; ./cluster-enroll-cobbler.sh add'
 }
 
 # only execute functions if being run and not sourced

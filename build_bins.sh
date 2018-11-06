@@ -23,8 +23,8 @@ apt-get update
 popd > /dev/null
 
 pushd lib/cluster-def-gem  > /dev/null
-/opt/chefdk/embedded/bin/gem build cluster_def.gemspec
-sudo /opt/chefdk/embedded/bin/gem install cluster_def
+chef gem build cluster_def.gemspec
+chef gem install cluster_def*.gem
 popd > /dev/null
 
 if pgrep 'chef-client' > /dev/null; then
@@ -43,7 +43,7 @@ fi
 # We don't want to overwrite a cookbooks tarball dropped off by the user!
 #
 if [[ ! -d $DIR/vendor/cookbooks/bach_repository ]]; then
-    /opt/chefdk/bin/berks vendor $DIR/vendor/cookbooks
+    berks vendor $DIR/vendor/cookbooks
 else
     echo "Found $DIR/vendor/cookbooks/bach_repository, not invoking Berkshelf"
 fi
