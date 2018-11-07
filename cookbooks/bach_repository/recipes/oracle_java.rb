@@ -47,5 +47,6 @@ ruby_block 'Copy JDK to file cache' do
   block do
     require 'fileutils'
     ::FileUtils.cp(jdk_local_path, Chef::Config[:file_cache_path])
+    ::FileUtils.cp("#{bins_dir}/jce_policy-8.zip", "#{Chef::Config[:file_cache_path]}/jce.zip")
   end
 end
