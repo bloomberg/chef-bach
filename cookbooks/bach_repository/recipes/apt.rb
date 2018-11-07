@@ -92,6 +92,9 @@ else
     end
   end
 
+  # FIXME: Refactor to just include_recipe 'bach_credentials::repository_apt'.
+  # Will probably have to flip this recipe around to accomplish that.
+
   execute 'generate-local-bach-keys' do
     command "cat #{gpg_conf_path} | gpg --batch --gen-key"
   end
