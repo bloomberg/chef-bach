@@ -18,26 +18,10 @@
 
 user = ENV['SUDO_USER'] || ENV['USER'] || 'vagrant'
 
-if node[:fqdn] == get_bootstrap
-  link '/etc/chef/client.rb' do
-    action :delete
-    only_if { ::File.symlink?('/etc/chef/client.rb') }
-  end
-
-  directory "/home/#{user}/.chef/client.d" do
-    mode 0755
-    user "#{user}"
-    group "#{user}"
-  end
-
-  link '/etc/chef/client.d' do
-    action :delete
-    only_if { ::File.symlink?('/etc/chef/client.d') }
-  end
-
-  link '/etc/chef/client.pem' do
-    to "/home/#{user}/chef-bcpc/.chef/#{node[:fqdn]}.pem"
-  end
+directory "/home/#{user}/chef-bcpc/.chef" do
+  mode 0755
+  user "#{user}"
+  group "#{user}"
 end
 
 include_recipe 'chef-client::config'
