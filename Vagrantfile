@@ -47,7 +47,7 @@ Vagrant.configure('2') do |config|
     vb.memory = ENV.fetch 'CLUSTER_VM_MEM', 8192
   end
 
-  config.vm.define 'bootstrap' do |bs|
+  config.vm.define 'bootstrap', primary: true do |bs|
     bs.vm.hostname = 'bootstrap.bcpc.example.com'
 
     # FIXME calculate subnets from Test-Laptop.json
