@@ -55,19 +55,26 @@ rm -f ../cluster/hadoop_cluster.txt
 printf "#### Setup VB's and Bootstrap\n"
 source ./vbox_create.sh
 
-<<<<<<< HEAD
-#
-# Copy local config files into place. (See vbox_create.sh)
-#
-copy_local_configuration
+# VM Snapshot Statemachine:
+# After cluster-assign-roles Bootstrap Step:
+SNAP_POST_BASIC='Post-Basic'
+# After cluster-assign-roles <cluster> Step:
+SNAP_POST_BOOTSTRAP='Post-Bootstrap'
+# After cluster-assign-roles <cluster> Step:
+SNAP_POST_INSTALL='Post-Install'
 
-#
-# Invoke Vagrant to spin up VMs with blank OS images.
-#
-create_cluster_VMs
+download_VM_files || ( echo "############## VBOX CREATE DOWNLOAD VM FILES RETURNED $? ##############" && exit 1 )
+create_bootstrap_VM || ( echo "############## VBOX CREATE BOOTSTRAP VM RETURNED $? ##############" && exit 1 )
+
+python_to_find_bootstrap_ip="import json; j = json.load(file('${environments[0]}')); print j['override_attributes']['bcpc']['bootstrap']['server']"
+BOOTSTRAP_IP=$(python -c "$python_to_find_bootstrap_ip")
+
+create_cluster_VMs || ( echo "############## VBOX CREATE CLUSTER VMs RETURNED $? ##############" && exit 1 )
+install_cluster $BACH_ENVIRONMENT $BOOTSTRAP_IP || ( echo "############## VBOX CREATE INSTALL CLUSTER RETURNED $? ##############" && exit 1 )
 
 printf "#### Chef the nodes with Basic role\n"
-vagrant ssh bootstrap -c "cd chef-bcpc; ./cluster-assign-roles.sh $BACH_ENVIRONMENT Basic"
+vagrant ssh -c "cd chef-bcpc; ./cluster-assign-roles.sh $BACH_ENVIRONMENT Basic"
+snapshotVMs "${SNAP_POST_BASIC}"
 
 printf "#### Chef the nodes with complete roles\n"
 printf "Cluster type: $CLUSTER_TYPE\n"
@@ -78,20 +85,22 @@ if [ "${CLUSTER_TYPE,,}" == "hadoop" ]; then
   # https://github.com/bloomberg/chef-bach/issues/847
   # We know the first run might fail set +e
   set +e
-  vagrant ssh bootstrap -c "cd chef-bcpc; ./cluster-assign-roles.sh $BACH_ENVIRONMENT Bootstrap"
+  vagrant ssh -c "cd chef-bcpc; ./cluster-assign-roles.sh $BACH_ENVIRONMENT Bootstrap"
   set -e
   # if we still fail here we have some other issue
-  vagrant ssh bootstrap -c "cd chef-bcpc; ./cluster-assign-roles.sh $BACH_ENVIRONMENT Bootstrap"
+  vagrant ssh -c "cd chef-bcpc; ./cluster-assign-roles.sh $BACH_ENVIRONMENT Bootstrap"
+  snapshotVMs "${SNAP_POST_BOOTSTRAP}"
   printf "Running final C-A-R(s)"
 fi
 
 printf "#### Chef machine bcpc-vms with $CLUSTER_TYPE\n"
-vagrant ssh bootstrap -c "cd chef-bcpc; ./cluster-assign-roles.sh $BACH_ENVIRONMENT $CLUSTER_TYPE"
+vagrant ssh -c "cd chef-bcpc; ./cluster-assign-roles.sh $BACH_ENVIRONMENT $CLUSTER_TYPE"
 
 # for Hadoop installs we need to re-run the headnodes once HDFS is up to ensure
 # we deploy various JARs. Run a second time once a datanode is up.
 if [[ "${CLUSTER_TYPE,,}" == "hadoop" ]]; then
-  vagrant ssh bootstrap -c "cd chef-bcpc; ./cluster-assign-roles.sh $BACH_ENVIRONMENT $CLUSTER_TYPE BCPC-Hadoop-Head"
+  vagrant ssh -c "cd chef-bcpc; ./cluster-assign-roles.sh $BACH_ENVIRONMENT $CLUSTER_TYPE BCPC-Hadoop-Head"
 fi
+snapshotVMs "${SNAP_POST_INSTALL}"
 
 printf '#### Install Completed!\n'

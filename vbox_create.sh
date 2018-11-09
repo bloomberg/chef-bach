@@ -134,23 +134,16 @@ function create_bootstrap_VM {
   vagrant up bootstrap
 }
 
-
-###################################################################
-# Function to create the ipxe disk
-# Args: Location to use for the ipxe disk
-# Post-Condition: The ipxe disk is added as a hdd in virtualbox
-#
-function create_vbox_ipxe_disk {
-  cp files/default/ipxe.vdi $1
-  $VBM modifyhd -type immutable $1
-}
-
 ###################################################################
 # Function to create the BCPC cluster VMs
 #
 function create_cluster_VMs {
+  if [[ -f ../Vagrantfile.local.rb ]]; then
+      cp ../Vagrantfile.local.rb .
+  fi
+
   # FIXME clean this up
-  vagrant up node0 node1 node2 node3 node4 node5
+  vagrant up
 }
 
 ###################################################################
