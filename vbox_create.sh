@@ -19,29 +19,9 @@ if [[ -z "$CURL" ]]; then
   exit 1
 fi
 
-# BOOTSTRAP_NAME is exported by automated_install.sh
-if [[ -z "$BOOTSTRAP_NAME" ]]; then
-  echo 'BOOTSTRAP_NAME is not defined'
-  exit 1
-fi
-
-# Bootstrap VM Defaults (these need to be exported for Vagrant's Vagrantfile)
-export BOOTSTRAP_VM_MEM=${BOOTSTRAP_VM_MEM-2048}
-export BOOTSTRAP_VM_CPUs=${BOOTSTRAP_VM_CPUs-1}
-# Use this if you intend to make an apt-mirror in this VM (see the
-# instructions on using an apt-mirror towards the end of bootstrap.md)
-# -- Vagrant VMs do not use this size --
-#BOOTSTRAP_VM_DRIVE_SIZE=120480
-
 # Is this a Hadoop or Kafka cluster?
 # (Kafka clusters, being 6 nodes, will require more RAM.)
 export CLUSTER_TYPE=${CLUSTER_TYPE:-Hadoop}
-
-# Cluster VM Defaults
-export CLUSTER_VM_MEM=${CLUSTER_VM_MEM-2048}
-export CLUSTER_VM_CPUs=${CLUSTER_VM_CPUs-1}
-export CLUSTER_VM_EFI=${CLUSTER_VM_EFI:-true}
-export CLUSTER_VM_DRIVE_SIZE=${CLUSTER_VM_DRIVE_SIZE-20480}
 
 if !hash vagrant 2> /dev/null ; then
   echo 'Vagrant not detected - we need Vagrant!' >&2
@@ -56,9 +36,67 @@ if (( ${#environments[*]} > 1 )); then
   exit 1
 fi
 
+# The root drive on cluster nodes must allow for a RAM-sized swap volume.
+CLUSTER_VM_ROOT_DRIVE_SIZE=$((CLUSTER_VM_DRIVE_SIZE + CLUSTER_VM_MEM - 2048))
+
 VBOX_DIR="`dirname ${BASH_SOURCE[0]}`/vbox"
 [[ -d $VBOX_DIR ]] || mkdir $VBOX_DIR
 VBOX_DIR_PATH=`python -c "import os.path; print os.path.abspath(\"${VBOX_DIR}/\")"`
+
+# Populate the VM list array from cluster.txt
+code_to_produce_vm_list="
+require './lib/cluster_data.rb';
+include BACH::ClusterData;
+cp=ENV.fetch('BACH_CLUSTER_PREFIX', '');
+cp += '-' unless cp.empty?;
+vms = parse_cluster_txt(File.readlines('cluster.txt'))
+puts vms.map{|e| cp + e[:hostname]}.join(' ')
+"
+export VM_LIST=( $(/usr/bin/env ruby -e "$code_to_produce_vm_list") )
+
+######################################################
+# Function to download files necessary for VM stand-up
+#
+function download_VM_files {
+  # Can we create the bootstrap VM via Vagrant
+  if [[ ! -d ~/.vagrant.d/boxes/bento-VAGRANTSLASH-ubuntu-14.04 ]]; then
+    vagrant box add bento/ubuntu-14.04 --provider virtualbox
+  fi
+}
+
+################################################################################
+# Function to snapshot VirtualBox VMs
+# Argument: name of snapshot to take
+# Post-Condition: If snapshot did not previously exist for VM: VM snapshot taken
+#                 If snapshot previously exists for that VM: Nothing for that VM
+function snapshotVMs {
+  local snapshot_name="$1"
+  vagrant snapshot ${snapshot_name}
+  wait
+}
+
+################################################################################
+# Function to enumerate VirtualBox hostonly interfaces
+# in use from VM's.
+# Argument: name of an associative array defined in calling context
+# Post-Condition: Updates associative array provided by name with keys being
+#                 all interfaces in use and values being the number of VMs on
+#                 each network
+function discover_VBOX_hostonly_ifs {
+  # make used_ifs a typeref to the passed-in associative array
+  local -n used_ifs=$1
+  for net in $($VBM list hostonlyifs | grep '^Name:' | sed 's/^Name:[ ]*//'); do
+    used_ifs[$net]=0
+  done
+  for vm in $($VBM list vms | sed -e 's/^[^{]*{//' -e 's/}$//'); do
+    ifs=$($VBM showvminfo --machinereadable $vm | \
+      egrep '^hostonlyadapter[0-9]*' | \
+      sed -e 's/^hostonlyadapter[0-9]*="//' -e 's/"$//')
+    for interface in $ifs; do
+      used_ifs[$interface]=$((${used_ifs[$interface]} + 1))
+    done
+  done
+}
 
 ################################################################################
 # Function to remove VirtualBox DHCP servers
@@ -86,39 +124,33 @@ function remove_DHCPservers {
 }
 
 ###################################################################
-# Copy local configuration files into place from the legacy build.
+# Function to create the bootstrap VM
 #
-function copy_local_configuration {
-  pushd $VBOX_DIR_PATH
-
-  #remove_DHCPservers
-
-  echo "Vagrant detected - using Vagrant to initialize bcpc-bootstrap VM"
-  cp ../Vagrantfile .
-
+function create_bootstrap_VM {
   if [[ -f ../Vagrantfile.local.rb ]]; then
       cp ../Vagrantfile.local.rb .
   fi
 
-  if [[ ! -f insecure_private_key ]]; then
-    # Ensure that the private key has been created by running vagrant at least once
-    vagrant status
-    cp $HOME/.vagrant.d/insecure_private_key .
-  fi
+  vagrant up bootstrap
+}
 
-  popd
+
+###################################################################
+# Function to create the ipxe disk
+# Args: Location to use for the ipxe disk
+# Post-Condition: The ipxe disk is added as a hdd in virtualbox
+#
+function create_vbox_ipxe_disk {
+  cp files/default/ipxe.vdi $1
+  $VBM modifyhd -type immutable $1
 }
 
 ###################################################################
 # Function to create the BCPC cluster VMs
 #
 function create_cluster_VMs {
-  pushd $VBOX_DIR_PATH
-  vagrant up --provision --parallel
-  popd
-
-  # # update cluster.txt to match VirtualBox MAC's
-  # ./vm-to-cluster.sh
+  # FIXME clean this up
+  vagrant up node0 node1 node2 node3 node4 node5
 }
 
 ###################################################################
@@ -128,11 +160,6 @@ function create_cluster_VMs {
 function install_cluster {
   environment=${1-Test-Laptop}
   ip=${2-10.0.100.3}
-  # N.B. As of Aug 2013, grub-pc gets confused and wants to prompt re: 3-way
-  # merge.  Sigh.
-  #vagrant ssh bootstrap -c "sudo ucf -p /etc/default/grub"
-  #vagrant ssh bootstrap -c "sudo ucfr -p grub-pc /etc/default/grub"
-  vagrant ssh bootstrap -c "test -f /etc/default/grub.ucf-dist && sudo mv /etc/default/grub.ucf-dist /etc/default/grub" || true
   # Duplicate what d-i's apt-setup generators/50mirror does when set in preseed
   if [ -n "$http_proxy" ]; then
     proxy_found=true
@@ -152,11 +179,14 @@ function install_cluster {
     echo '========= Failed to Chef!' >&2
     exit 1
   fi
+  vagrant ssh bootstrap -c 'cd chef-bcpc; ./cluster-enroll-cobbler.sh remove' || true
+  vagrant ssh bootstrap -c 'cd chef-bcpc; ./cluster-enroll-cobbler.sh add'
 }
 
 # only execute functions if being run and not sourced
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
-  copy_local_configuration
+  download_VM_files
+  create_bootstrap_VM
   create_cluster_VMs
   install_cluster
 fi

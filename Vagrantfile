@@ -52,6 +52,15 @@ Vagrant.configure('2') do |config|
 
     # FIXME calculate subnets from Test-Laptop.json
     bs.vm.network :private_network, ip: '10.0.100.3', netmask: '255.255.255.0'
+
+    config.vm.synced_folder '.', '/home/vagrant/chef-bcpc', type: 'rsync',
+        rsync__exclude: %w(vendor Gemfile.lock .kitchen .chef)
+    config.vm.synced_folder '../cluster', '/home/vagrant/cluster', type: 'rsync'
+
+    chefdk_version = ENV.fetch 'CHEFDK_VERSION', '1.2.22'
+    omnibus_url = ENV.fetch 'OMNIBUS_URL', 'https://omnitruck.chef.io/install.sh'
+    config.vm.provision 'deploy-chefdk', type: 'shell', path: omnibus_url,
+        args: ['-P', 'chefdk', '-v', chefdk_version], run: 'never'
   end
 
   #
