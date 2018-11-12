@@ -72,6 +72,8 @@ vagrant rsync bootstrap
 
 vagrant provision bootstrap --provision-with deploy-chefdk
 
+vagrant provision bootstrap --provision-with build-cookbooks
+
 echo "Building bins"
 $SSH_CMD "cd $BCPC_DIR && sudo ./build_bins.sh"
 # https://github.com/bloomberg/chef-bach/issues/848

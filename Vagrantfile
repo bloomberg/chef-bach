@@ -59,8 +59,16 @@ Vagrant.configure('2') do |config|
 
     chefdk_version = ENV.fetch 'CHEFDK_VERSION', '1.2.22'
     omnibus_url = ENV.fetch 'OMNIBUS_URL', 'https://omnitruck.chef.io/install.sh'
+
     bs.vm.provision 'deploy-chefdk', type: 'shell', path: omnibus_url,
         args: ['-P', 'chefdk', '-v', chefdk_version], run: 'never'
+    bs.vm.provision 'build-cookbooks', type: 'shell', run: 'never' do |s|
+      s.privileged = false
+      s.inline = <<~eos
+        cd ~vagrant/chef-bcpc
+        ./build_cookbooks.sh
+      eos
+    end
   end
 
   #
