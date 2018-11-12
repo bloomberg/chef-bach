@@ -69,6 +69,20 @@ Vagrant.configure('2') do |config|
         ./build_cookbooks.sh
       eos
     end
+    bs.vm.provision 'deploy-cookbooks', type: 'shell', run: 'never' do |s|
+      s.privileged = false
+      s.args = ENV.fetch 'COOKBOOKS_URL', 'file:///home/vagrant/chef-bcpc/release_master_cookbooks.tar.gz'
+      s.inline = <<~eos
+        cd ~vagrant/chef-bcpc
+        ./deploy_cookbooks.sh $@
+      eos
+    end
+    bs.vm.provision 'build-bins', type: 'shell', run: 'never' do |s|
+      s.inline = <<~eos
+        cd ~vagrant/chef-bcpc
+        ./build_bins.sh
+      eos
+    end
   end
 
   #

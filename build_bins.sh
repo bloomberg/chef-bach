@@ -33,23 +33,6 @@ if pgrep 'chef-client' > /dev/null; then
 fi
 
 #
-# Only vendor cookbooks if the directory is absent.
-# We don't want to overwrite a cookbooks tarball dropped off by the user!
-#
-if [[ ! -d $DIR/vendor/cookbooks/bach_repository ]]; then
-    berks vendor $DIR/vendor/cookbooks
-else
-    echo "Found $DIR/vendor/cookbooks/bach_repository, not invoking Berkshelf"
-fi
-
-# Don't allow Berkshelf output to be owned by root.
-if [[ ! -z "$SUDO_USER" ]]; then
-    chown -R $SUDO_USER $DIR/vendor
-    chown $SUDO_USER $DIR/Berksfile.lock
-    chown -R $SUDO_USER $HOME/.berkshelf
-fi
-
-#
 # We need to use the real Chef cache, even in local mode, so that ark
 # cookbook output works correctly on internet-disconnected hosts.
 #

@@ -74,8 +74,9 @@ vagrant provision bootstrap --provision-with deploy-chefdk
 
 vagrant provision bootstrap --provision-with build-cookbooks
 
-echo "Building bins"
-$SSH_CMD "cd $BCPC_DIR && sudo ./build_bins.sh"
+vagrant provision bootstrap --provision-with deploy-cookbooks
+
+vagrant provision bootstrap --provision-with build-bins
 # https://github.com/bloomberg/chef-bach/issues/848
 echo "HACK - removing stacktrace file, since the build_bins run succeeded."
 $SSH_CMD "sudo rm -f /var/chef/cache/chef-stacktrace.out"

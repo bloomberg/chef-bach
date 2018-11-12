@@ -1,5 +1,7 @@
 #!/bin/bash -e
 
+# FIXME: rename this something file to something appropriate like setup
+# chef-client / knife
 # Expected to be run in the root of the Chef Git repository (e.g. chef-bcpc)
 
 set -x
@@ -64,6 +66,3 @@ no_proxy no_proxy_string
 ENV['GIT_SSL_NO_VERIFY'] = 'true'
 EOF
 fi # end of [[ ! -f .chef/knife.rb ]]
-
-mkdir -p ./vendor
-/opt/chefdk/bin/berks vendor ./vendor/cookbooks
