@@ -83,6 +83,13 @@ Vagrant.configure('2') do |config|
         ./build_bins.sh
       eos
     end
+    bs.vm.provision 'deploy-bins', type: 'shell', run: 'never' do |s|
+      s.args = ENV.fetch 'BINS_URL', 'file:///home/vagrant/chef-bcpc/release_master_bins.tar.gz'
+      s.inline = <<~eos
+        cd ~vagrant/chef-bcpc
+        ./deploy_bins.sh $@
+      eos
+    end
   end
 
   #
