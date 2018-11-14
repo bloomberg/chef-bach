@@ -44,7 +44,7 @@
       "bootstrap": {
         "interface" : "eth0",
         "pxe_interface" : "eth1",
-        "hostname" : "bcpc-bootstrap",
+        "hostname" : "bootstrap",
         "server" : "10.0.100.3",
         "cluster_def_path": "/cluster-def/",
         "dhcp_subnet" : "10.0.100.0",
