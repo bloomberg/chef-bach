@@ -23,7 +23,7 @@ Vagrant.configure('2') do |config|
       '/usr/local/share/ca-certificates',
       mount_options: ['ro']
 
-    config.vm.provision 'shell',  inline: <<-EOM.gsub(/^ {4}/,'')
+    config.vm.provision 'deploy-certs', type: 'shell',  inline: <<-EOM.gsub(/^ {4}/,'')
       DEBIAN_TOOL_PATH=/usr/sbin/update-ca-certificates
       REDHAT_TOOL_PATH=/usr/bin/update-ca-trust
 
@@ -62,7 +62,7 @@ Vagrant.configure('2') do |config|
   end
 
   # set proxies if present
-  config.vm.provision 'shell',  inline: <<-EOM.gsub(/^ {4}/,'')
+  config.vm.provision 'propagate-proxies', type:'shell',  inline: <<-EOM.gsub(/^ {4}/,'')
     if [ -n "#{ENV['https_proxy']}" ]; then
       echo 'https_proxy=#{ENV['https_proxy']}' >> \
         /etc/environment
