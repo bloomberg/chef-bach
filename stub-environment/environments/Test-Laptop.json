@@ -1,6 +1,9 @@
 {
   "name": "Test-Laptop",
   "override_attributes": {
+    "bach": {
+      "car_user": "vagrant"
+    },
     "bcpc": {
       "databag_overrides": {
         "configs": {

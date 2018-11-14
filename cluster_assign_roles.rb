@@ -36,6 +36,15 @@ class ClusterAssignRoles
     @cd = BACH::ClusterDef.new(repo_dir: repo_dir)
   end
 
+  def car_user
+    attribute = chef_environment.override_attributes
+    if attribute.has_key?('bach') && attribute['bach'].has_key?('car_user') then
+      attribute['bach']['car_user']
+    else
+      'ubuntu'
+    end
+  end
+
   #
   # Takes no arguments.
   #
@@ -156,7 +165,7 @@ class ClusterAssignRoles
     chef_command = "sudo chef-client #{runlist_switch} #{runlist}"
 
     result = ssh(host: node[:ip_address],
-                 username: 'ubuntu',
+                 username: car_user,
                  password: cobbler_root_password,
                  command: chef_command,
                  streaming: true)
@@ -301,6 +310,7 @@ class ClusterAssignRoles
   #
   def install_stub(node:, runlist: 'recipe[bcpc::ssh]')
     puts "#{node[:fqdn]}: Installing and configuring chef"
+    puts cobbler_root_password
 
     bootstrap_url =
       'http://' +
@@ -327,7 +337,7 @@ class ClusterAssignRoles
                            '-y',
                            '-E', chef_environment_name,
                            '-r', runlist,
-                           '-x', 'ubuntu',
+                           '-x', car_user,
                            '-P', cobbler_root_password,
                            '--bootstrap-wget-options', '-e use_proxy=no',
                            '--bootstrap-url', bootstrap_url,
