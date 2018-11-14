@@ -77,17 +77,17 @@ Vagrant.configure('2') do |config|
         ./deploy_cookbooks.sh $@
       eos
     end
-    bs.vm.provision 'build-bins', type: 'shell', run: 'never' do |s|
-      s.inline = <<~eos
-        cd ~vagrant/chef-bcpc
-        ./build_bins.sh
-      eos
-    end
     bs.vm.provision 'deploy-bins', type: 'shell', run: 'never' do |s|
       s.args = ENV.fetch 'BINS_URL', 'file:///home/vagrant/chef-bcpc/release_master_bins.tar.gz'
       s.inline = <<~eos
         cd ~vagrant/chef-bcpc
         ./deploy_bins.sh $@
+      eos
+    end if ENV.has_key? 'BINS_URL'
+    bs.vm.provision 'build-bins', type: 'shell', run: 'never' do |s|
+      s.inline = <<~eos
+        cd ~vagrant/chef-bcpc
+        ./build_bins.sh
       eos
     end
   end

@@ -73,9 +73,10 @@ vagrant rsync bootstrap
 vagrant provision bootstrap --provision-with deploy-chefdk
 
 vagrant provision bootstrap --provision-with build-cookbooks
-
 vagrant provision bootstrap --provision-with deploy-cookbooks
 
+vagrant provision bootstrap --provision-with deploy-bins
+# Will run idempotently with BINS_URL is defined for the above step
 vagrant provision bootstrap --provision-with build-bins
 # https://github.com/bloomberg/chef-bach/issues/848
 echo "HACK - removing stacktrace file, since the build_bins run succeeded."
