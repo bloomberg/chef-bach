@@ -98,7 +98,7 @@ Vagrant.configure('2') do |config|
   #
   parse_cluster_txt(cluster_txt).each do |vm_definition|
     config.vm.define vm_definition[:hostname] do |vboxvm|
-      vboxvm.vm.hostname = vm_definition[:hostname]
+      vboxvm.vm.hostname = vm_definition[:fqdn]
       vboxvm.vm.network :private_network,
                         ip: vm_definition[:ip_address],
                         netmask: '255.255.255.0'
