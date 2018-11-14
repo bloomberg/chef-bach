@@ -310,7 +310,6 @@ class ClusterAssignRoles
   #
   def install_stub(node:, runlist: 'recipe[bcpc::ssh]')
     puts "#{node[:fqdn]}: Installing and configuring chef"
-    puts cobbler_root_password
 
     bootstrap_url =
       'http://' +
