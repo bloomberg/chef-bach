@@ -19,8 +19,6 @@ Erubis::Eruby.new(File.read(template_path)).evaluate(self)
 <% # Second, append our proxy variables. %>
 <% %w(http_proxy https_proxy no_proxy).each do |variable_name| %>
 <%   if node['chef_client']['config'][variable_name] %>
-ENV[<%= "'#{variable_name.upcase}'" %>] =
-  '<%= node['chef_client']['config'][variable_name] %>'
 ENV[<%= "'#{variable_name}'" %>] =
   '<%= node['chef_client']['config'][variable_name] %>'
 <%   end %>

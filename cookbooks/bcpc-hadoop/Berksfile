@@ -5,8 +5,8 @@ metadata
 
 group :integration do
   instance_eval(File.read('../../Berksfile.common'))
-  cookbook 'bach_repository', path: '../bach_repository'
+
   cookbook 'bcpc_hadoop_test', path: 'test/cookbooks/bcpc_hadoop_test'
-  cookbook 'bcpc', path: '../bcpc'
-  cookbook 'smoke-tests', path: '../smoke-tests'
+  cookbook 'bcpc', path: File.expand_path('../bcpc')
+  cookbook 'bach_repository', path: File.expand_path('../bach_repository')
 end

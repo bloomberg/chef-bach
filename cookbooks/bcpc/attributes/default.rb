@@ -3,10 +3,18 @@
 #  General configuration for this cluster
 #
 ###########################################
-default['bcpc']['bootstrap']['admin']['user'] = \
+
+#
+# bach_repository and bcpc constitute a recursive dependency set, so
+# we have to set this value in both places so both load orders work.
+#
+node.run_state[:bcpc_admin_user] ||=
   ENV['SUDO_USER'] || ENV['USER'] || 'vagrant'
 
-user = node['bcpc']['bootstrap']['admin']['user']
+default['bcpc']['bootstrap']['admin']['user'] =
+  node.run_state[:bcpc_admin_user]
+
+user = node.run_state[:bcpc_admin_user]
 
 
 # Region name for this cluster
@@ -110,7 +118,7 @@ end
 default['bcpc']['bootstrap']['interface'] = 'eth0'
 default['bcpc']['bootstrap']['pxe_interface'] = 'eth1'
 default['bcpc']['bootstrap']['server'] = '10.0.100.3'
-default['bcpc']['bootstrap']['vip'] = "#{node['bcpc']['bootstrap']['hostname']}.#{node['bcpc']['domain_name']}"
+default['bcpc']['bootstrap']['vip'] = node['bcpc']['bootstrap']['server']
 default['bcpc']['bootstrap']['dhcp_range'] = '10.0.100.14 10.0.100.250'
 default['bcpc']['bootstrap']['dhcp_subnet'] = '10.0.100.0'
 default['bcpc']['bootstrap']['cluster_def_path'] = '/cluster-def/'
@@ -201,8 +209,7 @@ default['bcpc']['no_proxy'] = [
    node['bcpc']['bootstrap']['server'],
    node['bcpc']['management']['vip'],
    node['domain'] ? "*#{node['domain']}" : nil,
-   node['bcpc']['additional_no_proxy'],
-   ENV['no_proxy']
+   node['bcpc']['additional_no_proxy']
 ].compact.flatten.uniq
 
 ###########################################
@@ -234,10 +241,10 @@ default['bcpc']['haproxy']['ha_services'] = []
 #  attributes for chef vault download and install
 #################################################
 default['bcpc']['chefvault']['filename'] =
-  'chef-vault-3.3.0.gem'
+  'chef-vault-2.2.4.gem'
 
 default['bcpc']['chefvault']['checksum'] =
-  '90c38490c1af7436ccdb4a3824c212a28c6695b9d75e842de0498f862122424f'
+  '8d89c96554f614ec2a80ef20e98b0574c355a6ea119a30bd49aa9cfdcde15b4a'
 
 # bcpc binary server pathnames
 default['bcpc']['bin_dir']['path'] = "/home/#{user}/chef-bcpc/bins/"

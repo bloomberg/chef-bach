@@ -21,7 +21,7 @@ maven_file = Pathname.new(node['maven']['url']).basename
 
 # Dependencies of the maven cookbook.
 %w(gyoku nori).each do |gem_name|
-  chef_gem gem_name do
+  bcpc_chef_gem gem_name do
     compile_time true
   end
 end

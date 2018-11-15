@@ -219,7 +219,7 @@ ruby_block 'update sharelib checksum' do
     require 'digest'
     node['bcpc']['hadoop']['oozie_hosts'].each do |oozie_host|
       next unless oozie_running?(float_host(oozie_host['hostname']))
-      node.default['bcpc']['hadoop']['oozie']['sharelib_checksum'] =
+      node.set['bcpc']['hadoop']['oozie']['sharelib_checksum'] =
         Digest::MD5.hexdigest(File.read(OOZIE_SHARELIB_TARBALL_PATH))
       break
     end

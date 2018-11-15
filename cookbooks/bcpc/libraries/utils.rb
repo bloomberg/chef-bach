@@ -306,14 +306,9 @@ def get_req_node_attributes(node_objects,srch_keys)
   return result
 end
 
-# Return the HTTP server hosting chef install script, Apt and Gem repos
-# NOTE: May run in Chef-Zero for build_bins.sh
 def get_binary_server_url
-  if node['bcpc']['binary_server_url'].nil?
-    return("http://#{URI(Chef::Config['chef_server_url']).host}/") if Chef::Config['chef_server_url'] != '127.0.0.1'
-    return("http://#{node['fqdn']}/")
-  end
-  node['bcpc']['binary_server_url']
+  return("http://#{URI(Chef::Config['chef_server_url']).host}/") if node[:bcpc][:binary_server_url].nil?
+  return(node[:bcpc][:binary_server_url])
 end
 
 def power_of_2(number)

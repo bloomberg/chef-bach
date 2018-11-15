@@ -1,14 +1,24 @@
-bins
-*/vendor/*
-vendor/**
+.chef
+.chef_found*
+.git
+.kitchen
 .vagrant
-vbox
-gemfiles
-gemfiles/**
-*/gemfiles/*
-ruby
-ruby/**
-*/ruby/*
+bins
+chef
+cookbooks
+core
+cluster.txt
+environments
+local-mode-cache
+provisioning
+roles
 src
-src/**
-*/src/*
+vendor
+vbox
+
+#
+# Ignore ruby scripts, or else Chef Server 11 tries to syntax check
+# them with ruby 1.9, which always fails.
+#
+cluster_assign_roles.rb
+repxe_host.rb

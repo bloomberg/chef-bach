@@ -107,7 +107,7 @@ vagrant ssh -c "cd chef-bcpc; source proxy_setup.sh; ./wait-for-hosts.sh ${VM_LI
 snapshotVMs "${SNAP_POST_PXE}"
 
 printf "#### Chef the nodes with Basic role\n"
-vagrant ssh -c "cd chef-bcpc; sudo ./cluster-assign-roles.sh $BACH_ENVIRONMENT Basic"
+vagrant ssh -c "cd chef-bcpc; ./cluster-assign-roles.sh $BACH_ENVIRONMENT Basic"
 snapshotVMs "${SNAP_POST_BASIC}"
 
 printf "#### Chef the nodes with complete roles\n"
@@ -119,21 +119,21 @@ if [ "${CLUSTER_TYPE,,}" == "hadoop" ]; then
   # https://github.com/bloomberg/chef-bach/issues/847
   # We know the first run might fail set +e
   set +e
-  vagrant ssh -c "cd chef-bcpc; sudo ./cluster-assign-roles.sh $BACH_ENVIRONMENT Bootstrap"
+  vagrant ssh -c "cd chef-bcpc; ./cluster-assign-roles.sh $BACH_ENVIRONMENT Bootstrap"
   set -e
   # if we still fail here we have some other issue
-  vagrant ssh -c "cd chef-bcpc; sudo ./cluster-assign-roles.sh $BACH_ENVIRONMENT Bootstrap"
+  vagrant ssh -c "cd chef-bcpc; ./cluster-assign-roles.sh $BACH_ENVIRONMENT Bootstrap"
   snapshotVMs "${SNAP_POST_BOOTSTRAP}"
   printf "Running final C-A-R(s)"
 fi
 
 printf "#### Chef machine bcpc-vms with $CLUSTER_TYPE\n"
-vagrant ssh -c "cd chef-bcpc; sudo ./cluster-assign-roles.sh $BACH_ENVIRONMENT $CLUSTER_TYPE"
+vagrant ssh -c "cd chef-bcpc; ./cluster-assign-roles.sh $BACH_ENVIRONMENT $CLUSTER_TYPE"
 
 # for Hadoop installs we need to re-run the headnodes once HDFS is up to ensure
 # we deploy various JARs. Run a second time once a datanode is up.
 if [[ "${CLUSTER_TYPE,,}" == "hadoop" ]]; then
-  vagrant ssh -c "cd chef-bcpc; sudo ./cluster-assign-roles.sh $BACH_ENVIRONMENT $CLUSTER_TYPE BCPC-Hadoop-Head"
+  vagrant ssh -c "cd chef-bcpc; ./cluster-assign-roles.sh $BACH_ENVIRONMENT $CLUSTER_TYPE BCPC-Hadoop-Head"
 fi
 snapshotVMs "${SNAP_POST_INSTALL}"
 
