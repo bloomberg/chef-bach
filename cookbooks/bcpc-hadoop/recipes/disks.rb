@@ -129,7 +129,9 @@ ruby_block 'format-disks' do
                    "/dev/#{base_name}"
                  else
                    case base_name
-                   when /^nvme/
+                   when /^nvme\d+/
+                     "/dev/#{base_name}p1"
+                   when /^md\d+/
                      "/dev/#{base_name}p1"
                    else
                      "/dev/#{base_name}1"
