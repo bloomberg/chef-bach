@@ -41,7 +41,7 @@ dirinfo.each_pair do |dir, info|
 
   # enforce ownership and permissions
   owner = info[:owner]
-  group = info[:groups]
+  group = info[:group]
   perms = FsPermission.new(info[:perms].to_i(8))
 
   # create the directory
