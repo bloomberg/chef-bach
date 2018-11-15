@@ -22,7 +22,7 @@ maintainer_email 'hadoop@bloomberg.net'
 description 'Overrides the default attributes in the backup cookbook.'
 license 'Apache 2.0'
 long_description IO.read(File.join(File.dirname(__FILE__), 'README.md'))
-version '3.6.2'
+version '3.6.3'
 
 # dependencies
 depends 'bcpc-hadoop' # needed for kerberos authentication

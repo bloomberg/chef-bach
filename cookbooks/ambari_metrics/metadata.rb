@@ -5,7 +5,7 @@ maintainer_email 'hadoop@bloomberg.net'
 license 'Apache License 2.0'
 description 'Installs/Configures ambari_metrics'
 long_description 'Installs/Configures ambari_metrics'
-version '3.6.2'
+version '3.6.3'
 
 depends 'ambari'
 depends 'grafana'
