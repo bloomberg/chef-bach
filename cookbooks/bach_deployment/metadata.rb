@@ -4,7 +4,7 @@ maintainer_email 'hadoop@bloomberg.net'
 license          'Apache License 2.0'
 description      'Wrapper for custom files/jars deployment'
 long_description IO.read(File.join(File.dirname(__FILE__), 'README.md'))
-version          '3.3.28'
+version          '3.3.29'
 
 depends 'bcpc'
 depends 'deployment'
