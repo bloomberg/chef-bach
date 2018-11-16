@@ -54,6 +54,7 @@ Vagrant.configure('2') do |config|
     bs.vm.network :private_network, ip: '10.0.100.3', netmask: '255.255.255.0'
 
     bs.vm.synced_folder '.', '/home/vagrant/chef-bcpc', type: 'rsync',
+        rsync__args: %w(--verbose --archive -z --partial --progress),
         rsync__exclude: %w(vendor Gemfile.lock .kitchen .chef)
     bs.vm.synced_folder '../cluster', '/home/vagrant/cluster', type: 'rsync'
 
