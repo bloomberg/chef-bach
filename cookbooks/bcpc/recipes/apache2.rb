@@ -122,7 +122,7 @@ template '/etc/apache2/sites-available/bach-web.conf' do
   group 'root'
   mode 0o0644
   variables(
-    'host_ip'       => node['bcpc']['floating']['ip'],
+    'host_ip'       => node['bcpc']['management']['ip'],
     'host_port'     => node['bcpc']['bach_web']['port'],
     'document_root' => node['bcpc']['bach_web']['document_root'],
     'json_url'      => node['bcpc']['bach_web']['json_url'],
