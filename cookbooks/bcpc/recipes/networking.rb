@@ -375,6 +375,15 @@ ruby_block 'bcpc-deconfigure-dhcp-interfaces' do
   only_if 'pgrep dhclient'
 end
 
+if node[:bcpc][:networks][subnet][:management][:interface] !=
+   node[:bcpc][:networks][subnet][:storage][:interface]
+  bash 'routing-storage' do
+    user 'root'
+    code "echo '2 storage' >> /etc/iproute2/rt_tables"
+    not_if "grep -e '^2 storage' /etc/iproute2/rt_tables"
+  end
+end
+
 #
 # Routing scripts for multi-home hosts
 #
