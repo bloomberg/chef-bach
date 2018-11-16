@@ -7,7 +7,7 @@ if [[ -f ./proxy_setup.sh ]]; then
 fi
 
 # Git needs to be installed for Berkshelf to be useful.
-if [ $(dpkg-query -W -f='${Status}' git 2>/dev/null | grep -c 'ok installed') -eq 0 ]; then
+if ! dpkg -p git >/dev/null 2>&1; then
     sudo apt-get update
     sudo apt-get -y install git
 fi
