@@ -16,7 +16,6 @@
     "recipe[bcpc-hadoop::graphite_disk_wrapper]",
     "recipe[bcpc::ssl_cert_deploy]",
     "recipe[bcpc::graphite]",
-    "recipe[bcpc::diamond]",
     "recipe[bcpc::zabbix-head]",
     "recipe[bcpc-hadoop::hdp_repo]",
     "recipe[bach_krb5::krb5_client]",
