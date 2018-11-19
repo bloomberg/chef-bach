@@ -7,6 +7,7 @@
       "role[Basic]",
       "recipe[bcpc::bootstrap]",
       "recipe[bcpc::apache-mirror]",
+      "recipe[bcpc::ufw]",
       "recipe[bcpc::chef_vault_download]",
       "recipe[bcpc::chef_vault_install]",
       "recipe[bcpc::certs]",
