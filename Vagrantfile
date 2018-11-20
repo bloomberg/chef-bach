@@ -45,6 +45,7 @@ Vagrant.configure('2') do |config|
     vb.gui = false
     vb.cpus = ENV.fetch 'CLUSTER_VM_CPUs', 2
     vb.memory = ENV.fetch 'CLUSTER_VM_MEM', 8192
+    vb.linked_clone = true
   end
 
   config.vm.define 'bootstrap', primary: true do |bs|
