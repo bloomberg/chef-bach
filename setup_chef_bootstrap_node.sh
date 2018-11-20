@@ -28,6 +28,11 @@ sudo /opt/chefdk/bin/chef-client -E "$CHEF_ENVIRONMENT" -c .chef/knife.rb
 [ ! -L ~/.chef ] && \
   sudo ln -s $(readlink -f .chef) ~/.chef
 
+echo "Setting up chef environment, roles, and uploading cookbooks"
+knife environment from file environments/${CHEF_ENVIRONMENT}.json
+knife role from file roles/*.json
+knife cookbook upload -a
+
 #
 # build_bins.sh has already built the BCPC local repository, but we
 # still need to configure Apache and chef-vault before doing a
