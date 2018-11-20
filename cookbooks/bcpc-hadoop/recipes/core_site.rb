@@ -79,7 +79,7 @@ end
 subnet = node["bcpc"]["management"]["subnet"]
 network_properties = {
   'hadoop.security.dns.interface' =>
-      node["bcpc"]["networks"][subnet]["floating"]["interface"]
+      node["bcpc"]["networks"][subnet]["management"]["interface"]
 }
 
 node.run_state[:core_site_generated_values].merge!(network_properties)

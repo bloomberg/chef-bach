@@ -26,8 +26,7 @@
     "recipe[bcpc-hadoop::oozie_client]",
     "recipe[bcpc-hadoop::hdfsdu_pre_fetch]",
     "recipe[hdfsdu::fetch_data]",
-    "recipe[bcpc-hadoop::smoke_test_wrapper]",
-    "recipe[bcpc::diamond]"
+    "recipe[bcpc-hadoop::smoke_test_wrapper]"
   ],
   "description": "A highly-available head node in a BCPC Hadoop cluster",
   "chef_type": "role",

@@ -76,6 +76,8 @@ default[:bcpc][:hadoop][:hbase][:site_xml].tap do |site_xml|
   site_xml['hbase.cluster.distributed'] = node['bcpc']['hadoop']['hbase']['cluster']['distributed'].to_s
   site_xml['hbase.quota.enabled'] = 'true'
   site_xml['hbase.hregion.majorcompaction'] = node['bcpc']['hadoop']['hbase']['major_compact']['time'].to_s
+  site_xml['hbase.regionserver.ipc.address'] = node['bcpc']['management']['ip'].to_s
+  site_xml['hbase.master.ipc.address'] = node['bcpc']['management']['ip'].to_s
   site_xml['hbase.defaults.for.version.skip'] = node['bcpc']['hadoop']['hbase']['defaults']['for']['version']['skip'].to_s
   site_xml['hbase.regionserver.wal.codec'] = 'org.apache.hadoop.hbase.regionserver.wal.IndexedWALEditCodec'
   site_xml['hbase.region.server.rpc.scheduler.factory.class'] = 'org.apache.hadoop.hbase.ipc.PhoenixRpcSchedulerFactory'

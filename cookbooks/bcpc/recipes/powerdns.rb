@@ -44,8 +44,6 @@ if node[:bcpc][:management][:vip] and get_nodes_for("mysql").length() > 0
     tempHash = Hash.new
     tempHash['hostname'] = nodeobj.hostname
     tempHash['management_ip'] = nodeobj.bcpc.management.ip
-    tempHash['storage_ip'] = nodeobj.bcpc.storage.ip
-    tempHash['floating_ip'] = nodeobj.bcpc.floating.ip
     allnodes.push(tempHash)
   end
 
@@ -53,8 +51,6 @@ if node[:bcpc][:management][:vip] and get_nodes_for("mysql").length() > 0
     tempHash = Hash.new
     tempHash['hostname'] = node[:bcpc][:management][:viphost].split('.')[0]
     tempHash['management_ip'] = node[:bcpc][:management][:vip]
-    tempHash['floating_ip'] =  node[:bcpc][:floating][:vip]
-    tempHash['storage_ip'] =  node[:bcpc][:management][:vip]
     allnodes.push(tempHash)
   end
 
@@ -144,75 +140,29 @@ end
 node.default['pdns']['authoritative']['config']['recursor'] =
   node[:bcpc][:dns_servers][0]
 
-node.default['pdns']['authoritative']['config']['local_address'] = [ node[:bcpc][:floating][:vip] , node[:bcpc][:management][:vip] ]
+node.default['pdns']['authoritative']['config']['local_address'] = [ node[:bcpc][:management][:vip] ]
 
 include_recipe 'pdns::authoritative_package'
 
-reverse_dns_zone = node['bcpc']['networks'][subnet]['floating']['reverse_dns_zone'] || calc_reverse_dns_zone(node['bcpc']['networks'][subnet]['floating']['cidr'])
+reverse_dns_zone = node['bcpc']['networks'][subnet]['management']['reverse_dns_zone'] || calc_reverse_dns_zone(node['bcpc']['networks'][subnet]['management']['cidr'])
 
 Chef::Log.info("Reverse DNS zone: #{reverse_dns_zone}")
 
 pdns_domain node[:bcpc][:domain_name] do
-  soa_ip node[:bcpc][:floating][:vip]
+  soa_ip node[:bcpc][:management][:vip]
 end
 
 pdns_domain reverse_dns_zone  do
-  soa_ip node[:bcpc][:floating][:vip]
+  soa_ip node[:bcpc][:management][:vip]
 end
 
 domain_name = node[:bcpc][:domain_name]
 allnodes.each do |server|
   management_ip = server['management_ip']
-  floating_ip = server['floating_ip']
-  storage_ip = server['storage_ip']
   hostname = server['hostname']
 
   ruby_block "create-dns-entry-#{hostname}" do
     block do
-      # check if we have a float address
-      if management_ip != floating_ip then
-        float_name = float_host(hostname) + '.' + domain_name
-
-        fwdR = Chef::Resource::PdnsRecord.new(float_name, run_context)
-        fwdR.domain(domain_name)
-        fwdR.content(floating_ip)
-        fwdR.type('A')
-        fwdR.ttl(300)
-        fwdR.run_action(:create)
-
-        # Create reverse record
-        revR = Chef::Resource::PdnsRecord.new(calc_reverse_ip_address(floating_ip),
-                                           run_context)
-        revR.domain(reverse_dns_zone)
-        revR.content(float_name)
-        revR.type('PTR')
-        revR.ttl(300)
-        revR.run_action(:create)
-      end
-
-      # check if we have a storage address
-      if management_ip != storage_ip then
-        storage_name =
-          storage_host(hostname) + '.' + domain_name
-
-        fwdR = Chef::Resource::PdnsRecord.new(storage_name, run_context)
-
-        fwdR.domain(domain_name)
-        fwdR.content(storage_ip)
-        fwdR.type('A')
-        fwdR.ttl(300)
-        fwdR.run_action(:create)
-
-        # Create reverse record
-        revR = Chef::Resource::PdnsRecord.new(calc_reverse_ip_address(storage_ip),
-                                           run_context)
-        revR.domain(reverse_dns_zone)
-        revR.content(storage_name)
-        revR.type('PTR')
-        revR.ttl(300)
-        revR.run_action(:create)
-      end
-
       if management_ip
         # add a record for the management IP
         management_name = hostname + '.' + domain_name
@@ -225,7 +175,7 @@ allnodes.each do |server|
 
         # Create reverse record
         revR = Chef::Resource::PdnsRecord.new(calc_reverse_ip_address(management_ip),
-                                           run_context)
+                                              run_context)
         revR.domain(reverse_dns_zone)
         revR.content(management_name)
         revR.type('PTR')

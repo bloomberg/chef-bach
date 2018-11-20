@@ -27,16 +27,12 @@ lib_file_path = Pathname.new(lib_file).dirname.to_s
 src_file_url = File.join(get_binary_server_url, lib_file_name)
 
 directory lib_file_path do
-  owner 'ubuntu'
-  group 'ubuntu'
   mode '0755'
   recursive true
 end
 
 remote_file lib_file.to_s do
   source src_file_url
-  owner 'ubuntu'
-  group 'ubuntu'
   mode '0755'
   checksum lib_file_checksum
 end

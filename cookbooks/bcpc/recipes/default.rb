@@ -52,11 +52,9 @@ ips = ifs.map{ |a| node[:network][:interfaces][a].attribute?(:addresses) and
 # If we're running on openstack, most of this recipe is irrelevant.
 if node['openstack'] && node['openstack']['local_ipv4']
   # select the fixed IP if we are on OpenStack and get rid of vip references
-  node.set['bcpc']['management']['ip'] =
+  node.set['bcpc']['management']['ip']
     node['openstack']['local_ipv4']
   node.force_override['bcpc']['management']['vip'] =
-    node['openstack']['local_ipv4']
-  node.force_override['bcpc']['floating']['ip'] =
     node['openstack']['local_ipv4']
 
   if node['openstack']['hostname']
@@ -97,19 +95,6 @@ else # All non-openstack situations
 
   mgmt_bitlen = (node['bcpc']['networks'][subnet]['management']['cidr'].match /\d+\.\d+\.\d+\.\d+\/(\d+)/)[1].to_i
   mgmt_hostaddr = IPAddr.new(node['bcpc']['management']['ip'])<<mgmt_bitlen>>mgmt_bitlen
-
-  stor_bitlen = (node['bcpc']['networks'][subnet]['storage']['cidr'].match /\d+\.\d+\.\d+\.\d+\/(\d+)/)[1].to_i
-  stor_hostaddr = IPAddr.new(node['bcpc']['management']['ip'])<<stor_bitlen>>stor_bitlen
-
-  flot_bitlen = (node['bcpc']['networks'][subnet]['floating']['cidr'].match /\d+\.\d+\.\d+\.\d+\/(\d+)/)[1].to_i
-  ##If we have a full class B, then simply leave the 3rd octet alone and use the 4th octet from mgmt ip
-  #Then we leave the rest of the float Ips for the VMs
-  flot_bitlen = 24 if flot_bitlen == 16
-  flot_hostaddr = IPAddr.new(node['bcpc']['management']['ip'])<<flot_bitlen>>flot_bitlen
-
-  node.default['bcpc']['storage']['ip'] = ((IPAddr.new(node['bcpc']['networks'][subnet]['storage']['cidr'])>>(32-stor_bitlen)<<(32-stor_bitlen))|stor_hostaddr).to_s
-  node.default['bcpc']['floating']['ip'] = ((IPAddr.new(node['bcpc']['networks'][subnet]['floating']['cidr'])>>(32-flot_bitlen)<<(32-flot_bitlen))|flot_hostaddr).to_s
-  node.default['bcpc']['floating']['cidr'] = node['bcpc']['networks'][subnet]['floating']['cidr']
 end
 
 node.save rescue nil

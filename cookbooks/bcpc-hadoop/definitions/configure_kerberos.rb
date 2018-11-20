@@ -5,7 +5,7 @@ define :configure_kerberos do
     srvdat = node[:bcpc][:hadoop][:kerberos][:data][service_name]
     srvc=service_name
     keytab_file = srvdat['keytab']
-    config_host = srvdat['princhost'] == "_HOST" ?  float_host(node[:hostname]) : srvdat['princhost'].split('.')[0]
+    config_host = srvdat['princhost'] == "_HOST" ?  node[:hostname] : srvdat['princhost'].split('.')[0]
 
     # Create directory to store keytab files
     directory keytab_dir do
@@ -34,8 +34,8 @@ define :configure_kerberos do
       only_if { user_exists?("#{srvdat['owner']}")  }
     end
 
-    princ_host = srvdat['princhost'] == "_HOST" ? float_host(node[:fqdn]) : srvdat['princhost']
-    
+    princ_host = srvdat['princhost'] == "_HOST" ? node[:fqdn] : srvdat['princhost']
+
     if srvdat['principal'] != "HTTP"
       execute "kdestroy-for-#{srvdat['owner']}" do
         command "kdestroy"

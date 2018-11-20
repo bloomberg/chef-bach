@@ -135,10 +135,10 @@ template '/opt/graphite/conf/carbon.conf' do
     'relay_recv_nic' => node[:bcpc][:graphite][:ip],
     'relay_idle_timeout' => node[:bcpc][:graphite][:carbon][:relay][:idle_timeout],
     'relay_dests' => get_static_head_node_local_ip_list.map { |host| host + ':2024' }.sort.join(','),
-    'aggr_recv_nic' => node[:bcpc][:floating][:ip],
-    'aggr_dests' => node[:bcpc][:floating][:ip] + ':2004',
-    'cache_recv_nic' => node[:bcpc][:floating][:ip],
-    'cache_query_nic' => node[:bcpc][:floating][:ip],
+    'aggr_recv_nic' => node[:bcpc][:management][:ip],
+    'aggr_dests' => node[:bcpc][:management][:ip] + ':2004',
+    'cache_recv_nic' => node[:bcpc][:management][:ip],
+    'cache_query_nic' => node[:bcpc][:management][:ip],
     'cache_max_updates_per_sec' => node['bcpc']['graphite']['carbon']['cache']['MAX_UPDATES_PER_SECOND'],
     'min_quorum' => get_static_head_nodes_count / 2 + 1,
     'use_whitelist' => node['bcpc']['graphite']['use_whitelist'] ? 'True' : 'False'
@@ -250,7 +250,7 @@ template '/opt/graphite/webapp/graphite/local_settings.py' do
     'graphite_nic' => node['bcpc']['graphite']['ip'],
     'cluster_servers' => get_static_head_node_local_ip_list.map { |host| "\"#{host}:#{node['bcpc']['graphite']['web_port']}\"" }.sort.join(', '),
     'intracluster_https' => node['bcpc']['graphite']['web_https'] ? 'True' : 'False',
-    'carbonlink_hosts' => node['bcpc']['floating']['ip']
+    'carbonlink_hosts' => node['bcpc']['management']['ip']
   )
   notifies :restart, 'service[apache2]', :delayed
 end

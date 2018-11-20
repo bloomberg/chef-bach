@@ -342,22 +342,6 @@ def secure_password_alphanum_upper(len=20)
     pw
 end
 
-def float_host(*args)
-  if node[:bcpc][:management][:ip] != node[:bcpc][:floating][:ip]
-    return ("f-" + args.join('.'))
-  else
-    return args.join('.')
-  end
-end
-
-def storage_host(*args)
-  if node[:bcpc][:management][:ip] != node[:bcpc][:floating][:ip]
-    return ("s-" + args.join('.'))
-  else
-    return args.join('.')
-  end
-end
-
 # requires cidr in form '1.2.3.0/24', where 1.2.3.0 is a dotted quad ip4 address
 # and 24 is a number of netmask bits (e.g. 8, 16, 24)
 def calc_reverse_dns_zone(cidr)

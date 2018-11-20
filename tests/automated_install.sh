@@ -21,19 +21,8 @@ fi
 
 export BACH_ENVIRONMENT=${BACH_ENVIRONMENT:-'Test-Laptop'}
 export BACH_CLUSTER_PREFIX=${BACH_CLUSTER_PREFIX:-''}
-export BOOTSTRAP_VM_MEM=${BOOTSTRAP_VM_MEM:-5096}
-export BOOTSTRAP_VM_CPUs=${BOOTSTRAP_VM_CPUS:-2}
-export CLUSTER_VM_MEM=${CLUSTER_VM_MEM:-7120}
-export CLUSTER_VM_CPUs=${CLUSTER_VM_CPUs:-4}
 export CLUSTER_TYPE=${CLUSTER_TYPE:-Hadoop}
 export PATH=/opt/chefdk/embedded/bin:$PATH
-
-BOOTSTRAP_NAME="bcpc-bootstrap"
-if [ "$BACH_CLUSTER_PREFIX" != "" ]; then
-  BOOTSTRAP_NAME="${BACH_CLUSTER_PREFIX}-bcpc-bootstrap"
-fi
-
-export BOOTSTRAP_NAME
 
 # normalize capitaliztion of CLUSTER_TYPE to lower case
 typeset -l CLUSTER_TYPE="${CLUSTER_TYPE}"
@@ -43,13 +32,13 @@ printf "#### Setup configuration files\n"
 $SEDINPLACE 's/vb.gui = true/vb.gui = false/' Vagrantfile
 
 # Prepare the test environment file and inject local settings.
-if hash ruby; then
-  ruby ./tests/edit_environment.rb
-else
+#if hash ruby; then
+  #ruby ./tests/edit_environment.rb
+#else
   printf "#### WARNING: no ruby found -- proceeding without editing environment!\n" > /dev/stderr
   mkdir -p ../cluster
   cp -rv stub-environment/* ../cluster
-fi
+#fi
 
 if [ "${CLUSTER_TYPE,,}" == "kafka" ]; then
   printf "Using kafka_cluster.txt\n"
@@ -66,25 +55,13 @@ rm -f ../cluster/hadoop_cluster.txt
 printf "#### Setup VB's and Bootstrap\n"
 source ./vbox_create.sh
 
-# Ensure we got VM_LIST from vbox_create.sh
-echo "Using CLUSTER_PREFIX=${BACH_CLUSTER_PREFIX}"
-echo "VM LIST"
-for vm in ${VM_LIST[*]}; do
-  echo $vm
-done
-
 # VM Snapshot Statemachine:
-# Before PXE boot:
-SNAP_PRE_PXE='Shoe-less'
-# After OS Install:
-SNAP_POST_PXE='Post-Cobble'
 # After cluster-assign-roles Bootstrap Step:
 SNAP_POST_BASIC='Post-Basic'
 # After cluster-assign-roles <cluster> Step:
 SNAP_POST_BOOTSTRAP='Post-Bootstrap'
 # After cluster-assign-roles <cluster> Step:
 SNAP_POST_INSTALL='Post-Install'
-
 
 download_VM_files || ( echo "############## VBOX CREATE DOWNLOAD VM FILES RETURNED $? ##############" && exit 1 )
 create_bootstrap_VM || ( echo "############## VBOX CREATE BOOTSTRAP VM RETURNED $? ##############" && exit 1 )
@@ -94,17 +71,6 @@ BOOTSTRAP_IP=$(python -c "$python_to_find_bootstrap_ip")
 
 create_cluster_VMs || ( echo "############## VBOX CREATE CLUSTER VMs RETURNED $? ##############" && exit 1 )
 install_cluster $BACH_ENVIRONMENT $BOOTSTRAP_IP || ( echo "############## VBOX CREATE INSTALL CLUSTER RETURNED $? ##############" && exit 1 )
-
-printf "#### Cobbler Boot\n"
-printf "  Snapshotting pre-Cobbler and booting (unless already running)\n"
-snapshotVMs "${SNAP_PRE_PXE}"
-for vm in ${VM_LIST[*]} ${BOOTSTRAP_NAME}; do
-  vboxmanage showvminfo $vm --machinereadable | grep -q '^VMState="running"$' || \
-    VBoxManage startvm $vm --type headless
-done
-
-vagrant ssh -c "cd chef-bcpc; source proxy_setup.sh; ./wait-for-hosts.sh ${VM_LIST[*]}"
-snapshotVMs "${SNAP_POST_PXE}"
 
 printf "#### Chef the nodes with Basic role\n"
 vagrant ssh -c "cd chef-bcpc; ./cluster-assign-roles.sh $BACH_ENVIRONMENT Basic"

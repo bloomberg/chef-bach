@@ -17,6 +17,8 @@
 # limitations under the License.
 #
 
+# FIXME: Remove someday.  This will be bitrotting as we stopped cobbler in the
+# bootstrap role.
 require 'digest/sha2'
 require 'chef-vault'
 

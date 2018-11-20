@@ -21,18 +21,3 @@ ff02::2 ip6-allrouters
 <%   end -%>
 <% end -%>
 
-<% @servers.select{|s| not s.name.include? 'bootstrap' }.each do |server| -%>
-<%   if server.has_key?('hostname') and server.has_key?('bcpc') and server['bcpc'].has_key?('storage') and server['bcpc']['storage'].has_key?('ip') -%>
-<%=   "#{server['bcpc']['storage']['ip']}   #{storage_host(server.fqdn)} #{storage_host(server.hostname, server['bcpc']['domain_name'])} #{storage_host(server.hostname)}" %>
-<%   else -%>
-<%     Chef::Log.fatal("Server #{server} has not all required attributes") -%>
-<%   end -%>
-<% end -%>
-
-<% @servers.select{|s| not s.name.include? 'bootstrap' }.each do |server| -%>
-<%   if server.has_key?('hostname') and server.has_key?('bcpc') and server['bcpc'].has_key?('floating') and server['bcpc']['floating'].has_key?('ip') -%>
-<%=    "#{server['bcpc']['floating']['ip']}   #{float_host(server.fqdn)} #{float_host(server.hostname, server['bcpc']['domain_name'])} #{float_host(server.hostname)}" %>
-<%   else -%>
-<%     Chef::Log.fatal("Server #{server} has not all required attributes") -%>
-<%   end -%>
-<% end -%>

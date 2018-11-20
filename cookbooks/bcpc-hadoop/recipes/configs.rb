@@ -51,7 +51,7 @@ end
 set_hosts
 node.override['locking_resource']['zookeeper_servers'] = \
   node['bcpc']['hadoop']['zookeeper']['servers'].map do |server|
-    [float_host(server['hostname']), node['bcpc']['hadoop']['zookeeper']['port']].join(':')
+    [server['hostname'], node['bcpc']['hadoop']['zookeeper']['port']].join(':')
   end
 
 package 'bigtop-jsvc'

@@ -63,7 +63,7 @@ listen mysql-galera <%= @management_vip %>:3306
 <% end -%>
 
 <% @ha_services.each do |service| -%>
-listen <%= "#{service['name']} #{@floating_vip}:#{service['port']}" %>
+listen <%= "#{service['name']} #{@management_vip}:#{service['port']}" %>
   balance roundrobin
   <% if !service['http_check_url'].nil? and !service['http_check_expect_str'].nil? -%>
   option httpchk GET <%= service['http_check_url'] %>
@@ -71,7 +71,7 @@ listen <%= "#{service['name']} #{@floating_vip}:#{service['port']}" %>
   <% end -%>
   source <%= @local_floating_ip %>
   <% service['servers'].each do |server| -%>
-  <%= "server #{server['floating_fqdn']} #{server['floating_ip']}:#{server['port']} check" %>
+  <%= "server #{server['fqdn']} #{server['management_ip']}:#{server['port']} check" %>
   <% end -%>
 
 <% end -%>

@@ -46,7 +46,7 @@ end
 
 service "hbase-thrift" do
   action :disable
-end 
+end
 
 bash 'create-hbase-dir' do
   code  <<-EOH
@@ -127,7 +127,7 @@ if node["bcpc"]["hadoop"]["phoenix"]["tracing"]["enabled"]
 
   bash "create_phoenix_trace_table" do
     code <<-EOH
-    HBASE_CONF_PATH=/etc/hadoop/conf:/etc/hbase/conf /usr/hdp/current/phoenix-client/bin/sqlline.py "#{node[:bcpc][:hadoop][:zookeeper][:servers].map{ |s| float_host(s[:hostname])}.join(",")}:#{node[:bcpc][:hadoop][:zookeeper][:port]}:/hbase" "#{Chef::Config[:file_cache_path]}/trace_table.sql"
+    HBASE_CONF_PATH=/etc/hadoop/conf:/etc/hbase/conf /usr/hdp/current/phoenix-client/bin/sqlline.py "#{node[:bcpc][:hadoop][:zookeeper][:servers].map{ |s| s[:hostname]}.join(",")}:#{node[:bcpc][:hadoop][:zookeeper][:port]}:/hbase" "#{Chef::Config[:file_cache_path]}/trace_table.sql"
     EOH
     user "hbase"
   end

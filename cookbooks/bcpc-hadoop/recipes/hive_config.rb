@@ -30,10 +30,10 @@ stats_password = make_config('mysql-hive-table-stats-password', secure_password)
   end
 end
 
-mysql_port = 
+mysql_port =
   node['bcpc']['hadoop']['hive']['mysql_port'] || 3306
-mysql_hosts = 
-  if node['bcpc']['hadoop']['hive']['mysql_hosts'].length > 0 then 
+mysql_hosts =
+  if node['bcpc']['hadoop']['hive']['mysql_hosts'].length > 0 then
     # our list is just a plain list of hosts
     node['bcpc']['hadoop']['hive']['mysql_hosts'].each\
       .map { |m| m + ":#{mysql_port}" }
@@ -74,14 +74,14 @@ hive_site_vars[:stats_sql_password] = \
 
 hive_site_vars[:metastore_princ] = \
   if node.run_list.expand(node.chef_environment).recipes.include?('bcpc-hadoop::hive_hcatalog')
-    "#{node['bcpc']['hadoop']['kerberos']['data']['hive']['principal']}/#{node['bcpc']['hadoop']['kerberos']['data']['hive']['princhost'] == '_HOST' ? float_host(node['fqdn']) : node['bcpc']['hadoop']['kerberos']['data']['hive']['princhost']}@#{node['bcpc']['hadoop']['kerberos']['realm']}"
+    "#{node['bcpc']['hadoop']['kerberos']['data']['hive']['principal']}/#{node['bcpc']['hadoop']['kerberos']['data']['hive']['princhost'] == '_HOST' ? node['fqdn'] : node['bcpc']['hadoop']['kerberos']['data']['hive']['princhost']}@#{node['bcpc']['hadoop']['kerberos']['realm']}"
   else
     "#{node['bcpc']['hadoop']['kerberos']['data']['hive']['principal']}/#{node['bcpc']['hadoop']['kerberos']['data']['hive']['princhost'] == '_HOST' ? '_HOST' : node['bcpc']['hadoop']['kerberos']['data']['hive']['princhost']}@#{node['bcpc']['hadoop']['kerberos']['realm']}"
   end
 
 hive_site_vars[:server_princ] = \
   if node.run_list.expand(node.chef_environment).recipes.include?('bcpc-hadoop::hive_hcatalog')
-    "#{node['bcpc']['hadoop']['kerberos']['data']['hive']['principal']}/#{node['bcpc']['hadoop']['kerberos']['data']['hive']['princhost'] == '_HOST' ? float_host(node['fqdn']) : node['bcpc']['hadoop']['kerberos']['data']['hive']['princhost']}@#{node['bcpc']['hadoop']['kerberos']['realm']}"
+    "#{node['bcpc']['hadoop']['kerberos']['data']['hive']['principal']}/#{node['bcpc']['hadoop']['kerberos']['data']['hive']['princhost'] == '_HOST' ? node['fqdn'] : node['bcpc']['hadoop']['kerberos']['data']['hive']['princhost']}@#{node['bcpc']['hadoop']['kerberos']['realm']}"
   else
     "#{node['bcpc']['hadoop']['kerberos']['data']['hive']['principal']}/#{node['bcpc']['hadoop']['kerberos']['data']['hive']['princhost'] == '_HOST' ? '_HOST' : node['bcpc']['hadoop']['kerberos']['data']['hive']['princhost']}@#{node['bcpc']['hadoop']['kerberos']['realm']}"
   end
@@ -97,16 +97,16 @@ generated_values = {
 
   'hive.metastore.uris' =>
     hive_site_vars[:hive_hosts]
-    .map { |s| 'thrift://' + float_host(s[:hostname]) + ':9083' }
+    .map { |s| 'thrift://' + s[:hostname] + ':9083' }
     .join(','),
   'hive.zookeeper.quorum' =>
-    get_head_nodes.map{ |s| float_host(s[:fqdn]) }.join(","),
+    get_head_nodes.map{ |s| s[:fqdn] }.join(","),
   'hive.server2.support.dynamic.service.discovery' => 'true',
-  'hive.server2.zookeeper.namespace' => 
+  'hive.server2.zookeeper.namespace' =>
     "HS2-#{node.chef_environment}-#{hive_site_vars[:hs2_auth]}",
-  'hive.server2.thrift.bind.host' => "#{float_host(node[:fqdn])}",
+  'hive.server2.thrift.bind.host' => "#{node[:fqdn]}",
   'hive.server2.thrift.port' =>
-    node['bcpc']['hadoop']['hive']['server2']['port'],
+    node['bcpc']['hadoop']['hive']['server2']['ports'],
   'hive.metastore.warehouse.dir' => hive_site_vars[:warehouse],
   'hive.exec.scratchdir' => hive_site_vars[:scratch],
   'hive.stats.dbconnectionstring' =>

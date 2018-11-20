@@ -54,10 +54,10 @@ vrrp_instance VI2_<%="#{node[:bcpc][:region_name]}"%> {
   state     BACKUP
   nopreempt
 
-  interface <%= "#{node[:bcpc][:networks][subnet][:floating][:interface]}" %>
+  interface <%= "#{node[:bcpc][:networks][subnet][:management][:interface]}" %>
 
   virtual_ipaddress {
-    <%="#{node[:bcpc][:networks][subnet][:floating][:vip]}/#{(node['bcpc'][:networks][subnet]['floating']['cidr'].match /\d+\.\d+\.\d+\.\d+\/(\d+)/)[1].to_i}"%>
+    <%="#{node[:bcpc][:networks][subnet][:management][:vip]}/#{(node['bcpc'][:networks][subnet]['management']['cidr'].match /\d+\.\d+\.\d+\.\d+\/(\d+)/)[1].to_i}"%>
   }
   track_script {
     chk_haproxy

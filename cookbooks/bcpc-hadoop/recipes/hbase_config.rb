@@ -61,23 +61,21 @@ subnet = node['bcpc']['management']['subnet']
 generated_values = {
   'dfs.client.read.shortcircuit' =>
     node['bcpc']['hadoop']['hbase']['shortcircuit']['read'].to_s,
-  'hbase.master.dns.interface' =>
-    node['bcpc']['networks'][subnet]['floating']['interface'],
-  'hbase.zookeeper.quorum' =>
-    node['bcpc']['hadoop']['zookeeper']['servers'].map do |s|
-      float_host(s['hostname'])
-    end.join(','),
   'hbase.zookeeper.property.clientPort' => node['bcpc']['hadoop']['zookeeper']['port'].to_s,
-  'hbase.master.hostname' => float_host(node['fqdn']),
-  'hbase.master.info.bindAddress' =>
-    node['bcpc']['floating']['ip'],
-  'hbase.regionserver.dns.interface' =>
-    node['bcpc']['networks'][subnet]['floating']['interface'],
-  'hbase.regionserver.ipc.address' =>
-    node['bcpc']['floating']['ip'],
+  'hbase.master.dns.interface' =>
+    node["bcpc"]["networks"][subnet]["management"]["interface"],
+  'hbase.master.hostname' => node[:fqdn],
   'hbase.master.ipc.address' =>
-    node['bcpc']['floating']['ip'],
-  'hbase.regionserver.hostname' => float_host(node['fqdn'])
+    node['bcpc']['management']['ip'],
+  'hbase.master.info.bindAddress' =>
+    node['bcpc']['management']['ip'],
+  'hbase.regionserver.dns.interface' =>
+    node["bcpc"]["networks"][subnet]["management"]["interface"],
+  'hbase.regionserver.hostname' => node[:fqdn],
+  'hbase.regionserver.ipc.address' =>
+    node['bcpc']['management']['ip'],
+  'hbase.zookeeper.quorum' =>
+    node[:bcpc][:hadoop][:zookeeper][:servers].map{ |s| s[:hostname]}.join(","),
 }
 
 # this configuration parameter only belongs in master

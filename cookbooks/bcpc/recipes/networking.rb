@@ -115,7 +115,7 @@ subnet = node[:bcpc][:management][:subnet]
 node.run_state['bcpc_networking_modules'] = %w(8021q mlx4_en)
 
 # XXX change subnet to pod or cell!!!
-if %w(floating storage management).select do |i|
+if %w(management).select do |i|
     node[:bcpc][:networks][subnet][i].attribute?('slaves')
   end.any?
 
@@ -192,7 +192,7 @@ ruby_block 'bcpc-add-resolvers' do
   end
 end
 
-ifaces = %w(management storage floating)
+ifaces = %w(management)
 ifaces.each_index do |i|
   iface = ifaces[i]
   device_name = node[:bcpc][:networks][subnet][iface][:interface]
