@@ -15,21 +15,18 @@ fi
 CHEF_SERVER=$1
 CHEF_ENVIRONMENT=$2
 
-# Assume we are running in the chef-bcpc directory
-sudo /opt/chefdk/bin/chef-client -E "$CHEF_ENVIRONMENT" -c .chef/knife.rb
+sudo knife clean create $(hostname -f) -a -d -f .chef/$(hostname -f).pem \
+  -u admin -k /etc/chef-server/admin.pem
 PEM_RELATIVE_PATH=.chef/$(hostname -f).pem
 sudo chown $(whoami):root $PEM_RELATIVE_PATH
 sudo chmod 550 $PEM_RELATIVE_PATH
+
+# Assume we are running in the chef-bcpc directory
+sudo /opt/chefdk/bin/chef-client -E "$CHEF_ENVIRONMENT" -c .chef/knife.rb
 [ ! -L /etc/chef/client.pem ] && \
   sudo ln -s $(readlink -f $PEM_RELATIVE_PATH) /etc/chef/client.pem
 [ ! -L ~/.chef ] && \
   sudo ln -s $(readlink -f .chef) ~/.chef
-
-admin_val=`sudo knife client show $(hostname -f) -c .chef/knife.rb | grep ^admin: | sed "s/admin:[^a-z]*//"`
-if [[ "$admin_val" != "true" ]]; then
-  # Make this client an admin user before proceeding.
-  echo -e "/\"admin\": false\ns/false/true\nw\nq\n" | EDITOR=ed sudo -E knife client edit `hostname -f` -c .chef/knife.rb -k /etc/chef-server/admin.pem -u admin
-fi
 
 #
 # build_bins.sh has already built the BCPC local repository, but we
