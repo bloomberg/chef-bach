@@ -18,51 +18,8 @@ ENVIRONMENT="${3-Test-Laptop}"
 load_binary_server_info "$ENVIRONMENT"
 
 mkdir -p .chef
-cat << EOF > .chef/knife.rb
-require 'rubygems'
-require 'ohai'
-
-# Disable the Ohai password module which explodes on a Single-Sign-On-joined system
-ohai.disabled_plugins = [ "passwd" ]
-
-o = Ohai::System.new
-o.all_plugins(['hostname','ipaddress'])
-
-log_level                :info
-node_name                o[:fqdn]
-client_key               "$(pwd)/.chef/#{o[:fqdn]}.pem"
-validation_client_name   'chef-validator'
-validation_key           '/etc/chef-server/chef-validator.pem'
-chef_server_url          'https://${BOOTSTRAP_IP}'
-syntax_check_cache_path  '$(pwd)/.chef/syntax_check_cache'
-cookbook_path '$(pwd)/vendor/cookbooks'
-
-ssl_verify_mode :verify_none
-verify_api_cert false
-no_lazy_load true
-
-knife[:vault_mode] = 'client'
-File.umask(0007)
-EOF
-
-if [[ -n "$http_proxy" ]]; then
-  cat << EOF >> .chef/knife.rb
-no_proxy_array = ["localhost", o[:ipaddress], o[:hostname], o[:fqdn], "${BOOTSTRAP_IP}", "${binary_server_host}", ENV['no_proxy']].compact
-no_proxy_array.insert("*#{o[:domain]}") unless o[:domain].nil?
-no_proxy_string = no_proxy_array.uniq * ","
-ENV['no_proxy'] = no_proxy_string
-
-http_proxy_string = "${http_proxy}"
-ENV['http_proxy'] =
-  http_proxy_string.downcase.start_with?('http') ? http_proxy_string : nil
-
-https_proxy_string = "${https_proxy}"
-ENV['https_proxy'] =
-  https_proxy_string.downcase.start_with?('http') ? https_proxy_string : nil
-
-http_proxy ENV['http_proxy']
-https_proxy ENV['https_proxy']
-no_proxy no_proxy_string
-ENV['GIT_SSL_NO_VERIFY'] = 'true'
-EOF
-fi # end of [[ ! -f .chef/knife.rb ]]
+touch .chef/knife.rb
+knife configure -c .chef/knife.rb -s https://${BOOTSTRAP_IP} -y \
+  -u $(hostname -f) -r $(pwd)/vendor \
+  --validation-client-name chef-validator \
+  --validation-key /etc/chef-server/chef-validator.pem
