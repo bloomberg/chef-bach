@@ -45,7 +45,12 @@ else
   mkdir -p /etc/chef-server
   cat > /etc/chef-server/chef-server.rb <<EOF
 chef_server_webui['enable'] = false
-nginx['server_name'] = node['ipaddress'] # So that we have a proper CN in the
+# So that we have a proper CN with the bootstrap IP
+# node['ipaddress'] is enough for a physical bootstrap.
+# Needed for Vagrant + Virtualbox because the default route is to the NAT
+# device.
+eth1 = node['network']['interfaces']['eth1']['addresses'] 
+nginx['server_name'] = eth1.detect { |_, v| v['family'] == 'inet' }.first
 certificate
 nginx['enable_non_ssl'] = false
 nginx['non_ssl_port'] = 4000
