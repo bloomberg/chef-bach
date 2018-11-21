@@ -11,6 +11,8 @@ cookbooks_url=$1
 if [[ ! -d $DIR/vendor/cookbooks/bach_repository ]]; then
   mkdir -p vendor
   curl $cookbooks_url | tar -xvz -C ./vendor
+  # For some reason, tar -C changes ./vendor's permissions to 700
+  chmod 755 vendor
 else
   echo "Found $DIR/vendor/cookbooks/bach_repository, not invoking Berkshelf"
 fi
