@@ -40,3 +40,11 @@
     action :upgrade
   end
 end
+
+#
+# One particularly unhelpful system package -- frequently consumes
+# 100% of CPU, but we don't send the metrics anywhere.
+#
+package 'pcp' do
+  action :purge
+end
