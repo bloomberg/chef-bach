@@ -23,3 +23,4 @@ knife configure -c .chef/knife.rb -s https://${BOOTSTRAP_IP} -y \
   -u $(hostname -f) -r $(pwd)/vendor \
   --validation-client-name chef-validator \
   --validation-key /etc/chef-server/chef-validator.pem
+knife ssl fetch
