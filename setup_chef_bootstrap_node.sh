@@ -15,11 +15,16 @@ fi
 CHEF_SERVER=$1
 CHEF_ENVIRONMENT=$2
 
-sudo knife clean create $(hostname -f) -a -d -f .chef/$(hostname -f).pem \
-  -u admin -k /etc/chef-server/admin.pem
+sudo knife client create $(hostname -f) -a -d -f .chef/$(hostname -f).pem \
+  -u admin --key /etc/chef-server/admin.pem
 PEM_RELATIVE_PATH=.chef/$(hostname -f).pem
 sudo chown $(whoami):root $PEM_RELATIVE_PATH
 sudo chmod 550 $PEM_RELATIVE_PATH
+
+echo "Setting up chef environment, roles, and uploading cookbooks"
+knife environment from file environments/${CHEF_ENVIRONMENT}.json
+knife role from file roles/*.json
+knife cookbook upload -a
 
 # Assume we are running in the chef-bcpc directory
 sudo /opt/chefdk/bin/chef-client -E "$CHEF_ENVIRONMENT" -c .chef/knife.rb
@@ -27,11 +32,6 @@ sudo /opt/chefdk/bin/chef-client -E "$CHEF_ENVIRONMENT" -c .chef/knife.rb
   sudo ln -s $(readlink -f $PEM_RELATIVE_PATH) /etc/chef/client.pem
 [ ! -L ~/.chef ] && \
   sudo ln -s $(readlink -f .chef) ~/.chef
-
-echo "Setting up chef environment, roles, and uploading cookbooks"
-knife environment from file environments/${CHEF_ENVIRONMENT}.json
-knife role from file roles/*.json
-knife cookbook upload -a
 
 #
 # build_bins.sh has already built the BCPC local repository, but we
