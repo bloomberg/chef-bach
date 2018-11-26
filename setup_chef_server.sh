@@ -51,7 +51,6 @@ chef_server_webui['enable'] = false
 # device.
 eth1 = node['network']['interfaces']['eth1']['addresses'] 
 nginx['server_name'] = eth1.detect { |_, v| v['family'] == 'inet' }.first
-certificate
 nginx['enable_non_ssl'] = false
 nginx['non_ssl_port'] = 4000
 # Configure Solr to index right away when we a new node.  
