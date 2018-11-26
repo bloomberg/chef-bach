@@ -3,7 +3,7 @@
 # Cookbook Name:: bcpc
 # Recipe:: grub.rb
 #
-# Copyright 2017, Bloomberg Finance L.P.
+# Copyright 2018, Bloomberg Finance L.P.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -40,7 +40,10 @@ sconsoles.each do |console|
     source 'grub/ttySX.conf.erb'
     owner 'root'
     group 'root'
-    mode '0644'
+    mode 0o0644
+    variables(
+      console: console
+    )
     notifies :run, 'execute[initctl_reloadconfig]', :immediate
     notifies :restart, "service[#{console}]", :delayed
   end
