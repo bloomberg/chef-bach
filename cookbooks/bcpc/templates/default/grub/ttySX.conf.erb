@@ -1,6 +1,6 @@
-# ttyS0 - getty
+# <%= @console %> - getty
 #
-# This service maintains a getty on ttyS0 from the point the system is
+# This service maintains a getty on <%= @console %> from the point the system is
 # started until it is shut down again.
 
 start on stopped rc RUNLEVEL=[2345] and (
@@ -11,4 +11,4 @@ start on stopped rc RUNLEVEL=[2345] and (
 stop on runlevel [!2345]
 
 respawn
-exec /sbin/getty -L -8 ttyS0 115200 vt102
+exec /sbin/getty -L -8 <%= @console %> 115200 vt102

@@ -25,8 +25,18 @@ default['bcpc']['domain_name'] = 'bcpc.example.com'
 
 default['bcpc']['encrypt_data_bag'] = false
 
+# Configure options for Grub serial console management
+default['bcpc']['grub'].tap do |grub|
+  grub['serial']['consoles'] = %w(ttyS0 ttyS1)
+end
+
+# Build the list of strings for console output
+sconsoles = node['bcpc']['grub']['serial']['consoles'].map do |console|
+  "console=#{console},115200n8r"
+end.join(' ')
+
 default['bcpc']['bootstrap']['preseed'].tap do |preseed|
-  preseed['add_kernel_opts'] = 'console=ttyS0,115200n8r console=ttyS1,115200n8r console=tty1'
+  preseed['add_kernel_opts'] = "#{sconsoles} console=tty1"
   preseed['additional_packages'] = %w(openssh-server lldpd)
 
   # Disable device renaming -- use the kernel's enumeration order.

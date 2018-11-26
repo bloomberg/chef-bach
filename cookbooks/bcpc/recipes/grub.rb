@@ -31,21 +31,27 @@ execute 'update-grub' do
   action :nothing
 end
 
-template '/etc/init/ttyS0.conf' do
-  source 'grub/ttyS0.conf.erb'
-  owner 'root'
-  group 'root'
-  mode '0644'
-  notifies :run, 'execute[initctl_reloadconfig]', :immediate
-  notifies :restart, 'service[ttyS0]', :delayed
-end
+# List of serial consoles to configure (ttySX)
+sconsoles = node['bcpc']['grub']['serial']['consoles']
 
-execute 'initctl_reloadconfig' do
-  command '/sbin/initctl reload-configuration'
-  action :nothing
-end
+# Create getty upstart configuration for all
+sconsoles.each do |console|
+  template "/etc/init/#{console}.conf" do
+    source 'grub/ttySX.conf.erb'
+    owner 'root'
+    group 'root'
+    mode '0644'
+    notifies :run, 'execute[initctl_reloadconfig]', :immediate
+    notifies :restart, "service[#{console}]", :delayed
+  end
 
-service 'ttyS0' do
-  supports status: true, restart: true, reload: false
-  action [:start, :enable]
+  execute 'initctl_reloadconfig' do
+    command '/sbin/initctl reload-configuration'
+    action :nothing
+  end
+
+  service console do
+    supports status: true, restart: true, reload: false
+    action [:start, :enable]
+  end
 end
