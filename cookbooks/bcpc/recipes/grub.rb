@@ -35,6 +35,7 @@ end
 sconsoles = node['bcpc']['grub']['serial']['consoles']
 
 # Create getty upstart configuration for all
+# FIXME: Rewrite this block when moving to 16.04/18.04
 sconsoles.each do |console|
   template "/etc/init/#{console}.conf" do
     source 'grub/ttySX.conf.erb'
