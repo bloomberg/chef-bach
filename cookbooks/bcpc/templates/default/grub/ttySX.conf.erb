@@ -1,0 +1,19 @@
+###############################################
+##   WARNING - THIS FILE IS MANAGED BY CHEF  ##
+## DO NOT MODIFY BY HAND, OR YOU'LL BE SORRY ##
+###############################################
+
+# <%= @console %> - getty
+#
+# This service maintains a getty on <%= @console %> from the point the system is
+# started until it is shut down again.
+
+start on stopped rc RUNLEVEL=[2345] and (
+            not-container or
+            container CONTAINER=lxc or
+            container CONTAINER=lxc-libvirt)
+
+stop on runlevel [!2345]
+
+respawn
+exec /sbin/getty -L -8 <%= @console %> 115200 vt102
