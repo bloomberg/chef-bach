@@ -172,8 +172,6 @@ function install_cluster {
     echo '========= Failed to Chef!' >&2
     exit 1
   fi
-  vagrant ssh bootstrap -c 'cd chef-bcpc; ./cluster-enroll-cobbler.sh remove' || true
-  vagrant ssh bootstrap -c 'cd chef-bcpc; ./cluster-enroll-cobbler.sh add'
 }
 
 # only execute functions if being run and not sourced

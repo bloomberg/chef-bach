@@ -23,7 +23,7 @@ if [ -n "$http_proxy" ]; then
     DOMAIN="$(domainname),"
   fi
 
-  local_ips=$(ip addr list |grep 'inet '|sed -e 's/.* inet //' -e 's#/.*#,#')
+  local_ips=$(ip addr list |grep 'inet '|sed -e 's/.* inet //' -e 's#/.*#,#' | sed ':a;N;$!ba;s/\n//g')
   export no_proxy="$(sed 's/ //g' <<< $local_ips)$(hostname),$(hostname -f),$DOMAIN10.0.100.,10.0.100.*,$no_proxy"
   export NO_PROXY="$no_proxy"
   echo "Force Ruby ecosystem to use system SSL certificates"
