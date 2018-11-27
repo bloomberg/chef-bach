@@ -40,12 +40,7 @@ Setup
 
 These recipes are currently intended for building a BACH cluster on top of
 Ubuntu 14.04 servers using Chef 11. When setting this up in VMs, be sure to
-add a few dedicated disks (for HDFS data nodes) aside from boot volume. In
-addition, it's expected that you have three separate NICs per machine, with
-the following as defaults (and recommendations for VM settings):
- - ``eth0`` - management traffic (host-only NIC in VM)
- - ``eth1`` - reserved traffic (host-only NIC in VM)
- - ``eth2`` - compute traffic (host-only NIC in VM)
+add a few dedicated disks (for HDFS data nodes) aside from boot volume.
 
 You should look at the various settings in ``cookbooks/bcpc/attributes/default.rb``
 and tweak accordingly for your setup (by adding them to an environment file).
@@ -53,8 +48,8 @@ and tweak accordingly for your setup (by adding them to an environment file).
 Cluster Bootstrap
 -----------------
 
-The provided scripts which sets up a Chef and Cobbler server via
-[Vagrant](http://www.vagrantup.com/) permits imaging of the cluster via PXE.
+The provided scripts which sets up a chef-server via
+[Vagrant](http://www.vagrantup.com/).
 
 Once the Chef server is set up, you can bootstrap any number of nodes to get
 them registered with the Chef server for your environment - see the next
@@ -80,12 +75,9 @@ all necessary information is provided as per [cluster-readme.txt](./cluster-read
 
 Using the script [tests/automated_install.sh](./tests/automated_install.sh),
 one can run through what is the expected "happy-path" install for a single
-machine running (by default) four VirtualBox VMs. This simple install supports
+machine running (by default) four Vagrant VMs. This simple install supports
 only changing DNS, proxy and VM resource settings. (This is the basis of our
 automated build tests.)
-
-Using the script [tests/automated_install.sh](./tests/automated_install.sh) on Mac OS (OS X),
-will require [`brew`](http://brew.sh) to be available/installed.
 
 **Note: To run more than one test cluster at a time with VirtualBox:**
   One may `export BACH_CLUSTER_PREFIX` to set their desired cluster name
@@ -119,10 +111,10 @@ will require [`brew`](http://brew.sh) to be available/installed.
 Other Deployment Flavors
 ------------------------
 
-In addition to the "happy-path" integration test using `automated_install.sh` there are ways to deploy on OpenStack or to bare-metal hosts. Lastly, for those using [test-kitchen](http://kitchen.ci/) there are various test-kitchen [suites](./.kitchen.yml) one can run as well.
+In addition to the "happy-path" integration test using `automated_install.sh` there are ways to deploy to bare-metal hosts. Lastly, for those using [test-kitchen](http://kitchen.ci/) there are various test-kitchen [suites](./.kitchen.yml) one can run as well.
 
 A view of the various full-cluster deployment types:
-![Flow Chart of BACH Deployment Flavors -- VBox, OpenStack, Vagrant Bootstrap/Baremetal, Baremetal Only](https://github.com/bloomberg/chef-bach/blob/pages/readme-images/BACH%20Deployment%20Types.png)
+![Flow Chart of BACH Deployment Flavors -- Vagrant, Vagrant Bootstrap/Baremetal](https://github.com/bloomberg/chef-bach/blob/pages/readme-images/BACH%20Deployment%20Types.png)
 
 Using a BACH cluster
 --------------------
@@ -136,14 +128,14 @@ web interface.  To find the automatically-generated service credentials, look
 in the data bag for your environment.
 
 ```
-ubuntu@bcpc-bootstrap:~$ knife data bag show configs Test-Laptop | grep mysql-root-password
+vagrant@bootstrap:~$ knife data bag show configs Test-Laptop | grep mysql-root-password
 mysql-root-password:       abcdefgh
 ```
 
 For example, to check on ``HDFS``:
 
 ```
-ubuntu@bcpc-vm1:~$ HADOOP_USER_NAME=hdfs hdfs dfsadmin -report
+vagrant@bcpc-vm1:~$ HADOOP_USER_NAME=hdfs hdfs dfsadmin -report
 Configured Capacity: 40781217792 (37.98 GB)
 Present Capacity: 40114298221 (37.36 GB)
 DFS Remaining: 39727463789 (37.00 GB)
@@ -156,7 +148,7 @@ Missing blocks: 0
 -------------------------------------------------
 Live datanodes (1):
 
-Name: 192.168.100.13:50010 (f-bcpc-vm3.bcpc.example.com)
+Name: 10.0.100.13:50010 (bcpc-vm3.bcpc.example.com)
 Hostname: bcpc-vm3.bcpc.example.com
 Decommission Status : Normal
 Configured Capacity: 40781217792 (37.98 GB)
@@ -188,11 +180,7 @@ reinstalled from scratch without disruption. Any Chef-BACH version which
 requires manual interaction is considered BREAKING (as a GitHub tag) and
 should be avoided as much as possible; our mantra is that all operations are
 handled automatically. All services should be secured and kerberized as
-appropriate.  Yet, testing should be done both with a kerberized VM cluster
-as well as a non-kerberized cluster (or Test-Kitchen VM) to ensure both workflows
-run-through. The non-kerberized path is useful to ensure others can more
-easily integrate starting in a non-secure environment before going fully
-secure.
+appropriate.  Yet, testing should be done both with a kerberized VM cluster.
 
 BACH Services
 -------------
@@ -206,7 +194,6 @@ BACH currently relies upon a number of open-source packages:
  - [Apache Hive](http://hive.apache.org/)
  - [Apache HTTP Server](http://httpd.apache.org/)
  - [Apache Kafka](http://kafka.apache.org/)
- - [Apache Mahout](http://mahout.apache.org/)
  - [Apache Oozie](http://oozie.apache.org/)
  - [Apache Phoenix](http://phoenix.apache.org)
  - [Apache Pig](http://pig.apache.org/)
@@ -217,17 +204,12 @@ BACH currently relies upon a number of open-source packages:
  - [Sentric Hannibal](https://github.com/sentric/hannibal/)
  - [Twitter HDFS-DU](https://github.com/twitter/hdfs-du)
  - [Chef](https://www.chef.io/chef/)
- - [Cobbler](http://cobbler.github.io/)
- - [Diamond](https://github.com/BrightcoveOS/Diamond)
- - [Etherboot](http://etherboot.org/)
- - [Graphite](http://graphite.readthedocs.org/en/latest/)
  - [HAProxy](http://haproxy.1wt.eu/)
  - [Keepalived](http://www.keepalived.org/)
  - [Percona XtraDB Cluster](http://www.percona.com/software/percona-xtradb-cluster)
  - [PowerDNS](https://www.powerdns.com/)
  - [Ubuntu](http://www.ubuntu.com/)
- - [Vagrant](http://www.vagrantup.com/) - Verified with version 1.2.2
- - [VirtualBox](https://www.virtualbox.org/) - >= 4.3.x supported
+ - [Vagrant](http://www.vagrantup.com/) - Verified with version 2.1.2
  - [Zabbix](http://www.zabbix.com/)
 
 Thanks to all of these communities for producing this software!
