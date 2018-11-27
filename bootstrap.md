@@ -2,22 +2,15 @@ BCPC Cluster Bootstrap Overview
 ===============================
 
 This repository contains a set of scripts that is useful to bootstrap a BCPC
-cluster with a Cobbler, Chef, DHCP, and gateway server.  Once the
-bcpc-bootstrap node is created, all of the other nodes (such as bcpc-vm1,
-bcpc-vm2, bcpc-vm3, etc.) can be PXE-booted with a valid image and then
-chef-ified with minimal effort.
+cluster with a Chef,  and gateway server.
 
-If you have Vagrant and VirtualBox installed, you can use our included
-Vagrantfile and an Ubuntu 12.04 box file to provision a bootstrap node that is
+If you have Vagrant and installed, you can use our included
+Vagrantfile and an Ubuntu 14.04 box file to provision a bootstrap node that is
 able to act as the provisioning server with minimal interaction.
 
 If you do not wish to use Vagrant or have a bare metal installation and wish to
-do a manual install of the bootstrap node, you can use our bootstrap_chef.sh
-scripts to bring a bare Ubuntu 12.04 image up as a provisioning server.
-
-Once the bootstrap node is provisioned, then you can PXE-boot the other virtual
-machines and enroll them in the cluster as head and worker nodes as you deem
-appropriate.
+do a manual install of the bootstrap node, you can use our `bootstrap_chef.sh`
+scripts to bring a bare Ubuntu 14.04 image up as a provisioning server.
 
 Finally, if you do not wish to use our scripts (we won't be offended), please
 refer to the [manual instructions](#manual-setup-notes) at the end of this
@@ -26,12 +19,7 @@ document.
 About hypervisor hosts
 ======================
 
-chef-bcpc has been successfully tested on Ubuntu 12.04, Mac OS X
-10.7.5 and Windows 7. On Windows, in addition to VirtualBox you need a
-working bash interpreter and rsync available in your PATH. More
-information about using chef-bcpc on Windows is provided in [Using
-Windows as your
-Hypervisor](https://github.com/bloomberg/chef-bcpc/blob/master/windows.md)
+chef-bcpc has been successfully tested on Ubuntu 14.04.
 
 About proxies
 =============
@@ -63,7 +51,7 @@ non-Vagrant method of bringing up the VMs.
 Kicking off the bootstrap process
 =================================
 
-To start off, create the VirtualBox images:
+To start off, create the vagrant machines:
 
 ```
 $ ./vbox_create.sh [chef-environment]
@@ -84,10 +72,7 @@ bootstrap node with non-default settings such as a a local APT mirror
 If you have vagrant installed, the ``vbox_create.sh`` script will automatically
 begin the provisioning of the bcpc-bootstrap node.  This may take 30-45 minutes
 to complete successfully.  See below for [notes around the Vagrant
-installation](#bcpc-bootstrap-creation-with-vagrant).  Otherwise, you can
-provision the bcpc-bootstrap node through included shell scripts - see below
-for
-[installation notes without Vagrant](#bcpc-bootstrap-creation-without-vagrant).
+installation](#bcpc-bootstrap-creation-with-vagrant).
 
 Once the bcpc-bootstrap node is available, the bcpc-vm images will be able to
 be configured and boot via PXE.  Once the initial bootstrap process is complete
@@ -105,7 +90,7 @@ bcpc-bootstrap creation with Vagrant
 
 If vagrant is locally installed, we utilize the
 [vagrant box images from Canonical](http://cloud-images.ubuntu.com/vagrant/)
-to provision the bcpc-bootstrap node.
+to provision the bootstrap node.
 
 If you have a [local repository mirror](#setting-up-a-private-repos-mirror),
 you can alter the Vagrantfile to use it when provisioning:
@@ -114,7 +99,7 @@ you can alter the Vagrantfile to use it when provisioning:
 $local_mirror = "10.0.100.4"
 ```
 
-You can log in to your bcpc-bootstrap node from the hypervisor via:
+You can log in to your bootstrap node from the hypervisor via:
 
 ```
 $ vagrant ssh
@@ -124,7 +109,7 @@ After the automatic Vagrant provisioning is complete, this is a good time to
 take a snapshot of your bootstrap node:
 
 ```
-$ VBoxManage snapshot bcpc-bootstrap take initial-install
+$ vagrant snapshot bootstrap
 ```
 
 Please note that the 3 bcpc-vm nodes are enrolled in cobbler on the bootstrap
@@ -132,67 +117,6 @@ node at the end of ``vbox_create.sh``.
 
 Please continue to [Imaging BCPC Nodes](#imaging-bcpc-nodes).
 
-bcpc-bootstrap creation without Vagrant
-=======================================
-
-If you do not have Vagrant installed, the ``vbox_create.sh`` script will create
-the appropriate VMs.  You will then need to bring up the bcpc-bootstrap VM -
-which has a virtual CD attached to kick off the Ubuntu install:
-
-```
-$ VBoxManage startvm bcpc-bootstrap
-```
-
-Manual install notes:
-
-- select eth0 as network interface for DHCP (vbox_create.sh sets it up as NAT)
-- bcpc-bootstrap as hostname
-- If using a proxy, enter it when prompted, else leave blank
-- ubuntu/ubuntu as default user/password
-- install OpenSSH server
-- install grub to MBR
-
-Login to new VM.
-
-If using NAT, port 22 inbound may be blocked; so, set up the other interfaces
-on the hostonlyif ifaces (eth1-3).  Edit /etc/network/interfaces on
-bcpc-bootstrap (for example using pico) :
-
-```
-$ sudo pico /etc/network/interfaces
-```
-
-add the following to the end
-
-```
-# Static interfaces
-auto eth1
-iface eth1 inet static
-  address 10.0.100.3
-  netmask 255.255.255.0
-
-auto eth2
-iface eth2 inet static
-  address 172.16.100.3
-  netmask 255.255.255.0
-
-auto eth3
-iface eth3 inet static
-  address 192.168.100.3
-  netmask 255.255.255.0
-```
-
-After changing the interfaces file:
-
-```
-$ sudo service networking restart
-```
-
-This is a good time to take a snapshot of your bootstrap node:
-
-```
-$ VBoxManage snapshot bcpc-bootstrap take initial-install
-```
 
 Provisioning chef-server without Vagrant
 ----------------------------------------
@@ -224,96 +148,14 @@ from the hypervisor running VirtualBox:
 $ ./bootstrap_chef.sh ubuntu 10.0.100.3
 ```
 
-This will bring up the chef-server on http://10.0.100.3:4040.
-The Web UI will be at http://10.0.100.3:4000 with defaults admin/p@ssw0rd1
+This will bring up the chef-server on https://10.0.100.3.
 
-At this point, your bcpc-bootstrap node should be appropriately provisioned.
+At this point, your bootstrap node should be appropriately provisioned.
 
 This is a good time to take a snapshot of your bootstrap node:
 
 ```
-$ VBoxManage snapshot bcpc-bootstrap take chef-server-provisioned
-```
-
-If you see Host key verification failed when testing the ssh connection, you 
-have probably recreated the VMs but not updated the SSH key. If this is the 
-case you need to manually remove the old key - remove the entry for 
-10.0.100.3 from ~/.ssh/known_hosts
-
-Registering VMs for PXE boot
-============================
-
-Once you have provisioned the local Chef server, you will need to register the
-bcpc-vm1, bcpc-vm2, and bcpc-vm3 VMs before they can boot. 
-
-When using vagrant you can register the remaining VMs like this :
-
-```
-$ ./enroll_cobbler.sh
-```
-
-whereas for the non-Vagrant case you'll have to provide the IP address
-of the bootstrap node (we are using 10.0.100.3 in this example) :
-
-```
-$ ./enroll_cobbler.sh 10.0.100.3
-```
-
-If you have other VMs to register, you need to do it on the bootstrap node :
-
-```
-$ ssh ubuntu@10.0.100.3
-$ sudo cobbler system add --name=bcpc-vm10 --hostname=bcpc-vm10 --profile=bcpc_host --ip-address=10.0.100.20 --mac=AA:BB:CC:DD:EE:FF
-$ sudo cobbler sync
-```
-
-Note that if you need to redo these registrations of manual nodes,
-you'll need to first remove them before re-adding, so
-
-```
-$ ssh ubuntu@10.0.100.3
-$ sudo cobbler system remove --name=bcpc-vm1
-$ ... modified add command ...
-$ sudo cobbler sync
-```
-
-Imaging BCPC Nodes
-==================
-
-Once the BCPC bootstrap VM is created and the node VMs are registered in
-Cobbler (done automatically with Vagrant-based ``vbox_create.sh`` invocations),
-you can boot up the other VMs now, for example :
-
-```
-$ VBoxManage startvm bcpc-vm1
-$ VBoxManage startvm bcpc-vm2
-$ VBoxManage startvm bcpc-vm3
-```
-
-This should kick off the PXE boot installation of the nodes.  If this
-doesn't work, please check that the systems are accessible in cobbler:
-
-```
-root@bcpc-bootstrap:~# cobbler system list
-   bcpc-vm1
-   bcpc-vm2
-   bcpc-vm3
-```
-
-User account on VM
-==================
-
-Upon PXE boot imaging, the bcpc-vm boxes will be imaged with the auto-generated
-password for the ubuntu user.  From the bootstrap node, you can retrieve the
-password as:
-
-```
-ubuntu@bcpc-bootstrap:~/chef-bcpc$ knife data bag show configs Test-Laptop
-cobbler-root-password:         abcdefgh
-...
-ubuntu@bcpc-bootstrap:~/chef-bcpc$ ssh ubuntu@10.0.100.11 uname -a
-ubuntu@10.0.100.11's password: <type in abcdefgh>
-Linux bcpc-vm1 3.2.0-41-generic #66-Ubuntu SMP Thu Apr 25 03:27:11 UTC 2013 x86_64 x86_64 x86_64 GNU/Linux
+$ vagrant snapshot bootstrap chef-server-provisioned
 ```
 
 Assigning roles to VM
@@ -328,28 +170,10 @@ http_proxy = http://10.0.100.2:3128/
 
 At this point, from the bootstrap node you can then run:
 ```
-ubuntu@bcpc-bootstrap:~/chef-bcpc$ sudo knife bootstrap -E Test-Laptop -r 'role[BCPC-Headnode]' 10.0.100.11 -x ubuntu --sudo
-ubuntu@bcpc-bootstrap:~/chef-bcpc$ sudo knife bootstrap -E Test-Laptop -r 'role[BCPC-Worknode]' 10.0.100.12 -x ubuntu --sudo
-ubuntu@bcpc-bootstrap:~/chef-bcpc$ sudo knife bootstrap -E Test-Laptop -r 'role[BCPC-Worknode]' 10.0.100.13 -x ubuntu --sudo
+vagrant@bootstrap:~/chef-bcpc$ ./cluster-assign-roles.sh Test-Laptop basic bcpc-vm1
+vagrant@bootstrap:~/chef-bcpc$ ./cluster-assign-roles.sh Test-Laptop basic bcpc-vm2
+vagrant@bootstrap:~/chef-bcpc$ ./cluster-assign-roles.sh Test-Laptop basic bcpc-vm3
 ```
-
-Also, after the first run, make the BCPC-Headnode an administrator, or you will get the error:
-'''
-[...]error: Net::HTTPServerException: 403 "Forbidden"
-'''
-To make a host an administrator, one can access the Chef web UI via
-http://10.0.100.3:4040 and follow:
-Clients -> &lt;Host> -> Edit -> Admin (toggle true) -> Save Client
-where &lt;Host> is something like bcpc-vm1.local.lan, then re-run the
-bootstrap command. 
-
-Note that a clue to the current name and password is on the right-hand side of that page 
-and will likely still be the defaults if this is your first time
-through. Also note that this will change your password in the
-data bag.
-
-If you get a "Tampered with cookie 500" error clear out your cookies
-from your browser for 10.0.100.3
 
 Boostrapping these nodes will take quite a long time - as much as an
 hour or more. You can monitor progress by logging into the VMs and
@@ -371,10 +195,9 @@ http_proxy = http://proxy.example.com:80
 and then do this :
 
 ```
-ubuntu@bcpc-bootstrap:~$ knife node run_list add \`hostname -f\` 'recipe[bcpc::apache-mirror]'
-ubuntu@bcpc-bootstrap:~$ knife node run_list add \`hostname -f\` 'recipe[bcpc::apt-mirror]'
-ubuntu@bcpc-bootstrap:~$ sudo chef-client
-ubuntu@bcpc-bootstrap:~$ sudo apt-mirror /etc/apt/mirror.list
+vagrant@bootstrap:~$ knife node run_list add \`hostname -f\` 'recipe[bcpc::apache-mirror]'
+vagrant@bootstrap:~$ sudo chef-client
+vagrant@bootstrap:~$ sudo apt-mirror /etc/apt/mirror.list
 ```
 
 After successfully downloading the repository mirrors, you will then need to
@@ -425,55 +248,25 @@ scripts to provision the bootstrap nodes.
 Step 1 - One-time setup
 ----------------------
 
-Make sure that you have `rubygems` and `chef` installed. Currently this only works on `chef@10.18` which requires some massaging to install due to a newer version of `net-ssh`.
+Install chef-dk via an Omnibus installer like
+https://omnitruck.chef.io/install.sh.
 
 ```
- $ [sudo] gem install net-ssh -v 2.2.2 --no-ri --no-rdoc
- $ [sudo] gem install net-ssh-gateway -v 1.1.0 --no-ri --no-rdoc --ignore-dependencies
- $ [sudo] gem install net-ssh-multi -v 1.1.0 --no-ri --no-rdoc --ignore-dependencies
- $ [sudo] gem install chef --no-ri --no-rdoc -v 10.18
+curl -s https://omnitruck.chef.io/install.sh | sudo bash -s -- -P chefdk -v 1.2.22
 ```
 
-These cookbooks assume that you already have the following cookbooks
-available:
- - apt
- - ubuntu
- - cron
- - chef-client
-
-You can install these cookbooks via:
+Build and deploy cookbooks
 
 ```
- $ cd cookbooks/
- $ knife cookbook site download apt  
- $ knife cookbook site download ubuntu  
- $ knife cookbook site download cron
- $ knife cookbook site download chef-client  
-```
-
-This will download the cookbooks locally. You need to untar them into `/cookbooks`:
-
-```
- $ tar -zxvf apt*.tar.gz
- $ tar -zxvf ubuntu*.tar.gz
- $ tar -zxvf cron*.tar.gz
- $ tar -zxvf chef-client*.tar.gz
- $ rm apt*.tar.gz ubuntu*.tar.gz rm cron*.tar.gz chef-client*.tar.gz
- $ cd ../
+berks install
+berks vendor vendor/cookbooks
 ```
 
 You also need to build the installer bins for a number of external
-dependencies, and there's a script to help (tested on Ubuntu 12.04)
+dependencies, and there's a script to help (tested on Ubuntu 14.04)
 
 ```
  $ ./build_bins.sh
-```
-
-If you're planning to run OpenStack on top of VirtualBox, be sure to build the base VirtualBox images first:
-
-```
- $ cd path/to/chef-bcpc
- $ ./vbox_create.sh
 ```
 
 Step 2 - Prep the servers
@@ -487,4 +280,3 @@ chef server:
  $ knife role from file roles/*.json  
  $ knife cookbook upload -a
 ```
-
