@@ -15,33 +15,21 @@
 Vagrant.configure('2') do |config|
 
   # load any local SSL certificates if present
-  if Dir.exist?('/usr/local/share/ca-certificates')
+  local_ca = ENV.fetch 'LOCAL_CERTS', '/usr/local/share/ca-certificates'
+  if Dir.exist?(local_ca)
     debian_bundle_path = '/etc/ssl/certs/ca-certificates.crt'
-    redhat_bundle_path = '/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem'
 
-    config.vm.synced_folder '/usr/local/share/ca-certificates',
+    config.vm.synced_folder local_ca,
       '/usr/local/share/ca-certificates',
       mount_options: ['ro']
 
-    config.vm.provision 'deploy-certs', type: 'shell',  inline: <<-EOM.gsub(/^ {4}/,'')
+    config.vm.provision 'deploy-certs', type: 'shell',  inline: <<~eos
       DEBIAN_TOOL_PATH=/usr/sbin/update-ca-certificates
-      REDHAT_TOOL_PATH=/usr/bin/update-ca-trust
 
       # Debian/Ubuntu
       if [[ -x $DEBIAN_TOOL_PATH ]]; then
         SSL_PATH=#{debian_bundle_path}
         $DEBIAN_TOOL_PATH
-      # RHEL/CentOS
-      elif [[ -x $REDHAT_TOOL_PATH ]]; then
-        for d in /usr/local/share/ca-certificates/*; do
-          for c in $d/*; do
-            ln -s "$c" /etc/pki/ca-trust/source/anchors
-          done
-        done
-
-        SSL_PATH=#{redhat_bundle_path}
-        $REDHAT_TOOL_PATH enable
-        $REDHAT_TOOL_PATH extract
       else
         exit -1
       fi
@@ -52,17 +40,14 @@ Vagrant.configure('2') do |config|
       umask 0277
       echo 'Defaults env_keep += "SSL_CERT_FILE"' > \
         /etc/sudoers.d/ssl
-    EOM
-
-    bundle_paths = [debian_bundle_path, redhat_bundle_path]
+    eos
 
     # Note: the box_download_ca_cert is used on the host, not the guest.
-    found_bps = bundle_paths.select { |bp| File.exist?(bp) }
-    config.vm.box_download_ca_cert = found_bps.first
+    config.vm.box_download_ca_cert = debian_bundle_path
   end
 
   # set proxies if present
-  config.vm.provision 'propagate-proxies', type:'shell',  inline: <<-EOM.gsub(/^ {4}/,'')
+  config.vm.provision 'propagate-proxies', type:'shell',  inline: <<~eos
     if [ -n "#{ENV['https_proxy']}" ]; then
       echo 'https_proxy=#{ENV['https_proxy']}' >> \
         /etc/environment
@@ -81,5 +66,5 @@ Vagrant.configure('2') do |config|
     umask 0277
     echo 'Defaults env_keep += "http_proxy https_proxy no_proxy"' > \
       /etc/sudoers.d/proxy
-  EOM
+  eos
 end
