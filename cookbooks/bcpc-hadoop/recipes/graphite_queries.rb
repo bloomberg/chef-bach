@@ -67,46 +67,6 @@ triggers = {
   }
 }
 
-def monitor_disk(triggers_host, host, disk, size, triggers_sensitivity)
-  if triggers_host["#{host}.diskspace.#{disk}.byte_avail"].nil?
-    triggers_host["#{host}.diskspace.#{disk}.byte_avail"] = {
-      'query' => "servers.#{node.chef_environment.gsub(/[\-_]/, '')}.*.diskspace.*.byte_avail",
-      'trigger_val' => "max(#{triggers_sensitivity})",
-      'trigger_cond' => '=0',
-      'trigger_name' => "#{host}_#{disk}_Availability",
-      'trigger_dep' => ["#{host}_NodeAvailability"],
-      'enable' => true,
-      'trigger_desc' => 'Disk seems to be full or down',
-      'severity' => 3,
-      'route_to' => 'admin'
-    }
-  end
-
-  if triggers_host["#{host}.diskspace.#{disk}.byte_used"].nil?
-    triggers_host["#{host}.diskspace.#{disk}.byte_used"] = {
-      'query' => "servers.#{node.chef_environment.gsub(/[\-_]/, '')}.*.diskspace.*.byte_used",
-      'trigger_val' => "max(#{triggers_sensitivity})",
-      'trigger_cond' => ">#{(size * 0.90).ceil}G",
-      'trigger_name' => "#{host}_#{disk}_SpaceUsed",
-      'trigger_dep' => ["#{host}_NodeAvailability"],
-      'enable' => true,
-      'trigger_desc' => 'More than 90% of disk space used',
-      'severity' => 3,
-      'route_to' => 'tenant'
-    }
-  end
-end
-
-def format_disk_size_hash(disk_size_hash)
-  # Format the mount names like diamond (https://github.com/python-diamond/..
-  # ..Diamond/blob/master/src/collectors/diskspace/diskspace.py#L196-L197)
-  # and convert size to GB
-  disk_size_hash.map { |mount, kb_size|
-    tmp = mount.tr('/', '_').tr('.', '_').tr('\\', '')
-    [tmp == '_' ? 'root' : tmp, (kb_size.to_f / 1024.0 / 1024.0).round(2)]
-  }
-end
-
 cluster_nodes_objs.each do |node_obj|
   host = node_obj.hostname
   # Copy overrrides
@@ -160,24 +120,6 @@ cluster_nodes_objs.each do |node_obj|
     }
   end
 
-  # Fetch disks for this node.
-  # Use the same logic as diamond (https://github.com/python-diamond/Diamond/..
-  # ..blob/master/src/collectors/diskspace/diskspace.py#L137-L165)
-  # to filter out unwanted disks/mounts
-  disk_size_hash = node_obj.filesystem
-                           .map { |_fs, props| [props['mount'], props['kb_size']] }.compact.uniq
-
-  # monitor only the root for all the cluster nodes
-  disk_size_hash = disk_size_hash.reject { |_mount, kb_size| kb_size.nil? }
-                                 .keep_if { |mount, _kb_size| mount.eql?('/') }
-
-  disk_size_hash = format_disk_size_hash(disk_size_hash)
-
-  # add to triggers
-  disk_size_hash.each do |disk, size|
-    monitor_disk(triggers[host], host, disk, size, triggers_sensitivity)
-  end
-
   # Copy service specific queries
   if !node_obj['bcpc']['hadoop']['graphite'].nil? &&
      !node_obj['bcpc']['hadoop']['graphite']['service_queries'].nil? &&
@@ -187,25 +129,6 @@ cluster_nodes_objs.each do |node_obj|
     end
   end
 end # End of 'monitored_nodes_objs.each do |node_obj|'
-
-# monitor all disks on head nodes
-head_nodes_objs.each do |head_node_obj|
-  host = head_node_obj[:hostname]
-
-  disk_size_hash = head_node_obj.filesystem
-                                .map { |_fs, props| [props['mount'], props['kb_size']] }.compact.uniq
-
-  # monitor all disks for head nodes
-  disk_size_hash = disk_size_hash.reject { |_mount, kb_size| kb_size.nil? }
-                                 .keep_if { |mount, _kb_size| mount.start_with?('/disk') }
-
-  disk_size_hash = format_disk_size_hash(disk_size_hash)
-
-  # add to triggers
-  disk_size_hash.each do |disk, size|
-    monitor_disk(triggers[host], host, disk, size, triggers_sensitivity)
-  end
-end
 
 # Save the trigger information in node's run_state so it is available for
 # the recipe which creates objects in Zabbix

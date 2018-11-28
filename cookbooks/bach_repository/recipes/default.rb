@@ -16,7 +16,6 @@ include_recipe 'bach_repository::gems'
 include_recipe 'cobblerd::cobbler_source_build'
 
 include_recipe 'bach_repository::chef'
-include_recipe 'bach_repository::diamond'
 include_recipe 'bach_repository::graphite'
 include_recipe 'bach_repository::opentsdb'
 include_recipe 'bach_repository::oracle_java'
