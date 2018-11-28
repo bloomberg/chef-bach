@@ -28,7 +28,6 @@
   libsasl2-modules-gssapi-mit
   lzop
   p7zip-full
-  pcp
   powertop
   silversearcher-ag
   sysstat
