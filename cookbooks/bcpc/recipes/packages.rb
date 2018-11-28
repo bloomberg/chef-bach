@@ -28,7 +28,6 @@
   libsasl2-modules-gssapi-mit
   lzop
   p7zip-full
-  pcp
   powertop
   silversearcher-ag
   sysstat
@@ -39,4 +38,12 @@
   package pkg do
     action :upgrade
   end
+end
+
+#
+# One particularly unhelpful system package -- frequently consumes
+# 100% of CPU, but we don't send the metrics anywhere.
+#
+package 'pcp' do
+  action :purge
 end

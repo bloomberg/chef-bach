@@ -46,9 +46,20 @@ if not node.has_key?('pam_d') or not node['pam_d'].has_key?('services') or not n
   }
 end
 
-# set vm.swapiness to 0 (to lessen swapping)
+#
+# set vm.swappiness to 0 (to lessen swapping)
 # NOTE: This include_recipe is necessary for resource collection
+#
 include_recipe 'sysctl::default'
+
 sysctl_param 'vm.swappiness' do
   value 0
+end
+
+#
+# Disable the chef client-as-a-service.  This was previously managed
+# by roles, but now it has to be handled here.
+#
+service 'chef-client' do
+  action [:disable, :stop]
 end
