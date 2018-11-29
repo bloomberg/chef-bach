@@ -228,8 +228,16 @@ ifaces.each_index do |i|
   end
 end
 
+# FIXME: this is an ugly hack
+
+ifup_command = unless node.chef_environment == 'Test-Laptop'
+                 'ifup -a'
+               else
+                 'ifdown -a && ifup -a'
+               end
+
 execute 'bcpc-interfaces-up' do
-  command 'ifup -a'
+  command ifup_command
 end
 
 ruby_block 'bcpc-deconfigure-dhcp-interfaces' do
