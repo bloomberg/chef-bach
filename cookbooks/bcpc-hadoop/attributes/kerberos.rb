@@ -110,15 +110,6 @@ default['bcpc']['hadoop']['kerberos']['data'] = {
     perms: '0440',
     spnego_keytab: 'spnego.service.keytab'
   },
-  flume: {
-    principal: 'flume',
-    keytab: 'flume.service.keytab',
-    owner: 'flume',
-    group: 'flume',
-    princhost: '_HOST',
-    perms: '0440',
-    spnego_keytab: 'spnego.service.keytab'
-  },
   hannibal: {
     principal: 'hannibal',
     keytab: 'hannibal.service.keytab',

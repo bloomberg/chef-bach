@@ -266,7 +266,7 @@ describe BACH::ClusterData do
       cluster_txt = <<-EOF
       vm1 08:00:27:56:A2:28 10.0.101.11 - bach_host_trusty bach.example.com role[BACH-Hadoop-Head]
       vm2 08:00:27:E5:3A:00 10.0.101.12 - bach_host_trusty bach.example.com role[BACH-Hadoop-Head],role[BACH-Hadoop-Head-ResourceManager]
-      vm3 08:00:27:AD:1D:EA 10.0.101.13 - bach_host_trusty bach.example.com role[BACH-Hadoop-Worker],recipe[bach_hadoop::copylog]
+      vm3 08:00:27:AD:1D:EA 10.0.101.13 - bach_host_trusty bach.example.com role[BACH-Hadoop-Worker]
       EOF
       # remove leading spaces
       cluster_txt.split("\n").map{ |l| l.strip() }.join("\n")
@@ -295,7 +295,7 @@ describe BACH::ClusterData do
         :ilo_address=>"-",
         :cobbler_profile=>"bach_host_trusty",
         :dns_domain=>"bach.example.com",
-        :runlist=>"role[BACH-Hadoop-Worker],recipe[bach_hadoop::copylog]",
+        :runlist=>"role[BACH-Hadoop-Worker],
         :fqdn=>"vm3.bach.example.com"}
        ]
     end

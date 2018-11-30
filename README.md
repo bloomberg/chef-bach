@@ -188,7 +188,6 @@ BACH Services
 BACH currently relies upon a number of open-source packages:
 
  - [Apache Bigtop](http://bigtop.apache.org/)
- - [Apache Flume](http://flume.apache.org/)
  - [Apache Hadoop](http://hadoop.apache.org/)
  - [Apache HBase](http://hbase.apache.org/)
  - [Apache Hive](http://hive.apache.org/)
