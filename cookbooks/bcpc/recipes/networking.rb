@@ -228,16 +228,9 @@ ifaces.each_index do |i|
   end
 end
 
-# FIXME: this is an ugly hack
-
-ifup_command = unless node.chef_environment == 'Test-Laptop'
-                 'ifup -a'
-               else
-                 'ifdown -a && ifup -a'
-               end
 
 execute 'bcpc-interfaces-up' do
-  command ifup_command
+  command 'ifup -a'
 end
 
 ruby_block 'bcpc-deconfigure-dhcp-interfaces' do
@@ -372,10 +365,18 @@ ruby_block 'bcpc-deconfigure-dhcp-interfaces' do
     deconfigure_targets =
       lease_interfaces - deliberately_configured_interfaces
 
+    # FIXME: this is an ugly hack to get the VMs route to the bootstrap in VM
+    # clusters.
+    ifup_command = unless node.chef_environment == 'Test-Laptop'
+                     'ifup -a'
+                   else
+                     'ifdown -a && ifup -a'
+                   end
+
     deconfigure_targets.each do |interface|
       Chef::Resource::Execute.new("bcpc-deconfigure-#{interface}",
                                   run_context).tap do |r|
-        r.command "ip addr flush dev #{interface}; ifup -a"
+        r.command "ip addr flush dev #{interface}; #{ifup_command}"
         r.run_action :run
       end
     end
