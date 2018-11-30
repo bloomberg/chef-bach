@@ -79,18 +79,6 @@ cluster_nodes_objs.each do |node_obj|
   end
 
   # Selectively add defaults
-  if triggers[host]["memory_active_#{host}"].nil?
-    triggers[host]["#{host}.memory.Active"] = {
-      'query' => "servers.#{node.chef_environment.gsub(/[\-_]/, '')}.*.memory.Active",
-      'trigger_val' => "max(#{triggers_sensitivity})",
-      'trigger_cond' => '=0',
-      'trigger_name' => "#{host}_NodeAvailability",
-      'enable' => true,
-      'trigger_desc' => 'Node seems to be down',
-      'severity' => 3,
-      'route_to' => 'admin'
-    }
-  end
   if triggers[host]["chef_client_success_#{host}"].nil?
     triggers[host]["chef.#{host}.success"] = {
       'query' => 'chef.*.success',
