@@ -187,7 +187,7 @@ if node['bcpc']['hadoop']['hbase']['site_xml']['hbase.region.replica.replication
 end
 
 site_xml = node['bcpc']['hadoop']['hbase']['site_xml']
-complete_hbase_site_hash = generated_values.merge(site_xml)
+complete_hbase_site_hash = site_xml.merge(generated_values)
 
 template '/etc/hbase/conf/hbase-site.xml' do
   source 'generic_site.xml.erb'
