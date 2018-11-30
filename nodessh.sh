@@ -64,6 +64,7 @@ else
 
     SSHCMD="ssh $SSHCOMMON"
 
+# FIXME: Change to "vagrant@" for VM clusters
     if [[ "$4" == sudo ]]; then
         # if we need to sudo, pipe the passwd to that too
 	sshpass -p $PASSWD $SSHCMD -t ubuntu@$IP "echo $PASSWD | sudo -S $COMMAND"
