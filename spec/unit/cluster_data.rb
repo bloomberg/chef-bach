@@ -295,7 +295,7 @@ describe BACH::ClusterData do
         :ilo_address=>"-",
         :cobbler_profile=>"bach_host_trusty",
         :dns_domain=>"bach.example.com",
-        :runlist=>"role[BACH-Hadoop-Worker],
+        :runlist=>"role[BACH-Hadoop-Worker]",
         :fqdn=>"vm3.bach.example.com"}
        ]
     end
