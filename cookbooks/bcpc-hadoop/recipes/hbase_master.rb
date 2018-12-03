@@ -3,19 +3,6 @@
 include_recipe 'bcpc-hadoop::hbase_config'
 include_recipe 'bcpc-hadoop::hbase_queries'
 
-#
-# Updating node attributes to copy HBase master log file to centralized location (HDFS)
-#
-node.default['bcpc']['hadoop']['copylog']['hbase_master'] = {
-    'logfile' => "/var/log/hbase/hbase-hbase-master-#{node.hostname}.log",
-    'docopy' => true
-}
-
-node.default['bcpc']['hadoop']['copylog']['hbase_master_out'] = {
-    'logfile' => "/var/log/hbase/hbase-hbase-master-#{node.hostname}.out",
-    'docopy' => true
-}
-
 %W(#{hwx_pkg_str('hbase', node[:bcpc][:hadoop][:distribution][:release])}
    #{hwx_pkg_str('phoenix', node[:bcpc][:hadoop][:distribution][:release])}
    libsnappy1).each do |p|

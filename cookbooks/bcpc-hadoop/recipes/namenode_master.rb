@@ -7,23 +7,6 @@ include_recipe 'bcpc-hadoop::namenode_queries'
 ::Chef::Recipe.send(:include, Bcpc_Hadoop::Helper)
 ::Chef::Resource::Bash.send(:include, Bcpc_Hadoop::Helper)
 
-#
-# Updating node attribuetes to copy namenode log files to centralized location
-# (HDFS)
-#
-node.default['bcpc']['hadoop']['copylog'].tap do |copylog|
-  copylog['namenode_master'] = {
-    'logfile' => '/var/log/hadoop-hdfs/'\
-                 "hadoop-hdfs-namenode-#{node.hostname}.log",
-    'docopy' => true
-  }
-  copylog['namenode_master_out'] = {
-    'logfile' => '/var/log/hadoop-hdfs/'\
-                 "hadoop-hdfs-namenode-#{node.hostname}.out",
-    'docopy' => true
-  }
-end
-
 # shortcut to the desired HDFS command version
 hdfs_cmd = "/usr/hdp/#{node[:bcpc][:hadoop][:distribution][:active_release]}/"\
            'hadoop-hdfs/bin/hdfs'

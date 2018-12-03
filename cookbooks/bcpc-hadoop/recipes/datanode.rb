@@ -5,11 +5,6 @@ include_recipe 'bcpc-hadoop::hive_config'
 ::Chef::Recipe.send(:include, Bcpc_Hadoop::Helper)
 ::Chef::Resource::Bash.send(:include, Bcpc_Hadoop::Helper)
 
-node.default['bcpc']['hadoop']['copylog']['datanode'] = {
-  'logfile' => "/var/log/hadoop-hdfs/hadoop-hdfs-datanode-#{node.hostname}.log",
-  'docopy' => true
-}
-
 hdp_select_pkgs = %w(hadoop-yarn-nodemanager hadoop-hdfs-datanode hadoop-client)
 
 hdp_pkg_strs = (hdp_select_pkgs + %w(
