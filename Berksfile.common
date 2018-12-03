@@ -45,11 +45,6 @@ cookbook 'cobblerd',
   git: 'https://github.com/cbaenziger/cobbler-cookbook',
   branch: 'source_build'
 
-# jmxtrans 1.0+ isn't on the supermarket.
-cookbook 'jmxtrans',
-  git: 'https://github.com/jmxtrans/jmxtrans-cookbook',
-  branch: 'ver-2.0'
-
 # 'kafka' has an entry on the supermarket, but it's the wrong cookbook.
 cookbook 'kafka',
   git: 'https://github.com/mthssdrbrg/kafka-cookbook.git',
