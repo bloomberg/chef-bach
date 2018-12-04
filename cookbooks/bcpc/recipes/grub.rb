@@ -17,11 +17,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+
+# Legacy NIC names for most machines
+subnet = node['bcpc']['management']['subnet']
+ifnames = ''
+unless node['bcpc']['networks'][subnet]['management']['legacy_names'] == false
+  ifnames = 'net.ifnames=0 biosdevname=0 ' # Leave the trailing space
+end
+
 template '/etc/default/grub' do
   source 'grub/etc_default_grub.erb'
   owner 'root'
   group 'root'
   mode 0o0644
+  variables(ifnames: ifnames)
   notifies :run, 'execute[update-grub]'
 end
 
