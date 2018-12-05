@@ -37,9 +37,14 @@ if node[:fqdn] == get_bootstrap
   #   * Prevent a pet configuration of knife.rb in our physical cluster's
   #     bootstrap machines.
   client_rb = resources("template[#{node['chef_client']['conf_dir']}/client.rb]")
-  knife_config = client_rb.variables
+  knife_config = client_rb.variables.dup
   knife_config[:chef_config] = knife_config[:chef_config].to_hash
   knife_config[:chef_config].delete('log_location')
+  knife_config[:chef_config].tap do |knife|
+    knife['node_name'] = 'bootstrap-admin'
+    knife['client_key'] = "/home/#{user}/chef-bcpc/.chef/bootstrap-admin.pem"
+  end
+
   template knife_rb do
     source client_rb.source
     cookbook 'chef-client'

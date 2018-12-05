@@ -20,7 +20,14 @@ load_binary_server_info "$ENVIRONMENT"
 mkdir -p .chef
 touch .chef/knife.rb
 knife configure -c .chef/knife.rb -s https://${BOOTSTRAP_IP} -y \
-  -u $(hostname -f) -r $(pwd)/vendor \
+  -u bootstrap-admin -r $(pwd)/vendor \
   --validation-client-name chef-validator \
   --validation-key /etc/chef-server/chef-validator.pem
 knife ssl fetch
+sudo knife client create bootstrap-admin -a -d -f .chef/bootstrap-admin.pem \
+  -u admin --key /etc/chef-server/admin.pem
+
+echo "Setting up chef environment, roles, and uploading cookbooks"
+knife environment from file environments/${ENVIRONMENT}.json
+knife role from file roles/*.json
+knife cookbook upload -a
