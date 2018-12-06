@@ -6,6 +6,7 @@ description      'Top-level chef-bach wrapper'
 long_description 'Top-level chef-bach wrapper'
 version          '0.1.0'
 
+depends 'bach_roles', '= 0.1.0'
 depends 'bach_common', '= 0.1.0'
 depends 'bach_krb5', '= 0.1.0'
 depends 'bach_repository', '= 0.1.0'

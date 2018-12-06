@@ -11,6 +11,7 @@ solver ENV.fetch('BERKS_SOLVER', :gecode)
 #
 # Local cookbooks, inside our repository.
 #
+cookbook 'bach_roles', path: './cookbooks/bach_roles'
 cookbook 'bach_backup', path: './cookbooks/bach_backup'
 cookbook 'bach_common', path: './cookbooks/bach_common'
 cookbook 'bach_krb5', path: './cookbooks/bach_krb5'
