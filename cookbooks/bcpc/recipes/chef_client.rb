@@ -18,17 +18,17 @@
 
 user = ENV['SUDO_USER'] || ENV['USER'] || 'vagrant'
 
-directory "/home/#{user}/chef-bcpc/.chef" do
-  mode 0755
-  user "#{user}"
-  group "#{user}"
-end
-
 include_recipe 'chef-client::config'
 
 knife_rb = "/home/#{user}/chef-bcpc/.chef/knife.rb"
 
 if node[:fqdn] == get_bootstrap
+  directory "/home/#{user}/chef-bcpc/.chef" do
+    mode 0755
+    user "#{user}"
+    group "#{user}"
+  end
+
   # Manage knife.rb through chef-client::config (except the log location) as
   # well.  Allows the following:
   #   * Remove the need for running `sudo knife ...` in the bootstrap.
