@@ -23,8 +23,6 @@
 
 require 'openssl'
 require 'net/ssh'
-include_recipe 'bcpc::default'
-include_recipe 'bcpc::chef_vault_install'
 
 bootstrap = get_bootstrap
 all_nodes = get_all_nodes.map! { |x| x['fqdn'] }.join(',')
