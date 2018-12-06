@@ -19,10 +19,6 @@ CHEF_ENVIRONMENT=$2
 # be replaced by bcpc::chef_client after converge of role[BCPC-Bootstrap].
 sudo knife configure client /etc/chef -c .chef/knife.rb  -y -u $(hostname -f)
 sudo knife ssl fetch -c /etc/chef/client.rb
-# FIXME: Remove after migrating to chef-server 12
-# FIXME: Remove "-a" flag before migrating to chef-server 12
-sudo knife client create $(hostname -f) -a -d -f /etc/chef/client.pem \
-  -u admin --key /etc/chef-server/admin.pem
 sudo /opt/chefdk/bin/chef-client -E "$CHEF_ENVIRONMENT"
 
 # FIXME: bootstrap-admin chef-run needs to always be "-o" to prevent node

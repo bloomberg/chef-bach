@@ -154,13 +154,6 @@ class ClusterAssignRoles
   def chef_node_with_runlist(node:, runlist:, override: false)
     runlist = runlist.join(',') if runlist.is_a?(Array)
 
-    #
-    # chef-bach recipes often expect to create data bags on the
-    # server, so clients are granted admin permission during chef
-    # runs.
-    #
-    set_chef_admin(node: node, admin: true)
-
     runlist_switch = override ? '-o' : '-r'
     chef_command = "sudo chef-client #{runlist_switch} #{runlist}"
 
@@ -169,12 +162,6 @@ class ClusterAssignRoles
                  password: cobbler_root_password,
                  command: chef_command,
                  streaming: true)
-
-    #
-    # Clients are de-admined after the chef run because subsequent
-    # runs will no longer require admin perms.
-    #
-    set_chef_admin(node: node, admin: false)
 
     if result[:status].zero?
       puts "#{node[:fqdn]}: Got status #{result[:status]} from chef run"
