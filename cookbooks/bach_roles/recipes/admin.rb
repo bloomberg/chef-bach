@@ -3,3 +3,4 @@
 include_recipe 'bcpc::admin_repository_apt'
 include_recipe 'bach_krb5::admin'
 include_recipe 'bcpc::admin_certs'
+include_recipe 'bcpc-hadoop::admin_ssl'
