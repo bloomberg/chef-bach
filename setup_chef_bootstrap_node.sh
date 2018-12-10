@@ -25,6 +25,8 @@ sudo knife client create $(hostname -f) -a -d -f /etc/chef/client.pem \
   -u admin --key /etc/chef-server/admin.pem
 sudo /opt/chefdk/bin/chef-client -E "$CHEF_ENVIRONMENT"
 
+chef-client -c .chef/knife.rb -E  "$CHEF_ENVIRONMENT" -r bach_roles::admin
+
 #
 # build_bins.sh has already built the BCPC local repository, but we
 # still need to configure Apache and chef-vault before doing a
@@ -54,6 +56,10 @@ sudo -E /opt/chefdk/bin/chef-client \
 #
 sudo -E /opt/chefdk/bin/chef-client \
      -r 'role[BCPC-Bootstrap]'
+
+# Needed to be reconverged in order to generate keytabs in the bootstrap
+# machine.  Not needed when using an external KDC
+chef-client -c .chef/knife.rb
 
 #
 # TODO: This chef run should not be necessary.  This is definitely a

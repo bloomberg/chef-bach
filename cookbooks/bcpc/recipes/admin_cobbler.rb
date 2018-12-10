@@ -7,17 +7,20 @@
 # Only meant for VM clusters
 #
 
-root_password = get_config('cobbler-root-password')
-root_password = 'vagrant' if root_password.nil?
 
-root_password_salted = root_password.crypt('$6$' + rand(36**8).to_s(36))
+if node['bach']['vm_cluster']
+  include_recipe 'bcpc::admin_base'
 
-chef_vault_secret 'cobbler' do
-  data_bag 'os'
-  raw_data('root-password' => root_password,
-           'root-password-salted' => root_password_salted)
-  admins node[:fqdn]
-  search '*:*'
-  action :create_if_missing
+  root_password = 'vagrant'
+  root_password_salted = root_password.crypt('$6$' + rand(36**8).to_s(36))
+
+  chef_vault_secret 'cobbler' do
+    data_bag 'os'
+    raw_data('root-password' => root_password,
+             'root-password-salted' => root_password_salted)
+    admins Chef::Config.node_name
+    search '*:*'
+    action :create_if_missing
+  end
+
 end
-
