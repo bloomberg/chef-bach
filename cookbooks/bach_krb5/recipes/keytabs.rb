@@ -1,5 +1,7 @@
 require 'cluster_def'
 
+include_recipe 'bach_krb5::default'
+
 keytab_dir = node[:bcpc][:hadoop][:kerberos][:keytab][:dir]
 realm = node[:bcpc][:hadoop][:kerberos][:realm]
 viphost = node[:bcpc][:management][:viphost]
@@ -47,11 +49,10 @@ host_list.each do |h|
   # Create a subdirectory for each host.
   directory File.join(keytab_dir, host_fqdn) do
     action :create
-    user 'root'
-    group 'root'
     mode 0o0700
   end
 
+  admin_principal = node['krb5']['admin_principal']
   node[:bcpc][:hadoop][:kerberos][:data].each do |ke, va|
     service_principal = va['principal']
 
@@ -65,8 +66,13 @@ host_list.each do |h|
 
     # Create the keytab file
     execute "creating-keytab-for-#{ke}" do
-      command "kadmin.local -q 'xst -k #{keytab_path} " \
-        "-norandkey #{keytab_principals}'"
+      command lazy {
+        admin_password = get_config 'krb5-admin-password'
+        "kadmin -p #{admin_principal} -w #{admin_password} " \
+        "-q 'xst -k #{keytab_path} " \
+        "#{keytab_principals}'"
+      }
+      sensitive true
       action :run
       not_if do
         # Don't run if all principals are found in an existing keytab file.
