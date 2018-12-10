@@ -18,33 +18,17 @@
 
 user = ENV['SUDO_USER'] || ENV['USER'] || 'vagrant'
 
-if node[:fqdn] == get_bootstrap
-  link '/etc/chef/client.rb' do
-    action :delete
-    only_if { ::File.symlink?('/etc/chef/client.rb') }
-  end
-
-  directory "/home/#{user}/.chef/client.d" do
-    mode 0755
-    user "#{user}"
-    group "#{user}"
-  end
-
-  link '/etc/chef/client.d' do
-    action :delete
-    only_if { ::File.symlink?('/etc/chef/client.d') }
-  end
-
-  link '/etc/chef/client.pem' do
-    to "/home/#{user}/chef-bcpc/.chef/#{node[:fqdn]}.pem"
-  end
-end
-
 include_recipe 'chef-client::config'
 
 knife_rb = "/home/#{user}/chef-bcpc/.chef/knife.rb"
 
 if node[:fqdn] == get_bootstrap
+  directory "/home/#{user}/chef-bcpc/.chef" do
+    mode 0755
+    user "#{user}"
+    group "#{user}"
+  end
+
   # Manage knife.rb through chef-client::config (except the log location) as
   # well.  Allows the following:
   #   * Remove the need for running `sudo knife ...` in the bootstrap.
@@ -53,9 +37,14 @@ if node[:fqdn] == get_bootstrap
   #   * Prevent a pet configuration of knife.rb in our physical cluster's
   #     bootstrap machines.
   client_rb = resources("template[#{node['chef_client']['conf_dir']}/client.rb]")
-  knife_config = client_rb.variables
+  knife_config = client_rb.variables.dup
   knife_config[:chef_config] = knife_config[:chef_config].to_hash
   knife_config[:chef_config].delete('log_location')
+  knife_config[:chef_config].tap do |knife|
+    knife['node_name'] = 'bootstrap-admin'
+    knife['client_key'] = "/home/#{user}/chef-bcpc/.chef/bootstrap-admin.pem"
+  end
+
   template knife_rb do
     source client_rb.source
     cookbook 'chef-client'

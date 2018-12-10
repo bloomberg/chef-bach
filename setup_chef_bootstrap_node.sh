@@ -15,23 +15,15 @@ fi
 CHEF_SERVER=$1
 CHEF_ENVIRONMENT=$2
 
-sudo knife client create $(hostname -f) -a -d -f .chef/$(hostname -f).pem \
+# Enough chef-client configuration in the bootstrap machine to converge.  Will
+# be replaced by bcpc::chef_client after converge of role[BCPC-Bootstrap].
+sudo knife configure client /etc/chef -c .chef/knife.rb  -y -u $(hostname -f)
+sudo knife ssl fetch -c /etc/chef/client.rb
+# FIXME: Remove after migrating to chef-server 12
+# FIXME: Remove "-a" flag before migrating to chef-server 12
+sudo knife client create $(hostname -f) -a -d -f /etc/chef/client.pem \
   -u admin --key /etc/chef-server/admin.pem
-PEM_RELATIVE_PATH=.chef/$(hostname -f).pem
-sudo chown $(whoami):root $PEM_RELATIVE_PATH
-sudo chmod 550 $PEM_RELATIVE_PATH
-
-echo "Setting up chef environment, roles, and uploading cookbooks"
-knife environment from file environments/${CHEF_ENVIRONMENT}.json
-knife role from file roles/*.json
-knife cookbook upload -a
-
-# Assume we are running in the chef-bcpc directory
-sudo /opt/chefdk/bin/chef-client -E "$CHEF_ENVIRONMENT" -c .chef/knife.rb
-[ ! -L /etc/chef/client.pem ] && \
-  sudo ln -s $(readlink -f $PEM_RELATIVE_PATH) /etc/chef/client.pem
-[ ! -L ~/.chef ] && \
-  sudo ln -s $(readlink -f .chef) ~/.chef
+sudo /opt/chefdk/bin/chef-client -E "$CHEF_ENVIRONMENT"
 
 #
 # build_bins.sh has already built the BCPC local repository, but we
@@ -39,15 +31,12 @@ sudo /opt/chefdk/bin/chef-client -E "$CHEF_ENVIRONMENT" -c .chef/knife.rb
 # complete Chef run.
 #
 sudo -E /opt/chefdk/bin/chef-client \
-     -c .chef/knife.rb \
      -o 'recipe[bcpc::apache-mirror]'
 
 sudo -E /opt/chefdk/bin/chef-client \
-     -c .chef/knife.rb \
      -o 'recipe[bcpc::chef_vault_install]'
 
 sudo /opt/chefdk/bin/chef-client \
-     -c .chef/knife.rb \
      -o 'recipe[bcpc::chef_poise_install]'
 
 
@@ -57,17 +46,13 @@ sudo /opt/chefdk/bin/chef-client \
 # to be properly put inside the configs/Test-Laptop data bag as we aren't even installing the chef vault until after the first apt run
 #
 sudo -E /opt/chefdk/bin/chef-client \
-     -c .chef/knife.rb \
      -o 'recipe[bach_repository::apt]'
-
-
 
 #
 # With chef-vault installed and the repo configured, it's safe to save
 # and converge the complete runlist.
 #
 sudo -E /opt/chefdk/bin/chef-client \
-     -c .chef/knife.rb \
      -r 'role[BCPC-Bootstrap]'
 
 #
@@ -76,5 +61,4 @@ sudo -E /opt/chefdk/bin/chef-client \
 # its GPG public/private keys even after it should be able to do so.
 #
 sudo -E /opt/chefdk/bin/chef-client \
-     -c .chef/knife.rb \
      -o 'recipe[bach_repository::apt]'
