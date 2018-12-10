@@ -13,8 +13,7 @@
       "role[HDFSDU-Build]",
       "recipe[bach_krb5::krb5_server]",
       "recipe[bcpc-hadoop::phoenixqs_kerberos]",
-      "recipe[bcpc::rotate_chef_nginx_access_log]",
-      "recipe[bcpc-hadoop::smoke_test_principal]"
+      "recipe[bcpc::rotate_chef_nginx_access_log]"
     ],
     "description": "A bootstrap node in a BCPC cluster",
     "chef_type": "role",
