@@ -157,10 +157,16 @@ template '/etc/cobbler/settings' do
   notifies :restart, "service[#{node['cobbler']['service']['name']}]", :immediately
 end
 
+# Filter bcpc::networks to remove any racks that explicitly disable DHCP
+allsubnets = node['bcpc']['networks']
+subnets = allsubnets.dup.delete_if do |rack, _|
+  node['bcpc']['networks'][rack]['management']['ignore_dhcp'] == true
+end
+
 template '/etc/cobbler/dhcp.template' do
   source 'cobbler/dhcp.template.erb'
   mode 0644
-  variables(subnets: node[:bcpc][:networks])
+  variables(subnets: subnets)
   notifies :run, 'bash[cobbler-sync]', :delayed
 end
 
