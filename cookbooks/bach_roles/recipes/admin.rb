@@ -9,3 +9,5 @@ include_recipe 'bach_krb5::admin'
 if node.run_state[:kadmind_service].running
   include_recipe 'bcpc-hadoop::smoke_test_principal'
 end
+
+include_recipe 'bcpc::admin_ssh'
