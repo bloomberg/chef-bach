@@ -22,9 +22,6 @@
 # bcpc::mysql expects to withdraw its users and passwords.
 #
 
-vault_admins =
-  get_all_nodes.map{ |x| x['fqdn'] }.compact.join(',')
-
 {
   check: 'check',
   galera: 'sst',
@@ -34,30 +31,36 @@ vault_admins =
   zabbix: 'zabbix',
   ambari: 'ambari'
 }.each do |category, username|
-  unless get_config("mysql-#{category}-user")
-    make_config("mysql-#{category}-user", username)
+  ruby_block "config mysql-#{category}-user" do
+    block do
+      make_config("mysql-#{category}-user", username)
+    end
+    not_if { get_config("mysql-#{category}-user") == "check" }
   end
-
-  category_password =
-    get_config("mysql-#{category}-password") || secure_password
 
   chef_vault_secret "mysql-#{category}" do
     data_bag 'os'
-    raw_data({ 'password' => category_password })
-    admins vault_admins
+    raw_data lazy {
+      { 'password' => secure_password }
+    }
+    admins Chef::Config.node_name
     search '*:*'
-    action :nothing
-  end.run_action(:create_if_missing)
+    action :create_if_missing
+  end
 
   #
   # We call get_config! so that this recipe fails unless the new keys
   # are retrievable.
   #
-  if get_config!("mysql-#{category}-user").nil?
-    raise "mysql-#{category}-user should not be nil!"
-  end
+  ruby_block 'validate configs' do
+    block do
+      if get_config!("mysql-#{category}-user").nil?
+        raise "mysql-#{category}-user should not be nil!"
+      end
 
-  if get_config!('password', "mysql-#{category}", 'os').nil?
-    raise "get_config(password, mysql-#{category}, os) should not be nil!"
+      if get_config!('password', "mysql-#{category}", 'os').nil?
+        raise "get_config(password, mysql-#{category}, os) should not be nil!"
+      end
+    end
   end
 end
