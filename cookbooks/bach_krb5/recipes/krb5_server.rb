@@ -12,6 +12,7 @@ template "/etc/krb5kdc/kdc.conf" do
   variables node['krb5']['kdc_conf']
 end
 
+include_recipe 'krb5::kdc_init'
 include_recipe "krb5::kadmin_init"
 
 ruby_block 'start_kerberos_services' do
