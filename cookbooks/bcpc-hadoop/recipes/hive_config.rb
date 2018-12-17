@@ -9,8 +9,7 @@
 hive_password = make_config('mysql-hive-password', secure_password)
 
 # Hive table stats user
-stats_user = make_config('mysql-hive-table-stats-user',
-                         node['bcpc']['hadoop']['hive']['hive_table_stats_db_user'])
+stats_user = node['bcpc']['hadoop']['hive']['hive_table_stats_db_user']
 stats_password = make_config('mysql-hive-table-stats-password', secure_password)
 
 %w(hive webhcat hcat hive-hcatalog).each do |w|
