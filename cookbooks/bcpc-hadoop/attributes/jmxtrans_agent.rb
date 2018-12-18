@@ -712,6 +712,7 @@ default['bcpc']['hadoop']['jmxtrans_agent']['datanode']['queries'] = default['bc
   {
     'objectName' => 'Hadoop:service=DataNode,name=*',
     'resultAlias' => 'dn_data_node_activity.DataNodeActivity.#attribute#',
+    'type' => 'gauge',
     'attributes' =>
       'BlockChecksumOpAvgTime, ' \
       'BlockChecksumOpNumOps, ' \
