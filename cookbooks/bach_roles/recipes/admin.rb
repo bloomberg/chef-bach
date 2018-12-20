@@ -18,5 +18,6 @@ include_recipe 'bcpc::mysql_data_bags'
 include_recipe 'bcpc::admin'
 
 # c-a-r hadoop related credentials
+include_recipe 'bcpc-hadoop::admin'
 
 # TODO: c-a-r kakfa related credentials
