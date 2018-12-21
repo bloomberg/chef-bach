@@ -267,3 +267,6 @@ default['bcpc']['jmxtrans_agent']['lib_file_checksum'] = 'd351ac0b863ffb27424770
 # sshd_config
 default['bcpc']['ssh']['address_family'] = 'inet'
 default['bcpc']['ssh']['x11_forwarding'] = false
+
+# legacy cobbler flags
+default['bach']['vm_cluster'] = false

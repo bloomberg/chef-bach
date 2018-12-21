@@ -27,10 +27,14 @@ results = get_all_nodes.map!{ |x| x['fqdn'] }.join(",")
 nodes = results == "" ? node['fqdn'] : results
 bootstrap = get_bootstrap
 
+admin_principal = node['krb5']['admin_principal']
+admin_password = get_config 'krb5-admin-password'
+
 execute "create #{test_user} principal" do
-  command "kadmin.local -q 'add_principal -randkey #{test_user}'" 
+  command "kadmin -p #{admin_principal} -w #{admin_password} -q 'add_principal -randkey #{test_user}'" 
+  sensitive true
   notifies :run, 'ruby_block[create temp file keytab]', :immediate
-  only_if { test_user_keytab == nil }
+  only_if { node['bach']['krb5']['generate_keytabs'] && test_user_keytab == nil }
 end
 
 ruby_block "create temp file keytab"  do
@@ -46,7 +50,10 @@ end
 
 execute "dump keytab for #{test_user}" do
   command lazy {
-    "kadmin.local -q \"ktadd -k #{node.run_state['test_user_keytab_file']} -norandkey #{test_user}\""}
+    "kadmin -p #{admin_principal} -w #{admin_password} " \
+    "-q \"ktadd -k #{node.run_state['test_user_keytab_file']} -norandkey #{test_user}\""
+  }
+  sensitive true
   action :nothing
   notifies :run, 'ruby_block[read in keytab]', :immediate
 end
@@ -66,7 +73,7 @@ chef_vault_secret 'test_user_keytab' do
   data_bag 'os'
   raw_data ( lazy {{ 'keytab' => node.run_state['test_user_base64_keytab']}})
   search '*:*'
-  admins "#{ nodes },#{ bootstrap }"
+  admins Chef::Config.node_name
   action :nothing
   notifies :run, 'ruby_block[delete temp file keytab]', :immediate
 end

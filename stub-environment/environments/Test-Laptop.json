@@ -2,6 +2,10 @@
   "name": "Test-Laptop",
   "override_attributes": {
     "bach": {
+      "krb5": {
+        "generate_keytabs": true
+      },
+      "vm_cluster": true,
       "car_user": "vagrant"
     },
     "bcpc": {

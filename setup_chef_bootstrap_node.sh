@@ -25,6 +25,14 @@ sudo knife client create $(hostname -f) -a -d -f /etc/chef/client.pem \
   -u admin --key /etc/chef-server/admin.pem
 sudo /opt/chefdk/bin/chef-client -E "$CHEF_ENVIRONMENT"
 
+# FIXME: bootstrap-admin chef-run needs to always be "-o" to prevent node
+# attributes being populated.  In Chef 13 we can use attribute whitelists on
+# knife.rb so that this is no longer needed.
+chef-client -c .chef/knife.rb -E  "$CHEF_ENVIRONMENT" -o bach_roles::admin
+# FIXME: Some chef-bach stuff still uses an actual node search and doesn't
+# expect the bootstrap-admin node object to exists.
+knife node delete -y bootstrap-admin
+
 #
 # build_bins.sh has already built the BCPC local repository, but we
 # still need to configure Apache and chef-vault before doing a
@@ -54,6 +62,13 @@ sudo -E /opt/chefdk/bin/chef-client \
 #
 sudo -E /opt/chefdk/bin/chef-client \
      -r 'role[BCPC-Bootstrap]'
+
+# Needed to be reconverged in order to generate keytabs in the bootstrap
+# machine.  Not needed when using an external KDC
+chef-client -c .chef/knife.rb -E  "$CHEF_ENVIRONMENT" -o bach_roles::admin
+# FIXME: Some chef-bach stuff still uses an actual node search and doesn't
+# expect the bootstrap-admin node object to exists.
+knife node delete -y bootstrap-admin
 
 #
 # TODO: This chef run should not be necessary.  This is definitely a

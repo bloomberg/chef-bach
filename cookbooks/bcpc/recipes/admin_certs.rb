@@ -23,8 +23,6 @@
 
 require 'openssl'
 require 'net/ssh'
-include_recipe 'bcpc::default'
-include_recipe 'bcpc::chef_vault_install'
 
 bootstrap = get_bootstrap
 all_nodes = get_all_nodes.map! { |x| x['fqdn'] }.join(',')
@@ -59,7 +57,7 @@ end
 chef_vault_secret 'ssh' do
   data_bag 'os'
   raw_data(lazy { { 'private-key' => node.run_state['new_ssh_private_key'] } })
-  admins "#{all_nodes},#{bootstrap}"
+  admins Chef::Config.node_name
   search '*:*'
   action :nothing
 end
@@ -86,8 +84,6 @@ Chef::Log.info("ssl-keypair: DNS list=#{dns_list}")
 # construct the config file for generating the ssl keypair
 template node['bcpc']['ssl']['conf_file'] do
   source 'bach_openssl.cnf.erb'
-  owner 'root'
-  group 'root'
   mode 0o0644
   variables(ip_list: ip_list, dns_list: dns_list)
 end
@@ -143,7 +139,7 @@ end
 chef_vault_secret 'ssl' do
   data_bag 'os'
   raw_data(lazy { { 'private-key' => node.run_state['new_ssl_private_key'] } })
-  admins "#{all_nodes},#{bootstrap}"
+  admins Chef::Config.node_name
   search '*:*'
   action :nothing
 end

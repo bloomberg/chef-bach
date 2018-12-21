@@ -32,41 +32,12 @@ custom_certs_glob = '/usr/local/share/ca-certificates/**/*'
 
 if node[:fqdn] == get_bootstrap
   #
-  # If we're on the bootstrap, we need to load all custom certs and
-  # save them as data bag items.
+  # If we're on the bootstrap, we need to load all custom certs from a directory
   #
-  ruby_block 'Upload Certificates' do
+  ruby_block 'load certificates' do
     block do
-      require 'base64'
-      require 'openssl'
-
       custom_certs = Dir.glob(custom_certs_glob).select do |ff|
         ::File.file?(ff)
-      end
-
-      if(!Chef::DataBag.list.key?('ca_certificates'))
-        Chef::DataBag.new.tap do |bb|
-          bb.name('ca_certificates')
-          bb.create
-        end
-      end
-
-      custom_certs.each do |pp|
-        raw_data = File.read(pp)
-        certificate = OpenSSL::X509::Certificate.new(raw_data)
-
-        Chef::DataBagItem.new.tap do |dbi|
-          dbi.data_bag('ca_certificates')
-          dbi.raw_data = {
-                          'id' => certificate.subject.hash.to_s(16),
-                          'encoded_data' => Base64.encode64(raw_data)
-                         }
-          begin
-            dbi.create
-          rescue
-            dbi.save
-          end
-        end
       end
 
       node.run_state[:bcpc_ca_certificate_list] = custom_certs
