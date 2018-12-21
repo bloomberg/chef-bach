@@ -145,6 +145,15 @@ default['bcpc']['hadoop']['kerberos']['data'] = {
     princhost: '_HOST',
     perms: '0440',
     spnego_keytab: 'spnego.service.keytab'
+  },
+  phoenixqs: {
+    principal: 'phoenixqs',
+    keytab: 'phoenixqs.service.keytab',
+    owner: 'phoenixqs',
+    group: 'phoenixqs',
+    princhost: '_HOST',
+    perms: '0440',
+    spnego_keytab: 'phoenixqs.service.keytab'
   }
 }
 default[:bcpc][:hadoop][:kerberos][:keytab][:dir] = "/etc/security/keytabs"

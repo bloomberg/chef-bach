@@ -9,3 +9,15 @@ include_recipe 'bach_krb5::admin'
 if node.run_state[:kadmind_service].running
   include_recipe 'bcpc-hadoop::smoke_test_principal'
 end
+
+# c-a-r basic related credentials
+include_recipe 'bcpc::admin_ssh'
+
+# c-a-r bootstrap related credentials
+include_recipe 'bcpc::mysql_data_bags'
+include_recipe 'bcpc::admin'
+
+# c-a-r hadoop related credentials
+include_recipe 'bcpc-hadoop::admin'
+
+# TODO: c-a-r kakfa related credentials
